@@ -96,3 +96,6 @@
 
 ## Demo Mode
 - [x] Add demo bypass: any credentials accepted, logs in as a demo user for portal review
+
+## UX Polish
+- [x] Add thin yellow demo environment banner at top of portal (inside authenticated layout)

@@ -191,6 +191,20 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Demo Environment Banner */}
+        <div
+          className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-center"
+          style={{
+            background: "#FBBF24",
+            color: "#1a1000",
+            letterSpacing: "0.02em",
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ fontSize: "13px" }}>⚠</span>
+          <span>DEMO ENVIRONMENT — Content and credentials are for internal review only. Not for customer use.</span>
+        </div>
+
         {/* Top bar */}
         <header
           className="flex items-center gap-4 px-4 lg:px-6 py-3 sticky top-0 z-30"
