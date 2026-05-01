@@ -113,3 +113,17 @@
 ## Hero Copy & Visual Updates (Round 7)
 - [x] Hero: replace feature pills with exactly 4 items: Self-Service Learning, Progress Tracking, AI-Powered Answers, On-Demand Recordings
 - [x] Hero: apply blue-to-green gradient across all words in "WAVV Success Center" headline
+
+## PortalLayout Redesign (Session 2)
+
+- [x] Move demo banner above top nav (not overlapping content)
+- [x] Widen AI search bar; placeholder = "Search for learning content"; keep "WAVV AI" label inside box
+- [x] Add notifications bell icon to top bar (top right)
+- [x] Add user avatar/initials button to top bar (top right)
+- [x] User avatar dropdown: Profile, Account Settings, History, Trophy Case, Bookmarks, Sign Out
+- [x] Remove "Help" section/button from top bar
+- [x] Sidebar: rename "Overview" to Home icon only (no text label)
+- [x] Sidebar nav items exactly: Home, Academy, Webinars, Guides & Docs, Support (each navigates to page)
+- [x] Remove Admin Panel from sidebar nav (keep page accessible via URL)
+- [x] Quick Links: replace "WAVV App" with "Chrome Extension"
+- [x] Quick Links: remove "Help Center" link

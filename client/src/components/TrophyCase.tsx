@@ -1,13 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trophy, X, Star, Lock } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 interface TrophyCaseProps {
   trigger?: React.ReactNode;
+  /** When provided, the modal opens/closes based on this value */
+  externalOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function TrophyCase({ trigger }: TrophyCaseProps) {
-  const [open, setOpen] = useState(false);
+export default function TrophyCase({ trigger, externalOpen, onClose }: TrophyCaseProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  // Sync external control
+  useEffect(() => {
+    if (externalOpen !== undefined) {
+      setInternalOpen(externalOpen);
+    }
+  }, [externalOpen]);
+
+  const open = internalOpen;
+  const handleClose = () => {
+    setInternalOpen(false);
+    onClose?.();
+  };
+
   const { data, isLoading } = trpc.trophy.get.useQuery(undefined, { enabled: open });
 
   const earnedCount = data?.badges.filter((b) => b.earned).length ?? 0;
@@ -15,20 +32,32 @@ export default function TrophyCase({ trigger }: TrophyCaseProps) {
 
   return (
     <>
-      {/* Trigger */}
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all hover:bg-white/5"
-        style={{ color: "#FBBF24" }}
-        title="Trophy Case"
-      >
-        {trigger ?? (
-          <>
-            <Trophy size={15} />
-            <span className="hidden sm:inline text-xs font-medium">Trophy Case</span>
-          </>
-        )}
-      </button>
+      {/* Trigger — only rendered if trigger prop is provided */}
+      {trigger !== undefined ? (
+        <button
+          onClick={() => setInternalOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all hover:bg-white/5"
+          style={{ color: "#FBBF24" }}
+          title="Trophy Case"
+        >
+          {trigger ?? (
+            <>
+              <Trophy size={15} />
+              <span className="hidden sm:inline text-xs font-medium">Trophy Case</span>
+            </>
+          )}
+        </button>
+      ) : (
+        <button
+          onClick={() => setInternalOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all hover:bg-white/5"
+          style={{ color: "#FBBF24" }}
+          title="Trophy Case"
+        >
+          <Trophy size={15} />
+          <span className="hidden sm:inline text-xs font-medium">Trophy Case</span>
+        </button>
+      )}
 
       {/* Modal */}
       {open && (
@@ -36,7 +65,7 @@ export default function TrophyCase({ trigger }: TrophyCaseProps) {
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setOpen(false)}
+            onClick={handleClose}
           />
 
           {/* Panel */}
@@ -61,7 +90,7 @@ export default function TrophyCase({ trigger }: TrophyCaseProps) {
                   <p className="text-gray-500 text-xs">{earnedCount} of {totalCount} badges earned</p>
                 </div>
               </div>
-              <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+              <button onClick={handleClose} className="text-gray-500 hover:text-white transition-colors">
                 <X size={18} />
               </button>
             </div>

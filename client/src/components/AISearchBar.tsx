@@ -44,7 +44,7 @@ export default function AISearchBar() {
   }
 
   return (
-    <div ref={containerRef} className="relative flex-1 max-w-md">
+    <div ref={containerRef} className="relative flex-1 max-w-2xl">
       {/* Input */}
       <div
         className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all"
@@ -54,11 +54,13 @@ export default function AISearchBar() {
         }}
       >
         <Sparkles size={13} style={{ color: "#0074F4", flexShrink: 0 }} />
+        <span className="text-xs font-semibold text-[#0074F4] whitespace-nowrap select-none">WAVV AI</span>
+        <span className="text-gray-700 text-xs select-none">|</span>
         <input
           ref={inputRef}
           type="text"
           value={query}
-          placeholder="Search Academy, Webinars, Guides..."
+          placeholder="Search for learning content"
           className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none min-w-0"
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
