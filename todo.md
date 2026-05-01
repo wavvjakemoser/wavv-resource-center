@@ -75,3 +75,10 @@
 - [x] Login page: remove "Learn About WAVV" button
 - [x] Login page: add footer with © 2026, Privacy Policy, Terms of Service
 - [x] Dashboard: replace Academy card icon with graduation cap
+
+## UI Overhaul (Round 3)
+- [x] Landing page: clean hero, no sign-in form visible on load
+- [x] Landing page: Sign In button opens a modal overlay (not inline form)
+- [x] Sign-in modal: WAVV official logo, email + password, matches WAVV brand screenshot
+- [x] Use official WAVV logo SVG/PNG from wavv.com branding
+- [x] Full WAVV brand polish across nav and landing page

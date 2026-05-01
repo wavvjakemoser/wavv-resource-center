@@ -80,23 +80,14 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
         }}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5" style={{ borderBottom: "1px solid #1e1e1e" }}>
-          <div className="flex items-center gap-2">
-            {/* WAVV Logo Mark */}
-            <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 0L5.5 22H8.5L13 5L17.5 22H20.5L26 0H22.5L19 14L14.5 0H11.5L7 14L3.5 0H0Z" fill="url(#wavv-grad)" />
-              <defs>
-                <linearGradient id="wavv-grad" x1="0" y1="0" x2="26" y2="22" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#0074F4" />
-                  <stop offset="50%" stopColor="#00A9E2" />
-                  <stop offset="100%" stopColor="#67C728" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div>
-              <div className="text-white font-bold text-sm leading-none">WAVV</div>
-              <div className="text-gray-500 text-xs leading-none mt-0.5">Resource Center</div>
-            </div>
+        <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "1px solid #1e1e1e" }}>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <img
+              src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
+              alt="WAVV"
+              className="h-6 w-auto"
+            />
+            <span className="text-gray-500 text-xs ml-1 whitespace-nowrap">Resource Center</span>
           </div>
           <button
             className="ml-auto lg:hidden text-gray-400 hover:text-white"
