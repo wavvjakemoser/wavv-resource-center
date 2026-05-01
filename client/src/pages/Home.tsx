@@ -1,6 +1,5 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
-import { useEffect, useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
   GraduationCap,
@@ -13,21 +12,28 @@ import {
   X,
   Eye,
   EyeOff,
+  AlertCircle,
 } from "lucide-react";
 
 export default function Home() {
-  const { isAuthenticated, loading } = useAuth();
   const [, navigate] = useLocation();
-  const [showModal, setShowModal] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const { data: user, isLoading: authLoading } = trpc.auth.me.useQuery();
+  const utils = trpc.useUtils();
 
+  const [showModal, setShowModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
+  // Redirect if already logged in
   useEffect(() => {
-    if (!loading && isAuthenticated) {
+    if (!authLoading && user) {
       navigate("/dashboard");
     }
-  }, [loading, isAuthenticated, navigate]);
+  }, [authLoading, user, navigate]);
 
-  // Close modal on Escape key
+  // Close modal on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") setShowModal(false);
@@ -36,7 +42,27 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  if (loading) {
+  const loginMutation = trpc.auth.login.useMutation({
+    onSuccess: async () => {
+      await utils.auth.me.invalidate();
+      navigate("/dashboard");
+    },
+    onError: (err) => {
+      setLoginError(err.message || "Invalid email or password. Please try again.");
+    },
+  });
+
+  const handleSignIn = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    if (!email || !password) {
+      setLoginError("Please enter your email and password.");
+      return;
+    }
+    loginMutation.mutate({ email: email.trim().toLowerCase(), password });
+  };
+
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#0d0d0d" }}>
         <div className="w-10 h-10 border-2 border-[#0074F4] border-t-transparent rounded-full animate-spin" />
@@ -81,16 +107,13 @@ export default function Home() {
         className="flex items-center justify-between px-6 sm:px-10 py-4"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
-        {/* Official WAVV logo */}
         <img
           src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
           alt="WAVV"
           className="h-7 w-auto"
-          style={{ filter: "brightness(1)" }}
         />
-
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => { setShowModal(true); setLoginError(""); }}
           className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
           style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
         >
@@ -101,7 +124,6 @@ export default function Home() {
 
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
-        {/* Pill badge */}
         <div
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-8"
           style={{
@@ -114,7 +136,6 @@ export default function Home() {
           Powered by WAVV AI
         </div>
 
-        {/* Headline */}
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.05] tracking-tight max-w-4xl">
           Your WAVV{" "}
           <span
@@ -133,9 +154,8 @@ export default function Home() {
           Training, webinars, guides, and AI-powered support — everything you need to get the most out of WAVV, all in one place.
         </p>
 
-        {/* CTA */}
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => { setShowModal(true); setLoginError(""); }}
           className="flex items-center gap-3 px-8 py-4 rounded-xl text-base font-bold text-white transition-all hover:opacity-90 hover:-translate-y-0.5 active:scale-95 shadow-lg"
           style={{
             background: "linear-gradient(135deg, #0074F4, #00A9E2)",
@@ -146,7 +166,6 @@ export default function Home() {
           <ArrowRight size={16} />
         </button>
 
-        {/* Module cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 max-w-4xl w-full">
           {modules.map((m) => {
             const Icon = m.icon;
@@ -181,7 +200,6 @@ export default function Home() {
           })}
         </div>
 
-        {/* Benefits strip */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-10 max-w-2xl">
           {[
             "Self-service learning",
@@ -242,7 +260,7 @@ export default function Home() {
               boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
             }}
           >
-            {/* Close button */}
+            {/* Close */}
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition-colors"
@@ -250,7 +268,7 @@ export default function Home() {
               <X size={18} />
             </button>
 
-            {/* Official WAVV logo */}
+            {/* WAVV logo */}
             <img
               src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
               alt="WAVV"
@@ -258,13 +276,17 @@ export default function Home() {
             />
 
             <h2 className="text-white text-xl font-bold mb-1 text-center">Sign in to your account</h2>
-            <p className="text-gray-500 text-sm mb-7 text-center">Enter your account email below</p>
+            <p className="text-gray-500 text-sm mb-7 text-center">Enter your WAVV account credentials</p>
 
-            {/* Email field */}
-            <div className="w-full mb-3">
+            <form onSubmit={handleSignIn} className="w-full flex flex-col gap-3">
+              {/* Email */}
               <input
                 type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
                 className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all"
                 style={{
                   background: "#242424",
@@ -280,60 +302,85 @@ export default function Home() {
                   e.currentTarget.style.boxShadow = "none";
                 }}
               />
-            </div>
 
-            {/* Password field */}
-            <div className="w-full mb-3 relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all pr-11"
-                style={{
-                  background: "#242424",
-                  border: "1px solid #333",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = "#0074F4";
-                  e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,116,244,0.15)";
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = "#333";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              />
+              {/* Password */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
+                  className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all pr-11"
+                  style={{
+                    background: "#242424",
+                    border: "1px solid #333",
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = "#0074F4";
+                    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,116,244,0.15)";
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = "#333";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+
+              {/* Error message */}
+              {loginError && (
+                <div
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs"
+                  style={{
+                    background: "rgba(239,68,68,0.1)",
+                    border: "1px solid rgba(239,68,68,0.25)",
+                    color: "#f87171",
+                  }}
+                >
+                  <AlertCircle size={13} className="flex-shrink-0" />
+                  {loginError}
+                </div>
+              )}
+
+              {/* Forgot password */}
+              <div className="flex justify-end">
+                <a
+                  href="mailto:support@wavv.com?subject=Password Reset Request"
+                  className="text-xs text-[#0074F4] hover:underline"
+                >
+                  Forgot password?
+                </a>
+              </div>
+
+              {/* Submit */}
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                type="submit"
+                disabled={loginMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  background: "linear-gradient(135deg, #0074F4, #00A9E2)",
+                  boxShadow: "0 4px 20px rgba(0,116,244,0.3)",
+                }}
               >
-                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                {loginMutation.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </button>
-            </div>
-
-            {/* Forgot password */}
-            <div className="w-full flex justify-end mb-5">
-              <a
-                href="https://app.wavv.com/forgot-password"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-[#0074F4] hover:underline"
-              >
-                Forgot password?
-              </a>
-            </div>
-
-            {/* Sign In button → Manus OAuth */}
-            <a
-              href={getLoginUrl()}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
-              style={{
-                background: "linear-gradient(135deg, #0074F4, #00A9E2)",
-                boxShadow: "0 4px 20px rgba(0,116,244,0.3)",
-              }}
-            >
-              Sign In
-            </a>
+            </form>
 
             <p className="text-gray-600 text-xs mt-5 text-center">
               Need access?{" "}

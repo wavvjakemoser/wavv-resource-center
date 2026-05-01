@@ -82,3 +82,14 @@
 - [x] Sign-in modal: WAVV official logo, email + password, matches WAVV brand screenshot
 - [x] Use official WAVV logo SVG/PNG from wavv.com branding
 - [x] Full WAVV brand polish across nav and landing page
+
+## Auth Overhaul (Round 4) - Native Email/Password
+- [x] Add password_hash column to users table
+- [x] Add email_verified, is_active columns to users table
+- [x] Build server-side auth: hashPassword, verifyPassword, createSession, validateSession
+- [x] Add tRPC procedures: auth.login, auth.logout, auth.me (no Manus OAuth)
+- [x] Build admin user management: create/invite users with temp password
+- [x] Update PortalLayout to use new session-based auth (not Manus OAuth)
+- [x] Update Home.tsx sign-in modal to POST credentials to new auth endpoint
+- [x] Remove all getLoginUrl() / Manus OAuth references from frontend
+- [x] Seed initial admin user (jake@wavv.com) for first login

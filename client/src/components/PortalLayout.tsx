@@ -1,5 +1,4 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import WavvAIChat from "./WavvAIChat";
@@ -31,14 +30,19 @@ interface PortalLayoutProps {
 }
 
 export default function PortalLayout({ children, title }: PortalLayoutProps) {
-  const { user, loading, isAuthenticated, logout } = useAuth();
+  const { data: user, isLoading: loading } = trpc.auth.me.useQuery();
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: () => { window.location.href = "/"; },
+  });
+  const logout = () => logoutMutation.mutate();
+  const isAuthenticated = !!user;
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      window.location.href = getLoginUrl();
+      window.location.href = "/";
     }
   }, [loading, isAuthenticated]);
 

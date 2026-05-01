@@ -6,6 +6,8 @@ import { invokeLLM } from "./_core/llm";
 import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { hashPassword, verifyPassword, createSessionToken } from "./nativeAuth";
+import { getUserByEmail, createNativeUser } from "./db";
 import {
   createCourse,
   createGuide,
@@ -443,11 +445,50 @@ const scheduledRouter = router({
   ping: publicProcedure.query(() => ({ ok: true })),
 });
 
-// ─── App Router ───────────────────────────────────────────────────────────────
+// ─// ─── App Router ───────────────────────────────────────────────────────────
 export const appRouter = router({
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query((opts) => opts.ctx.user),
+    me: publicProcedure.query((opts) => {
+      const u = opts.ctx.user;
+      if (!u) return null;
+      // Never expose passwordHash or other sensitive fields to the client
+      const { passwordHash: _ph, openId: _oid, ...safeUser } = u;
+      return safeUser;
+    }),
+
+    login: publicProcedure
+      .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await getUserByEmail(input.email);
+        if (!user || !user.passwordHash || !user.isActive) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        }
+        const valid = await verifyPassword(input.password, user.passwordHash);
+        if (!valid) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        }
+        const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+      }),
+
+    createUser: adminProcedure
+      .input(z.object({
+        email: z.string().email(),
+        name: z.string().min(1),
+        password: z.string().min(8),
+        role: z.enum(["user", "admin"]).default("user"),
+      }))
+      .mutation(async ({ input }) => {
+        const existing = await getUserByEmail(input.email);
+        if (existing) throw new TRPCError({ code: "CONFLICT", message: "Email already in use" });
+        const passwordHash = await hashPassword(input.password);
+        const user = await createNativeUser({ email: input.email, name: input.name, passwordHash, role: input.role });
+        return { success: true, userId: user.id };
+      }),
+
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

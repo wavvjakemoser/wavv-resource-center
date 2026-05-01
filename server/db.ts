@@ -402,3 +402,35 @@ export async function getAnalyticsSummary() {
     totalWebinarViews: totalWebinarViews?.total ?? 0,
   };
 }
+
+// ─── Native Auth Helpers ──────────────────────────────────────────────────────
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result[0] ?? null;
+}
+
+export async function createNativeUser(data: {
+  email: string;
+  name: string;
+  passwordHash: string;
+  role?: "user" | "admin";
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const openId = `native_${data.email}_${Date.now()}`;
+  await db.insert(users).values({
+    openId,
+    email: data.email,
+    name: data.name,
+    passwordHash: data.passwordHash,
+    loginMethod: "native",
+    role: data.role ?? "user",
+    isActive: true,
+    lastSignedIn: new Date(),
+  });
+  const created = await getUserByEmail(data.email);
+  if (!created) throw new Error("Failed to create user");
+   return created;
+}

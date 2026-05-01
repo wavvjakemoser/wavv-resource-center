@@ -15,6 +15,13 @@
       "when": 1777673080120,
       "tag": "0001_magenta_gressill",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1777675277744,
+      "tag": "0002_spotty_spiral",
+      "breakpoints": true
     }
   ]
 }
