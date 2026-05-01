@@ -1,0 +1,70 @@
+# WAVV Resource Center - TODO
+
+## Database & Backend
+- [x] Define full database schema (courses, lessons, progress, webinars, guides, tickets, analytics)
+- [x] Run schema migrations
+- [x] Seed initial WAVV Academy content (courses + lessons from GHL)
+- [x] Seed initial webinars (upcoming + past recordings)
+- [x] Seed initial guides & docs
+- [x] tRPC router: Academy (courses, lessons, progress)
+- [x] tRPC router: Webinars (list, register, watch)
+- [x] tRPC router: Guides & Docs (list, download)
+- [x] tRPC router: Support (submit ticket, list tickets)
+- [x] tRPC router: WAVV AI (chat with LLM, WAVV knowledge base)
+- [x] tRPC router: Analytics (track events, get stats)
+- [x] tRPC router: Admin (CRUD for all content types)
+- [x] Owner notification on new support ticket submission
+
+## Frontend - Core
+- [x] WAVV brand theme (dark #121212, blue #0074F4, green #67C728, light blue #00A9E2)
+- [x] Global CSS variables and typography (Inter/sans-serif)
+- [x] WAVV logo in header
+- [x] Auth-gated layout with sidebar navigation
+- [x] Login/landing page for unauthenticated users
+- [x] Dashboard overview page with module cards and AI search bar
+- [x] Responsive layout (mobile + desktop)
+
+## Frontend - WAVV Academy
+- [x] Academy landing page with course grid
+- [x] Course detail page with lesson list and progress bar
+- [x] Lesson viewer with video embed and completion tracking
+- [x] Course categories: Onboarding, How-To, Strategy and Best Practices, Dialer Setup, CRM Integrations, Spam Protection
+- [x] Progress persistence per user per lesson
+- [x] "Continue Learning" widget on dashboard
+
+## Frontend - Webinars
+- [x] Webinars page with Upcoming Live and On-Demand sections
+- [x] Webinar registration flow (upcoming)
+- [x] Webinar watch/embed (on-demand recordings)
+- [x] Webinar metadata: title, host, date, views
+
+## Frontend - Guides & Docs
+- [x] Guides page with card grid
+- [x] File download / view in new tab
+- [x] Category/tag filtering
+
+## Frontend - Support
+- [x] Support hub page with 4 options (Live Chat, Help Center, Book a Call, Submit Ticket)
+- [x] Support ticket submission form (subject, category, description, priority)
+- [x] Ticket confirmation and history view
+- [x] Automated notification to WAVV team on ticket submission
+
+## Frontend - WAVV AI
+- [x] Floating WAVV AI chat button (persistent across all pages)
+- [x] Chat panel with message history and streaming responses
+- [x] WAVV-specific system prompt (product knowledge, deflection logic)
+- [x] AI search bar on dashboard overview
+
+## Frontend - Admin Panel
+- [x] Admin-only route (/admin)
+- [x] Course management (create, edit, delete courses and lessons)
+- [x] Webinar management (add upcoming, upload past recordings)
+- [x] Guides management (upload, edit, delete)
+- [x] User management (view users, promote to admin)
+- [x] Analytics dashboard (course completions, ticket volume, webinar views)
+
+## Testing
+- [x] Vitest: Academy progress tracking
+- [x] Vitest: Support ticket submission + notification
+- [x] Vitest: Auth protection on protected routes
+- [x] 24 tests passing across auth, academy, webinars, guides, support, admin, analytics, and WAVV AI

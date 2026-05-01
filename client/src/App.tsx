@@ -5,33 +5,48 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import Academy from "./pages/Academy";
+import CourseDetail from "./pages/CourseDetail";
+import LessonViewer from "./pages/LessonViewer";
+import Webinars from "./pages/Webinars";
+import GuidesAndDocs from "./pages/GuidesAndDocs";
+import Support from "./pages/Support";
+import AdminPanel from "./pages/AdminPanel";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/academy" component={Academy} />
+      <Route path="/academy/:courseId" component={CourseDetail} />
+      <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
+      <Route path="/webinars" component={Webinars} />
+      <Route path="/guides" component={GuidesAndDocs} />
+      <Route path="/support" component={Support} />
+      <Route path="/admin" component={AdminPanel} />
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
-          <Toaster />
+          <Toaster
+            theme="dark"
+            toastOptions={{
+              style: {
+                background: "#1a1a1a",
+                border: "1px solid #2a2a2a",
+                color: "#f5f5f5",
+              },
+            }}
+          />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

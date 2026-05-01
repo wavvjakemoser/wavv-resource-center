@@ -1,28 +1,466 @@
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { invokeLLM } from "./_core/llm";
+import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import {
+  createCourse,
+  createGuide,
+  createLesson,
+  createSupportTicket,
+  createWebinar,
+  deleteCourse,
+  deleteGuide,
+  deleteLesson,
+  deleteWebinar,
+  getAllTickets,
+  getAllUsers,
+  getAnalyticsSummary,
+  getCourseById,
+  getCourses,
+  getGuideById,
+  getGuides,
+  getLessonsByCourse,
+  getLessonById,
+  getUserProgress,
+  getUserTickets,
+  getUserWebinarRegistrations,
+  getWebinarById,
+  getWebinars,
+  incrementGuideDownload,
+  incrementWebinarView,
+  markLessonComplete,
+  registerForWebinar,
+  trackEvent,
+  updateCourse,
+  updateGuide,
+  updateLesson,
+  updateTicketStatus,
+  updateUserRole,
+  updateWebinar,
+} from "./db";
 
+// ─── Admin guard ──────────────────────────────────────────────────────────────
+const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== "admin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+  }
+  return next({ ctx });
+});
+
+// ─── Academy Router ───────────────────────────────────────────────────────────
+const academyRouter = router({
+  getCourses: protectedProcedure.query(() => getCourses(true)),
+
+  getCourse: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      const course = await getCourseById(input.id);
+      if (!course) throw new TRPCError({ code: "NOT_FOUND" });
+      const courseLessons = await getLessonsByCourse(input.id, true);
+      return { course, lessons: courseLessons };
+    }),
+
+  getProgress: protectedProcedure
+    .input(z.object({ courseId: z.number().optional() }))
+    .query(({ ctx, input }) => getUserProgress(ctx.user.id, input.courseId)),
+
+  markComplete: protectedProcedure
+    .input(z.object({ lessonId: z.number(), courseId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await markLessonComplete(ctx.user.id, input.lessonId, input.courseId);
+      await trackEvent({
+        userId: ctx.user.id,
+        eventType: "lesson_completed",
+        resourceType: "lesson",
+        resourceId: input.lessonId,
+        metadata: JSON.stringify({ courseId: input.courseId }),
+      });
+      return { success: true };
+    }),
+
+  // Admin CRUD
+  adminCreateCourse: adminProcedure
+    .input(
+      z.object({
+        title: z.string().min(1),
+        description: z.string().optional(),
+        category: z.enum([
+          "Onboarding",
+          "How-To",
+          "Strategy and Best Practices",
+          "Dialer Setup",
+          "CRM Integrations",
+          "Spam Protection",
+        ]),
+        thumbnailUrl: z.string().optional(),
+        durationMinutes: z.number().optional(),
+        sortOrder: z.number().optional(),
+      })
+    )
+    .mutation(({ input }) => createCourse(input)),
+
+  adminUpdateCourse: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: z.object({
+          title: z.string().optional(),
+          description: z.string().optional(),
+          category: z
+            .enum([
+              "Onboarding",
+              "How-To",
+              "Strategy and Best Practices",
+              "Dialer Setup",
+              "CRM Integrations",
+              "Spam Protection",
+            ])
+            .optional(),
+          thumbnailUrl: z.string().optional(),
+          durationMinutes: z.number().optional(),
+          sortOrder: z.number().optional(),
+          published: z.boolean().optional(),
+        }),
+      })
+    )
+    .mutation(({ input }) => updateCourse(input.id, input.data)),
+
+  adminDeleteCourse: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => deleteCourse(input.id)),
+
+  adminGetAllCourses: adminProcedure.query(() => getCourses(false)),
+
+  adminCreateLesson: adminProcedure
+    .input(
+      z.object({
+        courseId: z.number(),
+        title: z.string().min(1),
+        description: z.string().optional(),
+        videoUrl: z.string().optional(),
+        durationMinutes: z.number().optional(),
+        sortOrder: z.number().optional(),
+      })
+    )
+    .mutation(({ input }) => createLesson(input)),
+
+  adminUpdateLesson: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: z.object({
+          title: z.string().optional(),
+          description: z.string().optional(),
+          videoUrl: z.string().optional(),
+          durationMinutes: z.number().optional(),
+          sortOrder: z.number().optional(),
+          published: z.boolean().optional(),
+        }),
+      })
+    )
+    .mutation(({ input }) => updateLesson(input.id, input.data)),
+
+  adminDeleteLesson: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => deleteLesson(input.id)),
+
+  adminGetLessons: adminProcedure
+    .input(z.object({ courseId: z.number() }))
+    .query(({ input }) => getLessonsByCourse(input.courseId, false)),
+});
+
+// ─── Webinars Router ──────────────────────────────────────────────────────────
+const webinarsRouter = router({
+  list: protectedProcedure
+    .input(z.object({ type: z.enum(["upcoming", "recording"]).optional() }))
+    .query(({ input }) => getWebinars(input.type)),
+
+  get: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      const webinar = await getWebinarById(input.id);
+      if (!webinar) throw new TRPCError({ code: "NOT_FOUND" });
+      return webinar;
+    }),
+
+  register: protectedProcedure
+    .input(z.object({ webinarId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const result = await registerForWebinar(ctx.user.id, input.webinarId);
+      if (!result.alreadyRegistered) {
+        await trackEvent({
+          userId: ctx.user.id,
+          eventType: "webinar_registered",
+          resourceType: "webinar",
+          resourceId: input.webinarId,
+        });
+      }
+      return result;
+    }),
+
+  watch: protectedProcedure
+    .input(z.object({ webinarId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await incrementWebinarView(input.webinarId);
+      await trackEvent({
+        userId: ctx.user.id,
+        eventType: "webinar_watched",
+        resourceType: "webinar",
+        resourceId: input.webinarId,
+      });
+      return { success: true };
+    }),
+
+  getMyRegistrations: protectedProcedure.query(({ ctx }) =>
+    getUserWebinarRegistrations(ctx.user.id)
+  ),
+
+  // Admin CRUD
+  adminCreate: adminProcedure
+    .input(
+      z.object({
+        title: z.string().min(1),
+        description: z.string().optional(),
+        host: z.string().optional(),
+        type: z.enum(["upcoming", "recording"]),
+        scheduledAt: z.date().optional(),
+        registrationUrl: z.string().optional(),
+        videoUrl: z.string().optional(),
+        thumbnailUrl: z.string().optional(),
+      })
+    )
+    .mutation(({ input }) => createWebinar({ ...input, published: true })),
+
+  adminUpdate: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: z.object({
+          title: z.string().optional(),
+          description: z.string().optional(),
+          host: z.string().optional(),
+          type: z.enum(["upcoming", "recording"]).optional(),
+          scheduledAt: z.date().optional(),
+          registrationUrl: z.string().optional(),
+          videoUrl: z.string().optional(),
+          thumbnailUrl: z.string().optional(),
+          published: z.boolean().optional(),
+        }),
+      })
+    )
+    .mutation(({ input }) => updateWebinar(input.id, input.data)),
+
+  adminDelete: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => deleteWebinar(input.id)),
+
+  adminList: adminProcedure.query(() => getWebinars()),
+});
+
+// ─── Guides Router ────────────────────────────────────────────────────────────
+const guidesRouter = router({
+  list: protectedProcedure.query(() => getGuides(true)),
+
+  get: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      const guide = await getGuideById(input.id);
+      if (!guide) throw new TRPCError({ code: "NOT_FOUND" });
+      return guide;
+    }),
+
+  download: protectedProcedure
+    .input(z.object({ guideId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await incrementGuideDownload(input.guideId);
+      await trackEvent({
+        userId: ctx.user.id,
+        eventType: "guide_downloaded",
+        resourceType: "guide",
+        resourceId: input.guideId,
+      });
+      return { success: true };
+    }),
+
+  // Admin CRUD
+  adminCreate: adminProcedure
+    .input(
+      z.object({
+        title: z.string().min(1),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        fileUrl: z.string().optional(),
+        fileType: z.enum(["pdf", "checklist", "playbook", "other"]).optional(),
+      })
+    )
+    .mutation(({ input }) => createGuide({ ...input, published: true })),
+
+  adminUpdate: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        data: z.object({
+          title: z.string().optional(),
+          description: z.string().optional(),
+          category: z.string().optional(),
+          fileUrl: z.string().optional(),
+          fileType: z.enum(["pdf", "checklist", "playbook", "other"]).optional(),
+          published: z.boolean().optional(),
+        }),
+      })
+    )
+    .mutation(({ input }) => updateGuide(input.id, input.data)),
+
+  adminDelete: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => deleteGuide(input.id)),
+
+  adminList: adminProcedure.query(() => getGuides(false)),
+});
+
+// ─── Support Router ───────────────────────────────────────────────────────────
+const supportRouter = router({
+  submitTicket: protectedProcedure
+    .input(
+      z.object({
+        subject: z.string().min(1).max(255),
+        category: z.enum([
+          "Technical Issue",
+          "Billing",
+          "Feature Request",
+          "Onboarding",
+          "General Question",
+          "Other",
+        ]),
+        priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
+        description: z.string().min(10),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await createSupportTicket({ ...input, userId: ctx.user.id, status: "open" });
+      await trackEvent({
+        userId: ctx.user.id,
+        eventType: "ticket_submitted",
+        resourceType: "ticket",
+        metadata: JSON.stringify({ category: input.category, priority: input.priority }),
+      });
+      // Notify WAVV team (Cassie & Jake)
+      await notifyOwner({
+        title: `New Support Ticket: ${input.subject}`,
+        content: `**Customer:** ${ctx.user.name ?? ctx.user.email ?? "Unknown"}\n**Category:** ${input.category}\n**Priority:** ${input.priority}\n\n**Description:**\n${input.description}`,
+      });
+      return { success: true };
+    }),
+
+  getMyTickets: protectedProcedure.query(({ ctx }) => getUserTickets(ctx.user.id)),
+
+  // Admin
+  adminGetAll: adminProcedure.query(() => getAllTickets()),
+  adminUpdateStatus: adminProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        status: z.enum(["open", "in_progress", "resolved", "closed"]),
+      })
+    )
+    .mutation(({ input }) => updateTicketStatus(input.id, input.status)),
+});
+
+// ─── WAVV AI Router ───────────────────────────────────────────────────────────
+const wavvAiRouter = router({
+  chat: protectedProcedure
+    .input(
+      z.object({
+        messages: z.array(
+          z.object({
+            role: z.enum(["user", "assistant"]),
+            content: z.string(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const systemPrompt = `You are WAVV AI, the intelligent assistant for WAVV's Customer Resource Center. WAVV is a multi-line power dialer and sales engagement platform built for high-volume outbound calling teams.
+
+Your role is to:
+1. Answer product questions about WAVV features (dialer, call boards, voicemails, spam protection, CRM integrations, call campaigns, number health, connection rates, etc.)
+2. Guide users through WAVV setup and configuration step-by-step
+3. Help users troubleshoot common issues before they escalate to a support ticket
+4. Direct users to the appropriate resource: WAVV Academy courses, webinars, guides, or the support team
+5. Deflect common support tickets by providing self-service answers
+
+Key WAVV features you know about:
+- Multi-line power dialer (single line and multi-line modes)
+- Call Boards for team calling sessions
+- Voicemail drop and management
+- Spam protection and number health monitoring
+- WAVV Wallet for number management
+- CRM integrations (GoHighLevel, Salesforce, HubSpot, etc.)
+- Call campaigns and resuming campaigns
+- Connection rates vs conversion rates
+- Audio source configuration
+- User roles and permissions
+- Team onboarding and agent setup
+
+When you cannot answer something with confidence, say so clearly and suggest the user submit a support ticket or book a call with the WAVV team.
+
+Be concise, direct, and helpful. Use bullet points for step-by-step instructions. Do not make up features or capabilities that WAVV may not have.`;
+
+      const llmMessages = [
+        { role: "system" as const, content: systemPrompt },
+        ...input.messages.map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
+      ];
+
+      const response = await invokeLLM({ messages: llmMessages });
+      const content = response.choices[0]?.message?.content ?? "I'm sorry, I couldn't process that request.";
+
+      await trackEvent({
+        userId: ctx.user.id,
+        eventType: "ai_chat",
+        resourceType: "ai",
+        metadata: JSON.stringify({ messageCount: input.messages.length }),
+      });
+
+      return { content };
+    }),
+});
+
+// ─── Analytics Router ─────────────────────────────────────────────────────────
+const analyticsRouter = router({
+  getSummary: adminProcedure.query(() => getAnalyticsSummary()),
+  getUsers: adminProcedure.query(() => getAllUsers()),
+  updateUserRole: adminProcedure
+    .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
+    .mutation(({ input }) => updateUserRole(input.userId, input.role)),
+});
+
+// ─── Scheduled Task endpoint ──────────────────────────────────────────────────
+const scheduledRouter = router({
+  ping: publicProcedure.query(() => ({ ok: true })),
+});
+
+// ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
   }),
-
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  academy: academyRouter,
+  webinars: webinarsRouter,
+  guides: guidesRouter,
+  support: supportRouter,
+  wavvAi: wavvAiRouter,
+  analytics: analyticsRouter,
+  scheduled: scheduledRouter,
 });
 
 export type AppRouter = typeof appRouter;
