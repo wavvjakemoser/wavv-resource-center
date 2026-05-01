@@ -109,3 +109,7 @@
 - [x] AI-powered search bar in portal top bar (sparkle icon, searches Academy/Webinars/Guides)
 - [x] Trophy Case: user achievement badges for completed courses, lessons, and milestones
 - [x] Trophy Case accessible from top bar via Trophy Case button
+
+## Hero Copy & Visual Updates (Round 7)
+- [x] Hero: replace feature pills with exactly 4 items: Self-Service Learning, Progress Tracking, AI-Powered Answers, On-Demand Recordings
+- [x] Hero: apply blue-to-green gradient across all words in "WAVV Success Center" headline

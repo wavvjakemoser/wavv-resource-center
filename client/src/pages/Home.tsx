@@ -136,17 +136,16 @@ export default function Home() {
           Powered by WAVV AI
         </div>
 
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.05] tracking-tight max-w-4xl">
-          Your WAVV{" "}
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.05] tracking-tight max-w-4xl">
           <span
             style={{
-              background: "linear-gradient(135deg, #0074F4 0%, #00A9E2 45%, #67C728 100%)",
+              background: "linear-gradient(90deg, #0074F4 0%, #00A9E2 35%, #00c4a0 60%, #67C728 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}
           >
-            Success Center
+            WAVV Success Center
           </span>
         </h1>
 
@@ -202,11 +201,10 @@ export default function Home() {
 
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-10 max-w-2xl">
           {[
-            "Self-service learning",
-            "AI-powered answers",
-            "Progress tracking",
-            "On-demand recordings",
-            "Create support tickets",
+            "Self-Service Learning",
+            "Progress Tracking",
+            "AI-Powered Answers",
+            "On-Demand Recordings",
           ].map((b) => (
             <div key={b} className="flex items-center gap-1.5">
               <CheckCircle size={13} className="text-[#67C728] flex-shrink-0" />
