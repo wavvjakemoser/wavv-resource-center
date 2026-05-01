@@ -53,9 +53,7 @@ export default function AISearchBar() {
           border: open ? "1px solid #0074F4" : "1px solid #2a2a2a",
         }}
       >
-        <Sparkles size={13} style={{ color: "#0074F4", flexShrink: 0 }} />
-        <span className="text-xs font-semibold text-[#0074F4] whitespace-nowrap select-none">WAVV AI</span>
-        <span className="text-gray-700 text-xs select-none">|</span>
+        <Search size={14} style={{ color: "#6b7280", flexShrink: 0 }} />
         <input
           ref={inputRef}
           type="text"

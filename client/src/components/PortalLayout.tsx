@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import WavvAIChat from "./WavvAIChat";
 import AISearchBar from "./AISearchBar";
-import TrophyCase from "./TrophyCase";
+import MedalCase from "./MedalCase";
 import {
   BookOpen,
   Video,
@@ -13,15 +13,17 @@ import {
   Menu,
   X,
   Bell,
-  User,
   Settings,
   History,
-  Trophy,
+  Medal,
   Bookmark,
   LogOut,
   ChevronDown,
   ExternalLink,
   Chrome,
+  Sparkles,
+  FlaskConical,
+  User,
 } from "lucide-react";
 
 const navItems = [
@@ -30,6 +32,7 @@ const navItems = [
   { href: "/webinars", label: "Webinars", icon: Video },
   { href: "/guides", label: "Guides & Docs", icon: FileText },
   { href: "/support", label: "Support", icon: LifeBuoy },
+  { href: "/hands-on", label: "Hands-On", icon: FlaskConical },
 ];
 
 interface PortalLayoutProps {
@@ -48,7 +51,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [trophyOpen, setTrophyOpen] = useState(false);
+  const [medalOpen, setMedalOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -124,27 +127,33 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             flexShrink: 0,
           }}
         >
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "1px solid #1e1e1e" }}>
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <img
-                src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
-                alt="WAVV"
-                className="h-6 w-auto"
-              />
-              <span className="text-gray-500 text-xs ml-1 whitespace-nowrap">Success Center</span>
-            </div>
+          {/* Logo — fixed height, no truncation */}
+          <div
+            className="flex items-center gap-2 px-4 py-4"
+            style={{ borderBottom: "1px solid #1e1e1e", minHeight: "60px" }}
+          >
+            <img
+              src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
+              alt="WAVV"
+              style={{ height: "22px", width: "auto", flexShrink: 0 }}
+            />
+            <span
+              className="text-gray-500 font-medium whitespace-nowrap"
+              style={{ fontSize: "11px", letterSpacing: "0.01em" }}
+            >
+              Success Center
+            </span>
             <button
-              className="ml-auto lg:hidden text-gray-400 hover:text-white"
+              className="ml-auto lg:hidden text-gray-400 hover:text-white flex-shrink-0"
               onClick={() => setSidebarOpen(false)}
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
 
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 overflow-y-auto">
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive =
@@ -173,7 +182,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 mb-2">
                 Quick Links
               </p>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <a
                   href="https://chrome.google.com/webstore/search/wavv"
                   target="_blank"
@@ -187,22 +196,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               </div>
             </div>
           </nav>
-
-          {/* Sidebar bottom — user info (no sign-out; that's in top-bar dropdown) */}
-          <div className="px-3 py-4" style={{ borderTop: "1px solid #1e1e1e" }}>
-            <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #0074F4, #67C728)" }}
-              >
-                {initials}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{user?.name ?? "User"}</p>
-                <p className="text-xs text-gray-500 truncate">{user?.email ?? ""}</p>
-              </div>
-            </div>
-          </div>
+          {/* No user footer — user info is in top-right dropdown */}
         </aside>
 
         {/* ── Main column ── */}
@@ -220,20 +214,34 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <Menu size={20} />
             </button>
 
-            {/* AI Search Bar — stretched */}
+            {/* Search bar — magnifying glass only */}
             <div className="flex-1 max-w-2xl">
               <AISearchBar />
             </div>
 
+            {/* WAVV AI button — right of search, opens chat */}
+            <button
+              onClick={() => setAiOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex-shrink-0"
+              style={{
+                background: "linear-gradient(135deg, #0074F4, #00A9E2)",
+                color: "white",
+                whiteSpace: "nowrap",
+              }}
+              title="Open WAVV AI Chat"
+            >
+              <Sparkles size={14} />
+              <span className="hidden sm:inline">WAVV AI</span>
+            </button>
+
             {/* Right-side controls */}
-            <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+            <div className="flex items-center gap-1 flex-shrink-0">
               {/* Notifications bell */}
               <button
                 className="relative flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
                 title="Notifications"
               >
                 <Bell size={18} />
-                {/* Unread dot */}
                 <span
                   className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
                   style={{ background: "#0074F4" }}
@@ -298,10 +306,10 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                       </button>
                       <button
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
-                        onClick={() => { setProfileOpen(false); setTrophyOpen(true); }}
+                        onClick={() => { setProfileOpen(false); setMedalOpen(true); }}
                       >
-                        <Trophy size={15} className="text-gray-500" />
-                        Trophy Case
+                        <Medal size={15} className="text-gray-500" />
+                        Medals
                       </button>
                       <button
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
@@ -338,8 +346,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
       {/* WAVV AI Chat */}
       <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />
 
-      {/* Trophy Case modal — triggered from dropdown */}
-      <TrophyCase externalOpen={trophyOpen} onClose={() => setTrophyOpen(false)} />
+      {/* Medal Case modal — triggered from dropdown */}
+      <MedalCase externalOpen={medalOpen} onClose={() => setMedalOpen(false)} />
     </div>
   );
 }

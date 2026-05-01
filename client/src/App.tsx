@@ -13,6 +13,7 @@ import Webinars from "./pages/Webinars";
 import GuidesAndDocs from "./pages/GuidesAndDocs";
 import Support from "./pages/Support";
 import AdminPanel from "./pages/AdminPanel";
+import HandsOn from "./pages/HandsOn";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
       <Route path="/admin" component={AdminPanel} />
+      <Route path="/hands-on" component={HandsOn} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -127,3 +127,18 @@
 - [x] Remove Admin Panel from sidebar nav (keep page accessible via URL)
 - [x] Quick Links: replace "WAVV App" with "Chrome Extension"
 - [x] Quick Links: remove "Help Center" link
+
+## UI Refinements Round 3 (Session 2 cont.)
+
+- [x] Fix sidebar logo: "Success Center" text truncation — ensure it fits without clipping
+- [x] Remove sidebar user footer (name/email/avatar) — already shown in top-right dropdown
+- [x] Search bar: replace WAVV AI label + sparkle icon with magnifying glass icon only
+- [x] Move WAVV AI button to right of search bar in top bar (opens chat widget on click)
+- [x] Rename "Trophy Case" to "Medals" everywhere (dropdown, modal title, badge)
+- [x] Add "Hands-On" nav item below Support in sidebar (sandbox environment page)
+- [x] Dashboard: replace resources/courses grid with personal usage stats panel
+  - Logins (last week / month / year-to-date)
+  - Total searches made
+  - Total AI conversations started
+  - Total open tickets
+  - Registered webinars
