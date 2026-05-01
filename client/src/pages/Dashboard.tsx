@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import {
-  BookOpen,
+  GraduationCap,
   Video,
   FileText,
   LifeBuoy,
@@ -19,7 +19,7 @@ const MODULE_CARDS = [
     href: "/academy",
     label: "WAVV Academy",
     desc: "Structured courses: Onboarding, How-To, Strategy & Best Practices, and more",
-    icon: BookOpen,
+    icon: GraduationCap,
     color: "#0074F4",
     badge: "Learn",
   },
@@ -112,7 +112,7 @@ export default function Dashboard() {
             {
               label: "Courses Available",
               value: courses?.length ?? 0,
-              icon: BookOpen,
+              icon: GraduationCap,
               color: "#0074F4",
             },
             {

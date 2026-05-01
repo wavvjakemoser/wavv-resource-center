@@ -68,3 +68,10 @@
 - [x] Vitest: Support ticket submission + notification
 - [x] Vitest: Auth protection on protected routes
 - [x] 24 tests passing across auth, academy, webinars, guides, support, admin, analytics, and WAVV AI
+
+## UI Refinements (Round 2)
+- [x] Login page: add WAVV logo top-left
+- [x] Login page: change to email + password form (matching WAVV sign-in style)
+- [x] Login page: remove "Learn About WAVV" button
+- [x] Login page: add footer with © 2026, Privacy Policy, Terms of Service
+- [x] Dashboard: replace Academy card icon with graduation cap
