@@ -171,7 +171,7 @@ export default function Home() {
             return (
               <div
                 key={m.label}
-                className="p-5 rounded-2xl text-left transition-all hover:-translate-y-1 cursor-default"
+                className="p-5 rounded-2xl text-center transition-all hover:-translate-y-1 cursor-default flex flex-col items-center"
                 style={{
                   background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.08)",
@@ -187,7 +187,7 @@ export default function Home() {
                 }}
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 mx-auto"
                   style={{ background: `${m.color}18` }}
                 >
                   <Icon size={20} style={{ color: m.color }} />
