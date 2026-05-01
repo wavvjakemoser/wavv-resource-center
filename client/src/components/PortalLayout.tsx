@@ -127,7 +127,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             flexShrink: 0,
           }}
         >
-          {/* Logo — fixed height, no truncation */}
+          {/* Logo — WAVV only */}
           <div
             className="flex items-center gap-2 px-4 py-4"
             style={{ borderBottom: "1px solid #1e1e1e", minHeight: "60px" }}
@@ -137,12 +137,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               alt="WAVV"
               style={{ height: "22px", width: "auto", flexShrink: 0 }}
             />
-            <span
-              className="text-gray-500 font-medium whitespace-nowrap"
-              style={{ fontSize: "11px", letterSpacing: "0.01em" }}
-            >
-              Success Center
-            </span>
             <button
               className="ml-auto lg:hidden text-gray-400 hover:text-white flex-shrink-0"
               onClick={() => setSidebarOpen(false)}
@@ -234,8 +228,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <span className="hidden sm:inline">WAVV AI</span>
             </button>
 
-            {/* Right-side controls */}
-            <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Right-side controls — pushed to far right */}
+            <div className="flex items-center gap-1 flex-shrink-0 ml-auto">
               {/* Notifications bell */}
               <button
                 className="relative flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"

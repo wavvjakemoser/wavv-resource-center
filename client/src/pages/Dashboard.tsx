@@ -7,7 +7,6 @@ import {
   FileText,
   LifeBuoy,
   CheckCircle,
-  Sparkles,
   LogIn,
   Search,
   MessageSquare,
@@ -15,8 +14,41 @@ import {
   CalendarCheck,
   TrendingUp,
   FlaskConical,
+  Play,
+  Clock,
 } from "lucide-react";
 import { Link } from "wouter";
+
+// Placeholder "continue" items — will be replaced with real last-viewed data
+const CONTINUE_ITEMS = [
+  {
+    type: "Course",
+    title: "Getting Started with WAVV Dialer",
+    progress: 65,
+    lastAccessed: "2 hours ago",
+    href: "/academy",
+    color: "#0074F4",
+    icon: GraduationCap,
+  },
+  {
+    type: "Webinar Recording",
+    title: "Power Dialer Best Practices — May 2026",
+    progress: 40,
+    lastAccessed: "Yesterday",
+    href: "/webinars",
+    color: "#00A9E2",
+    icon: Video,
+  },
+  {
+    type: "Course",
+    title: "CRM Integration Setup Guide",
+    progress: 20,
+    lastAccessed: "3 days ago",
+    href: "/academy",
+    color: "#67C728",
+    icon: FileText,
+  },
+];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -25,8 +57,7 @@ export default function Dashboard() {
   const { data: webinars } = trpc.webinars.list.useQuery({});
   const { data: tickets } = trpc.support.getMyTickets.useQuery();
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const firstName = user?.name?.split(" ")[0] ?? "there";
 
   const completedLessonIds = new Set(
     (progress ?? []).filter((p) => p.completed).map((p) => p.lessonId)
@@ -37,7 +68,7 @@ export default function Dashboard() {
     (t) => t.status === "open" || t.status === "in_progress"
   );
 
-  // Usage stats — real data where available, placeholder zeros for metrics not yet tracked
+  // Usage stats
   const usageStats = [
     {
       label: "Lessons Completed",
@@ -94,7 +125,7 @@ export default function Dashboard() {
     {
       label: "Progress Score",
       value: courses?.length
-        ? `${Math.round((completedLessonIds.size / Math.max(1, (courses.length * 3))) * 100)}%`
+        ? `${Math.round((completedLessonIds.size / Math.max(1, courses.length * 3)) * 100)}%`
         : "0%",
       icon: TrendingUp,
       color: "#67C728",
@@ -123,12 +154,11 @@ export default function Dashboard() {
           }}
         >
           <div className="relative z-10">
-            <p className="text-gray-400 text-sm mb-1">{greeting},</p>
             <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-              {user?.name ?? "Welcome back"} 👋
+              Welcome {firstName}!
             </h1>
             <p className="text-gray-400 text-sm max-w-xl">
-              Your WAVV Success Center — training, webinars, guides, and AI-powered support in one place.
+              Everything you need to succeed with WAVV starts here!
             </p>
           </div>
           <div
@@ -139,6 +169,80 @@ export default function Dashboard() {
             className="absolute bottom-0 right-20 w-32 h-32 rounded-full opacity-10 pointer-events-none"
             style={{ background: "radial-gradient(circle, #67C728, transparent)", transform: "translateY(30%)" }}
           />
+        </div>
+
+        {/* ── Continue Where You Left Off ── */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+            Continue Where You Left Off
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {CONTINUE_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="group flex flex-col p-4 rounded-xl transition-all cursor-pointer"
+                  style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", textDecoration: "none" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = item.color;
+                    e.currentTarget.style.boxShadow = `0 4px 20px ${item.color}18`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#2a2a2a";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                >
+                  {/* Top row: icon + type badge */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      style={{ background: `${item.color}20` }}
+                    >
+                      <Icon size={18} style={{ color: item.color }} />
+                    </div>
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                      style={{ background: `${item.color}15`, color: item.color }}
+                    >
+                      {item.type}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-white text-sm font-medium leading-snug mb-3 line-clamp-2">
+                    {item.title}
+                  </h3>
+
+                  {/* Progress bar */}
+                  <div className="mt-auto">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] text-gray-500 flex items-center gap-1">
+                        <Clock size={10} />
+                        {item.lastAccessed}
+                      </span>
+                      <span className="text-[10px] font-semibold" style={{ color: item.color }}>
+                        {item.progress}%
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full" style={{ background: "#2a2a2a" }}>
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${item.progress}%`, background: item.color }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Resume button hint */}
+                  <div className="flex items-center gap-1.5 mt-3 text-gray-500 group-hover:text-white transition-colors">
+                    <Play size={12} />
+                    <span className="text-xs font-medium">Resume</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         {/* ── Usage stats grid ── */}
@@ -215,37 +319,6 @@ export default function Dashboard() {
               );
             })}
           </div>
-        </div>
-
-        {/* ── WAVV AI CTA ── */}
-        <div
-          className="flex items-center gap-4 p-5 rounded-xl"
-          style={{
-            background: "linear-gradient(135deg, rgba(0,116,244,0.1), rgba(103,199,40,0.05))",
-            border: "1px solid rgba(0, 116, 244, 0.2)",
-          }}
-        >
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
-          >
-            <Sparkles size={18} className="text-white" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-white font-semibold text-sm">WAVV AI is here to help</h3>
-            <p className="text-gray-500 text-xs mt-0.5">
-              Get instant answers to product questions, troubleshoot issues, and find the right resources — without waiting for support.
-            </p>
-          </div>
-          <button
-            className="px-4 py-2 rounded-lg text-sm font-semibold text-white flex-shrink-0 transition-all hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
-            onClick={() => {
-              document.querySelector<HTMLButtonElement>("[data-wavv-ai-trigger]")?.click();
-            }}
-          >
-            Ask WAVV AI
-          </button>
         </div>
       </div>
     </PortalLayout>

@@ -30,10 +30,13 @@ export default function MedalCase({ trigger, externalOpen, onClose }: TrophyCase
   const earnedCount = data?.badges.filter((b) => b.earned).length ?? 0;
   const totalCount = data?.badges.length ?? 0;
 
+  // When externalOpen is provided, don't render any trigger button — modal only
+  const showTrigger = externalOpen === undefined;
+
   return (
     <>
-      {/* Trigger — only rendered if trigger prop is provided */}
-      {trigger !== undefined ? (
+      {/* Trigger — only rendered when NOT externally controlled */}
+      {showTrigger && (
         <button
           onClick={() => setInternalOpen(true)}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all hover:bg-white/5"
@@ -46,16 +49,6 @@ export default function MedalCase({ trigger, externalOpen, onClose }: TrophyCase
               <span className="hidden sm:inline text-xs font-medium">Medals</span>
             </>
           )}
-        </button>
-      ) : (
-        <button
-          onClick={() => setInternalOpen(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all hover:bg-white/5"
-          style={{ color: "#FBBF24" }}
-          title="Medals"
-        >
-          <Trophy size={15} />
-          <span className="hidden sm:inline text-xs font-medium">Medals</span>
         </button>
       )}
 

@@ -142,3 +142,12 @@
   - Total AI conversations started
   - Total open tickets
   - Registered webinars
+
+## UI Refinements Round 4
+
+- [x] Move notifications bell + avatar/name cluster to far right of top bar
+- [x] Sidebar logo: show only WAVV logo, remove "Success Center" text
+- [x] Remove Medals button from bottom-left of sidebar
+- [x] Remove "WAVV AI is here to help" CTA banner from dashboard
+- [x] Welcome banner: "Welcome {first name}!" + "Everything you need to succeed with WAVV starts here!"
+- [x] Add "Continue Where You Left Off" section with 3 placeholder cards (last course/video/recording)
