@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   analyticsEvents,
@@ -433,4 +433,114 @@ export async function createNativeUser(data: {
   const created = await getUserByEmail(data.email);
   if (!created) throw new Error("Failed to create user");
    return created;
+}
+
+// ─── Search ──────────────────────────────────────────────────────────────────
+export async function searchContent(query: string) {
+  const db = await getDb();
+  if (!db) return { courses: [], lessons: [], webinars: [], guides: [] };
+  const q = `%${query.toLowerCase()}%`;
+
+  const [matchedCourses, matchedLessons, matchedWebinars, matchedGuides] = await Promise.all([
+    db.select().from(courses).where(
+      and(eq(courses.published, true), or(like(courses.title, q), like(courses.description, q)))
+    ).limit(5),
+    db.select().from(lessons).where(
+      and(eq(lessons.published, true), or(like(lessons.title, q), like(lessons.description, q)))
+    ).limit(8),
+    db.select().from(webinars).where(
+      or(like(webinars.title, q), like(webinars.description, q))
+    ).limit(5),
+    db.select().from(guides).where(
+      and(eq(guides.published, true), or(like(guides.title, q), like(guides.description, q)))
+    ).limit(5),
+  ]);
+
+  return {
+    courses: matchedCourses,
+    lessons: matchedLessons,
+    webinars: matchedWebinars,
+    guides: matchedGuides,
+  };
+}
+
+// ─── Trophy Case ─────────────────────────────────────────────────────────────
+export async function getUserTrophies(userId: number) {
+  const db = await getDb();
+  if (!db) return { completedCourses: [], totalLessons: 0, badges: [] };
+
+  // Get all completed lessons for this user
+  const progress = await db
+    .select()
+    .from(lessonProgress)
+    .where(eq(lessonProgress.userId, userId));
+
+  const totalLessonsCompleted = progress.length;
+
+  // Get courses where all lessons are completed
+  const allCourses = await getCourses(true);
+  const completedCourseIds: number[] = [];
+
+  for (const course of allCourses) {
+    const courseLessons = await getLessonsByCourse(course.id, true);
+    if (courseLessons.length === 0) continue;
+    const completedInCourse = progress.filter(p => p.courseId === course.id).length;
+    if (completedInCourse >= courseLessons.length) {
+      completedCourseIds.push(course.id);
+    }
+  }
+
+  const completedCourses = allCourses.filter(c => completedCourseIds.includes(c.id));
+
+  // Compute badges
+  const badges: Array<{ id: string; label: string; icon: string; earned: boolean; description: string }> = [
+    {
+      id: "first_lesson",
+      label: "First Step",
+      icon: "🎯",
+      earned: totalLessonsCompleted >= 1,
+      description: "Complete your first lesson",
+    },
+    {
+      id: "five_lessons",
+      label: "Getting Started",
+      icon: "🚀",
+      earned: totalLessonsCompleted >= 5,
+      description: "Complete 5 lessons",
+    },
+    {
+      id: "ten_lessons",
+      label: "On a Roll",
+      icon: "🔥",
+      earned: totalLessonsCompleted >= 10,
+      description: "Complete 10 lessons",
+    },
+    {
+      id: "first_course",
+      label: "Course Champion",
+      icon: "🏆",
+      earned: completedCourses.length >= 1,
+      description: "Complete your first full course",
+    },
+    {
+      id: "three_courses",
+      label: "WAVV Expert",
+      icon: "⭐",
+      earned: completedCourses.length >= 3,
+      description: "Complete 3 full courses",
+    },
+    {
+      id: "all_courses",
+      label: "WAVV Master",
+      icon: "👑",
+      earned: completedCourses.length >= allCourses.length && allCourses.length > 0,
+      description: "Complete all available courses",
+    },
+  ];
+
+  return {
+    completedCourses,
+    totalLessonsCompleted,
+    badges,
+  };
 }

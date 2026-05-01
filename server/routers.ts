@@ -28,6 +28,8 @@ import {
   getLessonsByCourse,
   getLessonById,
   getUserProgress,
+  getUserTrophies,
+  searchContent,
   getUserTickets,
   getUserWebinarRegistrations,
   getWebinarById,
@@ -520,6 +522,19 @@ export const appRouter = router({
   wavvAi: wavvAiRouter,
   analytics: analyticsRouter,
   scheduled: scheduledRouter,
+  search: router({
+    query: protectedProcedure
+      .input(z.object({ q: z.string().min(1).max(200) }))
+      .query(async ({ input }) => {
+        if (input.q.trim().length < 2) return { courses: [], lessons: [], webinars: [], guides: [] };
+        return searchContent(input.q.trim());
+      }),
+  }),
+  trophy: router({
+    get: protectedProcedure.query(async ({ ctx }) => {
+      return getUserTrophies(ctx.user.id);
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

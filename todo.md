@@ -104,3 +104,8 @@
 - [x] Landing page: rename title to "WAVV Success Center"
 - [x] Landing page: remove "AI-powered support" from subheadline
 - [x] Landing page: change "Instant support tickets" to "Create support tickets"
+
+## Feature Additions (Round 6)
+- [x] AI-powered search bar in portal top bar (sparkle icon, searches Academy/Webinars/Guides)
+- [x] Trophy Case: user achievement badges for completed courses, lessons, and milestones
+- [x] Trophy Case accessible from top bar via Trophy Case button

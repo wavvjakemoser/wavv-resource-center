@@ -2,6 +2,8 @@ import { trpc } from "@/lib/trpc";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import WavvAIChat from "./WavvAIChat";
+import AISearchBar from "./AISearchBar";
+import TrophyCase from "./TrophyCase";
 import {
   BookOpen,
   Video,
@@ -207,21 +209,24 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
 
         {/* Top bar */}
         <header
-          className="flex items-center gap-4 px-4 lg:px-6 py-3 sticky top-0 z-30"
+          className="flex items-center gap-3 px-4 lg:px-6 py-3 sticky top-0 z-30"
           style={{ background: "#121212", borderBottom: "1px solid #1e1e1e" }}
         >
           <button
-            className="lg:hidden text-gray-400 hover:text-white"
+            className="lg:hidden text-gray-400 hover:text-white flex-shrink-0"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu size={20} />
           </button>
 
-          {title && (
-            <h1 className="text-base font-semibold text-white">{title}</h1>
-          )}
+          {/* AI Search Bar */}
+          <AISearchBar />
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Trophy Case */}
+            <TrophyCase />
+
+            {/* WAVV AI Chat */}
             <button
               onClick={() => setAiOpen(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
@@ -231,7 +236,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               }}
             >
               <Sparkles size={14} />
-              WAVV AI
+              <span className="hidden sm:inline">WAVV AI</span>
             </button>
           </div>
         </header>
