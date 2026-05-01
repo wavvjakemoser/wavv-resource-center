@@ -460,6 +460,24 @@ export const appRouter = router({
     login: publicProcedure
       .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
       .mutation(async ({ ctx, input }) => {
+        // ── DEMO MODE: any credentials accepted ──────────────────────────────
+        // TODO: Remove this block before production launch
+        const DEMO_MODE = true;
+        if (DEMO_MODE) {
+          // Try real credentials first; fall back to demo user
+          let demoUser = await getUserByEmail(input.email);
+          if (!demoUser) {
+            // Fall back to Jake's account as the demo user
+            demoUser = await getUserByEmail("jake@wavv.com");
+          }
+          if (demoUser) {
+            const token = await createSessionToken({ userId: demoUser.id, email: demoUser.email ?? "", role: demoUser.role });
+            const cookieOptions = getSessionCookieOptions(ctx.req);
+            ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+            return { success: true, user: { id: demoUser.id, name: demoUser.name, email: demoUser.email, role: demoUser.role } };
+          }
+        }
+        // ── END DEMO MODE ────────────────────────────────────────────────────
         const user = await getUserByEmail(input.email);
         if (!user || !user.passwordHash || !user.isActive) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });

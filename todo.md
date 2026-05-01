@@ -93,3 +93,6 @@
 - [x] Update Home.tsx sign-in modal to POST credentials to new auth endpoint
 - [x] Remove all getLoginUrl() / Manus OAuth references from frontend
 - [x] Seed initial admin user (jake@wavv.com) for first login
+
+## Demo Mode
+- [x] Add demo bypass: any credentials accepted, logs in as a demo user for portal review
