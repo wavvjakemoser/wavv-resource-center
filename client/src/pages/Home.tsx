@@ -146,12 +146,12 @@ export default function Home() {
               backgroundClip: "text",
             }}
           >
-            Resource Center
+            Success Center
           </span>
         </h1>
 
         <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mb-10 leading-relaxed">
-          Training, webinars, guides, and AI-powered support — everything you need to get the most out of WAVV, all in one place.
+          Training, webinars, guides, and dedicated support — everything you need to get the most out of WAVV, all in one place.
         </p>
 
         <button
@@ -162,7 +162,7 @@ export default function Home() {
             boxShadow: "0 8px 32px rgba(0,116,244,0.35)",
           }}
         >
-          Access Resource Center
+          Access Success Center
           <ArrowRight size={16} />
         </button>
 
@@ -206,7 +206,7 @@ export default function Home() {
             "AI-powered answers",
             "Progress tracking",
             "On-demand recordings",
-            "Instant support tickets",
+            "Create support tickets",
           ].map((b) => (
             <div key={b} className="flex items-center gap-1.5">
               <CheckCircle size={13} className="text-[#67C728] flex-shrink-0" />

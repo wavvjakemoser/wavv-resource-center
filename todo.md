@@ -99,3 +99,8 @@
 
 ## UX Polish
 - [x] Add thin yellow demo environment banner at top of portal (inside authenticated layout)
+
+## Copy Updates (Round 5)
+- [x] Landing page: rename title to "WAVV Success Center"
+- [x] Landing page: remove "AI-powered support" from subheadline
+- [x] Landing page: change "Instant support tickets" to "Create support tickets"
