@@ -128,7 +128,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
-            width: "220px",
+            width: "256px",
             background: "#0d0d0d",
             borderRight: "1px solid #1e1e1e",
             flexShrink: 0,
@@ -172,8 +172,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     }`}
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <Icon size={16} />
-                    {item.label}
+                    <Icon size={16} className="flex-shrink-0" />
+                    <span className="truncate">{item.label}</span>
                   </Link>
                 );
               })}

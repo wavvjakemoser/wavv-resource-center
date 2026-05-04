@@ -368,28 +368,29 @@ export default function Academy() {
             const liveCourses = coursesByCategory[cat.key] ?? [];
 
             return (
-              <section key={cat.key} className="space-y-4">
-                {/* Category banner */}
-                <div
-                  className="relative overflow-hidden rounded-2xl"
-                  style={{ border: `1px solid ${cat.color}30` }}
+              <section key={cat.key}>
+                {/* Category banner — fully clickable, navigates into the category */}
+                <Link
+                  href={`/academy/category/${encodeURIComponent(cat.key)}`}
+                  className="group relative overflow-hidden rounded-2xl block cursor-pointer"
+                  style={{ border: `1px solid ${cat.color}30`, textDecoration: "none" }}
                 >
                   <img
                     src={cat.thumbnail}
                     alt={cat.label}
-                    className="w-full object-cover"
+                    className="w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                     style={{ height: "160px" }}
                   />
                   {/* Overlay gradient */}
                   <div
-                    className="absolute inset-0"
+                    className="absolute inset-0 transition-opacity duration-200 group-hover:opacity-80"
                     style={{
                       background:
                         "linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)",
                     }}
                   />
                   {/* Text overlay */}
-                  <div className="absolute inset-0 flex items-center px-6">
+                  <div className="absolute inset-0 flex items-center justify-between px-6">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <div
@@ -412,33 +413,15 @@ export default function Academy() {
                       </div>
                       <p className="text-gray-300 text-xs max-w-sm">{cat.subtitle}</p>
                     </div>
+                    {/* Arrow CTA */}
+                    <div
+                      className="flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                      style={{ background: `${cat.color}30`, border: `1px solid ${cat.color}50` }}
+                    >
+                      <ChevronRight size={18} style={{ color: cat.color }} />
+                    </div>
                   </div>
-                </div>
-
-                {/* Course cards grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Live courses from DB */}
-                  {liveCourses.map((course) => (
-                    <LiveCourseCard
-                      key={course.id}
-                      course={course}
-                      accentColor={cat.color}
-                      completedCount={0}
-                    />
-                  ))}
-
-                  {/* Placeholder cards (always shown when no live courses) */}
-                  {liveCourses.length === 0 &&
-                    cat.placeholders.map((p) => (
-                      <PlaceholderCourseCard
-                        key={p.id}
-                        title={p.title}
-                        description={p.description}
-                        duration={p.duration}
-                        accentColor={cat.color}
-                      />
-                    ))}
-                </div>
+                </Link>
               </section>
             );
           })}
