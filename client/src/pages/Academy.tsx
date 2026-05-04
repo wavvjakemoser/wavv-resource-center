@@ -10,6 +10,9 @@ import {
   TrendingUp,
   Star,
   Lock,
+  Rocket,
+  PlayCircle,
+  Target,
 } from "lucide-react";
 
 // ─── 3 canonical categories ───────────────────────────────────────────────
@@ -19,6 +22,7 @@ const CATEGORIES = [
     label: "Onboarding",
     subtitle: "Get your team up and running with WAVV",
     color: "#0074F4",
+    icon: Rocket,
     thumbnail:
       "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-thumb-cy9amSDtDB8FaRgmGumyrX.webp",
     placeholders: [
@@ -53,6 +57,7 @@ const CATEGORIES = [
     label: "How-To",
     subtitle: "Step-by-step guides for core WAVV features",
     color: "#00A9E2",
+    icon: PlayCircle,
     thumbnail:
       "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-thumb-iuntTrCa6frsgxgN6pFnCD.webp",
     placeholders: [
@@ -84,9 +89,10 @@ const CATEGORIES = [
   },
   {
     key: "Strategy and Best Practices",
-    label: "Strategy & Best Practices",
+    label: "Strategy",
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
+    icon: Target,
     thumbnail:
       "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-thumb-fKFxPeA2NotYc3dTCL2qLc.webp",
     placeholders: [
@@ -393,22 +399,26 @@ export default function Academy() {
                   <div className="absolute inset-0 flex items-center justify-between px-6">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <div
-                          className="w-2 h-5 rounded-full"
-                          style={{ background: cat.color }}
-                        />
+                        {cat.icon && (
+                          <cat.icon size={18} style={{ color: cat.color }} />
+                        )}
                         <h2 className="text-lg font-bold text-white">{cat.label}</h2>
                         <span
                           className="text-[11px] font-bold px-2.5 py-0.5 rounded-full ml-1"
                           style={{
-                            background: `${cat.color}35`,
-                            color: cat.color,
-                            border: `1px solid ${cat.color}70`,
-                            textShadow: "0 0 8px currentColor",
+                            background: "rgba(255,255,255,0.12)",
+                            color: "#ffffff",
+                            border: "1px solid rgba(255,255,255,0.3)",
                           }}
                         >
                           {liveCourses.length > 0
-                            ? `${liveCourses.length} course${liveCourses.length !== 1 ? "s" : ""}`
+                            ? (() => {
+                                const totalLessons = liveCourses.reduce(
+                                  (sum, c) => sum + (c.lessonCount ?? 0),
+                                  0
+                                );
+                                return `${liveCourses.length} section${liveCourses.length !== 1 ? "s" : ""} · ${totalLessons} video${totalLessons !== 1 ? "s" : ""}`;
+                              })()
                             : "Coming Soon"}
                         </span>
                       </div>

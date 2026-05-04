@@ -63,7 +63,16 @@ const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 // ─── Academy Router ───────────────────────────────────────────────────────────
 const academyRouter = router({
-  getCourses: protectedProcedure.query(() => getCourses(true)),
+  getCourses: protectedProcedure.query(async () => {
+    const allCourses = await getCourses(true);
+    const enriched = await Promise.all(
+      allCourses.map(async (c) => {
+        const courseLessons = await getLessonsByCourse(c.id, true);
+        return { ...c, lessonCount: courseLessons.length };
+      })
+    );
+    return enriched;
+  }),
 
   getCourse: protectedProcedure
     .input(z.object({ id: z.number() }))

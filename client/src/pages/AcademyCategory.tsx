@@ -5,7 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Folder,
+  BookOpen,
   Play,
   Lock,
   GraduationCap,
@@ -275,7 +275,7 @@ function SectionRow({
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-white/5"
       >
-        <Folder size={18} style={{ color: accentColor, flexShrink: 0 }} />
+        <BookOpen size={16} style={{ color: accentColor, flexShrink: 0 }} />
         <span className="flex-1 text-sm font-semibold text-white">{section.title}</span>
         <span className="text-[11px] text-gray-500 mr-2">
           {section.videos.length} video{section.videos.length !== 1 ? "s" : ""}
