@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 
 const navItems = [
+  { href: "/dashboard", label: "Home", icon: Home },
   { href: "/academy", label: "WAVV Academy", icon: BookOpen },
   { href: "/webinars", label: "WAVV Webinars", icon: Video },
   { href: "/guides", label: "WAVV Guides & Docs", icon: FileText },

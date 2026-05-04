@@ -79,19 +79,19 @@ export default function Home() {
     },
     {
       icon: Video,
-      label: "Webinars",
+      label: "WAVV Webinars",
       desc: "Evergreen and live sessions to deepen your WAVV expertise",
       color: "#00A9E2",
     },
     {
       icon: FileText,
-      label: "Guides & Docs",
+      label: "WAVV Guides & Docs",
       desc: "Playbooks, checklists, and PDFs to accelerate your ROI",
       color: "#67C728",
     },
     {
       icon: LifeBuoy,
-      label: "Support",
+      label: "WAVV Support",
       desc: "Submit tickets, book calls, or get instant answers from WAVV AI",
       color: "#FF9900",
     },
