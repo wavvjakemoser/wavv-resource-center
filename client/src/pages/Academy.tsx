@@ -11,7 +11,7 @@ import {
   Star,
   Lock,
   Rocket,
-  PlayCircle,
+  Wrench,
   Target,
 } from "lucide-react";
 
@@ -57,7 +57,7 @@ const CATEGORIES = [
     label: "How-To",
     subtitle: "Step-by-step guides for core WAVV features",
     color: "#00A9E2",
-    icon: PlayCircle,
+    icon: Wrench,
     thumbnail:
       "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-thumb-iuntTrCa6frsgxgN6pFnCD.webp",
     placeholders: [
@@ -398,31 +398,36 @@ export default function Academy() {
                   {/* Text overlay */}
                   <div className="absolute inset-0 flex items-center justify-between px-6">
                     <div>
+                      {/* Title row: icon + label */}
                       <div className="flex items-center gap-2 mb-1">
                         {cat.icon && (
                           <cat.icon size={18} style={{ color: cat.color }} />
                         )}
                         <h2 className="text-lg font-bold text-white">{cat.label}</h2>
-                        <span
-                          className="text-[11px] font-bold px-2.5 py-0.5 rounded-full ml-1"
-                          style={{
-                            background: "rgba(255,255,255,0.12)",
-                            color: "#ffffff",
-                            border: "1px solid rgba(255,255,255,0.3)",
-                          }}
-                        >
-                          {liveCourses.length > 0
-                            ? (() => {
-                                const totalLessons = liveCourses.reduce(
-                                  (sum, c) => sum + (c.lessonCount ?? 0),
-                                  0
-                                );
-                                return `${liveCourses.length} section${liveCourses.length !== 1 ? "s" : ""} · ${totalLessons} video${totalLessons !== 1 ? "s" : ""}`;
-                              })()
-                            : "Coming Soon"}
-                        </span>
                       </div>
-                      <p className="text-gray-300 text-xs max-w-sm">{cat.subtitle}</p>
+                      {/* Description */}
+                      <p className="text-gray-300 text-xs max-w-sm mb-2">{cat.subtitle}</p>
+                      {/* Badge — below description, bright category color */}
+                      <span
+                        className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                        style={{
+                          background: `${cat.color}30`,
+                          color: "#ffffff",
+                          border: `1.5px solid ${cat.color}`,
+                          boxShadow: `0 0 10px ${cat.color}90, inset 0 0 6px ${cat.color}30`,
+                          textShadow: "0 1px 2px rgba(0,0,0,0.8)",
+                        }}
+                      >
+                        {liveCourses.length > 0
+                          ? (() => {
+                              const totalLessons = liveCourses.reduce(
+                                (sum, c) => sum + (c.lessonCount ?? 0),
+                                0
+                              );
+                              return `${liveCourses.length} section${liveCourses.length !== 1 ? "s" : ""} · ${totalLessons} video${totalLessons !== 1 ? "s" : ""}`;
+                            })()
+                          : "Coming Soon"}
+                      </span>
                     </div>
                     {/* Arrow CTA */}
                     <div

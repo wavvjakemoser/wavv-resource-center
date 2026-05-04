@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import React from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -52,6 +53,9 @@ import {
   Shield,
   ShieldOff,
   UserPlus,
+  Pencil,
+  Check,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -824,6 +828,7 @@ function LessonRow({
   lesson: {
     id: number;
     title: string;
+    description?: string | null;
     courseTitle?: string;
     courseCategory?: string;
     inactiveReason?: string | null;
@@ -833,60 +838,131 @@ function LessonRow({
   onDeactivate?: () => void;
   onActivate?: () => void;
 }) {
+  const [editing, setEditing] = React.useState(false);
+  const [editTitle, setEditTitle] = React.useState(lesson.title);
+  const [editDesc, setEditDesc] = React.useState(lesson.description ?? "");
+  const utils = trpc.useUtils();
+
+  const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
+    onSuccess: () => {
+      toast.success("Lesson updated");
+      utils.academy.adminGetAllLessons.invalidate();
+      setEditing(false);
+    },
+    onError: () => toast.error("Failed to update lesson"),
+  });
+
+  const handleSave = () => {
+    updateLesson.mutate({
+      id: lesson.id,
+      data: { title: editTitle.trim() || lesson.title, description: editDesc.trim() || undefined },
+    });
+  };
+
+  const handleCancel = () => {
+    setEditTitle(lesson.title);
+    setEditDesc(lesson.description ?? "");
+    setEditing(false);
+  };
+
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 rounded-xl"
+      className="px-4 py-3 rounded-xl"
       style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
     >
-      {/* Status dot */}
-      <div
-        className="w-2 h-2 rounded-full flex-shrink-0"
-        style={{ background: isActive ? "#22c55e" : "#4b5563" }}
-      />
-
-      {/* Title + meta */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white truncate">{lesson.title}</p>
-        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-          {lesson.courseTitle && (
-            <span className="text-[11px] text-gray-500">{lesson.courseTitle}</span>
-          )}
-          {lesson.courseCategory && (
-            <span
-              className="text-[10px] px-1.5 py-0.5 rounded-full"
+      {editing ? (
+        /* ── Edit mode ── */
+        <div className="flex flex-col gap-2">
+          <input
+            className="w-full bg-[#111] border border-[#333] rounded-lg px-3 py-1.5 text-sm text-white outline-none focus:border-blue-500"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            placeholder="Video title"
+          />
+          <textarea
+            className="w-full bg-[#111] border border-[#333] rounded-lg px-3 py-1.5 text-xs text-gray-300 outline-none focus:border-blue-500 resize-none"
+            rows={2}
+            value={editDesc}
+            onChange={(e) => setEditDesc(e.target.value)}
+            placeholder="Description (optional)"
+          />
+          <div className="flex items-center gap-2 justify-end">
+            <button
+              onClick={handleCancel}
+              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg transition hover:opacity-80"
               style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #333" }}
             >
-              {lesson.courseCategory}
-            </span>
-          )}
-          {!isActive && lesson.inactiveReason && (
-            <span
-              className="text-[10px] px-1.5 py-0.5 rounded-full"
+              <X size={12} /> Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={updateLesson.isPending}
+              className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg transition hover:opacity-80 disabled:opacity-50"
+              style={{ background: "rgba(59,130,246,0.15)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.3)" }}
+            >
+              <Check size={12} /> {updateLesson.isPending ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* ── View mode ── */
+        <div className="flex items-center gap-3">
+          <div
+            className="w-2 h-2 rounded-full flex-shrink-0"
+            style={{ background: isActive ? "#22c55e" : "#4b5563" }}
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">{lesson.title}</p>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              {lesson.courseTitle && (
+                <span className="text-[11px] text-gray-500">{lesson.courseTitle}</span>
+              )}
+              {lesson.courseCategory && (
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #333" }}
+                >
+                  {lesson.courseCategory}
+                </span>
+              )}
+              {!isActive && lesson.inactiveReason && (
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-full"
+                  style={{ background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
+                >
+                  {lesson.inactiveReason}
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Edit icon */}
+          <button
+            onClick={() => setEditing(true)}
+            className="flex-shrink-0 p-1.5 rounded-lg transition hover:opacity-80"
+            style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+            title="Edit title / description"
+          >
+            <Pencil size={13} />
+          </button>
+          {/* Activate / Deactivate */}
+          {isActive ? (
+            <button
+              onClick={onDeactivate}
+              className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80"
               style={{ background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
             >
-              {lesson.inactiveReason}
-            </span>
+              Deactivate
+            </button>
+          ) : (
+            <button
+              onClick={onActivate}
+              className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80"
+              style={{ background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }}
+            >
+              Activate
+            </button>
           )}
         </div>
-      </div>
-
-      {/* Action button */}
-      {isActive ? (
-        <button
-          onClick={onDeactivate}
-          className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80"
-          style={{ background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
-        >
-          Deactivate
-        </button>
-      ) : (
-        <button
-          onClick={onActivate}
-          className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80"
-          style={{ background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }}
-        >
-          Activate
-        </button>
       )}
     </div>
   );
