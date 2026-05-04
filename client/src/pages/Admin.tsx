@@ -852,7 +852,18 @@ function SectionRow2({
               );
             })}
           </div>
-          <p className="text-[10px] text-gray-600 mt-0.5">{lessons.length} video{lessons.length !== 1 ? "s" : ""}</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>
+              {lessons.length} video{lessons.length !== 1 ? "s" : ""}
+            </span>
+            {!course.published && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
+                Hidden
+              </span>
+            )}
+          </div>
         </div>
         {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -919,6 +930,8 @@ function SectionRow2({
 // ─── Category block (groups sections) ────────────────────────────────────────
 function CategoryBlock({
   categoryKey,
+  categoryLabel,
+  categoryBanner,
   courses,
   allLessons,
   onDeactivateLesson,
@@ -926,6 +939,8 @@ function CategoryBlock({
   accentColor,
 }: {
   categoryKey: string;
+  categoryLabel?: string;
+  categoryBanner?: string;
   courses: Array<{ id: number; title: string; category: string; published: boolean; tags?: string | null }>;
   allLessons: Array<any>;
   onDeactivateLesson: (lesson: { id: number; title: string }) => void;
@@ -933,22 +948,36 @@ function CategoryBlock({
   accentColor: string;
 }) {
   const [open, setOpen] = React.useState(true);
+  const displayLabel = categoryLabel ?? categoryKey;
 
   return (
     <div>
-      {/* Category header */}
+      {/* Category banner header — mirrors Academy layout */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-2.5 mb-3 group"
+        className="w-full relative overflow-hidden rounded-xl mb-3 group"
+        style={{ border: `1px solid ${accentColor}40` }}
       >
-        <div className="flex items-center justify-center w-6 h-6 rounded-lg flex-shrink-0"
-          style={{ background: `${accentColor}18`, border: `1px solid ${accentColor}40` }}>
-          {open ? <ChevronDown size={12} style={{ color: accentColor }} /> : <ChevronRightIcon size={12} style={{ color: accentColor }} />}
+        {/* Banner image */}
+        {categoryBanner && (
+          <img src={categoryBanner} alt={displayLabel} className="absolute inset-0 w-full h-full object-cover" aria-hidden />
+        )}
+        {/* Dark overlay */}
+        <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.50) 100%)` }} />
+        {/* Colour glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 85% 50%, ${accentColor}22 0%, transparent 60%)` }} />
+        {/* Content */}
+        <div className="relative flex items-center justify-between px-5 py-4">
+          <div className="flex items-center gap-3">
+            {open ? <ChevronDown size={14} style={{ color: accentColor }} /> : <ChevronRightIcon size={14} style={{ color: accentColor }} />}
+            <h2 className="text-base font-bold text-white">{displayLabel}</h2>
+            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: `${accentColor}25`, color: accentColor, border: `1px solid ${accentColor}50` }}>
+              {courses.length} section{courses.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+          <Layers size={16} style={{ color: accentColor, opacity: 0.7 }} />
         </div>
-        <Layers size={14} style={{ color: accentColor }} />
-        <h2 className="text-sm font-bold text-white">{categoryKey}</h2>
-        <span className="text-xs text-gray-600">{courses.length} section{courses.length !== 1 ? "s" : ""}</span>
       </button>
       {open && (
         <div className="space-y-2 ml-8">
@@ -1016,9 +1045,30 @@ function ContentTab() {
     return map;
   }, [courses]);
 
+  // Mirror the exact Academy category order, display names, colors, and banners
+  const ACADEMY_CATEGORIES = [
+    {
+      key: "Onboarding",
+      label: "Onboarding",
+      color: "#0074F4",
+      banner: "/manus-storage/banner-onboarding_dbd0bcc0.png",
+    },
+    {
+      key: "How-To",
+      label: "How-To",
+      color: "#00A9E2",
+      banner: "/manus-storage/banner-howto_b361bfde.png",
+    },
+    {
+      key: "Strategy and Best Practices",
+      label: "Strategy & Best Practices",
+      color: "#67C728",
+      banner: "/manus-storage/banner-strategy_07979b75.png",
+    },
+  ];
   const CATEGORY_COLORS: Record<string, string> = {
     "Onboarding": "#0074F4",
-    "How-To": "#F59E0B",
+    "How-To": "#00A9E2",
     "Strategy and Best Practices": "#67C728",
     "Dialer Setup": "#8B5CF6",
     "CRM Integrations": "#EC4899",
@@ -1035,18 +1085,39 @@ function ContentTab() {
 
   return (
     <div className="space-y-8">
-      {/* ── Category > Section > Video hierarchy ── */}
-      {Object.entries(byCategory).map(([categoryKey, categoryCourses]) => (
-        <CategoryBlock
-          key={categoryKey}
-          categoryKey={categoryKey}
-          courses={categoryCourses}
-          allLessons={lessons}
-          onDeactivateLesson={handleDeactivate}
-          onActivateLesson={handleActivate}
-          accentColor={CATEGORY_COLORS[categoryKey] ?? "#60a5fa"}
-        />
-      ))}
+      {/* ── Category > Section > Video hierarchy (mirrors Academy order) ── */}
+      {ACADEMY_CATEGORIES.map(({ key, label, color, banner }) => {
+        const categoryCourses = byCategory[key] ?? [];
+        return (
+          <CategoryBlock
+            key={key}
+            categoryKey={key}
+            categoryLabel={label}
+            categoryBanner={banner}
+            courses={categoryCourses}
+            allLessons={lessons}
+            onDeactivateLesson={handleDeactivate}
+            onActivateLesson={handleActivate}
+            accentColor={color}
+          />
+        );
+      })}
+      {/* Any extra categories not in the fixed list */}
+      {Object.entries(byCategory)
+        .filter(([k]) => !ACADEMY_CATEGORIES.find((c) => c.key === k))
+        .map(([categoryKey, categoryCourses]) => (
+          <CategoryBlock
+            key={categoryKey}
+            categoryKey={categoryKey}
+            categoryLabel={categoryKey}
+            courses={categoryCourses}
+            allLessons={lessons}
+            onDeactivateLesson={handleDeactivate}
+            onActivateLesson={handleActivate}
+            accentColor={CATEGORY_COLORS[categoryKey] ?? "#60a5fa"}
+          />
+        ))
+      }
 
       {/* ── Tags Management panel ── */}
       <TagsManagementPanel />

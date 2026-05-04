@@ -309,3 +309,12 @@
 - [x] AcademyCategory: bookmark icon on each video row (toggle on click)
 - [x] Profile page: show bookmarked content in a dedicated section
 - [x] Filter bar includes "Bookmarked" filter option
+
+## Banner + Admin Layout Fix (Batch 4)
+- [x] Upload 3 provided geometric banner images to webdev storage
+- [x] Academy.tsx: use uploaded images as banner backgrounds (rocket/checklist/chevron)
+- [x] Academy.tsx: banner labels read "Onboarding", "How-To", "Strategy & Best Practices"
+- [x] Academy.tsx: restore color-coded section/video count badges on category cards
+- [x] Academy.tsx: icon on right side, no subtitle text
+- [x] Admin content tab: restructure to exactly mirror Academy layout (same category/section/video order)
+- [x] Admin SectionRow2: color-coded video count badge (blue pill for count, red pill for Hidden status)

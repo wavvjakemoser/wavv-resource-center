@@ -23,8 +23,7 @@ const CATEGORIES = [
     subtitle: "Get your team up and running with WAVV",
     color: "#0074F4",
     icon: Rocket,
-    thumbnail:
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-thumb-cy9amSDtDB8FaRgmGumyrX.webp",
+    thumbnail: "/manus-storage/banner-onboarding_dbd0bcc0.png",
     placeholders: [
       {
         id: "p-onb-1",
@@ -58,8 +57,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step guides for core WAVV features",
     color: "#00A9E2",
     icon: Wrench,
-    thumbnail:
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-thumb-iuntTrCa6frsgxgN6pFnCD.webp",
+    thumbnail: "/manus-storage/banner-howto_b361bfde.png",
     placeholders: [
       {
         id: "p-how-1",
@@ -89,12 +87,11 @@ const CATEGORIES = [
   },
   {
     key: "Strategy and Best Practices",
-    label: "Strategy",
+    label: "Strategy & Best Practices",
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
     icon: Lightbulb,
-    thumbnail:
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-thumb-fKFxPeA2NotYc3dTCL2qLc.webp",
+    thumbnail: "/manus-storage/banner-strategy_07979b75.png",
     placeholders: [
       {
         id: "p-str-1",
@@ -402,8 +399,31 @@ export default function Academy() {
                   />
                   {/* Content */}
                   <div className="relative flex items-center justify-between px-8 py-10">
-                    {/* Left: label only */}
-                    <h2 className="text-2xl font-bold text-white tracking-tight">{cat.label}</h2>
+                    {/* Left: label + count badges */}
+                    <div className="flex flex-col gap-2">
+                      <h2 className="text-2xl font-bold text-white tracking-tight">{cat.label}</h2>
+                      {/* Color-coded section/video count badges */}
+                      {(() => {
+                        const liveCourses = coursesByCategory[cat.key] ?? [];
+                        const totalLessons = liveCourses.reduce((sum, c) => sum + (c.lessonCount ?? 0), 0);
+                        return liveCourses.length > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                              style={{ background: `${cat.color}25`, color: cat.color, border: `1px solid ${cat.color}50` }}
+                            >
+                              {liveCourses.length} {liveCourses.length === 1 ? "section" : "sections"}
+                            </span>
+                            <span
+                              className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                              style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}
+                            >
+                              {totalLessons} {totalLessons === 1 ? "video" : "videos"}
+                            </span>
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
                     {/* Right: large icon emblem */}
                     {cat.icon && (
                       <div
