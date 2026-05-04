@@ -780,6 +780,9 @@ function ContentTab() {
         )}
       </div>
 
+      {/* ── Tags Management panel ── */}
+      <TagsManagementPanel />
+
       {/* ── Deactivate reason dialog ── */}
       <Dialog open={reasonDialogOpen} onOpenChange={setReasonDialogOpen}>
         <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
@@ -810,6 +813,83 @@ function ContentTab() {
               className="text-white hover:opacity-90"
             >
               Deactivate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Tags Management Panel ─────────────────────────────────────────────────
+function TagsManagementPanel() {
+  const utils = trpc.useUtils();
+  const { data: usedTags = [], isLoading } = trpc.academy.adminGetAllUsedTags.useQuery();
+  const removeTag = trpc.academy.adminRemoveTagFromAll.useMutation({
+    onSuccess: (res) => {
+      toast.success(`Tag removed from ${res.updated} lesson(s)`);
+      utils.academy.adminGetAllUsedTags.invalidate();
+      utils.academy.adminGetAllLessons.invalidate();
+    },
+    onError: () => toast.error("Failed to remove tag"),
+  });
+  const [confirmTag, setConfirmTag] = React.useState<string | null>(null);
+
+  if (isLoading || usedTags.length === 0) return null;
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 rounded-full" style={{ background: "#fbbf24" }} />
+        <h2 className="text-sm font-semibold text-white">Tag Management</h2>
+        <span className="text-xs text-gray-500">Remove a tag from all lessons at once</span>
+      </div>
+      <div
+        className="rounded-xl p-4"
+        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+      >
+        <div className="flex flex-wrap gap-2">
+          {usedTags.map((tag) => (
+            <div key={tag} className="flex items-center gap-1">
+              <span
+                className="text-[11px] font-medium px-2.5 py-0.5 rounded-full"
+                style={{ background: "rgba(255,255,255,0.07)", color: "#d1d5db", border: "1px solid #444" }}
+              >
+                {tag}
+              </span>
+              <button
+                type="button"
+                onClick={() => setConfirmTag(tag)}
+                className="w-5 h-5 rounded-full flex items-center justify-center transition hover:opacity-80"
+                style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}
+                title={`Remove "${tag}" from all lessons`}
+              >
+                <X size={10} />
+              </button>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-gray-600 mt-3">Clicking × removes the tag from every lesson. This cannot be undone.</p>
+      </div>
+      {/* Confirm dialog */}
+      <Dialog open={!!confirmTag} onOpenChange={() => setConfirmTag(null)}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Remove Tag</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Remove <span className="font-semibold text-gray-200">"{confirmTag}"</span> from all lessons?
+              This will delete the tag everywhere it is applied.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmTag(null)} className="text-gray-400">Cancel</Button>
+            <Button
+              onClick={() => { if (confirmTag) { removeTag.mutate({ tag: confirmTag }); setConfirmTag(null); } }}
+              disabled={removeTag.isPending}
+              style={{ background: "#ef4444" }}
+              className="text-white hover:opacity-90"
+            >
+              Remove Tag
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -857,7 +937,9 @@ function LessonRow({
   const [editing, setEditing] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(lesson.title);
   const [editDesc, setEditDesc] = React.useState(lesson.description ?? "");
+  const [editVideoUrl, setEditVideoUrl] = React.useState(lesson.videoUrl ?? "");
   const [activeTags, setActiveTags] = React.useState<string[]>(() => parseTagList(lesson.tags));
+  const [customTagInput, setCustomTagInput] = React.useState("");
   const utils = trpc.useUtils();
 
   const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
@@ -875,6 +957,7 @@ function LessonRow({
       data: {
         title: editTitle.trim() || lesson.title,
         description: editDesc.trim() || undefined,
+        videoUrl: editVideoUrl.trim() || undefined,
         tags: activeTags.join(",") || null,
       },
     });
@@ -883,8 +966,17 @@ function LessonRow({
   const handleCancel = () => {
     setEditTitle(lesson.title);
     setEditDesc(lesson.description ?? "");
+    setEditVideoUrl(lesson.videoUrl ?? "");
     setActiveTags(parseTagList(lesson.tags));
+    setCustomTagInput("");
     setEditing(false);
+  };
+
+  const addCustomTag = () => {
+    const tag = customTagInput.trim();
+    if (!tag || activeTags.includes(tag)) { setCustomTagInput(""); return; }
+    setActiveTags((prev) => [...prev, tag]);
+    setCustomTagInput("");
   };
 
   const toggleTag = (label: string) => {
@@ -914,10 +1006,17 @@ function LessonRow({
             onChange={(e) => setEditDesc(e.target.value)}
             placeholder="Description (optional)"
           />
+          {/* Video URL field */}
+          <input
+            className="w-full bg-[#111] border border-[#333] rounded-lg px-3 py-1.5 text-xs text-gray-300 outline-none focus:border-blue-500 font-mono"
+            value={editVideoUrl}
+            onChange={(e) => setEditVideoUrl(e.target.value)}
+            placeholder="Video URL (Loom, YouTube, etc.)"
+          />
           {/* Tag editor */}
           <div>
-            <p className="text-[11px] text-gray-500 mb-1.5">Tags</p>
-            <div className="flex flex-wrap gap-1.5">
+            <p className="text-[11px] text-gray-500 mb-1.5">Tags — click to toggle presets, or type a custom tag</p>
+            <div className="flex flex-wrap gap-1.5 mb-2">
               {PRESET_TAGS.map((tag) => {
                 const active = activeTags.includes(tag.label);
                 return (
@@ -937,6 +1036,46 @@ function LessonRow({
                   </button>
                 );
               })}
+            </div>
+            {/* Active custom tags */}
+            {activeTags.filter((t) => !PRESET_TAGS.find((p) => p.label === t)).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {activeTags.filter((t) => !PRESET_TAGS.find((p) => p.label === t)).map((tag) => (
+                  <span
+                    key={tag}
+                    className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.07)", color: "#d1d5db", border: "1px solid #444" }}
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTags((prev) => prev.filter((t2) => t2 !== tag))}
+                      className="ml-0.5 hover:text-red-400 transition-colors"
+                    >
+                      <X size={10} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* Custom tag input */}
+            <div className="flex gap-1.5">
+              <input
+                className="flex-1 bg-[#111] border border-[#333] rounded-lg px-2.5 py-1 text-[11px] text-white outline-none focus:border-blue-500"
+                value={customTagInput}
+                onChange={(e) => setCustomTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomTag())}
+                placeholder="Add custom tag…"
+              />
+              <button
+                type="button"
+                onClick={addCustomTag}
+                disabled={!customTagInput.trim()}
+                className="text-[11px] px-2.5 py-1 rounded-lg transition hover:opacity-80 disabled:opacity-40"
+                style={{ background: "rgba(255,255,255,0.07)", color: "#9ca3af", border: "1px solid #333" }}
+              >
+                Add
+              </button>
             </div>
           </div>
           <div className="flex items-center gap-2 justify-end">

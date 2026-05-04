@@ -29,6 +29,13 @@
       "when": 1777925724564,
       "tag": "0003_pale_revanche",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1777930296391,
+      "tag": "0004_rapid_bushwacker",
+      "breakpoints": true
     }
   ]
 }

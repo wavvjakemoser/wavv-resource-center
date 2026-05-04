@@ -246,3 +246,44 @@
 - [x] Admin Content tab: tag editor with preset pills (Most Popular, Must Watch, New, Featured, Spam Protection, Connection Rates)
 - [x] AcademyCategory: display tag pills on video rows
 - [x] AcademyCategory: auto-show NEW badge on videos added within last 30 days
+
+## How-To + Strategy Video Content
+
+- [x] Upload 3 PDFs to webdev storage (2a, 5a, 5b)
+- [x] Wire How-To Loom URLs into AcademyCategory static data (8 videos, all available)
+- [x] Wire Strategy Loom URLs into AcademyCategory static data (6 videos + 3 downloadable PDFs)
+- [ ] Auto-apply "Most Popular" tag to Connection Rates section videos in DB
+- [x] Add downloadable file support to video rows (PDF download button with label)
+- [ ] Update DB lesson titles to match new static titles for How-To and Strategy
+
+## Academy Banner Restore
+
+- [x] Restore thumbnail+gradient overlay banners on Academy.tsx category cards (with correct labels/icons, no watermark)
+- [x] Restore thumbnail+gradient overlay on AcademyCategory.tsx hero (with correct labels/icons)
+
+## Trending Section Fix
+
+- [x] Remove auto-populated tag pills from Trending section on homepage
+
+## Profile Dropdown Redesign
+
+- [x] Remove "Account Settings" from profile dropdown
+- [x] Add full Profile page: name, email, avatar upload, activity history, analytics
+- [x] Move "Your Activity" from homepage to profile dropdown/page
+- [x] Profile dropdown shows name + email at top
+
+## Homepage Cleanup + New Sections
+
+- [x] Remove "Your Activity" section from homepage
+- [x] Keep "Pick up where you left off" section on homepage
+- [x] Add "New Releases" section to homepage
+- [x] Add "Recommended" section to homepage
+- [x] Move Trending from sidebar nav to homepage section
+
+## Admin Enhancements
+
+- [x] Admin: full tag CRUD — add custom tags, remove tags from videos, delete tags from DB
+- [x] Admin: edit video URL and title inline
+- [ ] Admin: edit/replace downloadable files per video
+- [ ] Admin: hide/show entire sections or categories (visibility toggle)
+- [x] Admin: hide/show individual videos (via Active/Inactive toggle — already existed)

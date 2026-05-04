@@ -310,27 +310,24 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
 
                     {/* Menu items */}
                     <div className="py-1">
-                      <button
+                      <Link
+                        href="/profile"
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
+                        style={{ textDecoration: "none" }}
                         onClick={() => setProfileOpen(false)}
                       >
                         <User size={15} className="text-gray-500" />
                         Profile
-                      </button>
-                      <button
+                      </Link>
+                      <Link
+                        href="/profile#activity"
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
-                        onClick={() => setProfileOpen(false)}
-                      >
-                        <Settings size={15} className="text-gray-500" />
-                        Account Settings
-                      </button>
-                      <button
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
+                        style={{ textDecoration: "none" }}
                         onClick={() => setProfileOpen(false)}
                       >
                         <History size={15} className="text-gray-500" />
-                        History
-                      </button>
+                        Your Activity
+                      </Link>
                       <button
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
                         onClick={() => { setProfileOpen(false); setMedalOpen(true); }}

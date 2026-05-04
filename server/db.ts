@@ -657,3 +657,68 @@ export async function getUserTrophies(userId: number) {
     badges,
   };
 }
+
+// ─── Profile Helpers ──────────────────────────────────────────────────────────
+
+/** Get recent activity events for a specific user */
+export async function getUserActivity(userId: number, limit = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select()
+    .from(analyticsEvents)
+    .where(eq(analyticsEvents.userId, userId))
+    .orderBy(desc(analyticsEvents.createdAt))
+    .limit(limit);
+  return rows;
+}
+
+/** Update a user's avatar URL */
+export async function updateUserAvatar(userId: number, avatarUrl: string | null) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ avatarUrl, updatedAt: new Date() }).where(eq(users.id, userId));
+}
+
+/** Get a user by ID */
+export async function getUserById(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return result[0] ?? null;
+}
+
+/** Remove a specific tag from ALL lessons that have it */
+export async function removeTagFromAllLessons(tagLabel: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Get all lessons that have this tag
+  const allLessons = await db.select({ id: lessons.id, tags: lessons.tags }).from(lessons);
+  const toUpdate = allLessons.filter((l) => {
+    if (!l.tags) return false;
+    return l.tags.split(",").map((t) => t.trim()).includes(tagLabel);
+  });
+  for (const lesson of toUpdate) {
+    const newTags = (lesson.tags ?? "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t && t !== tagLabel)
+      .join(",");
+    await db.update(lessons).set({ tags: newTags || null }).where(eq(lessons.id, lesson.id));
+  }
+  return { updated: toUpdate.length };
+}
+
+/** Get all unique tags currently in use across all lessons */
+export async function getAllUsedTags() {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ tags: lessons.tags }).from(lessons).where(sql`tags IS NOT NULL AND tags != ''`);
+  const tagSet = new Set<string>();
+  for (const row of rows) {
+    if (row.tags) {
+      row.tags.split(",").map((t) => t.trim()).filter(Boolean).forEach((t) => tagSet.add(t));
+    }
+  }
+  return Array.from(tagSet).sort();
+}

@@ -52,6 +52,11 @@ import {
   updateTicketStatus,
   updateUserRole,
   updateWebinar,
+  getUserActivity,
+  updateUserAvatar,
+  getUserById,
+  removeTagFromAllLessons,
+  getAllUsedTags,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -189,6 +194,13 @@ const academyRouter = router({
   adminDeleteLesson: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => deleteLesson(input.id)),
+
+  adminRemoveTagFromAll: adminProcedure
+    .input(z.object({ tag: z.string().min(1) }))
+    .mutation(({ input }) => removeTagFromAllLessons(input.tag)),
+
+  adminGetAllUsedTags: adminProcedure
+    .query(() => getAllUsedTags()),
 
   adminGetLessons: adminProcedure
     .input(z.object({ courseId: z.number() }))
@@ -733,6 +745,43 @@ export const appRouter = router({
           metadata: JSON.stringify({ path: input.path }),
         });
         return { ok: true };
+      }),
+  }),
+  profile: router({
+    get: protectedProcedure.query(async ({ ctx }) => {
+      const user = await getUserById(ctx.user.id);
+      if (!user) throw new TRPCError({ code: "NOT_FOUND" });
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl ?? null,
+        role: user.role,
+        createdAt: user.createdAt,
+        lastSignedIn: user.lastSignedIn,
+      };
+    }),
+    getActivity: protectedProcedure
+      .input(z.object({ limit: z.number().min(1).max(100).default(30) }))
+      .query(async ({ ctx, input }) => {
+        return getUserActivity(ctx.user.id, input.limit);
+      }),
+    updateAvatar: protectedProcedure
+      .input(z.object({ avatarUrl: z.string().url().nullable() }))
+      .mutation(async ({ ctx, input }) => {
+        await updateUserAvatar(ctx.user.id, input.avatarUrl);
+        return { success: true };
+      }),
+    uploadAvatar: protectedProcedure
+      .input(z.object({ base64: z.string(), mimeType: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const { storagePut } = await import("./storage");
+        const buffer = Buffer.from(input.base64, "base64");
+        const ext = input.mimeType.split("/")[1] ?? "jpg";
+        const key = `avatars/user-${ctx.user.id}-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        await updateUserAvatar(ctx.user.id, url);
+        return { url };
       }),
   }),
 });

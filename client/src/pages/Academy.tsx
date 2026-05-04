@@ -379,19 +379,26 @@ export default function Academy() {
                 <Link
                   href={`/academy/category/${encodeURIComponent(cat.key)}`}
                   className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
-                  style={{
-                    textDecoration: "none",
-                    background: `linear-gradient(135deg, #111 0%, #1a1a1a 60%, ${cat.color}18 100%)`,
-                    border: `1px solid ${cat.color}40`,
-                    boxShadow: `0 0 0 0 ${cat.color}00`,
-                  }}
+                  style={{ textDecoration: "none", border: `1px solid ${cat.color}40` }}
                 >
-                  {/* Decorative background pattern */}
+                  {/* Background thumbnail */}
+                  <img
+                    src={cat.thumbnail}
+                    alt={cat.label}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    aria-hidden="true"
+                  />
+                  {/* Heavy dark overlay — hides baked-in thumbnail text, keeps image texture */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: `linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.82) 55%, rgba(0,0,0,0.55) 100%)`,
+                    }}
+                  />
+                  {/* Colour accent glow on the right */}
                   <div
                     className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(ellipse at 80% 50%, ${cat.color}15 0%, transparent 65%)`,
-                    }}
+                    style={{ background: `radial-gradient(ellipse at 85% 50%, ${cat.color}22 0%, transparent 60%)` }}
                   />
                   {/* Content */}
                   <div className="relative flex items-center justify-between px-6 py-8">
@@ -401,7 +408,7 @@ export default function Academy() {
                         {cat.icon && (
                           <div
                             className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{ background: `${cat.color}20`, border: `1px solid ${cat.color}40` }}
+                            style={{ background: `${cat.color}25`, border: `1px solid ${cat.color}50` }}
                           >
                             <cat.icon size={18} style={{ color: cat.color }} />
                           </div>
@@ -409,14 +416,14 @@ export default function Academy() {
                         <h2 className="text-lg font-bold text-white">{cat.label}</h2>
                       </div>
                       {/* Description */}
-                      <p className="text-gray-400 text-xs max-w-sm mb-3">{cat.subtitle}</p>
+                      <p className="text-gray-300 text-xs max-w-sm mb-3">{cat.subtitle}</p>
                       {/* Badge */}
                       <span
                         className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full"
                         style={{
-                          background: `${cat.color}20`,
+                          background: `${cat.color}25`,
                           color: cat.color,
-                          border: `1px solid ${cat.color}50`,
+                          border: `1px solid ${cat.color}55`,
                         }}
                       >
                         {liveCourses.length > 0
@@ -433,7 +440,7 @@ export default function Academy() {
                     {/* Arrow CTA */}
                     <div
                       className="flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
-                      style={{ background: `${cat.color}20`, border: `1px solid ${cat.color}40` }}
+                      style={{ background: `${cat.color}25`, border: `1px solid ${cat.color}50` }}
                     >
                       <ChevronRight size={18} style={{ color: cat.color }} />
                     </div>
@@ -449,16 +456,6 @@ export default function Academy() {
             <div className="flex items-center gap-2">
               <TrendingUp size={18} style={{ color: "#FBBF24" }} />
               <h2 className="text-base font-bold text-white">Trending This Week</h2>
-              <span
-                className="text-[10px] font-semibold px-2 py-0.5 rounded-full ml-1"
-                style={{
-                  background: "rgba(251,191,36,0.1)",
-                  color: "#FBBF24",
-                  border: "1px solid rgba(251,191,36,0.25)",
-                }}
-              >
-                Auto-populated
-              </span>
             </div>
             <p className="text-gray-500 text-xs -mt-2">
               Most-watched content across all WAVV Academy users this week.

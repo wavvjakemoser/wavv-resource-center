@@ -12,6 +12,7 @@ import {
   Play,
   Lock,
   GraduationCap,
+  Download,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -48,6 +49,7 @@ interface VideoItem {
   duration?: string;
   status: "available" | "coming_soon";
   loopUrl?: string;
+  downloadFile?: { url: string; label: string };
 }
 
 interface Section {
@@ -181,66 +183,57 @@ const CATEGORY_DATA: CategoryData[] = [
         id: "how-1",
         title: "1. Welcome To The How-To Section",
         videos: [
-          { id: "how-1-1", title: "How to Navigate This Section", duration: "2 min", status: "coming_soon" },
+          { id: "how-1-1", title: "Welcome to the How-To Section", status: "available" as const, loopUrl: "https://www.loom.com/share/31c2aacc6f9c4a0593bb4d173e8142c0" },
         ],
       },
       {
         id: "how-2",
         title: "2. Making Calls With WAVV",
         videos: [
-          { id: "how-2-1", title: "Dialing From a List", duration: "6 min", status: "coming_soon" },
-          { id: "how-2-2", title: "Using Dispositions During a Call", duration: "5 min", status: "coming_soon" },
-          { id: "how-2-3", title: "Call Notes & CRM Sync", duration: "4 min", status: "coming_soon" },
+          { id: "how-2-1", title: "Different Ways to Make Calls With WAVV", status: "available" as const, loopUrl: "https://www.loom.com/share/f4bbb4ff9b0743f1a8e41e613b26adb3" },
         ],
       },
       {
         id: "how-3",
         title: "3. Voicemails",
         videos: [
-          { id: "how-3-1", title: "Setting Up Voicemail Drop", duration: "5 min", status: "coming_soon" },
-          { id: "how-3-2", title: "Recording Custom Voicemails", duration: "4 min", status: "coming_soon" },
+          { id: "how-3-1", title: "Understanding the Voicemail Tab and Incoming Voicemails", status: "available" as const, loopUrl: "https://www.loom.com/share/74809218f7514cfda22a8136dc0c8aeb" },
+          { id: "how-3-2", title: "How to Use Outbound Voicemails Within Your WAVV Dialer", status: "available" as const, loopUrl: "https://www.loom.com/share/74809218f7514cfda22a8136dc0c8aeb" },
         ],
       },
       {
         id: "how-4",
         title: "4. WAVV Call Campaigns",
         videos: [
-          { id: "how-4-1", title: "Creating a Call Campaign", duration: "8 min", status: "coming_soon" },
-          { id: "how-4-2", title: "Uploading & Managing Contact Lists", duration: "6 min", status: "coming_soon" },
-          { id: "how-4-3", title: "Campaign Analytics & Reporting", duration: "7 min", status: "coming_soon" },
+          { id: "how-4-1", title: "Resuming a WAVV Call Campaign", status: "available" as const, loopUrl: "https://www.loom.com/share/386827621d2045a098a3b5958694a437" },
         ],
       },
       {
         id: "how-5",
         title: "5. Nuisance Protection",
         videos: [
-          { id: "how-5-1", title: "What Is Nuisance Protection?", duration: "4 min", status: "coming_soon" },
-          { id: "how-5-2", title: "Configuring Nuisance Filters", duration: "5 min", status: "coming_soon" },
+          { id: "how-5-1", title: "Understanding the Nuisance Protection Feature", status: "available" as const, loopUrl: "https://www.loom.com/share/3138552497fc4b8fb73b0b0618ac58e0" },
         ],
       },
       {
         id: "how-6",
         title: "6. Call Transfers",
         videos: [
-          { id: "how-6-1", title: "Warm vs. Cold Transfers", duration: "5 min", status: "coming_soon" },
-          { id: "how-6-2", title: "Transferring to External Numbers", duration: "4 min", status: "coming_soon" },
+          { id: "how-6-1", title: "How to Transfer Calls Within WAVV", status: "available" as const, loopUrl: "https://www.loom.com/share/1fb002c3ce8646cfb5227c0ba911fbdf" },
         ],
       },
       {
         id: "how-7",
         title: "7. Audio Source",
         videos: [
-          { id: "how-7-1", title: "Selecting Your Audio Input", duration: "3 min", status: "coming_soon" },
-          { id: "how-7-2", title: "Troubleshooting Audio Quality", duration: "4 min", status: "coming_soon" },
+          { id: "how-7-1", title: "Understanding Your Audio Source", status: "available" as const, loopUrl: "https://www.loom.com/share/40096adc8e19414383bd8be6e27c2028" },
         ],
       },
       {
         id: "how-8",
         title: "8. Spam Protection",
         videos: [
-          { id: "how-8-1", title: "Understanding SPAM Flagging", duration: "6 min", status: "coming_soon" },
-          { id: "how-8-2", title: "Number Rotation to Avoid SPAM", duration: "8 min", status: "coming_soon" },
-          { id: "how-8-3", title: "Remediation Steps for Flagged Numbers", duration: "5 min", status: "coming_soon" },
+          { id: "how-8-1", title: "How to Add Spam Protection", status: "available" as const, loopUrl: "https://www.loom.com/share/34bc6fb91674441897d7e4e1af3ddac0" },
         ],
       },
     ],
@@ -257,25 +250,27 @@ const CATEGORY_DATA: CategoryData[] = [
         id: "str-1",
         title: "1. Welcome To The Strategy & Best Practices Section",
         videos: [
-          { id: "str-1-1", title: "Why Strategy Matters in Outbound", duration: "4 min", status: "coming_soon" },
+          { id: "str-1-1", title: "Welcome to Strategy & Best Practices", status: "available" as const, loopUrl: "https://www.loom.com/share/dfe22925928c4e3585739d0c4cde3607" },
         ],
       },
       {
         id: "str-2",
         title: "2. WAVV Phone Numbers Tab",
         videos: [
-          { id: "str-2-1", title: "Managing Your Number Pool", duration: "6 min", status: "coming_soon" },
-          { id: "str-2-2", title: "Local Presence & Area Code Strategy", duration: "7 min", status: "coming_soon" },
-          { id: "str-2-3", title: "When to Retire & Replace Numbers", duration: "5 min", status: "coming_soon" },
+          { id: "str-2-1", title: "Understanding the WAVV Phone Numbers Tab", status: "available" as const, loopUrl: "https://www.loom.com/share/405084a41eef425c9ec1d827b476d3e6" },
         ],
       },
       {
         id: "str-3",
-        title: "3. IMPORTANT: Connection Rates",
+        title: "3. Connection Rates",
         videos: [
-          { id: "str-3-1", title: "What Drives Connection Rates", duration: "8 min", status: "coming_soon" },
-          { id: "str-3-2", title: "Benchmarks & What Good Looks Like", duration: "6 min", status: "coming_soon" },
-          { id: "str-3-3", title: "Diagnosing & Fixing Low Connection Rates", duration: "9 min", status: "coming_soon" },
+          { id: "str-3-1", title: "Overview of Connection Rates", status: "available" as const, loopUrl: "https://www.loom.com/share/fb5a30d1e0aa4a18b9f6524d55d76d7c" },
+          { id: "str-3-2", title: "Connection Rates vs Conversion Rates", status: "available" as const, loopUrl: "https://www.loom.com/share/8273b292095c473db9b7a2da03bcb832", downloadFile: { url: "/manus-storage/2a.ConnectionRatesvsConversationRatesFlowchart_a2f5024c.pdf", label: "2a. Connection Rates vs Conversation Rates Flowchart" } },
+          { id: "str-3-3", title: "Using the Reports Tab to Track Connection Rates", status: "available" as const, loopUrl: "https://www.loom.com/share/a975028bb8944a07b008ee8d325c46df" },
+          { id: "str-3-4", title: "Connection Rates vs Conversion Rates", status: "available" as const, loopUrl: "https://www.loom.com/share/ff828e167c8544dfab40511485f5e562" },
+          { id: "str-3-5", title: "Beginner Foundational Setup", status: "available" as const, loopUrl: "https://www.loom.com/share/144e92518ee242469a3fa9d4e0510aae", downloadFile: { url: "/manus-storage/5a.RestingPhoneNumbersFlowchart_52b791e3.pdf", label: "5a. Resting Phone Numbers Flowchart" } },
+          { id: "str-3-5b", title: "Beginner Foundational Setup (Part 2)", status: "available" as const, loopUrl: "https://www.loom.com/share/144e92518ee242469a3fa9d4e0510aae", downloadFile: { url: "/manus-storage/5b.WhentoReplacePhoneNumbersFlowchart_0d74bff6.pdf", label: "5b. When to Replace Phone Numbers Flowchart" } },
+          { id: "str-3-6", title: "Advanced Foundational Setup", status: "available" as const, loopUrl: "https://www.loom.com/share/e6d749ab3fa9496a99092ee5c754166a" },
         ],
       },
     ],
@@ -405,20 +400,49 @@ function SectionRow({
                 </div>
               </>
             );
-            return video.loopUrl ? (
+            const videoRow = video.loopUrl ? (
               <a
                 key={video.id}
                 href={video.loopUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={rowClass}
-                style={rowStyle}
+                style={video.downloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}
               >
                 {inner}
               </a>
             ) : (
-              <div key={video.id} className={rowClass} style={rowStyle}>
+              <div key={video.id} className={rowClass} style={video.downloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}>
                 {inner}
+              </div>
+            );
+            return (
+              <div key={video.id}>
+                {videoRow}
+                {video.downloadFile && (
+                  <a
+                    href={video.downloadFile.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2.5 px-5 py-2 transition-colors hover:bg-white/5"
+                    style={{ borderBottom: idx < section.videos.length - 1 ? "1px solid #222" : "none", textDecoration: "none" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.25)" }}
+                    >
+                      <Download size={11} style={{ color: "#60a5fa" }} />
+                    </div>
+                    <span className="text-xs text-blue-400 hover:text-blue-300 transition-colors">{video.downloadFile.label}</span>
+                    <span
+                      className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full ml-auto"
+                      style={{ background: "rgba(96,165,250,0.1)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.25)" }}
+                    >
+                      PDF
+                    </span>
+                  </a>
+                )}
               </div>
             );
           })}
