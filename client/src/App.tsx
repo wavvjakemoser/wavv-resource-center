@@ -15,6 +15,7 @@ import Support from "./pages/Support";
 import AdminPanel from "./pages/AdminPanel";
 import HandsOn from "./pages/HandsOn";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminUsers from "./pages/AdminUsers";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { usePageTracking } from "./hooks/usePageTracking";
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
       <Route path="/admin/analytics" component={AdminAnalytics} />
+      <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin" component={AdminPanel} />
       <Route path="/hands-on" component={HandsOn} />
       <Route path="/404" component={NotFound} />

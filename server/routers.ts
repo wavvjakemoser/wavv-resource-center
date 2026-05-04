@@ -657,6 +657,29 @@ export const appRouter = router({
   wavvAi: wavvAiRouter,
   analytics: analyticsRouter,
   scheduled: scheduledRouter,
+  admin: router({
+    listUsers: adminProcedure
+      .input(z.object({ search: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        const allUsersData = await getAllUsers();
+        const search = input?.search?.trim().toLowerCase();
+        if (!search) return allUsersData;
+        return allUsersData.filter(
+          (u) =>
+            (u.name ?? "").toLowerCase().includes(search) ||
+            (u.email ?? "").toLowerCase().includes(search)
+        );
+      }),
+    updateRole: adminProcedure
+      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
+      .mutation(async ({ ctx, input }) => {
+        if (input.userId === ctx.user.id) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own role" });
+        }
+        await updateUserRole(input.userId, input.role);
+        return { success: true };
+      }),
+  }),
   search: router({
     query: protectedProcedure
       .input(z.object({ q: z.string().min(1).max(200) }))

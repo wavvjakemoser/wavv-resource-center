@@ -187,3 +187,13 @@
 
 - [x] Add CSV export button to admin analytics dashboard
 - [x] Export includes: event counts, sign-in trend, top content, summary stats
+
+## Admin User Management
+
+- [x] Add tRPC procedure: admin.listUsers (searchable by name/email, client-side filtering)
+- [x] Add tRPC procedure: admin.updateUserRole (promote/demote user to admin/user)
+- [x] Build /admin/users page with user table (name, email, role, registered date)
+- [x] Add search/filter input to find users by name or email
+- [x] Add one-click role toggle (admin/user) with confirmation
+- [x] Add "Users" nav item under Admin section in sidebar (admin-only)
+- [x] Register /admin/users route in App.tsx

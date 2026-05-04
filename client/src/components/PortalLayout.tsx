@@ -24,6 +24,7 @@ import {
   Sparkles,
   FlaskConical,
   User,
+  Users,
   BarChart3,
 } from "lucide-react";
 
@@ -38,6 +39,7 @@ const navItems = [
 
 const adminNavItems = [
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/users", label: "Users", icon: Users },
 ];
 
 interface PortalLayoutProps {
