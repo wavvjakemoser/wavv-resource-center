@@ -30,16 +30,15 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/academy", label: "Academy", icon: BookOpen },
-  { href: "/webinars", label: "Webinars", icon: Video },
-  { href: "/guides", label: "Guides & Docs", icon: FileText },
-  { href: "/support", label: "Support", icon: LifeBuoy },
-  { href: "/hands-on", label: "Hands-On", icon: FlaskConical },
+  { href: "/academy", label: "WAVV Academy", icon: BookOpen },
+  { href: "/webinars", label: "WAVV Webinars", icon: Video },
+  { href: "/guides", label: "WAVV Guides & Docs", icon: FileText },
+  { href: "/hands-on", label: "WAVV Playground", icon: FlaskConical },
+  { href: "/support", label: "WAVV Support", icon: LifeBuoy },
 ];
 
 const adminNavItems = [
-  { href: "/admin", label: "Admin", icon: Shield },
+  { href: "/admin", label: "WAVV Admin", icon: Shield },
 ];
 
 interface PortalLayoutProps {
@@ -217,7 +216,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
                 >
                   <Chrome size={13} />
-                  Chrome Extension
+                  WAVV Chrome Extension
                   <ExternalLink size={11} className="ml-auto opacity-50" />
                 </a>
               </div>
