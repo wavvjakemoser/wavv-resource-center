@@ -2,6 +2,7 @@ import { and, desc, eq, gte, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   analyticsEvents,
+  bookmarks,
   courses,
   guides,
   InsertUser,
@@ -721,4 +722,50 @@ export async function getAllUsedTags() {
     }
   }
   return Array.from(tagSet).sort();
+}
+
+// ─── Bookmarks ────────────────────────────────────────────────────────────────
+export async function getUserBookmarks(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(bookmarks)
+    .where(eq(bookmarks.userId, userId))
+    .orderBy(desc(bookmarks.createdAt));
+}
+
+export async function addBookmark(userId: number, contentType: string, contentId: number, contentTitle?: string) {
+  const db = await getDb();
+  if (!db) return null;
+  // Check if already bookmarked
+  const existing = await db
+    .select()
+    .from(bookmarks)
+    .where(and(eq(bookmarks.userId, userId), eq(bookmarks.contentType, contentType), eq(bookmarks.contentId, contentId)));
+  if (existing.length > 0) return existing[0];
+  await db.insert(bookmarks).values({ userId, contentType, contentId, contentTitle: contentTitle ?? null });
+  const inserted = await db
+    .select()
+    .from(bookmarks)
+    .where(and(eq(bookmarks.userId, userId), eq(bookmarks.contentType, contentType), eq(bookmarks.contentId, contentId)));
+  return inserted[0] ?? null;
+}
+
+export async function removeBookmark(userId: number, contentType: string, contentId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .delete(bookmarks)
+    .where(and(eq(bookmarks.userId, userId), eq(bookmarks.contentType, contentType), eq(bookmarks.contentId, contentId)));
+}
+
+export async function isBookmarked(userId: number, contentType: string, contentId: number) {
+  const db = await getDb();
+  if (!db) return false;
+  const rows = await db
+    .select()
+    .from(bookmarks)
+    .where(and(eq(bookmarks.userId, userId), eq(bookmarks.contentType, contentType), eq(bookmarks.contentId, contentId)));
+  return rows.length > 0;
 }

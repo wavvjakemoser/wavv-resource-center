@@ -287,3 +287,25 @@
 - [x] Admin: edit/replace downloadable files per video (fileUrl field in LessonRow edit form)
 - [x] Admin: hide/show entire sections or categories (SectionVisibilityPanel in ContentTab)
 - [x] Admin: hide/show individual videos (via Active/Inactive toggle — already existed)
+
+## Academy Banner + Dropdown Cleanup (Round 2)
+
+- [x] Academy.tsx banners: labels read "Onboarding", "How-To", "Strategy" (no subtitle), icon on RIGHT side only
+- [x] Remove "Your Activity" from profile dropdown (it's accessible via Profile page)
+
+## Admin Content Restructure
+
+- [x] Add tags column to courses table (section-level tags), migrate DB
+- [x] Update adminUpdateCourse tRPC to accept tags field
+- [x] Admin Content tab: reorganize by Category > Section (course) > Video (lesson) hierarchy
+- [x] Admin: section-level tag editor (same preset pills as lesson tags) on each course/section row
+- [x] Admin: section tags display on the section header in view mode
+
+## Content Filtering + Bookmarking
+
+- [x] AcademyCategory: add filter bar to filter videos by tag (Most Popular, Trending, custom tags, Bookmarked)
+- [x] DB: bookmarks table (userId, lessonId/videoTitle, category), migrate
+- [x] Add bookmark tRPC procedures: toggle, list
+- [x] AcademyCategory: bookmark icon on each video row (toggle on click)
+- [x] Profile page: show bookmarked content in a dedicated section
+- [x] Filter bar includes "Bookmarked" filter option

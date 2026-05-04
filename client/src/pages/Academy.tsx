@@ -89,7 +89,7 @@ const CATEGORIES = [
   },
   {
     key: "Strategy and Best Practices",
-    label: "Strategy & Best Practices",
+    label: "Strategy",
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
     icon: Lightbulb,
@@ -401,49 +401,22 @@ export default function Academy() {
                     style={{ background: `radial-gradient(ellipse at 85% 50%, ${cat.color}22 0%, transparent 60%)` }}
                   />
                   {/* Content */}
-                  <div className="relative flex items-center justify-between px-6 py-8">
-                    <div>
-                      {/* Title row: icon + label */}
-                      <div className="flex items-center gap-2.5 mb-1.5">
-                        {cat.icon && (
-                          <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                            style={{ background: `${cat.color}25`, border: `1px solid ${cat.color}50` }}
-                          >
-                            <cat.icon size={18} style={{ color: cat.color }} />
-                          </div>
-                        )}
-                        <h2 className="text-lg font-bold text-white">{cat.label}</h2>
-                      </div>
-                      {/* Description */}
-                      <p className="text-gray-300 text-xs max-w-sm mb-3">{cat.subtitle}</p>
-                      {/* Badge */}
-                      <span
-                        className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                  <div className="relative flex items-center justify-between px-8 py-10">
+                    {/* Left: label only */}
+                    <h2 className="text-2xl font-bold text-white tracking-tight">{cat.label}</h2>
+                    {/* Right: large icon emblem */}
+                    {cat.icon && (
+                      <div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
                         style={{
-                          background: `${cat.color}25`,
-                          color: cat.color,
-                          border: `1px solid ${cat.color}55`,
+                          background: `${cat.color}20`,
+                          border: `1.5px solid ${cat.color}55`,
+                          boxShadow: `0 0 24px ${cat.color}30`,
                         }}
                       >
-                        {liveCourses.length > 0
-                          ? (() => {
-                              const totalLessons = liveCourses.reduce(
-                                (sum, c) => sum + (c.lessonCount ?? 0),
-                                0
-                              );
-                              return `${liveCourses.length} section${liveCourses.length !== 1 ? "s" : ""} · ${totalLessons} video${totalLessons !== 1 ? "s" : ""}`;
-                            })()
-                          : "Coming Soon"}
-                      </span>
-                    </div>
-                    {/* Arrow CTA */}
-                    <div
-                      className="flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
-                      style={{ background: `${cat.color}25`, border: `1px solid ${cat.color}50` }}
-                    >
-                      <ChevronRight size={18} style={{ color: cat.color }} />
-                    </div>
+                        <cat.icon size={28} style={{ color: cat.color }} />
+                      </div>
+                    )}
                   </div>
                 </Link>
               </section>

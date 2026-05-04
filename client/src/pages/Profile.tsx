@@ -16,6 +16,9 @@ import {
   CheckCircle2,
   MessageSquare,
   Download,
+  Bookmark,
+  BookmarkCheck,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -124,6 +127,10 @@ export default function Profile() {
   const { data: profile, isLoading: profileLoading } = trpc.profile.get.useQuery();
   const { data: activity, isLoading: activityLoading } = trpc.profile.getActivity.useQuery({ limit: 50 });
   const { data: trophies } = trpc.trophy.get.useQuery();
+  const { data: bookmarks = [] } = trpc.bookmarks.getAll.useQuery();
+  const removeBookmark = trpc.bookmarks.remove.useMutation({
+    onSuccess: () => utils.bookmarks.getAll.invalidate(),
+  });
 
   const uploadAvatar = trpc.profile.uploadAvatar.useMutation({
     onSuccess: () => {
@@ -294,6 +301,58 @@ export default function Profile() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </section>
+
+        {/* ── Bookmarks ── */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Bookmark size={17} style={{ color: "#fbbf24" }} />
+            <h2 className="text-base font-bold text-white">Bookmarks</h2>
+            {bookmarks.length > 0 && (
+              <span className="text-xs text-gray-500 ml-1">({bookmarks.length} saved)</span>
+            )}
+          </div>
+          {bookmarks.length === 0 ? (
+            <div
+              className="rounded-xl p-8 text-center"
+              style={{ background: "#111", border: "1px solid #1a1a1a" }}
+            >
+              <BookmarkCheck size={28} className="text-gray-700 mx-auto mb-3" />
+              <p className="text-gray-500 text-sm">No bookmarks yet.</p>
+              <p className="text-gray-600 text-xs mt-1">Bookmark videos from any Academy category page.</p>
+            </div>
+          ) : (
+            <div
+              className="rounded-xl overflow-hidden divide-y"
+              style={{ background: "#111", border: "1px solid #222" }}
+            >
+              {bookmarks.map((bm) => (
+                <div key={bm.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(251,191,36,0.12)" }}
+                  >
+                    <Bookmark size={13} style={{ color: "#fbbf24" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-300 truncate">{bm.contentTitle ?? `${bm.contentType} #${bm.contentId}`}</p>
+                    <p className="text-[11px] text-gray-600 capitalize">{bm.contentType}</p>
+                  </div>
+                  <span className="text-[11px] text-gray-600 flex-shrink-0 mr-2">
+                    {new Date(bm.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeBookmark.mutate({ contentType: bm.contentType as "lesson" | "webinar" | "guide", contentId: bm.contentId })}
+                    className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10 text-gray-600 hover:text-red-400"
+                    title="Remove bookmark"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </section>

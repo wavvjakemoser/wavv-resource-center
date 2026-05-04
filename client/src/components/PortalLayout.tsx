@@ -319,15 +319,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                         <User size={15} className="text-gray-500" />
                         Profile
                       </Link>
-                      <Link
-                        href="/profile#activity"
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
-                        style={{ textDecoration: "none" }}
-                        onClick={() => setProfileOpen(false)}
-                      >
-                        <History size={15} className="text-gray-500" />
-                        Your Activity
-                      </Link>
+
                       <button
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
                         onClick={() => { setProfileOpen(false); setMedalOpen(true); }}

@@ -56,6 +56,11 @@ import {
   Pencil,
   Check,
   X,
+  ChevronDown,
+  ChevronRight as ChevronRightIcon,
+  Tag,
+  FolderOpen,
+  Layers,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -676,9 +681,299 @@ function formatTimeAgo(date: Date | string): string {
 }
 
 // ─── Content Management Tab ───────────────────────────────────────────────────
+// ─── Section-level tag editor (inline, same as LessonRow tag editor) ──────────
+function SectionTagEditor({
+  courseId,
+  currentTags,
+  onClose,
+}: {
+  courseId: number;
+  currentTags: string | null | undefined;
+  onClose: () => void;
+}) {
+  const utils = trpc.useUtils();
+  const [activeTags, setActiveTags] = React.useState<string[]>(() => parseTagList(currentTags));
+  const [customTagInput, setCustomTagInput] = React.useState("");
+
+  const updateCourse = trpc.academy.adminUpdateCourse.useMutation({
+    onSuccess: () => {
+      toast.success("Section tags updated");
+      utils.academy.adminGetAllCourses.invalidate();
+      onClose();
+    },
+    onError: () => toast.error("Failed to update section tags"),
+  });
+
+  const toggleTag = (label: string) => {
+    setActiveTags((prev) => prev.includes(label) ? prev.filter((t) => t !== label) : [...prev, label]);
+  };
+
+  const addCustomTag = () => {
+    const tag = customTagInput.trim();
+    if (!tag || activeTags.includes(tag)) { setCustomTagInput(""); return; }
+    setActiveTags((prev) => [...prev, tag]);
+    setCustomTagInput("");
+  };
+
+  return (
+    <div className="mt-2 p-3 rounded-lg space-y-2" style={{ background: "#111", border: "1px solid #333" }}>
+      <p className="text-[11px] text-gray-500 mb-1.5">Section tags — click to toggle</p>
+      <div className="flex flex-wrap gap-1.5">
+        {PRESET_TAGS.map((tag) => {
+          const active = activeTags.includes(tag.label);
+          return (
+            <button
+              key={tag.label}
+              type="button"
+              onClick={() => toggleTag(tag.label)}
+              className="text-[11px] font-medium px-2.5 py-0.5 rounded-full transition-all"
+              style={{
+                background: active ? tag.bg : "rgba(255,255,255,0.04)",
+                color: active ? tag.color : "#6b7280",
+                border: `1px solid ${active ? tag.border : "#333"}`,
+                boxShadow: active ? `0 0 8px ${tag.bg}` : "none",
+              }}
+            >
+              {tag.label}
+            </button>
+          );
+        })}
+      </div>
+      {/* Custom tags */}
+      {activeTags.filter((t) => !PRESET_TAGS.find((p) => p.label === t)).length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {activeTags.filter((t) => !PRESET_TAGS.find((p) => p.label === t)).map((tag) => (
+            <span
+              key={tag}
+              className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full"
+              style={{ background: "rgba(255,255,255,0.07)", color: "#d1d5db", border: "1px solid #444" }}
+            >
+              {tag}
+              <button type="button" onClick={() => setActiveTags((prev) => prev.filter((t2) => t2 !== tag))} className="ml-0.5 hover:text-red-400">
+                <X size={10} />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="flex gap-1.5">
+        <input
+          className="flex-1 bg-[#0a0a0a] border border-[#333] rounded-lg px-2.5 py-1 text-[11px] text-white outline-none focus:border-blue-500"
+          value={customTagInput}
+          onChange={(e) => setCustomTagInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomTag())}
+          placeholder="Add custom tag…"
+        />
+        <button type="button" onClick={addCustomTag} disabled={!customTagInput.trim()}
+          className="text-[11px] px-2.5 py-1 rounded-lg transition hover:opacity-80 disabled:opacity-40"
+          style={{ background: "rgba(255,255,255,0.07)", color: "#9ca3af", border: "1px solid #333" }}
+        >Add</button>
+      </div>
+      <div className="flex items-center gap-2 justify-end pt-1">
+        <button onClick={onClose}
+          className="text-[11px] px-2.5 py-1 rounded-lg transition hover:opacity-80"
+          style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #333" }}
+        >Cancel</button>
+        <button
+          onClick={() => updateCourse.mutate({ id: courseId, data: { tags: activeTags.join(",") || null } })}
+          disabled={updateCourse.isPending}
+          className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg transition hover:opacity-80 disabled:opacity-50"
+          style={{ background: "rgba(59,130,246,0.15)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.3)" }}
+        >
+          <Check size={12} /> {updateCourse.isPending ? "Saving…" : "Save"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Section row (course) with collapsible lessons ────────────────────────────
+function SectionRow2({
+  course,
+  lessons,
+  onDeactivateLesson,
+  onActivateLesson,
+}: {
+  course: { id: number; title: string; category: string; published: boolean; tags?: string | null };
+  lessons: Array<{
+    id: number; title: string; description?: string | null; courseTitle?: string;
+    courseCategory?: string; inactiveReason?: string | null; videoUrl?: string | null;
+    fileUrl?: string | null; tags?: string | null; published: boolean;
+  }>;
+  onDeactivateLesson: (lesson: { id: number; title: string }) => void;
+  onActivateLesson: (id: number) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [editingTags, setEditingTags] = React.useState(false);
+  const utils = trpc.useUtils();
+  const updateCourse = trpc.academy.adminUpdateCourse.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetAllCourses.invalidate();
+      toast.success("Section updated");
+    },
+    onError: () => toast.error("Failed to update section"),
+  });
+
+  const sectionTags = parseTagList(course.tags);
+
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+      {/* Section header */}
+      <div
+        className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none"
+        style={{ background: "#1a1a1a" }}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {/* Expand chevron */}
+        <div className="flex-shrink-0 text-gray-500">
+          {open ? <ChevronDown size={14} /> : <ChevronRightIcon size={14} />}
+        </div>
+        {/* Published dot */}
+        <div
+          className="w-2 h-2 rounded-full flex-shrink-0"
+          style={{ background: course.published ? "#22c55e" : "#4b5563" }}
+        />
+        {/* Title + tags */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold text-white">{course.title}</p>
+            {sectionTags.map((tag) => {
+              const def = PRESET_TAGS.find((t) => t.label === tag);
+              return def ? (
+                <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full"
+                  style={{ background: def.bg, color: def.color, border: `1px solid ${def.border}` }}>
+                  {tag}
+                </span>
+              ) : (
+                <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.07)", color: "#d1d5db", border: "1px solid #444" }}>
+                  {tag}
+                </span>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-gray-600 mt-0.5">{lessons.length} video{lessons.length !== 1 ? "s" : ""}</p>
+        </div>
+        {/* Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          {/* Tag section */}
+          <button
+            type="button"
+            onClick={() => setEditingTags((v) => !v)}
+            className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition hover:opacity-80"
+            style={{ background: editingTags ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.05)", color: editingTags ? "#fbbf24" : "#9ca3af", border: `1px solid ${editingTags ? "rgba(251,191,36,0.3)" : "#2a2a2a"}` }}
+            title="Edit section tags"
+          >
+            <Tag size={11} /> Tags
+          </button>
+          {/* Hide/Show */}
+          <button
+            type="button"
+            onClick={() => updateCourse.mutate({ id: course.id, data: { published: !course.published } })}
+            disabled={updateCourse.isPending}
+            className="text-[11px] font-medium px-2.5 py-1.5 rounded-lg transition hover:opacity-80 disabled:opacity-50"
+            style={course.published
+              ? { background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }
+              : { background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }
+            }
+          >
+            {course.published ? "Hide" : "Show"}
+          </button>
+        </div>
+      </div>
+
+      {/* Section tag editor (inline, below header) */}
+      {editingTags && (
+        <div className="px-4 pb-3" style={{ background: "#1a1a1a" }}>
+          <SectionTagEditor
+            courseId={course.id}
+            currentTags={course.tags}
+            onClose={() => setEditingTags(false)}
+          />
+        </div>
+      )}
+
+      {/* Lesson rows */}
+      {open && (
+        <div className="divide-y" style={{ borderTop: "1px solid #222", borderColor: "#222" }}>
+          {lessons.length === 0 ? (
+            <p className="text-xs text-gray-600 px-4 py-3">No videos in this section.</p>
+          ) : (
+            lessons.map((lesson) => (
+              <div key={lesson.id} className="px-3 py-2" style={{ background: "#141414" }}>
+                <LessonRow
+                  lesson={lesson}
+                  isActive={lesson.published}
+                  onDeactivate={() => onDeactivateLesson({ id: lesson.id, title: lesson.title })}
+                  onActivate={() => onActivateLesson(lesson.id)}
+                />
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Category block (groups sections) ────────────────────────────────────────
+function CategoryBlock({
+  categoryKey,
+  courses,
+  allLessons,
+  onDeactivateLesson,
+  onActivateLesson,
+  accentColor,
+}: {
+  categoryKey: string;
+  courses: Array<{ id: number; title: string; category: string; published: boolean; tags?: string | null }>;
+  allLessons: Array<any>;
+  onDeactivateLesson: (lesson: { id: number; title: string }) => void;
+  onActivateLesson: (id: number) => void;
+  accentColor: string;
+}) {
+  const [open, setOpen] = React.useState(true);
+
+  return (
+    <div>
+      {/* Category header */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-2.5 mb-3 group"
+      >
+        <div className="flex items-center justify-center w-6 h-6 rounded-lg flex-shrink-0"
+          style={{ background: `${accentColor}18`, border: `1px solid ${accentColor}40` }}>
+          {open ? <ChevronDown size={12} style={{ color: accentColor }} /> : <ChevronRightIcon size={12} style={{ color: accentColor }} />}
+        </div>
+        <Layers size={14} style={{ color: accentColor }} />
+        <h2 className="text-sm font-bold text-white">{categoryKey}</h2>
+        <span className="text-xs text-gray-600">{courses.length} section{courses.length !== 1 ? "s" : ""}</span>
+      </button>
+      {open && (
+        <div className="space-y-2 ml-8">
+          {courses.map((course) => {
+            const courseLessons = allLessons.filter((l) => l.courseTitle === course.title);
+            return (
+              <SectionRow2
+                key={course.id}
+                course={course}
+                lessons={courseLessons}
+                onDeactivateLesson={onDeactivateLesson}
+                onActivateLesson={onActivateLesson}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ContentTab() {
   const utils = trpc.useUtils();
-  const { data: lessons = [], isLoading } = trpc.academy.adminGetAllLessons.useQuery();
+  const { data: lessons = [], isLoading: lessonsLoading } = trpc.academy.adminGetAllLessons.useQuery();
+  const { data: courses = [], isLoading: coursesLoading } = trpc.academy.adminGetAllCourses.useQuery();
   const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
     onSuccess: () => {
       utils.academy.adminGetAllLessons.invalidate();
@@ -691,9 +986,6 @@ function ContentTab() {
   const [pendingLesson, setPendingLesson] = useState<{ id: number; title: string } | null>(null);
   const [reasonInput, setReasonInput] = useState("");
 
-  const activeLessons = lessons.filter((l) => l.published);
-  const inactiveLessons = lessons.filter((l) => !l.published);
-
   function handleDeactivate(lesson: { id: number; title: string }) {
     setPendingLesson(lesson);
     setReasonInput("");
@@ -704,23 +996,36 @@ function ContentTab() {
     if (!pendingLesson) return;
     updateLesson.mutate({
       id: pendingLesson.id,
-      data: {
-        published: false,
-        inactiveReason: reasonInput.trim() || null,
-      },
+      data: { published: false, inactiveReason: reasonInput.trim() || null },
     });
     setReasonDialogOpen(false);
     setPendingLesson(null);
   }
 
   function handleActivate(id: number) {
-    updateLesson.mutate({
-      id,
-      data: { published: true, inactiveReason: null },
-    });
+    updateLesson.mutate({ id, data: { published: true, inactiveReason: null } });
   }
 
-  if (isLoading) {
+  // Group courses by category
+  const byCategory = useMemo(() => {
+    const map: Record<string, typeof courses> = {};
+    for (const c of courses) {
+      if (!map[c.category]) map[c.category] = [];
+      map[c.category].push(c);
+    }
+    return map;
+  }, [courses]);
+
+  const CATEGORY_COLORS: Record<string, string> = {
+    "Onboarding": "#0074F4",
+    "How-To": "#F59E0B",
+    "Strategy and Best Practices": "#67C728",
+    "Dialer Setup": "#8B5CF6",
+    "CRM Integrations": "#EC4899",
+    "Spam Protection": "#F97316",
+  };
+
+  if (lessonsLoading || coursesLoading) {
     return (
       <div className="flex items-center justify-center h-40">
         <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
@@ -730,58 +1035,18 @@ function ContentTab() {
 
   return (
     <div className="space-y-8">
-      {/* ── Active content ── */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
-          <h2 className="text-sm font-semibold text-white">
-            Active ({activeLessons.length})
-          </h2>
-          <span className="text-xs text-gray-500">Visible to users</span>
-        </div>
-        {activeLessons.length === 0 ? (
-          <p className="text-sm text-gray-600 py-4">No active lessons.</p>
-        ) : (
-          <div className="space-y-2">
-            {activeLessons.map((lesson) => (
-              <LessonRow
-                key={lesson.id}
-                lesson={lesson}
-                isActive
-                onDeactivate={() => handleDeactivate({ id: lesson.id, title: lesson.title })}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── Inactive content ── */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 rounded-full bg-gray-500" />
-          <h2 className="text-sm font-semibold text-white">
-            Inactive ({inactiveLessons.length})
-          </h2>
-          <span className="text-xs text-gray-500">Hidden from users</span>
-        </div>
-        {inactiveLessons.length === 0 ? (
-          <p className="text-sm text-gray-600 py-4">No inactive lessons.</p>
-        ) : (
-          <div className="space-y-2">
-            {inactiveLessons.map((lesson) => (
-              <LessonRow
-                key={lesson.id}
-                lesson={lesson}
-                isActive={false}
-                onActivate={() => handleActivate(lesson.id)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── Section Visibility panel ── */}
-      <SectionVisibilityPanel />
+      {/* ── Category > Section > Video hierarchy ── */}
+      {Object.entries(byCategory).map(([categoryKey, categoryCourses]) => (
+        <CategoryBlock
+          key={categoryKey}
+          categoryKey={categoryKey}
+          courses={categoryCourses}
+          allLessons={lessons}
+          onDeactivateLesson={handleDeactivate}
+          onActivateLesson={handleActivate}
+          accentColor={CATEGORY_COLORS[categoryKey] ?? "#60a5fa"}
+        />
+      ))}
 
       {/* ── Tags Management panel ── */}
       <TagsManagementPanel />
@@ -820,70 +1085,6 @@ function ContentTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-// ─── Section Visibility Panel ──────────────────────────────────────────────
-function SectionVisibilityPanel() {
-  const utils = trpc.useUtils();
-  const { data: courses = [], isLoading } = trpc.academy.adminGetAllCourses.useQuery();
-  const updateCourse = trpc.academy.adminUpdateCourse.useMutation({
-    onSuccess: () => {
-      utils.academy.adminGetAllCourses.invalidate();
-      utils.academy.adminGetAllLessons.invalidate();
-      toast.success("Section visibility updated");
-    },
-    onError: () => toast.error("Failed to update section"),
-  });
-
-  if (isLoading) return null;
-
-  // Group courses by category
-  const byCategory: Record<string, typeof courses> = {};
-  for (const c of courses) {
-    if (!byCategory[c.category]) byCategory[c.category] = [];
-    byCategory[c.category].push(c);
-  }
-
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-2 h-2 rounded-full" style={{ background: "#60a5fa" }} />
-        <h2 className="text-sm font-semibold text-white">Section Visibility</h2>
-        <span className="text-xs text-gray-500">Show or hide entire sections from users</span>
-      </div>
-      <div
-        className="rounded-xl overflow-hidden divide-y"
-        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", borderColor: "#2a2a2a" }}
-      >
-        {courses.map((course) => (
-          <div key={course.id} className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div
-                className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ background: course.published ? "#22c55e" : "#4b5563" }}
-              />
-              <div className="min-w-0">
-                <p className="text-sm text-white truncate">{course.title}</p>
-                <p className="text-[10px] text-gray-600">{course.category}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => updateCourse.mutate({ id: course.id, data: { published: !course.published } })}
-              disabled={updateCourse.isPending}
-              className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80 disabled:opacity-50"
-              style={course.published
-                ? { background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }
-                : { background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }
-              }
-            >
-              {course.published ? "Hide" : "Show"}
-            </button>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

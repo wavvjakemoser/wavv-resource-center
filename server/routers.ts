@@ -57,6 +57,10 @@ import {
   getUserById,
   removeTagFromAllLessons,
   getAllUsedTags,
+  getUserBookmarks,
+  addBookmark,
+  removeBookmark,
+  isBookmarked,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -149,6 +153,7 @@ const academyRouter = router({
           durationMinutes: z.number().optional(),
           sortOrder: z.number().optional(),
           published: z.boolean().optional(),
+          tags: z.string().nullable().optional(),
         }),
       })
     )
@@ -783,6 +788,37 @@ export const appRouter = router({
         const { url } = await storagePut(key, buffer, input.mimeType);
         await updateUserAvatar(ctx.user.id, url);
         return { url };
+      }),
+  }),
+  bookmarks: router({
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      return getUserBookmarks(ctx.user.id);
+    }),
+    add: protectedProcedure
+      .input(z.object({
+        contentType: z.enum(["lesson", "webinar", "guide"]),
+        contentId: z.number(),
+        contentTitle: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return addBookmark(ctx.user.id, input.contentType, input.contentId, input.contentTitle);
+      }),
+    remove: protectedProcedure
+      .input(z.object({
+        contentType: z.enum(["lesson", "webinar", "guide"]),
+        contentId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await removeBookmark(ctx.user.id, input.contentType, input.contentId);
+        return { success: true };
+      }),
+    check: protectedProcedure
+      .input(z.object({
+        contentType: z.enum(["lesson", "webinar", "guide"]),
+        contentId: z.number(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return isBookmarked(ctx.user.id, input.contentType, input.contentId);
       }),
   }),
 });

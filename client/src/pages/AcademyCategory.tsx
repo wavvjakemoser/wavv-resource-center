@@ -13,6 +13,9 @@ import {
   Lock,
   GraduationCap,
   Download,
+  Bookmark,
+  BookmarkCheck,
+  Filter,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -35,6 +38,15 @@ const TAG_COLORS: Record<string, { color: string; bg: string; border: string }> 
 
 const NEW_BADGE = { color: "#4ade80", bg: "rgba(74,222,128,0.12)", border: "rgba(74,222,128,0.35)" };
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+// Stable numeric hash for a string (used as bookmark contentId for static videos)
+function hashTitle(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
 
 function isNewLesson(createdAt: Date | string | null | undefined): boolean {
   if (!createdAt) return false;
@@ -287,12 +299,16 @@ function SectionRow({
   categoryKey,
   defaultOpen = false,
   dbLessonMap = {},
+  bookmarkedIds = new Set<number>(),
+  onToggleBookmark,
 }: {
   section: Section;
   accentColor: string;
   categoryKey: string;
   defaultOpen?: boolean;
   dbLessonMap?: Record<string, DbLessonMeta>;
+  bookmarkedIds?: Set<number>;
+  onToggleBookmark?: (contentId: number, title: string, isBookmarked: boolean) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -385,7 +401,7 @@ function SectionRow({
                     </div>
                   )}
                 </div>
-                {/* Badge / arrow */}
+                {/* Badge / arrow / bookmark */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {video.duration && (
                     <span className="text-[11px] text-gray-600">{video.duration}</span>
@@ -401,6 +417,22 @@ function SectionRow({
                   {video.status === "available" && (
                     <ChevronRight size={14} style={{ color: accentColor }} />
                   )}
+                  {onToggleBookmark && video.status === "available" && (() => {
+                    const cid = hashTitle(video.title);
+                    const isBm = bookmarkedIds.has(cid);
+                    return (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleBookmark(cid, video.title, isBm); }}
+                        className="p-1 rounded transition-colors hover:bg-white/10"
+                        title={isBm ? "Remove bookmark" : "Bookmark this video"}
+                      >
+                        {isBm
+                          ? <BookmarkCheck size={14} style={{ color: "#fbbf24" }} />
+                          : <Bookmark size={14} className="text-gray-600 hover:text-gray-400" />}
+                      </button>
+                    );
+                  })()}
                 </div>
               </>
             );
@@ -463,11 +495,41 @@ export default function AcademyCategory() {
 
   const cat = CATEGORY_DATA.find((c) => c.key === categoryKey);
 
+  // Active filter pill (null = All)
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
   // Fetch DB lessons for this category to get tags + createdAt
   const { data: dbLessons = [] } = trpc.academy.getLessonsByCategory.useQuery(
     { category: cat?.key ?? "" },
     { enabled: !!cat }
   );
+
+  // Fetch user bookmarks
+  const utils = trpc.useUtils();
+  const { data: userBookmarks = [] } = trpc.bookmarks.getAll.useQuery();
+  const addBookmarkMut = trpc.bookmarks.add.useMutation({
+    onSuccess: () => utils.bookmarks.getAll.invalidate(),
+  });
+  const removeBookmarkMut = trpc.bookmarks.remove.useMutation({
+    onSuccess: () => utils.bookmarks.getAll.invalidate(),
+  });
+
+  // Set of bookmarked contentIds (hashed titles)
+  const bookmarkedIds = useMemo(() => {
+    const s = new Set<number>();
+    for (const b of userBookmarks) {
+      if (b.contentType === "lesson") s.add(b.contentId);
+    }
+    return s;
+  }, [userBookmarks]);
+
+  function handleToggleBookmark(contentId: number, title: string, isCurrentlyBookmarked: boolean) {
+    if (isCurrentlyBookmarked) {
+      removeBookmarkMut.mutate({ contentType: "lesson", contentId });
+    } else {
+      addBookmarkMut.mutate({ contentType: "lesson", contentId, contentTitle: title });
+    }
+  }
 
   // Build a map: normalized title -> { tags, createdAt }
   const dbLessonMap = useMemo(() => {
@@ -477,6 +539,34 @@ export default function AcademyCategory() {
     }
     return map;
   }, [dbLessons]);
+
+  // Collect all tags present in this category for the filter bar
+  const availableTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    for (const meta of Object.values(dbLessonMap)) {
+      if (meta.tags) meta.tags.split(",").map((t) => t.trim()).filter(Boolean).forEach((t) => tagSet.add(t));
+    }
+    return Array.from(tagSet);
+  }, [dbLessonMap]);
+
+  // Filter sections: hide videos that don't match the active filter
+  const filteredSections = useMemo(() => {
+    if (!cat) return [];
+    if (!activeFilter) return cat.sections;
+    return cat.sections
+      .map((section) => ({
+        ...section,
+        videos: section.videos.filter((v) => {
+          if (activeFilter === "Bookmarked") return bookmarkedIds.has(hashTitle(v.title));
+          const meta = dbLessonMap[v.title.toLowerCase().trim()];
+          if (!meta) return false;
+          const tags = meta.tags ? meta.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+          if (activeFilter === "New") return isNewLesson(meta.createdAt);
+          return tags.includes(activeFilter);
+        }),
+      }))
+      .filter((s) => s.videos.length > 0);
+  }, [cat, activeFilter, dbLessonMap, bookmarkedIds]);
 
   if (!cat) {
     return (
@@ -553,9 +643,43 @@ export default function AcademyCategory() {
           </div>
         </div>
 
+        {/* ── Filter bar ── */}
+        <div className="flex items-center gap-2 flex-wrap">
+            <Filter size={13} className="text-gray-500 flex-shrink-0" />
+            {["All", ...availableTags, "New", "Trending", "Bookmarked"].map((f) => {
+              const isActive = (f === "All" && !activeFilter) || activeFilter === f;
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setActiveFilter(f === "All" ? null : f)}
+                  className="text-[11px] font-semibold px-3 py-1 rounded-full transition-all"
+                  style={isActive
+                    ? { background: cat.color, color: "#fff", border: `1px solid ${cat.color}` }
+                    : { background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #2a2a2a" }
+                  }
+                >
+                  {f === "Bookmarked" ? `★ Bookmarked` : f}
+                </button>
+              );
+            })}
+        </div>
+
         {/* ── Section list ── */}
         <div className="space-y-3">
-          {cat.sections.map((section, idx) => (
+          {filteredSections.length === 0 && activeFilter && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-sm">No videos match the "{activeFilter}" filter.</p>
+              <button
+                type="button"
+                onClick={() => setActiveFilter(null)}
+                className="mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Clear filter
+              </button>
+            </div>
+          )}
+          {filteredSections.map((section, idx) => (
             <SectionRow
               key={section.id}
               section={section}
@@ -563,6 +687,8 @@ export default function AcademyCategory() {
               categoryKey={cat.key}
               defaultOpen={idx === 0}
               dbLessonMap={dbLessonMap}
+              bookmarkedIds={bookmarkedIds}
+              onToggleBookmark={handleToggleBookmark}
             />
           ))}
         </div>

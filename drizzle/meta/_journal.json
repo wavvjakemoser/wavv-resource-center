@@ -36,6 +36,20 @@
       "when": 1777930296391,
       "tag": "0004_rapid_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1777931922720,
+      "tag": "0005_parallel_chameleon",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1777932210023,
+      "tag": "0006_fancy_stryfe",
+      "breakpoints": true
     }
   ]
 }

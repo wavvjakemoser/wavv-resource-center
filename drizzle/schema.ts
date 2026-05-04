@@ -45,6 +45,8 @@ export const courses = mysqlTable("courses", {
   durationMinutes: int("durationMinutes").default(0),
   sortOrder: int("sortOrder").default(0),
   published: boolean("published").default(true).notNull(),
+  // Admin-applied tags, comma-separated (e.g. "Most Popular,Featured")
+  tags: text("tags"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -162,3 +164,18 @@ export const analyticsEvents = mysqlTable("analytics_events", {
 });
 
 export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
+
+// ─── Bookmarks ────────────────────────────────────────────────────────────────
+export const bookmarks = mysqlTable("bookmarks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  // Content type: "lesson" | "webinar" | "guide"
+  contentType: varchar("contentType", { length: 50 }).notNull(),
+  // The ID of the bookmarked item (lessonId, webinarId, or guideId)
+  contentId: int("contentId").notNull(),
+  // Denormalized title for quick display without joins
+  contentTitle: varchar("contentTitle", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Bookmark = typeof bookmarks.$inferSelect;
