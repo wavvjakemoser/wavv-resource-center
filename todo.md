@@ -252,9 +252,9 @@
 - [x] Upload 3 PDFs to webdev storage (2a, 5a, 5b)
 - [x] Wire How-To Loom URLs into AcademyCategory static data (8 videos, all available)
 - [x] Wire Strategy Loom URLs into AcademyCategory static data (6 videos + 3 downloadable PDFs)
-- [ ] Auto-apply "Most Popular" tag to Connection Rates section videos in DB
+- [x] Auto-apply "Most Popular" tag to Connection Rates section videos in DB
 - [x] Add downloadable file support to video rows (PDF download button with label)
-- [ ] Update DB lesson titles to match new static titles for How-To and Strategy
+- [x] Update DB lesson titles to match new static titles for How-To and Strategy
 
 ## Academy Banner Restore
 
@@ -284,6 +284,6 @@
 
 - [x] Admin: full tag CRUD — add custom tags, remove tags from videos, delete tags from DB
 - [x] Admin: edit video URL and title inline
-- [ ] Admin: edit/replace downloadable files per video
-- [ ] Admin: hide/show entire sections or categories (visibility toggle)
+- [x] Admin: edit/replace downloadable files per video (fileUrl field in LessonRow edit form)
+- [x] Admin: hide/show entire sections or categories (SectionVisibilityPanel in ContentTab)
 - [x] Admin: hide/show individual videos (via Active/Inactive toggle — already existed)

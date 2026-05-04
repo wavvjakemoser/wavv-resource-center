@@ -278,7 +278,7 @@ const CATEGORY_DATA: CategoryData[] = [
 ];
 
 /// DB lesson metadata (tags, createdAt) keyed by normalized title
-type DbLessonMeta = { tags: string | null; createdAt: Date | string };
+type DbLessonMeta = { tags: string | null; createdAt: Date | string; fileUrl?: string | null };
 
 // ─── Expandable section row ───────────────────────────────────────────────
 function SectionRow({
@@ -334,6 +334,10 @@ function SectionRow({
             const dbMeta = dbLessonMap[video.title.toLowerCase().trim()];
             const tagList = dbMeta?.tags ? dbMeta.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
             const showNew = dbMeta ? isNewLesson(dbMeta.createdAt) : false;
+            // Use DB fileUrl as override if set, otherwise fall back to static downloadFile
+            const effectiveDownloadFile = dbMeta?.fileUrl
+              ? { url: dbMeta.fileUrl, label: video.downloadFile?.label ?? "Download" }
+              : video.downloadFile;
             const inner = (
               <>
                 {/* Play / lock icon */}
@@ -407,21 +411,21 @@ function SectionRow({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={rowClass}
-                style={video.downloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}
+                style={effectiveDownloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}
               >
                 {inner}
               </a>
             ) : (
-              <div key={video.id} className={rowClass} style={video.downloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}>
+              <div key={video.id} className={rowClass} style={effectiveDownloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}>
                 {inner}
               </div>
             );
             return (
               <div key={video.id}>
                 {videoRow}
-                {video.downloadFile && (
+                {effectiveDownloadFile && (
                   <a
-                    href={video.downloadFile.url}
+                    href={effectiveDownloadFile.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2.5 px-5 py-2 transition-colors hover:bg-white/5"
@@ -434,7 +438,7 @@ function SectionRow({
                     >
                       <Download size={11} style={{ color: "#60a5fa" }} />
                     </div>
-                    <span className="text-xs text-blue-400 hover:text-blue-300 transition-colors">{video.downloadFile.label}</span>
+                    <span className="text-xs text-blue-400 hover:text-blue-300 transition-colors">{effectiveDownloadFile.label}</span>
                     <span
                       className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full ml-auto"
                       style={{ background: "rgba(96,165,250,0.1)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.25)" }}
@@ -469,7 +473,7 @@ export default function AcademyCategory() {
   const dbLessonMap = useMemo(() => {
     const map: Record<string, DbLessonMeta> = {};
     for (const l of dbLessons) {
-      map[l.title.toLowerCase().trim()] = { tags: l.tags ?? null, createdAt: l.createdAt };
+      map[l.title.toLowerCase().trim()] = { tags: l.tags ?? null, createdAt: l.createdAt, fileUrl: (l as any).fileUrl ?? null };
     }
     return map;
   }, [dbLessons]);

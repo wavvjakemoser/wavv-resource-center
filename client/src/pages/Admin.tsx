@@ -780,6 +780,9 @@ function ContentTab() {
         )}
       </div>
 
+      {/* ── Section Visibility panel ── */}
+      <SectionVisibilityPanel />
+
       {/* ── Tags Management panel ── */}
       <TagsManagementPanel />
 
@@ -817,6 +820,70 @@ function ContentTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+// ─── Section Visibility Panel ──────────────────────────────────────────────
+function SectionVisibilityPanel() {
+  const utils = trpc.useUtils();
+  const { data: courses = [], isLoading } = trpc.academy.adminGetAllCourses.useQuery();
+  const updateCourse = trpc.academy.adminUpdateCourse.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetAllCourses.invalidate();
+      utils.academy.adminGetAllLessons.invalidate();
+      toast.success("Section visibility updated");
+    },
+    onError: () => toast.error("Failed to update section"),
+  });
+
+  if (isLoading) return null;
+
+  // Group courses by category
+  const byCategory: Record<string, typeof courses> = {};
+  for (const c of courses) {
+    if (!byCategory[c.category]) byCategory[c.category] = [];
+    byCategory[c.category].push(c);
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 rounded-full" style={{ background: "#60a5fa" }} />
+        <h2 className="text-sm font-semibold text-white">Section Visibility</h2>
+        <span className="text-xs text-gray-500">Show or hide entire sections from users</span>
+      </div>
+      <div
+        className="rounded-xl overflow-hidden divide-y"
+        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", borderColor: "#2a2a2a" }}
+      >
+        {courses.map((course) => (
+          <div key={course.id} className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ background: course.published ? "#22c55e" : "#4b5563" }}
+              />
+              <div className="min-w-0">
+                <p className="text-sm text-white truncate">{course.title}</p>
+                <p className="text-[10px] text-gray-600">{course.category}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => updateCourse.mutate({ id: course.id, data: { published: !course.published } })}
+              disabled={updateCourse.isPending}
+              className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80 disabled:opacity-50"
+              style={course.published
+                ? { background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }
+                : { background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }
+              }
+            >
+              {course.published ? "Hide" : "Show"}
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -928,6 +995,7 @@ function LessonRow({
     courseCategory?: string;
     inactiveReason?: string | null;
     videoUrl?: string | null;
+    fileUrl?: string | null;
     tags?: string | null;
   };
   isActive: boolean;
@@ -938,6 +1006,7 @@ function LessonRow({
   const [editTitle, setEditTitle] = React.useState(lesson.title);
   const [editDesc, setEditDesc] = React.useState(lesson.description ?? "");
   const [editVideoUrl, setEditVideoUrl] = React.useState(lesson.videoUrl ?? "");
+  const [editFileUrl, setEditFileUrl] = React.useState(lesson.fileUrl ?? "");
   const [activeTags, setActiveTags] = React.useState<string[]>(() => parseTagList(lesson.tags));
   const [customTagInput, setCustomTagInput] = React.useState("");
   const utils = trpc.useUtils();
@@ -958,6 +1027,7 @@ function LessonRow({
         title: editTitle.trim() || lesson.title,
         description: editDesc.trim() || undefined,
         videoUrl: editVideoUrl.trim() || undefined,
+        fileUrl: editFileUrl.trim() || null,
         tags: activeTags.join(",") || null,
       },
     });
@@ -967,6 +1037,7 @@ function LessonRow({
     setEditTitle(lesson.title);
     setEditDesc(lesson.description ?? "");
     setEditVideoUrl(lesson.videoUrl ?? "");
+    setEditFileUrl(lesson.fileUrl ?? "");
     setActiveTags(parseTagList(lesson.tags));
     setCustomTagInput("");
     setEditing(false);
@@ -1012,6 +1083,13 @@ function LessonRow({
             value={editVideoUrl}
             onChange={(e) => setEditVideoUrl(e.target.value)}
             placeholder="Video URL (Loom, YouTube, etc.)"
+          />
+          {/* Downloadable file URL field */}
+          <input
+            className="w-full bg-[#111] border border-[#333] rounded-lg px-3 py-1.5 text-xs text-gray-300 outline-none focus:border-blue-500 font-mono"
+            value={editFileUrl}
+            onChange={(e) => setEditFileUrl(e.target.value)}
+            placeholder="Downloadable file URL (PDF, etc.) — leave blank to remove"
           />
           {/* Tag editor */}
           <div>
@@ -1139,6 +1217,16 @@ function LessonRow({
                   </span>
                 );
               })}
+              {/* File URL indicator */}
+              {lesson.fileUrl && (
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1"
+                  style={{ background: "rgba(167,139,250,0.1)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.25)" }}
+                  title={lesson.fileUrl}
+                >
+                  <Download size={9} /> PDF
+                </span>
+              )}
             </div>
           </div>
           {/* Edit icon */}
