@@ -151,3 +151,22 @@
 - [x] Remove "WAVV AI is here to help" CTA banner from dashboard
 - [x] Welcome banner: "Welcome {first name}!" + "Everything you need to succeed with WAVV starts here!"
 - [x] Add "Continue Where You Left Off" section with 3 placeholder cards (last course/video/recording)
+
+## Admin Analytics Dashboard
+
+- [x] Create analytics_events table (event_type, user_id, resource_id, metadata JSON, timestamp)
+- [x] Build server-side event logging helper (logEvent function)
+- [x] Create admin-only tRPC procedures for aggregated analytics queries
+- [x] Build /admin/analytics page with role-gating (admin only)
+- [x] Dashboard cards: total sign-ins, active users (DAU/WAU/MAU), content views, searches, AI conversations
+- [x] Charts: sign-ins over time, top content by views, user engagement trend
+- [x] Time-range filter (7d / 30d / 90d / all time)
+- [x] Wire event tracking into login flow
+- [x] Wire event tracking into page views / content interactions
+- [x] Wire event tracking into search and AI chat usage
+- [x] Add admin nav item in sidebar (visible only to admin-role users)
+
+## Admin Analytics Gaps (follow-up)
+
+- [x] Add Searches stat card to admin analytics dashboard
+- [x] Add page-view event tracking (client-side trackEvent on route changes)

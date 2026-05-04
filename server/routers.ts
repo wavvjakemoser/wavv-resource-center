@@ -18,15 +18,21 @@ import {
   deleteGuide,
   deleteLesson,
   deleteWebinar,
+  getActiveUsers,
   getAllTickets,
   getAllUsers,
   getAnalyticsSummary,
   getCourseById,
   getCourses,
+  getDailyEventCounts,
+  getEventCountsByType,
   getGuideById,
   getGuides,
   getLessonsByCourse,
   getLessonById,
+  getRecentEvents,
+  getSignInTrend,
+  getTopContent,
   getUserProgress,
   getUserTrophies,
   searchContent,
@@ -433,13 +439,56 @@ Be concise, direct, and helpful. Use bullet points for step-by-step instructions
     }),
 });
 
-// ─── Analytics Router ─────────────────────────────────────────────────────────
+// ─── Analytics Router ─────────────────────────────────────────────────
 const analyticsRouter = router({
   getSummary: adminProcedure.query(() => getAnalyticsSummary()),
   getUsers: adminProcedure.query(() => getAllUsers()),
   updateUserRole: adminProcedure
     .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
     .mutation(({ input }) => updateUserRole(input.userId, input.role)),
+
+  // ── Advanced analytics for admin dashboard ──
+  getEventCounts: adminProcedure
+    .input(z.object({ days: z.number().min(1).max(365).default(30) }))
+    .query(({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getEventCountsByType(since);
+    }),
+
+  getSignInTrend: adminProcedure
+    .input(z.object({ days: z.number().min(1).max(365).default(30) }))
+    .query(({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getSignInTrend(since);
+    }),
+
+  getDailyEvents: adminProcedure
+    .input(z.object({ eventType: z.string(), days: z.number().min(1).max(365).default(30) }))
+    .query(({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getDailyEventCounts(input.eventType, since);
+    }),
+
+  getActiveUsers: adminProcedure
+    .input(z.object({ days: z.number().min(1).max(365).default(30) }))
+    .query(({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getActiveUsers(since);
+    }),
+
+  getTopContent: adminProcedure
+    .input(z.object({ days: z.number().min(1).max(365).default(30), limit: z.number().min(1).max(50).default(10) }))
+    .query(({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getTopContent(since, input.limit);
+    }),
+
+  getRecentEvents: adminProcedure
+    .input(z.object({ days: z.number().min(1).max(365).default(7), limit: z.number().min(1).max(100).default(50) }))
+    .query(({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getRecentEvents(since, input.limit);
+    }),
 });
 
 // ─── Scheduled Task endpoint ──────────────────────────────────────────────────
@@ -476,6 +525,7 @@ export const appRouter = router({
             const token = await createSessionToken({ userId: demoUser.id, email: demoUser.email ?? "", role: demoUser.role });
             const cookieOptions = getSessionCookieOptions(ctx.req);
             ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+            await trackEvent({ userId: demoUser.id, eventType: "login" });
             return { success: true, user: { id: demoUser.id, name: demoUser.name, email: demoUser.email, role: demoUser.role } };
           }
         }
@@ -491,6 +541,7 @@ export const appRouter = router({
         const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        await trackEvent({ userId: user.id, eventType: "login" });
         return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
       }),
 
@@ -525,8 +576,9 @@ export const appRouter = router({
   search: router({
     query: protectedProcedure
       .input(z.object({ q: z.string().min(1).max(200) }))
-      .query(async ({ input }) => {
+      .query(async ({ ctx, input }) => {
         if (input.q.trim().length < 2) return { courses: [], lessons: [], webinars: [], guides: [] };
+        await trackEvent({ userId: ctx.user.id, eventType: "search", metadata: JSON.stringify({ query: input.q.trim() }) });
         return searchContent(input.q.trim());
       }),
   }),
@@ -534,6 +586,18 @@ export const appRouter = router({
     get: protectedProcedure.query(async ({ ctx }) => {
       return getUserTrophies(ctx.user.id);
     }),
+  }),
+  tracking: router({
+    pageView: protectedProcedure
+      .input(z.object({ path: z.string().max(500) }))
+      .mutation(async ({ ctx, input }) => {
+        await trackEvent({
+          userId: ctx.user.id,
+          eventType: "page_view",
+          metadata: JSON.stringify({ path: input.path }),
+        });
+        return { ok: true };
+      }),
   }),
 });
 

@@ -1,4 +1,4 @@
-import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   analyticsEvents,
@@ -401,6 +401,103 @@ export async function getAnalyticsSummary() {
     completedLessons: completedLessons?.count ?? 0,
     totalWebinarViews: totalWebinarViews?.total ?? 0,
   };
+}
+
+// ─── Advanced Analytics Queries ──────────────────────────────────────────────
+
+/** Get event counts grouped by eventType within a date range */
+export async function getEventCountsByType(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      eventType: analyticsEvents.eventType,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(gte(analyticsEvents.createdAt, sinceDate))
+    .groupBy(analyticsEvents.eventType);
+  return rows;
+}
+
+/** Get daily event counts for a specific event type (for charts) */
+export async function getDailyEventCounts(eventType: string, sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      date: sql<string>`DATE(createdAt)`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(and(eq(analyticsEvents.eventType, eventType), gte(analyticsEvents.createdAt, sinceDate)))
+    .groupBy(sql`DATE(createdAt)`)
+    .orderBy(sql`DATE(createdAt)`);
+  return rows;
+}
+
+/** Get unique active users (users with any event) within a date range */
+export async function getActiveUsers(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return { count: 0 };
+  const [result] = await db
+    .select({ count: sql<number>`COUNT(DISTINCT userId)` })
+    .from(analyticsEvents)
+    .where(and(gte(analyticsEvents.createdAt, sinceDate), sql`userId IS NOT NULL`));
+  return { count: result?.count ?? 0 };
+}
+
+/** Get top content by views/interactions */
+export async function getTopContent(sinceDate: Date, limit = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      resourceType: analyticsEvents.resourceType,
+      resourceId: analyticsEvents.resourceId,
+      eventType: analyticsEvents.eventType,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        sql`resourceId IS NOT NULL`
+      )
+    )
+    .groupBy(analyticsEvents.resourceType, analyticsEvents.resourceId, analyticsEvents.eventType)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows;
+}
+
+/** Get sign-in trend (daily logins) */
+export async function getSignInTrend(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      date: sql<string>`DATE(createdAt)`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(and(eq(analyticsEvents.eventType, "login"), gte(analyticsEvents.createdAt, sinceDate)))
+    .groupBy(sql`DATE(createdAt)`)
+    .orderBy(sql`DATE(createdAt)`);
+  return rows;
+}
+
+/** Get all events for a time range (paginated) */
+export async function getRecentEvents(sinceDate: Date, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select()
+    .from(analyticsEvents)
+    .where(gte(analyticsEvents.createdAt, sinceDate))
+    .orderBy(desc(analyticsEvents.createdAt))
+    .limit(limit);
+  return rows;
 }
 
 // ─── Native Auth Helpers ──────────────────────────────────────────────────────

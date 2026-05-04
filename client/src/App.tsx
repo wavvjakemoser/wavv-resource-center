@@ -14,8 +14,11 @@ import GuidesAndDocs from "./pages/GuidesAndDocs";
 import Support from "./pages/Support";
 import AdminPanel from "./pages/AdminPanel";
 import HandsOn from "./pages/HandsOn";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import { usePageTracking } from "./hooks/usePageTracking";
 
 function Router() {
+  usePageTracking();
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -26,6 +29,7 @@ function Router() {
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
+      <Route path="/admin/analytics" component={AdminAnalytics} />
       <Route path="/admin" component={AdminPanel} />
       <Route path="/hands-on" component={HandsOn} />
       <Route path="/404" component={NotFound} />

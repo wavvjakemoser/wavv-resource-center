@@ -24,6 +24,7 @@ import {
   Sparkles,
   FlaskConical,
   User,
+  BarChart3,
 } from "lucide-react";
 
 const navItems = [
@@ -33,6 +34,10 @@ const navItems = [
   { href: "/guides", label: "Guides & Docs", icon: FileText },
   { href: "/support", label: "Support", icon: LifeBuoy },
   { href: "/hands-on", label: "Hands-On", icon: FlaskConical },
+];
+
+const adminNavItems = [
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 interface PortalLayoutProps {
@@ -169,6 +174,31 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                   </Link>
                 );
               })}
+              {/* Admin-only nav items */}
+              {user?.role === "admin" && (
+                <div className="mt-4 pt-4" style={{ borderTop: "1px solid #1e1e1e" }}>
+                  <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Admin</p>
+                  {adminNavItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.startsWith(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
+                          isActive
+                            ? "text-[#0074F4] bg-[#0074F4]/10 border border-[#0074F4]/30"
+                            : "text-gray-400 hover:text-white hover:bg-white/5"
+                        }`}
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <Icon size={16} />
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Quick Links */}
