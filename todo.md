@@ -216,22 +216,22 @@
 
 ## Loom Videos + Visibility Toggle (Current Session)
 
-- [ ] Fix JSX error in AcademyCategory (dynamic Tag pattern → conditional anchor/div)
-- [ ] Brighten and bold course count badge on Academy category banners
-- [ ] Wire real Loom videos into Onboarding sections (9 videos across 6 sections)
-- [ ] Add is_visible (boolean, default true) field to lessons/videos in DB schema
-- [ ] Admin panel: add Active/Inactive toggle switch per video in course management
-- [ ] Admin panel: show inactive videos in a separate collapsible "Inactive" section
-- [ ] Public category pages: filter out inactive videos from display
+- [x] Fix JSX error in AcademyCategory (dynamic Tag pattern → conditional anchor/div)
+- [x] Brighten and bold course count badge on Academy category banners
+- [x] Wire real Loom videos into Onboarding sections (9 videos across 6 sections)
+- [x] Add is_visible (published boolean) field to lessons/videos in DB schema — already existed
+- [x] Admin panel: add Active/Inactive toggle switch per video in course management
+- [x] Admin panel: show inactive videos in a separate collapsible "Inactive" section
+- [x] Public category pages: filter out inactive videos from display
 
 ## Content Status Management
 
-- [ ] Add contentStatus enum ('active', 'inactive', 'needs_update') to lessons table in DB schema
-- [ ] Run migration to add contentStatus column (default 'active')
-- [ ] Update db.ts updateLesson helper to accept contentStatus
-- [ ] Add adminUpdateLessonStatus tRPC procedure
-- [ ] Admin panel: Content Management tab showing all lessons grouped by course
-- [ ] Admin panel: per-lesson status badge (Active / Inactive / Needs Update) with dropdown toggle
-- [ ] Admin panel: "Needs Update" filter view — show all flagged lessons in one list for bulk review
-- [ ] Public category pages: filter out inactive lessons from display
-- [ ] Public category pages: no visual indicator for "needs_update" (internal flag only)
+- [x] Simplified to Active/Inactive only (needs_update → inactive with reason note)
+- [x] Added inactiveReason text column to lessons table (migration applied)
+- [x] updateLesson helper already accepts published + inactiveReason
+- [x] adminUpdateLesson procedure updated to accept inactiveReason + title + description
+- [x] Admin panel: Content Management tab showing all lessons with Active/Inactive sections
+- [x] Admin panel: per-lesson Deactivate/Activate toggle with optional inactiveReason dialog
+- [x] Inactive section shows all deactivated lessons with reason label for bulk review
+- [x] Public category pages: filter out inactive lessons from display (getLessonsByCourse filters by published)
+- [x] Inactive/reason is admin-only — no public indicator

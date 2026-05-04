@@ -5,11 +5,20 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  BookOpen,
+  Rocket,
+  Wrench,
+  Target,
   Play,
   Lock,
   GraduationCap,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  Onboarding: Rocket,
+  "How-To": Wrench,
+  "Strategy & Best Practices": Target,
+};
 
 // ─── Section / video data ─────────────────────────────────────────────────────
 
@@ -257,10 +266,12 @@ const CATEGORY_DATA: CategoryData[] = [
 function SectionRow({
   section,
   accentColor,
+  categoryKey,
   defaultOpen = false,
 }: {
   section: Section;
   accentColor: string;
+  categoryKey: string;
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -275,7 +286,7 @@ function SectionRow({
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-white/5"
       >
-        <BookOpen size={16} style={{ color: accentColor, flexShrink: 0 }} />
+        {(() => { const Icon = CATEGORY_ICONS[categoryKey] ?? Rocket; return <Icon size={16} style={{ color: accentColor, flexShrink: 0 }} />; })()}
         <span className="flex-1 text-sm font-semibold text-white">{section.title}</span>
         <span className="text-[11px] text-gray-500 mr-2">
           {section.videos.length} video{section.videos.length !== 1 ? "s" : ""}
@@ -425,7 +436,7 @@ export default function AcademyCategory() {
           <div className="absolute inset-0 flex items-center px-6">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-5 rounded-full" style={{ background: cat.color }} />
+                {(() => { const Icon = CATEGORY_ICONS[cat.key] ?? Rocket; return <Icon size={20} style={{ color: cat.color, flexShrink: 0 }} />; })()}
                 <h1 className="text-xl font-bold text-white">{cat.label}</h1>
                 <span
                   className="text-[10px] font-semibold px-2 py-0.5 rounded-full ml-1"
@@ -450,6 +461,7 @@ export default function AcademyCategory() {
               key={section.id}
               section={section}
               accentColor={cat.color}
+              categoryKey={cat.key}
               defaultOpen={idx === 0}
             />
           ))}
