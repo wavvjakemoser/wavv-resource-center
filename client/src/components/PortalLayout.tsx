@@ -38,8 +38,8 @@ const navItems = [
 ];
 
 const adminNavItems = [
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin?tab=analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin?tab=users", label: "Users", icon: Users },
 ];
 
 interface PortalLayoutProps {

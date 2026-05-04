@@ -206,3 +206,10 @@
 - [x] Map all existing courses into the 3 categories
 - [x] Add Trending / Recommended placeholder section at bottom of Academy page
 - [x] Upload thumbnails to static assets and reference via CDN URL
+
+## Admin Navigation Consolidation (Round 6)
+
+- [x] Consolidate /admin/analytics and /admin/users into single /admin route with in-page tab switching
+- [x] Sidebar Analytics and Users links navigate to /admin?tab=analytics and /admin?tab=users respectively
+- [x] Tab selection syncs from URL query param so direct links work correctly
+- [x] Sidebar stays fully static — no page navigation triggered when switching admin tabs
