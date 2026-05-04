@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Academy from "./pages/Academy";
 import CourseDetail from "./pages/CourseDetail";
+import AcademyCategory from "./pages/AcademyCategory";
 import LessonViewer from "./pages/LessonViewer";
 import Webinars from "./pages/Webinars";
 import GuidesAndDocs from "./pages/GuidesAndDocs";
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/academy" component={Academy} />
+      <Route path="/academy/category/:categoryKey" component={AcademyCategory} />
       <Route path="/academy/:courseId" component={CourseDetail} />
       <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
       <Route path="/webinars" component={Webinars} />
