@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useParams } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
+import { trpc } from "@/lib/trpc";
 import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
   Rocket,
   Wrench,
-  Target,
+  Lightbulb,
   Play,
   Lock,
   GraduationCap,
@@ -17,8 +18,27 @@ import type { LucideIcon } from "lucide-react";
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Onboarding: Rocket,
   "How-To": Wrench,
-  "Strategy & Best Practices": Target,
+  "Strategy and Best Practices": Lightbulb,
+  "Strategy & Best Practices": Lightbulb,
 };
+
+// Tag color map (matches admin preset tags)
+const TAG_COLORS: Record<string, { color: string; bg: string; border: string }> = {
+  "Most Popular":    { color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
+  "Must Watch":      { color: "#f87171", bg: "rgba(248,113,113,0.12)", border: "rgba(248,113,113,0.35)" },
+  "New":             { color: "#4ade80", bg: "rgba(74,222,128,0.12)",  border: "rgba(74,222,128,0.35)" },
+  "Featured":        { color: "#60a5fa", bg: "rgba(96,165,250,0.12)",  border: "rgba(96,165,250,0.35)" },
+  "Spam Protection": { color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
+  "Connection Rates":{ color: "#c084fc", bg: "rgba(192,132,252,0.12)", border: "rgba(192,132,252,0.35)" },
+};
+
+const NEW_BADGE = { color: "#4ade80", bg: "rgba(74,222,128,0.12)", border: "rgba(74,222,128,0.35)" };
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+function isNewLesson(createdAt: Date | string | null | undefined): boolean {
+  if (!createdAt) return false;
+  return Date.now() - new Date(createdAt).getTime() < THIRTY_DAYS_MS;
+}
 
 // ─── Section / video data ─────────────────────────────────────────────────────
 
@@ -60,7 +80,7 @@ const CATEGORY_DATA: CategoryData[] = [
         videos: [
           {
             id: "onb-1-1",
-            title: "WAVV Onboarding Welcome Video",
+            title: "Welcome to the Onboarding Section",
             status: "available" as const,
             loopUrl: "https://www.loom.com/share/120f6c99ba1245e288ec5c486c146524",
           },
@@ -72,7 +92,7 @@ const CATEGORY_DATA: CategoryData[] = [
         videos: [
           {
             id: "onb-2-1",
-            title: "WAVV Wallet",
+            title: "Introducing WAVV Wallet",
             status: "available" as const,
             loopUrl: "https://www.loom.com/share/f8163ba9c8ae4bc2a90d789a77523248",
           },
@@ -84,7 +104,7 @@ const CATEGORY_DATA: CategoryData[] = [
         videos: [
           {
             id: "onb-3-1",
-            title: "WAVV Individual Single Line Onboarding",
+            title: "Getting Started With Your Single Line Dialer",
             status: "available" as const,
             loopUrl: "https://www.loom.com/share/5ff763a76caa4ec68d764d06cfe798f1",
           },
@@ -96,7 +116,7 @@ const CATEGORY_DATA: CategoryData[] = [
         videos: [
           {
             id: "onb-4-1",
-            title: "WAVV Individual Multi Line Onboarding",
+            title: "Getting Started With Your Multi Line Dialer",
             status: "available" as const,
             loopUrl: "https://www.loom.com/share/bb53e452362346e48510619256bfda1b",
           },
@@ -108,19 +128,19 @@ const CATEGORY_DATA: CategoryData[] = [
         videos: [
           {
             id: "onb-5-1",
-            title: "Team Intro",
+            title: "Team Onboarding - Intro",
             status: "available" as const,
             loopUrl: "https://www.loom.com/share/306c20a4bd97470aaa2911eb18e5a2ea",
           },
           {
             id: "onb-5-2",
-            title: "Team Manager Onboarding",
+            title: "Manager/Billing Owner Onboarding",
             status: "available" as const,
             loopUrl: "https://www.loom.com/share/54c64029a8504929abceac46acee752c",
           },
           {
             id: "onb-5-3",
-            title: "Lock Dialer Settings for Your Team",
+            title: "Settings Lock",
             status: "available" as const,
             loopUrl: "https://www.loom.com/share/ec6a9741c531470aa8835347c9e1fc58",
           },
@@ -262,17 +282,22 @@ const CATEGORY_DATA: CategoryData[] = [
   },
 ];
 
-// ─── Expandable section row ───────────────────────────────────────────────────
+/// DB lesson metadata (tags, createdAt) keyed by normalized title
+type DbLessonMeta = { tags: string | null; createdAt: Date | string };
+
+// ─── Expandable section row ───────────────────────────────────────────────
 function SectionRow({
   section,
   accentColor,
   categoryKey,
   defaultOpen = false,
+  dbLessonMap = {},
 }: {
   section: Section;
   accentColor: string;
   categoryKey: string;
   defaultOpen?: boolean;
+  dbLessonMap?: Record<string, DbLessonMeta>;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -310,6 +335,10 @@ function SectionRow({
               textDecoration: "none" as const,
             };
             const rowClass = "flex items-center gap-3 px-5 py-3 transition-colors hover:bg-white/5";
+            // Look up DB metadata by title (case-insensitive)
+            const dbMeta = dbLessonMap[video.title.toLowerCase().trim()];
+            const tagList = dbMeta?.tags ? dbMeta.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+            const showNew = dbMeta ? isNewLesson(dbMeta.createdAt) : false;
             const inner = (
               <>
                 {/* Play / lock icon */}
@@ -323,13 +352,40 @@ function SectionRow({
                     <Lock size={11} className="text-gray-600" />
                   )}
                 </div>
-                {/* Title */}
-                <span
-                  className="flex-1 text-sm"
-                  style={{ color: video.status === "available" ? "#e5e7eb" : "#6b7280" }}
-                >
-                  {video.title}
-                </span>
+                {/* Title + tag pills */}
+                <div className="flex-1 min-w-0">
+                  <span
+                    className="text-sm"
+                    style={{ color: video.status === "available" ? "#e5e7eb" : "#6b7280" }}
+                  >
+                    {video.title}
+                  </span>
+                  {(tagList.length > 0 || showNew) && (
+                    <div className="flex flex-wrap gap-1 mt-0.5">
+                      {showNew && !tagList.includes("New") && (
+                        <span
+                          className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                          style={{ background: NEW_BADGE.bg, color: NEW_BADGE.color, border: `1px solid ${NEW_BADGE.border}` }}
+                        >
+                          NEW
+                        </span>
+                      )}
+                      {tagList.map((tag) => {
+                        const def = TAG_COLORS[tag];
+                        if (!def) return null;
+                        return (
+                          <span
+                            key={tag}
+                            className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                            style={{ background: def.bg, color: def.color, border: `1px solid ${def.border}` }}
+                          >
+                            {tag}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
                 {/* Badge / arrow */}
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {video.duration && (
@@ -372,12 +428,27 @@ function SectionRow({
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ─── Main page ────────────────────────────────────────────────────────
 export default function AcademyCategory() {
   const params = useParams<{ categoryKey: string }>();
   const categoryKey = decodeURIComponent(params.categoryKey ?? "");
 
   const cat = CATEGORY_DATA.find((c) => c.key === categoryKey);
+
+  // Fetch DB lessons for this category to get tags + createdAt
+  const { data: dbLessons = [] } = trpc.academy.getLessonsByCategory.useQuery(
+    { category: cat?.key ?? "" },
+    { enabled: !!cat }
+  );
+
+  // Build a map: normalized title -> { tags, createdAt }
+  const dbLessonMap = useMemo(() => {
+    const map: Record<string, DbLessonMeta> = {};
+    for (const l of dbLessons) {
+      map[l.title.toLowerCase().trim()] = { tags: l.tags ?? null, createdAt: l.createdAt };
+    }
+    return map;
+  }, [dbLessons]);
 
   if (!cat) {
     return (
@@ -418,38 +489,38 @@ export default function AcademyCategory() {
         {/* ── Category hero banner ── */}
         <div
           className="relative overflow-hidden rounded-2xl"
-          style={{ border: `1px solid ${cat.color}30` }}
+          style={{
+            background: `linear-gradient(135deg, #111 0%, #1a1a1a 60%, ${cat.color}18 100%)`,
+            border: `1px solid ${cat.color}40`,
+          }}
         >
-          <img
-            src={cat.thumbnail}
-            alt={cat.label}
-            className="w-full object-cover"
-            style={{ height: "160px" }}
-          />
+          {/* Decorative radial glow */}
           <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.35) 70%, transparent 100%)",
-            }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: `radial-gradient(ellipse at 80% 50%, ${cat.color}15 0%, transparent 65%)` }}
           />
-          <div className="absolute inset-0 flex items-center px-6">
+          <div className="relative flex items-center px-6 py-8">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                {(() => { const Icon = CATEGORY_ICONS[cat.key] ?? Rocket; return <Icon size={20} style={{ color: cat.color, flexShrink: 0 }} />; })()}
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${cat.color}20`, border: `1px solid ${cat.color}40` }}
+                >
+                  {(() => { const Icon = CATEGORY_ICONS[cat.key] ?? Rocket; return <Icon size={20} style={{ color: cat.color }} />; })()}
+                </div>
                 <h1 className="text-xl font-bold text-white">{cat.label}</h1>
                 <span
                   className="text-[10px] font-semibold px-2 py-0.5 rounded-full ml-1"
                   style={{
-                    background: `${cat.color}25`,
+                    background: `${cat.color}20`,
                     color: cat.color,
-                    border: `1px solid ${cat.color}40`,
+                    border: `1px solid ${cat.color}50`,
                   }}
                 >
                   {cat.sections.length} sections · {totalVideos} videos
                 </span>
               </div>
-              <p className="text-gray-300 text-xs max-w-sm">{cat.subtitle}</p>
+              <p className="text-gray-400 text-xs max-w-sm">{cat.subtitle}</p>
             </div>
           </div>
         </div>
@@ -463,6 +534,7 @@ export default function AcademyCategory() {
               accentColor={cat.color}
               categoryKey={cat.key}
               defaultOpen={idx === 0}
+              dbLessonMap={dbLessonMap}
             />
           ))}
         </div>

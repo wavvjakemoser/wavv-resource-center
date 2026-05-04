@@ -62,6 +62,8 @@ export const lessons = mysqlTable("lessons", {
   published: boolean("published").default(true).notNull(),
   // Admin-only: reason why content was deactivated (e.g. "Outdated", "Feature removed", "Needs update")
   inactiveReason: varchar("inactiveReason", { length: 255 }),
+  // Admin-applied tags, comma-separated (e.g. "Most Popular,Must Watch,New")
+  tags: text("tags"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

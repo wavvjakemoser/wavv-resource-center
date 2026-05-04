@@ -12,7 +12,7 @@ import {
   Lock,
   Rocket,
   Wrench,
-  Target,
+  Lightbulb,
 } from "lucide-react";
 
 // ─── 3 canonical categories ───────────────────────────────────────────────
@@ -89,10 +89,10 @@ const CATEGORIES = [
   },
   {
     key: "Strategy and Best Practices",
-    label: "Strategy",
+    label: "Strategy & Best Practices",
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
-    icon: Target,
+    icon: Lightbulb,
     thumbnail:
       "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-thumb-fKFxPeA2NotYc3dTCL2qLc.webp",
     placeholders: [
@@ -378,44 +378,45 @@ export default function Academy() {
                 {/* Category banner — fully clickable, navigates into the category */}
                 <Link
                   href={`/academy/category/${encodeURIComponent(cat.key)}`}
-                  className="group relative overflow-hidden rounded-2xl block cursor-pointer"
-                  style={{ border: `1px solid ${cat.color}30`, textDecoration: "none" }}
+                  className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
+                  style={{
+                    textDecoration: "none",
+                    background: `linear-gradient(135deg, #111 0%, #1a1a1a 60%, ${cat.color}18 100%)`,
+                    border: `1px solid ${cat.color}40`,
+                    boxShadow: `0 0 0 0 ${cat.color}00`,
+                  }}
                 >
-                  <img
-                    src={cat.thumbnail}
-                    alt={cat.label}
-                    className="w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                    style={{ height: "160px" }}
-                  />
-                  {/* Overlay gradient */}
+                  {/* Decorative background pattern */}
                   <div
-                    className="absolute inset-0 transition-opacity duration-200 group-hover:opacity-80"
+                    className="absolute inset-0 pointer-events-none"
                     style={{
-                      background:
-                        "linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)",
+                      background: `radial-gradient(ellipse at 80% 50%, ${cat.color}15 0%, transparent 65%)`,
                     }}
                   />
-                  {/* Text overlay */}
-                  <div className="absolute inset-0 flex items-center justify-between px-6">
+                  {/* Content */}
+                  <div className="relative flex items-center justify-between px-6 py-8">
                     <div>
                       {/* Title row: icon + label */}
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2.5 mb-1.5">
                         {cat.icon && (
-                          <cat.icon size={18} style={{ color: cat.color }} />
+                          <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style={{ background: `${cat.color}20`, border: `1px solid ${cat.color}40` }}
+                          >
+                            <cat.icon size={18} style={{ color: cat.color }} />
+                          </div>
                         )}
                         <h2 className="text-lg font-bold text-white">{cat.label}</h2>
                       </div>
                       {/* Description */}
-                      <p className="text-gray-300 text-xs max-w-sm mb-2">{cat.subtitle}</p>
-                      {/* Badge — below description, bright category color */}
+                      <p className="text-gray-400 text-xs max-w-sm mb-3">{cat.subtitle}</p>
+                      {/* Badge */}
                       <span
                         className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full"
                         style={{
-                          background: `${cat.color}30`,
-                          color: "#ffffff",
-                          border: `1.5px solid ${cat.color}`,
-                          boxShadow: `0 0 10px ${cat.color}90, inset 0 0 6px ${cat.color}30`,
-                          textShadow: "0 1px 2px rgba(0,0,0,0.8)",
+                          background: `${cat.color}20`,
+                          color: cat.color,
+                          border: `1px solid ${cat.color}50`,
                         }}
                       >
                         {liveCourses.length > 0
@@ -432,7 +433,7 @@ export default function Academy() {
                     {/* Arrow CTA */}
                     <div
                       className="flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1"
-                      style={{ background: `${cat.color}30`, border: `1px solid ${cat.color}50` }}
+                      style={{ background: `${cat.color}20`, border: `1px solid ${cat.color}40` }}
                     >
                       <ChevronRight size={18} style={{ color: cat.color }} />
                     </div>

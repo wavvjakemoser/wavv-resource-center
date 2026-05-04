@@ -137,6 +137,22 @@ export async function getLessonsByCourse(courseId: number, publishedOnly = true)
   return db.select().from(lessons).where(conditions).orderBy(lessons.sortOrder, lessons.createdAt);
 }
 
+export async function getLessonsByCategory(category: string) {
+  const db = await getDb();
+  if (!db) return [];
+  // Join lessons through courses filtered by category
+  const categoryCourses = await db
+    .select()
+    .from(courses)
+    .where(and(eq(courses.category, category as any), eq(courses.published, true)));
+  if (categoryCourses.length === 0) return [];
+  const courseIds = categoryCourses.map((c) => c.id);
+  const allLessons = await Promise.all(
+    courseIds.map((id) => getLessonsByCourse(id, true))
+  );
+  return allLessons.flat();
+}
+
 export async function getLessonById(id: number) {
   const db = await getDb();
   if (!db) return undefined;

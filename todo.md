@@ -235,3 +235,14 @@
 - [x] Inactive section shows all deactivated lessons with reason label for bulk review
 - [x] Public category pages: filter out inactive lessons from display (getLessonsByCourse filters by published)
 - [x] Inactive/reason is admin-only — no public indicator
+
+## Banner Cleanup + Tags + NEW Badge
+
+- [x] Academy.tsx: remove watermark/background text from banners ("Get started with WAVV", "Step-by-step guides", "Best Practices")
+- [x] Academy.tsx: rename Strategy label to "Strategy & Best Practices"
+- [x] Academy.tsx + AcademyCategory.tsx: swap Target icon to Lightbulb for Strategy
+- [x] Add tags text column to lessons table (comma-separated preset tags), migrate
+- [x] Update adminUpdateLesson tRPC to accept tags field
+- [x] Admin Content tab: tag editor with preset pills (Most Popular, Must Watch, New, Featured, Spam Protection, Connection Rates)
+- [x] AcademyCategory: display tag pills on video rows
+- [x] AcademyCategory: auto-show NEW badge on videos added within last 30 days

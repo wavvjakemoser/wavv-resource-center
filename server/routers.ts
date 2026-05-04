@@ -29,6 +29,7 @@ import {
   getGuideById,
   getGuides,
   getLessonsByCourse,
+  getLessonsByCategory,
   getLessonById,
   getRecentEvents,
   getSignInTrend,
@@ -179,6 +180,7 @@ const academyRouter = router({
           sortOrder: z.number().optional(),
           published: z.boolean().optional(),
           inactiveReason: z.string().nullable().optional(),
+          tags: z.string().nullable().optional(),
         }),
       })
     )
@@ -191,6 +193,10 @@ const academyRouter = router({
   adminGetLessons: adminProcedure
     .input(z.object({ courseId: z.number() }))
     .query(({ input }) => getLessonsByCourse(input.courseId, false)),
+
+  getLessonsByCategory: protectedProcedure
+    .input(z.object({ category: z.string() }))
+    .query(({ input }) => getLessonsByCategory(input.category)),
 
   // Returns ALL lessons across all courses for the content management view
   adminGetAllLessons: adminProcedure

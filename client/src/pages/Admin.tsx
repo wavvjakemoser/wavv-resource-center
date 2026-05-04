@@ -818,6 +818,21 @@ function ContentTab() {
   );
 }
 
+// ─── Preset tag definitions ──────────────────────────────────────────────────
+const PRESET_TAGS: { label: string; color: string; bg: string; border: string }[] = [
+  { label: "Most Popular",    color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
+  { label: "Must Watch",      color: "#f87171", bg: "rgba(248,113,113,0.12)", border: "rgba(248,113,113,0.35)" },
+  { label: "New",             color: "#4ade80", bg: "rgba(74,222,128,0.12)",  border: "rgba(74,222,128,0.35)" },
+  { label: "Featured",        color: "#60a5fa", bg: "rgba(96,165,250,0.12)",  border: "rgba(96,165,250,0.35)" },
+  { label: "Spam Protection", color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
+  { label: "Connection Rates",color: "#c084fc", bg: "rgba(192,132,252,0.12)", border: "rgba(192,132,252,0.35)" },
+];
+
+function parseTagList(tags: string | null | undefined): string[] {
+  if (!tags) return [];
+  return tags.split(",").map((t) => t.trim()).filter(Boolean);
+}
+
 // ─── Lesson row sub-component ─────────────────────────────────────────────────
 function LessonRow({
   lesson,
@@ -833,6 +848,7 @@ function LessonRow({
     courseCategory?: string;
     inactiveReason?: string | null;
     videoUrl?: string | null;
+    tags?: string | null;
   };
   isActive: boolean;
   onDeactivate?: () => void;
@@ -841,6 +857,7 @@ function LessonRow({
   const [editing, setEditing] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(lesson.title);
   const [editDesc, setEditDesc] = React.useState(lesson.description ?? "");
+  const [activeTags, setActiveTags] = React.useState<string[]>(() => parseTagList(lesson.tags));
   const utils = trpc.useUtils();
 
   const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
@@ -855,14 +872,25 @@ function LessonRow({
   const handleSave = () => {
     updateLesson.mutate({
       id: lesson.id,
-      data: { title: editTitle.trim() || lesson.title, description: editDesc.trim() || undefined },
+      data: {
+        title: editTitle.trim() || lesson.title,
+        description: editDesc.trim() || undefined,
+        tags: activeTags.join(",") || null,
+      },
     });
   };
 
   const handleCancel = () => {
     setEditTitle(lesson.title);
     setEditDesc(lesson.description ?? "");
+    setActiveTags(parseTagList(lesson.tags));
     setEditing(false);
+  };
+
+  const toggleTag = (label: string) => {
+    setActiveTags((prev) =>
+      prev.includes(label) ? prev.filter((t) => t !== label) : [...prev, label]
+    );
   };
 
   return (
@@ -886,6 +914,31 @@ function LessonRow({
             onChange={(e) => setEditDesc(e.target.value)}
             placeholder="Description (optional)"
           />
+          {/* Tag editor */}
+          <div>
+            <p className="text-[11px] text-gray-500 mb-1.5">Tags</p>
+            <div className="flex flex-wrap gap-1.5">
+              {PRESET_TAGS.map((tag) => {
+                const active = activeTags.includes(tag.label);
+                return (
+                  <button
+                    key={tag.label}
+                    type="button"
+                    onClick={() => toggleTag(tag.label)}
+                    className="text-[11px] font-medium px-2.5 py-0.5 rounded-full transition-all"
+                    style={{
+                      background: active ? tag.bg : "rgba(255,255,255,0.04)",
+                      color: active ? tag.color : "#6b7280",
+                      border: `1px solid ${active ? tag.border : "#333"}`,
+                      boxShadow: active ? `0 0 8px ${tag.bg}` : "none",
+                    }}
+                  >
+                    {tag.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div className="flex items-center gap-2 justify-end">
             <button
               onClick={handleCancel}
@@ -933,6 +986,20 @@ function LessonRow({
                   {lesson.inactiveReason}
                 </span>
               )}
+              {/* Applied tags (view mode) */}
+              {activeTags.map((tag) => {
+                const def = PRESET_TAGS.find((t) => t.label === tag);
+                if (!def) return null;
+                return (
+                  <span
+                    key={tag}
+                    className="text-[10px] px-1.5 py-0.5 rounded-full"
+                    style={{ background: def.bg, color: def.color, border: `1px solid ${def.border}` }}
+                  >
+                    {tag}
+                  </span>
+                );
+              })}
             </div>
           </div>
           {/* Edit icon */}
