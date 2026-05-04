@@ -399,11 +399,12 @@ export default function Academy() {
                         />
                         <h2 className="text-lg font-bold text-white">{cat.label}</h2>
                         <span
-                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full ml-1"
+                          className="text-[11px] font-bold px-2.5 py-0.5 rounded-full ml-1"
                           style={{
-                            background: `${cat.color}25`,
+                            background: `${cat.color}35`,
                             color: cat.color,
-                            border: `1px solid ${cat.color}40`,
+                            border: `1px solid ${cat.color}70`,
+                            textShadow: "0 0 8px currentColor",
                           }}
                         >
                           {liveCourses.length > 0

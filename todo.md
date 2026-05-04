@@ -213,3 +213,25 @@
 - [x] Sidebar Analytics and Users links navigate to /admin?tab=analytics and /admin?tab=users respectively
 - [x] Tab selection syncs from URL query param so direct links work correctly
 - [x] Sidebar stays fully static — no page navigation triggered when switching admin tabs
+
+## Loom Videos + Visibility Toggle (Current Session)
+
+- [ ] Fix JSX error in AcademyCategory (dynamic Tag pattern → conditional anchor/div)
+- [ ] Brighten and bold course count badge on Academy category banners
+- [ ] Wire real Loom videos into Onboarding sections (9 videos across 6 sections)
+- [ ] Add is_visible (boolean, default true) field to lessons/videos in DB schema
+- [ ] Admin panel: add Active/Inactive toggle switch per video in course management
+- [ ] Admin panel: show inactive videos in a separate collapsible "Inactive" section
+- [ ] Public category pages: filter out inactive videos from display
+
+## Content Status Management
+
+- [ ] Add contentStatus enum ('active', 'inactive', 'needs_update') to lessons table in DB schema
+- [ ] Run migration to add contentStatus column (default 'active')
+- [ ] Update db.ts updateLesson helper to accept contentStatus
+- [ ] Add adminUpdateLessonStatus tRPC procedure
+- [ ] Admin panel: Content Management tab showing all lessons grouped by course
+- [ ] Admin panel: per-lesson status badge (Active / Inactive / Needs Update) with dropdown toggle
+- [ ] Admin panel: "Needs Update" filter view — show all flagged lessons in one list for bulk review
+- [ ] Public category pages: filter out inactive lessons from display
+- [ ] Public category pages: no visual indicator for "needs_update" (internal flag only)

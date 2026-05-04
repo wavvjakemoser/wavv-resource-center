@@ -169,6 +169,7 @@ const academyRouter = router({
           durationMinutes: z.number().optional(),
           sortOrder: z.number().optional(),
           published: z.boolean().optional(),
+          inactiveReason: z.string().nullable().optional(),
         }),
       })
     )
@@ -181,6 +182,19 @@ const academyRouter = router({
   adminGetLessons: adminProcedure
     .input(z.object({ courseId: z.number() }))
     .query(({ input }) => getLessonsByCourse(input.courseId, false)),
+
+  // Returns ALL lessons across all courses for the content management view
+  adminGetAllLessons: adminProcedure
+    .query(async () => {
+      const allCourses = await getCourses(false);
+      const results = await Promise.all(
+        allCourses.map(async (course) => {
+          const courseLessons = await getLessonsByCourse(course.id, false);
+          return courseLessons.map((l) => ({ ...l, courseTitle: course.title, courseCategory: course.category }));
+        })
+      );
+      return results.flat();
+    }),
 });
 
 // ─── Webinars Router ──────────────────────────────────────────────────────────

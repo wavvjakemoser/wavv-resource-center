@@ -40,7 +40,7 @@ const CATEGORY_DATA: CategoryData[] = [
   {
     key: "Onboarding",
     label: "Onboarding",
-    subtitle: "Everything you need to get your team up and running with WAVV quickly and effectively.",
+    subtitle: "Get your team up and running with WAVV quickly and effectively.",
     color: "#0074F4",
     thumbnail:
       "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-thumb-cy9amSDtDB8FaRgmGumyrX.webp",
@@ -49,53 +49,93 @@ const CATEGORY_DATA: CategoryData[] = [
         id: "onb-1",
         title: "1. Welcome To The Onboarding Section",
         videos: [
-          { id: "onb-1-1", title: "Welcome to WAVV — What to Expect", duration: "3 min", status: "coming_soon" },
-          { id: "onb-1-2", title: "How to Use This Training Center", duration: "2 min", status: "coming_soon" },
+          {
+            id: "onb-1-1",
+            title: "WAVV Onboarding Welcome Video",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/120f6c99ba1245e288ec5c486c146524",
+          },
         ],
       },
       {
         id: "onb-2",
         title: "2. NEW: WAVV Wallet",
         videos: [
-          { id: "onb-2-1", title: "What Is WAVV Wallet?", duration: "5 min", status: "coming_soon" },
-          { id: "onb-2-2", title: "Setting Up Your Wallet", duration: "7 min", status: "coming_soon" },
-          { id: "onb-2-3", title: "Managing Credits & Billing", duration: "6 min", status: "coming_soon" },
+          {
+            id: "onb-2-1",
+            title: "WAVV Wallet",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/f8163ba9c8ae4bc2a90d789a77523248",
+          },
         ],
       },
       {
         id: "onb-3",
         title: "3. Individual Single Line Dialer Onboarding",
         videos: [
-          { id: "onb-3-1", title: "Single Line Dialer Overview", duration: "8 min", status: "coming_soon" },
-          { id: "onb-3-2", title: "Setting Up Your First List", duration: "6 min", status: "coming_soon" },
-          { id: "onb-3-3", title: "Making Your First Call", duration: "5 min", status: "coming_soon" },
+          {
+            id: "onb-3-1",
+            title: "WAVV Individual Single Line Onboarding",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/5ff763a76caa4ec68d764d06cfe798f1",
+          },
         ],
       },
       {
         id: "onb-4",
         title: "4. Individual Multi Line Dialer Onboarding",
         videos: [
-          { id: "onb-4-1", title: "Multi Line Dialer Overview", duration: "9 min", status: "coming_soon" },
-          { id: "onb-4-2", title: "Configuring Lines & Ratios", duration: "7 min", status: "coming_soon" },
-          { id: "onb-4-3", title: "Managing Live Calls Simultaneously", duration: "8 min", status: "coming_soon" },
+          {
+            id: "onb-4-1",
+            title: "WAVV Individual Multi Line Onboarding",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/bb53e452362346e48510619256bfda1b",
+          },
         ],
       },
       {
         id: "onb-5",
         title: "5. Team Onboarding",
         videos: [
-          { id: "onb-5-1", title: "Adding Team Members & Seats", duration: "6 min", status: "coming_soon" },
-          { id: "onb-5-2", title: "Setting Up Team Permissions", duration: "5 min", status: "coming_soon" },
-          { id: "onb-5-3", title: "Team Call Boards Overview", duration: "7 min", status: "coming_soon" },
+          {
+            id: "onb-5-1",
+            title: "Team Intro",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/306c20a4bd97470aaa2911eb18e5a2ea",
+          },
+          {
+            id: "onb-5-2",
+            title: "Team Manager Onboarding",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/54c64029a8504929abceac46acee752c",
+          },
+          {
+            id: "onb-5-3",
+            title: "Lock Dialer Settings for Your Team",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/ec6a9741c531470aa8835347c9e1fc58",
+          },
+          {
+            id: "onb-5-4",
+            title: "Understanding User Roles",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/4482c88a456c457c8e98ff73171dd873",
+          },
+          {
+            id: "onb-5-5",
+            title: "Agent Onboarding",
+            status: "available" as const,
+            loopUrl: "https://www.loom.com/share/c22c59b083fb408b9cc8bef1ecab4250",
+          },
         ],
       },
       {
         id: "onb-6",
         title: "6. Common Onboarding Questions",
         videos: [
-          { id: "onb-6-1", title: "Troubleshooting Audio & Mic Issues", duration: "4 min", status: "coming_soon" },
-          { id: "onb-6-2", title: "CRM Connection FAQs", duration: "5 min", status: "coming_soon" },
-          { id: "onb-6-3", title: "Billing & Account Questions", duration: "4 min", status: "coming_soon" },
+          { id: "onb-6-1", title: "Troubleshooting Audio & Mic Issues", status: "coming_soon" as const },
+          { id: "onb-6-2", title: "CRM Connection FAQs", status: "coming_soon" as const },
+          { id: "onb-6-3", title: "Billing & Account Questions", status: "coming_soon" as const },
         ],
       },
     ],
@@ -253,59 +293,68 @@ function SectionRow({
           className="border-t"
           style={{ borderColor: "#2a2a2a" }}
         >
-          {section.videos.map((video, idx) => (
-            <div
-              key={video.id}
-              className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-white/5"
-              style={{
-                borderBottom: idx < section.videos.length - 1 ? "1px solid #222" : "none",
-              }}
-            >
-              {/* Play / lock icon */}
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{
-                  background: video.status === "available" ? `${accentColor}20` : "rgba(255,255,255,0.04)",
-                }}
+          {section.videos.map((video, idx) => {
+            const rowStyle = {
+              borderBottom: idx < section.videos.length - 1 ? "1px solid #222" : "none",
+              textDecoration: "none" as const,
+            };
+            const rowClass = "flex items-center gap-3 px-5 py-3 transition-colors hover:bg-white/5";
+            const inner = (
+              <>
+                {/* Play / lock icon */}
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: video.status === "available" ? `${accentColor}20` : "rgba(255,255,255,0.04)" }}
+                >
+                  {video.status === "available" ? (
+                    <Play size={12} style={{ color: accentColor }} />
+                  ) : (
+                    <Lock size={11} className="text-gray-600" />
+                  )}
+                </div>
+                {/* Title */}
+                <span
+                  className="flex-1 text-sm"
+                  style={{ color: video.status === "available" ? "#e5e7eb" : "#6b7280" }}
+                >
+                  {video.title}
+                </span>
+                {/* Badge / arrow */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {video.duration && (
+                    <span className="text-[11px] text-gray-600">{video.duration}</span>
+                  )}
+                  {video.status === "coming_soon" && (
+                    <span
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      style={{ background: "rgba(255,255,255,0.05)", color: "#555", border: "1px solid #333" }}
+                    >
+                      Coming Soon
+                    </span>
+                  )}
+                  {video.status === "available" && (
+                    <ChevronRight size={14} style={{ color: accentColor }} />
+                  )}
+                </div>
+              </>
+            );
+            return video.loopUrl ? (
+              <a
+                key={video.id}
+                href={video.loopUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={rowClass}
+                style={rowStyle}
               >
-                {video.status === "available" ? (
-                  <Play size={12} style={{ color: accentColor }} />
-                ) : (
-                  <Lock size={11} className="text-gray-600" />
-                )}
+                {inner}
+              </a>
+            ) : (
+              <div key={video.id} className={rowClass} style={rowStyle}>
+                {inner}
               </div>
-
-              {/* Title */}
-              <span
-                className="flex-1 text-sm"
-                style={{ color: video.status === "available" ? "#e5e7eb" : "#6b7280" }}
-              >
-                {video.title}
-              </span>
-
-              {/* Duration + Coming Soon badge */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {video.duration && (
-                  <span className="text-[11px] text-gray-600">{video.duration}</span>
-                )}
-                {video.status === "coming_soon" && (
-                  <span
-                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                    style={{
-                      background: "rgba(255,255,255,0.05)",
-                      color: "#555",
-                      border: "1px solid #333",
-                    }}
-                  >
-                    Coming Soon
-                  </span>
-                )}
-                {video.status === "available" && (
-                  <ChevronRight size={14} className="text-gray-600" />
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

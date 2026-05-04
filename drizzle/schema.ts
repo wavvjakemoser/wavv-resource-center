@@ -60,6 +60,8 @@ export const lessons = mysqlTable("lessons", {
   durationMinutes: int("durationMinutes").default(0),
   sortOrder: int("sortOrder").default(0),
   published: boolean("published").default(true).notNull(),
+  // Admin-only: reason why content was deactivated (e.g. "Outdated", "Feature removed", "Needs update")
+  inactiveReason: varchar("inactiveReason", { length: 255 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

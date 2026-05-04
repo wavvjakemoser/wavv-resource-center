@@ -55,7 +55,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "users";
+type AdminTab = "analytics" | "users" | "content";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -67,7 +67,9 @@ export default function Admin() {
   const initialTab = (): AdminTab => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
-    return t === "users" ? "users" : "analytics";
+    if (t === "users") return "users";
+    if (t === "content") return "content";
+    return "analytics";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
@@ -75,7 +77,9 @@ export default function Admin() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
-    setActiveTab(t === "users" ? "users" : "analytics");
+    if (t === "users") setActiveTab("users");
+    else if (t === "content") setActiveTab("content");
+    else setActiveTab("analytics");
   }, [location]);
 
   if (!loading && user && user.role !== "admin") {
@@ -96,6 +100,7 @@ export default function Admin() {
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
     { id: "analytics", label: "Analytics", icon: <BarChart3 size={15} /> },
     { id: "users", label: "Users", icon: <Users size={15} /> },
+    { id: "content", label: "Content", icon: <BookOpen size={15} /> },
   ];
 
   return (
@@ -142,6 +147,7 @@ export default function Admin() {
         {/* ── Tab content ── */}
         {activeTab === "analytics" && <AnalyticsTab />}
         {activeTab === "users" && <UsersTab />}
+        {activeTab === "content" && <ContentTab />}
 
       </div>
     </PortalLayout>
@@ -663,4 +669,225 @@ function formatTimeAgo(date: Date | string): string {
   if (diffHr < 24) return `${diffHr}h ago`;
   const diffDays = Math.floor(diffHr / 24);
   return `${diffDays}d ago`;
+}
+
+// ─── Content Management Tab ───────────────────────────────────────────────────
+function ContentTab() {
+  const utils = trpc.useUtils();
+  const { data: lessons = [], isLoading } = trpc.academy.adminGetAllLessons.useQuery();
+  const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetAllLessons.invalidate();
+      toast.success("Content status updated");
+    },
+    onError: () => toast.error("Failed to update content status"),
+  });
+
+  const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
+  const [pendingLesson, setPendingLesson] = useState<{ id: number; title: string } | null>(null);
+  const [reasonInput, setReasonInput] = useState("");
+
+  const activeLessons = lessons.filter((l) => l.published);
+  const inactiveLessons = lessons.filter((l) => !l.published);
+
+  function handleDeactivate(lesson: { id: number; title: string }) {
+    setPendingLesson(lesson);
+    setReasonInput("");
+    setReasonDialogOpen(true);
+  }
+
+  function confirmDeactivate() {
+    if (!pendingLesson) return;
+    updateLesson.mutate({
+      id: pendingLesson.id,
+      data: {
+        published: false,
+        inactiveReason: reasonInput.trim() || null,
+      },
+    });
+    setReasonDialogOpen(false);
+    setPendingLesson(null);
+  }
+
+  function handleActivate(id: number) {
+    updateLesson.mutate({
+      id,
+      data: { published: true, inactiveReason: null },
+    });
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* ── Active content ── */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <h2 className="text-sm font-semibold text-white">
+            Active ({activeLessons.length})
+          </h2>
+          <span className="text-xs text-gray-500">Visible to users</span>
+        </div>
+        {activeLessons.length === 0 ? (
+          <p className="text-sm text-gray-600 py-4">No active lessons.</p>
+        ) : (
+          <div className="space-y-2">
+            {activeLessons.map((lesson) => (
+              <LessonRow
+                key={lesson.id}
+                lesson={lesson}
+                isActive
+                onDeactivate={() => handleDeactivate({ id: lesson.id, title: lesson.title })}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Inactive content ── */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2 h-2 rounded-full bg-gray-500" />
+          <h2 className="text-sm font-semibold text-white">
+            Inactive ({inactiveLessons.length})
+          </h2>
+          <span className="text-xs text-gray-500">Hidden from users</span>
+        </div>
+        {inactiveLessons.length === 0 ? (
+          <p className="text-sm text-gray-600 py-4">No inactive lessons.</p>
+        ) : (
+          <div className="space-y-2">
+            {inactiveLessons.map((lesson) => (
+              <LessonRow
+                key={lesson.id}
+                lesson={lesson}
+                isActive={false}
+                onActivate={() => handleActivate(lesson.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Deactivate reason dialog ── */}
+      <Dialog open={reasonDialogOpen} onOpenChange={setReasonDialogOpen}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Deactivate Content</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              <span className="font-medium text-gray-300">{pendingLesson?.title}</span> will be hidden from users.
+              Optionally add a reason so your team knows why it was pulled.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Input
+              placeholder="Reason (e.g. Outdated, Feature removed, Needs update)"
+              value={reasonInput}
+              onChange={(e) => setReasonInput(e.target.value)}
+              className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+              onKeyDown={(e) => e.key === "Enter" && confirmDeactivate()}
+            />
+            <p className="text-xs text-gray-600">Leave blank to deactivate without a reason.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setReasonDialogOpen(false)} className="text-gray-400">
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDeactivate}
+              style={{ background: "#ef4444" }}
+              className="text-white hover:opacity-90"
+            >
+              Deactivate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Lesson row sub-component ─────────────────────────────────────────────────
+function LessonRow({
+  lesson,
+  isActive,
+  onDeactivate,
+  onActivate,
+}: {
+  lesson: {
+    id: number;
+    title: string;
+    courseTitle?: string;
+    courseCategory?: string;
+    inactiveReason?: string | null;
+    videoUrl?: string | null;
+  };
+  isActive: boolean;
+  onDeactivate?: () => void;
+  onActivate?: () => void;
+}) {
+  return (
+    <div
+      className="flex items-center gap-3 px-4 py-3 rounded-xl"
+      style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+    >
+      {/* Status dot */}
+      <div
+        className="w-2 h-2 rounded-full flex-shrink-0"
+        style={{ background: isActive ? "#22c55e" : "#4b5563" }}
+      />
+
+      {/* Title + meta */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-white truncate">{lesson.title}</p>
+        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+          {lesson.courseTitle && (
+            <span className="text-[11px] text-gray-500">{lesson.courseTitle}</span>
+          )}
+          {lesson.courseCategory && (
+            <span
+              className="text-[10px] px-1.5 py-0.5 rounded-full"
+              style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #333" }}
+            >
+              {lesson.courseCategory}
+            </span>
+          )}
+          {!isActive && lesson.inactiveReason && (
+            <span
+              className="text-[10px] px-1.5 py-0.5 rounded-full"
+              style={{ background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
+            >
+              {lesson.inactiveReason}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Action button */}
+      {isActive ? (
+        <button
+          onClick={onDeactivate}
+          className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80"
+          style={{ background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
+        >
+          Deactivate
+        </button>
+      ) : (
+        <button
+          onClick={onActivate}
+          className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80"
+          style={{ background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }}
+        >
+          Activate
+        </button>
+      )}
+    </div>
+  );
 }
