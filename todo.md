@@ -197,3 +197,12 @@
 - [x] Add one-click role toggle (admin/user) with confirmation
 - [x] Add "Users" nav item under Admin section in sidebar (admin-only)
 - [x] Register /admin/users route in App.tsx
+
+## Academy Restructure + Sidebar Fix (Round 5)
+
+- [x] Fix sidebar: make left nav fixed/sticky so it does not scroll with page content
+- [x] Generate 3 WAVV-branded category thumbnails (Onboarding, How-To, Strategy & Best Practices)
+- [x] Restructure Academy to exactly 3 categories: Onboarding, How-To, Strategy & Best Practices
+- [x] Map all existing courses into the 3 categories
+- [x] Add Trending / Recommended placeholder section at bottom of Academy page
+- [x] Upload thumbnails to static assets and reference via CDN URL

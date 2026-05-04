@@ -97,7 +97,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     : "U";
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#121212", fontFamily: "'Inter', sans-serif" }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#121212", fontFamily: "'Inter', sans-serif" }}>
       {/* ── Demo Banner — ABOVE everything ── */}
       <div
         className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-center w-full flex-shrink-0"
@@ -124,7 +124,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
 
         {/* ── Sidebar ── */}
         <aside
-          className={`fixed top-0 left-0 h-full z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto ${
+          className={`fixed top-0 left-0 h-full z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto lg:h-full ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
@@ -132,6 +132,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             background: "#0d0d0d",
             borderRight: "1px solid #1e1e1e",
             flexShrink: 0,
+            overflowY: "auto",
           }}
         >
           {/* Logo — WAVV only */}
@@ -363,7 +364,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-y-auto">
             {children}
           </main>
         </div>

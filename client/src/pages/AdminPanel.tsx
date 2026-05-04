@@ -207,7 +207,7 @@ function AdminCourses() {
               className="px-3 py-2 rounded-lg text-sm text-white outline-none"
               style={{ background: "#111", border: "1px solid #333" }}
             >
-              {["Onboarding", "How-To", "Strategy and Best Practices", "Dialer Setup", "CRM Integrations", "Spam Protection"].map((c) => (
+              {["Onboarding", "How-To", "Strategy and Best Practices"].map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
@@ -239,7 +239,7 @@ function AdminCourses() {
               onClick={() => createMutation.mutate({
                 title: form.title,
                 description: form.description,
-                category: form.category as "Onboarding" | "How-To" | "Strategy and Best Practices" | "Dialer Setup" | "CRM Integrations" | "Spam Protection",
+                category: form.category as "Onboarding" | "How-To" | "Strategy and Best Practices",
                 durationMinutes: form.durationMinutes ? parseInt(form.durationMinutes) : undefined,
                 thumbnailUrl: form.thumbnailUrl || undefined,
                 sortOrder: parseInt(form.sortOrder),
