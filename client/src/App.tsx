@@ -15,6 +15,8 @@ import Support from "./pages/Support";
 import AdminPanel from "./pages/AdminPanel";
 import HandsOn from "./pages/HandsOn";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import { usePageTracking } from "./hooks/usePageTracking";
 
 function Router() {
@@ -22,6 +24,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/academy" component={Academy} />
       <Route path="/academy/:courseId" component={CourseDetail} />

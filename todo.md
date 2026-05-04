@@ -170,3 +170,20 @@
 
 - [x] Add Searches stat card to admin analytics dashboard
 - [x] Add page-view event tracking (client-side trackEvent on route changes)
+
+## Self-Contained Auth (Replace Manus OAuth)
+
+- [x] Add password_hash column to users table (migration) — already existed
+- [x] Build server-side register procedure (name, email, password → hashed, create user, set session)
+- [x] Build server-side login procedure (email, password → verify hash, set session) — already existed
+- [x] Build WAVV-branded Login page (email/password form, link to register)
+- [x] Build WAVV-branded Register page (name, email, password, confirm password)
+- [x] Update routing: replace Manus OAuth redirect with local login/register pages
+- [x] Update PortalLayout: remove Manus OAuth references, use local auth state
+- [x] Preserve admin role gating for analytics dashboard
+- [x] Session management via JWT cookie (same pattern, local credentials)
+
+## CSV Export for Admin Analytics
+
+- [x] Add CSV export button to admin analytics dashboard
+- [x] Export includes: event counts, sign-in trend, top content, summary stats

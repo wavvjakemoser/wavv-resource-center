@@ -29,6 +29,7 @@ import {
   Download,
   Ticket,
   ArrowLeft,
+  FileDown,
 } from "lucide-react";
 
 type TimeRange = 7 | 30 | 90 | 365;
@@ -73,20 +74,29 @@ export default function AdminAnalytics() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
-            {([7, 30, 90, 365] as TimeRange[]).map((d) => (
-              <button
-                key={d}
-                onClick={() => setDays(d)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${
-                  days === d
-                    ? "bg-cyan-500/20 text-cyan-400"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                {d === 365 ? "1Y" : `${d}D`}
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => exportCSV(days)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition"
+            >
+              <FileDown size={14} />
+              Export CSV
+            </button>
+            <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
+              {([7, 30, 90, 365] as TimeRange[]).map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDays(d)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${
+                    days === d
+                      ? "bg-cyan-500/20 text-cyan-400"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  {d === 365 ? "1Y" : `${d}D`}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -532,6 +542,28 @@ function formatEventType(type: string): string {
   return type
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+async function exportCSV(days: number) {
+  try {
+    const url = `/api/trpc/analytics.exportCSV?input=${encodeURIComponent(JSON.stringify({ json: { days } }))}`;
+    const res = await fetch(url, { credentials: "include" });
+    if (!res.ok) throw new Error("Export failed");
+    const json = await res.json();
+    // tRPC wraps the result in { result: { data: { json: "..." } } }
+    const csvText = json?.result?.data?.json ?? json?.result?.data ?? "";
+    const blob = new Blob([csvText], { type: "text/csv" });
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `wavv-analytics-${days}d-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    alert("Failed to export analytics. Please try again.");
+  }
 }
 
 function formatTimeAgo(date: Date | string): string {

@@ -489,6 +489,71 @@ const analyticsRouter = router({
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getRecentEvents(since, input.limit);
     }),
+
+  exportCSV: adminProcedure
+    .input(z.object({ days: z.number().min(1).max(365).default(30) }))
+    .query(async ({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      const [eventCounts, signInTrend, activeUsersData, topContentData, summary, rawEvents, allUsersData] = await Promise.all([
+        getEventCountsByType(since),
+        getSignInTrend(since),
+        getActiveUsers(since),
+        getTopContent(since, 50),
+        getAnalyticsSummary(),
+        getRecentEvents(since, 10000),
+        getAllUsers(),
+      ]);
+
+      // Build user ID → email lookup
+      const userMap = new Map<number, string>();
+      (allUsersData ?? []).forEach((u: { id: number; email: string | null }) => {
+        if (u.email) userMap.set(u.id, u.email);
+      });
+
+      const rows: string[] = [];
+
+      // ── Section 1: Summary ──
+      rows.push("=== SUMMARY ===");
+      rows.push("Section,Metric,Value,Period");
+      rows.push(`Summary,Total Users,${summary?.totalUsers ?? 0},all time`);
+      rows.push(`Summary,Active Users,${activeUsersData.count},last ${input.days}d`);
+      eventCounts.forEach((e) => {
+        const label = e.eventType.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+        rows.push(`Events,${label},${e.count},last ${input.days}d`);
+      });
+
+      // ── Section 2: Sign-in trend ──
+      rows.push("");
+      rows.push("=== SIGN-IN TREND ===");
+      rows.push("Date,Sign-Ins");
+      signInTrend.forEach((d) => rows.push(`${d.date},${d.count}`));
+
+      // ── Section 3: Top content ──
+      rows.push("");
+      rows.push("=== TOP CONTENT ===");
+      rows.push("Rank,Resource Type,Resource ID,Event Type,Count");
+      topContentData.forEach((item, idx) => {
+        const evtLabel = item.eventType.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+        rows.push(`${idx + 1},${item.resourceType ?? "unknown"},${item.resourceId ?? "-"},${evtLabel},${item.count}`);
+      });
+
+      // ── Section 4: Raw event log ──
+      rows.push("");
+      rows.push("=== RAW EVENT LOG ===");
+      rows.push("Timestamp,Event Type,User Email,Resource Type,Resource ID,Metadata");
+      rawEvents.forEach((evt) => {
+        const ts = evt.createdAt ? new Date(evt.createdAt).toISOString() : "";
+        const evtType = evt.eventType ?? "";
+        const userEmail = evt.userId ? (userMap.get(evt.userId) ?? `user_${evt.userId}`) : "anonymous";
+        const resType = evt.resourceType ?? "";
+        const resId = evt.resourceId != null ? String(evt.resourceId) : "";
+        // Escape metadata for CSV (wrap in quotes if it contains commas)
+        const meta = evt.metadata ? `"${String(evt.metadata).replace(/"/g, '""')}"` : "";
+        rows.push(`${ts},${evtType},${userEmail},${resType},${resId},${meta}`);
+      });
+
+      return rows.join("\n");
+    }),
 });
 
 // ─── Scheduled Task endpoint ──────────────────────────────────────────────────
@@ -538,6 +603,25 @@ export const appRouter = router({
         if (!valid) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
         }
+        const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        await trackEvent({ userId: user.id, eventType: "login" });
+        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+      }),
+
+    register: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        name: z.string().min(1).max(100),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const existing = await getUserByEmail(input.email.trim().toLowerCase());
+        if (existing) throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists. Please sign in instead." });
+        const passwordHash = await hashPassword(input.password);
+        const user = await createNativeUser({ email: input.email.trim().toLowerCase(), name: input.name.trim(), passwordHash, role: "user" });
+        // Auto-login after registration
         const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
