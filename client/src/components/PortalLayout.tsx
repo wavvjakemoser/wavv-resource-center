@@ -26,6 +26,7 @@ import {
   User,
   Users,
   BarChart3,
+  Shield,
 } from "lucide-react";
 
 const navItems = [
@@ -38,8 +39,7 @@ const navItems = [
 ];
 
 const adminNavItems = [
-  { href: "/admin?tab=analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/admin?tab=users", label: "Users", icon: Users },
+  { href: "/admin", label: "Admin", icon: Shield },
 ];
 
 interface PortalLayoutProps {
