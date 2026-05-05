@@ -62,6 +62,13 @@ function WebinarCard({
   // Use per-card color for evergreen, section default otherwise
   const accentColor = (variant === "evergreen" && webinar.accentColor) ? webinar.accentColor : SECTION_ACCENT[variant];
 
+  const SECTION_BG: Record<WebinarType, string> = {
+    evergreen: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-evergreen-2cPyRZRnXAqiyUHXfbDqdj.webp",
+    exclusive: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-7ryE8gMbUFrhcmd2J2aGvc.webp",
+    recording: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-recording-L6jvMn6pmLzQoDyrUJczvk.webp",
+  };
+  const thumbBg = webinar.thumbnailUrl || SECTION_BG[variant];
+
   return (
     <div
       className="flex flex-col rounded-xl overflow-hidden transition-all duration-200"
@@ -75,29 +82,46 @@ function WebinarCard({
         e.currentTarget.style.boxShadow = "none";
       }}
     >
-      {/* Header strip — clean gradient with title text */}
+      {/* Thumbnail with background image + centered title overlay */}
       <div
-        className="relative flex items-end flex-shrink-0 p-4"
+        className="relative flex-shrink-0 overflow-hidden"
         style={{
-          height: "100px",
-          background: `linear-gradient(135deg, ${accentColor}28 0%, ${accentColor}10 60%, #111 100%)`,
+          height: "120px",
           borderBottom: `1px solid ${accentColor}30`,
         }}
       >
+        {/* Background image */}
+        <img
+          src={thumbBg}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.85 }}
+        />
+        {/* Dark gradient overlay for legibility */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%)" }}
+        />
+        {/* View count badge */}
         {webinar.viewCount ? (
           <div
-            className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-            style={{ background: "rgba(0,0,0,0.5)", color: "#9ca3af" }}
+            className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs z-10"
+            style={{ background: "rgba(0,0,0,0.6)", color: "#d1d5db" }}
           >
             <Users size={10} /> {webinar.viewCount}
           </div>
         ) : null}
-        <h3
-          className="text-white font-bold text-sm leading-snug line-clamp-2"
-          style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
-        >
-          {webinar.title}
-        </h3>
+        {/* Centered title */}
+        <div className="absolute inset-0 flex items-center justify-center px-4 z-10">
+          <h3
+            className="text-white font-bold text-sm leading-snug text-center line-clamp-3"
+            style={{ textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}
+          >
+            {webinar.title}
+          </h3>
+        </div>
+        {/* Accent bottom bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: accentColor }} />
       </div>
 
       {/* Countdown bar — below thumbnail, not overlaid */}
