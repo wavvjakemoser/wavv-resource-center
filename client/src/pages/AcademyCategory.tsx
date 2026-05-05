@@ -187,7 +187,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "How-To",
     subtitle: "Step-by-step guides for every core WAVV feature.",
     color: "#00A9E2",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v4-iwUYTthWGbyxMoLnBdTybu.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v5-YVRgeeFs4sPRzvDVmBPSrE.webp",
     sections: [
       {
         id: "how-1",
@@ -253,7 +253,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Strategy & Best Practices",
     subtitle: "Maximize connection rates, conversions, and team performance.",
     color: "#67C728",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v5-QRzh8aYG4sozUwRU4Z7nuj.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v6-dNyH6Ejf6mvJv9uSkHT5jy.webp",
     sections: [
       {
         id: "str-1",

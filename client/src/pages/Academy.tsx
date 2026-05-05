@@ -57,7 +57,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step guides for core WAVV features",
     color: "#00A9E2",
     icon: Wrench,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v4-iwUYTthWGbyxMoLnBdTybu.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v5-YVRgeeFs4sPRzvDVmBPSrE.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -91,7 +91,7 @@ const CATEGORIES = [
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
     icon: Lightbulb,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v5-QRzh8aYG4sozUwRU4Z7nuj.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v6-dNyH6Ejf6mvJv9uSkHT5jy.webp",
     placeholders: [
       {
         id: "p-str-1",
@@ -390,9 +390,8 @@ export default function Academy() {
                   <img
                     src={cat.thumbnail}
                     alt={cat.label}
-                    className="absolute inset-0 w-full h-full object-contain object-center"
+                    className="absolute inset-0 w-full h-full object-cover object-center"
                     aria-hidden="true"
-                    style={{ background: "#0a0c12" }}
                   />
                   {/* Dark overlay — fades image into card background on both sides */}
                   <div

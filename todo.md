@@ -441,3 +441,8 @@
 
 ## Banner Sizing Fix
 - [x] Fix banner image sizing: all 3 banners must display at same zoom level as Onboarding (object-contain, fixed height, consistent across all categories)
+
+## Banner Style Match (v2)
+- [x] Regenerate How-To banner to exactly match Onboarding banner: same aspect ratio, same dark navy background, same large ghost text style, same neon icon placement, same font treatment
+- [x] Regenerate Strategy banner to exactly match Onboarding banner: same style as above
+- [x] Revert banner image rendering to object-cover so banners fill the space (not object-contain)
