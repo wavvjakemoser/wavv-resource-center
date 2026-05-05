@@ -9,8 +9,6 @@ import {
   ChevronRight,
   GraduationCap,
   Play,
-  TrendingUp,
-  Star,
   Lock,
   Rocket,
   Wrench,
@@ -133,45 +131,9 @@ const CATEGORIES = [
       },
     ],
   },
-] as const;
-
-// ─── Trending placeholder cards ───────────────────────────────────────────
-const TRENDING = [
-  {
-    id: "t-1",
-    title: "Welcome to WAVV — Platform Overview",
-    category: "Onboarding",
-    categoryColor: "#0074F4",
-    duration: "8 min",
-    views: 142,
-  },
-  {
-    id: "t-2",
-    title: "Using Call Boards Effectively",
-    category: "How-To",
-    categoryColor: "#00A9E2",
-    duration: "9 min",
-    views: 98,
-  },
-  {
-    id: "t-3",
-    title: "Building a High-Performance Dialing Cadence",
-    category: "Strategy & Best Practices",
-    categoryColor: "#67C728",
-    duration: "14 min",
-    views: 87,
-  },
-  {
-    id: "t-4",
-    title: "Number Rotation & SPAM Visibility",
-    category: "How-To",
-    categoryColor: "#00A9E2",
-    duration: "11 min",
-    views: 74,
-  },
 ];
 
-// ─── Course card (live data from DB) ─────────────────────────────────────
+// ─── Course card (live data from DB) ────────────────────────────────────────────────────
 function LiveCourseCard({
   course,
   accentColor,
@@ -453,63 +415,6 @@ export default function Academy() {
               </section>
             );
           })}
-
-        {/* ── Trending This Week ── */}
-        {!isLoading && (
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp size={18} style={{ color: "#FBBF24" }} />
-              <h2 className="text-base font-bold text-white">Trending This Week</h2>
-            </div>
-            <p className="text-gray-500 text-xs -mt-2">
-              Most-watched content across all WAVV Academy users this week.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {TRENDING.map((item, idx) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col rounded-xl p-4 opacity-75"
-                  style={{
-                    background: "#1a1a1a",
-                    border: "1px solid #2a2a2a",
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className="text-lg font-black"
-                      style={{ color: idx === 0 ? "#FBBF24" : "#444" }}
-                    >
-                      #{idx + 1}
-                    </span>
-                    <span
-                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-                      style={{
-                        background: `${item.categoryColor}20`,
-                        color: item.categoryColor,
-                      }}
-                    >
-                      {item.category}
-                    </span>
-                  </div>
-                  <h3 className="text-white text-xs font-semibold leading-snug mb-2 line-clamp-2">
-                    {item.title}
-                  </h3>
-                  <div className="mt-auto flex items-center justify-between text-[10px] text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <Clock size={10} />
-                      {item.duration}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Star size={10} />
-                      {item.views} views
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
       </div>
 
