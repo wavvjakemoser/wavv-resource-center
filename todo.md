@@ -370,3 +370,9 @@
 - [x] Webinars page: clicking a tab shows only that section's content
 - [x] Seed 8 evergreen webinar placeholders with rolling 30-min schedule (IDs 30006-30013)
 - [x] Evergreen cards: live countdown clock to next session start (updates every second, staggered per card)
+
+## Webinar Tab Reorder + Shared Countdown Fix
+- [x] Reorder Webinars tabs: Evergreen Webinars → Upcoming Exclusive Webinars → On-Demand Recordings
+- [x] Rename "Upcoming Exclusive" tab to "Upcoming Exclusive Webinars"
+- [x] Fix all 8 evergreen cards to share one unified countdown clock synced to :00 and :30 of each hour
+- [x] Removed per-card staggered countdown logic; all cards use sharedNextSession = nextHalfHour()

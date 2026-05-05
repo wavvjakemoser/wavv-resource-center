@@ -185,18 +185,21 @@ function WebinarCard({
 // ─── Main page ────────────────────────────────────────────────────────────────
 type WebinarSection = "exclusive" | "evergreen" | "recording";
 
+// Tab order: Evergreen → Exclusive → Recording
+const SECTION_ORDER: WebinarSection[] = ["evergreen", "exclusive", "recording"];
+
 const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactNode; accent: string; description: string }> = {
-  exclusive: {
-    label: "Upcoming Exclusive",
-    icon: <Star size={14} />,
-    accent: "#f59e0b",
-    description: "Single-topic, focused live sessions — limited availability",
-  },
   evergreen: {
     label: "Evergreen Webinars",
     icon: <RefreshCw size={14} />,
     accent: "#0074F4",
     description: "Always-on sessions running every 30 minutes — join anytime",
+  },
+  exclusive: {
+    label: "Upcoming Exclusive Webinars",
+    icon: <Star size={14} />,
+    accent: "#f59e0b",
+    description: "Single-topic, focused live sessions — limited availability",
   },
   recording: {
     label: "On-Demand Recordings",
@@ -217,18 +220,14 @@ function SectionSkeleton() {
 }
 
 export default function Webinars() {
-  const [activeSection, setActiveSection] = useState<WebinarSection>("exclusive");
+  const [activeSection, setActiveSection] = useState<WebinarSection>("evergreen");
 
   const { data: exclusiveWebinars, isLoading: loadingExclusive } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const { data: evergreenWebinars, isLoading: loadingEvergreen } = trpc.webinars.list.useQuery({ type: "evergreen" });
   const { data: recordings, isLoading: loadingRecordings } = trpc.webinars.list.useQuery({ type: "recording" });
 
-  // Stagger next-session times: each evergreen card gets its own 30-min slot
-  const baseNextSession = nextHalfHour();
-  const evergreenSessions = (evergreenWebinars ?? []).map((w, i) => ({
-    webinar: w,
-    nextSession: new Date(baseNextSession.getTime() + i * 30 * 60 * 1000),
-  }));
+  // All 8 evergreen cards share the same countdown — next :00 or :30 boundary
+  const sharedNextSession = nextHalfHour();
 
   const cfg = SECTION_CONFIG[activeSection];
 
@@ -259,7 +258,7 @@ export default function Webinars() {
 
         {/* ── Section tab bar ── */}
         <div className="flex gap-2 flex-wrap">
-          {(Object.entries(SECTION_CONFIG) as [WebinarSection, typeof cfg][]).map(([key, c]) => {
+          {(SECTION_ORDER.map(key => [key, SECTION_CONFIG[key]] as [WebinarSection, typeof cfg])).map(([key, c]) => {
             const isActive = activeSection === key;
             return (
               <button
@@ -305,10 +304,10 @@ export default function Webinars() {
 
         {activeSection === "evergreen" && (
           loadingEvergreen ? <SectionSkeleton /> :
-          evergreenSessions.length > 0 ? (
+          (evergreenWebinars ?? []).length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {evergreenSessions.map(({ webinar, nextSession }) => (
-                <WebinarCard key={webinar.id} webinar={webinar} variant="evergreen" nextSession={nextSession} />
+              {(evergreenWebinars ?? []).map((w) => (
+                <WebinarCard key={w.id} webinar={w} variant="evergreen" nextSession={sharedNextSession} />
               ))}
             </div>
           ) : (
