@@ -258,7 +258,7 @@ export default function Webinars() {
               <Video size={24} style={{ color: "#00A9E2" }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold mb-1" style={{ background: "linear-gradient(90deg, #0074F4, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>WAVV Webinars</h1>
+              <h1 className="text-xl font-bold mb-1" style={{ color: "#00A9E2" }}>WAVV Webinars</h1>
               <p className="text-gray-400 text-sm">
                 Join exclusive live sessions, drop into evergreen workshops, or watch on-demand recordings from the WAVV team.
               </p>

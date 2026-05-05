@@ -355,7 +355,7 @@ export default function Academy() {
               <GraduationCap size={24} style={{ color: "#0074F4" }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold mb-1" style={{ background: "linear-gradient(90deg, #0074F4, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>WAVV Academy</h1>
+              <h1 className="text-xl font-bold mb-1" style={{ color: "#0074F4" }}>WAVV Academy</h1>
               <p className="text-gray-400 text-sm max-w-xl">
                 Structured learning paths to help you and your team get the most out of WAVV.
                 Every lesson is designed to solve a specific problem — faster onboarding, higher
