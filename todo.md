@@ -547,3 +547,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin tabs: uniform size, font weight, padding across all tabs
 - [x] Each tab has a correctly matched icon (GraduationCap=Academy, Video=Webinars, FileText=Guides, FlaskConical=Playground, Headphones=Support, BarChart=Analytics, Users=Users, MessageSquare=Content Requests)
 - [x] Users tab: add UserCircle/person silhouette icon
+
+## Support Page Redesign (Round 2)
+
+- [x] Add "Chat with Support" as 3rd action card alongside Ask WAVV AI and Help Center
+- [x] Chat with Support card: opens Intercom widget on click (window.Intercom('show')); graceful fallback toast if not configured
+- [ ] Scaffold Intercom: load Intercom script via INTERCOM_APP_ID env var; wire into index.html or App.tsx — BLOCKED on INTERCOM_APP_ID credential
+- [ ] Add INTERCOM_APP_ID to secrets (blocked on credential — scaffold only)
+- [x] Consolidate My Tickets: replace large section + oversized empty state with compact inline bar (ticket count badge + New Ticket button)
+- [x] My Tickets compact bar: clicking ticket count or "View All" expands a collapsible list below

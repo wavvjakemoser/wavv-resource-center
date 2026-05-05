@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import {
   Headphones, Plus, ExternalLink, MessageSquare, Clock,
-  CheckCircle, AlertCircle, Sparkles, X
+  CheckCircle, AlertCircle, Sparkles, X, ChevronDown, ChevronUp, MessagesSquare
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,8 +33,19 @@ const PRIORITY_META: Record<string, { color: string }> = {
   urgent: { color: "#ef4444" },
 };
 
+// Intercom launcher — uses window.Intercom if the script is loaded, otherwise shows a toast
+function openIntercom() {
+  const w = window as unknown as { Intercom?: (cmd: string) => void };
+  if (typeof w.Intercom === "function") {
+    w.Intercom("show");
+  } else {
+    toast.info("Live chat coming soon — use the ticket form or Help Center in the meantime.");
+  }
+}
+
 export default function Support() {
   const [modalOpen, setModalOpen] = useState(false);
+  const [ticketsExpanded, setTicketsExpanded] = useState(false);
   const [form, setForm] = useState({
     subject: "",
     category: "General Question" as (typeof CATEGORIES)[number],
@@ -49,6 +60,7 @@ export default function Support() {
       setForm({ subject: "", category: "General Question", priority: "medium", description: "" });
       setModalOpen(false);
       refetchTickets();
+      setTicketsExpanded(true);
     },
     onError: () => {
       toast.error("Failed to submit ticket. Please try again.");
@@ -63,6 +75,9 @@ export default function Support() {
     }
     submitMutation.mutate(form);
   };
+
+  const ticketCount = tickets?.length ?? 0;
+  const openCount = tickets?.filter((t) => t.status === "open" || t.status === "in_progress").length ?? 0;
 
   return (
     <PortalLayout title="Support">
@@ -86,14 +101,15 @@ export default function Support() {
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#FF9900" }}>WAVV Support</h1>
               <p className="text-gray-400 text-sm">
-                Get help fast — search the knowledge base, ask WAVV AI, or submit a ticket and we'll get back to you.
+                Get help fast — ask WAVV AI, browse the knowledge base, or chat with the support team directly.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Quick action cards — 2 cards only */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Quick action cards — 3 cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
           {/* Ask WAVV AI */}
           <div
             className="flex items-start gap-3 p-4 rounded-xl transition-all cursor-pointer"
@@ -150,46 +166,85 @@ export default function Support() {
               </div>
             </div>
           </a>
+
+          {/* Chat with Support (Intercom) */}
+          <div
+            className="flex items-start gap-3 p-4 rounded-xl transition-all cursor-pointer"
+            style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "#67C728";
+              e.currentTarget.style.boxShadow = "0 4px 20px #67C72815";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "#2a2a2a";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+            onClick={openIntercom}
+          >
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#67C72820" }}>
+              <MessagesSquare size={18} style={{ color: "#67C728" }} />
+            </div>
+            <div>
+              <p className="text-white text-sm font-semibold">Chat with Support</p>
+              <p className="text-gray-500 text-xs mt-0.5">Talk to the WAVV team in real time</p>
+            </div>
+          </div>
+
         </div>
 
-        {/* My Tickets header + New Ticket button */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare size={16} style={{ color: "#FF9900" }} />
-            <h2 className="text-white font-semibold text-sm">
-              My Tickets {tickets && tickets.length > 0 ? `(${tickets.length})` : ""}
-            </h2>
-          </div>
+        {/* ── Compact My Tickets bar ── */}
+        <div
+          className="rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+        >
+          {/* Left: label + counts */}
+          <button
+            className="flex items-center gap-2 min-w-0 hover:opacity-80 transition-opacity"
+            onClick={() => setTicketsExpanded((v) => !v)}
+          >
+            <MessageSquare size={15} style={{ color: "#FF9900" }} />
+            <span className="text-white text-sm font-semibold">My Tickets</span>
+            {ticketCount > 0 && (
+              <span
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                style={{ background: "#FF990020", color: "#FF9900" }}
+              >
+                {ticketCount}
+              </span>
+            )}
+            {openCount > 0 && (
+              <span
+                className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                style={{ background: "#0074F420", color: "#0074F4" }}
+              >
+                {openCount} open
+              </span>
+            )}
+            {ticketCount === 0 && (
+              <span className="text-gray-600 text-xs">No tickets yet</span>
+            )}
+            {ticketCount > 0 && (
+              ticketsExpanded
+                ? <ChevronUp size={13} className="text-gray-500 ml-1" />
+                : <ChevronDown size={13} className="text-gray-500 ml-1" />
+            )}
+          </button>
+
+          {/* Right: New Ticket button */}
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90 flex-shrink-0"
             style={{ background: "linear-gradient(135deg, #FF9900, #ff7700)", color: "#fff" }}
           >
-            <Plus size={14} />
+            <Plus size={12} />
             New Ticket
           </button>
         </div>
 
-        {/* My Tickets list */}
-        <div className="space-y-3">
-          {!tickets || tickets.length === 0 ? (
-            <div className="text-center py-16">
-              <MessageSquare size={48} className="text-gray-700 mx-auto mb-4" />
-              <h3 className="text-white font-semibold mb-2">No tickets yet</h3>
-              <p className="text-gray-500 text-sm mb-4">
-                Need help? Submit a ticket and the WAVV team will get back to you.
-              </p>
-              <button
-                onClick={() => setModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
-                style={{ background: "linear-gradient(135deg, #FF9900, #ff7700)", color: "#fff" }}
-              >
-                <Plus size={14} />
-                Submit Your First Ticket
-              </button>
-            </div>
-          ) : (
-            tickets.map((ticket) => {
+        {/* Collapsible ticket list */}
+        {ticketsExpanded && ticketCount > 0 && (
+          <div className="space-y-3 -mt-3">
+            {tickets!.map((ticket) => {
               const statusMeta = STATUS_META[ticket.status] ?? STATUS_META.open;
               const priorityMeta = PRIORITY_META[ticket.priority] ?? PRIORITY_META.medium;
               return (
@@ -226,14 +281,16 @@ export default function Support() {
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
+
       </div>
 
       <ReadinessWidget page="support" />
+
       {/* Ticket form modal */}
-     {modalOpen && (
+      {modalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
@@ -273,7 +330,6 @@ export default function Support() {
                   onBlur={(e) => { e.target.style.borderColor = "#333"; }}
                 />
               </div>
-
               {/* Category + Priority */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -301,7 +357,6 @@ export default function Support() {
                   </select>
                 </div>
               </div>
-
               {/* Description */}
               <div>
                 <label className="block text-xs font-medium text-gray-400 mb-1.5">
@@ -318,7 +373,6 @@ export default function Support() {
                   onBlur={(e) => { e.target.style.borderColor = "#333"; }}
                 />
               </div>
-
               <div className="flex gap-3 pt-1">
                 <button
                   type="button"
