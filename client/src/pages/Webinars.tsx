@@ -76,10 +76,12 @@ function WebinarCard({
     >
       {/* Thumbnail / header strip */}
       <div
-        className="relative flex items-center justify-center"
+        className="relative flex items-center justify-center flex-shrink-0"
         style={{
-          height: "100px",
+          height: "140px",
           background: webinar.thumbnailUrl ? `url(${webinar.thumbnailUrl}) center/cover no-repeat` : `linear-gradient(135deg, ${accentColor}22, ${accentColor}08)`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
         {!webinar.thumbnailUrl && <Video size={28} className="text-gray-700" />}
@@ -230,7 +232,8 @@ export default function Webinars() {
   const { data: recordings, isLoading: loadingRecordings } = trpc.webinars.list.useQuery({ type: "recording" });
 
   // All 8 evergreen cards share the same countdown — next :00 or :30 boundary
-  const sharedNextSession = nextHalfHour();
+  // Use useState to stabilize reference and avoid infinite re-renders
+  const [sharedNextSession] = useState(() => nextHalfHour());
 
   const cfg = SECTION_CONFIG[activeSection];
 
