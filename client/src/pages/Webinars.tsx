@@ -103,40 +103,47 @@ function WebinarCard({
           className="absolute inset-0"
           style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%)" }}
         />
-        {/* View count badge */}
-        {webinar.viewCount ? (
-          <div
-            className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs z-10"
-            style={{ background: "rgba(0,0,0,0.6)", color: "#d1d5db" }}
-          >
-            <Users size={10} /> {webinar.viewCount}
-          </div>
-        ) : null}
-        {/* Centered title */}
+        {/* Centered title — only text shown on thumbnail */}
         <div className="absolute inset-0 flex items-center justify-center px-4 z-10">
           <h3
             className="text-white font-bold text-sm leading-snug text-center line-clamp-3"
-            style={{ textShadow: "0 1px 6px rgba(0,0,0,0.9)" }}
+            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.95)" }}
           >
             {webinar.title}
           </h3>
         </div>
-        {/* DEMO badge for placeholder content */}
+        {/* Red rubber-stamp DEMO overlay for placeholder content */}
         {isDemo && (
           <div
-            className="absolute top-2 left-2 z-20 px-2 py-0.5 rounded text-xs font-bold tracking-widest"
-            style={{
-              background: "rgba(255,180,0,0.15)",
-              color: "#FFB400",
-              border: "1px solid rgba(255,180,0,0.4)",
-              backdropFilter: "blur(4px)",
-            }}
+            className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"
+            style={{ transform: "rotate(-12deg)" }}
           >
-            DEMO
+            <div
+              style={{
+                border: "3px solid rgba(200,30,30,0.85)",
+                borderRadius: "4px",
+                padding: "4px 14px",
+                boxShadow: "inset 0 0 0 2px rgba(200,30,30,0.3)",
+                background: "rgba(180,20,20,0.08)",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'Impact', 'Arial Black', sans-serif",
+                  fontSize: "28px",
+                  fontWeight: 900,
+                  letterSpacing: "0.18em",
+                  color: "rgba(210,35,35,0.88)",
+                  textShadow: "1px 1px 0 rgba(180,20,20,0.4)",
+                  display: "block",
+                  lineHeight: 1,
+                }}
+              >
+                DEMO
+              </span>
+            </div>
           </div>
         )}
-        {/* Accent bottom bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: accentColor }} />
       </div>
 
       {/* Countdown bar — below thumbnail, not overlaid */}
