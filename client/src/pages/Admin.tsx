@@ -79,7 +79,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests";
+type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "notifications";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -98,6 +98,7 @@ export default function Admin() {
     if (t === "playground") return "playground";
     if (t === "support") return "support";
     if (t === "content_requests") return "content_requests";
+    if (t === "notifications") return "notifications";
     return "analytics";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
@@ -113,6 +114,7 @@ export default function Admin() {
     else if (t === "playground") setActiveTab("playground");
     else if (t === "support") setActiveTab("support");
     else if (t === "content_requests") setActiveTab("content_requests");
+    else if (t === "notifications") setActiveTab("notifications");
     else setActiveTab("analytics");
   }, [location]);
   if (!loading && user && user.role !== "admin" && user.role !== "super_admin") {
@@ -139,6 +141,7 @@ export default function Admin() {
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={16} /> },
     { id: "support",          label: "Support",           icon: <Headphones size={16} /> },
     { id: "content_requests", label: "Content Requests",  icon: <MessageSquare size={16} /> },
+    { id: "notifications",    label: "Notifications",     icon: <Bell size={16} /> },
   ];
 
   return (
@@ -186,6 +189,7 @@ export default function Admin() {
         {activeTab === "playground" && <PlaygroundTab />}
         {activeTab === "support" && <SupportTab />}
         {activeTab === "content_requests" && <ContentRequestsTab />}
+        {activeTab === "notifications" && <NotificationsTab />}
 
       </div>
     </PortalLayout>
@@ -2886,6 +2890,248 @@ function ContentRequestGroups({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ─── Notifications Tab ────────────────────────────────────────────────────────
+function NotificationsTab() {
+  const utils = trpc.useUtils();
+  const { data: notifications = [], isLoading } = trpc.admin.listNotifications.useQuery();
+  const { data: allUsers = [] } = trpc.admin.listUsers.useQuery();
+
+  const createMutation = trpc.admin.createNotification.useMutation({
+    onSuccess: () => {
+      toast.success("Notification sent");
+      utils.admin.listNotifications.invalidate();
+      setForm({ title: "", message: "", type: "info", userId: undefined, link: "", linkLabel: "" });
+      setShowForm(false);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const deleteMutation = trpc.admin.deleteNotification.useMutation({
+    onSuccess: () => {
+      toast.success("Notification deleted");
+      utils.admin.listNotifications.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState<{
+    title: string;
+    message: string;
+    type: "info" | "success" | "warning" | "announcement";
+    userId?: number;
+    link: string;
+    linkLabel: string;
+  }>({ title: "", message: "", type: "info", userId: undefined, link: "", linkLabel: "" });
+
+  const typeColors: Record<string, string> = {
+    info: "#38bdf8",
+    success: "#4ade80",
+    warning: "#fbbf24",
+    announcement: "#e879f9",
+  };
+
+  const handleSubmit = () => {
+    if (!form.title.trim() || !form.message.trim()) {
+      toast.error("Title and message are required");
+      return;
+    }
+    createMutation.mutate({
+      title: form.title.trim(),
+      message: form.message.trim(),
+      type: form.type,
+      userId: form.userId,
+      link: form.link.trim() || undefined,
+      linkLabel: form.linkLabel.trim() || undefined,
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-white">Notifications</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Push notifications to all users or specific individuals</p>
+        </div>
+        <Button
+          onClick={() => setShowForm((v) => !v)}
+          className="flex items-center gap-2 text-sm"
+          style={{ background: "#0074F4", color: "#fff" }}
+        >
+          <Plus size={14} />
+          {showForm ? "Cancel" : "New Notification"}
+        </Button>
+      </div>
+
+      {/* Create form */}
+      {showForm && (
+        <div className="rounded-xl p-5 space-y-4" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <h3 className="text-sm font-semibold text-white">Create Notification</h3>
+
+          {/* Type selector */}
+          <div className="flex gap-2 flex-wrap">
+            {(["info", "success", "warning", "announcement"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setForm((f) => ({ ...f, type: t }))}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-all"
+                style={{
+                  background: form.type === t ? typeColors[t] + "22" : "rgba(255,255,255,0.05)",
+                  color: form.type === t ? typeColors[t] : "#9ca3af",
+                  border: `1px solid ${form.type === t ? typeColors[t] + "55" : "transparent"}`,
+                }}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          {/* Audience */}
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Audience</label>
+            <select
+              className="w-full px-3 py-2 rounded-lg text-sm text-white"
+              style={{ background: "#111", border: "1px solid #2a2a2a" }}
+              value={form.userId ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, userId: e.target.value ? Number(e.target.value) : undefined }))}
+            >
+              <option value="">All users (broadcast)</option>
+              {allUsers.map((u: any) => (
+                <option key={u.id} value={u.id}>{u.name ?? u.email ?? `User #${u.id}`}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Title <span className="text-red-400">*</span></label>
+            <Input
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="e.g. New feature available"
+              className="bg-[#111] border-[#2a2a2a] text-white"
+            />
+          </div>
+
+          {/* Message */}
+          <div>
+            <label className="text-xs text-gray-400 mb-1 block">Message <span className="text-red-400">*</span></label>
+            <textarea
+              value={form.message}
+              onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+              placeholder="Notification body text..."
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white resize-none"
+              style={{ background: "#111", border: "1px solid #2a2a2a", outline: "none" }}
+            />
+          </div>
+
+          {/* Optional link */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Link URL (optional)</label>
+              <Input
+                value={form.link}
+                onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))}
+                placeholder="https://..."
+                className="bg-[#111] border-[#2a2a2a] text-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Link label (optional)</label>
+              <Input
+                value={form.linkLabel}
+                onChange={(e) => setForm((f) => ({ ...f, linkLabel: e.target.value }))}
+                placeholder="e.g. Learn more"
+                className="bg-[#111] border-[#2a2a2a] text-white"
+              />
+            </div>
+          </div>
+
+          <Button
+            onClick={handleSubmit}
+            disabled={createMutation.isPending}
+            className="w-full"
+            style={{ background: "#0074F4", color: "#fff" }}
+          >
+            {createMutation.isPending ? "Sending..." : "Send Notification"}
+          </Button>
+        </div>
+      )}
+
+      {/* Existing notifications list */}
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1a1a1a", borderBottom: "1px solid #2a2a2a" }}>
+          <span className="text-sm font-semibold text-white">Sent Notifications</span>
+          <span className="text-xs text-gray-500">{notifications.length} total</span>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-2">
+            <Bell size={28} className="text-gray-600" />
+            <p className="text-sm text-gray-400">No notifications sent yet.</p>
+          </div>
+        ) : (
+          <div>
+            {notifications.map((n: any) => (
+              <div
+                key={n.id}
+                className="flex items-start gap-3 px-4 py-3"
+                style={{ borderBottom: "1px solid #1e1e1e" }}
+              >
+                <span
+                  className="mt-0.5 w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ background: typeColors[n.type] ?? "#38bdf8", marginTop: "6px" }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-medium text-white">{n.title}</p>
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 rounded-full capitalize font-medium"
+                      style={{ background: (typeColors[n.type] ?? "#38bdf8") + "22", color: typeColors[n.type] ?? "#38bdf8" }}
+                    >
+                      {n.type}
+                    </span>
+                    {n.userId ? (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400">
+                        Targeted
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400">
+                        Broadcast
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">{n.message}</p>
+                  {n.link && (
+                    <a href={n.link} className="text-xs text-blue-400 mt-0.5 inline-block hover:text-blue-300">
+                      {n.linkLabel ?? n.link}
+                    </a>
+                  )}
+                  <p className="text-[10px] text-gray-600 mt-1">
+                    {new Date(n.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+                <button
+                  onClick={() => deleteMutation.mutate({ id: n.id })}
+                  className="p-1.5 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-colors flex-shrink-0"
+                  title="Delete notification"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
