@@ -334,3 +334,9 @@
 - [x] Replace bottom CTA banner with inline feature request form (name, email, playground interest, message)
 - [x] Add tRPC procedure for feature request submission (stores to DB + notifies owner)
 - [x] Add playground_requests table to schema (migration applied)
+
+## WAVV Playground Modal + Admin Dashboard
+- [x] Replace inline form with modal dialog (CTA button → popup form → submit)
+- [x] Clean up bottom section to simple headline + description + "Notify Me" button
+- [x] Add tRPC query for playground request analytics (total requests, per-playground breakdown, recent submissions)
+- [x] Add Playground tab in Admin.tsx with stats cards, bar chart, and request list table

@@ -789,3 +789,27 @@ export async function createPlaygroundRequest(data: {
     message: data.message ?? null,
   });
 }
+
+export async function getPlaygroundRequests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(playgroundRequests)
+    .orderBy(desc(playgroundRequests.createdAt));
+}
+
+export async function getPlaygroundStats() {
+  const db = await getDb();
+  if (!db) return { total: 0, byPlayground: [] as { playground: string; count: number }[] };
+  const rows = await db.select().from(playgroundRequests);
+  const total = rows.length;
+  const counts: Record<string, number> = {};
+  for (const r of rows) {
+    counts[r.playground] = (counts[r.playground] ?? 0) + 1;
+  }
+  const byPlayground = Object.entries(counts)
+    .map(([playground, count]) => ({ playground, count }))
+    .sort((a, b) => b.count - a.count);
+  return { total, byPlayground };
+}

@@ -61,10 +61,12 @@ import {
   Tag,
   FolderOpen,
   Layers,
+  FlaskConical,
+  Bell,
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "users" | "content";
+type AdminTab = "analytics" | "users" | "content" | "playground";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -78,6 +80,7 @@ export default function Admin() {
     const t = params.get("tab");
     if (t === "users") return "users";
     if (t === "content") return "content";
+    if (t === "playground") return "playground";
     return "analytics";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
@@ -88,6 +91,7 @@ export default function Admin() {
     const t = params.get("tab");
     if (t === "users") setActiveTab("users");
     else if (t === "content") setActiveTab("content");
+    else if (t === "playground") setActiveTab("playground");
     else setActiveTab("analytics");
   }, [location]);
 
@@ -110,6 +114,7 @@ export default function Admin() {
     { id: "analytics", label: "Analytics", icon: <BarChart3 size={15} /> },
     { id: "users", label: "Users", icon: <Users size={15} /> },
     { id: "content", label: "Content", icon: <BookOpen size={15} /> },
+    { id: "playground", label: "Playground", icon: <FlaskConical size={15} /> },
   ];
 
   return (
@@ -157,6 +162,7 @@ export default function Admin() {
         {activeTab === "analytics" && <AnalyticsTab />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "content" && <ContentTab />}
+        {activeTab === "playground" && <PlaygroundTab />}
 
       </div>
     </PortalLayout>
@@ -1567,6 +1573,160 @@ function LessonRow({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Playground Tab ───────────────────────────────────────────────────────────
+function PlaygroundTab() {
+  const { data: stats, isLoading: statsLoading } = trpc.playground.getStats.useQuery();
+  const { data: requests, isLoading: reqLoading } = trpc.playground.getRequests.useQuery();
+
+  const PLAYGROUND_COLORS: Record<string, string> = {
+    "WAVV Dialer Playground": "#0074F4",
+    "WAVV Call Boards Playground": "#00A9E2",
+    "WAVV Settings Playground": "#67C728",
+    "Other / General Feedback": "#a855f7",
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-base font-semibold text-white">Playground Dashboard</h2>
+
+      {/* ── Stats cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total requests */}
+        <div
+          className="rounded-xl p-4"
+          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Bell size={14} style={{ color: "#a855f7" }} />
+            <span className="text-xs text-gray-400 font-medium">Total Requests</span>
+          </div>
+          <p className="text-2xl font-bold text-white">
+            {statsLoading ? "—" : (stats?.total ?? 0)}
+          </p>
+        </div>
+
+        {/* Per-playground breakdown */}
+        {statsLoading
+          ? null
+          : (stats?.byPlayground ?? []).slice(0, 3).map((item) => (
+              <div
+                key={item.playground}
+                className="rounded-xl p-4"
+                style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <FlaskConical
+                    size={14}
+                    style={{ color: PLAYGROUND_COLORS[item.playground] ?? "#9ca3af" }}
+                  />
+                  <span className="text-xs text-gray-400 font-medium truncate" title={item.playground}>
+                    {item.playground.replace(" Playground", "").replace("WAVV ", "")}
+                  </span>
+                </div>
+                <p className="text-2xl font-bold text-white">{item.count}</p>
+                <p className="text-xs text-gray-600 mt-0.5">requests</p>
+              </div>
+            ))}
+      </div>
+
+      {/* ── Bar chart ── */}
+      {!statsLoading && (stats?.byPlayground ?? []).length > 0 && (
+        <div
+          className="rounded-xl p-5"
+          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+        >
+          <h3 className="text-sm font-semibold text-white mb-4">Requests by Playground</h3>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={stats!.byPlayground} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+              <XAxis
+                dataKey="playground"
+                tick={{ fill: "#9ca3af", fontSize: 10 }}
+                tickFormatter={(v: string) =>
+                  v.replace(" Playground", "").replace("WAVV ", "").replace("Other / General Feedback", "Other")
+                }
+              />
+              <YAxis tick={{ fill: "#9ca3af", fontSize: 10 }} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{ background: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "8px" }}
+                labelStyle={{ color: "#fff", fontSize: 12 }}
+                itemStyle={{ color: "#a855f7" }}
+              />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                {(stats?.byPlayground ?? []).map((entry) => (
+                  <Cell
+                    key={entry.playground}
+                    fill={PLAYGROUND_COLORS[entry.playground] ?? "#a855f7"}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* ── Requests table ── */}
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+      >
+        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-white">All Requests</h3>
+          <span className="text-xs text-gray-500">{requests?.length ?? 0} total</span>
+        </div>
+        {reqLoading ? (
+          <div className="flex items-center justify-center h-24">
+            <div className="animate-spin w-6 h-6 border-2 border-[#a855f7] border-t-transparent rounded-full" />
+          </div>
+        ) : !requests || requests.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <FlaskConical size={28} className="text-gray-600 mb-2" />
+            <p className="text-gray-500 text-sm">No requests yet</p>
+            <p className="text-gray-600 text-xs mt-1">Submissions will appear here once users click "Notify Me"</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow style={{ borderColor: "#2a2a2a" }}>
+                <TableHead className="text-gray-400 text-xs">Name</TableHead>
+                <TableHead className="text-gray-400 text-xs">Email</TableHead>
+                <TableHead className="text-gray-400 text-xs">Playground</TableHead>
+                <TableHead className="text-gray-400 text-xs">Notes</TableHead>
+                <TableHead className="text-gray-400 text-xs">Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {requests.map((req) => (
+                <TableRow key={req.id} style={{ borderColor: "#2a2a2a" }}>
+                  <TableCell className="text-white text-sm font-medium">{req.name}</TableCell>
+                  <TableCell className="text-gray-400 text-xs">{req.email}</TableCell>
+                  <TableCell>
+                    <span
+                      className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                      style={{
+                        background: `${PLAYGROUND_COLORS[req.playground] ?? "#a855f7"}20`,
+                        color: PLAYGROUND_COLORS[req.playground] ?? "#a855f7",
+                      }}
+                    >
+                      {req.playground.replace(" Playground", "").replace("WAVV ", "")}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-gray-500 text-xs max-w-xs truncate">
+                    {req.message ?? <span className="text-gray-700">—</span>}
+                  </TableCell>
+                  <TableCell className="text-gray-500 text-xs">
+                    {new Date(req.createdAt).toLocaleDateString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
     </div>
   );
 }

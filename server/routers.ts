@@ -62,6 +62,8 @@ import {
   removeBookmark,
   isBookmarked,
   createPlaygroundRequest,
+  getPlaygroundRequests,
+  getPlaygroundStats,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -792,6 +794,12 @@ export const appRouter = router({
       }),
   }),
   playground: router({
+    getRequests: adminProcedure.query(async () => {
+      return getPlaygroundRequests();
+    }),
+    getStats: adminProcedure.query(async () => {
+      return getPlaygroundStats();
+    }),
     submitRequest: protectedProcedure
       .input(z.object({
         name: z.string().min(1).max(255),

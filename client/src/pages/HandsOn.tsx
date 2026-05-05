@@ -2,7 +2,17 @@ import { useState } from "react";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { FlaskConical, Phone, LayoutDashboard, Settings, Lock, CheckCircle2, Send } from "lucide-react";
+import {
+  FlaskConical,
+  Phone,
+  LayoutDashboard,
+  Settings,
+  Lock,
+  CheckCircle2,
+  Send,
+  Bell,
+  X,
+} from "lucide-react";
 
 const PLAYGROUND_TOOLS = [
   {
@@ -32,12 +42,21 @@ const PLAYGROUND_OPTIONS = [
   "Other / General Feedback",
 ];
 
-export default function HandsOn() {
-  const { data: user } = trpc.auth.me.useQuery();
+function RequestModal({
+  open,
+  onClose,
+  userName,
+  userEmail,
+}: {
+  open: boolean;
+  onClose: () => void;
+  userName?: string | null;
+  userEmail?: string | null;
+}) {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
-    name: user?.name ?? "",
-    email: user?.email ?? "",
+    name: userName ?? "",
+    email: userEmail ?? "",
     playground: "",
     message: "",
   });
@@ -46,7 +65,7 @@ export default function HandsOn() {
   const submitMutation = trpc.playground.submitRequest.useMutation({
     onSuccess: () => {
       setSubmitted(true);
-      toast.success("Request submitted! We'll be in touch.");
+      toast.success("Request submitted! We'll notify you when it's ready.");
     },
     onError: (err) => {
       toast.error(err.message ?? "Submission failed. Please try again.");
@@ -64,7 +83,10 @@ export default function HandsOn() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
     setErrors({});
     submitMutation.mutate({
       name: form.name.trim(),
@@ -74,8 +96,20 @@ export default function HandsOn() {
     });
   }
 
-  const inputStyle = {
-    background: "#1a1a1a",
+  function handleClose() {
+    onClose();
+    // Reset after close animation
+    setTimeout(() => {
+      setSubmitted(false);
+      setForm({ name: userName ?? "", email: userEmail ?? "", playground: "", message: "" });
+      setErrors({});
+    }, 200);
+  }
+
+  if (!open) return null;
+
+  const inputStyle: React.CSSProperties = {
+    background: "#111",
     border: "1px solid #2a2a2a",
     color: "#fff",
     borderRadius: "8px",
@@ -83,9 +117,127 @@ export default function HandsOn() {
     fontSize: "13px",
     width: "100%",
     outline: "none",
-  } as React.CSSProperties;
+  };
 
-  const errorStyle = { color: "#f87171", fontSize: "11px", marginTop: "4px" };
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+    >
+      <div
+        className="relative w-full max-w-md rounded-2xl p-6 shadow-2xl"
+        style={{ background: "#161616", border: "1px solid rgba(168,85,247,0.25)" }}
+      >
+        {/* Close */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          <X size={18} />
+        </button>
+
+        {submitted ? (
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <CheckCircle2 size={44} style={{ color: "#67C728" }} />
+            <h3 className="text-white font-semibold text-lg">You're on the list!</h3>
+            <p className="text-gray-400 text-sm max-w-xs">
+              We'll notify you as soon as your selected playground is available.
+            </p>
+            <button
+              onClick={handleClose}
+              className="mt-3 px-5 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-2">
+                <Bell size={16} style={{ color: "#a855f7" }} />
+                <h3 className="text-white font-semibold text-base">Get Notified</h3>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Let us know which playground you'd like access to and we'll notify you when it's ready.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Name</label>
+                  <input
+                    type="text"
+                    placeholder="Your name"
+                    value={form.name}
+                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                    style={inputStyle}
+                  />
+                  {errors.name && <p className="text-red-400 text-[11px] mt-1">{errors.name}</p>}
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
+                  <input
+                    type="email"
+                    placeholder="you@company.com"
+                    value={form.email}
+                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                    style={inputStyle}
+                  />
+                  {errors.email && <p className="text-red-400 text-[11px] mt-1">{errors.email}</p>}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">Which Playground?</label>
+                <select
+                  value={form.playground}
+                  onChange={(e) => setForm((f) => ({ ...f, playground: e.target.value }))}
+                  style={{ ...inputStyle, appearance: "none" as const }}
+                >
+                  <option value="">Select a playground…</option>
+                  {PLAYGROUND_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+                {errors.playground && <p className="text-red-400 text-[11px] mt-1">{errors.playground}</p>}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                  Notes <span className="text-gray-600">(optional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="What would you like to practice or explore?"
+                  value={form.message}
+                  onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                  style={{ ...inputStyle, resize: "vertical" as const }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 mt-1"
+                style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+              >
+                <Send size={13} />
+                {submitMutation.isPending ? "Submitting…" : "Notify Me When Ready"}
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function HandsOn() {
+  const { data: user } = trpc.auth.me.useQuery();
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <PortalLayout title="WAVV Playground">
@@ -174,102 +326,39 @@ export default function HandsOn() {
           </div>
         </div>
 
-        {/* ── Feature Request Form ── */}
+        {/* ── CTA banner ── */}
         <div
-          className="rounded-2xl p-6 lg:p-8"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl px-6 py-5"
           style={{
-            background: "rgba(168,85,247,0.06)",
+            background: "rgba(168,85,247,0.07)",
             border: "1px solid rgba(168,85,247,0.18)",
           }}
         >
-          {submitted ? (
-            <div className="flex flex-col items-center gap-3 py-6 text-center">
-              <CheckCircle2 size={40} style={{ color: "#67C728" }} />
-              <h3 className="text-white font-semibold text-lg">Request Submitted</h3>
-              <p className="text-gray-400 text-sm max-w-md">
-                Thanks for your interest! Your WAVV team has been notified and will follow up with you.
-              </p>
-              <button
-                onClick={() => { setSubmitted(false); setForm({ name: user?.name ?? "", email: user?.email ?? "", playground: "", message: "" }); }}
-                className="mt-2 text-xs text-gray-500 underline hover:text-gray-300 transition-colors"
-              >
-                Submit another request
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="mb-5">
-                <h3 className="text-white font-semibold text-base mb-1">Interested in a WAVV Playground?</h3>
-                <p className="text-gray-500 text-sm">
-                  Let us know which playground you'd like access to and we'll notify you when it's ready.
-                </p>
-              </div>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Your Name</label>
-                    <input
-                      type="text"
-                      placeholder="Jake Moser"
-                      value={form.name}
-                      onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                      style={inputStyle}
-                    />
-                    {errors.name && <p style={errorStyle}>{errors.name}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Email Address</label>
-                    <input
-                      type="email"
-                      placeholder="you@company.com"
-                      value={form.email}
-                      onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                      style={inputStyle}
-                    />
-                    {errors.email && <p style={errorStyle}>{errors.email}</p>}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Which Playground Are You Interested In?</label>
-                  <select
-                    value={form.playground}
-                    onChange={(e) => setForm((f) => ({ ...f, playground: e.target.value }))}
-                    style={{ ...inputStyle, appearance: "none" as const }}
-                  >
-                    <option value="">Select a playground…</option>
-                    {PLAYGROUND_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                  {errors.playground && <p style={errorStyle}>{errors.playground}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Additional Notes <span className="text-gray-600">(optional)</span></label>
-                  <textarea
-                    rows={3}
-                    placeholder="Tell us what you'd like to practice or explore…"
-                    value={form.message}
-                    onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                    style={{ ...inputStyle, resize: "vertical" as const }}
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={submitMutation.isPending}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                    style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
-                  >
-                    <Send size={14} />
-                    {submitMutation.isPending ? "Submitting…" : "Submit Request"}
-                  </button>
-                </div>
-              </form>
-            </>
-          )}
+          <div>
+            <h3 className="text-white font-semibold text-sm mb-1">Interested in WAVV Playground?</h3>
+            <p className="text-gray-500 text-xs leading-relaxed max-w-md">
+              Let us know which playground you'd like access to and we'll notify you when it's ready.
+            </p>
+          </div>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+          >
+            <Bell size={14} />
+            Notify Me
+          </button>
         </div>
 
       </div>
+
+      {/* ── Modal ── */}
+      <RequestModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        userName={user?.name}
+        userEmail={user?.email}
+      />
     </PortalLayout>
   );
 }
