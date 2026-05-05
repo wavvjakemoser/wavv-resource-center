@@ -5,7 +5,7 @@ import {
   GraduationCap,
   Video,
   FileText,
-  LifeBuoy,
+  Headphones,
   ArrowRight,
   CheckCircle,
   Sparkles,
@@ -97,9 +97,9 @@ export default function Home() {
       color: "#a855f7",
     },
     {
-      icon: LifeBuoy,
+      icon: Headphones,
       label: "WAVV Support",
-      desc: "Submit tickets, book calls, or get instant answers from WAVV AI",
+      desc: "Submit a ticket, chat with support, or get instant answers from WAVV AI",
       color: "#FF9900",
     },
   ];
