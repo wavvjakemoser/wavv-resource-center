@@ -208,7 +208,7 @@ export default function GuidesAndDocs() {
 
       {/* ── Request a Written Guide ── */}
       <div className="px-4 lg:px-6 pb-10">
-        <ContentRequestCTA requestType="guide" accentColor="#00A9E2" />
+        <ContentRequestCTA requestType="guide" accentColor="#67C728" />
       </div>
     </PortalLayout>
   );

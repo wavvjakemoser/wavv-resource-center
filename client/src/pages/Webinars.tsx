@@ -349,7 +349,7 @@ export default function Webinars() {
 
       {/* ── Request a Webinar ── */}
       <div className="px-4 lg:px-6 pb-10">
-        <ContentRequestCTA requestType="webinar" accentColor="#67C728" />
+        <ContentRequestCTA requestType="webinar" accentColor="#00A9E2" />
       </div>
     </PortalLayout>
   );
