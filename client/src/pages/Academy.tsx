@@ -57,7 +57,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step guides for core WAVV features",
     color: "#00A9E2",
     icon: Wrench,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v3-QjwFLLxvyHT4K6FGdux3HN.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v4-iwUYTthWGbyxMoLnBdTybu.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -91,7 +91,7 @@ const CATEGORIES = [
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
     icon: Lightbulb,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v4-HDmSANa4baq3Su4Qaaewfw.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v5-QRzh8aYG4sozUwRU4Z7nuj.webp",
     placeholders: [
       {
         id: "p-str-1",
@@ -405,11 +405,9 @@ export default function Academy() {
                     className="absolute inset-0 pointer-events-none"
                     style={{ background: `radial-gradient(ellipse at 70% 50%, ${cat.color}18 0%, transparent 55%)` }}
                   />
-                  {/* Content */}
+                  {/* Content — badges only, title/subtitle are baked into the image */}
                   <div className="relative flex items-center px-8 py-10">
                     <div className="flex flex-col gap-3">
-                      <h2 className="text-2xl font-bold text-white tracking-tight">{cat.label}</h2>
-                      <p className="text-sm text-gray-300 max-w-xs leading-snug">{cat.subtitle}</p>
                       {(() => {
                         const counts = STATIC_COUNTS[cat.key];
                         if (!counts) return null;
