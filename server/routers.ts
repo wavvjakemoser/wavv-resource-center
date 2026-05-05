@@ -202,6 +202,8 @@ const academyRouter = router({
           inactiveReason: z.string().nullable().optional(),
           tags: z.string().nullable().optional(),
           fileUrl: z.string().nullable().optional(),
+          starred: z.boolean().optional(),
+          hidden: z.boolean().optional(),
         }),
       })
     )

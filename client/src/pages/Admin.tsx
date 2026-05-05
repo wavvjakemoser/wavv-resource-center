@@ -40,8 +40,9 @@ import {
 import {
   BarChart3,
   Users,
+  UserCircle,
   LogIn,
-  BookOpen,
+  GraduationCap,
   MessageSquare,
   Search,
   TrendingUp,
@@ -68,10 +69,12 @@ import {
   Plus,
   Trash2,
   ExternalLink,
-  HeadphonesIcon,
+  Headphones,
   AlertCircle,
   Clock,
   CheckCircle2,
+  Star,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -127,14 +130,14 @@ export default function Admin() {
   }
 
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
-    { id: "analytics", label: "Advanced Analytics", icon: <BarChart3 size={15} /> },
-    { id: "users", label: "Users", icon: <Users size={15} /> },
-    { id: "academy", label: "WAVV Academy", icon: <BookOpen size={15} /> },
-    { id: "webinars", label: "WAVV Webinars", icon: <Video size={15} /> },
-    { id: "guides", label: "WAVV Guides & Docs", icon: <FileText size={15} /> },
-    { id: "playground", label: "WAVV Playground", icon: <FlaskConical size={15} /> },
-    { id: "support", label: "WAVV Support", icon: <HeadphonesIcon size={15} /> },
-    { id: "content_requests", label: "Content Requests", icon: <Bell size={15} /> },
+    { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={16} /> },
+    { id: "users",            label: "Users",             icon: <UserCircle size={16} /> },
+    { id: "academy",          label: "Academy",           icon: <GraduationCap size={16} /> },
+    { id: "webinars",         label: "Webinars",          icon: <Video size={16} /> },
+    { id: "guides",           label: "Guides & Docs",     icon: <FileText size={16} /> },
+    { id: "playground",       label: "Playground",        icon: <FlaskConical size={16} /> },
+    { id: "support",          label: "Support",           icon: <Headphones size={16} /> },
+    { id: "content_requests", label: "Content Requests",  icon: <MessageSquare size={16} /> },
   ];
 
   return (
@@ -153,23 +156,18 @@ export default function Admin() {
 
         {/* ── Tab bar ── */}
         <div
-          className="flex items-center gap-1 p-1 rounded-xl w-fit"
+          className="flex flex-wrap items-center gap-1 p-1 rounded-xl"
           style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
         >
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
               style={
                 activeTab === tab.id
-                  ? {
-                      background: "#0074F4",
-                      color: "#fff",
-                    }
-                  : {
-                      color: "#9ca3af",
-                    }
+                  ? { background: "#0074F4", color: "#fff" }
+                  : { color: "#9ca3af" }
               }
             >
               {tab.icon}
@@ -302,7 +300,7 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
       </div>
       {/* Row 2 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<BookOpen size={18} />} label="Lessons Completed" value={stats?.lessonCompleted ?? 0} color="emerald" subtitle={`last ${days}d`} />
+        <StatCard icon={<GraduationCap size={18} />} label="Lessons Completed" value={stats?.lessonCompleted ?? 0} color="emerald" subtitle={`last ${days}d`} />
         <StatCard icon={<Eye size={18} />} label="Webinars Watched" value={stats?.webinarWatched ?? 0} color="amber" subtitle={`last ${days}d`} />
         <StatCard icon={<Download size={18} />} label="Guide Downloads" value={stats?.guideDownloaded ?? 0} color="teal" subtitle={`last ${days}d`} />
         <StatCard icon={<Ticket size={18} />} label="Tickets Submitted" value={stats?.ticketsSubmitted ?? 0} color="red" subtitle={`last ${days}d`} />
@@ -1336,6 +1334,8 @@ function LessonRow({
     videoUrl?: string | null;
     fileUrl?: string | null;
     tags?: string | null;
+    starred?: boolean | null;
+    hidden?: boolean | null;
   };
   isActive: boolean;
   onDeactivate?: () => void;
@@ -1348,6 +1348,8 @@ function LessonRow({
   const [editFileUrl, setEditFileUrl] = React.useState(lesson.fileUrl ?? "");
   const [activeTags, setActiveTags] = React.useState<string[]>(() => parseTagList(lesson.tags));
   const [customTagInput, setCustomTagInput] = React.useState("");
+  const [isStarred, setIsStarred] = React.useState(!!lesson.starred);
+  const [isHidden, setIsHidden] = React.useState(!!lesson.hidden);
   const utils = trpc.useUtils();
 
   const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
@@ -1357,6 +1359,18 @@ function LessonRow({
       setEditing(false);
     },
     onError: () => toast.error("Failed to update lesson"),
+  });
+
+  const toggleStar = trpc.academy.adminUpdateLesson.useMutation({
+    onMutate: () => setIsStarred((v) => !v),
+    onError: () => { setIsStarred((v) => !v); toast.error("Failed to update star"); },
+    onSuccess: () => utils.academy.adminGetAllLessons.invalidate(),
+  });
+
+  const toggleHide = trpc.academy.adminUpdateLesson.useMutation({
+    onMutate: () => setIsHidden((v) => !v),
+    onError: () => { setIsHidden((v) => !v); toast.error("Failed to update visibility"); },
+    onSuccess: () => utils.academy.adminGetAllLessons.invalidate(),
   });
 
   const handleSave = () => {
@@ -1556,6 +1570,24 @@ function LessonRow({
                   </span>
                 );
               })}
+              {/* Starred indicator */}
+              {isStarred && (
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1"
+                  style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
+                >
+                  <Star size={9} fill="#fbbf24" /> Starred
+                </span>
+              )}
+              {/* Hidden indicator */}
+              {isHidden && (
+                <span
+                  className="text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1"
+                  style={{ background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
+                >
+                  <EyeOff size={9} /> Hidden
+                </span>
+              )}
               {/* File URL indicator */}
               {lesson.fileUrl && (
                 <span
@@ -1576,6 +1608,32 @@ function LessonRow({
             title="Edit title / description"
           >
             <Pencil size={13} />
+          </button>
+          {/* Star toggle */}
+          <button
+            onClick={() => toggleStar.mutate({ id: lesson.id, data: { starred: !isStarred } })}
+            disabled={toggleStar.isPending}
+            className="flex-shrink-0 p-1.5 rounded-lg transition hover:opacity-80 disabled:opacity-50"
+            style={isStarred
+              ? { background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.35)" }
+              : { background: "rgba(255,255,255,0.05)", color: "#4b5563", border: "1px solid #2a2a2a" }
+            }
+            title={isStarred ? "Unstar lesson" : "Star lesson (featured)"}
+          >
+            <Star size={13} fill={isStarred ? "#fbbf24" : "none"} />
+          </button>
+          {/* Hide toggle */}
+          <button
+            onClick={() => toggleHide.mutate({ id: lesson.id, data: { hidden: !isHidden } })}
+            disabled={toggleHide.isPending}
+            className="flex-shrink-0 p-1.5 rounded-lg transition hover:opacity-80 disabled:opacity-50"
+            style={isHidden
+              ? { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }
+              : { background: "rgba(255,255,255,0.05)", color: "#4b5563", border: "1px solid #2a2a2a" }
+            }
+            title={isHidden ? "Show lesson (currently hidden)" : "Hide lesson from users"}
+          >
+            <EyeOff size={13} />
           </button>
           {/* Activate / Deactivate */}
           {isActive ? (
@@ -2158,7 +2216,7 @@ function SupportSection() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <HeadphonesIcon size={16} style={{ color: "#0074F4" }} />
+        <Headphones size={16} style={{ color: "#0074F4" }} />
         <h3 className="text-sm font-semibold text-white">Support Tickets</h3>
         {openCount > 0 && (
           <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(239,68,68,0.15)", color: "#f87171" }}>
@@ -2194,7 +2252,7 @@ function SupportSection() {
           <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
         ) : tickets.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <HeadphonesIcon size={28} className="text-gray-600 mb-2" />
+            <Headphones size={28} className="text-gray-600 mb-2" />
             <p className="text-gray-500 text-sm">No tickets yet</p>
           </div>
         ) : (
@@ -2254,7 +2312,7 @@ function SupportTab() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
-          <HeadphonesIcon size={18} style={{ color: "#0074F4" }} />
+          <Headphones size={18} style={{ color: "#0074F4" }} />
         </div>
         <div>
           <h2 className="text-base font-bold text-white">WAVV Support</h2>

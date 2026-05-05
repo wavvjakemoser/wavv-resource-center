@@ -531,3 +531,19 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Hover expands to full checklist with checkboxes, page label, and color-coded progress bar
 - [x] Admin-only: hidden from non-admin users via useAuth() role check
 - [x] Add widget to Academy, Webinars, GuidesAndDocs, HandsOn, Support pages
+
+## Admin Academy Tab Cleanup + Loom Embedding
+
+- [x] Remove duplicate "Voicemails" lesson from How-To course (keep 1, delete duplicate)
+- [x] Consolidate course display in Admin to exactly 3 sections: Onboarding, How-To, Strategy & Best Practices
+- [x] Admin Academy tab: tree view grouped by section → course → lesson
+- [x] Per-lesson controls: edit video URL, add/edit tags, toggle hidden/visible, toggle starred
+- [x] Per-course controls: edit title, description, reorder, hide/show
+- [ ] Loom embed: update lesson viewer to embed Loom iframes (not redirect links) — BLOCKED on URLs from Jake
+- [ ] Wire all Loom URLs into lessons once provided
+
+## Admin Panel Tab Polish
+
+- [x] Admin tabs: uniform size, font weight, padding across all tabs
+- [x] Each tab has a correctly matched icon (GraduationCap=Academy, Video=Webinars, FileText=Guides, FlaskConical=Playground, Headphones=Support, BarChart=Analytics, Users=Users, MessageSquare=Content Requests)
+- [x] Users tab: add UserCircle/person silhouette icon

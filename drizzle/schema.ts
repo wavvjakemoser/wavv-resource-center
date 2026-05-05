@@ -68,6 +68,12 @@ export const lessons = mysqlTable("lessons", {
   inactiveReason: varchar("inactiveReason", { length: 255 }),
   // Admin-applied tags, comma-separated (e.g. "Most Popular,Must Watch,New")
   tags: text("tags"),
+  // Admin star: marks lesson as featured/starred in the Academy
+  starred: boolean("starred").default(false).notNull(),
+  // Admin hide: quick visibility toggle (separate from published/deactivate flow)
+  hidden: boolean("hidden").default(false).notNull(),
+  // Admin-set file URL for downloadable resources (PDF, etc.)
+  fileUrl: text("fileUrl"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
