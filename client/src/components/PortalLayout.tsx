@@ -6,6 +6,7 @@ import AISearchBar from "./AISearchBar";
 import MedalCase from "./MedalCase";
 import {
   BookOpen,
+  GraduationCap,
   Video,
   FileText,
   LifeBuoy,
@@ -31,7 +32,7 @@ import {
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/academy", label: "WAVV Academy", icon: BookOpen },
+  { href: "/academy", label: "WAVV Academy", icon: GraduationCap },
   { href: "/webinars", label: "WAVV Webinars", icon: Video },
   { href: "/guides", label: "WAVV Guides & Docs", icon: FileText },
   { href: "/hands-on", label: "WAVV Playground", icon: FlaskConical },

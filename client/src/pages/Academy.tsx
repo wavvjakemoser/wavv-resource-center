@@ -18,6 +18,8 @@ import {
   Send,
   CheckCircle2,
   Sparkles,
+  GraduationCap as GradCap,
+  FileText,
 } from "lucide-react";
 import {
   Dialog,
@@ -529,6 +531,8 @@ export function ContentRequestCTA({
   const [open, setOpen] = useState(false);
   const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#67C728");
   const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
+  // Match the sidebar emblem for each section
+  const CtaIcon = requestType === "video" ? GradCap : requestType === "guide" ? FileText : Video;
   const tagline = requestType === "video"
     ? "Don't see what you need? Help us build what matters most to you."
     : requestType === "guide"
@@ -543,7 +547,7 @@ export function ContentRequestCTA({
       >
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl flex-shrink-0" style={{ background: `${accent}18` }}>
-            <Sparkles size={18} style={{ color: accent }} />
+            <CtaIcon size={18} style={{ color: accent }} />
           </div>
           <div>
             <p className="text-white font-semibold text-sm">Request a {typeLabel}</p>
