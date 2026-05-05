@@ -424,3 +424,8 @@
 ## Academy Banner Fixes
 - [x] Remove small icon badge overlays from Academy category banners (rocket/wrench/lightbulb icons)
 - [x] Fix gray/green right-side bleed on How-To and Strategy banners — add dark fade overlay so image blends into card background
+
+## Academy Banner Regeneration
+- [x] Regenerate How-To banner: neon wrench icon only, no baked-in text, dark background, matches Onboarding banner style
+- [x] Regenerate Strategy banner: neon lightbulb icon only, no baked-in text, dark background, matches Onboarding banner style
+- [x] Upload and update Academy.tsx with new banner paths

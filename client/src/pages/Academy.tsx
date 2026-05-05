@@ -57,7 +57,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step guides for core WAVV features",
     color: "#00A9E2",
     icon: Wrench,
-    thumbnail: "/manus-storage/banner-howto-v2_9c54c4b2.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v3-QjwFLLxvyHT4K6FGdux3HN.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -91,7 +91,7 @@ const CATEGORIES = [
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
     icon: Lightbulb,
-    thumbnail: "/manus-storage/banner-strategy-v3_188b3d6c.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v4-HDmSANa4baq3Su4Qaaewfw.webp",
     placeholders: [
       {
         id: "p-str-1",
