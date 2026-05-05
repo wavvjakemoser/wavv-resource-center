@@ -390,8 +390,8 @@ export default function HandsOn() {
           </div>
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-black transition-all hover:opacity-90 flex-shrink-0"
-            style={{ background: "#67C728" }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
           >
             <Bell size={14} />
             Notify Me
