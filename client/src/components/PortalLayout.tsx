@@ -175,7 +175,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 );
               })}
               {/* Admin-only nav items */}
-              {user?.role === "admin" && (
+              {(user?.role === "admin" || user?.role === "super_admin") && (
                 <div className="mt-4 pt-4" style={{ borderTop: "1px solid #1e1e1e" }}>
                   <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Admin</p>
                   {adminNavItems.map((item) => {
