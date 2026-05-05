@@ -61,6 +61,7 @@ import {
   addBookmark,
   removeBookmark,
   isBookmarked,
+  createPlaygroundRequest,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -788,6 +789,29 @@ export const appRouter = router({
         const { url } = await storagePut(key, buffer, input.mimeType);
         await updateUserAvatar(ctx.user.id, url);
         return { url };
+      }),
+  }),
+  playground: router({
+    submitRequest: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(255),
+        email: z.string().email().max(320),
+        playground: z.string().min(1).max(255),
+        message: z.string().max(2000).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await createPlaygroundRequest({
+          userId: ctx.user.id,
+          name: input.name,
+          email: input.email,
+          playground: input.playground,
+          message: input.message ?? null,
+        });
+        await notifyOwner({
+          title: `New Playground Request: ${input.playground}`,
+          content: `From: ${input.name} (${input.email})\nPlayground: ${input.playground}\nMessage: ${input.message ?? "(none)"}`,
+        });
+        return { success: true };
       }),
   }),
   bookmarks: router({

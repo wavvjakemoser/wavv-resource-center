@@ -8,6 +8,7 @@ import {
   InsertUser,
   lessonProgress,
   lessons,
+  playgroundRequests,
   supportTickets,
   users,
   webinarRegistrations,
@@ -768,4 +769,23 @@ export async function isBookmarked(userId: number, contentType: string, contentI
     .from(bookmarks)
     .where(and(eq(bookmarks.userId, userId), eq(bookmarks.contentType, contentType), eq(bookmarks.contentId, contentId)));
   return rows.length > 0;
+}
+
+// ─── Playground Requests ──────────────────────────────────────────────────────
+export async function createPlaygroundRequest(data: {
+  userId?: number | null;
+  name: string;
+  email: string;
+  playground: string;
+  message?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(playgroundRequests).values({
+    userId: data.userId ?? null,
+    name: data.name,
+    email: data.email,
+    playground: data.playground,
+    message: data.message ?? null,
+  });
 }

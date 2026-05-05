@@ -179,3 +179,15 @@ export const bookmarks = mysqlTable("bookmarks", {
 });
 
 export type Bookmark = typeof bookmarks.$inferSelect;
+
+// ─── Playground Feature Requests ───────────────────────────────────────────────
+export const playgroundRequests = mysqlTable("playground_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  playground: varchar("playground", { length: 255 }).notNull(),
+  message: text("message"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PlaygroundRequest = typeof playgroundRequests.$inferSelect;

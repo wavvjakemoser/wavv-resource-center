@@ -325,3 +325,12 @@
 - [x] Fix Academy.tsx banner count badges to use static CATEGORY_DATA counts (3 sections, 8 videos for Strategy)
 - [x] Fix AcademyCategory.tsx static data: removed duplicate str-3-4, replaced str-3-5b with Intermediate Foundational Setup
 - [x] Fix Admin panel: canonical course filter per category; Spam Protection moves to Legacy/Extra block
+
+## WAVV Playground Update
+- [x] Rename "Hands-On Sandbox" page title to "WAVV Playground"
+- [x] Update sidebar nav label from "Hands-On" to "WAVV Playground" (already was set)
+- [x] Change section header from "PLANNED SANDBOX TOOLS" to "PLANNED WAVV PLAYGROUNDS"
+- [x] Replace 4 cards with 3: WAVV Dialer Playground, WAVV Call Boards Playground, WAVV Settings Playground
+- [x] Replace bottom CTA banner with inline feature request form (name, email, playground interest, message)
+- [x] Add tRPC procedure for feature request submission (stores to DB + notifies owner)
+- [x] Add playground_requests table to schema (migration applied)
