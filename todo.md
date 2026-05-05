@@ -506,3 +506,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Enlarge DEMO stamp on Playground tiles to cover the full tile
 - [x] Swap Support sidebar icon from current to Headphones (lucide Headphones)
 - [x] Swap Support page header icon to Headphones as well
+
+## DEMO Stamp Softening
+
+- [x] Webinars: DEMO stamp default 40% opacity, hover fades to 15% (200ms ease)
+- [x] GuidesAndDocs: DEMO stamp default 40% opacity, hover fades to 15% (200ms ease)
+- [x] HandsOn (Playground): DEMO stamp default 40% opacity, hover fades to 15% (200ms ease)

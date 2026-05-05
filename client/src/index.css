@@ -194,3 +194,7 @@
     }
   }
 }
+/* DEMO stamp: soften on parent hover */
+.relative:hover .demo-stamp-overlay {
+  opacity: 0.15 !important;
+}

@@ -103,14 +103,14 @@ function WebinarCard({
         {/* Red rubber-stamp DEMO overlay for placeholder content */}
         {isDemo && (
           <div
-            className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"
+            className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none demo-stamp-overlay"
+            style={{ opacity: 0.4, transition: "opacity 200ms ease" }}
           >
             <div
               style={{
                 border: "4px double #cc0000",
                 borderRadius: "4px",
                 padding: "10px 28px",
-                opacity: 0.85,
                 transform: "rotate(-12deg)",
               }}
             >

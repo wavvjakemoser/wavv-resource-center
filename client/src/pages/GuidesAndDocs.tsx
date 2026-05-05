@@ -64,7 +64,6 @@ export default function GuidesAndDocs() {
             </div>
           </div>
         </div>
-
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div
@@ -128,14 +127,14 @@ export default function GuidesAndDocs() {
                 >
                   {/* Full-tile DEMO stamp */}
                   <div
-                    className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none rounded-xl overflow-hidden"
+                    className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none rounded-xl overflow-hidden demo-stamp-overlay"
+                    style={{ opacity: 0.4, transition: "opacity 200ms ease" }}
                   >
                     <div
                       style={{
                         border: "4px double #cc0000",
                         padding: "10px 28px",
                         borderRadius: "4px",
-                        opacity: 0.85,
                         transform: "rotate(-12deg)",
                       }}
                     >
