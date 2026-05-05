@@ -251,35 +251,7 @@ export default function HandsOn() {
                     opacity: 0.85,
                   }}
                 >
-                  {/* Full-tile DEMO stamp */}
-                  <div
-                    className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none demo-stamp-overlay"
-                    style={{ opacity: 0.4, transition: "opacity 200ms ease" }}
-                  >
-                    <div
-                      style={{
-                        border: "4px double #cc0000",
-                        borderRadius: "4px",
-                        padding: "8px 22px",
-                        transform: "rotate(-12deg)",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "Impact, 'Arial Black', sans-serif",
-                          fontSize: "2.6rem",
-                          fontWeight: 900,
-                          letterSpacing: "0.12em",
-                          color: "#cc0000",
-                          textShadow: "1px 1px 0 #8b000040",
-                          display: "block",
-                          lineHeight: 1,
-                        }}
-                      >
-                        DEMO
-                      </span>
-                    </div>
-                  </div>
+
                   <div className="flex items-center gap-3">
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
