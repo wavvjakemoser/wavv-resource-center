@@ -13,6 +13,7 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  FlaskConical,
 } from "lucide-react";
 
 export default function Home() {
@@ -88,6 +89,12 @@ export default function Home() {
       label: "WAVV Guides & Docs",
       desc: "Playbooks, checklists, and PDFs to accelerate your ROI",
       color: "#67C728",
+    },
+    {
+      icon: FlaskConical,
+      label: "WAVV Playground",
+      desc: "Practice WAVV features in a safe, isolated environment before going live",
+      color: "#a855f7",
     },
     {
       icon: LifeBuoy,

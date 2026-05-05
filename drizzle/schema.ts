@@ -93,7 +93,7 @@ export const webinars = mysqlTable("webinars", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   host: varchar("host", { length: 255 }),
-  type: mysqlEnum("type", ["upcoming", "recording"]).notNull(),
+  type: mysqlEnum("type", ["upcoming", "recording", "exclusive", "evergreen"]).notNull(),
   scheduledAt: timestamp("scheduledAt"),
   registrationUrl: text("registrationUrl"),
   videoUrl: text("videoUrl"),

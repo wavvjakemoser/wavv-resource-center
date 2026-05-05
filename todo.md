@@ -348,3 +348,16 @@
 - [x] Move Support ticket management into "WAVV Playground" tab (alongside playground requests/analytics)
 - [x] Add CSV export button to Playground tab request list (downloads playground-requests.csv)
 - [x] Add "Most Requested" badge to top playground card on HandsOn.tsx (driven by live DB stats)
+
+## Landing Page + Export + Webinar Restructure
+- [ ] Landing page: rename feature cards to "WAVV Guides & Docs", "WAVV Playground", "WAVV Support"
+- [ ] Admin Webinars tab: add CSV export of webinar registrants (name, email, webinar title, date registered)
+- [ ] Admin Guides tab: add CSV export of guide downloaders (name, email, guide title, date downloaded)
+- [ ] Admin Playground & Support tab: add CSV export of support ticket submitters (name, email, subject, category, date)
+- [ ] Add tRPC admin procedures: getWebinarRegistrants, getGuideDownloaders, getSupportSubmitters
+- [ ] Webinars page: restructure into 3 sections — Upcoming Exclusive, Evergreen, On-Demand Recordings
+- [ ] DB: add webinar_section enum/column (exclusive | evergreen | recording) to webinars table
+- [ ] Admin Webinars tab: add section selector (Exclusive / Evergreen / Recording) when creating/editing webinars
+- [ ] Webinars page: Upcoming Exclusive shows 1 featured webinar with prominent CTA
+- [ ] Webinars page: Evergreen shows 5-10 registerable webinars in a grid
+- [ ] Webinars page: On-Demand Recordings shows past recording cards

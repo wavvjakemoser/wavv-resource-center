@@ -64,6 +64,9 @@ import {
   createPlaygroundRequest,
   getPlaygroundRequests,
   getPlaygroundStats,
+  getWebinarRegistrantsExport,
+  getGuideDownloadersExport,
+  getSupportSubmittersExport,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -236,7 +239,7 @@ const academyRouter = router({
 // ─── Webinars Router ──────────────────────────────────────────────────────────
 const webinarsRouter = router({
   list: protectedProcedure
-    .input(z.object({ type: z.enum(["upcoming", "recording"]).optional() }))
+    .input(z.object({ type: z.enum(["upcoming", "recording", "exclusive", "evergreen"]).optional() }))
     .query(({ input }) => getWebinars(input.type)),
 
   get: protectedProcedure
@@ -286,7 +289,7 @@ const webinarsRouter = router({
         title: z.string().min(1),
         description: z.string().optional(),
         host: z.string().optional(),
-        type: z.enum(["upcoming", "recording"]),
+        type: z.enum(["upcoming", "recording", "exclusive", "evergreen"]),
         scheduledAt: z.date().optional(),
         registrationUrl: z.string().optional(),
         videoUrl: z.string().optional(),
@@ -303,7 +306,7 @@ const webinarsRouter = router({
           title: z.string().optional(),
           description: z.string().optional(),
           host: z.string().optional(),
-          type: z.enum(["upcoming", "recording"]).optional(),
+          type: z.enum(["upcoming", "recording", "exclusive", "evergreen"]).optional(),
           scheduledAt: z.date().optional(),
           registrationUrl: z.string().optional(),
           videoUrl: z.string().optional(),
@@ -319,6 +322,7 @@ const webinarsRouter = router({
     .mutation(({ input }) => deleteWebinar(input.id)),
 
   adminList: adminProcedure.query(() => getWebinars()),
+  adminExportRegistrants: adminProcedure.query(() => getWebinarRegistrantsExport()),
 });
 
 // ─── Guides Router ────────────────────────────────────────────────────────────
@@ -380,6 +384,7 @@ const guidesRouter = router({
     .mutation(({ input }) => deleteGuide(input.id)),
 
   adminList: adminProcedure.query(() => getGuides(false)),
+  adminExportDownloaders: adminProcedure.query(() => getGuideDownloadersExport()),
 });
 
 // ─── Support Router ───────────────────────────────────────────────────────────
@@ -420,6 +425,7 @@ const supportRouter = router({
 
   // Admin
   adminGetAll: adminProcedure.query(() => getAllTickets()),
+  adminExportSubmitters: adminProcedure.query(() => getSupportSubmittersExport()),
   adminUpdateStatus: adminProcedure
     .input(
       z.object({

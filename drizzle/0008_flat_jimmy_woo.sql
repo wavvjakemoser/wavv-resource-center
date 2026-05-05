@@ -1,0 +1,1 @@
+ALTER TABLE `webinars` MODIFY COLUMN `type` enum('upcoming','recording','exclusive','evergreen') NOT NULL;

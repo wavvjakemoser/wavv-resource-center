@@ -236,7 +236,7 @@ export async function getCourseCompletionStats() {
 }
 
 // ─── Webinars ─────────────────────────────────────────────────────────────────
-export async function getWebinars(type?: "upcoming" | "recording") {
+export async function getWebinars(type?: "upcoming" | "recording" | "exclusive" | "evergreen") {
   const db = await getDb();
   if (!db) return [];
   const conditions = type
@@ -812,4 +812,68 @@ export async function getPlaygroundStats() {
     .map(([playground, count]) => ({ playground, count }))
     .sort((a, b) => b.count - a.count);
   return { total, byPlayground };
+}
+
+// ─── Export helpers ───────────────────────────────────────────────────────────
+
+export async function getWebinarRegistrantsExport() {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      userId: webinarRegistrations.userId,
+      webinarId: webinarRegistrations.webinarId,
+      registeredAt: webinarRegistrations.registeredAt,
+      userName: users.name,
+      userEmail: users.email,
+      webinarTitle: webinars.title,
+    })
+    .from(webinarRegistrations)
+    .leftJoin(users, eq(users.id, webinarRegistrations.userId))
+    .leftJoin(webinars, eq(webinars.id, webinarRegistrations.webinarId))
+    .orderBy(desc(webinarRegistrations.registeredAt));
+  return rows;
+}
+
+export async function getGuideDownloadersExport() {
+  const db = await getDb();
+  if (!db) return [];
+  // guide_downloaded events joined with users and guides
+  const rows = await db
+    .select({
+      userId: analyticsEvents.userId,
+      resourceId: analyticsEvents.resourceId,
+      createdAt: analyticsEvents.createdAt,
+      userName: users.name,
+      userEmail: users.email,
+      guideTitle: guides.title,
+      guideCategory: guides.category,
+    })
+    .from(analyticsEvents)
+    .leftJoin(users, eq(users.id, analyticsEvents.userId))
+    .leftJoin(guides, eq(guides.id, analyticsEvents.resourceId))
+    .where(eq(analyticsEvents.eventType, "guide_downloaded"))
+    .orderBy(desc(analyticsEvents.createdAt));
+  return rows;
+}
+
+export async function getSupportSubmittersExport() {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      ticketId: supportTickets.id,
+      userId: supportTickets.userId,
+      subject: supportTickets.subject,
+      category: supportTickets.category,
+      priority: supportTickets.priority,
+      status: supportTickets.status,
+      createdAt: supportTickets.createdAt,
+      userName: users.name,
+      userEmail: users.email,
+    })
+    .from(supportTickets)
+    .leftJoin(users, eq(users.id, supportTickets.userId))
+    .orderBy(desc(supportTickets.createdAt));
+  return rows;
 }

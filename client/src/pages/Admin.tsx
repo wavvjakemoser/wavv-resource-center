@@ -1789,7 +1789,7 @@ function WebinarsTab() {
     title: "",
     description: "",
     host: "",
-    type: "upcoming" as "upcoming" | "recording",
+    type: "upcoming" as "upcoming" | "recording" | "exclusive" | "evergreen",
     registrationUrl: "",
     videoUrl: "",
   });
@@ -1807,11 +1807,11 @@ function WebinarsTab() {
     onError: (e) => toast.error(e.message),
   });
 
-  function resetForm() { setForm({ title: "", description: "", host: "", type: "upcoming", registrationUrl: "", videoUrl: "" }); }
+  function resetForm() { setForm({ title: "", description: "", host: "", type: "upcoming" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "" }); }
 
   function startEdit(w: typeof webinars[0]) {
     setEditId(w.id);
-    setForm({ title: w.title, description: w.description ?? "", host: w.host ?? "", type: w.type as "upcoming" | "recording", registrationUrl: w.registrationUrl ?? "", videoUrl: w.videoUrl ?? "" });
+    setForm({ title: w.title, description: w.description ?? "", host: w.host ?? "", type: w.type as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: w.registrationUrl ?? "", videoUrl: w.videoUrl ?? "" });
     setShowForm(true);
   }
 
@@ -1831,13 +1831,28 @@ function WebinarsTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-white">WAVV Webinars</h2>
-        <button
-          onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
-          style={{ background: "#0074F4" }}
-        >
-          <Plus size={13} /> Add Webinar
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              const rows = await utils.webinars.adminExportRegistrants.fetch();
+              if (!rows?.length) { toast.error("No registrants to export"); return; }
+              const headers = ["Name","Email","Webinar","Registered At"];
+              const csv = [headers.join(","), ...rows.map(r => [r.userName ?? "", r.userEmail ?? "", r.webinarTitle ?? "", r.registeredAt ? new Date(r.registeredAt).toLocaleString() : ""].map(v => `"${v}"`).join(","))].join("\n");
+              const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "webinar-registrants.csv"; a.click();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#67C728" }}
+          >
+            <FileDown size={13} /> Export Registrants
+          </button>
+          <button
+            onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
+            style={{ background: "#0074F4" }}
+          >
+            <Plus size={13} /> Add Webinar
+          </button>
+        </div>
       </div>
 
       {/* Form */}
@@ -1862,14 +1877,16 @@ function WebinarsTab() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Type</label>
-                <select style={{ ...inputStyle, appearance: "none" as const }} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as "upcoming" | "recording" }))}>
-                  <option value="upcoming">Upcoming</option>
-                  <option value="recording">Recording</option>
+                <select style={{ ...inputStyle, appearance: "none" as const }} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as "upcoming" | "recording" | "exclusive" | "evergreen" }))}>
+                  <option value="exclusive">Upcoming Exclusive</option>
+                  <option value="evergreen">Evergreen</option>
+                  <option value="recording">On-Demand Recording</option>
+                  <option value="upcoming">Upcoming (Legacy)</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">{form.type === "upcoming" ? "Registration URL" : "Video URL"}</label>
-                <input style={inputStyle} value={form.type === "upcoming" ? form.registrationUrl : form.videoUrl} onChange={e => setForm(f => form.type === "upcoming" ? { ...f, registrationUrl: e.target.value } : { ...f, videoUrl: e.target.value })} placeholder="https://..." />
+                <label className="block text-xs text-gray-400 mb-1">{form.type === "recording" ? "Video URL" : "Registration URL"}</label>
+                <input style={inputStyle} value={form.type === "recording" ? form.videoUrl : form.registrationUrl} onChange={e => setForm(f => form.type === "recording" ? { ...f, videoUrl: e.target.value } : { ...f, registrationUrl: e.target.value })} placeholder="https://..." />
               </div>
             </div>
             <div className="flex gap-2 justify-end">
@@ -1988,13 +2005,28 @@ function GuidesTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-white">WAVV Guides & Docs</h2>
-        <button
-          onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
-          style={{ background: "#0074F4" }}
-        >
-          <Plus size={13} /> Add Guide
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              const rows = await utils.guides.adminExportDownloaders.fetch();
+              if (!rows?.length) { toast.error("No downloads to export"); return; }
+              const headers = ["Name","Email","Guide","Category","Downloaded At"];
+              const csv = [headers.join(","), ...rows.map(r => [r.userName ?? "", r.userEmail ?? "", r.guideTitle ?? "", r.guideCategory ?? "", r.createdAt ? new Date(r.createdAt).toLocaleString() : ""].map(v => `"${v}"`).join(","))].join("\n");
+              const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "guide-downloaders.csv"; a.click();
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#67C728" }}
+          >
+            <FileDown size={13} /> Export Downloaders
+          </button>
+          <button
+            onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
+            style={{ background: "#0074F4" }}
+          >
+            <Plus size={13} /> Add Guide
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -2135,6 +2167,19 @@ function SupportSection() {
             {inProgressCount} in progress
           </span>
         )}
+        <button
+          onClick={async () => {
+            const rows = await utils.support.adminExportSubmitters.fetch();
+            if (!rows?.length) { toast.error("No tickets to export"); return; }
+            const headers = ["Name","Email","Subject","Category","Priority","Status","Submitted At"];
+            const csv = [headers.join(","), ...rows.map(r => [r.userName ?? "", r.userEmail ?? "", r.subject ?? "", r.category ?? "", r.priority ?? "", r.status ?? "", r.createdAt ? new Date(r.createdAt).toLocaleString() : ""].map(v => `"${v}"`).join(","))].join("\n");
+            const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "support-submitters.csv"; a.click();
+          }}
+          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#67C728" }}
+        >
+          <FileDown size={13} /> Export Tickets
+        </button>
       </div>
 
       <div className="rounded-xl overflow-hidden" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
