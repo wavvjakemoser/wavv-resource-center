@@ -393,24 +393,23 @@ export default function Academy() {
                     className="absolute inset-0 w-full h-full object-cover"
                     aria-hidden="true"
                   />
-                  {/* Heavy dark overlay — hides baked-in thumbnail text, keeps image texture */}
+                  {/* Dark overlay — fades image into card background on both sides */}
                   <div
                     className="absolute inset-0"
                     style={{
-                      background: `linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.82) 55%, rgba(0,0,0,0.55) 100%)`,
+                      background: `linear-gradient(90deg, rgba(10,12,18,0.88) 0%, rgba(10,12,18,0.55) 50%, rgba(10,12,18,0.88) 100%)`,
                     }}
                   />
-                  {/* Colour accent glow on the right */}
+                  {/* Colour accent glow — subtle, centre-right */}
                   <div
                     className="absolute inset-0 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse at 85% 50%, ${cat.color}22 0%, transparent 60%)` }}
+                    style={{ background: `radial-gradient(ellipse at 70% 50%, ${cat.color}18 0%, transparent 55%)` }}
                   />
                   {/* Content */}
-                  <div className="relative flex items-center justify-between px-8 py-10">
-                    {/* Left: label + count badges */}
+                  <div className="relative flex items-center px-8 py-10">
+                    {/* Label + count badges only — no icon badge */}
                     <div className="flex flex-col gap-2">
                       <h2 className="text-2xl font-bold text-white tracking-tight">{cat.label}</h2>
-                      {/* Color-coded section/video count badges — driven by static CATEGORY_DATA counts */}
                       {(() => {
                         const counts = STATIC_COUNTS[cat.key];
                         if (!counts) return null;
@@ -432,19 +431,6 @@ export default function Academy() {
                         );
                       })()}
                     </div>
-                    {/* Right: large icon emblem */}
-                    {cat.icon && (
-                      <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background: `${cat.color}20`,
-                          border: `1.5px solid ${cat.color}55`,
-                          boxShadow: `0 0 24px ${cat.color}30`,
-                        }}
-                      >
-                        <cat.icon size={28} style={{ color: cat.color }} />
-                      </div>
-                    )}
                   </div>
                 </Link>
               </section>

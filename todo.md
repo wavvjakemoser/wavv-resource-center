@@ -420,3 +420,7 @@
 
 ## Landing Page Card Style Refresh
 - [x] Update feature cards on Home.tsx to match reference style: deep navy gradient background, colored rounded icon badges, blue accent title text, premium card feel
+
+## Academy Banner Fixes
+- [x] Remove small icon badge overlays from Academy category banners (rocket/wrench/lightbulb icons)
+- [x] Fix gray/green right-side bleed on How-To and Strategy banners — add dark fade overlay so image blends into card background
