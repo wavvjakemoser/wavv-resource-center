@@ -63,10 +63,19 @@ import {
   Layers,
   FlaskConical,
   Bell,
+  Video,
+  FileText,
+  Plus,
+  Trash2,
+  ExternalLink,
+  HeadphonesIcon,
+  AlertCircle,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "users" | "content" | "playground";
+type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -79,7 +88,9 @@ export default function Admin() {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
     if (t === "users") return "users";
-    if (t === "content") return "content";
+    if (t === "academy" || t === "content") return "academy";
+    if (t === "webinars") return "webinars";
+    if (t === "guides") return "guides";
     if (t === "playground") return "playground";
     return "analytics";
   };
@@ -90,7 +101,9 @@ export default function Admin() {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
     if (t === "users") setActiveTab("users");
-    else if (t === "content") setActiveTab("content");
+    else if (t === "academy" || t === "content") setActiveTab("academy");
+    else if (t === "webinars") setActiveTab("webinars");
+    else if (t === "guides") setActiveTab("guides");
     else if (t === "playground") setActiveTab("playground");
     else setActiveTab("analytics");
   }, [location]);
@@ -113,8 +126,10 @@ export default function Admin() {
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
     { id: "analytics", label: "Analytics", icon: <BarChart3 size={15} /> },
     { id: "users", label: "Users", icon: <Users size={15} /> },
-    { id: "content", label: "Content", icon: <BookOpen size={15} /> },
-    { id: "playground", label: "Playground", icon: <FlaskConical size={15} /> },
+    { id: "academy", label: "WAVV Academy", icon: <BookOpen size={15} /> },
+    { id: "webinars", label: "WAVV Webinars", icon: <Video size={15} /> },
+    { id: "guides", label: "Guides & Docs", icon: <FileText size={15} /> },
+    { id: "playground", label: "Playground & Support", icon: <FlaskConical size={15} /> },
   ];
 
   return (
@@ -161,7 +176,9 @@ export default function Admin() {
         {/* ── Tab content ── */}
         {activeTab === "analytics" && <AnalyticsTab />}
         {activeTab === "users" && <UsersTab />}
-        {activeTab === "content" && <ContentTab />}
+        {activeTab === "academy" && <ContentTab />}
+        {activeTab === "webinars" && <WebinarsTab />}
+        {activeTab === "guides" && <GuidesTab />}
         {activeTab === "playground" && <PlaygroundTab />}
 
       </div>
@@ -1582,6 +1599,23 @@ function PlaygroundTab() {
   const { data: stats, isLoading: statsLoading } = trpc.playground.getStats.useQuery();
   const { data: requests, isLoading: reqLoading } = trpc.playground.getRequests.useQuery();
 
+  function exportCSVRequests() {
+    if (!requests || requests.length === 0) { toast.error("No requests to export"); return; }
+    const header = ["Name", "Email", "Playground", "Notes", "Date"];
+    const rows = requests.map(r => [
+      `"${r.name}"`,
+      `"${r.email}"`,
+      `"${r.playground}"`,
+      `"${(r.message ?? "").replace(/"/g, '""')}"`,
+      `"${new Date(r.createdAt).toLocaleDateString()}"`,
+    ]);
+    const csv = [header.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "playground-requests.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const PLAYGROUND_COLORS: Record<string, string> = {
     "WAVV Dialer Playground": "#0074F4",
     "WAVV Call Boards Playground": "#00A9E2",
@@ -1591,7 +1625,16 @@ function PlaygroundTab() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-base font-semibold text-white">Playground Dashboard</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold text-white">Playground & Support</h2>
+        <button
+          onClick={exportCSVRequests}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+          style={{ background: "rgba(168,85,247,0.1)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.2)" }}
+        >
+          <FileDown size={13} /> Export Requests CSV
+        </button>
+      </div>
 
       {/* ── Stats cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1723,6 +1766,432 @@ function PlaygroundTab() {
                   </TableCell>
                 </TableRow>
               ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+
+      {/* ── Support Tickets ── */}
+      <div style={{ borderTop: "1px solid #2a2a2a", paddingTop: "1.5rem" }}>
+        <SupportSection />
+      </div>
+    </div>
+  );
+}
+
+// ─── Webinars Tab ─────────────────────────────────────────────────────────────
+function WebinarsTab() {
+  const utils = trpc.useUtils();
+  const { data: webinars = [], isLoading } = trpc.webinars.adminList.useQuery();
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    host: "",
+    type: "upcoming" as "upcoming" | "recording",
+    registrationUrl: "",
+    videoUrl: "",
+  });
+
+  const createMutation = trpc.webinars.adminCreate.useMutation({
+    onSuccess: () => { utils.webinars.adminList.invalidate(); setShowForm(false); resetForm(); toast.success("Webinar created"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const updateMutation = trpc.webinars.adminUpdate.useMutation({
+    onSuccess: () => { utils.webinars.adminList.invalidate(); setShowForm(false); setEditId(null); resetForm(); toast.success("Webinar updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const deleteMutation = trpc.webinars.adminDelete.useMutation({
+    onSuccess: () => { utils.webinars.adminList.invalidate(); toast.success("Webinar deleted"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  function resetForm() { setForm({ title: "", description: "", host: "", type: "upcoming", registrationUrl: "", videoUrl: "" }); }
+
+  function startEdit(w: typeof webinars[0]) {
+    setEditId(w.id);
+    setForm({ title: w.title, description: w.description ?? "", host: w.host ?? "", type: w.type as "upcoming" | "recording", registrationUrl: w.registrationUrl ?? "", videoUrl: w.videoUrl ?? "" });
+    setShowForm(true);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.title.trim()) { toast.error("Title is required"); return; }
+    if (editId !== null) {
+      updateMutation.mutate({ id: editId, data: { ...form, description: form.description || undefined, host: form.host || undefined, registrationUrl: form.registrationUrl || undefined, videoUrl: form.videoUrl || undefined } });
+    } else {
+      createMutation.mutate({ ...form, description: form.description || undefined, host: form.host || undefined, registrationUrl: form.registrationUrl || undefined, videoUrl: form.videoUrl || undefined });
+    }
+  }
+
+  const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold text-white">WAVV Webinars</h2>
+        <button
+          onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
+          style={{ background: "#0074F4" }}
+        >
+          <Plus size={13} /> Add Webinar
+        </button>
+      </div>
+
+      {/* Form */}
+      {showForm && (
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit Webinar" : "New Webinar"}</h3>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Title *</label>
+                <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Webinar title" />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Host</label>
+                <input style={inputStyle} value={form.host} onChange={e => setForm(f => ({ ...f, host: e.target.value }))} placeholder="Host name" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Description</label>
+              <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Type</label>
+                <select style={{ ...inputStyle, appearance: "none" as const }} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as "upcoming" | "recording" }))}>
+                  <option value="upcoming">Upcoming</option>
+                  <option value="recording">Recording</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">{form.type === "upcoming" ? "Registration URL" : "Video URL"}</label>
+                <input style={inputStyle} value={form.type === "upcoming" ? form.registrationUrl : form.videoUrl} onChange={e => setForm(f => form.type === "upcoming" ? { ...f, registrationUrl: e.target.value } : { ...f, videoUrl: e.target.value })} placeholder="https://..." />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#2a2a2a" }}>Cancel</button>
+              <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>
+                {editId !== null ? "Save Changes" : "Create Webinar"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="rounded-xl overflow-hidden" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
+          <span className="text-sm font-semibold text-white">All Webinars</span>
+          <span className="text-xs text-gray-500">{webinars.length} total</span>
+        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
+        ) : webinars.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Video size={28} className="text-gray-600 mb-2" />
+            <p className="text-gray-500 text-sm">No webinars yet</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow style={{ borderColor: "#2a2a2a" }}>
+                <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                <TableHead className="text-gray-400 text-xs">Host</TableHead>
+                <TableHead className="text-gray-400 text-xs">Type</TableHead>
+                <TableHead className="text-gray-400 text-xs">Views</TableHead>
+                <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {webinars.map((w) => (
+                <TableRow key={w.id} style={{ borderColor: "#2a2a2a" }}>
+                  <TableCell className="text-white text-sm font-medium max-w-xs truncate">{w.title}</TableCell>
+                  <TableCell className="text-gray-400 text-xs">{w.host ?? "—"}</TableCell>
+                  <TableCell>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: w.type === "upcoming" ? "rgba(0,116,244,0.15)" : "rgba(103,199,40,0.15)", color: w.type === "upcoming" ? "#0074F4" : "#67C728" }}>
+                      {w.type === "upcoming" ? "Upcoming" : "Recording"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-gray-400 text-xs">{w.viewCount ?? 0}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {(w.registrationUrl || w.videoUrl) && (
+                        <a href={(w.registrationUrl || w.videoUrl)!} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
+                      )}
+                      <button onClick={() => startEdit(w)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+                      <button onClick={() => { if (confirm("Delete this webinar?")) deleteMutation.mutate({ id: w.id }); }} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Guides & Docs Tab ────────────────────────────────────────────────────────
+function GuidesTab() {
+  const utils = trpc.useUtils();
+  const { data: guides = [], isLoading } = trpc.guides.adminList.useQuery();
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+    fileUrl: "",
+    fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other",
+  });
+
+  const createMutation = trpc.guides.adminCreate.useMutation({
+    onSuccess: () => { utils.guides.adminList.invalidate(); setShowForm(false); resetForm(); toast.success("Guide created"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const updateMutation = trpc.guides.adminUpdate.useMutation({
+    onSuccess: () => { utils.guides.adminList.invalidate(); setShowForm(false); setEditId(null); resetForm(); toast.success("Guide updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const deleteMutation = trpc.guides.adminDelete.useMutation({
+    onSuccess: () => { utils.guides.adminList.invalidate(); toast.success("Guide deleted"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  function resetForm() { setForm({ title: "", description: "", category: "", fileUrl: "", fileType: "pdf" }); }
+
+  function startEdit(g: typeof guides[0]) {
+    setEditId(g.id);
+    setForm({ title: g.title, description: g.description ?? "", category: g.category ?? "", fileUrl: g.fileUrl ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other") ?? "pdf" });
+    setShowForm(true);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.title.trim()) { toast.error("Title is required"); return; }
+    if (editId !== null) {
+      updateMutation.mutate({ id: editId, data: { ...form, description: form.description || undefined, category: form.category || undefined, fileUrl: form.fileUrl || undefined } });
+    } else {
+      createMutation.mutate({ ...form, description: form.description || undefined, category: form.category || undefined, fileUrl: form.fileUrl || undefined });
+    }
+  }
+
+  const FILE_TYPE_COLORS: Record<string, string> = { pdf: "#ef4444", checklist: "#0074F4", playbook: "#67C728", other: "#9ca3af" };
+  const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold text-white">WAVV Guides & Docs</h2>
+        <button
+          onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
+          style={{ background: "#0074F4" }}
+        >
+          <Plus size={13} /> Add Guide
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit Guide" : "New Guide"}</h3>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Title *</label>
+                <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Guide title" />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Category</label>
+                <input style={inputStyle} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} placeholder="e.g. Onboarding, Connection Rates" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Description</label>
+              <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">File Type</label>
+                <select style={{ ...inputStyle, appearance: "none" as const }} value={form.fileType} onChange={e => setForm(f => ({ ...f, fileType: e.target.value as "pdf" | "checklist" | "playbook" | "other" }))}>
+                  <option value="pdf">PDF</option>
+                  <option value="checklist">Checklist</option>
+                  <option value="playbook">Playbook</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">File URL</label>
+                <input style={inputStyle} value={form.fileUrl} onChange={e => setForm(f => ({ ...f, fileUrl: e.target.value }))} placeholder="https://..." />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#2a2a2a" }}>Cancel</button>
+              <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>
+                {editId !== null ? "Save Changes" : "Create Guide"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="rounded-xl overflow-hidden" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
+          <span className="text-sm font-semibold text-white">All Guides</span>
+          <span className="text-xs text-gray-500">{guides.length} total</span>
+        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
+        ) : guides.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <FileText size={28} className="text-gray-600 mb-2" />
+            <p className="text-gray-500 text-sm">No guides yet</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow style={{ borderColor: "#2a2a2a" }}>
+                <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                <TableHead className="text-gray-400 text-xs">Category</TableHead>
+                <TableHead className="text-gray-400 text-xs">Type</TableHead>
+                <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
+                <TableHead className="text-gray-400 text-xs">Status</TableHead>
+                <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {guides.map((g) => (
+                <TableRow key={g.id} style={{ borderColor: "#2a2a2a" }}>
+                  <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
+                  <TableCell className="text-gray-400 text-xs">{g.category ?? "—"}</TableCell>
+                  <TableCell>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase" style={{ background: `${FILE_TYPE_COLORS[g.fileType ?? "other"]}20`, color: FILE_TYPE_COLORS[g.fileType ?? "other"] }}>
+                      {g.fileType ?? "other"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
+                  <TableCell>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: g.published ? "rgba(103,199,40,0.15)" : "rgba(239,68,68,0.15)", color: g.published ? "#67C728" : "#f87171" }}>
+                      {g.published ? "Published" : "Hidden"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {g.fileUrl && (
+                        <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
+                      )}
+                      <button onClick={() => startEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+                      <button onClick={() => { if (confirm("Delete this guide?")) deleteMutation.mutate({ id: g.id }); }} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Support section (used inside PlaygroundTab) ──────────────────────────────
+function SupportSection() {
+  const utils = trpc.useUtils();
+  const { data: tickets = [], isLoading } = trpc.support.adminGetAll.useQuery();
+  const updateStatus = trpc.support.adminUpdateStatus.useMutation({
+    onSuccess: () => { utils.support.adminGetAll.invalidate(); toast.success("Status updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
+    open: { label: "Open", color: "#f87171", bg: "rgba(239,68,68,0.15)", icon: <AlertCircle size={11} /> },
+    in_progress: { label: "In Progress", color: "#fbbf24", bg: "rgba(251,191,36,0.15)", icon: <Clock size={11} /> },
+    resolved: { label: "Resolved", color: "#67C728", bg: "rgba(103,199,40,0.15)", icon: <CheckCircle2 size={11} /> },
+    closed: { label: "Closed", color: "#6b7280", bg: "rgba(107,114,128,0.15)", icon: <X size={11} /> },
+  };
+
+  const PRIORITY_COLOR: Record<string, string> = { low: "#6b7280", medium: "#fbbf24", high: "#f97316", urgent: "#ef4444" };
+
+  const openCount = tickets.filter(t => t.status === "open").length;
+  const inProgressCount = tickets.filter(t => t.status === "in_progress").length;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <HeadphonesIcon size={16} style={{ color: "#0074F4" }} />
+        <h3 className="text-sm font-semibold text-white">Support Tickets</h3>
+        {openCount > 0 && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(239,68,68,0.15)", color: "#f87171" }}>
+            {openCount} open
+          </span>
+        )}
+        {inProgressCount > 0 && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24" }}>
+            {inProgressCount} in progress
+          </span>
+        )}
+      </div>
+
+      <div className="rounded-xl overflow-hidden" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
+          <span className="text-sm font-semibold text-white">All Tickets</span>
+          <span className="text-xs text-gray-500">{tickets.length} total</span>
+        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
+        ) : tickets.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <HeadphonesIcon size={28} className="text-gray-600 mb-2" />
+            <p className="text-gray-500 text-sm">No tickets yet</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow style={{ borderColor: "#2a2a2a" }}>
+                <TableHead className="text-gray-400 text-xs">Subject</TableHead>
+                <TableHead className="text-gray-400 text-xs">Category</TableHead>
+                <TableHead className="text-gray-400 text-xs">Priority</TableHead>
+                <TableHead className="text-gray-400 text-xs">Status</TableHead>
+                <TableHead className="text-gray-400 text-xs">Date</TableHead>
+                <TableHead className="text-gray-400 text-xs">Update</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tickets.map((t) => {
+                const sc = STATUS_CONFIG[t.status] ?? STATUS_CONFIG.open;
+                return (
+                  <TableRow key={t.id} style={{ borderColor: "#2a2a2a" }}>
+                    <TableCell className="text-white text-sm font-medium max-w-xs truncate">{t.subject}</TableCell>
+                    <TableCell className="text-gray-400 text-xs">{t.category}</TableCell>
+                    <TableCell>
+                      <span className="text-[10px] font-semibold uppercase" style={{ color: PRIORITY_COLOR[t.priority] ?? "#9ca3af" }}>{t.priority}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold w-fit" style={{ background: sc.bg, color: sc.color }}>
+                        {sc.icon}{sc.label}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-gray-500 text-xs">{new Date(t.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <select
+                        value={t.status}
+                        onChange={e => updateStatus.mutate({ id: t.id, status: e.target.value as "open" | "in_progress" | "resolved" | "closed" })}
+                        style={{ background: "#111", border: "1px solid #2a2a2a", color: "#9ca3af", borderRadius: "6px", padding: "3px 6px", fontSize: "11px", outline: "none", appearance: "none" as const }}
+                      >
+                        <option value="open">Open</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}

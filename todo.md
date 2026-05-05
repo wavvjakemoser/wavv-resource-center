@@ -340,3 +340,11 @@
 - [x] Clean up bottom section to simple headline + description + "Notify Me" button
 - [x] Add tRPC query for playground request analytics (total requests, per-playground breakdown, recent submissions)
 - [x] Add Playground tab in Admin.tsx with stats cards, bar chart, and request list table
+
+## Admin Tab Restructure
+- [x] Rename "Content" tab to "WAVV Academy" (keep all existing ContentTab logic)
+- [x] Add "WAVV Webinars" admin tab with webinar CRUD management (create/edit/delete, view count)
+- [x] Add "WAVV Guides & Docs" admin tab with guide CRUD management (create/edit/delete, download count, published toggle)
+- [x] Move Support ticket management into "WAVV Playground" tab (alongside playground requests/analytics)
+- [x] Add CSV export button to Playground tab request list (downloads playground-requests.csv)
+- [x] Add "Most Requested" badge to top playground card on HandsOn.tsx (driven by live DB stats)

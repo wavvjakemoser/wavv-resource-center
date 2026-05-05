@@ -237,7 +237,11 @@ function RequestModal({
 
 export default function HandsOn() {
   const { data: user } = trpc.auth.me.useQuery();
+  const { data: playgroundStats } = trpc.playground.getStats.useQuery();
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Determine the most requested playground (if any requests exist)
+  const mostRequested = playgroundStats?.byPlayground?.[0]?.playground ?? null;
 
   return (
     <PortalLayout title="WAVV Playground">
@@ -292,14 +296,15 @@ export default function HandsOn() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {PLAYGROUND_TOOLS.map((tool) => {
               const Icon = tool.icon;
+              const isMostRequested = mostRequested === tool.label;
               return (
                 <div
                   key={tool.label}
                   className="flex flex-col gap-3 p-5 rounded-xl"
                   style={{
                     background: "#1a1a1a",
-                    border: "1px solid #2a2a2a",
-                    opacity: 0.75,
+                    border: isMostRequested ? `1px solid ${tool.color}40` : "1px solid #2a2a2a",
+                    opacity: 0.85,
                   }}
                 >
                   <div className="flex items-center gap-3">
@@ -317,7 +322,17 @@ export default function HandsOn() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold text-sm mb-1">{tool.label}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-white font-semibold text-sm">{tool.label}</h3>
+                      {isMostRequested && (
+                        <span
+                          className="text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide"
+                          style={{ background: `${tool.color}20`, color: tool.color }}
+                        >
+                          Most Requested
+                        </span>
+                      )}
+                    </div>
                     <p className="text-gray-500 text-xs leading-relaxed">{tool.desc}</p>
                   </div>
                 </div>
