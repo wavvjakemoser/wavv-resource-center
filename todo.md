@@ -318,3 +318,10 @@
 - [x] Academy.tsx: icon on right side, no subtitle text
 - [x] Admin content tab: restructure to exactly mirror Academy layout (same category/section/video order)
 - [x] Admin SectionRow2: color-coded video count badge (blue pill for count, red pill for Hidden status)
+
+## Count Consistency Fix (Strategy & Best Practices)
+
+- [x] Audit DB courses for Strategy category — identify which courses are canonical vs extra
+- [x] Fix Academy.tsx banner count badges to use static CATEGORY_DATA counts (3 sections, 8 videos for Strategy)
+- [x] Fix AcademyCategory.tsx static data: removed duplicate str-3-4, replaced str-3-5b with Intermediate Foundational Setup
+- [x] Fix Admin panel: canonical course filter per category; Spam Protection moves to Legacy/Extra block

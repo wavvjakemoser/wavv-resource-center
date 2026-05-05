@@ -1045,6 +1045,14 @@ function ContentTab() {
     return map;
   }, [courses]);
 
+  // Canonical course titles per category — only these appear under the main 3 category banners.
+  // Any other courses in the same category fall through to the "extra categories" block below.
+  const CANONICAL_COURSE_TITLES: Record<string, string> = {
+    "Onboarding": "Onboarding",
+    "How-To": "How-To",
+    "Strategy and Best Practices": "Strategy & Best Practices",
+  };
+
   // Mirror the exact Academy category order, display names, colors, and banners
   const ACADEMY_CATEGORIES = [
     {
@@ -1087,7 +1095,11 @@ function ContentTab() {
     <div className="space-y-8">
       {/* ── Category > Section > Video hierarchy (mirrors Academy order) ── */}
       {ACADEMY_CATEGORIES.map(({ key, label, color, banner }) => {
-        const categoryCourses = byCategory[key] ?? [];
+        // Only show the canonical course for this category in the main block
+        const canonicalTitle = CANONICAL_COURSE_TITLES[key];
+        const categoryCourses = (byCategory[key] ?? []).filter(
+          (c) => !canonicalTitle || c.title === canonicalTitle
+        );
         return (
           <CategoryBlock
             key={key}
@@ -1102,22 +1114,47 @@ function ContentTab() {
           />
         );
       })}
-      {/* Any extra categories not in the fixed list */}
-      {Object.entries(byCategory)
-        .filter(([k]) => !ACADEMY_CATEGORIES.find((c) => c.key === k))
-        .map(([categoryKey, categoryCourses]) => (
-          <CategoryBlock
-            key={categoryKey}
-            categoryKey={categoryKey}
-            categoryLabel={categoryKey}
-            courses={categoryCourses}
-            allLessons={lessons}
-            onDeactivateLesson={handleDeactivate}
-            onActivateLesson={handleActivate}
-            accentColor={CATEGORY_COLORS[categoryKey] ?? "#60a5fa"}
-          />
-        ))
-      }
+      {/* Extra / legacy courses: any course not in the fixed canonical list */}
+      {(() => {
+        const extraCourses: Array<{ categoryKey: string; course: typeof courses[0] }> = [];
+        for (const [catKey, catCourses] of Object.entries(byCategory)) {
+          const canonicalTitle = CANONICAL_COURSE_TITLES[catKey];
+          const isCanonicalCategory = !!ACADEMY_CATEGORIES.find((c) => c.key === catKey);
+          for (const course of catCourses) {
+            if (!isCanonicalCategory || (canonicalTitle && course.title !== canonicalTitle)) {
+              extraCourses.push({ categoryKey: catKey, course });
+            }
+          }
+        }
+        if (extraCourses.length === 0) return null;
+        // Group extra courses by their category key for display
+        const extraByCategory: Record<string, typeof courses> = {};
+        for (const { categoryKey, course } of extraCourses) {
+          if (!extraByCategory[categoryKey]) extraByCategory[categoryKey] = [];
+          extraByCategory[categoryKey].push(course);
+        }
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pt-2">
+              <div className="h-px flex-1" style={{ background: "#2a2a2a" }} />
+              <span className="text-[11px] font-semibold text-gray-500 px-2">Legacy / Extra Courses</span>
+              <div className="h-px flex-1" style={{ background: "#2a2a2a" }} />
+            </div>
+            {Object.entries(extraByCategory).map(([categoryKey, categoryCourses]) => (
+              <CategoryBlock
+                key={categoryKey + "-extra"}
+                categoryKey={categoryKey}
+                categoryLabel={categoryKey}
+                courses={categoryCourses}
+                allLessons={lessons}
+                onDeactivateLesson={handleDeactivate}
+                onActivateLesson={handleActivate}
+                accentColor={CATEGORY_COLORS[categoryKey] ?? "#60a5fa"}
+              />
+            ))}
+          </div>
+        );
+      })()}
 
       {/* ── Tags Management panel ── */}
       <TagsManagementPanel />

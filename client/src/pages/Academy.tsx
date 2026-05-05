@@ -300,7 +300,15 @@ export default function Academy() {
     (progress ?? []).filter((p) => p.completed).map((p) => p.lessonId)
   );
 
-  // Group live courses by category key
+  // Static section/video counts per category (source of truth = AcademyCategory CATEGORY_DATA)
+  // These must stay in sync with the CATEGORY_DATA sections array in AcademyCategory.tsx
+  const STATIC_COUNTS: Record<string, { sections: number; videos: number }> = {
+    "Onboarding": { sections: 6, videos: 12 },
+    "How-To": { sections: 8, videos: 9 },
+    "Strategy and Best Practices": { sections: 3, videos: 8 },
+  };
+
+  // Group live courses by category key (still needed for progress tracking)
   const coursesByCategory = CATEGORIES.reduce(
     (acc, cat) => {
       acc[cat.key] = (courses ?? []).filter((c) => c.category === cat.key);
@@ -402,26 +410,26 @@ export default function Academy() {
                     {/* Left: label + count badges */}
                     <div className="flex flex-col gap-2">
                       <h2 className="text-2xl font-bold text-white tracking-tight">{cat.label}</h2>
-                      {/* Color-coded section/video count badges */}
+                      {/* Color-coded section/video count badges — driven by static CATEGORY_DATA counts */}
                       {(() => {
-                        const liveCourses = coursesByCategory[cat.key] ?? [];
-                        const totalLessons = liveCourses.reduce((sum, c) => sum + (c.lessonCount ?? 0), 0);
-                        return liveCourses.length > 0 ? (
+                        const counts = STATIC_COUNTS[cat.key];
+                        if (!counts) return null;
+                        return (
                           <div className="flex items-center gap-2">
                             <span
                               className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
                               style={{ background: `${cat.color}25`, color: cat.color, border: `1px solid ${cat.color}50` }}
                             >
-                              {liveCourses.length} {liveCourses.length === 1 ? "section" : "sections"}
+                              {counts.sections} {counts.sections === 1 ? "section" : "sections"}
                             </span>
                             <span
                               className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
                               style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}
                             >
-                              {totalLessons} {totalLessons === 1 ? "video" : "videos"}
+                              {counts.videos} {counts.videos === 1 ? "video" : "videos"}
                             </span>
                           </div>
-                        ) : null;
+                        );
                       })()}
                     </div>
                     {/* Right: large icon emblem */}
