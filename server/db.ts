@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, like, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   analyticsEvents,
@@ -14,6 +14,7 @@ import {
   users,
   webinarRegistrations,
   webinars,
+  pageReadinessItems,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -958,4 +959,18 @@ export async function getContentRequests(requestType?: "video" | "guide" | "webi
     return query.where(eq(contentRequests.requestType, requestType));
   }
   return query;
+}
+
+// ─── Page Readiness Checklist ─────────────────────────────────────────────────
+export async function getReadinessItems(page: "academy" | "webinars" | "guides" | "playground" | "support") {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(pageReadinessItems).where(eq(pageReadinessItems.page, page)).orderBy(asc(pageReadinessItems.sortOrder));
+}
+
+export async function toggleReadinessItem(id: number, checked: boolean) {
+  const db = await getDb();
+  if (!db) return { success: false };
+  await db.update(pageReadinessItems).set({ checked }).where(eq(pageReadinessItems.id, id));
+  return { success: true };
 }

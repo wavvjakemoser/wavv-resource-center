@@ -1,4 +1,5 @@
 import PortalLayout from "@/components/PortalLayout";
+import { ReadinessWidget } from "@/components/ReadinessWidget";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import {
@@ -230,8 +231,9 @@ export default function Support() {
         </div>
       </div>
 
-      {/* New Ticket Modal */}
-      {modalOpen && (
+      <ReadinessWidget page="support" />
+      {/* Ticket form modal */}
+     {modalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}

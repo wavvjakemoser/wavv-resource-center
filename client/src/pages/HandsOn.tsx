@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PortalLayout from "@/components/PortalLayout";
+import { ReadinessWidget } from "@/components/ReadinessWidget";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
@@ -403,6 +404,7 @@ export default function HandsOn() {
         userName={user?.name}
         userEmail={user?.email}
       />
+      <ReadinessWidget page="playground" />
     </PortalLayout>
   );
 }

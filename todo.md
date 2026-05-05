@@ -520,3 +520,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Convert "New Ticket" from default open tab to modal dialog triggered by a button
 - [x] Keep "My Tickets" as the default/main view on the Support page
 - [x] Build Intercom integration scaffold: server-side POST to Intercom Conversations API when ticket is submitted (needs INTERCOM_API_KEY secret — BLOCKED on credentials)
+
+## Admin Readiness Widget (5 Pages)
+
+- [x] DB: page_readiness_items table (id, page, label, checked, sort_order, created_at)
+- [x] Seed default checklist items for all 5 pages
+- [x] tRPC: readiness.getItems(page) — admin only
+- [x] tRPC: readiness.toggleItem(id) — admin only
+- [x] ReadinessWidget component: floating bottom-right pill showing X/Y progress
+- [x] Hover expands to full checklist with checkboxes, page label, and color-coded progress bar
+- [x] Admin-only: hidden from non-admin users via useAuth() role check
+- [x] Add widget to Academy, Webinars, GuidesAndDocs, HandsOn, Support pages

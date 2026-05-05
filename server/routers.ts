@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { ENV } from "./_core/env";
+import { getReadinessItems, toggleReadinessItem } from "./db";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -975,6 +976,24 @@ export const appRouter = router({
         });
         return [header, ...lines].join("\n");
       }),
+  }),
+
+  readiness: router({
+    getItems: protectedProcedure
+      .input(z.object({ page: z.enum(["academy", "webinars", "guides", "playground", "support"]) }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .query(({ input }) => getReadinessItems(input.page)),
+
+    toggleItem: protectedProcedure
+      .input(z.object({ id: z.number(), checked: z.boolean() }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => toggleReadinessItem(input.id, input.checked)),
   }),
 });
 

@@ -213,3 +213,14 @@ export const contentRequests = mysqlTable("content_requests", {
 });
 
 export type ContentRequest = typeof contentRequests.$inferSelect;
+
+// ─── Page Readiness Checklist (Admin Only) ────────────────────────────────────
+export const pageReadinessItems = mysqlTable("page_readiness_items", {
+  id: int("id").autoincrement().primaryKey(),
+  page: mysqlEnum("page", ["academy", "webinars", "guides", "playground", "support"]).notNull(),
+  label: varchar("label", { length: 255 }).notNull(),
+  checked: boolean("checked").default(false).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PageReadinessItem = typeof pageReadinessItems.$inferSelect;

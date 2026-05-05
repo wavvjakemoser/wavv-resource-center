@@ -1,4 +1,5 @@
 import PortalLayout from "@/components/PortalLayout";
+import { ReadinessWidget } from "@/components/ReadinessWidget";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { useState } from "react";
@@ -516,6 +517,7 @@ export default function Academy() {
       <div className="px-6 pb-10">
         <ContentRequestCTA requestType="video" />
       </div>
+      <ReadinessWidget page="academy" />
     </PortalLayout>
   );
 }
