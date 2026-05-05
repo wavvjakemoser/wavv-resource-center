@@ -53,6 +53,7 @@ import {
   FileDown,
   Shield,
   ShieldOff,
+  Swords,
   UserPlus,
   Pencil,
   Check,
@@ -114,7 +115,7 @@ export default function Admin() {
     else if (t === "content_requests") setActiveTab("content_requests");
     else setActiveTab("analytics");
   }, [location]);
-  if (!loading && user && user.role !== "admin") {
+  if (!loading && user && user.role !== "admin" && user.role !== "super_admin") {
     navigate("/dashboard");
     return null;
   }
@@ -464,63 +465,167 @@ function SearchAIChart({ days }: { days: number }) {
 }
 
 // ─── Users Tab ────────────────────────────────────────────────────────────────
+type RoleFilter = "all" | "super_admin" | "admin" | "user";
+
+// Composite Super Admin icon: Shield with Swords crossed behind it
+function SuperAdminIcon({ size = 14 }: { size?: number }) {
+  return (
+    <span className="relative inline-flex items-center justify-center" style={{ width: size + 4, height: size + 4 }}>
+      <Swords style={{ width: size - 2, height: size - 2, color: "#e879f9", position: "absolute", opacity: 0.85 }} />
+      <Shield style={{ width: size, height: size, color: "#e879f9", position: "absolute", filter: "drop-shadow(0 0 3px #e879f9)" }} />
+    </span>
+  );
+}
+
 function UsersTab() {
   const { user: currentUser } = useAuth();
+  const isSuperAdmin = currentUser?.role === "super_admin";
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     userId: number;
     userName: string;
     currentRole: string;
-    newRole: "user" | "admin";
+    action: "promote_admin" | "promote_super" | "demote" | "remove";
   } | null>(null);
 
   const { data: users, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined, {
-    enabled: currentUser?.role === "admin",
+    enabled: currentUser?.role === "admin" || currentUser?.role === "super_admin",
   });
 
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
-      toast.success(`${confirmDialog?.userName} is now ${confirmDialog?.newRole === "admin" ? "an admin" : "a standard user"}.`);
+      const action = confirmDialog?.action;
+      const label = action === "promote_super" ? "a Super Admin" : action === "promote_admin" ? "an Admin" : "a Standard User";
+      toast.success(`${confirmDialog?.userName} is now ${label}.`);
       setConfirmDialog(null);
       refetch();
     },
     onError: (err) => { toast.error(err.message); },
   });
 
+  const removeUser = trpc.admin.removeUser.useMutation({
+    onSuccess: () => {
+      toast.success(`${confirmDialog?.userName} has been removed.`);
+      setConfirmDialog(null);
+      refetch();
+    },
+    onError: (err) => { toast.error(err.message); },
+  });
+
+  const isPendingPromotion = (email: string | null | undefined) => {
+    if (!email) return false;
+    return /^[a-z]+\.[a-z]+@wavv\.com$/.test(email.toLowerCase());
+  };
+
   const filteredUsers = useMemo(() => {
     if (!users) return [];
-    if (!search.trim()) return users;
+    let list = users;
+    if (roleFilter !== "all") list = list.filter((u) => u.role === roleFilter);
+    if (!search.trim()) return list;
     const q = search.trim().toLowerCase();
-    return users.filter(
+    return list.filter(
       (u) => (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q)
     );
-  }, [users, search]);
+  }, [users, search, roleFilter]);
 
+  const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "super_admin").length, [users]);
   const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "admin").length, [users]);
+  const userCount = useMemo(() => (users ?? []).filter((u) => u.role === "user").length, [users]);
   const totalCount = users?.length ?? 0;
+  const pendingCount = useMemo(() => isSuperAdmin ? (users ?? []).filter((u) => u.role === "user" && isPendingPromotion(u.email)).length : 0, [users, isSuperAdmin]);
+
+  const statCards: { filter: RoleFilter; label: string; value: number; iconEl: React.ReactNode; color: string; bg: string; activeBorder: string }[] = [
+    {
+      filter: "all",
+      label: "Total Users",
+      value: totalCount,
+      iconEl: <Users className="h-5 w-5" style={{ color: "#38bdf8" }} />,
+      color: "#38bdf8",
+      bg: "rgba(56,189,248,0.1)",
+      activeBorder: "#38bdf8",
+    },
+    {
+      filter: "super_admin",
+      label: "Super Admins",
+      value: superAdminCount,
+      iconEl: <SuperAdminIcon size={20} />,
+      color: "#e879f9",
+      bg: "rgba(232,121,249,0.1)",
+      activeBorder: "#e879f9",
+    },
+    {
+      filter: "admin",
+      label: "Admins",
+      value: adminCount,
+      iconEl: <Shield className="h-5 w-5" style={{ color: "#fbbf24" }} />,
+      color: "#fbbf24",
+      bg: "rgba(251,191,36,0.1)",
+      activeBorder: "#fbbf24",
+    },
+    {
+      filter: "user",
+      label: "Standard Users",
+      value: userCount,
+      iconEl: <UserPlus className="h-5 w-5" style={{ color: "#4ade80" }} />,
+      color: "#4ade80",
+      bg: "rgba(74,222,128,0.1)",
+      activeBorder: "#4ade80",
+    },
+  ];
+
+  function handleConfirm() {
+    if (!confirmDialog) return;
+    if (confirmDialog.action === "remove") {
+      removeUser.mutate({ userId: confirmDialog.userId });
+    } else {
+      const role = confirmDialog.action === "promote_super" ? "super_admin" : confirmDialog.action === "promote_admin" ? "admin" : "user";
+      updateRole.mutate({ userId: confirmDialog.userId, role });
+    }
+  }
+
+  const isPending = updateRole.isPending || removeUser.isPending;
 
   return (
     <div className="space-y-6">
-      <h2 className="text-base font-semibold text-white">User Management</h2>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-base font-semibold text-white">User Management</h2>
+        {isSuperAdmin && pendingCount > 0 && (
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+            style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.3)" }}>
+            <Bell className="h-3 w-3" /> {pendingCount} pending promotion{pendingCount > 1 ? "s" : ""}
+          </span>
+        )}
+      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[
-          { icon: <Users className="h-5 w-5 text-blue-400" />, label: "Total Users", value: totalCount, bg: "rgba(59,130,246,0.1)" },
-          { icon: <Shield className="h-5 w-5 text-amber-400" />, label: "Admins", value: adminCount, bg: "rgba(245,158,11,0.1)" },
-          { icon: <UserPlus className="h-5 w-5 text-green-400" />, label: "Standard Users", value: totalCount - adminCount, bg: "rgba(34,197,94,0.1)" },
-        ].map((s) => (
-          <div key={s.label} className="rounded-xl p-4" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg" style={{ background: s.bg }}>{s.icon}</div>
-              <div>
-                <p className="text-xs text-gray-500">{s.label}</p>
-                <p className="text-2xl font-bold text-white">{s.value}</p>
+      {/* Clickable stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {statCards.map((s) => {
+          const active = roleFilter === s.filter;
+          return (
+            <button
+              key={s.filter}
+              onClick={() => setRoleFilter(active ? "all" : s.filter)}
+              className="rounded-xl p-4 text-left transition-all"
+              style={{
+                background: "#1a1a1a",
+                border: active ? `1.5px solid ${s.activeBorder}` : "1px solid #2a2a2a",
+                boxShadow: active ? `0 0 12px ${s.activeBorder}33` : "none",
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg flex items-center justify-center" style={{ background: s.bg }}>
+                  {s.iconEl}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{s.label}</p>
+                  <p className="text-2xl font-bold" style={{ color: active ? s.color : "#fff" }}>{s.value}</p>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       {/* Search */}
@@ -540,11 +645,11 @@ function UsersTab() {
         <Table>
           <TableHeader>
             <TableRow style={{ background: "#1a1a1a", borderBottom: "1px solid #2a2a2a" }}>
-              <TableHead className="text-gray-400 w-[250px]">Name</TableHead>
-              <TableHead className="text-gray-400 w-[300px]">Email</TableHead>
-              <TableHead className="text-gray-400 w-[120px]">Role</TableHead>
-              <TableHead className="text-gray-400 w-[180px]">Registered</TableHead>
-              <TableHead className="text-gray-400 w-[120px] text-right">Actions</TableHead>
+              <TableHead className="text-gray-400 w-[240px]">Name</TableHead>
+              <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
+              <TableHead className="text-gray-400 w-[160px]">Role</TableHead>
+              <TableHead className="text-gray-400 w-[160px]">Registered</TableHead>
+              <TableHead className="text-gray-400 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -555,13 +660,14 @@ function UsersTab() {
             ) : filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-12 text-gray-500">
-                  {search ? "No users match your search." : "No users found."}
+                  {search || roleFilter !== "all" ? "No users match your filter." : "No users found."}
                 </TableCell>
               </TableRow>
             ) : (
               filteredUsers.map((u) => {
                 const isSelf = u.id === currentUser?.id;
-                const initials = (u.name ?? "?").split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+                const initials = (u.name ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+                const pending = isSuperAdmin && u.role === "user" && isPendingPromotion(u.email);
                 return (
                   <TableRow key={u.id} style={{ borderBottom: "1px solid #1e1e1e", background: isSelf ? "rgba(0,116,244,0.05)" : "transparent" }}>
                     <TableCell>
@@ -576,32 +682,77 @@ function UsersTab() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-400">{u.email ?? "—"}</TableCell>
+                    <TableCell className="text-gray-400 text-sm">{u.email ?? "—"}</TableCell>
                     <TableCell>
-                      {u.role === "admin" ? (
-                        <Badge className="text-[10px]" style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
-                          <Shield className="h-3 w-3 mr-1" /> Admin
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary" className="text-[10px]">User</Badge>
-                      )}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {u.role === "super_admin" ? (
+                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.4)", boxShadow: "0 0 8px rgba(232,121,249,0.2)" }}>
+                            <SuperAdminIcon size={12} />
+                            Super Admin
+                          </Badge>
+                        ) : u.role === "admin" ? (
+                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
+                            <Shield className="h-3 w-3" /> Admin
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-[10px]">User</Badge>
+                        )}
+                        {pending && (
+                          <Badge className="text-[10px]" style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.3)" }}>
+                            Pending Promotion
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
-                    <TableCell className="text-gray-500">
+                    <TableCell className="text-gray-500 text-sm">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       {isSelf ? (
                         <span className="text-xs text-gray-600">—</span>
-                      ) : u.role === "admin" ? (
-                        <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                          onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, newRole: "user" })}>
-                          <ShieldOff className="h-4 w-4 mr-1" /> Revoke
-                        </Button>
                       ) : (
-                        <Button variant="ghost" size="sm" className="text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
-                          onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, newRole: "admin" })}>
-                          <Shield className="h-4 w-4 mr-1" /> Promote
-                        </Button>
+                        <div className="flex items-center justify-end gap-1 flex-wrap">
+                          {/* Super admin actions */}
+                          {isSuperAdmin && u.role === "user" && (
+                            <Button variant="ghost" size="sm"
+                              className="text-xs h-7 px-2"
+                              style={{ color: "#fbbf24" }}
+                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_admin" })}>
+                              <Shield className="h-3 w-3 mr-1" /> Make Admin
+                            </Button>
+                          )}
+                          {isSuperAdmin && u.role === "admin" && (
+                            <>
+                              <Button variant="ghost" size="sm"
+                                className="text-xs h-7 px-2"
+                                style={{ color: "#e879f9" }}
+                                onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_super" })}>
+                                <SuperAdminIcon size={12} />
+                                <span className="ml-1">Super Admin</span>
+                              </Button>
+                              <Button variant="ghost" size="sm"
+                                className="text-xs h-7 px-2 text-gray-400 hover:text-white"
+                                onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "demote" })}>
+                                <ShieldOff className="h-3 w-3 mr-1" /> Demote
+                              </Button>
+                            </>
+                          )}
+                          {isSuperAdmin && u.role === "super_admin" && (
+                            <Button variant="ghost" size="sm"
+                              className="text-xs h-7 px-2 text-gray-400 hover:text-white"
+                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "demote" })}>
+                              <ShieldOff className="h-3 w-3 mr-1" /> Demote
+                            </Button>
+                          )}
+                          {/* Remove button — super_admin can remove anyone; admin can only remove users */}
+                          {(isSuperAdmin || (!isSuperAdmin && u.role === "user")) && (
+                            <Button variant="ghost" size="sm"
+                              className="text-xs h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "remove" })}>
+                              <Trash2 className="h-3 w-3 mr-1" /> Remove
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
@@ -614,27 +765,45 @@ function UsersTab() {
 
       {/* Confirm dialog */}
       <Dialog open={!!confirmDialog?.open} onOpenChange={(open) => { if (!open) setConfirmDialog(null); }}>
-        <DialogContent>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
-            <DialogTitle>
-              {confirmDialog?.newRole === "admin" ? "Promote to Admin" : "Revoke Admin Access"}
+            <DialogTitle className="text-white">
+              {confirmDialog?.action === "promote_super" && "Promote to Super Admin"}
+              {confirmDialog?.action === "promote_admin" && "Promote to Admin"}
+              {confirmDialog?.action === "demote" && "Demote User"}
+              {confirmDialog?.action === "remove" && "Remove User"}
             </DialogTitle>
-            <DialogDescription>
-              {confirmDialog?.newRole === "admin" ? (
-                <><strong>{confirmDialog.userName}</strong> will gain access to the admin analytics dashboard, user management, and content management tools.</>
-              ) : (
-                <><strong>{confirmDialog?.userName}</strong> will lose access to admin tools. They will retain standard user access to all learning content.</>
+            <DialogDescription className="text-gray-400">
+              {confirmDialog?.action === "promote_super" && (
+                <><strong className="text-white">{confirmDialog.userName}</strong> will become a Super Admin with full access to all admin tools and user management.</>
+              )}
+              {confirmDialog?.action === "promote_admin" && (
+                <><strong className="text-white">{confirmDialog.userName}</strong> will gain access to the admin dashboard and content management tools.</>
+              )}
+              {confirmDialog?.action === "demote" && (
+                <><strong className="text-white">{confirmDialog?.userName}</strong> will be demoted to a standard user and lose all admin access.</>
+              )}
+              {confirmDialog?.action === "remove" && (
+                <><strong className="text-white">{confirmDialog?.userName}</strong> will be permanently removed from the platform. This cannot be undone.</>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmDialog(null)} disabled={isPending}>Cancel</Button>
             <Button
-              variant={confirmDialog?.newRole === "admin" ? "default" : "destructive"}
-              onClick={() => { if (confirmDialog) updateRole.mutate({ userId: confirmDialog.userId, role: confirmDialog.newRole }); }}
-              disabled={updateRole.isPending}
+              variant={confirmDialog?.action === "remove" || confirmDialog?.action === "demote" ? "destructive" : "default"}
+              style={confirmDialog?.action === "promote_super" ? { background: "#c026d3", color: "#fff" } : undefined}
+              onClick={handleConfirm}
+              disabled={isPending}
             >
-              {updateRole.isPending ? "Updating..." : confirmDialog?.newRole === "admin" ? "Promote to Admin" : "Revoke Admin"}
+              {isPending ? "Processing..." : (
+                <>
+                  {confirmDialog?.action === "promote_super" && "Promote to Super Admin"}
+                  {confirmDialog?.action === "promote_admin" && "Promote to Admin"}
+                  {confirmDialog?.action === "demote" && "Demote to User"}
+                  {confirmDialog?.action === "remove" && "Remove User"}
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

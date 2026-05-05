@@ -591,3 +591,26 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ### Content Requests Tab
 - [x] Admin Content Requests: group by section (Video Requests, Webinar Requests, Guide Requests)
 - [x] Each section group: collapsible with request count badge, View All toggle
+
+## Admin Users Tab Overhaul
+
+- [ ] Stat cards (Total Users, Admins, Standard Users) are clickable and filter the user table
+- [ ] Auto-flag users with firstname.lastname@wavv.com pattern as "Pending Admin Promotion"
+- [ ] Super admin can promote pending users to admin with one-click action
+- [ ] Add Remove User action for all non-self users (with confirmation)
+- [ ] Delete test users: Cassie (cassie@wavv.com) and duplicate jake@wavv.com from DB
+- [ ] Keep only Jake Moser (jake.moser@wavv.com)
+
+## 3-Tier Role System + Admin Users Overhaul
+
+- [ ] Add super_admin to role enum in DB schema (users table)
+- [ ] Migrate DB: ALTER TABLE users MODIFY role enum('super_admin','admin','user')
+- [ ] Update routers.ts: superAdminProcedure gate for write operations; adminProcedure for read-only
+- [ ] Admin panel: super_admin = full read+write; admin = read-only (no edit/delete/promote buttons); user = no access
+- [ ] Add admin.removeUser procedure (super_admin only)
+- [ ] UsersTab: clickable stat cards filter table (Total / Admins / Standard Users)
+- [ ] UsersTab: auto-flag firstname.lastname@wavv.com pattern as "Pending Admin Promotion" badge
+- [ ] UsersTab: super_admin can promote pending users to admin or super_admin
+- [ ] UsersTab: Remove User action for all non-self users (super_admin only, with confirmation)
+- [ ] DB cleanup: delete Cassie (cassie@wavv.com) and jake@wavv.com test users
+- [ ] DB: set jake.moser@wavv.com role to super_admin

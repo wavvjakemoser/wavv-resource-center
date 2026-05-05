@@ -71,12 +71,19 @@ import {
   getSupportSubmittersExport,
   createContentRequest,
   getContentRequests,
+  deleteUser,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin") {
+  if (ctx.user.role !== "admin" && ctx.user.role !== "super_admin") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+  }
+  return next({ ctx });
+});
+const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== "super_admin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Super admin access required" });
   }
   return next({ ctx });
 });
@@ -798,13 +805,30 @@ export const appRouter = router({
             (u.email ?? "").toLowerCase().includes(search)
         );
       }),
-    updateRole: adminProcedure
-      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
+    updateRole: superAdminProcedure
+      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "super_admin"]) }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own role" });
         }
         await updateUserRole(input.userId, input.role);
+        return { success: true };
+      }),
+    removeUser: adminProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (input.userId === ctx.user.id) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot remove yourself" });
+        }
+        // Admins can only remove users (not other admins or super_admins)
+        // Super admins can remove anyone
+        const allUsers = await getAllUsers();
+        const target = allUsers.find(u => u.id === input.userId);
+        if (!target) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        if (ctx.user.role === "admin" && (target.role === "admin" || target.role === "super_admin")) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Admins can only remove standard users" });
+        }
+        await deleteUser(input.userId);
         return { success: true };
       }),
   }),
