@@ -376,3 +376,9 @@
 - [x] Rename "Upcoming Exclusive" tab to "Upcoming Exclusive Webinars"
 - [x] Fix all 8 evergreen cards to share one unified countdown clock synced to :00 and :30 of each hour
 - [x] Removed per-card staggered countdown logic; all cards use sharedNextSession = nextHalfHour()
+
+## Evergreen Color Palette + Gold Exclusive Accent
+- [x] Add `accentColor` column to webinars table (varchar 20, nullable) — migration applied
+- [x] Update 8 evergreen webinar records with per-topic colors (Dialer=blue, Boards=green, Settings=purple, Spam=amber, Wallet=teal, Dialer Options=indigo, Connection Rates=orange, Onboarding=emerald)
+- [x] Update WebinarCard to use webinar.accentColor when present, fallback to section default
+- [x] Change Upcoming Exclusive section accent from amber #F59E0B to gold #D4AF37

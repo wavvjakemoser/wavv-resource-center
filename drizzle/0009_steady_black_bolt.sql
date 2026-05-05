@@ -1,0 +1,1 @@
+ALTER TABLE `webinars` ADD `accentColor` varchar(20);

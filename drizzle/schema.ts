@@ -98,6 +98,7 @@ export const webinars = mysqlTable("webinars", {
   registrationUrl: text("registrationUrl"),
   videoUrl: text("videoUrl"),
   thumbnailUrl: text("thumbnailUrl"),
+  accentColor: varchar("accentColor", { length: 20 }),
   viewCount: int("viewCount").default(0),
   published: boolean("published").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

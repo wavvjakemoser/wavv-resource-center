@@ -64,6 +64,20 @@
       "when": 1777943961524,
       "tag": "0008_flat_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1777947276520,
+      "tag": "0009_steady_black_bolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1777947288278,
+      "tag": "0009_steady_black_bolt",
+      "breakpoints": true
     }
   ]
 }

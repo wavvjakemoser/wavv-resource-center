@@ -37,7 +37,7 @@ function WebinarCard({
   variant,
   nextSession,
 }: {
-  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null };
+  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null };
   variant: WebinarType;
   nextSession?: Date;
 }) {
@@ -53,12 +53,13 @@ function WebinarCard({
   const isRegistered = (myRegistrations ?? []).some((r) => r.webinarId === webinar.id);
   const countdown = useCountdown(nextSession ?? nextHalfHour());
 
-  const ACCENT: Record<WebinarType, string> = {
-    exclusive: "#f59e0b",
+  const SECTION_ACCENT: Record<WebinarType, string> = {
+    exclusive: "#D4AF37",
     evergreen: "#0074F4",
     recording: "#00A9E2",
   };
-  const accentColor = ACCENT[variant];
+  // Use per-card color for evergreen, section default otherwise
+  const accentColor = (variant === "evergreen" && webinar.accentColor) ? webinar.accentColor : SECTION_ACCENT[variant];
 
   return (
     <div
@@ -198,7 +199,7 @@ const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactN
   exclusive: {
     label: "Upcoming Exclusive Webinars",
     icon: <Star size={14} />,
-    accent: "#f59e0b",
+    accent: "#D4AF37",
     description: "Single-topic, focused live sessions — limited availability",
   },
   recording: {
