@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import WavvAIChat from "./WavvAIChat";
 import AISearchBar from "./AISearchBar";
-import MedalCase from "./MedalCase";
 import {
   BookOpen,
   GraduationCap,
@@ -16,8 +15,6 @@ import {
   Bell,
   Settings,
   History,
-  Medal,
-  Bookmark,
   LogOut,
   ChevronDown,
   ExternalLink,
@@ -59,7 +56,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [medalOpen, setMedalOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -320,21 +316,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                         <User size={15} className="text-gray-500" />
                         Profile
                       </Link>
-
-                      <button
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
-                        onClick={() => { setProfileOpen(false); setMedalOpen(true); }}
-                      >
-                        <Medal size={15} className="text-gray-500" />
-                        Medals
-                      </button>
-                      <button
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-all text-left"
-                        onClick={() => setProfileOpen(false)}
-                      >
-                        <Bookmark size={15} className="text-gray-500" />
-                        Bookmarks
-                      </button>
                     </div>
 
                     {/* Sign out */}
@@ -363,8 +344,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
       {/* WAVV AI Chat */}
       <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />
 
-      {/* Medal Case modal — triggered from dropdown */}
-      <MedalCase externalOpen={medalOpen} onClose={() => setMedalOpen(false)} />
     </div>
   );
 }

@@ -556,3 +556,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Add INTERCOM_APP_ID to secrets (blocked on credential — scaffold only)
 - [x] Consolidate My Tickets: replace large section + oversized empty state with compact inline bar (ticket count badge + New Ticket button)
 - [x] My Tickets compact bar: clicking ticket count or "View All" expands a collapsible list below
+
+## Support Page v3 + Profile My Tickets
+
+- [x] Support page: replace current layout with 4 equal action cards (Ask WAVV AI, Help Center, Chat with Support, Submit a New Ticket)
+- [x] Support page: remove My Tickets bar and ticket history entirely from Support page
+- [x] Profile page: add "My Support Tickets" section showing ticket history with status/priority badges
+- [x] Profile My Tickets: include New Ticket button to open submission modal from Profile
+
+## User Dropdown Cleanup
+
+- [x] Remove medals and bookmarks items from user dropdown in PortalLayout
+- [x] User dropdown: keep only Profile and Sign Out

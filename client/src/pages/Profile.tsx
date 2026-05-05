@@ -19,6 +19,9 @@ import {
   Bookmark,
   BookmarkCheck,
   Trash2,
+  AlertCircle,
+  Plus,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -386,7 +389,243 @@ export default function Profile() {
           </section>
         )}
 
+        {/* ── My Support Tickets ── */}
+        <SupportTicketsSection />
+
       </div>
     </PortalLayout>
+  );
+}
+
+// ─── Support Tickets section (self-contained) ─────────────────────────────────
+const TICKET_STATUS_META: Record<string, { label: string; color: string }> = {
+  open:        { label: "Open",        color: "#0074F4" },
+  in_progress: { label: "In Progress", color: "#FF9900" },
+  resolved:    { label: "Resolved",    color: "#67C728" },
+  closed:      { label: "Closed",      color: "#6b7280" },
+};
+const TICKET_PRIORITY_META: Record<string, { color: string }> = {
+  low:    { color: "#6b7280" },
+  medium: { color: "#00A9E2" },
+  high:   { color: "#FF9900" },
+  urgent: { color: "#ef4444" },
+};
+const TICKET_CATEGORIES = [
+  "Technical Issue", "Billing", "Feature Request",
+  "Onboarding", "General Question", "Other",
+] as const;
+const TICKET_PRIORITIES = ["low", "medium", "high", "urgent"] as const;
+
+function SupportTicketsSection() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState({
+    subject: "",
+    category: "General Question" as (typeof TICKET_CATEGORIES)[number],
+    priority: "medium" as (typeof TICKET_PRIORITIES)[number],
+    description: "",
+  });
+
+  const { data: tickets = [], refetch } = trpc.support.getMyTickets.useQuery();
+  const submitMutation = trpc.support.submitTicket.useMutation({
+    onSuccess: () => {
+      toast.success("Ticket submitted! The WAVV team has been notified.");
+      setForm({ subject: "", category: "General Question", priority: "medium", description: "" });
+      setModalOpen(false);
+      refetch();
+    },
+    onError: () => toast.error("Failed to submit ticket. Please try again."),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.subject.trim() || !form.description.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+    submitMutation.mutate(form);
+  };
+
+  return (
+    <>
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <LifeBuoy size={17} style={{ color: "#FF9900" }} />
+            <h2 className="text-base font-bold text-white">My Support Tickets</h2>
+            {tickets.length > 0 && (
+              <span className="text-xs text-gray-500">({tickets.length})</span>
+            )}
+          </div>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #FF9900, #ff7700)", color: "#fff" }}
+          >
+            <Plus size={12} />
+            New Ticket
+          </button>
+        </div>
+
+        {tickets.length === 0 ? (
+          <div
+            className="rounded-xl px-5 py-8 text-center"
+            style={{ background: "#111", border: "1px solid #1e1e1e" }}
+          >
+            <LifeBuoy size={28} className="text-gray-700 mx-auto mb-2" />
+            <p className="text-gray-500 text-sm">No tickets yet.</p>
+            <p className="text-gray-600 text-xs mt-1">
+              Submit a ticket from the{" "}
+              <a href="/support" className="underline" style={{ color: "#FF9900" }}>Support page</a>
+              {" "}and it will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {tickets.map((ticket) => {
+              const sm = TICKET_STATUS_META[ticket.status] ?? TICKET_STATUS_META.open;
+              const pm = TICKET_PRIORITY_META[ticket.priority] ?? TICKET_PRIORITY_META.medium;
+              return (
+                <div
+                  key={ticket.id}
+                  className="p-4 rounded-xl"
+                  style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h3 className="text-white text-sm font-semibold leading-snug">{ticket.subject}</h3>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full font-medium capitalize"
+                        style={{ background: `${pm.color}20`, color: pm.color }}
+                      >
+                        {ticket.priority}
+                      </span>
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1"
+                        style={{ background: `${sm.color}20`, color: sm.color }}
+                      >
+                        {ticket.status === "resolved"
+                          ? <CheckCircle2 size={10} />
+                          : <AlertCircle size={10} />}
+                        {sm.label}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-gray-500 text-xs line-clamp-2 mb-2">{ticket.description}</p>
+                  <div className="flex items-center gap-3 text-xs text-gray-600">
+                    <span>{ticket.category}</span>
+                    <span className="flex items-center gap-1">
+                      <Clock size={10} />
+                      {new Date(ticket.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Ticket form modal */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl p-6 space-y-4"
+            style={{ background: "#1a1a1a", border: "1px solid #333" }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-white font-semibold">Submit a Support Ticket</h2>
+                <p className="text-gray-500 text-xs mt-0.5">The WAVV support team will be notified immediately.</p>
+              </div>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:bg-white/10"
+              >
+                <X size={15} className="text-gray-400" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                  Subject <span className="text-red-400">*</span>
+                </label>
+                <input
+                  value={form.subject}
+                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                  placeholder="Brief description of your issue"
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 outline-none transition-all"
+                  style={{ background: "#111", border: "1px solid #333" }}
+                  onFocus={(e) => { e.target.style.borderColor = "#FF9900"; }}
+                  onBlur={(e) => { e.target.style.borderColor = "#333"; }}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Category</label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value as typeof form.category })}
+                    className="w-full px-3 py-2.5 rounded-lg text-sm text-white outline-none transition-all"
+                    style={{ background: "#111", border: "1px solid #333" }}
+                  >
+                    {TICKET_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Priority</label>
+                  <select
+                    value={form.priority}
+                    onChange={(e) => setForm({ ...form, priority: e.target.value as typeof form.priority })}
+                    className="w-full px-3 py-2.5 rounded-lg text-sm text-white outline-none transition-all"
+                    style={{ background: "#111", border: "1px solid #333" }}
+                  >
+                    {TICKET_PRIORITIES.map((p) => (
+                      <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                  Description <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Describe your issue in detail..."
+                  rows={4}
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 outline-none transition-all resize-none"
+                  style={{ background: "#111", border: "1px solid #333" }}
+                  onFocus={(e) => { e.target.style.borderColor = "#FF9900"; }}
+                  onBlur={(e) => { e.target.style.borderColor = "#333"; }}
+                />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
+                  style={{ background: "#111", border: "1px solid #333", color: "#9ca3af" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitMutation.isPending}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #FF9900, #ff7700)" }}
+                >
+                  {submitMutation.isPending ? "Submitting..." : "Submit Ticket"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
