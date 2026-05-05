@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Plus,
   X,
+  Headphones,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -450,7 +451,7 @@ function SupportTicketsSection() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <LifeBuoy size={17} style={{ color: "#FF9900" }} />
+            <Headphones size={17} style={{ color: "#FF9900" }} />
             <h2 className="text-base font-bold text-white">My Support Tickets</h2>
             {tickets.length > 0 && (
               <span className="text-xs text-gray-500">({tickets.length})</span>
@@ -471,7 +472,7 @@ function SupportTicketsSection() {
             className="rounded-xl px-5 py-8 text-center"
             style={{ background: "#111", border: "1px solid #1e1e1e" }}
           >
-            <LifeBuoy size={28} className="text-gray-700 mx-auto mb-2" />
+            <Headphones size={28} className="text-gray-700 mx-auto mb-2" />
             <p className="text-gray-500 text-sm">No tickets yet.</p>
             <p className="text-gray-600 text-xs mt-1">
               Submit a ticket from the{" "}
