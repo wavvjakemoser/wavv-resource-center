@@ -7,4 +7,6 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  intercomApiKey: process.env.INTERCOM_API_KEY ?? "",
+  intercomWorkspaceId: process.env.INTERCOM_WORKSPACE_ID ?? "",
 };

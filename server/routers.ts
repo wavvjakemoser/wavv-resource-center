@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { ENV } from "./_core/env";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
@@ -420,6 +421,27 @@ const supportRouter = router({
         title: `New Support Ticket: ${input.subject}`,
         content: `**Customer:** ${ctx.user.name ?? ctx.user.email ?? "Unknown"}\n**Category:** ${input.category}\n**Priority:** ${input.priority}\n\n**Description:**\n${input.description}`,
       });
+      // Intercom integration — create conversation when API key is configured
+      if (ENV.intercomApiKey) {
+        try {
+          const intercomBody: Record<string, unknown> = {
+            from: { type: "user", email: ctx.user.email ?? undefined },
+            body: `[${input.category}] [${input.priority.toUpperCase()}] ${input.subject}\n\n${input.description}`,
+          };
+          await fetch("https://api.intercom.io/conversations", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${ENV.intercomApiKey}`,
+              Accept: "application/json",
+            },
+            body: JSON.stringify(intercomBody),
+          });
+        } catch (err) {
+          // Non-fatal: log but don't block ticket submission
+          console.error("[Intercom] Failed to create conversation:", err);
+        }
+      }
       return { success: true };
     }),
 

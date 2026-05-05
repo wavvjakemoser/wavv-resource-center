@@ -512,3 +512,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Webinars: DEMO stamp default 40% opacity, hover fades to 15% (200ms ease)
 - [x] GuidesAndDocs: DEMO stamp default 40% opacity, hover fades to 15% (200ms ease)
 - [x] HandsOn (Playground): DEMO stamp default 40% opacity, hover fades to 15% (200ms ease)
+
+## Support Page Redesign
+
+- [x] Remove "Book a Call" card from Support landing page
+- [x] Reframe "Ask WAVV AI" card copy: "Get an instant answer before submitting a ticket"
+- [x] Convert "New Ticket" from default open tab to modal dialog triggered by a button
+- [x] Keep "My Tickets" as the default/main view on the Support page
+- [x] Build Intercom integration scaffold: server-side POST to Intercom Conversations API when ticket is submitted (needs INTERCOM_API_KEY secret — BLOCKED on credentials)
