@@ -438,3 +438,6 @@
 - [x] Regenerate Strategy banner with ghost/watermark text baked in (matching Onboarding style)
 - [x] Remove React text overlay from banners (title/subtitle rendered by component), keep only section/video count badges
 - [x] Upload and update Academy.tsx + AcademyCategory.tsx with new banner paths
+
+## Banner Sizing Fix
+- [x] Fix banner image sizing: all 3 banners must display at same zoom level as Onboarding (object-contain, fixed height, consistent across all categories)
