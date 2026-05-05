@@ -85,8 +85,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Onboarding",
     subtitle: "Get your team up and running with WAVV quickly and effectively.",
     color: "#0074F4",
-    thumbnail:
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-thumb-cy9amSDtDB8FaRgmGumyrX.webp",
+    thumbnail: "/manus-storage/banner-onboarding-v2_ddea462f.png",
     sections: [
       {
         id: "onb-1",
@@ -188,8 +187,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "How-To",
     subtitle: "Step-by-step guides for every core WAVV feature.",
     color: "#00A9E2",
-    thumbnail:
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-thumb-iuntTrCa6frsgxgN6pFnCD.webp",
+    thumbnail: "/manus-storage/banner-howto-v2_9c54c4b2.png",
     sections: [
       {
         id: "how-1",
@@ -255,8 +253,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Strategy & Best Practices",
     subtitle: "Maximize connection rates, conversions, and team performance.",
     color: "#67C728",
-    thumbnail:
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-thumb-fKFxPeA2NotYc3dTCL2qLc.webp",
+    thumbnail: "/manus-storage/banner-strategy-v2_218fad02.png",
     sections: [
       {
         id: "str-1",

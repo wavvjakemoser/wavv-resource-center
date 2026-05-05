@@ -37,7 +37,7 @@ function WebinarCard({
   variant,
   nextSession,
 }: {
-  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null };
+  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null };
   variant: WebinarType;
   nextSession?: Date;
 }) {
@@ -79,14 +79,14 @@ function WebinarCard({
         className="relative flex items-center justify-center"
         style={{
           height: "100px",
-          background: `linear-gradient(135deg, #0d1117, #1a1a2e)`,
+          background: webinar.thumbnailUrl ? `url(${webinar.thumbnailUrl}) center/cover no-repeat` : `linear-gradient(135deg, ${accentColor}22, ${accentColor}08)`,
         }}
       >
-        <Video size={28} className="text-gray-700" />
+        {!webinar.thumbnailUrl && <Video size={28} className="text-gray-700" />}
         {variant === "evergreen" && nextSession && (
           <div
             className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
-            style={{ background: "rgba(0,116,244,0.85)", color: "#fff" }}
+            style={{ background: `${accentColor}cc`, color: "#fff" }}
           >
             <Timer size={11} />
             Next session in {countdown}
@@ -249,7 +249,7 @@ export default function Webinars() {
               <Video size={24} style={{ color: "#00A9E2" }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white mb-1">WAVV Webinars</h1>
+              <h1 className="text-xl font-bold mb-1" style={{ background: "linear-gradient(90deg, #0074F4, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>WAVV Webinars</h1>
               <p className="text-gray-400 text-sm">
                 Join exclusive live sessions, drop into evergreen workshops, or watch on-demand recordings from the WAVV team.
               </p>

@@ -79,7 +79,7 @@ export default function Support() {
               <LifeBuoy size={24} style={{ color: "#FF9900" }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white mb-1">Support</h1>
+              <h1 className="text-xl font-bold mb-1" style={{ background: "linear-gradient(90deg, #0074F4, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Support</h1>
               <p className="text-gray-400 text-sm">
                 Submit a support ticket, book a call with the WAVV team, or get instant answers from WAVV AI.
               </p>

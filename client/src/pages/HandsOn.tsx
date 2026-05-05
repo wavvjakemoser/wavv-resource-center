@@ -263,7 +263,7 @@ export default function HandsOn() {
               <FlaskConical size={28} className="text-white" />
             </div>
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">WAVV Playground</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2" style={{ background: "linear-gradient(90deg, #0074F4, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>WAVV Playground</h1>
               <p className="text-gray-400 text-sm max-w-2xl leading-relaxed">
                 A safe, isolated environment to explore WAVV features without affecting your live account.
                 Practice the dialer, explore call boards, and get comfortable with the platform before going live.

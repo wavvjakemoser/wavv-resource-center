@@ -382,3 +382,9 @@
 - [x] Update 8 evergreen webinar records with per-topic colors (Dialer=blue, Boards=green, Settings=purple, Spam=amber, Wallet=teal, Dialer Options=indigo, Connection Rates=orange, Onboarding=emerald)
 - [x] Update WebinarCard to use webinar.accentColor when present, fallback to section default
 - [x] Change Upcoming Exclusive section accent from amber #F59E0B to gold #D4AF37
+
+## Webinar Card Polish + Header Gradient
+- [ ] Fix evergreen countdown bar to use per-card accentColor instead of hardcoded blue
+- [ ] Generate 8 WAVV-branded webinar thumbnails (one per topic, matching accent color)
+- [ ] Upload thumbnails and wire to webinar DB records via thumbnailUrl
+- [ ] Apply blue-to-green gradient to all section page headers (WAVV Webinars, WAVV Academy, etc.)

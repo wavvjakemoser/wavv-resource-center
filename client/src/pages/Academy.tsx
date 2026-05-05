@@ -23,7 +23,7 @@ const CATEGORIES = [
     subtitle: "Get your team up and running with WAVV",
     color: "#0074F4",
     icon: Rocket,
-    thumbnail: "/manus-storage/banner-onboarding_dbd0bcc0.png",
+    thumbnail: "/manus-storage/banner-onboarding-v2_ddea462f.png",
     placeholders: [
       {
         id: "p-onb-1",
@@ -57,7 +57,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step guides for core WAVV features",
     color: "#00A9E2",
     icon: Wrench,
-    thumbnail: "/manus-storage/banner-howto_b361bfde.png",
+    thumbnail: "/manus-storage/banner-howto-v2_9c54c4b2.png",
     placeholders: [
       {
         id: "p-how-1",
@@ -91,7 +91,7 @@ const CATEGORIES = [
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
     icon: Lightbulb,
-    thumbnail: "/manus-storage/banner-strategy_07979b75.png",
+    thumbnail: "/manus-storage/banner-strategy-v2_218fad02.png",
     placeholders: [
       {
         id: "p-str-1",
@@ -342,7 +342,7 @@ export default function Academy() {
               <GraduationCap size={24} style={{ color: "#0074F4" }} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white mb-1">WAVV Academy</h1>
+              <h1 className="text-xl font-bold mb-1" style={{ background: "linear-gradient(90deg, #0074F4, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>WAVV Academy</h1>
               <p className="text-gray-400 text-sm max-w-xl">
                 Structured learning paths to help you and your team get the most out of WAVV.
                 Every lesson is designed to solve a specific problem — faster onboarding, higher
