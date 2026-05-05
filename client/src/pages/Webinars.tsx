@@ -63,11 +63,12 @@ function WebinarCard({
   const accentColor = (variant === "evergreen" && webinar.accentColor) ? webinar.accentColor : SECTION_ACCENT[variant];
 
   const SECTION_BG: Record<WebinarType, string> = {
-    evergreen: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-evergreen-2cPyRZRnXAqiyUHXfbDqdj.webp",
-    exclusive: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-7ryE8gMbUFrhcmd2J2aGvc.webp",
-    recording: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-recording-L6jvMn6pmLzQoDyrUJczvk.webp",
+    evergreen: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-evergreen-v2-GrKL79AD2FdyCtLXnUSv4C.webp",
+    exclusive: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp",
+    recording: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-recording-v2-3C9ghU23nQyUUDrjZs5iVM.webp",
   };
   const thumbBg = webinar.thumbnailUrl || SECTION_BG[variant];
+  const isDemo = variant === "exclusive" || variant === "recording";
 
   return (
     <div
@@ -120,6 +121,20 @@ function WebinarCard({
             {webinar.title}
           </h3>
         </div>
+        {/* DEMO badge for placeholder content */}
+        {isDemo && (
+          <div
+            className="absolute top-2 left-2 z-20 px-2 py-0.5 rounded text-xs font-bold tracking-widest"
+            style={{
+              background: "rgba(255,180,0,0.15)",
+              color: "#FFB400",
+              border: "1px solid rgba(255,180,0,0.4)",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            DEMO
+          </div>
+        )}
         {/* Accent bottom bar */}
         <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ background: accentColor }} />
       </div>
