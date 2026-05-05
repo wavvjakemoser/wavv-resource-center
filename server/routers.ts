@@ -72,6 +72,12 @@ import {
   createContentRequest,
   getContentRequests,
   deleteUser,
+  getNotificationsForUser,
+  markNotificationRead,
+  markAllNotificationsRead,
+  createNotification,
+  deleteNotification,
+  getAllNotifications,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -831,6 +837,52 @@ export const appRouter = router({
         await deleteUser(input.userId);
         return { success: true };
       }),
+    // Notification management (admin only)
+    listNotifications: adminProcedure.query(async () => {
+      return getAllNotifications();
+    }),
+    createNotification: adminProcedure
+      .input(z.object({
+        title: z.string().min(1).max(255),
+        message: z.string().min(1),
+        type: z.enum(["info", "success", "warning", "announcement"]).default("info"),
+        userId: z.number().optional(),
+        link: z.string().optional(),
+        linkLabel: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await createNotification({
+          userId: input.userId ?? null,
+          title: input.title,
+          message: input.message,
+          type: input.type,
+          link: input.link,
+          linkLabel: input.linkLabel,
+        });
+        return { success: true };
+      }),
+    deleteNotification: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteNotification(input.id);
+        return { success: true };
+      }),
+  }),
+  // Notifications for the current user
+  notifications: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return getNotificationsForUser(ctx.user.id);
+    }),
+    markRead: protectedProcedure
+      .input(z.object({ notificationId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await markNotificationRead(input.notificationId, ctx.user.id);
+        return { success: true };
+      }),
+    markAllRead: protectedProcedure.mutation(async ({ ctx }) => {
+      await markAllNotificationsRead(ctx.user.id);
+      return { success: true };
+    }),
   }),
   search: router({
     query: protectedProcedure

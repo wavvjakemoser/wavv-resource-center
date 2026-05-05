@@ -15,6 +15,8 @@ import {
   webinarRegistrations,
   webinars,
   pageReadinessItems,
+  userNotifications,
+  notificationReads,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -982,4 +984,81 @@ export async function toggleReadinessItem(id: number, checked: boolean) {
   if (!db) return { success: false };
   await db.update(pageReadinessItems).set({ checked }).where(eq(pageReadinessItems.id, id));
   return { success: true };
+}
+
+// ─── User Notifications ───────────────────────────────────────────────────────
+export async function getNotificationsForUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  // Get all broadcast (userId null) + targeted (userId = this user) notifications
+  const allNotifs = await db
+    .select()
+    .from(userNotifications)
+    .orderBy(desc(userNotifications.createdAt));
+  const relevant = allNotifs.filter((n) => n.userId === null || n.userId === userId);
+  // Get read records for this user
+  const reads = await db
+    .select()
+    .from(notificationReads)
+    .where(eq(notificationReads.userId, userId));
+  const readSet = new Set(reads.map((r) => r.notificationId));
+  return relevant.map((n) => ({ ...n, read: readSet.has(n.id) }));
+}
+
+export async function markNotificationRead(notificationId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  // Upsert: only insert if not already read
+  const existing = await db
+    .select()
+    .from(notificationReads)
+    .where(and(eq(notificationReads.notificationId, notificationId), eq(notificationReads.userId, userId)));
+  if (existing.length === 0) {
+    await db.insert(notificationReads).values({ notificationId, userId });
+  }
+}
+
+export async function markAllNotificationsRead(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const notifs = await getNotificationsForUser(userId);
+  for (const n of notifs) {
+    if (!n.read) {
+      await db.insert(notificationReads).values({ notificationId: n.id, userId });
+    }
+  }
+}
+
+export async function createNotification(data: {
+  userId?: number | null;
+  title: string;
+  message: string;
+  type?: "info" | "success" | "warning" | "announcement";
+  link?: string;
+  linkLabel?: string;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  const [result] = await db.insert(userNotifications).values({
+    userId: data.userId ?? null,
+    title: data.title,
+    message: data.message,
+    type: data.type ?? "info",
+    link: data.link ?? null,
+    linkLabel: data.linkLabel ?? null,
+  });
+  return result;
+}
+
+export async function deleteNotification(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(notificationReads).where(eq(notificationReads.notificationId, id));
+  await db.delete(userNotifications).where(eq(userNotifications.id, id));
+}
+
+export async function getAllNotifications() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(userNotifications).orderBy(desc(userNotifications.createdAt));
 }

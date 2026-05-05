@@ -1,8 +1,8 @@
-import { trpc } from "@/lib/trpc";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import WavvAIChat from "./WavvAIChat";
 import AISearchBar from "./AISearchBar";
+import { trpc } from "@/lib/trpc";
 import {
   BookOpen,
   GraduationCap,
@@ -25,6 +25,11 @@ import {
   Users,
   BarChart3,
   Shield,
+  CheckCheck,
+  Info,
+  CheckCircle2,
+  AlertTriangle,
+  Megaphone,
 } from "lucide-react";
 
 const navItems = [
@@ -56,7 +61,18 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Notifications
+  const { data: notifications = [], refetch: refetchNotifs } = trpc.notifications.list.useQuery(
+    undefined,
+    { enabled: !!user, refetchInterval: 30000 }
+  );
+  const markRead = trpc.notifications.markRead.useMutation({ onSuccess: () => refetchNotifs() });
+  const markAllRead = trpc.notifications.markAllRead.useMutation({ onSuccess: () => refetchNotifs() });
+  const unreadCount = notifications.filter((n: any) => !n.read).length;
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -64,11 +80,14 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     }
   }, [loading, isAuthenticated]);
 
-  // Close profile dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -261,16 +280,102 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             {/* Right-side controls — pushed to far right */}
             <div className="flex items-center gap-1 flex-shrink-0 ml-auto">
               {/* Notifications bell */}
-              <button
-                className="relative flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
-                title="Notifications"
-              >
-                <Bell size={18} />
-                <span
-                  className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-                  style={{ background: "#0074F4" }}
-                />
-              </button>
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={() => setNotifOpen((v) => !v)}
+                  className="relative flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+                  title="Notifications"
+                >
+                  <Bell size={18} />
+                  {unreadCount > 0 && (
+                    <span
+                      className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
+                      style={{ background: "#0074F4" }}
+                    />
+                  )}
+                </button>
+
+                {/* Notification dropdown */}
+                {notifOpen && (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-80 rounded-xl shadow-2xl z-50 overflow-hidden"
+                    style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #2a2a2a" }}>
+                      <div className="flex items-center gap-2">
+                        <Bell size={14} className="text-gray-400" />
+                        <span className="text-sm font-semibold text-white">Notifications</span>
+                        {unreadCount > 0 && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#0074F4", color: "#fff" }}>
+                            {unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={() => markAllRead.mutate()}
+                          className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+                        >
+                          <CheckCheck size={12} /> Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Notification list */}
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 gap-2">
+                          <CheckCircle2 size={28} className="text-gray-600" />
+                          <p className="text-sm font-medium text-gray-400">All caught up.</p>
+                          <p className="text-xs text-gray-600">No new notifications.</p>
+                        </div>
+                      ) : (
+                        notifications.map((n: any) => {
+                          const typeIcon = n.type === "success" ? <CheckCircle2 size={14} style={{ color: "#4ade80", flexShrink: 0 }} />
+                            : n.type === "warning" ? <AlertTriangle size={14} style={{ color: "#fbbf24", flexShrink: 0 }} />
+                            : n.type === "announcement" ? <Megaphone size={14} style={{ color: "#e879f9", flexShrink: 0 }} />
+                            : <Info size={14} style={{ color: "#38bdf8", flexShrink: 0 }} />;
+                          return (
+                            <div
+                              key={n.id}
+                              className="px-4 py-3 cursor-pointer transition-colors"
+                              style={{
+                                borderBottom: "1px solid #1e1e1e",
+                                background: n.read ? "transparent" : "rgba(0,116,244,0.05)",
+                              }}
+                              onClick={() => { if (!n.read) markRead.mutate({ notificationId: n.id }); }}
+                            >
+                              <div className="flex items-start gap-2.5">
+                                <div className="mt-0.5">{typeIcon}</div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-medium text-white truncate">{n.title}</p>
+                                    {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />}
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{n.message}</p>
+                                  {n.link && (
+                                    <a
+                                      href={n.link}
+                                      className="text-xs text-blue-400 hover:text-blue-300 mt-1 inline-block"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {n.linkLabel ?? "View →"}
+                                    </a>
+                                  )}
+                                  <p className="text-[10px] text-gray-600 mt-1">
+                                    {new Date(n.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* User avatar + dropdown */}
               <div className="relative" ref={profileRef}>

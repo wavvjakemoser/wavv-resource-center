@@ -232,3 +232,28 @@ export const pageReadinessItems = mysqlTable("page_readiness_items", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type PageReadinessItem = typeof pageReadinessItems.$inferSelect;
+
+// ─── User Notifications ───────────────────────────────────────────────────────
+export const userNotifications = mysqlTable("user_notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  // null = broadcast to all users; non-null = targeted to specific user
+  userId: int("userId"),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: mysqlEnum("type", ["info", "success", "warning", "announcement"]).default("info").notNull(),
+  link: varchar("link", { length: 500 }),
+  linkLabel: varchar("linkLabel", { length: 100 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  // Tracks which users have dismissed/read this notification (stored as JSON array of userIds)
+});
+export type UserNotification = typeof userNotifications.$inferSelect;
+export type InsertUserNotification = typeof userNotifications.$inferInsert;
+
+// ─── Notification Reads ───────────────────────────────────────────────────────
+export const notificationReads = mysqlTable("notification_reads", {
+  id: int("id").autoincrement().primaryKey(),
+  notificationId: int("notificationId").notNull(),
+  userId: int("userId").notNull(),
+  readAt: timestamp("readAt").defaultNow().notNull(),
+});
+export type NotificationRead = typeof notificationReads.$inferSelect;
