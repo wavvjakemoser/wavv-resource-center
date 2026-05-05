@@ -75,7 +75,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support";
+type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -93,6 +93,7 @@ export default function Admin() {
     if (t === "guides") return "guides";
     if (t === "playground") return "playground";
     if (t === "support") return "support";
+    if (t === "content_requests") return "content_requests";
     return "analytics";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
@@ -107,9 +108,9 @@ export default function Admin() {
     else if (t === "guides") setActiveTab("guides");
     else if (t === "playground") setActiveTab("playground");
     else if (t === "support") setActiveTab("support");
+    else if (t === "content_requests") setActiveTab("content_requests");
     else setActiveTab("analytics");
   }, [location]);
-
   if (!loading && user && user.role !== "admin") {
     navigate("/dashboard");
     return null;
@@ -133,6 +134,7 @@ export default function Admin() {
     { id: "guides", label: "WAVV Guides & Docs", icon: <FileText size={15} /> },
     { id: "playground", label: "WAVV Playground", icon: <FlaskConical size={15} /> },
     { id: "support", label: "WAVV Support", icon: <HeadphonesIcon size={15} /> },
+    { id: "content_requests", label: "Content Requests", icon: <Bell size={15} /> },
   ];
 
   return (
@@ -184,6 +186,7 @@ export default function Admin() {
         {activeTab === "guides" && <GuidesTab />}
         {activeTab === "playground" && <PlaygroundTab />}
         {activeTab === "support" && <SupportTab />}
+        {activeTab === "content_requests" && <ContentRequestsTab />}
 
       </div>
     </PortalLayout>
@@ -2259,6 +2262,171 @@ function SupportTab() {
         </div>
       </div>
       <SupportSection />
+    </div>
+  );
+}
+
+// ─── Content Requests Tab ─────────────────────────────────────────────────────
+function ContentRequestsTab() {
+  const [filterType, setFilterType] = useState<"video" | "guide" | "webinar" | "">("");
+  const { data: requests, isLoading } = trpc.contentRequests.adminList.useQuery({
+    requestType: filterType || undefined,
+  });
+
+  const TYPE_COLOR: Record<string, string> = {
+    video: "#0074F4",
+    guide: "#00A9E2",
+    webinar: "#67C728",
+  };
+  const PRIORITY_COLOR: Record<string, string> = {
+    high: "#ef4444",
+    medium: "#FBBF24",
+    low: "#9ca3af",
+  };
+
+  function exportCSV() {
+    if (!requests || requests.length === 0) { toast.error("No requests to export"); return; }
+    const header = "Date,Type,Topic,Category,Format Preference,Priority,User,Email,Description";
+    const lines = (requests as Array<{
+      createdAt: Date | string;
+      requestType: string;
+      topic: string;
+      category?: string | null;
+      formatPreference?: string | null;
+      priority: string;
+      userName?: string | null;
+      userEmail?: string | null;
+      description?: string | null;
+    }>).map((r) => {
+      const date = r.createdAt ? new Date(r.createdAt).toISOString() : "";
+      const desc = r.description ? `"${String(r.description).replace(/"/g, '""')}"` : "";
+      return `${date},${r.requestType},"${r.topic}",${r.category ?? ""},${r.formatPreference ?? ""},${r.priority},${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
+    });
+    const csv = [header, ...lines].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "content-requests.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+            <Bell size={18} style={{ color: "#0074F4" }} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white">Content Requests</h2>
+            <p className="text-xs text-gray-500">User-submitted requests for videos, guides, and webinars</p>
+          </div>
+        </div>
+        <button
+          onClick={exportCSV}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+          style={{ background: "rgba(0,116,244,0.1)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.2)" }}
+        >
+          <FileDown size={13} /> Export CSV
+        </button>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex gap-2 flex-wrap">
+        {(["", "video", "guide", "webinar"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setFilterType(t)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize"
+            style={{
+              background: filterType === t ? `${TYPE_COLOR[t] ?? "#0074F4"}20` : "#1a1a1a",
+              color: filterType === t ? (TYPE_COLOR[t] ?? "#0074F4") : "#9ca3af",
+              border: filterType === t ? `1px solid ${TYPE_COLOR[t] ?? "#0074F4"}50` : "1px solid #2a2a2a",
+            }}
+          >
+            {t === "" ? "All" : t === "video" ? "Videos" : t === "guide" ? "Guides" : "Webinars"}
+          </button>
+        ))}
+      </div>
+
+      {/* Table */}
+      {isLoading ? (
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: "#1a1a1a" }} />
+          ))}
+        </div>
+      ) : !requests || requests.length === 0 ? (
+        <div className="text-center py-16 rounded-xl" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
+          <Bell size={32} className="text-gray-700 mx-auto mb-3" />
+          <p className="text-gray-400 text-sm font-medium">No content requests yet.</p>
+          <p className="text-gray-600 text-xs mt-1">Requests submitted by users will appear here.</p>
+        </div>
+      ) : (
+        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+          <Table>
+            <TableHeader>
+              <TableRow style={{ background: "#1a1a1a", borderBottom: "1px solid #2a2a2a" }}>
+                <TableHead className="text-gray-400 text-xs">Date</TableHead>
+                <TableHead className="text-gray-400 text-xs">Type</TableHead>
+                <TableHead className="text-gray-400 text-xs">Topic</TableHead>
+                <TableHead className="text-gray-400 text-xs">Category</TableHead>
+                <TableHead className="text-gray-400 text-xs">Format</TableHead>
+                <TableHead className="text-gray-400 text-xs">Priority</TableHead>
+                <TableHead className="text-gray-400 text-xs">User</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(requests as Array<{
+                id: number;
+                createdAt: Date | string;
+                requestType: string;
+                topic: string;
+                description?: string | null;
+                category?: string | null;
+                formatPreference?: string | null;
+                priority: string;
+                userName?: string | null;
+                userEmail?: string | null;
+              }>).map((r) => (
+                <TableRow key={r.id} style={{ borderBottom: "1px solid #1f1f1f" }}>
+                  <TableCell className="text-gray-500 text-xs whitespace-nowrap">
+                    {new Date(r.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize"
+                      style={{ background: `${TYPE_COLOR[r.requestType] ?? "#9ca3af"}20`, color: TYPE_COLOR[r.requestType] ?? "#9ca3af" }}
+                    >
+                      {r.requestType}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-white text-xs max-w-[200px]">
+                    <div className="truncate" title={r.topic}>{r.topic}</div>
+                    {r.description && (
+                      <div className="text-gray-600 text-[10px] truncate mt-0.5" title={r.description}>{r.description}</div>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-gray-400 text-xs">{r.category ?? "—"}</TableCell>
+                  <TableCell className="text-gray-400 text-xs">{r.formatPreference ?? "—"}</TableCell>
+                  <TableCell>
+                    <span
+                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize"
+                      style={{ background: `${PRIORITY_COLOR[r.priority] ?? "#9ca3af"}20`, color: PRIORITY_COLOR[r.priority] ?? "#9ca3af" }}
+                    >
+                      {r.priority}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-gray-400 text-xs">
+                    <div>{r.userName ?? "—"}</div>
+                    {r.userEmail && <div className="text-gray-600 text-[10px]">{r.userEmail}</div>}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

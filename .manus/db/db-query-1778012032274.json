@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `content_requests` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`requestType` enum('video','guide','webinar') NOT NULL,\n\t`topic` varchar(255) NOT NULL,\n\t`description` text,\n\t`category` varchar(100),\n\t`formatPreference` varchar(100),\n\t`priority` enum('low','medium','high') NOT NULL DEFAULT 'medium',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `content_requests_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute CREATE TABLE `content_requests` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`requestType` enum('video','guide','webinar') NOT NULL,\n\t`topic` varchar(255) NOT NULL,\n\t`description` text,\n\t`category` varchar(100),\n\t`formatPreference` varchar(100),\n\t`priority` enum('low','medium','high') NOT NULL DEFAULT 'medium',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `content_requests_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 176
+}

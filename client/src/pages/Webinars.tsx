@@ -6,6 +6,7 @@ import {
   Users, Star, RefreshCw, Timer
 } from "lucide-react";
 import { toast } from "sonner";
+import { ContentRequestForm } from "./Academy";
 
 // ─── Countdown helper ─────────────────────────────────────────────────────────
 // Returns the next 30-min boundary from now (e.g. :00 or :30)
@@ -344,6 +345,11 @@ export default function Webinars() {
           )
         )}
 
+      </div>
+
+      {/* ── Request a Webinar ── */}
+      <div className="px-4 lg:px-6 pb-10 max-w-2xl">
+        <ContentRequestForm requestType="webinar" accentColor="#67C728" />
       </div>
     </PortalLayout>
   );

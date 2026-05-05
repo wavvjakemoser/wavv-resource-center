@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { FileText, Download, ExternalLink, Search, BookOpen, CheckSquare, Map } from "lucide-react";
 import { toast } from "sonner";
+import { ContentRequestForm } from "./Academy";
 
 const FILE_TYPE_META: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   pdf: { label: "PDF", color: "#ef4444", icon: FileText },
@@ -203,6 +204,11 @@ export default function GuidesAndDocs() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* ── Request a Written Guide ── */}
+      <div className="px-4 lg:px-6 pb-10 max-w-2xl">
+        <ContentRequestForm requestType="guide" accentColor="#00A9E2" />
       </div>
     </PortalLayout>
   );

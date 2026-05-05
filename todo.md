@@ -451,3 +451,31 @@
 - [x] Regenerate How-To banner (v6) with crisp white bold ghost text matching Onboarding contrast
 - [x] Regenerate Strategy banner (v7) with crisp white bold ghost text matching Onboarding contrast
 - [x] Add React text overlay to all 3 banners: accent-colored "WAVV Academy" label, bold white category name, gray subtitle, count badges
+
+## Content Request Forms (3 Pages)
+
+### DB + Backend
+- [x] Add content_requests table: id, user_id, request_type (video/guide/webinar), topic, description, category, priority, created_at
+- [x] Run schema migration
+- [x] tRPC procedure: submitContentRequest (protected, stores to DB, notifies owner)
+- [x] tRPC procedure: admin.getContentRequests (admin only, filterable by type)
+
+### Academy — Video Request Form
+- [x] Add "Request a Video" section at bottom of Academy page (below Trending This Week)
+- [x] Form fields: Topic/Feature Area (dropdown), What do you want to learn? (textarea), Category (Onboarding/How-To/Strategy), Priority (Low/Medium/High)
+- [x] Submit triggers owner notification with request details
+
+### Guides & Docs — Written Guide Request Form
+- [x] Add "Request a Guide" section at bottom of Guides & Docs page
+- [x] Form fields: Topic (text), What problem are you trying to solve? (textarea), Format preference (Step-by-step / Reference / Checklist), Priority (Low/Medium/High)
+- [x] Submit triggers owner notification with request details
+
+### Webinars — Webinar Request Form
+- [x] Add "Request a Webinar" section at bottom of Webinars page
+- [x] Form fields: Topic (text), What do you want covered? (textarea), Preferred format (Live / Evergreen / Either), Priority (Low/Medium/High)
+- [x] Submit triggers owner notification with request details
+
+### Admin Panel
+- [x] Add "Content Requests" tab (or sub-section) in Admin showing all 3 request types in a unified table
+- [x] Table columns: Type badge, Topic, Description, Category, Priority, User, Date
+- [x] CSV export of all content requests

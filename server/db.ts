@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import {
   analyticsEvents,
   bookmarks,
+  contentRequests,
   courses,
   guides,
   InsertUser,
@@ -915,4 +916,46 @@ export async function getSupportSubmittersExport() {
     .leftJoin(users, eq(users.id, supportTickets.userId))
     .orderBy(desc(supportTickets.createdAt));
   return rows;
+}
+
+// ─── Content Requests ─────────────────────────────────────────────────────────
+export async function createContentRequest(data: {
+  userId: number;
+  requestType: "video" | "guide" | "webinar";
+  topic: string;
+  description?: string;
+  category?: string;
+  formatPreference?: string;
+  priority: "low" | "medium" | "high";
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  const [result] = await db.insert(contentRequests).values(data);
+  return result;
+}
+
+export async function getContentRequests(requestType?: "video" | "guide" | "webinar") {
+  const db = await getDb();
+  if (!db) return [];
+  const query = db
+    .select({
+      id: contentRequests.id,
+      userId: contentRequests.userId,
+      requestType: contentRequests.requestType,
+      topic: contentRequests.topic,
+      description: contentRequests.description,
+      category: contentRequests.category,
+      formatPreference: contentRequests.formatPreference,
+      priority: contentRequests.priority,
+      createdAt: contentRequests.createdAt,
+      userName: users.name,
+      userEmail: users.email,
+    })
+    .from(contentRequests)
+    .leftJoin(users, eq(users.id, contentRequests.userId))
+    .orderBy(desc(contentRequests.createdAt));
+  if (requestType) {
+    return query.where(eq(contentRequests.requestType, requestType));
+  }
+  return query;
 }

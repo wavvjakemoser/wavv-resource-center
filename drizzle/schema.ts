@@ -193,3 +193,23 @@ export const playgroundRequests = mysqlTable("playground_requests", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type PlaygroundRequest = typeof playgroundRequests.$inferSelect;
+
+// ─── Content Requests ─────────────────────────────────────────────────────────
+export const contentRequests = mysqlTable("content_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  // Type of content being requested
+  requestType: mysqlEnum("requestType", ["video", "guide", "webinar"]).notNull(),
+  // Topic / title of the requested content
+  topic: varchar("topic", { length: 255 }).notNull(),
+  // Detailed description of what they want to learn / cover
+  description: text("description"),
+  // Category context (varies by request type)
+  category: varchar("category", { length: 100 }),
+  // Format preference (varies by request type)
+  formatPreference: varchar("formatPreference", { length: 100 }),
+  priority: mysqlEnum("priority", ["low", "medium", "high"]).default("medium").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ContentRequest = typeof contentRequests.$inferSelect;

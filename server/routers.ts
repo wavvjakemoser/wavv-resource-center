@@ -67,6 +67,8 @@ import {
   getWebinarRegistrantsExport,
   getGuideDownloadersExport,
   getSupportSubmittersExport,
+  createContentRequest,
+  getContentRequests,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -902,6 +904,54 @@ export const appRouter = router({
       }))
       .query(async ({ ctx, input }) => {
         return isBookmarked(ctx.user.id, input.contentType, input.contentId);
+      }),
+  }),
+
+  // ─── Content Requests ──────────────────────────────────────────────────────
+  contentRequests: router({
+    submit: protectedProcedure
+      .input(z.object({
+        requestType: z.enum(["video", "guide", "webinar"]),
+        topic: z.string().min(1).max(255),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        formatPreference: z.string().optional(),
+        priority: z.enum(["low", "medium", "high"]).default("medium"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await createContentRequest({ userId: ctx.user.id, ...input });
+        const typeLabel = input.requestType === "video" ? "Video" : input.requestType === "guide" ? "Guide" : "Webinar";
+        await notifyOwner({
+          title: `New ${typeLabel} Request: ${input.topic}`,
+          content: [
+            `User: ${ctx.user.name ?? ctx.user.email ?? "Unknown"} (${ctx.user.email ?? ""})`,
+            `Type: ${typeLabel}`,
+            `Topic: ${input.topic}`,
+            input.category ? `Category: ${input.category}` : null,
+            input.formatPreference ? `Format Preference: ${input.formatPreference}` : null,
+            `Priority: ${input.priority}`,
+            input.description ? `\nDetails: ${input.description}` : null,
+          ].filter(Boolean).join("\n"),
+        });
+        return { success: true };
+      }),
+
+    adminList: adminProcedure
+      .input(z.object({ requestType: z.enum(["video", "guide", "webinar"]).optional() }))
+      .query(async ({ input }) => {
+        return getContentRequests(input.requestType);
+      }),
+
+    adminExportCsv: adminProcedure
+      .query(async () => {
+        const rows = await getContentRequests();
+        const header = "Date,Type,Topic,Category,Format Preference,Priority,User,Email,Description";
+        const lines = rows.map((r) => {
+          const date = r.createdAt ? new Date(r.createdAt).toISOString() : "";
+          const desc = r.description ? `"${String(r.description).replace(/"/g, '""')}"` : "";
+          return `${date},${r.requestType},"${r.topic}",${r.category ?? ""},${r.formatPreference ?? ""},${r.priority},${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
+        });
+        return [header, ...lines].join("\n");
       }),
   }),
 });

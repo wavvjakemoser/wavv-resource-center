@@ -78,6 +78,13 @@
       "when": 1777947288278,
       "tag": "0009_steady_black_bolt",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1778012014432,
+      "tag": "0010_thankful_synch",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,7 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
+import { useState } from "react";
 import {
   BookOpen,
   Clock,
@@ -13,6 +14,9 @@ import {
   Rocket,
   Wrench,
   Lightbulb,
+  Video,
+  Send,
+  CheckCircle2,
 } from "lucide-react";
 
 // ─── 3 canonical categories ───────────────────────────────────────────────
@@ -498,6 +502,196 @@ export default function Academy() {
         )}
 
       </div>
+
+      {/* ── Request a Video ── */}
+      <div className="px-6 pb-10 max-w-2xl">
+        <ContentRequestForm requestType="video" />
+      </div>
     </PortalLayout>
+  );
+}
+
+// ─── Reusable Content Request Form ───────────────────────────────────────────
+export function ContentRequestForm({
+  requestType,
+  accentColor,
+  categoryOptions,
+  formatOptions,
+  categoryLabel,
+  formatLabel,
+}: {
+  requestType: "video" | "guide" | "webinar";
+  accentColor?: string;
+  categoryOptions?: string[];
+  formatOptions?: string[];
+  categoryLabel?: string;
+  formatLabel?: string;
+}) {
+  const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#67C728");
+  const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
+  const typeIcon = requestType === "video" ? Video : requestType === "guide" ? BookOpen : GraduationCap;
+  const TypeIcon = typeIcon;
+
+  const [topic, setTopic] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [formatPref, setFormatPref] = useState("");
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
+  const [submitted, setSubmitted] = useState(false);
+
+  const submit = trpc.contentRequests.submit.useMutation({
+    onSuccess: () => setSubmitted(true),
+  });
+
+  const defaultCategoryOptions = requestType === "video"
+    ? ["Onboarding", "How-To", "Strategy & Best Practices", "Dialer Setup", "CRM Integrations", "Spam Protection"]
+    : requestType === "guide"
+    ? ["Getting Started", "Feature Deep-Dive", "Troubleshooting", "Integrations", "Best Practices"]
+    : ["Product Demo", "Feature Training", "Strategy & Best Practices", "Q&A Session", "Industry Trends"];
+
+  const defaultFormatOptions = requestType === "video"
+    ? ["Short clip (< 5 min)", "Full tutorial (5–15 min)", "Deep dive (15+ min)"]
+    : requestType === "guide"
+    ? ["Step-by-step", "Reference / Cheat sheet", "Checklist", "Playbook"]
+    : ["Live session", "Evergreen recording", "Either"];
+
+  const cats = categoryOptions ?? defaultCategoryOptions;
+  const fmts = formatOptions ?? defaultFormatOptions;
+  const catLabel = categoryLabel ?? (requestType === "video" ? "Category" : requestType === "guide" ? "Topic Area" : "Session Topic");
+  const fmtLabel = formatLabel ?? (requestType === "video" ? "Preferred Length" : requestType === "guide" ? "Format Preference" : "Preferred Format");
+
+  if (submitted) {
+    return (
+      <div
+        className="rounded-2xl p-6 flex flex-col items-center gap-3 text-center"
+        style={{ background: "#0f1623", border: `1px solid ${accent}40` }}
+      >
+        <CheckCircle2 size={36} style={{ color: accent }} />
+        <h3 className="text-white font-bold text-lg">Request Submitted</h3>
+        <p className="text-gray-400 text-sm">
+          Thanks for the suggestion. We review all requests and prioritize based on demand.
+        </p>
+        <button
+          onClick={() => { setSubmitted(false); setTopic(""); setDescription(""); setCategory(""); setFormatPref(""); setPriority("medium"); }}
+          className="text-xs mt-1 underline"
+          style={{ color: accent }}
+        >
+          Submit another request
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-2xl p-6 space-y-4"
+      style={{ background: "#0f1623", border: `1px solid ${accent}30` }}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg" style={{ background: `${accent}18` }}>
+          <TypeIcon size={18} style={{ color: accent }} />
+        </div>
+        <div>
+          <h3 className="text-white font-bold text-base">Request a {typeLabel}</h3>
+          <p className="text-gray-500 text-xs">Don't see what you need? Let us know what to build next.</p>
+        </div>
+      </div>
+
+      {/* Topic */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Topic *</label>
+        <input
+          type="text"
+          placeholder={`e.g. ${requestType === "video" ? "How to set up call boards" : requestType === "guide" ? "CRM integration checklist" : "Advanced dialing strategies"}`}
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          maxLength={255}
+          className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:ring-1"
+          style={{ background: "#161d2e", border: "1px solid #2a3347" }}
+        />
+      </div>
+
+      {/* Category + Format in a row */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{catLabel}</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
+            style={{ background: "#161d2e", border: "1px solid #2a3347" }}
+          >
+            <option value="">Select...</option>
+            {cats.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{fmtLabel}</label>
+          <select
+            value={formatPref}
+            onChange={(e) => setFormatPref(e.target.value)}
+            className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
+            style={{ background: "#161d2e", border: "1px solid #2a3347" }}
+          >
+            <option value="">Select...</option>
+            {fmts.map((f) => <option key={f} value={f}>{f}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Description */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          {requestType === "video" ? "What do you want to learn?" : requestType === "guide" ? "What problem are you solving?" : "What should we cover?"}
+        </label>
+        <textarea
+          placeholder="Describe the specific use case, problem, or outcome you're looking for..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none resize-none"
+          style={{ background: "#161d2e", border: "1px solid #2a3347" }}
+        />
+      </div>
+
+      {/* Priority + Submit */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Priority</label>
+          <div className="flex gap-1">
+            {(["low", "medium", "high"] as const).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPriority(p)}
+                className="text-[11px] font-semibold px-2.5 py-1 rounded-full transition-all"
+                style={{
+                  background: priority === p ? `${accent}25` : "#161d2e",
+                  color: priority === p ? accent : "#666",
+                  border: priority === p ? `1px solid ${accent}60` : "1px solid #2a3347",
+                }}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            if (!topic.trim()) return;
+            submit.mutate({ requestType, topic: topic.trim(), description: description.trim() || undefined, category: category || undefined, formatPreference: formatPref || undefined, priority });
+          }}
+          disabled={!topic.trim() || submit.isPending}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
+          style={{ background: accent, color: "#000" }}
+        >
+          <Send size={14} />
+          {submit.isPending ? "Submitting..." : "Submit Request"}
+        </button>
+      </div>
+      {submit.isError && (
+        <p className="text-red-400 text-xs">{submit.error?.message ?? "Something went wrong. Please try again."}</p>
+      )}
+    </div>
   );
 }
