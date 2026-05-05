@@ -172,35 +172,36 @@ export default function Home() {
           <ArrowRight size={16} />
         </button>
 
-        <div className="grid grid-cols-5 gap-3 mt-16 max-w-5xl w-full">
+        <div className="flex flex-col gap-3 mt-16 max-w-3xl w-full">
           {modules.map((m) => {
             const Icon = m.icon;
             return (
               <div
                 key={m.label}
-                className="p-5 rounded-2xl text-center transition-all hover:-translate-y-1 cursor-default flex flex-col items-center"
+                className="flex items-center gap-4 px-5 py-4 rounded-2xl transition-all hover:-translate-y-0.5 cursor-default"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  backdropFilter: "blur(8px)",
+                  background: `linear-gradient(135deg, #0a1628 0%, #0d1f35 70%, ${m.color}12 100%)`,
+                  border: `1px solid ${m.color}25`,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = `${m.color}60`;
+                  e.currentTarget.style.borderColor = `${m.color}55`;
                   e.currentTarget.style.boxShadow = `0 4px 24px ${m.color}18`;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                  e.currentTarget.style.borderColor = `${m.color}25`;
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 mx-auto"
-                  style={{ background: `${m.color}18` }}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${m.color}22`, border: `1px solid ${m.color}30` }}
                 >
-                  <Icon size={20} style={{ color: m.color }} />
+                  <Icon size={22} style={{ color: m.color }} />
                 </div>
-                <h3 className="text-white font-semibold text-sm mb-1">{m.label}</h3>
-                <p className="text-gray-500 text-xs leading-relaxed">{m.desc}</p>
+                <div className="text-left">
+                  <h3 className="font-bold text-sm mb-0.5" style={{ color: m.color }}>{m.label}</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">{m.desc}</p>
+                </div>
               </div>
             );
           })}

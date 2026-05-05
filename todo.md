@@ -417,3 +417,6 @@
 
 ## Webinar Card Thumbnail Redesign
 - [x] Remove thumbnail images from webinar cards — replace with clean dark gradient header showing title text only (no WAVV logo, no image clutter)
+
+## Landing Page Card Style Refresh
+- [x] Update feature cards on Home.tsx to match reference style: deep navy gradient background, colored rounded icon badges, blue accent title text, premium card feel
