@@ -384,7 +384,7 @@
 - [x] Change Upcoming Exclusive section accent from amber #F59E0B to gold #D4AF37
 
 ## Webinar Card Polish + Header Gradient
-- [ ] Fix evergreen countdown bar to use per-card accentColor instead of hardcoded blue
-- [ ] Generate 8 WAVV-branded webinar thumbnails (one per topic, matching accent color)
-- [ ] Upload thumbnails and wire to webinar DB records via thumbnailUrl
-- [ ] Apply blue-to-green gradient to all section page headers (WAVV Webinars, WAVV Academy, etc.)
+- [x] Fix evergreen countdown bar to use per-card accentColor instead of hardcoded blue
+- [x] Generate 8 WAVV-branded webinar thumbnails (one per topic, matching accent color)
+- [x] Upload thumbnails and wire to webinar DB records via thumbnailUrl
+- [x] Apply blue-to-green gradient to all section page headers (WAVV Webinars, WAVV Academy, etc.)
