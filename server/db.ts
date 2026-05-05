@@ -550,6 +550,45 @@ export async function createNativeUser(data: {
    return created;
 }
 
+export async function upsertGoogleUser(data: {
+  googleId: string;
+  email: string;
+  name: string;
+  avatarUrl?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Check if user exists by googleId or email
+  const byGoogle = await db.select().from(users).where(eq(users.googleId, data.googleId)).limit(1);
+  if (byGoogle[0]) {
+    // Update last signed in and avatar
+    await db.update(users).set({ lastSignedIn: new Date(), avatarUrl: data.avatarUrl ?? byGoogle[0].avatarUrl }).where(eq(users.id, byGoogle[0].id));
+    return byGoogle[0];
+  }
+  const byEmail = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+  if (byEmail[0]) {
+    // Link Google ID to existing account
+    await db.update(users).set({ googleId: data.googleId, lastSignedIn: new Date(), avatarUrl: data.avatarUrl ?? byEmail[0].avatarUrl }).where(eq(users.id, byEmail[0].id));
+    return byEmail[0];
+  }
+  // Create new user
+  const openId = `google_${data.googleId}`;
+  await db.insert(users).values({
+    openId,
+    email: data.email,
+    name: data.name,
+    googleId: data.googleId,
+    avatarUrl: data.avatarUrl,
+    loginMethod: "google",
+    role: "user",
+    isActive: true,
+    lastSignedIn: new Date(),
+  });
+  const created = await getUserByEmail(data.email);
+  if (!created) throw new Error("Failed to create Google user");
+  return created;
+}
+
 // ─── Search ──────────────────────────────────────────────────────────────────
 export async function searchContent(query: string) {
   const db = await getDb();

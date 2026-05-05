@@ -172,7 +172,7 @@ export default function Home() {
           <ArrowRight size={16} />
         </button>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 max-w-4xl w-full">
+        <div className="grid grid-cols-5 gap-3 mt-16 max-w-5xl w-full">
           {modules.map((m) => {
             const Icon = m.icon;
             return (
@@ -387,17 +387,7 @@ export default function Home() {
               </button>
             </form>
 
-            <p className="text-gray-600 text-xs mt-5 text-center">
-              Need access?{" "}
-              <a
-                href="https://wavv.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#0074F4] hover:underline"
-              >
-                Contact your WAVV rep
-              </a>
-            </p>
+
           </div>
         </div>
       )}

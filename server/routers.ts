@@ -7,7 +7,7 @@ import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { hashPassword, verifyPassword, createSessionToken } from "./nativeAuth";
-import { getUserByEmail, createNativeUser } from "./db";
+import { getUserByEmail, createNativeUser, upsertGoogleUser } from "./db";
 import {
   createCourse,
   createGuide,
@@ -678,6 +678,51 @@ export const appRouter = router({
         const passwordHash = await hashPassword(input.password);
         const user = await createNativeUser({ email: input.email.trim().toLowerCase(), name: input.name.trim(), passwordHash, role: "user" });
         // Auto-login after registration
+        const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        await trackEvent({ userId: user.id, eventType: "login" });
+        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+      }),
+
+    googleAuth: publicProcedure
+      .input(z.object({ code: z.string(), redirectUri: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+        const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+        if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Google OAuth not configured" });
+        }
+        // Exchange code for tokens
+        const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            code: input.code,
+            client_id: GOOGLE_CLIENT_ID,
+            client_secret: GOOGLE_CLIENT_SECRET,
+            redirect_uri: input.redirectUri,
+            grant_type: "authorization_code",
+          }),
+        });
+        if (!tokenRes.ok) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Failed to exchange Google code" });
+        }
+        const tokenData = await tokenRes.json() as { access_token: string };
+        // Get user profile
+        const profileRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` },
+        });
+        if (!profileRes.ok) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Failed to get Google profile" });
+        }
+        const profile = await profileRes.json() as { id: string; email: string; name: string; picture?: string };
+        const user = await upsertGoogleUser({
+          googleId: profile.id,
+          email: profile.email,
+          name: profile.name,
+          avatarUrl: profile.picture,
+        });
         const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });

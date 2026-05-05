@@ -395,3 +395,18 @@
 - [x] Upload and update DB thumbnail_url for Call Boards webinar (ID 30007)
 - [x] Regenerate Strategy & Best Practices Academy banner with glowing lightbulb (not chart/arrow)
 - [x] Upload and update Academy.tsx + AcademyCategory.tsx with new strategy banner path
+
+## Landing Page + Sign-In Overhaul (Round 3)
+- [x] Landing page: force 5 feature cards into a single row (5-column grid, no wrap)
+- [x] Sign-in modal: remove "Need access? Contact your WAVV rep" link
+- [x] Sign-in modal: add "Continue with Google" button (Google OAuth)
+- [x] Backend: Google OAuth tRPC procedure (exchange code → get profile → upsert user → create session)
+- [x] Frontend: Google OAuth callback page / handler
+- [x] Wire GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET secrets
+
+## Customer Gating + Auth Cleanup
+- [x] Remove Google OAuth button from sign-in modal (deferred — no credentials available)
+- [x] Keep Google OAuth backend code in place but dormant (activate when Client ID is available)
+- [x] Document customer-gating strategy: active WAVV customer verification via API
+- [ ] Future: wire WAVV customer status API to gate login (only active subscribers can access)
+- [ ] Future: Google OAuth as secondary sign-in option once Client ID is available

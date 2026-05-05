@@ -19,6 +19,7 @@ import HandsOn from "./pages/HandsOn";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import GoogleCallback from "./pages/GoogleCallback";
 import { usePageTracking } from "./hooks/usePageTracking";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/auth/google/callback" component={GoogleCallback} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/academy" component={Academy} />
       <Route path="/academy/category/:categoryKey" component={AcademyCategory} />
