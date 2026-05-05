@@ -8,7 +8,7 @@ import {
   Phone,
   LayoutDashboard,
   Settings,
-  Lock,
+  Construction,
   CheckCircle2,
   Send,
   Bell,
@@ -225,10 +225,9 @@ export default function HandsOn() {
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm"
           style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}
         >
-          <Lock size={14} style={{ color: "#a855f7", flexShrink: 0 }} />
+          <Construction size={14} style={{ color: "#a855f7", flexShrink: 0 }} />
           <span className="text-gray-400">
-            Playground environments are currently in development. They will be available in an upcoming release.
-            The playgrounds below show what's planned.
+            These playgrounds are under construction — here's what's coming.
           </span>
         </div>
 
