@@ -253,7 +253,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Strategy & Best Practices",
     subtitle: "Maximize connection rates, conversions, and team performance.",
     color: "#67C728",
-    thumbnail: "/manus-storage/banner-strategy-v2_218fad02.png",
+    thumbnail: "/manus-storage/banner-strategy-v3_188b3d6c.png",
     sections: [
       {
         id: "str-1",

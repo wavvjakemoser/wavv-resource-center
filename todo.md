@@ -388,3 +388,10 @@
 - [x] Generate 8 WAVV-branded webinar thumbnails (one per topic, matching accent color)
 - [x] Upload thumbnails and wire to webinar DB records via thumbnailUrl
 - [x] Apply blue-to-green gradient to all section page headers (WAVV Webinars, WAVV Academy, etc.)
+
+## Webinar Card + Banner Fixes (Round 2)
+- [x] Move countdown timer from overlay on thumbnail to below the thumbnail (separate row, not covering image)
+- [x] Generate new Call Boards webinar thumbnail (kanban/board layout style, green accent)
+- [x] Upload and update DB thumbnail_url for Call Boards webinar (ID 30007)
+- [x] Regenerate Strategy & Best Practices Academy banner with glowing lightbulb (not chart/arrow)
+- [x] Upload and update Academy.tsx + AcademyCategory.tsx with new strategy banner path

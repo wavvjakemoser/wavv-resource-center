@@ -83,15 +83,6 @@ function WebinarCard({
         }}
       >
         {!webinar.thumbnailUrl && <Video size={28} className="text-gray-700" />}
-        {variant === "evergreen" && nextSession && (
-          <div
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
-            style={{ background: `${accentColor}cc`, color: "#fff" }}
-          >
-            <Timer size={11} />
-            Next session in {countdown}
-          </div>
-        )}
         {webinar.viewCount ? (
           <div
             className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
@@ -101,6 +92,17 @@ function WebinarCard({
           </div>
         ) : null}
       </div>
+
+      {/* Countdown bar — below thumbnail, not overlaid */}
+      {variant === "evergreen" && nextSession && (
+        <div
+          className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
+          style={{ background: `${accentColor}22`, color: accentColor, borderBottom: `1px solid ${accentColor}40` }}
+        >
+          <Timer size={11} />
+          Next session in {countdown}
+        </div>
+      )}
 
       {/* Body */}
       <div className="p-4 flex flex-col flex-1">

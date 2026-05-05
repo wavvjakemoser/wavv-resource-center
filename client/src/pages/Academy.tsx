@@ -91,7 +91,7 @@ const CATEGORIES = [
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
     icon: Lightbulb,
-    thumbnail: "/manus-storage/banner-strategy-v2_218fad02.png",
+    thumbnail: "/manus-storage/banner-strategy-v3_188b3d6c.png",
     placeholders: [
       {
         id: "p-str-1",
