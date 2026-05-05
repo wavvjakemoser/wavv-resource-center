@@ -446,3 +446,8 @@
 - [x] Regenerate How-To banner to exactly match Onboarding banner: same aspect ratio, same dark navy background, same large ghost text style, same neon icon placement, same font treatment
 - [x] Regenerate Strategy banner to exactly match Onboarding banner: same style as above
 - [x] Revert banner image rendering to object-cover so banners fill the space (not object-contain)
+
+## Banner Sharpness + Label Overlays
+- [x] Regenerate How-To banner (v6) with crisp white bold ghost text matching Onboarding contrast
+- [x] Regenerate Strategy banner (v7) with crisp white bold ghost text matching Onboarding contrast
+- [x] Add React text overlay to all 3 banners: accent-colored "WAVV Academy" label, bold white category name, gray subtitle, count badges

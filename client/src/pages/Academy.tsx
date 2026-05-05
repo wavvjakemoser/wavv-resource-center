@@ -57,7 +57,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step guides for core WAVV features",
     color: "#00A9E2",
     icon: Wrench,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v5-YVRgeeFs4sPRzvDVmBPSrE.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v6-K3TYV9Xeg5ZaWLpmZiJwHh.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -91,7 +91,7 @@ const CATEGORIES = [
     subtitle: "Maximize connection rates, conversions, and team performance",
     color: "#67C728",
     icon: Lightbulb,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v6-dNyH6Ejf6mvJv9uSkHT5jy.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v7-h4rfU3p4xkyGFotsGxeuPW.webp",
     placeholders: [
       {
         id: "p-str-1",
@@ -405,30 +405,35 @@ export default function Academy() {
                     className="absolute inset-0 pointer-events-none"
                     style={{ background: `radial-gradient(ellipse at 70% 50%, ${cat.color}18 0%, transparent 55%)` }}
                   />
-                  {/* Content — badges only, title/subtitle are baked into the image */}
-                  <div className="relative flex items-center px-8 py-10">
-                    <div className="flex flex-col gap-3">
-                      {(() => {
-                        const counts = STATIC_COUNTS[cat.key];
-                        if (!counts) return null;
-                        return (
-                          <div className="flex items-center gap-2 mt-1">
-                            <span
-                              className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
-                              style={{ background: `${cat.color}25`, color: cat.color, border: `1px solid ${cat.color}50` }}
-                            >
-                              {counts.sections} {counts.sections === 1 ? "section" : "sections"}
-                            </span>
-                            <span
-                              className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
-                              style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}
-                            >
-                              {counts.videos} {counts.videos === 1 ? "video" : "videos"}
-                            </span>
-                          </div>
-                        );
-                      })()}
-                    </div>
+                  {/* Content overlay — category label, subtitle, and count badges */}
+                  <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
+                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: cat.color }}>
+                      WAVV Academy
+                    </p>
+                    <h2 className="text-2xl font-extrabold text-white leading-tight">
+                      {cat.label}
+                    </h2>
+                    <p className="text-sm text-gray-300 mb-2">{cat.subtitle}</p>
+                    {(() => {
+                      const counts = STATIC_COUNTS[cat.key];
+                      if (!counts) return null;
+                      return (
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                            style={{ background: `${cat.color}25`, color: cat.color, border: `1px solid ${cat.color}50` }}
+                          >
+                            {counts.sections} {counts.sections === 1 ? "section" : "sections"}
+                          </span>
+                          <span
+                            className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                            style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}
+                          >
+                            {counts.videos} {counts.videos === 1 ? "video" : "videos"}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </Link>
               </section>
