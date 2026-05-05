@@ -486,3 +486,23 @@
 - [x] Academy: replace inline form section with CTA strip ("Don't see what you need? Let us know what to build next." + "Request a Video" button)
 - [x] Guides & Docs: replace inline form section with CTA strip + "Request a Guide" button
 - [x] Webinars: replace inline form section with CTA strip + "Request a Webinar" button
+
+## Evergreen Webinars — Production Checklist (Blocked on Content, Not Engineering)
+
+UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. The following steps must be completed before the Evergreen section can be fully wired with real content:
+
+- [ ] Finalize all 8 webinar topics (confirm scope, audience, and JTBD for each)
+- [ ] Finalize scripts for each webinar
+- [ ] Finalize slide decks for each webinar
+- [ ] Record all 8 webinars
+- [ ] Launch recordings on a true Evergreen platform (e.g., Demio, EasyWebinar, or similar — platform TBD)
+- [ ] Wire each live Evergreen URL into the webinar records in the DB (replace placeholder join links)
+
+## Guides & Demo Stamp Updates
+
+- [x] Trim Guides DB to exactly 3 docs: WAVV Quick Start Checklist, Connect and Rate Optimization Playbook, Spam Protection Best Practices
+- [x] Add DEMO stamp to all 3 guide cards (same red rubber-stamp style)
+- [x] Enlarge DEMO stamp on Webinar Exclusive/On-Demand cards to cover the full tile
+- [x] Enlarge DEMO stamp on Playground tiles to cover the full tile
+- [x] Swap Support sidebar icon from current to Headphones (lucide Headphones)
+- [x] Swap Support page header icon to Headphones as well

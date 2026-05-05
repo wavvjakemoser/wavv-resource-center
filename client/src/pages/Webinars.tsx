@@ -104,25 +104,24 @@ function WebinarCard({
         {isDemo && (
           <div
             className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"
-            style={{ transform: "rotate(-12deg)" }}
           >
             <div
               style={{
-                border: "3px solid rgba(200,30,30,0.85)",
+                border: "4px double #cc0000",
                 borderRadius: "4px",
-                padding: "4px 14px",
-                boxShadow: "inset 0 0 0 2px rgba(200,30,30,0.3)",
-                background: "rgba(180,20,20,0.08)",
+                padding: "10px 28px",
+                opacity: 0.85,
+                transform: "rotate(-12deg)",
               }}
             >
               <span
                 style={{
-                  fontFamily: "'Impact', 'Arial Black', sans-serif",
-                  fontSize: "28px",
+                  fontFamily: "Impact, 'Arial Black', sans-serif",
+                  fontSize: "3.2rem",
                   fontWeight: 900,
-                  letterSpacing: "0.18em",
-                  color: "rgba(210,35,35,0.88)",
-                  textShadow: "1px 1px 0 rgba(180,20,20,0.4)",
+                  letterSpacing: "0.12em",
+                  color: "#cc0000",
+                  textShadow: "1px 1px 0 #8b000040",
                   display: "block",
                   lineHeight: 1,
                 }}

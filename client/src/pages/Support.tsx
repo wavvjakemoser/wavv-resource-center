@@ -1,7 +1,7 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
-import { LifeBuoy, Plus, ExternalLink, Calendar, MessageSquare, Clock, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
+import { Headphones, Plus, ExternalLink, Calendar, MessageSquare, Clock, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = [
@@ -76,7 +76,7 @@ export default function Support() {
               className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ background: "rgba(255, 153, 0, 0.2)" }}
             >
-              <LifeBuoy size={24} style={{ color: "#FF9900" }} />
+              <Headphones size={24} style={{ color: "#FF9900" }} />
             </div>
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ background: "linear-gradient(90deg, #0074F4, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Support</h1>

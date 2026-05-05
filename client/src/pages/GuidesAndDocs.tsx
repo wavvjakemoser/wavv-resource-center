@@ -115,7 +115,7 @@ export default function GuidesAndDocs() {
               return (
                 <div
                   key={guide.id}
-                  className="flex flex-col p-5 rounded-xl transition-all"
+                  className="relative flex flex-col p-5 rounded-xl transition-all"
                   style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = meta.color;
@@ -126,6 +126,35 @@ export default function GuidesAndDocs() {
                     e.currentTarget.style.boxShadow = "none";
                   }}
                 >
+                  {/* Full-tile DEMO stamp */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none rounded-xl overflow-hidden"
+                  >
+                    <div
+                      style={{
+                        border: "4px double #cc0000",
+                        padding: "10px 28px",
+                        borderRadius: "4px",
+                        opacity: 0.85,
+                        transform: "rotate(-12deg)",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "Impact, Arial Black, sans-serif",
+                          fontSize: "2.8rem",
+                          fontWeight: 900,
+                          color: "#cc0000",
+                          letterSpacing: "0.12em",
+                          textShadow: "1px 1px 0 #8b000040",
+                          lineHeight: 1,
+                          display: "block",
+                        }}
+                      >
+                        DEMO
+                      </span>
+                    </div>
+                  </div>
                   <div className="flex items-start justify-between mb-3">
                     <div
                       className="w-10 h-10 rounded-lg flex items-center justify-center"

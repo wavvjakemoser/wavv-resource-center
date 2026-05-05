@@ -9,7 +9,7 @@ import {
   GraduationCap,
   Video,
   FileText,
-  LifeBuoy,
+  Headphones,
   Home,
   Menu,
   X,
@@ -36,7 +36,7 @@ const navItems = [
   { href: "/webinars", label: "WAVV Webinars", icon: Video },
   { href: "/guides", label: "WAVV Guides & Docs", icon: FileText },
   { href: "/hands-on", label: "WAVV Playground", icon: FlaskConical },
-  { href: "/support", label: "WAVV Support", icon: LifeBuoy },
+  { href: "/support", label: "WAVV Support", icon: Headphones },
 ];
 
 const adminNavItems = [
