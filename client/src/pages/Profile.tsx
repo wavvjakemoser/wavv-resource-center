@@ -20,8 +20,6 @@ import {
   BookmarkCheck,
   Trash2,
   AlertCircle,
-  Plus,
-  X,
   Headphones,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -411,60 +409,18 @@ const TICKET_PRIORITY_META: Record<string, { color: string }> = {
   high:   { color: "#FF9900" },
   urgent: { color: "#ef4444" },
 };
-const TICKET_CATEGORIES = [
-  "Technical Issue", "Billing", "Feature Request",
-  "Onboarding", "General Question", "Other",
-] as const;
-const TICKET_PRIORITIES = ["low", "medium", "high", "urgent"] as const;
-
 function SupportTicketsSection() {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({
-    subject: "",
-    category: "General Question" as (typeof TICKET_CATEGORIES)[number],
-    priority: "medium" as (typeof TICKET_PRIORITIES)[number],
-    description: "",
-  });
-
-  const { data: tickets = [], refetch } = trpc.support.getMyTickets.useQuery();
-  const submitMutation = trpc.support.submitTicket.useMutation({
-    onSuccess: () => {
-      toast.success("Ticket submitted! The WAVV team has been notified.");
-      setForm({ subject: "", category: "General Question", priority: "medium", description: "" });
-      setModalOpen(false);
-      refetch();
-    },
-    onError: () => toast.error("Failed to submit ticket. Please try again."),
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.subject.trim() || !form.description.trim()) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-    submitMutation.mutate(form);
-  };
+  const { data: tickets = [] } = trpc.support.getMyTickets.useQuery();
 
   return (
     <>
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Headphones size={17} style={{ color: "#FF9900" }} />
-            <h2 className="text-base font-bold text-white">My Support Tickets</h2>
-            {tickets.length > 0 && (
-              <span className="text-xs text-gray-500">({tickets.length})</span>
-            )}
-          </div>
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, #FF9900, #ff7700)", color: "#fff" }}
-          >
-            <Plus size={12} />
-            New Ticket
-          </button>
+        <div className="flex items-center gap-2">
+          <Headphones size={17} style={{ color: "#FF9900" }} />
+          <h2 className="text-base font-bold text-white">My Support Tickets</h2>
+          {tickets.length > 0 && (
+            <span className="text-xs text-gray-500">({tickets.length})</span>
+          )}
         </div>
 
         {tickets.length === 0 ? (
@@ -526,107 +482,6 @@ function SupportTicketsSection() {
         )}
       </section>
 
-      {/* Ticket form modal */}
-      {modalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false); }}
-        >
-          <div
-            className="w-full max-w-lg rounded-2xl p-6 space-y-4"
-            style={{ background: "#1a1a1a", border: "1px solid #333" }}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-white font-semibold">Submit a Support Ticket</h2>
-                <p className="text-gray-500 text-xs mt-0.5">The WAVV support team will be notified immediately.</p>
-              </div>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center transition-all hover:bg-white/10"
-              >
-                <X size={15} className="text-gray-400" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                  Subject <span className="text-red-400">*</span>
-                </label>
-                <input
-                  value={form.subject}
-                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  placeholder="Brief description of your issue"
-                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 outline-none transition-all"
-                  style={{ background: "#111", border: "1px solid #333" }}
-                  onFocus={(e) => { e.target.style.borderColor = "#FF9900"; }}
-                  onBlur={(e) => { e.target.style.borderColor = "#333"; }}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Category</label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value as typeof form.category })}
-                    className="w-full px-3 py-2.5 rounded-lg text-sm text-white outline-none transition-all"
-                    style={{ background: "#111", border: "1px solid #333" }}
-                  >
-                    {TICKET_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Priority</label>
-                  <select
-                    value={form.priority}
-                    onChange={(e) => setForm({ ...form, priority: e.target.value as typeof form.priority })}
-                    className="w-full px-3 py-2.5 rounded-lg text-sm text-white outline-none transition-all"
-                    style={{ background: "#111", border: "1px solid #333" }}
-                  >
-                    {TICKET_PRIORITIES.map((p) => (
-                      <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                  Description <span className="text-red-400">*</span>
-                </label>
-                <textarea
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Describe your issue in detail..."
-                  rows={4}
-                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 outline-none transition-all resize-none"
-                  style={{ background: "#111", border: "1px solid #333" }}
-                  onFocus={(e) => { e.target.style.borderColor = "#FF9900"; }}
-                  onBlur={(e) => { e.target.style.borderColor = "#333"; }}
-                />
-              </div>
-              <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-all hover:bg-white/5"
-                  style={{ background: "#111", border: "1px solid #333", color: "#9ca3af" }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitMutation.isPending}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{ background: "linear-gradient(135deg, #FF9900, #ff7700)" }}
-                >
-                  {submitMutation.isPending ? "Submitting..." : "Submit Ticket"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
 }
