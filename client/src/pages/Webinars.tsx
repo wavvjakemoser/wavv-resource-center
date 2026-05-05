@@ -384,7 +384,7 @@ export default function Webinars() {
       </div>
 
       {/* ── Request a Webinar ── */}
-      <div className="px-4 lg:px-6 pb-10">
+      <div className="px-4 lg:px-6 pb-10 max-w-5xl mx-auto">
         <ContentRequestCTA requestType="webinar" accentColor="#00A9E2" />
       </div>
       <ReadinessWidget page="webinars" />

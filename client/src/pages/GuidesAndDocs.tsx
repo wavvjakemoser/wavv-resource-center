@@ -236,7 +236,7 @@ export default function GuidesAndDocs() {
       </div>
 
       {/* ── Request a Written Guide ── */}
-      <div className="px-4 lg:px-6 pb-10">
+      <div className="px-4 lg:px-6 pb-10 max-w-5xl mx-auto">
         <ContentRequestCTA requestType="guide" accentColor="#67C728" />
       </div>
       <ReadinessWidget page="guides" />

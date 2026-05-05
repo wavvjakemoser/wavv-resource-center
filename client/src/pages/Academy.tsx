@@ -514,7 +514,7 @@ export default function Academy() {
       </div>
 
       {/* ── Request a Video CTA ── */}
-      <div className="px-6 pb-10">
+      <div className="px-4 lg:px-6 pb-10 max-w-6xl mx-auto">
         <ContentRequestCTA requestType="video" />
       </div>
       <ReadinessWidget page="academy" />
