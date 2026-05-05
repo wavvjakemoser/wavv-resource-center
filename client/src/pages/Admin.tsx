@@ -1960,56 +1960,106 @@ function WebinarsTab() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="rounded-xl overflow-hidden" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
-        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
-          <span className="text-sm font-semibold text-white">All Webinars</span>
-          <span className="text-xs text-gray-500">{webinars.length} total</span>
-        </div>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
-        ) : webinars.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Video size={28} className="text-gray-600 mb-2" />
-            <p className="text-gray-500 text-sm">No webinars yet</p>
+      {/* Grouped sections */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
+      ) : (
+        <WebinarGroups
+          webinars={webinars}
+          onEdit={startEdit}
+          onDelete={(id) => { if (confirm("Delete this webinar?")) deleteMutation.mutate({ id }); }}
+        />
+      )}
+    </div>
+  );
+}
+
+const WEBINAR_GROUP_META: Record<string, { label: string; color: string; description: string }> = {
+  evergreen:  { label: "Evergreen",           color: "#67C728", description: "Always-available training content" },
+  exclusive:  { label: "Exclusive / Upcoming", color: "#0074F4", description: "Live or invite-only sessions" },
+  recording:  { label: "On Demand",            color: "#FF9900", description: "Recorded sessions available anytime" },
+  upcoming:   { label: "Upcoming (Legacy)",    color: "#6b7280", description: "Legacy upcoming entries" },
+};
+
+function WebinarGroups({
+  webinars,
+  onEdit,
+  onDelete,
+}: {
+  webinars: import("../../../drizzle/schema").Webinar[];
+  onEdit: (w: import("../../../drizzle/schema").Webinar) => void;
+  onDelete: (id: number) => void;
+}) {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const groupOrder = ["evergreen", "exclusive", "recording", "upcoming"];
+  const grouped = groupOrder.reduce((acc, type) => {
+    acc[type] = webinars.filter(w => w.type === type);
+    return acc;
+  }, {} as Record<string, typeof webinars>);
+
+  return (
+    <div className="space-y-4">
+      {groupOrder.map((type) => {
+        const group = grouped[type];
+        if (group.length === 0 && type === "upcoming") return null; // hide empty legacy
+        const meta = WEBINAR_GROUP_META[type];
+        const isCollapsed = collapsed[type];
+        return (
+          <div key={type} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+            <button
+              className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
+              style={{ background: "#1a1a1a" }}
+              onClick={() => setCollapsed(c => ({ ...c, [type]: !c[type] }))}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: meta.color }} />
+                <span className="text-sm font-semibold text-white">{meta.label}</span>
+                <span className="text-xs text-gray-500">{meta.description}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${meta.color}20`, color: meta.color }}>{group.length}</span>
+                <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
+              </div>
+            </button>
+            {!isCollapsed && (
+              group.length === 0 ? (
+                <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
+                  <p className="text-gray-600 text-xs">No {meta.label.toLowerCase()} webinars yet. Click "Add Webinar" above and set the type.</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                      <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Host</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Views</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {group.map((w) => (
+                      <TableRow key={w.id} style={{ borderColor: "#2a2a2a" }}>
+                        <TableCell className="text-white text-sm font-medium max-w-xs truncate">{w.title}</TableCell>
+                        <TableCell className="text-gray-400 text-xs">{w.host ?? "—"}</TableCell>
+                        <TableCell className="text-gray-400 text-xs">{w.viewCount ?? 0}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {(w.registrationUrl || w.videoUrl) && (
+                              <a href={(w.registrationUrl || w.videoUrl)!} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
+                            )}
+                            <button onClick={() => onEdit(w as Parameters<typeof onEdit>[0])} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+                            <button onClick={() => onDelete(w.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )
+            )}
           </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow style={{ borderColor: "#2a2a2a" }}>
-                <TableHead className="text-gray-400 text-xs">Title</TableHead>
-                <TableHead className="text-gray-400 text-xs">Host</TableHead>
-                <TableHead className="text-gray-400 text-xs">Type</TableHead>
-                <TableHead className="text-gray-400 text-xs">Views</TableHead>
-                <TableHead className="text-gray-400 text-xs">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {webinars.map((w) => (
-                <TableRow key={w.id} style={{ borderColor: "#2a2a2a" }}>
-                  <TableCell className="text-white text-sm font-medium max-w-xs truncate">{w.title}</TableCell>
-                  <TableCell className="text-gray-400 text-xs">{w.host ?? "—"}</TableCell>
-                  <TableCell>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: w.type === "upcoming" ? "rgba(0,116,244,0.15)" : "rgba(103,199,40,0.15)", color: w.type === "upcoming" ? "#0074F4" : "#67C728" }}>
-                      {w.type === "upcoming" ? "Upcoming" : "Recording"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-gray-400 text-xs">{w.viewCount ?? 0}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {(w.registrationUrl || w.videoUrl) && (
-                        <a href={(w.registrationUrl || w.videoUrl)!} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
-                      )}
-                      <button onClick={() => startEdit(w)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
-                      <button onClick={() => { if (confirm("Delete this webinar?")) deleteMutation.mutate({ id: w.id }); }} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+        );
+      })}
     </div>
   );
 }
@@ -2133,61 +2183,113 @@ function GuidesTab() {
         </div>
       )}
 
-      <div className="rounded-xl overflow-hidden" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
-        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
-          <span className="text-sm font-semibold text-white">All Guides</span>
-          <span className="text-xs text-gray-500">{guides.length} total</span>
-        </div>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
-        ) : guides.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <FileText size={28} className="text-gray-600 mb-2" />
-            <p className="text-gray-500 text-sm">No guides yet</p>
+      {/* Grouped by file type */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
+      ) : (
+        <GuideGroups
+          guides={guides}
+          onEdit={startEdit}
+          onDelete={(id) => { if (confirm("Delete this guide?")) deleteMutation.mutate({ id }); }}
+        />
+      )}
+    </div>
+  );
+}
+
+const GUIDE_GROUP_META: Record<string, { label: string; color: string; description: string }> = {
+  pdf:       { label: "PDF",       color: "#ef4444", description: "Downloadable PDF documents" },
+  checklist: { label: "Checklist", color: "#67C728", description: "Step-by-step checklists" },
+  playbook:  { label: "Playbook",  color: "#0074F4", description: "Strategy and process playbooks" },
+  resource:  { label: "Resource",  color: "#FF9900", description: "Reference materials and templates" },
+  other:     { label: "Other",     color: "#6b7280", description: "Miscellaneous guides" },
+};
+
+function GuideGroups({
+  guides,
+  onEdit,
+  onDelete,
+}: {
+  guides: import("../../../drizzle/schema").Guide[];
+  onEdit: (g: import("../../../drizzle/schema").Guide) => void;
+  onDelete: (id: number) => void;
+}) {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const groupOrder = ["pdf", "checklist", "playbook", "resource", "other"];
+  const grouped = groupOrder.reduce((acc, type) => {
+    acc[type] = guides.filter(g => (g.fileType ?? "other") === type);
+    return acc;
+  }, {} as Record<string, typeof guides>);
+
+  return (
+    <div className="space-y-4">
+      {groupOrder.map((type) => {
+        const group = grouped[type];
+        if (group.length === 0 && type === "other") return null;
+        const meta = GUIDE_GROUP_META[type];
+        const isCollapsed = collapsed[type];
+        return (
+          <div key={type} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+            <button
+              className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
+              style={{ background: "#1a1a1a" }}
+              onClick={() => setCollapsed(c => ({ ...c, [type]: !c[type] }))}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: meta.color }} />
+                <span className="text-sm font-semibold text-white">{meta.label}</span>
+                <span className="text-xs text-gray-500">{meta.description}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${meta.color}20`, color: meta.color }}>{group.length}</span>
+                <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
+              </div>
+            </button>
+            {!isCollapsed && (
+              group.length === 0 ? (
+                <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
+                  <p className="text-gray-600 text-xs">No {meta.label.toLowerCase()} guides yet. Click "Add Guide" above and set the type.</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                      <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Category</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Status</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {group.map((g) => (
+                      <TableRow key={g.id} style={{ borderColor: "#2a2a2a" }}>
+                        <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
+                        <TableCell className="text-gray-400 text-xs">{g.category ?? "—"}</TableCell>
+                        <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
+                        <TableCell>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: g.published ? "rgba(103,199,40,0.15)" : "rgba(239,68,68,0.15)", color: g.published ? "#67C728" : "#f87171" }}>
+                            {g.published ? "Published" : "Hidden"}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {g.fileUrl && (
+                              <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
+                            )}
+                            <button onClick={() => onEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+                            <button onClick={() => onDelete(g.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )
+            )}
           </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow style={{ borderColor: "#2a2a2a" }}>
-                <TableHead className="text-gray-400 text-xs">Title</TableHead>
-                <TableHead className="text-gray-400 text-xs">Category</TableHead>
-                <TableHead className="text-gray-400 text-xs">Type</TableHead>
-                <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
-                <TableHead className="text-gray-400 text-xs">Status</TableHead>
-                <TableHead className="text-gray-400 text-xs">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {guides.map((g) => (
-                <TableRow key={g.id} style={{ borderColor: "#2a2a2a" }}>
-                  <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
-                  <TableCell className="text-gray-400 text-xs">{g.category ?? "—"}</TableCell>
-                  <TableCell>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase" style={{ background: `${FILE_TYPE_COLORS[g.fileType ?? "other"]}20`, color: FILE_TYPE_COLORS[g.fileType ?? "other"] }}>
-                      {g.fileType ?? "other"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
-                  <TableCell>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: g.published ? "rgba(103,199,40,0.15)" : "rgba(239,68,68,0.15)", color: g.published ? "#67C728" : "#f87171" }}>
-                      {g.published ? "Published" : "Hidden"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {g.fileUrl && (
-                        <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
-                      )}
-                      <button onClick={() => startEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
-                      <button onClick={() => { if (confirm("Delete this guide?")) deleteMutation.mutate({ id: g.id }); }} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+        );
+      })}
     </div>
   );
 }
@@ -2243,65 +2345,137 @@ function SupportSection() {
         </button>
       </div>
 
-      <div className="rounded-xl overflow-hidden" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
-        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
-          <span className="text-sm font-semibold text-white">All Tickets</span>
-          <span className="text-xs text-gray-500">{tickets.length} total</span>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
+      ) : tickets.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
+          <Headphones size={28} className="text-gray-600 mb-2" />
+          <p className="text-gray-500 text-sm">No tickets yet</p>
         </div>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
-        ) : tickets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Headphones size={28} className="text-gray-600 mb-2" />
-            <p className="text-gray-500 text-sm">No tickets yet</p>
+      ) : (
+        <TicketGroups tickets={tickets} STATUS_CONFIG={STATUS_CONFIG} PRIORITY_COLOR={PRIORITY_COLOR} onUpdateStatus={(id, status) => updateStatus.mutate({ id, status })} />
+      )}
+    </div>
+  );
+}
+
+const TICKET_CATEGORY_META: Record<string, { label: string; color: string }> = {
+  "Technical Issue":  { label: "Technical Issue",  color: "#ef4444" },
+  "Billing":          { label: "Billing",           color: "#fbbf24" },
+  "Feature Request":  { label: "Feature Request",  color: "#0074F4" },
+  "Onboarding":       { label: "Onboarding",        color: "#67C728" },
+  "General Question": { label: "General Question", color: "#9ca3af" },
+  "Other":            { label: "Other",             color: "#6b7280" },
+};
+
+function TicketGroups({
+  tickets,
+  STATUS_CONFIG,
+  PRIORITY_COLOR,
+  onUpdateStatus,
+}: {
+  tickets: Array<{ id: number; subject: string; category: string; priority: string; status: string; createdAt: Date | string }>;
+  STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }>;
+  PRIORITY_COLOR: Record<string, string>;
+  onUpdateStatus: (id: number, status: "open" | "in_progress" | "resolved" | "closed") => void;
+}) {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [showAll, setShowAll] = useState<Record<string, boolean>>({});
+  const PREVIEW_COUNT = 5;
+
+  const categories = Object.keys(TICKET_CATEGORY_META);
+  const grouped = categories.reduce((acc, cat) => {
+    acc[cat] = tickets.filter(t => t.category === cat);
+    return acc;
+  }, {} as Record<string, typeof tickets>);
+  // Catch-all for tickets with unknown categories
+  const unknownCat = tickets.filter(t => !categories.includes(t.category));
+  if (unknownCat.length > 0) grouped["Other"] = [...(grouped["Other"] ?? []), ...unknownCat];
+
+  return (
+    <div className="space-y-3">
+      {categories.map((cat) => {
+        const group = grouped[cat] ?? [];
+        if (group.length === 0) return null;
+        const meta = TICKET_CATEGORY_META[cat];
+        const isCollapsed = collapsed[cat];
+        const isShowAll = showAll[cat];
+        const displayed = isShowAll ? group : group.slice(0, PREVIEW_COUNT);
+        return (
+          <div key={cat} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+            <button
+              className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
+              style={{ background: "#1a1a1a" }}
+              onClick={() => setCollapsed(c => ({ ...c, [cat]: !c[cat] }))}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: meta.color }} />
+                <span className="text-sm font-semibold text-white">{meta.label}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${meta.color}20`, color: meta.color }}>{group.length}</span>
+                <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
+              </div>
+            </button>
+            {!isCollapsed && (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                      <TableHead className="text-gray-400 text-xs">Subject</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Priority</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Status</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Date</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Update</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displayed.map((t) => {
+                      const sc = STATUS_CONFIG[t.status] ?? STATUS_CONFIG.open;
+                      return (
+                        <TableRow key={t.id} style={{ borderColor: "#2a2a2a" }}>
+                          <TableCell className="text-white text-sm font-medium max-w-xs truncate">{t.subject}</TableCell>
+                          <TableCell>
+                            <span className="text-[10px] font-semibold uppercase" style={{ color: PRIORITY_COLOR[t.priority] ?? "#9ca3af" }}>{t.priority}</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold w-fit" style={{ background: sc.bg, color: sc.color }}>
+                              {sc.icon}{sc.label}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-gray-500 text-xs">{new Date(t.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <select
+                              value={t.status}
+                              onChange={e => onUpdateStatus(t.id, e.target.value as "open" | "in_progress" | "resolved" | "closed")}
+                              style={{ background: "#111", border: "1px solid #2a2a2a", color: "#9ca3af", borderRadius: "6px", padding: "3px 6px", fontSize: "11px", outline: "none", appearance: "none" as const }}
+                            >
+                              <option value="open">Open</option>
+                              <option value="in_progress">In Progress</option>
+                              <option value="resolved">Resolved</option>
+                              <option value="closed">Closed</option>
+                            </select>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+                {group.length > PREVIEW_COUNT && (
+                  <div className="px-5 py-2 border-t border-[#2a2a2a]" style={{ background: "#111" }}>
+                    <button
+                      onClick={() => setShowAll(s => ({ ...s, [cat]: !s[cat] }))}
+                      className="text-xs text-gray-500 hover:text-white transition"
+                    >
+                      {isShowAll ? "Show less" : `View all ${group.length} tickets`}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow style={{ borderColor: "#2a2a2a" }}>
-                <TableHead className="text-gray-400 text-xs">Subject</TableHead>
-                <TableHead className="text-gray-400 text-xs">Category</TableHead>
-                <TableHead className="text-gray-400 text-xs">Priority</TableHead>
-                <TableHead className="text-gray-400 text-xs">Status</TableHead>
-                <TableHead className="text-gray-400 text-xs">Date</TableHead>
-                <TableHead className="text-gray-400 text-xs">Update</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tickets.map((t) => {
-                const sc = STATUS_CONFIG[t.status] ?? STATUS_CONFIG.open;
-                return (
-                  <TableRow key={t.id} style={{ borderColor: "#2a2a2a" }}>
-                    <TableCell className="text-white text-sm font-medium max-w-xs truncate">{t.subject}</TableCell>
-                    <TableCell className="text-gray-400 text-xs">{t.category}</TableCell>
-                    <TableCell>
-                      <span className="text-[10px] font-semibold uppercase" style={{ color: PRIORITY_COLOR[t.priority] ?? "#9ca3af" }}>{t.priority}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold w-fit" style={{ background: sc.bg, color: sc.color }}>
-                        {sc.icon}{sc.label}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-gray-500 text-xs">{new Date(t.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <select
-                        value={t.status}
-                        onChange={e => updateStatus.mutate({ id: t.id, status: e.target.value as "open" | "in_progress" | "resolved" | "closed" })}
-                        style={{ background: "#111", border: "1px solid #2a2a2a", color: "#9ca3af", borderRadius: "6px", padding: "3px 6px", fontSize: "11px", outline: "none", appearance: "none" as const }}
-                      >
-                        <option value="open">Open</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="closed">Closed</option>
-                      </select>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+        );
+      })}
     </div>
   );
 }
@@ -2389,28 +2563,10 @@ function ContentRequestsTab() {
         </button>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 flex-wrap">
-        {(["", "video", "guide", "webinar"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setFilterType(t)}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize"
-            style={{
-              background: filterType === t ? `${TYPE_COLOR[t] ?? "#0074F4"}20` : "#1a1a1a",
-              color: filterType === t ? (TYPE_COLOR[t] ?? "#0074F4") : "#9ca3af",
-              border: filterType === t ? `1px solid ${TYPE_COLOR[t] ?? "#0074F4"}50` : "1px solid #2a2a2a",
-            }}
-          >
-            {t === "" ? "All" : t === "video" ? "Videos" : t === "guide" ? "Guides" : "Webinars"}
-          </button>
-        ))}
-      </div>
-
-      {/* Table */}
+      {/* Grouped by request type */}
       {isLoading ? (
         <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: "#1a1a1a" }} />
           ))}
         </div>
@@ -2421,70 +2577,146 @@ function ContentRequestsTab() {
           <p className="text-gray-600 text-xs mt-1">Requests submitted by users will appear here.</p>
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-          <Table>
-            <TableHeader>
-              <TableRow style={{ background: "#1a1a1a", borderBottom: "1px solid #2a2a2a" }}>
-                <TableHead className="text-gray-400 text-xs">Date</TableHead>
-                <TableHead className="text-gray-400 text-xs">Type</TableHead>
-                <TableHead className="text-gray-400 text-xs">Topic</TableHead>
-                <TableHead className="text-gray-400 text-xs">Category</TableHead>
-                <TableHead className="text-gray-400 text-xs">Format</TableHead>
-                <TableHead className="text-gray-400 text-xs">Priority</TableHead>
-                <TableHead className="text-gray-400 text-xs">User</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(requests as Array<{
-                id: number;
-                createdAt: Date | string;
-                requestType: string;
-                topic: string;
-                description?: string | null;
-                category?: string | null;
-                formatPreference?: string | null;
-                priority: string;
-                userName?: string | null;
-                userEmail?: string | null;
-              }>).map((r) => (
-                <TableRow key={r.id} style={{ borderBottom: "1px solid #1f1f1f" }}>
-                  <TableCell className="text-gray-500 text-xs whitespace-nowrap">
-                    {new Date(r.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize"
-                      style={{ background: `${TYPE_COLOR[r.requestType] ?? "#9ca3af"}20`, color: TYPE_COLOR[r.requestType] ?? "#9ca3af" }}
-                    >
-                      {r.requestType}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-white text-xs max-w-[200px]">
-                    <div className="truncate" title={r.topic}>{r.topic}</div>
-                    {r.description && (
-                      <div className="text-gray-600 text-[10px] truncate mt-0.5" title={r.description}>{r.description}</div>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-gray-400 text-xs">{r.category ?? "—"}</TableCell>
-                  <TableCell className="text-gray-400 text-xs">{r.formatPreference ?? "—"}</TableCell>
-                  <TableCell>
-                    <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize"
-                      style={{ background: `${PRIORITY_COLOR[r.priority] ?? "#9ca3af"}20`, color: PRIORITY_COLOR[r.priority] ?? "#9ca3af" }}
-                    >
-                      {r.priority}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-gray-400 text-xs">
-                    <div>{r.userName ?? "—"}</div>
-                    {r.userEmail && <div className="text-gray-600 text-[10px]">{r.userEmail}</div>}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <ContentRequestGroups requests={requests as Array<{
+          id: number;
+          createdAt: Date | string;
+          requestType: string;
+          topic: string;
+          description?: string | null;
+          category?: string | null;
+          formatPreference?: string | null;
+          priority: string;
+          userName?: string | null;
+          userEmail?: string | null;
+        }>} TYPE_COLOR={TYPE_COLOR} PRIORITY_COLOR={PRIORITY_COLOR} />
       )}
+    </div>
+  );
+}
+
+const CONTENT_REQUEST_GROUPS: Array<{ key: string; label: string; description: string }> = [
+  { key: "video",   label: "Video Requests",   description: "Academy lesson and tutorial requests" },
+  { key: "webinar", label: "Webinar Requests",  description: "Live and on-demand webinar requests" },
+  { key: "guide",   label: "Guide Requests",    description: "Playbook, checklist, and doc requests" },
+];
+
+function ContentRequestGroups({
+  requests,
+  TYPE_COLOR,
+  PRIORITY_COLOR,
+}: {
+  requests: Array<{
+    id: number;
+    createdAt: Date | string;
+    requestType: string;
+    topic: string;
+    description?: string | null;
+    category?: string | null;
+    formatPreference?: string | null;
+    priority: string;
+    userName?: string | null;
+    userEmail?: string | null;
+  }>;
+  TYPE_COLOR: Record<string, string>;
+  PRIORITY_COLOR: Record<string, string>;
+}) {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [showAll, setShowAll] = useState<Record<string, boolean>>({});
+  const PREVIEW_COUNT = 5;
+
+  const grouped = CONTENT_REQUEST_GROUPS.reduce((acc, g) => {
+    acc[g.key] = requests.filter(r => r.requestType === g.key);
+    return acc;
+  }, {} as Record<string, typeof requests>);
+  // Catch-all for unknown types
+  const knownKeys = CONTENT_REQUEST_GROUPS.map(g => g.key);
+  const otherRequests = requests.filter(r => !knownKeys.includes(r.requestType));
+
+  const allGroups = [
+    ...CONTENT_REQUEST_GROUPS,
+    ...(otherRequests.length > 0 ? [{ key: "other", label: "Other", description: "Miscellaneous requests" }] : []),
+  ];
+  if (otherRequests.length > 0) grouped["other"] = otherRequests;
+
+  return (
+    <div className="space-y-3">
+      {allGroups.map(({ key, label, description }) => {
+        const group = grouped[key] ?? [];
+        if (group.length === 0) return null;
+        const color = TYPE_COLOR[key] ?? "#9ca3af";
+        const isCollapsed = collapsed[key];
+        const isShowAll = showAll[key];
+        const displayed = isShowAll ? group : group.slice(0, PREVIEW_COUNT);
+        return (
+          <div key={key} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+            <button
+              className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
+              style={{ background: "#1a1a1a" }}
+              onClick={() => setCollapsed(c => ({ ...c, [key]: !c[key] }))}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
+                <span className="text-sm font-semibold text-white">{label}</span>
+                <span className="text-xs text-gray-500">{description}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${color}20`, color }}>{group.length}</span>
+                <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
+              </div>
+            </button>
+            {!isCollapsed && (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                      <TableHead className="text-gray-400 text-xs">Date</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Topic</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Category</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Format</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Priority</TableHead>
+                      <TableHead className="text-gray-400 text-xs">User</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displayed.map((r) => (
+                      <TableRow key={r.id} style={{ borderColor: "#2a2a2a" }}>
+                        <TableCell className="text-gray-500 text-xs whitespace-nowrap">{new Date(r.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-white text-xs max-w-[200px]">
+                          <div className="truncate" title={r.topic}>{r.topic}</div>
+                          {r.description && (
+                            <div className="text-gray-600 text-[10px] truncate mt-0.5" title={r.description}>{r.description}</div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-gray-400 text-xs">{r.category ?? "—"}</TableCell>
+                        <TableCell className="text-gray-400 text-xs">{r.formatPreference ?? "—"}</TableCell>
+                        <TableCell>
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize" style={{ background: `${PRIORITY_COLOR[r.priority] ?? "#9ca3af"}20`, color: PRIORITY_COLOR[r.priority] ?? "#9ca3af" }}>
+                            {r.priority}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-gray-400 text-xs">
+                          <div>{r.userName ?? "—"}</div>
+                          {r.userEmail && <div className="text-gray-600 text-[10px]">{r.userEmail}</div>}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {group.length > PREVIEW_COUNT && (
+                  <div className="px-5 py-2 border-t border-[#2a2a2a]" style={{ background: "#111" }}>
+                    <button
+                      onClick={() => setShowAll(s => ({ ...s, [key]: !s[key] }))}
+                      className="text-xs text-gray-500 hover:text-white transition"
+                    >
+                      {isShowAll ? "Show less" : `View all ${group.length} requests`}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

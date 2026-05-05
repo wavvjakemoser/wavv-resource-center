@@ -568,3 +568,26 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 - [x] Remove medals and bookmarks items from user dropdown in PortalLayout
 - [x] User dropdown: keep only Profile and Sign Out
+
+## Admin Panel Overhaul (Round 2)
+
+### Webinars Tab
+- [x] Admin Webinars: group webinars by type — Evergreen, Exclusive, On Demand (collapsible sections)
+- [x] Each webinar group: add, edit, delete, toggle active actions
+
+### Guides Tab
+- [x] Admin Guides: group guides by type — PDF, Checklist, Playbook, Resource (collapsible sections)
+- [x] Each guide group: same add/edit/delete/toggle actions as before
+
+### Playground Tab
+- [x] Replace Playground feature request form with "Notify Me" opt-in (name + email + which feature)
+- [x] Restyle Playground CTA bar to match other form submission bars (dark bg, icon left, green button right)
+- [x] Admin Playground tab: show opt-in list, export to CSV button
+
+### Support Tickets Tab
+- [x] Admin Support Tickets: group by category (Technical Issue, Billing, Feature Request, Onboarding, General Question, Other)
+- [x] Each category group: collapsible with ticket count badge, View All toggle
+
+### Content Requests Tab
+- [x] Admin Content Requests: group by section (Video Requests, Webinar Requests, Guide Requests)
+- [x] Each section group: collapsible with request count badge, View All toggle

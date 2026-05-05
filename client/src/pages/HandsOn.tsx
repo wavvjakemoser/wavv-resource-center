@@ -373,22 +373,25 @@ export default function HandsOn() {
 
         {/* ── CTA banner ── */}
         <div
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl px-6 py-5"
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-4"
           style={{
-            background: "rgba(168,85,247,0.07)",
-            border: "1px solid rgba(168,85,247,0.18)",
+            background: "rgba(168,85,247,0.08)",
+            border: "1px solid rgba(168,85,247,0.2)",
           }}
         >
-          <div>
-            <h3 className="text-white font-semibold text-sm mb-1">Interested in WAVV Playground?</h3>
-            <p className="text-gray-500 text-xs leading-relaxed max-w-md">
-              Let us know which playground you'd like access to and we'll notify you when it's ready.
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(168,85,247,0.15)" }}>
+              <Bell size={16} className="text-purple-400" />
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm">Get Notified When WAVV Playground Launches</p>
+              <p className="text-gray-500 text-xs mt-0.5">Sign up and we'll let you know the moment it's ready.</p>
+            </div>
           </div>
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-black transition-all hover:opacity-90 flex-shrink-0"
+            style={{ background: "#67C728" }}
           >
             <Bell size={14} />
             Notify Me
