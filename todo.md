@@ -410,3 +410,7 @@
 - [x] Document customer-gating strategy: active WAVV customer verification via API
 - [ ] Future: wire WAVV customer status API to gate login (only active subscribers can access)
 - [ ] Future: Google OAuth as secondary sign-in option once Client ID is available
+
+## Sign-In Copy + Magic Link Architecture
+- [x] Update sign-in modal subtitle to "Enter your WAVV account credentials to sign in"
+- [ ] Future: magic link endpoint — WAVV platform embeds a one-click link that auto-authenticates active customers into the Resource Center

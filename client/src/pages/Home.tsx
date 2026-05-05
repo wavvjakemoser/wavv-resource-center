@@ -281,7 +281,7 @@ export default function Home() {
             />
 
             <h2 className="text-white text-xl font-bold mb-1 text-center">Sign in to your account</h2>
-            <p className="text-gray-500 text-sm mb-7 text-center">Enter your WAVV account credentials</p>
+            <p className="text-gray-500 text-sm mb-7 text-center">Enter your WAVV account credentials to sign in</p>
 
             <form onSubmit={handleSignIn} className="w-full flex flex-col gap-3">
               {/* Email */}
