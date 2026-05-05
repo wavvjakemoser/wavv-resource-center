@@ -479,3 +479,10 @@
 - [x] Add "Content Requests" tab (or sub-section) in Admin showing all 3 request types in a unified table
 - [x] Table columns: Type badge, Topic, Description, Category, Priority, User, Date
 - [x] CSV export of all content requests
+
+## Content Request Forms — Modal Conversion
+- [x] Refactor ContentRequestForm into a modal dialog (Dialog/DialogContent) triggered by a button
+- [x] Add ContentRequestCTA component: compact strip with tagline text + "Request a Video/Guide/Webinar" button
+- [x] Academy: replace inline form section with CTA strip ("Don't see what you need? Let us know what to build next." + "Request a Video" button)
+- [x] Guides & Docs: replace inline form section with CTA strip + "Request a Guide" button
+- [x] Webinars: replace inline form section with CTA strip + "Request a Webinar" button

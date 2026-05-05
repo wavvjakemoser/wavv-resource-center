@@ -17,7 +17,14 @@ import {
   Video,
   Send,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // ─── 3 canonical categories ───────────────────────────────────────────────
 const CATEGORIES = [
@@ -503,11 +510,71 @@ export default function Academy() {
 
       </div>
 
-      {/* ── Request a Video ── */}
-      <div className="px-6 pb-10 max-w-2xl">
-        <ContentRequestForm requestType="video" />
+      {/* ── Request a Video CTA ── */}
+      <div className="px-6 pb-10">
+        <ContentRequestCTA requestType="video" />
       </div>
     </PortalLayout>
+  );
+}
+
+// ─── CTA Strip (triggers modal) ─────────────────────────────────────────────
+export function ContentRequestCTA({
+  requestType,
+  accentColor,
+}: {
+  requestType: "video" | "guide" | "webinar";
+  accentColor?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#67C728");
+  const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
+  const tagline = requestType === "video"
+    ? "Don't see what you need? Help us build what matters most to you."
+    : requestType === "guide"
+    ? "Missing a playbook or reference doc? Tell us what would help your team."
+    : "Want a session on a specific topic? Let us know what to cover next.";
+
+  return (
+    <>
+      <div
+        className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-5"
+        style={{ background: `linear-gradient(135deg, ${accent}10 0%, #0a0f1a 100%)`, border: `1px solid ${accent}25` }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl flex-shrink-0" style={{ background: `${accent}18` }}>
+            <Sparkles size={18} style={{ color: accent }} />
+          </div>
+          <div>
+            <p className="text-white font-semibold text-sm">Request a {typeLabel}</p>
+            <p className="text-gray-500 text-xs mt-0.5">{tagline}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all hover:opacity-90 flex-shrink-0"
+          style={{ background: accent, color: "#000" }}
+        >
+          Request a {typeLabel}
+        </button>
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          className="max-w-lg"
+          style={{ background: "#0d1117", border: `1px solid ${accent}30`, color: "white" }}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-white text-base font-bold">Request a {typeLabel}</DialogTitle>
+          </DialogHeader>
+          <ContentRequestForm
+            requestType={requestType}
+            accentColor={accent}
+            onSuccess={() => setOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -519,6 +586,7 @@ export function ContentRequestForm({
   formatOptions,
   categoryLabel,
   formatLabel,
+  onSuccess,
 }: {
   requestType: "video" | "guide" | "webinar";
   accentColor?: string;
@@ -526,6 +594,7 @@ export function ContentRequestForm({
   formatOptions?: string[];
   categoryLabel?: string;
   formatLabel?: string;
+  onSuccess?: () => void;
 }) {
   const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#67C728");
   const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
@@ -540,7 +609,11 @@ export function ContentRequestForm({
   const [submitted, setSubmitted] = useState(false);
 
   const submit = trpc.contentRequests.submit.useMutation({
-    onSuccess: () => setSubmitted(true),
+    onSuccess: () => {
+      setSubmitted(true);
+      // Close modal after a short delay so user sees confirmation
+      if (onSuccess) setTimeout(onSuccess, 1800);
+    },
   });
 
   const defaultCategoryOptions = requestType === "video"
