@@ -350,14 +350,23 @@
 - [x] Add "Most Requested" badge to top playground card on HandsOn.tsx (driven by live DB stats)
 
 ## Landing Page + Export + Webinar Restructure
-- [ ] Landing page: rename feature cards to "WAVV Guides & Docs", "WAVV Playground", "WAVV Support"
-- [ ] Admin Webinars tab: add CSV export of webinar registrants (name, email, webinar title, date registered)
-- [ ] Admin Guides tab: add CSV export of guide downloaders (name, email, guide title, date downloaded)
-- [ ] Admin Playground & Support tab: add CSV export of support ticket submitters (name, email, subject, category, date)
-- [ ] Add tRPC admin procedures: getWebinarRegistrants, getGuideDownloaders, getSupportSubmitters
-- [ ] Webinars page: restructure into 3 sections — Upcoming Exclusive, Evergreen, On-Demand Recordings
-- [ ] DB: add webinar_section enum/column (exclusive | evergreen | recording) to webinars table
-- [ ] Admin Webinars tab: add section selector (Exclusive / Evergreen / Recording) when creating/editing webinars
-- [ ] Webinars page: Upcoming Exclusive shows 1 featured webinar with prominent CTA
-- [ ] Webinars page: Evergreen shows 5-10 registerable webinars in a grid
-- [ ] Webinars page: On-Demand Recordings shows past recording cards
+- [x] Landing page: rename feature cards to "WAVV Guides & Docs", "WAVV Playground", "WAVV Support"
+- [x] Admin Webinars tab: add CSV export of webinar registrants (name, email, webinar title, date registered)
+- [x] Admin Guides tab: add CSV export of guide downloaders (name, email, guide title, date downloaded)
+- [x] Admin Playground & Support tab: add CSV export of support ticket submitters (name, email, subject, category, date)
+- [x] Add tRPC admin procedures: getWebinarRegistrantsExport, getGuideDownloadersExport, getSupportSubmittersExport
+- [x] Webinars page: restructured into 3 sections — Upcoming Exclusive, Evergreen, On-Demand Recordings
+- [x] DB: extended webinars type enum to include exclusive/evergreen (migration applied)
+- [x] Admin Webinars tab: type selector updated (Upcoming Exclusive, Evergreen, On-Demand Recording, Upcoming Legacy)
+- [x] Webinars page: Upcoming Exclusive section with amber accent and empty state
+- [x] Webinars page: Evergreen section with 5 seeded webinars in a 3-col grid
+- [x] Webinars page: On-Demand Recordings section with 3 existing recordings
+
+## Admin 7-Tab Reorder + Webinar Tabs + Evergreen Countdown
+- [x] Admin: reorder to 7 tabs — Advanced Analytics, Users, WAVV Academy, WAVV Webinars, WAVV Guides & Docs, WAVV Playground, WAVV Support
+- [x] Admin: split WAVV Support into its own dedicated tab (SupportTab component)
+- [x] Admin: renamed Playground tab to "WAVV Playground" (no more support tickets inside it)
+- [x] Webinars page: 3-section tab bar (Upcoming Exclusive | Evergreen Webinars | On-Demand Recordings)
+- [x] Webinars page: clicking a tab shows only that section's content
+- [x] Seed 8 evergreen webinar placeholders with rolling 30-min schedule (IDs 30006-30013)
+- [x] Evergreen cards: live countdown clock to next session start (updates every second, staggered per card)

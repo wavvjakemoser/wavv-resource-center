@@ -75,7 +75,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground";
+type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -92,6 +92,7 @@ export default function Admin() {
     if (t === "webinars") return "webinars";
     if (t === "guides") return "guides";
     if (t === "playground") return "playground";
+    if (t === "support") return "support";
     return "analytics";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
@@ -105,6 +106,7 @@ export default function Admin() {
     else if (t === "webinars") setActiveTab("webinars");
     else if (t === "guides") setActiveTab("guides");
     else if (t === "playground") setActiveTab("playground");
+    else if (t === "support") setActiveTab("support");
     else setActiveTab("analytics");
   }, [location]);
 
@@ -124,12 +126,13 @@ export default function Admin() {
   }
 
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
-    { id: "analytics", label: "Analytics", icon: <BarChart3 size={15} /> },
+    { id: "analytics", label: "Advanced Analytics", icon: <BarChart3 size={15} /> },
     { id: "users", label: "Users", icon: <Users size={15} /> },
     { id: "academy", label: "WAVV Academy", icon: <BookOpen size={15} /> },
     { id: "webinars", label: "WAVV Webinars", icon: <Video size={15} /> },
-    { id: "guides", label: "Guides & Docs", icon: <FileText size={15} /> },
-    { id: "playground", label: "Playground & Support", icon: <FlaskConical size={15} /> },
+    { id: "guides", label: "WAVV Guides & Docs", icon: <FileText size={15} /> },
+    { id: "playground", label: "WAVV Playground", icon: <FlaskConical size={15} /> },
+    { id: "support", label: "WAVV Support", icon: <HeadphonesIcon size={15} /> },
   ];
 
   return (
@@ -180,6 +183,7 @@ export default function Admin() {
         {activeTab === "webinars" && <WebinarsTab />}
         {activeTab === "guides" && <GuidesTab />}
         {activeTab === "playground" && <PlaygroundTab />}
+        {activeTab === "support" && <SupportTab />}
 
       </div>
     </PortalLayout>
@@ -1771,10 +1775,6 @@ function PlaygroundTab() {
         )}
       </div>
 
-      {/* ── Support Tickets ── */}
-      <div style={{ borderTop: "1px solid #2a2a2a", paddingTop: "1.5rem" }}>
-        <SupportSection />
-      </div>
     </div>
   );
 }
@@ -2241,6 +2241,24 @@ function SupportSection() {
           </Table>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Support Tab ──────────────────────────────────────────────────────────────
+function SupportTab() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+          <HeadphonesIcon size={18} style={{ color: "#0074F4" }} />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-white">WAVV Support</h2>
+          <p className="text-xs text-gray-500">Manage and respond to customer support tickets</p>
+        </div>
+      </div>
+      <SupportSection />
     </div>
   );
 }
