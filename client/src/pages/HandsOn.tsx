@@ -55,69 +55,41 @@ function RequestModal({
   userEmail?: string | null;
 }) {
   const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({
-    name: userName ?? "",
-    email: userEmail ?? "",
-    playground: "",
-    message: "",
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [optIn, setOptIn] = useState(true);
 
   const submitMutation = trpc.playground.submitRequest.useMutation({
     onSuccess: () => {
       setSubmitted(true);
-      toast.success("Request submitted! We'll notify you when it's ready.");
+      toast.success("You're on the list! We'll notify you when it's ready.");
     },
     onError: (err) => {
       toast.error(err.message ?? "Submission failed. Please try again.");
     },
   });
 
-  function validate() {
-    const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    if (!form.playground) e.playground = "Please select a playground";
-    return e;
-  }
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      return;
-    }
-    setErrors({});
-    submitMutation.mutate({
-      name: form.name.trim(),
-      email: form.email.trim(),
-      playground: form.playground,
-      message: form.message.trim() || undefined,
-    });
+    submitMutation.mutate({ optIn });
   }
 
   function handleClose() {
     onClose();
-    // Reset after close animation
     setTimeout(() => {
       setSubmitted(false);
-      setForm({ name: userName ?? "", email: userEmail ?? "", playground: "", message: "" });
-      setErrors({});
+      setOptIn(true);
     }, 200);
   }
 
   if (!open) return null;
 
-  const inputStyle: React.CSSProperties = {
-    background: "#111",
-    border: "1px solid #2a2a2a",
-    color: "#fff",
+  const readonlyStyle: React.CSSProperties = {
+    background: "#0d0d0d",
+    border: "1px solid #1e1e1e",
+    color: "#9ca3af",
     borderRadius: "8px",
     padding: "10px 12px",
     fontSize: "13px",
     width: "100%",
-    outline: "none",
   };
 
   return (
@@ -127,10 +99,9 @@ function RequestModal({
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
       <div
-        className="relative w-full max-w-md rounded-2xl p-6 shadow-2xl"
+        className="relative w-full max-w-sm rounded-2xl p-6 shadow-2xl"
         style={{ background: "#161616", border: "1px solid rgba(168,85,247,0.25)" }}
       >
-        {/* Close */}
         <button
           onClick={handleClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition-colors"
@@ -143,7 +114,7 @@ function RequestModal({
             <CheckCircle2 size={44} style={{ color: "#67C728" }} />
             <h3 className="text-white font-semibold text-lg">You're on the list!</h3>
             <p className="text-gray-400 text-sm max-w-xs">
-              We'll notify you as soon as your selected playground is available.
+              We'll notify you as soon as WAVV Playground is available.
             </p>
             <button
               onClick={handleClose}
@@ -161,72 +132,44 @@ function RequestModal({
                 <h3 className="text-white font-semibold text-base">Get Notified</h3>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Let us know which playground you'd like access to and we'll notify you when it's ready.
+                We'll send you a notification when WAVV Playground goes live.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Name</label>
-                  <input
-                    type="text"
-                    placeholder="Your name"
-                    value={form.name}
-                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                    style={inputStyle}
-                  />
-                  {errors.name && <p className="text-red-400 text-[11px] mt-1">{errors.name}</p>}
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
-                  <input
-                    type="email"
-                    placeholder="you@company.com"
-                    value={form.email}
-                    onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                    style={inputStyle}
-                  />
-                  {errors.email && <p className="text-red-400 text-[11px] mt-1">{errors.email}</p>}
-                </div>
-              </div>
-
+            {/* Read-only user info */}
+            <div className="space-y-2 mb-4">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">Which Playground?</label>
-                <select
-                  value={form.playground}
-                  onChange={(e) => setForm((f) => ({ ...f, playground: e.target.value }))}
-                  style={{ ...inputStyle, appearance: "none" as const }}
-                >
-                  <option value="">Select a playground…</option>
-                  {PLAYGROUND_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-                {errors.playground && <p className="text-red-400 text-[11px] mt-1">{errors.playground}</p>}
+                <p className="text-xs text-gray-500 mb-1">Name</p>
+                <div style={readonlyStyle}>{userName ?? "—"}</div>
               </div>
-
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                  Notes <span className="text-gray-600">(optional)</span>
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="What would you like to practice or explore?"
-                  value={form.message}
-                  onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                  style={{ ...inputStyle, resize: "vertical" as const }}
+                <p className="text-xs text-gray-500 mb-1">Email</p>
+                <div style={readonlyStyle}>{userEmail ?? "—"}</div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Opt-in checkbox */}
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={optIn}
+                  onChange={(e) => setOptIn(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded accent-purple-500 cursor-pointer"
                 />
-              </div>
+                <span className="text-sm text-gray-300 leading-snug">
+                  Yes, notify me when WAVV Playground is live. I agree to receive product communications from WAVV.
+                </span>
+              </label>
 
               <button
                 type="submit"
-                disabled={submitMutation.isPending}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50 mt-1"
+                disabled={submitMutation.isPending || !optIn}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
               >
-                <Send size={13} />
-                {submitMutation.isPending ? "Submitting…" : "Notify Me When Ready"}
+                <Bell size={13} />
+                {submitMutation.isPending ? "Submitting…" : "Notify Me"}
               </button>
             </form>
           </>

@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "7a66abc4-c907-4023-bdd6-c171be1d4de4",
-  "prevId": "8497b6ae-53f2-45d1-8ffa-412f68dceef8",
+  "id": "1b4fc6d9-4a23-432e-8c28-5b09aa24078f",
+  "prevId": "7a66abc4-c907-4023-bdd6-c171be1d4de4",
   "tables": {
     "analytics_events": {
       "name": "analytics_events",
@@ -699,13 +699,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "lastName": {
-          "name": "lastName",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "email": {
           "name": "email",
           "type": "varchar(320)",
@@ -719,14 +712,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "optIn": {
-          "name": "optIn",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
         },
         "message": {
           "name": "message",

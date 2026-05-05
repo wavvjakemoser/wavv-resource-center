@@ -880,22 +880,22 @@ export const appRouter = router({
     }),
     submitRequest: protectedProcedure
       .input(z.object({
-        name: z.string().min(1).max(255),
-        email: z.string().email().max(320),
-        playground: z.string().min(1).max(255),
-        message: z.string().max(2000).optional(),
+        optIn: z.boolean().default(true),
       }))
       .mutation(async ({ ctx, input }) => {
+        const userName = ctx.user.name ?? "";
+        const userEmail = ctx.user.email ?? "";
         await createPlaygroundRequest({
           userId: ctx.user.id,
-          name: input.name,
-          email: input.email,
-          playground: input.playground,
-          message: input.message ?? null,
+          name: userName,
+          email: userEmail,
+          playground: "WAVV Playground",
+          optIn: input.optIn,
+          message: null,
         });
         await notifyOwner({
-          title: `New Playground Request: ${input.playground}`,
-          content: `From: ${input.name} (${input.email})\nPlayground: ${input.playground}\nMessage: ${input.message ?? "(none)"}`,
+          title: `New Playground Opt-In: ${userName}`,
+          content: `User: ${userName} (${userEmail})\nOpt-in to notifications: ${input.optIn ? "Yes" : "No"}`,
         });
         return { success: true };
       }),

@@ -193,8 +193,10 @@ export const playgroundRequests = mysqlTable("playground_requests", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId"),
   name: varchar("name", { length: 255 }).notNull(),
+  lastName: varchar("lastName", { length: 255 }),
   email: varchar("email", { length: 320 }).notNull(),
   playground: varchar("playground", { length: 255 }).notNull(),
+  optIn: boolean("optIn").default(true).notNull(),
   message: text("message"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

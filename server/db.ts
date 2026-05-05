@@ -816,8 +816,10 @@ export async function isBookmarked(userId: number, contentType: string, contentI
 export async function createPlaygroundRequest(data: {
   userId?: number | null;
   name: string;
+  lastName?: string | null;
   email: string;
   playground: string;
+  optIn?: boolean;
   message?: string | null;
 }) {
   const db = await getDb();
@@ -825,8 +827,10 @@ export async function createPlaygroundRequest(data: {
   await db.insert(playgroundRequests).values({
     userId: data.userId ?? null,
     name: data.name,
+    lastName: data.lastName ?? null,
     email: data.email,
     playground: data.playground,
+    optIn: data.optIn ?? true,
     message: data.message ?? null,
   });
 }
