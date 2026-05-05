@@ -407,14 +407,14 @@ export default function Academy() {
                   />
                   {/* Content */}
                   <div className="relative flex items-center px-8 py-10">
-                    {/* Label + count badges only — no icon badge */}
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                       <h2 className="text-2xl font-bold text-white tracking-tight">{cat.label}</h2>
+                      <p className="text-sm text-gray-300 max-w-xs leading-snug">{cat.subtitle}</p>
                       {(() => {
                         const counts = STATIC_COUNTS[cat.key];
                         if (!counts) return null;
                         return (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mt-1">
                             <span
                               className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
                               style={{ background: `${cat.color}25`, color: cat.color, border: `1px solid ${cat.color}50` }}

@@ -429,3 +429,6 @@
 - [x] Regenerate How-To banner: neon wrench icon only, no baked-in text, dark background, matches Onboarding banner style
 - [x] Regenerate Strategy banner: neon lightbulb icon only, no baked-in text, dark background, matches Onboarding banner style
 - [x] Upload and update Academy.tsx with new banner paths
+
+## Banner Text Restore
+- [x] Restore category label + subtitle text overlay on Academy banners (How-To and Strategy) — keep clean icon image, add text back as overlay content
