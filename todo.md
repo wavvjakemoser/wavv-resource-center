@@ -414,3 +414,6 @@
 ## Sign-In Copy + Magic Link Architecture
 - [x] Update sign-in modal subtitle to "Enter your WAVV account credentials to sign in"
 - [ ] Future: magic link endpoint — WAVV platform embeds a one-click link that auto-authenticates active customers into the Resource Center
+
+## Webinar Card Thumbnail Redesign
+- [x] Remove thumbnail images from webinar cards — replace with clean dark gradient header showing title text only (no WAVV logo, no image clutter)

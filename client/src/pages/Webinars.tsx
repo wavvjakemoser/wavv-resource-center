@@ -74,25 +74,29 @@ function WebinarCard({
         e.currentTarget.style.boxShadow = "none";
       }}
     >
-      {/* Thumbnail / header strip */}
+      {/* Header strip — clean gradient with title text */}
       <div
-        className="relative flex items-center justify-center flex-shrink-0"
+        className="relative flex items-end flex-shrink-0 p-4"
         style={{
-          height: "140px",
-          background: webinar.thumbnailUrl ? `url(${webinar.thumbnailUrl}) center/cover no-repeat` : `linear-gradient(135deg, ${accentColor}22, ${accentColor}08)`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          height: "100px",
+          background: `linear-gradient(135deg, ${accentColor}28 0%, ${accentColor}10 60%, #111 100%)`,
+          borderBottom: `1px solid ${accentColor}30`,
         }}
       >
-        {!webinar.thumbnailUrl && <Video size={28} className="text-gray-700" />}
         {webinar.viewCount ? (
           <div
             className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-            style={{ background: "rgba(0,0,0,0.6)", color: "#9ca3af" }}
+            style={{ background: "rgba(0,0,0,0.5)", color: "#9ca3af" }}
           >
             <Users size={10} /> {webinar.viewCount}
           </div>
         ) : null}
+        <h3
+          className="text-white font-bold text-sm leading-snug line-clamp-2"
+          style={{ textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
+        >
+          {webinar.title}
+        </h3>
       </div>
 
       {/* Countdown bar — below thumbnail, not overlaid */}
@@ -108,7 +112,6 @@ function WebinarCard({
 
       {/* Body */}
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="text-white font-semibold text-sm mb-1 leading-snug">{webinar.title}</h3>
         {webinar.description && (
           <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-2">{webinar.description}</p>
         )}
