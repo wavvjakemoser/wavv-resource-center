@@ -83,7 +83,7 @@ function WebinarCard({
         e.currentTarget.style.boxShadow = "none";
       }}
     >
-      {/* Thumbnail with background image + centered title overlay */}
+      {/* Thumbnail — image only, no text */}
       <div
         className="relative flex-shrink-0 overflow-hidden"
         style={{
@@ -96,22 +96,7 @@ function WebinarCard({
           src={thumbBg}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.85 }}
         />
-        {/* Dark gradient overlay for legibility */}
-        <div
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.65) 100%)" }}
-        />
-        {/* Centered title — only text shown on thumbnail */}
-        <div className="absolute inset-0 flex items-center justify-center px-4 z-10">
-          <h3
-            className="text-white font-bold text-sm leading-snug text-center line-clamp-3"
-            style={{ textShadow: "0 2px 8px rgba(0,0,0,0.95)" }}
-          >
-            {webinar.title}
-          </h3>
-        </div>
         {/* Red rubber-stamp DEMO overlay for placeholder content */}
         {isDemo && (
           <div
@@ -159,6 +144,8 @@ function WebinarCard({
 
       {/* Body */}
       <div className="p-4 flex flex-col flex-1">
+        {/* Title — shown here, not on thumbnail */}
+        <h3 className="text-white font-bold text-sm leading-snug mb-2">{webinar.title}</h3>
         {webinar.description && (
           <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-2">{webinar.description}</p>
         )}
