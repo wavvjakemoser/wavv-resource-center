@@ -649,3 +649,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Build StatDetailDrawer component: slide-out panel showing a table of individual event rows for the selected metric
 - [x] Wire all 8 stat cards to open the drawer with the correct event type filter
 - [x] Drawer shows: user name/email, event type, resource, timestamp — sortable by date
+
+## DB Video Title Sync
+
+- [x] Sync all 20 DB lesson titles to match exact titles on Academy landing page (AcademyCategory.tsx)
