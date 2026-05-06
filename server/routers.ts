@@ -248,7 +248,7 @@ const academyRouter = router({
       const results = await Promise.all(
         allCourses.map(async (course) => {
           const courseLessons = await getLessonsByCourse(course.id, false);
-          return courseLessons.map((l) => ({ ...l, courseTitle: course.title, courseCategory: course.category }));
+          return courseLessons.map((l) => ({ ...l, courseId: course.id, courseTitle: course.title, courseCategory: course.category }));
         })
       );
       return results.flat();

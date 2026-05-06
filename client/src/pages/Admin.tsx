@@ -1374,7 +1374,7 @@ function CategoryBlock({
       {open && (
         <div className="space-y-2 ml-8">
           {courses.map((course) => {
-            const courseLessons = allLessons.filter((l) => l.courseTitle === course.title);
+            const courseLessons = allLessons.filter((l) => l.courseId === course.id);
             return (
               <SectionRow2
                 key={course.id}
@@ -1439,6 +1439,7 @@ function ContentTab() {
 
   // Canonical course titles per category — only these appear under the main 3 category banners.
   // Any other courses in the same category fall through to the "extra categories" block below.
+  // Maps category key → canonical course title in the DB
   const CANONICAL_COURSE_TITLES: Record<string, string> = {
     "Onboarding": "Onboarding",
     "How-To": "How-To",
