@@ -692,3 +692,18 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Dashboard: what's new — 2-column grid with description text and category labels
 - [x] Dashboard: trending — colored rank badges + category labels; side-by-side with What's New (3/5 + 2/5 grid)
 - [x] Dashboard: removed bottom Navigate tiles (replaced by quick-access bar in hero)
+
+## Tags: Admin → User-Facing Reflection
+
+- [ ] Audit tag data model: how tags are stored on courses/lessons in DB and returned by API
+- [ ] AcademyCategory page: display section-level tags (e.g. "Most Popular") on section cards
+- [ ] AcademyLesson / video cards: display lesson-level tags as colored badges (e.g. "NEW", "MUST WATCH", "MOST POPULAR")
+- [ ] Ensure tags are included in the getLessonsByCourse and getCategories API responses
+
+## Tags Wiring — Completed
+
+- [x] Audit tag data model: tags stored as comma-separated text on courses/lessons tables
+- [x] Add getCoursesByCategory tRPC procedure (returns published courses for a category, includes tags field)
+- [x] AcademyCategory.tsx: call getCoursesByCategory, build dbCourseMap keyed by normalized section title
+- [x] SectionRow: add courseTags prop; render colored tag pills on section header (same TAG_COLORS style as lesson tags)
+- [x] Lesson-level tags already working via getLessonsByCategory + dbLessonMap

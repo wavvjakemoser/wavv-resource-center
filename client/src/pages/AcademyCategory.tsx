@@ -309,6 +309,7 @@ function SectionRow({
   categoryKey,
   defaultOpen = false,
   dbLessonMap = {},
+  courseTags = [] as string[],
   bookmarkedIds = new Set<number>(),
   onToggleBookmark,
   onPlay,
@@ -318,6 +319,7 @@ function SectionRow({
   categoryKey: string;
   defaultOpen?: boolean;
   dbLessonMap?: Record<string, DbLessonMeta>;
+  courseTags?: string[];
   bookmarkedIds?: Set<number>;
   onToggleBookmark?: (contentId: number, title: string, isBookmarked: boolean) => void;
   onPlay?: (embedUrl: string, title: string) => void;
@@ -335,7 +337,25 @@ function SectionRow({
         className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-white/5"
       >
         {(() => { const Icon = CATEGORY_ICONS[categoryKey] ?? Rocket; return <Icon size={16} style={{ color: accentColor, flexShrink: 0 }} />; })()}
-        <span className="flex-1 text-sm font-semibold text-white">{section.title}</span>
+        <span className="text-sm font-semibold text-white">{section.title}</span>
+        {courseTags.length > 0 && (
+          <div className="flex flex-wrap gap-1 ml-1">
+            {courseTags.map((tag) => {
+              const def = TAG_COLORS[tag];
+              if (!def) return null;
+              return (
+                <span
+                  key={tag}
+                  className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                  style={{ background: def.bg, color: def.color, border: `1px solid ${def.border}` }}
+                >
+                  {tag}
+                </span>
+              );
+            })}
+          </div>
+        )}
+        <span className="flex-1" />
         <span className="text-[11px] text-gray-500 mr-2">
           {section.videos.length} video{section.videos.length !== 1 ? "s" : ""}
         </span>
@@ -523,6 +543,12 @@ export default function AcademyCategory() {
     { enabled: !!cat }
   );
 
+  // Fetch DB courses (sections) for this category to get section-level tags
+  const { data: dbCourses = [] } = trpc.academy.getCoursesByCategory.useQuery(
+    { category: cat?.key ?? "" },
+    { enabled: !!cat }
+  );
+
   // Fetch user bookmarks
   const utils = trpc.useUtils();
   const { data: userBookmarks = [] } = trpc.bookmarks.getAll.useQuery();
@@ -549,6 +575,15 @@ export default function AcademyCategory() {
       addBookmarkMut.mutate({ contentType: "lesson", contentId, contentTitle: title });
     }
   }
+
+  // Build a map: normalized course title -> { tags }
+  const dbCourseMap = useMemo(() => {
+    const map: Record<string, { tags: string | null }> = {};
+    for (const c of dbCourses) {
+      map[c.title.toLowerCase().trim()] = { tags: c.tags ?? null };
+    }
+    return map;
+  }, [dbCourses]);
 
   // Build a map: normalized title -> { tags, createdAt }
   const dbLessonMap = useMemo(() => {
@@ -717,6 +752,12 @@ export default function AcademyCategory() {
               categoryKey={cat.key}
               defaultOpen={idx === 0}
               dbLessonMap={dbLessonMap}
+              courseTags={
+                dbCourseMap[section.title.toLowerCase().trim()]?.tags
+                  ?.split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean) ?? []
+              }
               bookmarkedIds={bookmarkedIds}
               onToggleBookmark={handleToggleBookmark}
               onPlay={handlePlay}

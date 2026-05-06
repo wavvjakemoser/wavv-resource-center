@@ -247,6 +247,14 @@ const academyRouter = router({
     .input(z.object({ category: z.string() }))
     .query(({ input }) => getLessonsByCategory(input.category)),
 
+  // Returns courses (sections) for a given category — includes tags field for user-facing display
+  getCoursesByCategory: protectedProcedure
+    .input(z.object({ category: z.string() }))
+    .query(async ({ input }) => {
+      const allCourses = await getCourses(true);
+      return allCourses.filter((c) => c.category === input.category);
+    }),
+
   // Returns ALL lessons across all courses for the content management view
   adminGetAllLessons: adminProcedure
     .query(async () => {
