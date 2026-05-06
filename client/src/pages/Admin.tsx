@@ -75,6 +75,7 @@ import {
   CheckCircle2,
   Star,
   EyeOff,
+  Maximize2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -246,13 +247,110 @@ function AnalyticsTab() {
   );
 }
 
+// ─── Reusable chart card wrapper with per-chart time range + expand ────────────
+function ChartCard({
+  title, icon, iconColor, children, chartDays, onDaysChange, expanded, onExpand,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  iconColor: string;
+  children: (days: number, height: number) => React.ReactNode;
+  chartDays: TimeRange;
+  onDaysChange: (d: TimeRange) => void;
+  expanded: boolean;
+  onExpand: () => void;
+}) {
+  // Close on Escape
+  useEffect(() => {
+    if (!expanded) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onExpand(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [expanded, onExpand]);
+
+  const rangeSelector = (
+    <div className="flex items-center gap-1">
+      {([7, 30, 90, 365] as TimeRange[]).map((d) => (
+        <button
+          key={d}
+          onClick={(e) => { e.stopPropagation(); onDaysChange(d); }}
+          className="px-2 py-0.5 text-[10px] font-medium rounded transition"
+          style={chartDays === d
+            ? { background: "rgba(6,182,212,0.2)", color: "#22d3ee" }
+            : { color: "#6b7280" }
+          }
+        >{d === 365 ? "1Y" : `${d}D`}</button>
+      ))}
+      <button
+        onClick={(e) => { e.stopPropagation(); onExpand(); }}
+        className="ml-1 p-1 rounded transition hover:bg-white/10"
+        title="Expand"
+        style={{ color: "#6b7280" }}
+      >
+        <Maximize2 size={12} />
+      </button>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Normal card */}
+      <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <span style={{ color: iconColor }}>{icon}</span> {title}
+          </h3>
+          {rangeSelector}
+        </div>
+        {children(chartDays, 208)}
+      </div>
+
+      {/* Fullscreen modal */}
+      {expanded && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: "rgba(0,0,0,0.85)" }}
+          onClick={onExpand}
+        >
+          <div
+            className="relative w-full max-w-5xl rounded-2xl p-6"
+            style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.15)", maxHeight: "90vh", overflow: "auto" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                <span style={{ color: iconColor }}>{icon}</span> {title}
+              </h3>
+              <div className="flex items-center gap-2">
+                {rangeSelector}
+                <button onClick={onExpand} className="p-1.5 rounded-lg hover:bg-white/10" style={{ color: "#9ca3af" }}>
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            {children(chartDays, 480)}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function AnalyticsContent({ days }: { days: TimeRange }) {
   const { data: eventCounts, isLoading: eventsLoading } =
     trpc.analytics.getEventCounts.useQuery({ days });
-  const { data: signInTrend } =
-    trpc.analytics.getSignInTrend.useQuery({ days });
-  const { data: topContent } =
-    trpc.analytics.getTopContent.useQuery({ days, limit: 30 });
+
+  // Per-chart independent time ranges
+  const [signInDays, setSignInDays] = useState<TimeRange>(30);
+  const [distDays, setDistDays] = useState<TimeRange>(30);
+  const [topDays, setTopDays] = useState<TimeRange>(30);
+  const [searchDays, setSearchDays] = useState<TimeRange>(30);
+
+  // Per-chart expand state
+  const [expandedChart, setExpandedChart] = useState<"signin" | "dist" | "top" | "search" | null>(null);
+
+  const { data: signInTrend } = trpc.analytics.getSignInTrend.useQuery({ days: signInDays });
+  const { data: topContent } = trpc.analytics.getTopContent.useQuery({ days: topDays, limit: 30 });
 
   // Top-content section tab
   const [topSection, setTopSection] = useState<"academy" | "webinars" | "guides">("academy");
@@ -307,150 +405,196 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
     <div className="space-y-6">
       {/* 8 Stat Cards in 2 rows of 4 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<LogIn size={18} />}         label="Sign-Ins"                          value={stats?.logins ?? 0}           color="blue"    subtitle={`last ${days}d`} />
-        <StatCard icon={<GraduationCap size={18} />} label="Academy Lessons Completed"         value={stats?.lessonCompleted ?? 0}  color="cyan"    subtitle={`last ${days}d`} />
-        <StatCard icon={<Eye size={18} />}           label="Evergreen Webinars Watched"        value={stats?.evergreenWatched ?? 0} color="amber"   subtitle={`last ${days}d`} />
-        <StatCard icon={<Star size={18} />}          label="Exclusive Webinar Registrations"  value={stats?.exclusiveReg ?? 0}     color="purple"  subtitle={`last ${days}d`} />
+        {/* Sign-Ins: blue (matches portal sign-in) */}
+        <StatCard icon={<LogIn size={18} />}         label="Sign-Ins"                         value={stats?.logins ?? 0}           color="blue"    subtitle={`last ${days}d`} />
+        {/* Academy: cyan (matches WAVV Academy landing accent) */}
+        <StatCard icon={<GraduationCap size={18} />} label="Academy Lessons Completed"        value={stats?.lessonCompleted ?? 0}  color="cyan"    subtitle={`last ${days}d`} />
+        {/* Evergreen Webinars: amber (matches Webinars landing accent) */}
+        <StatCard icon={<Eye size={18} />}           label="Evergreen Webinars Watched"       value={stats?.evergreenWatched ?? 0} color="amber"   subtitle={`last ${days}d`} />
+        {/* Exclusive Registrations: purple (exclusive badge color) */}
+        <StatCard icon={<Star size={18} />}          label="Exclusive Webinar Registrations" value={stats?.exclusiveReg ?? 0}     color="purple"  subtitle={`last ${days}d`} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Video size={18} />}         label="On-Demand Webinars Watched"        value={stats?.ondemandWatched ?? 0}  color="emerald" subtitle={`last ${days}d`} />
-        <StatCard icon={<Download size={18} />}      label="Guides & Docs Downloads"           value={stats?.guideDownloaded ?? 0}  color="teal"    subtitle={`last ${days}d`} />
-        <StatCard icon={<Search size={18} />}        label="Total Searches"                    value={stats?.searches ?? 0}         color="green"   subtitle={`last ${days}d`} />
-        <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"             value={stats?.aiChats ?? 0}          color="red"     subtitle={`last ${days}d`} />
+        {/* On-Demand: amber (same webinar family) */}
+        <StatCard icon={<Video size={18} />}         label="On-Demand Webinars Watched"       value={stats?.ondemandWatched ?? 0}  color="amber"   subtitle={`last ${days}d`} />
+        {/* Guides & Docs: green (matches Guides landing accent) */}
+        <StatCard icon={<Download size={18} />}      label="Guides & Docs Downloads"          value={stats?.guideDownloaded ?? 0}  color="green"   subtitle={`last ${days}d`} />
+        {/* Total Searches: teal (matches search/AI page accent) */}
+        <StatCard icon={<Search size={18} />}        label="Total Searches"                   value={stats?.searches ?? 0}         color="teal"    subtitle={`last ${days}d`} />
+        {/* WAVV AI: purple (matches AI/Playground accent) */}
+        <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"            value={stats?.aiChats ?? 0}          color="purple"  subtitle={`last ${days}d`} />
       </div>
 
       {/* Charts row: Sign-In Trend + Event Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sign-In Trend */}
-        <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <TrendingUp size={15} className="text-cyan-400" /> Sign-In Trend
-          </h3>
-          <div className="h-52">
-            {signInTrend && signInTrend.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={signInTrend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="date" tick={{ fill: "#9ca3af", fontSize: 11 }}
-                    tickFormatter={(v) => { const d = new Date(v); return `${d.getMonth()+1}/${d.getDate()}`; }} />
-                  <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
-                  <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }} />
-                  <Line type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500 text-sm">No sign-in data for this period</div>
-            )}
-          </div>
-        </div>
+        <ChartCard
+          title="Sign-In Trend"
+          icon={<TrendingUp size={15} />}
+          iconColor="#22d3ee"
+          chartDays={signInDays}
+          onDaysChange={setSignInDays}
+          expanded={expandedChart === "signin"}
+          onExpand={() => setExpandedChart(expandedChart === "signin" ? null : "signin")}
+        >
+          {(d, h) => <SignInTrendChart days={d} height={h} />}
+        </ChartCard>
 
-        {/* Event Distribution — donut + right-side legend */}
-        <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Activity size={15} className="text-purple-400" /> Event Distribution
-          </h3>
-          {pieData.length > 0 ? (
-            <div className="flex items-center gap-4 h-52">
-              {/* Donut — no labels on slices */}
-              <div className="shrink-0" style={{ width: 160, height: 160 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={46} outerRadius={72}
-                      dataKey="value" labelLine={false} label={false}
-                    >
-                      {pieData.map((entry, idx) => (
-                        <Cell key={idx} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{ background: "#1f2937", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }}
-                      formatter={(value: number, name: string) => [`${value} (${pieTotal > 0 ? ((value / pieTotal) * 100).toFixed(1) : 0}%)`, name]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              {/* Right-side legend */}
-              <div className="flex-1 space-y-1.5 overflow-y-auto max-h-52 pr-1">
-                {pieData.map((entry, idx) => {
-                  const pct = pieTotal > 0 ? ((entry.value / pieTotal) * 100).toFixed(1) : "0.0";
-                  return (
-                    <div key={idx} className="flex items-center justify-between gap-2 text-xs">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: entry.fill }} />
-                        <span className="text-gray-300 truncate">{entry.name}</span>
-                      </div>
-                      <span className="text-gray-400 shrink-0 font-medium">{pct}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-52 text-gray-500 text-sm">No events recorded yet</div>
-          )}
-        </div>
+        <ChartCard
+          title="Event Distribution"
+          icon={<Activity size={15} />}
+          iconColor="#a78bfa"
+          chartDays={distDays}
+          onDaysChange={setDistDays}
+          expanded={expandedChart === "dist"}
+          onExpand={() => setExpandedChart(expandedChart === "dist" ? null : "dist")}
+        >
+          {(d, h) => <EventDistChart days={d} height={h} />}
+        </ChartCard>
       </div>
 
       {/* Top Content by Section + Search & AI */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Content — sectioned tabs */}
-        <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <Search size={15} className="text-amber-400" /> Top Content
-          </h3>
-          {/* Section tabs */}
-          <div className="flex gap-1 mb-4 p-1 rounded-lg" style={{ background: "rgba(255,255,255,0.04)" }}>
-            {SECTION_TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTopSection(t.key)}
-                className="flex-1 py-1 text-xs font-medium rounded-md transition"
-                style={topSection === t.key
-                  ? { background: "rgba(255,255,255,0.1)", color: t.color }
-                  : { color: "#6b7280" }
-                }
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-          {sectionContent.length > 0 ? (
-            <div className="space-y-1.5">
-              {sectionContent.slice(0, 8).map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-lg"
-                  style={{ background: "rgba(255,255,255,0.03)" }}>
-                  <div className="flex items-center gap-2 text-sm min-w-0">
-                    <span className="text-gray-500 w-5 shrink-0 text-right">{idx + 1}.</span>
-                    <span className="text-gray-300 capitalize truncate">
-                      {item.resourceType ?? "unknown"} #{item.resourceId}
-                    </span>
-                    <span className="text-xs text-gray-500 px-1.5 py-0.5 rounded shrink-0"
-                      style={{ background: "rgba(255,255,255,0.05)" }}>
-                      {formatEventType(item.eventType)}
-                    </span>
-                  </div>
-                  <span className="text-sm font-semibold text-white shrink-0 ml-2">{item.count}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-gray-500 text-sm text-center py-8">No interactions yet for this section</div>
+        <ChartCard
+          title="Top Content"
+          icon={<Search size={15} />}
+          iconColor="#fbbf24"
+          chartDays={topDays}
+          onDaysChange={setTopDays}
+          expanded={expandedChart === "top"}
+          onExpand={() => setExpandedChart(expandedChart === "top" ? null : "top")}
+        >
+          {(d, _h) => (
+            <TopContentPanel days={d} section={topSection} onSectionChange={setTopSection} sectionTabs={SECTION_TABS} />
           )}
-        </div>
+        </ChartCard>
 
-        {/* Search & AI Usage Trend */}
-        <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Search size={15} className="text-teal-400" /> Search & AI Usage Trend
-          </h3>
-          <SearchAIChart days={days} />
-        </div>
+        <ChartCard
+          title="Search & AI Usage Trend"
+          icon={<Search size={15} />}
+          iconColor="#2dd4bf"
+          chartDays={searchDays}
+          onDaysChange={setSearchDays}
+          expanded={expandedChart === "search"}
+          onExpand={() => setExpandedChart(expandedChart === "search" ? null : "search")}
+        >
+          {(d, h) => <SearchAIChart days={d} height={h} />}
+        </ChartCard>
       </div>
     </div>
   );
 }
 
-function SearchAIChart({ days }: { days: number }) {
+// ─── Chart sub-components (height-aware for expand modal) ───────────────────
+function SignInTrendChart({ days, height = 208 }: { days: number; height?: number }) {
+  const { data: signInTrend } = trpc.analytics.getSignInTrend.useQuery({ days });
+  if (!signInTrend || signInTrend.length === 0)
+    return <div className="flex items-center justify-center text-gray-500 text-sm" style={{ height }}>No sign-in data for this period</div>;
+  return (
+    <div style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={signInTrend}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <XAxis dataKey="date" tick={{ fill: "#9ca3af", fontSize: 11 }}
+            tickFormatter={(v) => { const d = new Date(v); return `${d.getMonth()+1}/${d.getDate()}`; }} />
+          <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
+          <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }} />
+          <Line type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function EventDistChart({ days, height = 208 }: { days: number; height?: number }) {
+  const { data: eventCounts } = trpc.analytics.getEventCounts.useQuery({ days });
+  const CHART_COLORS = ["#06b6d4","#22c55e","#f59e0b","#8b5cf6","#ec4899","#14b8a6","#f97316","#ef4444"];
+  const pieData = (eventCounts ?? [])
+    .filter((e) => e.count > 0)
+    .map((e, idx) => ({ name: formatEventType(e.eventType), value: e.count, fill: CHART_COLORS[idx % CHART_COLORS.length] }));
+  const pieTotal = pieData.reduce((s, d) => s + d.value, 0);
+  const donutSize = Math.min(height - 20, 200);
+  if (pieData.length === 0)
+    return <div className="flex items-center justify-center text-gray-500 text-sm" style={{ height }}>No events recorded yet</div>;
+  return (
+    <div className="flex items-center gap-4" style={{ height }}>
+      <div className="shrink-0" style={{ width: donutSize, height: donutSize }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={pieData} cx="50%" cy="50%"
+              innerRadius={donutSize * 0.28} outerRadius={donutSize * 0.44}
+              dataKey="value" labelLine={false} label={false}>
+              {pieData.map((entry, idx) => <Cell key={idx} fill={entry.fill} />)}
+            </Pie>
+            <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }}
+              formatter={(value: number, name: string) => [`${value} (${pieTotal > 0 ? ((value/pieTotal)*100).toFixed(1) : 0}%)`, name]} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="flex-1 space-y-1.5 overflow-y-auto pr-1" style={{ maxHeight: height }}>
+        {pieData.map((entry, idx) => {
+          const pct = pieTotal > 0 ? ((entry.value / pieTotal) * 100).toFixed(1) : "0.0";
+          return (
+            <div key={idx} className="flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: entry.fill }} />
+                <span className="text-gray-300 truncate">{entry.name}</span>
+              </div>
+              <span className="text-gray-400 shrink-0 font-medium">{pct}%</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TopContentPanel({
+  days, section, onSectionChange, sectionTabs,
+}: {
+  days: number;
+  section: "academy" | "webinars" | "guides";
+  onSectionChange: (s: "academy" | "webinars" | "guides") => void;
+  sectionTabs: { key: "academy" | "webinars" | "guides"; label: string; color: string }[];
+}) {
+  const { data: topContent } = trpc.analytics.getTopContent.useQuery({ days, limit: 30 });
+  const academyContent = (topContent ?? []).filter((i) => i.resourceType === "lesson" || i.resourceType === "course");
+  const webinarContent = (topContent ?? []).filter((i) => i.resourceType === "webinar");
+  const guideContent   = (topContent ?? []).filter((i) => i.resourceType === "guide");
+  const sectionContent = section === "academy" ? academyContent : section === "webinars" ? webinarContent : guideContent;
+  return (
+    <div>
+      <div className="flex gap-1 mb-3 p-1 rounded-lg" style={{ background: "rgba(255,255,255,0.04)" }}>
+        {sectionTabs.map((t) => (
+          <button key={t.key} onClick={() => onSectionChange(t.key)}
+            className="flex-1 py-1 text-xs font-medium rounded-md transition"
+            style={section === t.key ? { background: "rgba(255,255,255,0.1)", color: t.color } : { color: "#6b7280" }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {sectionContent.length > 0 ? (
+        <div className="space-y-1.5">
+          {sectionContent.slice(0, 10).map((item, idx) => (
+            <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-lg"
+              style={{ background: "rgba(255,255,255,0.03)" }}>
+              <div className="flex items-center gap-2 text-sm min-w-0">
+                <span className="text-gray-500 w-5 shrink-0 text-right">{idx + 1}.</span>
+                <span className="text-gray-300 capitalize truncate">{item.resourceType ?? "unknown"} #{item.resourceId}</span>
+                <span className="text-xs text-gray-500 px-1.5 py-0.5 rounded shrink-0"
+                  style={{ background: "rgba(255,255,255,0.05)" }}>{formatEventType(item.eventType)}</span>
+              </div>
+              <span className="text-sm font-semibold text-white shrink-0 ml-2">{item.count}</span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-gray-500 text-sm text-center py-8">No interactions yet for this section</div>
+      )}
+    </div>
+  );
+}
+
+function SearchAIChart({ days, height = 192 }: { days: number; height?: number }) {
   const { data: searchTrend } = trpc.analytics.getDailyEvents.useQuery({ eventType: "search", days });
   const { data: aiTrend } = trpc.analytics.getDailyEvents.useQuery({ eventType: "ai_chat", days });
 
@@ -882,7 +1026,7 @@ function StatCard({ icon, label, value, color, subtitle }: {
       style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
       <div className={`p-2 rounded-lg ${colorMap[color] ?? "text-gray-400 bg-gray-400/10"}`}>{icon}</div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-400 truncate">{label}</p>
+        <p className="text-xs text-gray-400 leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{label}</p>
         <p className="text-2xl font-bold text-white">{value.toLocaleString()}</p>
         {subtitle && <p className="text-[10px] text-gray-500">{subtitle}</p>}
       </div>
