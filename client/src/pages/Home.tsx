@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import {
   GraduationCap,
   Video,
+  FileText,
   Headphones,
   ArrowRight,
   CheckCircle,
@@ -84,6 +85,12 @@ export default function Home() {
       color: "#00A9E2",
     },
     {
+      icon: FileText,
+      label: "Guides & Docs",
+      desc: "Playbooks, how-to guides, and documentation to reference anytime",
+      color: "#67C728",
+    },
+    {
       icon: FlaskConical,
       label: "WAVV Playground",
       desc: "Practice WAVV features in a safe, isolated environment before going live",
@@ -92,7 +99,7 @@ export default function Home() {
     {
       icon: Headphones,
       label: "WAVV Support",
-      desc: "Submit a ticket, chat with support, or get instant answers from WAVV AI",
+      desc: "Get instant answers from WAVV AI or visit the Help Center",
       color: "#FF9900",
     },
   ];

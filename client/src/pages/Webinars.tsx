@@ -230,8 +230,8 @@ function WebinarCard({
 // ─── Main page ────────────────────────────────────────────────────────────────
 type WebinarSection = "exclusive" | "evergreen" | "recording";
 
-// Tab order: Exclusive → Evergreen (no recordings tab until real recordings exist)
-const SECTION_ORDER: WebinarSection[] = ["exclusive", "evergreen"];
+// Tab order: Evergreen → Exclusive → On-Demand Recordings
+const SECTION_ORDER: WebinarSection[] = ["evergreen", "exclusive", "recording"];
 
 const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactNode; accent: string; description: string }> = {
   evergreen: {
@@ -265,11 +265,11 @@ function SectionSkeleton() {
 }
 
 export default function Webinars() {
-  const [activeSection, setActiveSection] = useState<WebinarSection>("exclusive");
+  const [activeSection, setActiveSection] = useState<WebinarSection>("evergreen");
 
   const { data: exclusiveWebinars, isLoading: loadingExclusive } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const { data: evergreenWebinars, isLoading: loadingEvergreen } = trpc.webinars.list.useQuery({ type: "evergreen" });
-  // On-Demand Recordings tab removed until real recordings exist
+  const { data: recordingWebinars, isLoading: loadingRecording } = trpc.webinars.list.useQuery({ type: "recording" });
 
   // All 8 evergreen cards share the same countdown — next :00 or :30 boundary
   // Use useState to stabilize reference and avoid infinite re-renders
@@ -364,7 +364,22 @@ export default function Webinars() {
           )
         )}
 
-        {/* On-Demand Recordings tab hidden until real recordings are available */}
+        {activeSection === "recording" && (
+          loadingRecording ? <SectionSkeleton /> :
+          (recordingWebinars ?? []).length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(recordingWebinars ?? []).map((w) => (
+                <WebinarCard key={w.id} webinar={w} variant="recording" />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
+              <PlayCircle size={32} className="text-gray-700 mb-3" />
+              <p className="text-gray-400 text-sm font-medium">No recordings available yet.</p>
+              <p className="text-gray-600 text-xs mt-1">Completed exclusive webinars will be added here.</p>
+            </div>
+          )
+        )}
 
       </div>
 
