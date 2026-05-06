@@ -136,10 +136,10 @@ export default function Admin() {
     { id: "users",            label: "Users",             icon: <UserCircle size={13} /> },
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} /> },
     { id: "webinars",         label: "Webinars",          icon: <Video size={13} /> },
-    { id: "guides",           label: "Guides & Docs",     icon: <FileText size={13} /> },
+    { id: "guides",           label: "Guides",            icon: <FileText size={13} /> },
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} /> },
     { id: "support",          label: "Support",           icon: <Headphones size={13} /> },
-    { id: "content_requests", label: "Content Requests",  icon: <MessageSquare size={13} /> },
+    { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} /> },
     { id: "notifications",    label: "Notifications",     icon: <Bell size={13} /> },
   ];
 
