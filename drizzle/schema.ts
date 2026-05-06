@@ -107,11 +107,11 @@ export const webinars = mysqlTable("webinars", {
   thumbnailUrl: varchar('thumbnail_url', { length: 500 }),
   accentColor: varchar('accent_color', { length: 20 }),
   viewCount: int("viewCount").default(0),
+  sortOrder: int("sortOrder").default(0).notNull(),
   published: boolean("published").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
-
 export type Webinar = typeof webinars.$inferSelect;
 
 // ─── Webinar Registrations ────────────────────────────────────────────────────
@@ -131,11 +131,11 @@ export const guides = mysqlTable("guides", {
   fileUrl: text("fileUrl"),
   fileType: mysqlEnum("fileType", ["pdf", "checklist", "playbook", "other"]).default("pdf"),
   downloadCount: int("downloadCount").default(0),
+  sortOrder: int("sortOrder").default(0).notNull(),
   published: boolean("published").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
-
 export type Guide = typeof guides.$inferSelect;
 
 // ─── Support Tickets ──────────────────────────────────────────────────────────

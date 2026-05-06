@@ -1098,3 +1098,80 @@ export async function getAllNotifications() {
   if (!db) return [];
   return db.select().from(userNotifications).orderBy(desc(userNotifications.createdAt));
 }
+
+// ─── Academy: getCategories (DB-driven Academy page) ─────────────────────────
+export async function getCategories() {
+  const db = await getDb();
+  if (!db) return [];
+  // Get all published courses ordered by category then sortOrder
+  const allCourses = await db
+    .select()
+    .from(courses)
+    .where(eq(courses.published, true))
+    .orderBy(courses.sortOrder, courses.createdAt);
+
+  // For each course, get its published lessons
+  const coursesWithLessons = await Promise.all(
+    allCourses.map(async (course) => {
+      const courseLessons = await db
+        .select()
+        .from(lessons)
+        .where(and(eq(lessons.courseId, course.id), eq(lessons.published, true), eq(lessons.hidden, false)))
+        .orderBy(lessons.sortOrder, lessons.createdAt);
+      return { ...course, lessons: courseLessons };
+    })
+  );
+
+  // Group by category
+  const categoryOrder = ["Onboarding", "How-To", "Strategy and Best Practices"];
+  const grouped: Record<string, typeof coursesWithLessons> = {};
+  for (const course of coursesWithLessons) {
+    if (!grouped[course.category]) grouped[course.category] = [];
+    grouped[course.category].push(course);
+  }
+
+  return categoryOrder
+    .filter((cat) => grouped[cat])
+    .map((cat) => ({ category: cat, sections: grouped[cat] }));
+}
+
+// ─── Reorder helpers ──────────────────────────────────────────────────────────
+export async function reorderCourses(id1: number, id2: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [c1] = await db.select({ sortOrder: courses.sortOrder }).from(courses).where(eq(courses.id, id1)).limit(1);
+  const [c2] = await db.select({ sortOrder: courses.sortOrder }).from(courses).where(eq(courses.id, id2)).limit(1);
+  if (!c1 || !c2) throw new Error("Course not found");
+  await db.update(courses).set({ sortOrder: c2.sortOrder }).where(eq(courses.id, id1));
+  await db.update(courses).set({ sortOrder: c1.sortOrder }).where(eq(courses.id, id2));
+}
+
+export async function reorderLessons(id1: number, id2: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [l1] = await db.select({ sortOrder: lessons.sortOrder }).from(lessons).where(eq(lessons.id, id1)).limit(1);
+  const [l2] = await db.select({ sortOrder: lessons.sortOrder }).from(lessons).where(eq(lessons.id, id2)).limit(1);
+  if (!l1 || !l2) throw new Error("Lesson not found");
+  await db.update(lessons).set({ sortOrder: l2.sortOrder }).where(eq(lessons.id, id1));
+  await db.update(lessons).set({ sortOrder: l1.sortOrder }).where(eq(lessons.id, id2));
+}
+
+export async function reorderWebinars(id1: number, id2: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [w1] = await db.select({ sortOrder: webinars.sortOrder }).from(webinars).where(eq(webinars.id, id1)).limit(1);
+  const [w2] = await db.select({ sortOrder: webinars.sortOrder }).from(webinars).where(eq(webinars.id, id2)).limit(1);
+  if (!w1 || !w2) throw new Error("Webinar not found");
+  await db.update(webinars).set({ sortOrder: w2.sortOrder }).where(eq(webinars.id, id1));
+  await db.update(webinars).set({ sortOrder: w1.sortOrder }).where(eq(webinars.id, id2));
+}
+
+export async function reorderGuides(id1: number, id2: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [g1] = await db.select({ sortOrder: guides.sortOrder }).from(guides).where(eq(guides.id, id1)).limit(1);
+  const [g2] = await db.select({ sortOrder: guides.sortOrder }).from(guides).where(eq(guides.id, id2)).limit(1);
+  if (!g1 || !g2) throw new Error("Guide not found");
+  await db.update(guides).set({ sortOrder: g2.sortOrder }).where(eq(guides.id, id1));
+  await db.update(guides).set({ sortOrder: g1.sortOrder }).where(eq(guides.id, id2));
+}

@@ -73,6 +73,11 @@ import {
   getContentRequests,
   deleteUser,
   getStatDetail,
+  getCategories,
+  reorderCourses,
+  reorderLessons,
+  reorderWebinars,
+  reorderGuides,
   getNotificationsForUser,
   markNotificationRead,
   markAllNotificationsRead,
@@ -254,6 +259,19 @@ const academyRouter = router({
       );
       return results.flat();
     }),
+
+  // DB-driven Academy page: courses grouped by category with their published lessons
+  getCategories: protectedProcedure.query(() => getCategories()),
+
+  // Reorder: swap sortOrder between two courses (super_admin only)
+  reorderCourses: superAdminProcedure
+    .input(z.object({ id1: z.number(), id2: z.number() }))
+    .mutation(({ input }) => reorderCourses(input.id1, input.id2)),
+
+  // Reorder: swap sortOrder between two lessons (super_admin only)
+  reorderLessons: superAdminProcedure
+    .input(z.object({ id1: z.number(), id2: z.number() }))
+    .mutation(({ input }) => reorderLessons(input.id1, input.id2)),
 });
 
 // ─── Webinars Router ──────────────────────────────────────────────────────────
@@ -349,6 +367,11 @@ const webinarsRouter = router({
 
   adminList: adminProcedure.query(() => getWebinars()),
   adminExportRegistrants: adminProcedure.query(() => getWebinarRegistrantsExport()),
+
+  // Reorder: swap sortOrder between two webinars (super_admin only)
+  adminReorder: superAdminProcedure
+    .input(z.object({ id1: z.number(), id2: z.number() }))
+    .mutation(({ input }) => reorderWebinars(input.id1, input.id2)),
 });
 
 // ─── Guides Router ────────────────────────────────────────────────────────────
@@ -411,6 +434,11 @@ const guidesRouter = router({
 
   adminList: adminProcedure.query(() => getGuides(false)),
   adminExportDownloaders: adminProcedure.query(() => getGuideDownloadersExport()),
+
+  // Reorder: swap sortOrder between two guides (super_admin only)
+  adminReorder: superAdminProcedure
+    .input(z.object({ id1: z.number(), id2: z.number() }))
+    .mutation(({ input }) => reorderGuides(input.id1, input.id2)),
 });
 
 // ─── Support Router ───────────────────────────────────────────────────────────

@@ -653,3 +653,20 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## DB Video Title Sync
 
 - [x] Sync all 20 DB lesson titles to match exact titles on Academy landing page (AcademyCategory.tsx)
+
+## Admin Self-Service: Create New, Reorder, Collapse, DB-Driven Academy
+
+- [x] Admin Academy: all sections collapsed by default (expand on click)
+- [x] Admin Academy: "Add Video" button per section to create a new lesson inline
+- [x] Admin Academy: "Add Section" button per category to create a new course/section
+- [ ] Admin Webinars: "Create New Webinar" button with full form (title, type, date, description, registration link, thumbnail URL)
+- [ ] Admin Guides: "Create New Guide" button with full form (title, description, file URL, tags, category)
+- [x] Admin Academy: up/down reorder arrows on sections (super_admin only) — updates sortOrder
+- [x] Admin Academy: up/down reorder arrows on videos within a section (super_admin only)
+- [ ] Admin Webinars: up/down reorder arrows on webinar list (super_admin only)
+- [ ] Admin Guides: up/down reorder arrows on guide list (super_admin only)
+- [x] Backend: add/verify sortOrder field on courses, lessons, webinars, guides tables
+- [x] Backend: add reorderCourse, reorderLesson, reorderWebinar, reorderGuide tRPC procedures
+- [ ] Migrate AcademyCategory.tsx: replace static CATEGORY_DATA array with DB query (trpc.academy.getCategories) — deferred, backend ready
+- [x] Backend: add getCategories procedure returning courses grouped by category with their published lessons
+- [ ] Ensure Academy page shows Loom embeds from DB loopUrl field (no external redirects) — blocked on Loom URLs from Jake

@@ -77,6 +77,8 @@ import {
   EyeOff,
   Maximize2,
   AlertTriangle,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -1326,6 +1328,8 @@ function SectionRow2({
   onDeactivateLesson,
   onActivateLesson,
   onDeleteCourse,
+  onAddVideo,
+  onReorderLesson,
 }: {
   course: { id: number; title: string; category: string; published: boolean; tags?: string | null };
   lessons: Array<{
@@ -1336,6 +1340,8 @@ function SectionRow2({
   onDeactivateLesson: (lesson: { id: number; title: string }) => void;
   onActivateLesson: (id: number) => void;
   onDeleteCourse?: (id: number, title: string) => void;
+  onAddVideo?: () => void;
+  onReorderLesson?: (id: number, direction: "up" | "down", siblingId: number) => void;
 }) {
   const [open, setOpen] = React.useState(false);
   const [editingTags, setEditingTags] = React.useState(false);
@@ -1500,16 +1506,52 @@ function SectionRow2({
           {lessons.length === 0 ? (
             <p className="text-xs text-gray-600 px-4 py-3">No videos in this section.</p>
           ) : (
-            lessons.map((lesson) => (
-              <div key={lesson.id} className="px-3 py-2" style={{ background: "#141414" }}>
-                <LessonRow
-                  lesson={lesson}
-                  isActive={lesson.published}
-                  onDeactivate={() => onDeactivateLesson({ id: lesson.id, title: lesson.title })}
-                  onActivate={() => onActivateLesson(lesson.id)}
-                />
-              </div>
-            ))
+            lessons.map((lesson, lessonIdx) => {
+              const prevLesson = lessons[lessonIdx - 1];
+              const nextLesson = lessons[lessonIdx + 1];
+              return (
+                <div key={lesson.id} className="relative group/lesson px-3 py-2" style={{ background: "#141414" }}>
+                  {/* Lesson reorder arrows */}
+                  {onReorderLesson && (
+                    <div className="absolute -left-5 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover/lesson:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        disabled={!prevLesson}
+                        onClick={() => prevLesson && onReorderLesson(lesson.id, "up", prevLesson.id)}
+                        className="p-0.5 rounded text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition"
+                        title="Move video up"
+                      ><ArrowUp size={10} /></button>
+                      <button
+                        type="button"
+                        disabled={!nextLesson}
+                        onClick={() => nextLesson && onReorderLesson(lesson.id, "down", nextLesson.id)}
+                        className="p-0.5 rounded text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition"
+                        title="Move video down"
+                      ><ArrowDown size={10} /></button>
+                    </div>
+                  )}
+                  <LessonRow
+                    lesson={lesson}
+                    isActive={lesson.published}
+                    onDeactivate={() => onDeactivateLesson({ id: lesson.id, title: lesson.title })}
+                    onActivate={() => onActivateLesson(lesson.id)}
+                  />
+                </div>
+              );
+            })
+          )}
+          {/* Add Video button */}
+          {onAddVideo && (
+            <div className="px-3 py-2" style={{ background: "#141414" }}>
+              <button
+                type="button"
+                onClick={onAddVideo}
+                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition hover:opacity-90"
+                style={{ background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px dashed #333" }}
+              >
+                <Plus size={11} /> Add Video
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -1528,6 +1570,10 @@ function CategoryBlock({
   allLessons,
   onDeactivateLesson,
   onActivateLesson,
+  onAddSection,
+  onAddVideo,
+  onReorderCourse,
+  onReorderLesson,
   accentColor,
 }: {
   categoryKey: string;
@@ -1539,9 +1585,13 @@ function CategoryBlock({
   allLessons: Array<any>;
   onDeactivateLesson: (lesson: { id: number; title: string }) => void;
   onActivateLesson: (id: number) => void;
+  onAddSection?: (categoryKey: string) => void;
+  onAddVideo?: (courseId: number, courseTitle: string) => void;
+  onReorderCourse?: (id: number, direction: "up" | "down", siblingId: number) => void;
+  onReorderLesson?: (id: number, direction: "up" | "down", siblingId: number) => void;
   accentColor: string;
 }) {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const displayLabel = categoryLabel ?? categoryKey;
 
   return (
@@ -1583,18 +1633,53 @@ function CategoryBlock({
       </button>
       {open && (
         <div className="space-y-2 ml-8">
-          {courses.map((course) => {
+          {courses.map((course, idx) => {
             const courseLessons = allLessons.filter((l) => l.courseId === course.id);
+            const prevCourse = courses[idx - 1];
+            const nextCourse = courses[idx + 1];
             return (
-              <SectionRow2
-                key={course.id}
-                course={course}
-                lessons={courseLessons}
-                onDeactivateLesson={onDeactivateLesson}
-                onActivateLesson={onActivateLesson}
-              />
+              <div key={course.id} className="relative group/section">
+                {/* Reorder arrows — super_admin only, shown on hover */}
+                {onReorderCourse && (
+                  <div className="absolute -left-7 top-2 flex flex-col gap-0.5 opacity-0 group-hover/section:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      disabled={!prevCourse}
+                      onClick={() => prevCourse && onReorderCourse(course.id, "up", prevCourse.id)}
+                      className="p-0.5 rounded text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition"
+                      title="Move section up"
+                    ><ArrowUp size={12} /></button>
+                    <button
+                      type="button"
+                      disabled={!nextCourse}
+                      onClick={() => nextCourse && onReorderCourse(course.id, "down", nextCourse.id)}
+                      className="p-0.5 rounded text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition"
+                      title="Move section down"
+                    ><ArrowDown size={12} /></button>
+                  </div>
+                )}
+                <SectionRow2
+                  course={course}
+                  lessons={courseLessons}
+                  onDeactivateLesson={onDeactivateLesson}
+                  onActivateLesson={onActivateLesson}
+                  onAddVideo={onAddVideo ? () => onAddVideo(course.id, course.title) : undefined}
+                  onReorderLesson={onReorderLesson}
+                />
+              </div>
             );
           })}
+          {/* Add Section button */}
+          {onAddSection && (
+            <button
+              type="button"
+              onClick={() => onAddSection(categoryKey)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-medium transition hover:opacity-90"
+              style={{ background: `${accentColor}12`, color: accentColor, border: `1px dashed ${accentColor}40` }}
+            >
+              <Plus size={13} /> Add Section
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -1721,12 +1806,89 @@ function ContentTab() {
     onError: () => toast.error("Failed to delete section"),
   });
 
+  // Create section mutation
+  const createCourse = trpc.academy.adminCreateCourse.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetAllCourses.invalidate();
+      toast.success("Section created");
+      setAddSectionDialog(null);
+    },
+    onError: () => toast.error("Failed to create section"),
+  });
+
+  // Create lesson mutation
+  const createLesson = trpc.academy.adminCreateLesson.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetAllLessons.invalidate();
+      toast.success("Video added");
+      setAddVideoDialog(null);
+    },
+    onError: () => toast.error("Failed to add video"),
+  });
+
+  // Reorder mutations
+  const reorderCourse = trpc.academy.reorderCourses.useMutation({
+    onSuccess: () => utils.academy.adminGetAllCourses.invalidate(),
+    onError: () => toast.error("Failed to reorder section"),
+  });
+  const reorderLesson = trpc.academy.reorderLessons.useMutation({
+    onSuccess: () => utils.academy.adminGetAllLessons.invalidate(),
+    onError: () => toast.error("Failed to reorder video"),
+  });
+
+  // Dialog state: Add Section
+  const [addSectionDialog, setAddSectionDialog] = useState<{ categoryKey: string } | null>(null);
+  const [newSectionTitle, setNewSectionTitle] = useState("");
+
+  // Dialog state: Add Video
+  const [addVideoDialog, setAddVideoDialog] = useState<{ courseId: number; courseTitle: string } | null>(null);
+  const [newVideoForm, setNewVideoForm] = useState({ title: "", videoUrl: "", description: "" });
+
   const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
   const [pendingLesson, setPendingLesson] = useState<{ id: number; title: string } | null>(null);
   const [reasonInput, setReasonInput] = useState("");
 
   // Delete confirmation state
   const [deleteDialog, setDeleteDialog] = useState<{ type: "lesson" | "course"; id: number; title: string } | null>(null);
+
+  function handleAddSection(categoryKey: string) {
+    setNewSectionTitle("");
+    setAddSectionDialog({ categoryKey });
+  }
+
+  function confirmAddSection() {
+    if (!addSectionDialog || !newSectionTitle.trim()) return;
+    createCourse.mutate({
+      title: newSectionTitle.trim(),
+      category: addSectionDialog.categoryKey as "Onboarding" | "How-To" | "Strategy and Best Practices",
+      description: "",
+      sortOrder: 99,
+    });
+  }
+
+  function handleAddVideo(courseId: number, courseTitle: string) {
+    setNewVideoForm({ title: "", videoUrl: "", description: "" });
+    setAddVideoDialog({ courseId, courseTitle });
+  }
+
+  function confirmAddVideo() {
+    if (!addVideoDialog || !newVideoForm.title.trim()) return;
+    createLesson.mutate({
+      courseId: addVideoDialog.courseId,
+      title: newVideoForm.title.trim(),
+      videoUrl: newVideoForm.videoUrl.trim() || undefined,
+      description: newVideoForm.description.trim() || undefined,
+      sortOrder: 99,
+    });
+  }
+
+  function handleReorderCourse(id: number, _direction: "up" | "down", siblingId: number) {
+    reorderCourse.mutate({ id1: id, id2: siblingId });
+  }
+
+  function handleReorderLesson(id: number, _direction: "up" | "down", siblingId: number) {
+    reorderLesson.mutate({ id1: id, id2: siblingId });
+  }
 
   function handleDeactivate(lesson: { id: number; title: string }) {
     setPendingLesson(lesson);
@@ -1842,6 +2004,10 @@ function ContentTab() {
                 allLessons={lessons}
                 onDeactivateLesson={handleDeactivate}
                 onActivateLesson={handleActivate}
+                onAddSection={handleAddSection}
+                onAddVideo={handleAddVideo}
+                onReorderCourse={handleReorderCourse}
+                onReorderLesson={handleReorderLesson}
                 accentColor={color}
               />
             );
@@ -1904,6 +2070,95 @@ function ContentTab() {
           </div>
         )}
       </div>
+
+      {/* ── Add Section dialog ── */}
+      <Dialog open={!!addSectionDialog} onOpenChange={(open) => !open && setAddSectionDialog(null)}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Add New Section</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Adding to <span className="font-medium text-gray-300">{addSectionDialog?.categoryKey}</span>. The section will be live immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Section Title</label>
+              <Input
+                placeholder="e.g. Getting Started, Advanced Settings"
+                value={newSectionTitle}
+                onChange={(e) => setNewSectionTitle(e.target.value)}
+                className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+                onKeyDown={(e) => e.key === "Enter" && confirmAddSection()}
+                autoFocus
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddSectionDialog(null)} className="text-gray-400">Cancel</Button>
+            <Button
+              onClick={confirmAddSection}
+              disabled={!newSectionTitle.trim() || createCourse.isPending}
+              style={{ background: "#0074F4" }}
+              className="text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {createCourse.isPending ? "Creating..." : "Create Section"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Add Video dialog ── */}
+      <Dialog open={!!addVideoDialog} onOpenChange={(open) => !open && setAddVideoDialog(null)}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Add Video</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Adding to section: <span className="font-medium text-gray-300">{addVideoDialog?.courseTitle}</span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Video Title <span className="text-red-400">*</span></label>
+              <Input
+                placeholder="e.g. Getting Started With Your Single Line Dialer"
+                value={newVideoForm.title}
+                onChange={(e) => setNewVideoForm((f) => ({ ...f, title: e.target.value }))}
+                className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Loom / Video URL</label>
+              <Input
+                placeholder="https://www.loom.com/share/..."
+                value={newVideoForm.videoUrl}
+                onChange={(e) => setNewVideoForm((f) => ({ ...f, videoUrl: e.target.value }))}
+                className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Description (optional)</label>
+              <Input
+                placeholder="Brief description of what this video covers"
+                value={newVideoForm.description}
+                onChange={(e) => setNewVideoForm((f) => ({ ...f, description: e.target.value }))}
+                className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddVideoDialog(null)} className="text-gray-400">Cancel</Button>
+            <Button
+              onClick={confirmAddVideo}
+              disabled={!newVideoForm.title.trim() || createLesson.isPending}
+              style={{ background: "#0074F4" }}
+              className="text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {createLesson.isPending ? "Adding..." : "Add Video"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Tags Management panel ── */}
       <TagsManagementPanel />
