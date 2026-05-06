@@ -1324,6 +1324,8 @@ function CategoryBlock({
   categoryKey,
   categoryLabel,
   categoryBanner,
+  categorySubtitle,
+  videoCount,
   courses,
   allLessons,
   onDeactivateLesson,
@@ -1333,6 +1335,8 @@ function CategoryBlock({
   categoryKey: string;
   categoryLabel?: string;
   categoryBanner?: string;
+  categorySubtitle?: string;
+  videoCount?: number;
   courses: Array<{ id: number; title: string; category: string; published: boolean; tags?: string | null }>;
   allLessons: Array<any>;
   onDeactivateLesson: (lesson: { id: number; title: string }) => void;
@@ -1344,12 +1348,12 @@ function CategoryBlock({
 
   return (
     <div>
-      {/* Category banner header — mirrors Academy layout */}
+      {/* Category banner header — mirrors Academy landing page */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full relative overflow-hidden rounded-xl mb-3 group"
-        style={{ border: `1px solid ${accentColor}40` }}
+        style={{ border: `1px solid ${accentColor}40`, minHeight: "110px" }}
       >
         {/* Banner image */}
         {categoryBanner && (
@@ -1359,16 +1363,24 @@ function CategoryBlock({
         <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.50) 100%)` }} />
         {/* Colour glow */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 85% 50%, ${accentColor}22 0%, transparent 60%)` }} />
-        {/* Content */}
-        <div className="relative flex items-center justify-between px-5 py-4">
-          <div className="flex items-center gap-3">
-            {open ? <ChevronDown size={14} style={{ color: accentColor }} /> : <ChevronRightIcon size={14} style={{ color: accentColor }} />}
-            <h2 className="text-base font-bold text-white">{displayLabel}</h2>
-            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: `${accentColor}25`, color: accentColor, border: `1px solid ${accentColor}50` }}>
+        {/* Content — mirrors Academy landing page: WAVV ACADEMY label, title, subtitle, section+video badges */}
+        <div className="relative flex flex-col justify-center h-full px-6 py-4 gap-0.5 text-left">
+          <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: accentColor }}>WAVV Academy</p>
+          <div className="flex items-center gap-2">
+            {open ? <ChevronDown size={13} style={{ color: accentColor }} /> : <ChevronRightIcon size={13} style={{ color: accentColor }} />}
+            <h2 className="text-xl font-extrabold text-white leading-tight">{displayLabel}</h2>
+          </div>
+          {categorySubtitle && <p className="text-xs text-gray-300 mb-1">{categorySubtitle}</p>}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: `${accentColor}25`, color: accentColor, border: `1px solid ${accentColor}50` }}>
               {courses.length} section{courses.length !== 1 ? "s" : ""}
             </span>
+            {videoCount !== undefined && (
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}>
+                {videoCount} video{videoCount !== 1 ? "s" : ""}
+              </span>
+            )}
           </div>
-          <Layers size={16} style={{ color: accentColor, opacity: 0.7 }} />
         </div>
       </button>
       {open && (
@@ -1437,44 +1449,33 @@ function ContentTab() {
     return map;
   }, [courses]);
 
-  // Canonical course titles per category — only these appear under the main 3 category banners.
-  // Any other courses in the same category fall through to the "extra categories" block below.
-  // Maps category key → canonical course title in the DB
-  const CANONICAL_COURSE_TITLES: Record<string, string> = {
-    "Onboarding": "Onboarding",
-    "How-To": "How-To",
-    "Strategy and Best Practices": "Strategy & Best Practices",
-  };
-
-  // Mirror the exact Academy category order, display names, colors, and banners
+  // Mirror the exact Academy category order, display names, colors, banners, subtitles, and video counts
   const ACADEMY_CATEGORIES = [
     {
       key: "Onboarding",
       label: "Onboarding",
+      subtitle: "Get your team up and running with WAVV",
       color: "#0074F4",
-      banner: "/manus-storage/banner-onboarding_dbd0bcc0.png",
+      banner: "/manus-storage/banner-onboarding-v2_ddea462f.png",
+      videoCount: 12,
     },
     {
       key: "How-To",
       label: "How-To",
+      subtitle: "Step-by-step guides for core WAVV features",
       color: "#00A9E2",
-      banner: "/manus-storage/banner-howto_b361bfde.png",
+      banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v6-K3TYV9Xeg5ZaWLpmZiJwHh.webp",
+      videoCount: 9,
     },
     {
       key: "Strategy and Best Practices",
       label: "Strategy & Best Practices",
+      subtitle: "Maximize connection rates, conversions, and team performance",
       color: "#67C728",
-      banner: "/manus-storage/banner-strategy_07979b75.png",
+      banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v7-h4rfU3p4xkyGFotsGxeuPW.webp",
+      videoCount: 8,
     },
   ];
-  const CATEGORY_COLORS: Record<string, string> = {
-    "Onboarding": "#0074F4",
-    "How-To": "#00A9E2",
-    "Strategy and Best Practices": "#67C728",
-    "Dialer Setup": "#8B5CF6",
-    "CRM Integrations": "#EC4899",
-    "Spam Protection": "#F97316",
-  };
 
   if (lessonsLoading || coursesLoading) {
     return (
@@ -1484,70 +1485,118 @@ function ContentTab() {
     );
   }
 
+  // Inactive: courses with published=false OR lessons with published=false
+  const inactiveCourses = useMemo(() => courses.filter((c) => !c.published), [courses]);
+  const inactiveLessons = useMemo(() => lessons.filter((l) => !l.published), [lessons]);
+  const hasInactive = inactiveCourses.length > 0 || inactiveLessons.length > 0;
+
   return (
     <div className="space-y-8">
-      {/* ── Category > Section > Video hierarchy (mirrors Academy order) ── */}
-      {ACADEMY_CATEGORIES.map(({ key, label, color, banner }) => {
-        // Only show the canonical course for this category in the main block
-        const canonicalTitle = CANONICAL_COURSE_TITLES[key];
-        const categoryCourses = (byCategory[key] ?? []).filter(
-          (c) => !canonicalTitle || c.title === canonicalTitle
-        );
-        return (
-          <CategoryBlock
-            key={key}
-            categoryKey={key}
-            categoryLabel={label}
-            categoryBanner={banner}
-            courses={categoryCourses}
-            allLessons={lessons}
-            onDeactivateLesson={handleDeactivate}
-            onActivateLesson={handleActivate}
-            accentColor={color}
-          />
-        );
-      })}
-      {/* Extra / legacy courses: any course not in the fixed canonical list */}
-      {(() => {
-        const extraCourses: Array<{ categoryKey: string; course: typeof courses[0] }> = [];
-        for (const [catKey, catCourses] of Object.entries(byCategory)) {
-          const canonicalTitle = CANONICAL_COURSE_TITLES[catKey];
-          const isCanonicalCategory = !!ACADEMY_CATEGORIES.find((c) => c.key === catKey);
-          for (const course of catCourses) {
-            if (!isCanonicalCategory || (canonicalTitle && course.title !== canonicalTitle)) {
-              extraCourses.push({ categoryKey: catKey, course });
-            }
-          }
-        }
-        if (extraCourses.length === 0) return null;
-        // Group extra courses by their category key for display
-        const extraByCategory: Record<string, typeof courses> = {};
-        for (const { categoryKey, course } of extraCourses) {
-          if (!extraByCategory[categoryKey]) extraByCategory[categoryKey] = [];
-          extraByCategory[categoryKey].push(course);
-        }
-        return (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pt-2">
-              <div className="h-px flex-1" style={{ background: "#2a2a2a" }} />
-              <span className="text-[11px] font-semibold text-gray-500 px-2">Legacy / Extra Courses</span>
-              <div className="h-px flex-1" style={{ background: "#2a2a2a" }} />
-            </div>
-            {Object.entries(extraByCategory).map(([categoryKey, categoryCourses]) => (
+      {/* ── Section 1: Live Sections & Courses ── */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-2 h-2 rounded-full" style={{ background: "#22c55e" }} />
+          <h2 className="text-sm font-semibold text-white">Live Sections &amp; Courses</h2>
+          <span className="text-xs text-gray-500">Everything currently visible on WAVV Academy</span>
+        </div>
+        <div className="space-y-6">
+          {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner, videoCount }) => {
+            // All published courses for this category = the live sections
+            const categoryCourses = (byCategory[key] ?? []).filter((c) => c.published);
+            return (
               <CategoryBlock
-                key={categoryKey + "-extra"}
-                categoryKey={categoryKey}
-                categoryLabel={categoryKey}
+                key={key}
+                categoryKey={key}
+                categoryLabel={label}
+                categoryBanner={banner}
+                categorySubtitle={subtitle}
+                videoCount={videoCount}
                 courses={categoryCourses}
                 allLessons={lessons}
                 onDeactivateLesson={handleDeactivate}
                 onActivateLesson={handleActivate}
-                accentColor={CATEGORY_COLORS[categoryKey] ?? "#60a5fa"}
+                accentColor={color}
               />
-            ))}
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Section 2: Inactive Sections / Videos ── */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-2 h-2 rounded-full" style={{ background: "#4b5563" }} />
+          <h2 className="text-sm font-semibold text-white">Inactive Sections / Videos</h2>
+          <span className="text-xs text-gray-500">Hidden from users — sections or videos that have been deactivated</span>
+        </div>
+        {!hasInactive ? (
+          <div
+            className="rounded-xl px-5 py-6 text-center"
+            style={{ background: "#141414", border: "1px solid #2a2a2a" }}
+          >
+            <p className="text-sm text-gray-500">No inactive sections or videos.</p>
+            <p className="text-xs text-gray-600 mt-1">Use the Hide/Deactivate controls on any section or video above to move it here.</p>
           </div>
-        );
-      })()}
+        ) : (
+          <div className="space-y-3">
+            {/* Inactive sections (courses with published=false) */}
+            {inactiveCourses.length > 0 && (
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{ border: "1px solid #2a2a2a" }}
+              >
+                <div className="px-4 py-2" style={{ background: "#1a1a1a", borderBottom: "1px solid #222" }}>
+                  <p className="text-[11px] font-semibold text-gray-400">Hidden Sections ({inactiveCourses.length})</p>
+                </div>
+                <div className="divide-y" style={{ borderColor: "#222" }}>
+                  {inactiveCourses.map((course) => {
+                    const courseLessons = lessons.filter((l) => l.courseId === course.id);
+                    return (
+                      <div key={course.id} className="px-4 py-3" style={{ background: "#141414" }}>
+                        <SectionRow2
+                          course={course}
+                          lessons={courseLessons}
+                          onDeactivateLesson={handleDeactivate}
+                          onActivateLesson={handleActivate}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {/* Inactive videos (lessons with published=false) */}
+            {inactiveLessons.length > 0 && (
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{ border: "1px solid #2a2a2a" }}
+              >
+                <div className="px-4 py-2" style={{ background: "#1a1a1a", borderBottom: "1px solid #222" }}>
+                  <p className="text-[11px] font-semibold text-gray-400">Deactivated Videos ({inactiveLessons.length})</p>
+                </div>
+                <div className="divide-y" style={{ borderColor: "#222" }}>
+                  {inactiveLessons.map((lesson) => (
+                    <div key={lesson.id} className="px-4 py-3" style={{ background: "#141414" }}>
+                      <div className="flex items-start gap-2 mb-1">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 mt-0.5"
+                          style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
+                          Inactive
+                        </span>
+                        <span className="text-[10px] text-gray-500">{lesson.courseTitle ?? ""}</span>
+                      </div>
+                      <LessonRow
+                        lesson={lesson}
+                        isActive={false}
+                        onActivate={() => handleActivate(lesson.id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ── Tags Management panel ── */}
       <TagsManagementPanel />

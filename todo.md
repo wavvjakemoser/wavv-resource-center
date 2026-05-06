@@ -614,3 +614,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] UsersTab: Remove User action for all non-self users (super_admin only, with confirmation)
 - [ ] DB cleanup: delete Cassie (cassie@wavv.com) and jake@wavv.com test users
 - [ ] DB: set jake.moser@wavv.com role to super_admin
+
+## Admin Academy Tab — Live/Inactive Restructure
+
+- [x] Remove Legacy/Extra Courses block from Admin Academy tab
+- [x] Admin Academy: 2 sections only — "Live Sections & Courses" and "Inactive Sections / Videos"
+- [x] Live section: 3 category banners mirroring Academy landing page (same banners, subtitles, section/video count badges)
+- [x] Each category banner shows: WAVV Academy label, bold title, subtitle, section count badge, video count badge
+- [x] Inactive section: shows hidden courses (published=false) and deactivated videos (published=false) separately
+- [x] Inactive section shows empty state when nothing is deactivated
+- [x] DB restructured: each section is its own course row (17 total: 6 Onboarding, 8 How-To, 3 Strategy)
