@@ -177,31 +177,39 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              {/* Progress strip */}
-              <div className="flex gap-4 lg:gap-6 flex-shrink-0">
-                {[
-                  { label: "Onboarding", pct: 33, color: "#0074F4" },
-                  { label: "How-To", pct: 0, color: "#00A9E2" },
-                  { label: "Strategy", pct: 0, color: "#67C728" },
-                ].map((track) => (
-                  <div key={track.label} className="flex flex-col items-center gap-2 min-w-[72px]">
-                    <div className="relative w-12 h-12">
-                      <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
-                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1a2a3a" strokeWidth="3" />
-                        <circle
-                          cx="18" cy="18" r="15.9" fill="none"
-                          stroke={track.color} strokeWidth="3"
-                          strokeDasharray={`${track.pct} ${100 - track.pct}`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
-                        {track.pct}%
-                      </span>
+              {/* Progress strip — PLACEHOLDER: wired to real per-user category progress once lesson-level tracking is complete */}
+              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                <div className="flex gap-4 lg:gap-6">
+                  {[
+                    { label: "Onboarding", pct: 33, color: "#0074F4" },
+                    { label: "How-To", pct: 0, color: "#00A9E2" },
+                    { label: "Strategy", pct: 0, color: "#67C728" },
+                  ].map((track) => (
+                    <div key={track.label} className="flex flex-col items-center gap-2 min-w-[72px]">
+                      <div className="relative w-12 h-12">
+                        <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
+                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1a2a3a" strokeWidth="3" />
+                          <circle
+                            cx="18" cy="18" r="15.9" fill="none"
+                            stroke={track.color} strokeWidth="3"
+                            strokeDasharray={`${track.pct} ${100 - track.pct}`}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
+                          {track.pct}%
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-gray-500 text-center leading-tight">{track.label}</span>
                     </div>
-                    <span className="text-[10px] text-gray-500 text-center leading-tight">{track.label}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <span
+                  className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
+                >
+                  ⚠ Placeholder data
+                </span>
               </div>
             </div>
 
@@ -447,9 +455,17 @@ export default function Dashboard() {
 
           {/* What's New — 3/5 width */}
           <div className="lg:col-span-3">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={15} style={{ color: "#0074F4" }} />
-              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">What's New</h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Sparkles size={15} style={{ color: "#0074F4" }} />
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">What's New</h2>
+              </div>
+              <span
+                className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
+              >
+                ⚠ Placeholder — editorial content
+              </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {WHATS_NEW.map((item) => {
@@ -496,9 +512,17 @@ export default function Dashboard() {
 
           {/* Trending — 2/5 width */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={15} style={{ color: "#67C728" }} />
-              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Trending Now</h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp size={15} style={{ color: "#67C728" }} />
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Trending Now</h2>
+              </div>
+              <span
+                className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
+              >
+                ⚠ Placeholder
+              </span>
             </div>
             <div className="rounded-xl overflow-hidden divide-y divide-[#1a1a1a]"
               style={{ background: "#111", border: "1px solid #1e1e1e" }}>
