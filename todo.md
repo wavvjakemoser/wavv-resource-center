@@ -670,3 +670,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Migrate AcademyCategory.tsx: replace static CATEGORY_DATA array with DB query (trpc.academy.getCategories) — deferred, backend ready
 - [x] Backend: add getCategories procedure returning courses grouped by category with their published lessons
 - [ ] Ensure Academy page shows Loom embeds from DB loopUrl field (no external redirects) — blocked on Loom URLs from Jake
+
+## Home Page Redesign (Round 8)
+
+- [x] Hero: full-viewport layout with animated gradient orb/glow behind headline
+- [x] Hero: asymmetric layout — headline left, visual element right (not centered column)
+- [x] Hero: bold outcome-focused sub-headline
+- [x] Hero: primary CTA with glow pulse animation; secondary "See what's inside" anchor
+- [x] Feature cards: 3-column grid with large icons, bold labels, hover animated border
+- [x] Social proof bar: inline stats row in hero (29 videos, 3 categories, 24/7 AI)
+- [x] Bottom CTA band: full-width dark-to-blue gradient with sign-in button
+- [x] Preserve all auth logic (login modal, form, mutations) exactly as-is
