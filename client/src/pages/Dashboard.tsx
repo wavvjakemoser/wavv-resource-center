@@ -26,9 +26,9 @@ import { Link } from "wouter";
 const NAV_TILES = [
   { href: "/academy", label: "WAVV Academy", icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars", label: "WAVV Webinars", icon: Video, color: "#00A9E2" },
-  { href: "/guides", label: "Guides & Docs", icon: FileText, color: "#67C728" },
-  { href: "/support", label: "Support", icon: Headphones, color: "#FF9900" },
-  { href: "/hands-on", label: "Playground", icon: FlaskConical, color: "#a855f7" },
+  { href: "/guides", label: "WAVV Guides & Docs", icon: FileText, color: "#67C728" },
+  { href: "/hands-on", label: "WAVV Playground", icon: FlaskConical, color: "#a855f7" },
+  { href: "/support", label: "WAVV Support", icon: Headphones, color: "#FF9900" },
 ];
 
 // ─── Featured content (hero card + 2 side cards) ─────────────────────────────
