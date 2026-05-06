@@ -53,7 +53,6 @@ import {
   FileDown,
   Shield,
   ShieldOff,
-  Swords,
   UserPlus,
   Pencil,
   Check,
@@ -471,14 +470,9 @@ function SearchAIChart({ days }: { days: number }) {
 // ─── Users Tab ────────────────────────────────────────────────────────────────
 type RoleFilter = "all" | "super_admin" | "admin" | "user";
 
-// Composite Super Admin icon: Shield with Swords crossed behind it
+// Super Admin icon: plain Shield in fuchsia, matching Admin amber shield style
 function SuperAdminIcon({ size = 14 }: { size?: number }) {
-  return (
-    <span className="relative inline-flex items-center justify-center" style={{ width: size + 4, height: size + 4 }}>
-      <Swords style={{ width: size - 2, height: size - 2, color: "#e879f9", position: "absolute", opacity: 0.85 }} />
-      <Shield style={{ width: size, height: size, color: "#e879f9", position: "absolute", filter: "drop-shadow(0 0 3px #e879f9)" }} />
-    </span>
-  );
+  return <Shield style={{ width: size, height: size, color: "#e879f9" }} />;
 }
 
 function UsersTab() {
