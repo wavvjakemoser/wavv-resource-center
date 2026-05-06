@@ -450,15 +450,17 @@ function SectionRow({
             );
             const embedUrl = video.loopUrl ? getEmbedUrl(video.loopUrl) : null;
             const videoRow = embedUrl && video.status === "available" ? (
-              <button
+              <div
                 key={video.id}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => onPlay?.(embedUrl, video.title)}
-                className={rowClass + " w-full text-left cursor-pointer"}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPlay?.(embedUrl, video.title); } }}
+                className={rowClass + " cursor-pointer"}
                 style={effectiveDownloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}
               >
                 {inner}
-              </button>
+              </div>
             ) : (
               <div key={video.id} className={rowClass} style={effectiveDownloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}>
                 {inner}
