@@ -1477,6 +1477,12 @@ function ContentTab() {
     },
   ];
 
+  // Inactive: courses with published=false OR lessons with published=false
+  // MUST be declared before any early return to satisfy Rules of Hooks
+  const inactiveCourses = useMemo(() => courses.filter((c) => !c.published), [courses]);
+  const inactiveLessons = useMemo(() => lessons.filter((l) => !l.published), [lessons]);
+  const hasInactive = inactiveCourses.length > 0 || inactiveLessons.length > 0;
+
   if (lessonsLoading || coursesLoading) {
     return (
       <div className="flex items-center justify-center h-40">
@@ -1484,11 +1490,6 @@ function ContentTab() {
       </div>
     );
   }
-
-  // Inactive: courses with published=false OR lessons with published=false
-  const inactiveCourses = useMemo(() => courses.filter((c) => !c.published), [courses]);
-  const inactiveLessons = useMemo(() => lessons.filter((l) => !l.published), [lessons]);
-  const hasInactive = inactiveCourses.length > 0 || inactiveLessons.length > 0;
 
   return (
     <div className="space-y-8">
