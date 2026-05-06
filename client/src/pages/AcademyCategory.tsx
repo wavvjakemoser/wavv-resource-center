@@ -624,38 +624,49 @@ export default function AcademyCategory() {
         {/* ── Category hero banner ── */}
         <div
           className="relative overflow-hidden rounded-2xl"
-          style={{
-            background: `linear-gradient(135deg, #111 0%, #1a1a1a 60%, ${cat.color}18 100%)`,
-            border: `1px solid ${cat.color}40`,
-          }}
+          style={{ height: "160px", border: `1px solid ${cat.color}40` }}
         >
-          {/* Decorative radial glow */}
+          {/* Background thumbnail image */}
+          {cat.thumbnail && (
+            <img
+              src={cat.thumbnail}
+              alt={cat.label}
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              aria-hidden="true"
+            />
+          )}
+          {/* Dark overlay — fades image into card background on both sides */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(90deg, rgba(10,12,18,0.88) 0%, rgba(10,12,18,0.55) 50%, rgba(10,12,18,0.88) 100%)`,
+            }}
+          />
+          {/* Colour accent glow */}
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse at 80% 50%, ${cat.color}15 0%, transparent 65%)` }}
+            style={{ background: `radial-gradient(ellipse at 70% 50%, ${cat.color}18 0%, transparent 55%)` }}
           />
-          <div className="relative flex items-center px-6 py-8">
-            <div>
-              <div className="flex items-center gap-2.5 mb-1.5">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: `${cat.color}20`, border: `1px solid ${cat.color}40` }}
-                >
-                  {(() => { const Icon = CATEGORY_ICONS[cat.key] ?? Rocket; return <Icon size={20} style={{ color: cat.color }} />; })()}
-                </div>
-                <h1 className="text-xl font-bold text-white">{cat.label}</h1>
-                <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full ml-1"
-                  style={{
-                    background: `${cat.color}20`,
-                    color: cat.color,
-                    border: `1px solid ${cat.color}50`,
-                  }}
-                >
-                  {cat.sections.length} sections · {totalVideos} videos
-                </span>
-              </div>
-              <p className="text-gray-400 text-xs max-w-sm">{cat.subtitle}</p>
+          {/* Content overlay */}
+          <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: cat.color }}>
+              WAVV Academy
+            </p>
+            <h1 className="text-2xl font-extrabold text-white leading-tight">{cat.label}</h1>
+            <p className="text-sm text-gray-300 mb-2">{cat.subtitle}</p>
+            <div className="flex items-center gap-2">
+              <span
+                className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                style={{ background: `${cat.color}25`, color: cat.color, border: `1px solid ${cat.color}50` }}
+              >
+                {cat.sections.length} {cat.sections.length === 1 ? "section" : "sections"}
+              </span>
+              <span
+                className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}
+              >
+                {totalVideos} {totalVideos === 1 ? "video" : "videos"}
+              </span>
             </div>
           </div>
         </div>
