@@ -16,6 +16,7 @@ import {
   Bookmark,
   BookmarkCheck,
   Filter,
+  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -289,6 +290,19 @@ const CATEGORY_DATA: CategoryData[] = [
 type DbLessonMeta = { tags: string | null; createdAt: Date | string; fileUrl?: string | null };
 
 // ─── Expandable section row ───────────────────────────────────────────────
+function getEmbedUrl(url: string): string | null {
+  if (!url) return null;
+  const loomShare = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+  if (loomShare) return `https://www.loom.com/embed/${loomShare[1]}`;
+  const loomEmbed = url.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/);
+  if (loomEmbed) return `https://www.loom.com/embed/${loomEmbed[1]}`;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`;
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return null;
+}
+
 function SectionRow({
   section,
   accentColor,
@@ -297,6 +311,7 @@ function SectionRow({
   dbLessonMap = {},
   bookmarkedIds = new Set<number>(),
   onToggleBookmark,
+  onPlay,
 }: {
   section: Section;
   accentColor: string;
@@ -305,6 +320,7 @@ function SectionRow({
   dbLessonMap?: Record<string, DbLessonMeta>;
   bookmarkedIds?: Set<number>;
   onToggleBookmark?: (contentId: number, title: string, isBookmarked: boolean) => void;
+  onPlay?: (embedUrl: string, title: string) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -432,17 +448,17 @@ function SectionRow({
                 </div>
               </>
             );
-            const videoRow = video.loopUrl ? (
-              <a
+            const embedUrl = video.loopUrl ? getEmbedUrl(video.loopUrl) : null;
+            const videoRow = embedUrl && video.status === "available" ? (
+              <button
                 key={video.id}
-                href={video.loopUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={rowClass}
+                type="button"
+                onClick={() => onPlay?.(embedUrl, video.title)}
+                className={rowClass + " w-full text-left cursor-pointer"}
                 style={effectiveDownloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}
               >
                 {inner}
-              </a>
+              </button>
             ) : (
               <div key={video.id} className={rowClass} style={effectiveDownloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}>
                 {inner}
@@ -493,6 +509,11 @@ export default function AcademyCategory() {
 
   // Active filter pill (null = All)
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  // Video player modal state
+  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
+  const handlePlay = (embedUrl: string, title: string) => setPlayingVideo({ embedUrl, title });
+  const handleClosePlayer = () => setPlayingVideo(null);
 
   // Fetch DB lessons for this category to get tags + createdAt
   const { data: dbLessons = [] } = trpc.academy.getLessonsByCategory.useQuery(
@@ -685,11 +706,55 @@ export default function AcademyCategory() {
               dbLessonMap={dbLessonMap}
               bookmarkedIds={bookmarkedIds}
               onToggleBookmark={handleToggleBookmark}
+              onPlay={handlePlay}
             />
           ))}
         </div>
 
       </div>
+
+      {/* ── Inline video player modal ── */}
+      {playingVideo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.85)" }}
+          onClick={handleClosePlayer}
+        >
+          <div
+            className="relative w-full max-w-4xl rounded-2xl overflow-hidden"
+            style={{ background: "#111", border: "1px solid #2a2a2a", boxShadow: "0 25px 80px rgba(0,0,0,0.7)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal header */}
+            <div
+              className="flex items-center justify-between px-5 py-3"
+              style={{ borderBottom: "1px solid #2a2a2a" }}
+            >
+              <p className="text-sm font-semibold text-white truncate pr-4">{playingVideo.title}</p>
+              <button
+                type="button"
+                onClick={handleClosePlayer}
+                className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                aria-label="Close video"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            {/* 16:9 iframe */}
+            <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+              <iframe
+                src={playingVideo.embedUrl}
+                title={playingVideo.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+                style={{ border: "none" }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
     </PortalLayout>
   );
 }
