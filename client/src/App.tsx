@@ -11,7 +11,6 @@ import CourseDetail from "./pages/CourseDetail";
 import AcademyCategory from "./pages/AcademyCategory";
 import LessonViewer from "./pages/LessonViewer";
 import Webinars from "./pages/Webinars";
-import GuidesAndDocs from "./pages/GuidesAndDocs";
 import Support from "./pages/Support";
 import AdminPanel from "./pages/AdminPanel";
 import Admin from "./pages/Admin";
@@ -36,7 +35,6 @@ function Router() {
       <Route path="/academy/:courseId" component={CourseDetail} />
       <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
       <Route path="/webinars" component={Webinars} />
-      <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/legacy" component={AdminPanel} />

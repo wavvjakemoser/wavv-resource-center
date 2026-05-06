@@ -72,7 +72,7 @@ function WebinarCard({
   const thumbBg = variant === 'evergreen' && webinar.thumbnailUrl
     ? webinar.thumbnailUrl
     : SECTION_BG[variant];
-  const isDemo = variant === "exclusive" || variant === "recording";
+  const isDemo = false; // No DEMO stamps — all content is real or Coming Soon
 
   return (
     <div
@@ -134,14 +134,14 @@ function WebinarCard({
         )}
       </div>
 
-      {/* Countdown bar — below thumbnail, not overlaid */}
-      {variant === "evergreen" && nextSession && (
+      {/* Coming Soon bar for evergreen — replaces countdown until real sessions are live */}
+      {variant === "evergreen" && (
         <div
           className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
           style={{ background: `${accentColor}22`, color: accentColor, borderBottom: `1px solid ${accentColor}40` }}
         >
           <Timer size={11} />
-          Next session in {countdown}
+          Coming Soon
         </div>
       )}
 
@@ -172,7 +172,7 @@ function WebinarCard({
         {variant === "evergreen" && (
           <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
             <RefreshCw size={11} style={{ color: accentColor }} />
-            Runs every 30 minutes — join anytime
+            Session details coming soon
           </p>
         )}
 
@@ -230,8 +230,8 @@ function WebinarCard({
 // ─── Main page ────────────────────────────────────────────────────────────────
 type WebinarSection = "exclusive" | "evergreen" | "recording";
 
-// Tab order: Evergreen → Exclusive → Recording
-const SECTION_ORDER: WebinarSection[] = ["evergreen", "exclusive", "recording"];
+// Tab order: Exclusive → Evergreen (no recordings tab until real recordings exist)
+const SECTION_ORDER: WebinarSection[] = ["exclusive", "evergreen"];
 
 const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactNode; accent: string; description: string }> = {
   evergreen: {
@@ -265,11 +265,11 @@ function SectionSkeleton() {
 }
 
 export default function Webinars() {
-  const [activeSection, setActiveSection] = useState<WebinarSection>("evergreen");
+  const [activeSection, setActiveSection] = useState<WebinarSection>("exclusive");
 
   const { data: exclusiveWebinars, isLoading: loadingExclusive } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const { data: evergreenWebinars, isLoading: loadingEvergreen } = trpc.webinars.list.useQuery({ type: "evergreen" });
-  const { data: recordings, isLoading: loadingRecordings } = trpc.webinars.list.useQuery({ type: "recording" });
+  // On-Demand Recordings tab removed until real recordings exist
 
   // All 8 evergreen cards share the same countdown — next :00 or :30 boundary
   // Use useState to stabilize reference and avoid infinite re-renders
@@ -296,7 +296,7 @@ export default function Webinars() {
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#00A9E2" }}>WAVV Webinars</h1>
               <p className="text-gray-400 text-sm">
-                Join exclusive live sessions, drop into evergreen workshops, or watch on-demand recordings from the WAVV team.
+                Join exclusive live sessions and evergreen workshops from the WAVV team.
               </p>
             </div>
           </div>
@@ -364,22 +364,7 @@ export default function Webinars() {
           )
         )}
 
-        {activeSection === "recording" && (
-          loadingRecordings ? <SectionSkeleton /> :
-          recordings && recordings.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recordings.map((w) => (
-                <WebinarCard key={w.id} webinar={w} variant="recording" />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
-              <PlayCircle size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-400 text-sm font-medium">No recordings available yet.</p>
-              <p className="text-gray-600 text-xs mt-1">Past webinar recordings will appear here after each session.</p>
-            </div>
-          )
-        )}
+        {/* On-Demand Recordings tab hidden until real recordings are available */}
 
       </div>
 

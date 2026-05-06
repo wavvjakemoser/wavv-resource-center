@@ -712,3 +712,23 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 - [x] Wire Dashboard Continue Learning to real DB progress data
 - [x] Add empty state: "You're all caught up! Explore the WAVV Success Center for more helpful resources"
+
+## Launch Readiness Pass
+
+- [ ] Remove Guides & Docs from sidebar nav (PortalLayout)
+- [ ] Remove Guides & Docs from Dashboard quick-access tiles
+- [ ] Remove Guides & Docs route from App.tsx
+- [ ] Remove fake progress rings from Dashboard hero (replace with "Start your first course" CTA)
+- [ ] Create exclusive webinar in DB: "Always Know Who to Call with WAVV Call Boards" — May 14 11am MDT, gold accent
+- [ ] Remove all On-Demand Recording webinar placeholders (DEMO-stamped) from DB and UI
+- [ ] Remove all Exclusive webinar placeholders (DEMO-stamped) from DB and UI
+- [ ] Replace all 8 evergreen webinar DB records with 6 clean "Coming Soon" placeholder cards (no DEMO stamps, no countdown)
+- [ ] Support page: remove Chat With Support card
+- [ ] Support page: remove Submit a New Ticket card
+- [ ] Support page: remove My Tickets section / ticket history from Support page
+- [ ] Support page: keep only AskWAVV AI card and Help Center card (2-card layout)
+- [ ] Remove all ticket-related tRPC calls from Support.tsx UI (keep backend dormant)
+- [ ] Admin — Webinars tab: verify "Create New Webinar" form is fully functional with all fields (title, type, date, host, description, registration URL, video URL, thumbnail URL, accent color picker)
+- [ ] Admin — Webinars tab: ensure accent color picker is a real color input (not just text field)
+- [ ] Admin — Academy tab: verify "Add Section" and "Add Video" flows work end-to-end
+- [ ] Admin — Academy tab: verify edit/delete/reorder all work without developer involvement

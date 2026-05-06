@@ -351,6 +351,7 @@ const webinarsRouter = router({
         registrationUrl: z.string().optional(),
         videoUrl: z.string().optional(),
         thumbnailUrl: z.string().optional(),
+        accentColor: z.string().optional(),
       })
     )
     .mutation(({ input }) => createWebinar({ ...input, published: true })),
@@ -368,6 +369,7 @@ const webinarsRouter = router({
           registrationUrl: z.string().optional(),
           videoUrl: z.string().optional(),
           thumbnailUrl: z.string().optional(),
+          accentColor: z.string().optional(),
           published: z.boolean().optional(),
         }),
       })

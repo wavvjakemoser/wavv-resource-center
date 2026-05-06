@@ -7,7 +7,6 @@ import {
   BookOpen,
   GraduationCap,
   Video,
-  FileText,
   Headphones,
   Home,
   Menu,
@@ -36,7 +35,6 @@ const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/academy", label: "WAVV Academy", icon: GraduationCap },
   { href: "/webinars", label: "WAVV Webinars", icon: Video },
-  { href: "/guides", label: "WAVV Guides & Docs", icon: FileText },
   { href: "/hands-on", label: "WAVV Playground", icon: FlaskConical },
   { href: "/support", label: "WAVV Support", icon: Headphones },
 ];

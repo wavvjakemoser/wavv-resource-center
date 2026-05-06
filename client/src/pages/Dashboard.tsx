@@ -4,7 +4,6 @@ import { trpc } from "@/lib/trpc";
 import {
   GraduationCap,
   Video,
-  FileText,
   Headphones,
   FlaskConical,
   Play,
@@ -27,7 +26,6 @@ import { Link } from "wouter";
 const NAV_TILES = [
   { href: "/academy", label: "WAVV Academy", icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars", label: "WAVV Webinars", icon: Video, color: "#00A9E2" },
-  { href: "/guides", label: "WAVV Guides & Docs", icon: FileText, color: "#67C728" },
   { href: "/hands-on", label: "WAVV Playground", icon: FlaskConical, color: "#a855f7" },
   { href: "/support", label: "WAVV Support", icon: Headphones, color: "#FF9900" },
 ];
@@ -177,40 +175,19 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              {/* Progress strip — PLACEHOLDER: wired to real per-user category progress once lesson-level tracking is complete */}
-              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                <div className="flex gap-4 lg:gap-6">
-                  {[
-                    { label: "Onboarding", pct: 33, color: "#0074F4" },
-                    { label: "How-To", pct: 0, color: "#00A9E2" },
-                    { label: "Strategy", pct: 0, color: "#67C728" },
-                  ].map((track) => (
-                    <div key={track.label} className="flex flex-col items-center gap-2 min-w-[72px]">
-                      <div className="relative w-12 h-12">
-                        <svg viewBox="0 0 36 36" className="w-12 h-12 -rotate-90">
-                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1a2a3a" strokeWidth="3" />
-                          <circle
-                            cx="18" cy="18" r="15.9" fill="none"
-                            stroke={track.color} strokeWidth="3"
-                            strokeDasharray={`${track.pct} ${100 - track.pct}`}
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
-                          {track.pct}%
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-gray-500 text-center leading-tight">{track.label}</span>
-                    </div>
-                  ))}
-                </div>
-                <span
-                  className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
-                >
-                  ⚠ Placeholder data
-                </span>
-              </div>
+              {/* CTA — Start your first course */}
+              <Link
+                href="/academy"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white flex-shrink-0 transition-all hover:opacity-90 hover:-translate-y-0.5 active:scale-95"
+                style={{
+                  background: "linear-gradient(135deg, #0074F4, #00A9E2)",
+                  boxShadow: "0 4px 20px rgba(0,116,244,0.3)",
+                  textDecoration: "none",
+                }}
+              >
+                <GraduationCap size={15} />
+                Start Your First Course
+              </Link>
             </div>
 
             {/* Quick-access bar */}

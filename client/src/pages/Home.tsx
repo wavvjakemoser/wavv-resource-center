@@ -4,7 +4,6 @@ import { useLocation } from "wouter";
 import {
   GraduationCap,
   Video,
-  FileText,
   Headphones,
   ArrowRight,
   CheckCircle,
@@ -85,12 +84,6 @@ export default function Home() {
       color: "#00A9E2",
     },
     {
-      icon: FileText,
-      label: "WAVV Guides & Docs",
-      desc: "Playbooks, checklists, and PDFs to accelerate your ROI",
-      color: "#67C728",
-    },
-    {
       icon: FlaskConical,
       label: "WAVV Playground",
       desc: "Practice WAVV features in a safe, isolated environment before going live",
@@ -157,7 +150,7 @@ export default function Home() {
         </h1>
 
         <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mb-10 leading-relaxed">
-          Training, webinars, guides, and dedicated support — everything you need to get the most out of WAVV, all in one place.
+          Training, webinars, and dedicated support — everything you need to get the most out of WAVV, all in one place.
         </p>
 
         <button

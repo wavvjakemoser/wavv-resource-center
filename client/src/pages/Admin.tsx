@@ -2842,9 +2842,12 @@ function WebinarsTab() {
     title: "",
     description: "",
     host: "",
-    type: "upcoming" as "upcoming" | "recording" | "exclusive" | "evergreen",
+    type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen",
     registrationUrl: "",
     videoUrl: "",
+    scheduledAt: "",
+    accentColor: "#0074F4",
+    thumbnailUrl: "",
   });
 
   const createMutation = trpc.webinars.adminCreate.useMutation({
@@ -2860,21 +2863,52 @@ function WebinarsTab() {
     onError: (e) => toast.error(e.message),
   });
 
-  function resetForm() { setForm({ title: "", description: "", host: "", type: "upcoming" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "" }); }
+  function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", thumbnailUrl: "" }); }
 
   function startEdit(w: typeof webinars[0]) {
     setEditId(w.id);
-    setForm({ title: w.title, description: w.description ?? "", host: w.host ?? "", type: w.type as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: w.registrationUrl ?? "", videoUrl: w.videoUrl ?? "" });
+    setForm({
+      title: w.title,
+      description: w.description ?? "",
+      host: w.host ?? "",
+      type: w.type as "upcoming" | "recording" | "exclusive" | "evergreen",
+      registrationUrl: w.registrationUrl ?? "",
+      videoUrl: w.videoUrl ?? "",
+      scheduledAt: w.scheduledAt ? new Date(w.scheduledAt).toISOString().slice(0, 16) : "",
+      accentColor: (w as { accentColor?: string | null }).accentColor ?? "#0074F4",
+      thumbnailUrl: w.thumbnailUrl ?? "",
+    });
     setShowForm(true);
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim()) { toast.error("Title is required"); return; }
+    const scheduledAtDate = form.scheduledAt ? new Date(form.scheduledAt) : undefined;
     if (editId !== null) {
-      updateMutation.mutate({ id: editId, data: { ...form, description: form.description || undefined, host: form.host || undefined, registrationUrl: form.registrationUrl || undefined, videoUrl: form.videoUrl || undefined } });
+      updateMutation.mutate({ id: editId, data: {
+        title: form.title,
+        description: form.description || undefined,
+        host: form.host || undefined,
+        type: form.type,
+        registrationUrl: form.registrationUrl || undefined,
+        videoUrl: form.videoUrl || undefined,
+        thumbnailUrl: form.thumbnailUrl || undefined,
+        accentColor: form.accentColor || undefined,
+        scheduledAt: scheduledAtDate,
+      }});
     } else {
-      createMutation.mutate({ ...form, description: form.description || undefined, host: form.host || undefined, registrationUrl: form.registrationUrl || undefined, videoUrl: form.videoUrl || undefined });
+      createMutation.mutate({
+        title: form.title,
+        description: form.description || undefined,
+        host: form.host || undefined,
+        type: form.type,
+        registrationUrl: form.registrationUrl || undefined,
+        videoUrl: form.videoUrl || undefined,
+        thumbnailUrl: form.thumbnailUrl || undefined,
+        accentColor: form.accentColor || undefined,
+        scheduledAt: scheduledAtDate,
+      });
     }
   }
 
@@ -2934,12 +2968,47 @@ function WebinarsTab() {
                   <option value="exclusive">Upcoming Exclusive</option>
                   <option value="evergreen">Evergreen</option>
                   <option value="recording">On-Demand Recording</option>
-                  <option value="upcoming">Upcoming (Legacy)</option>
                 </select>
               </div>
               <div>
                 <label className="block text-xs text-gray-400 mb-1">{form.type === "recording" ? "Video URL" : "Registration URL"}</label>
                 <input style={inputStyle} value={form.type === "recording" ? form.videoUrl : form.registrationUrl} onChange={e => setForm(f => form.type === "recording" ? { ...f, videoUrl: e.target.value } : { ...f, registrationUrl: e.target.value })} placeholder="https://..." />
+              </div>
+            </div>
+            {/* Scheduled date — only for exclusive/upcoming */}
+            {(form.type === "exclusive" || form.type === "upcoming") && (
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Scheduled Date &amp; Time</label>
+                <input
+                  type="datetime-local"
+                  style={inputStyle}
+                  value={form.scheduledAt}
+                  onChange={e => setForm(f => ({ ...f, scheduledAt: e.target.value }))}
+                />
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Accent Color</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={form.accentColor}
+                    onChange={e => setForm(f => ({ ...f, accentColor: e.target.value }))}
+                    className="w-10 h-9 rounded cursor-pointer border-0 p-0.5"
+                    style={{ background: "#111", border: "1px solid #2a2a2a" }}
+                  />
+                  <input
+                    style={{ ...inputStyle, flex: 1 }}
+                    value={form.accentColor}
+                    onChange={e => setForm(f => ({ ...f, accentColor: e.target.value }))}
+                    placeholder="#0074F4"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Thumbnail URL <span className="text-gray-600">(optional)</span></label>
+                <input style={inputStyle} value={form.thumbnailUrl} onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))} placeholder="https://..." />
               </div>
             </div>
             <div className="flex gap-2 justify-end">
