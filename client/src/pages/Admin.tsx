@@ -76,6 +76,7 @@ import {
   Star,
   EyeOff,
   Maximize2,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -1185,6 +1186,7 @@ function SectionRow2({
   lessons,
   onDeactivateLesson,
   onActivateLesson,
+  onDeleteCourse,
 }: {
   course: { id: number; title: string; category: string; published: boolean; tags?: string | null };
   lessons: Array<{
@@ -1194,9 +1196,12 @@ function SectionRow2({
   }>;
   onDeactivateLesson: (lesson: { id: number; title: string }) => void;
   onActivateLesson: (id: number) => void;
+  onDeleteCourse?: (id: number, title: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
   const [editingTags, setEditingTags] = React.useState(false);
+  const [renamingTitle, setRenamingTitle] = React.useState(false);
+  const [renameValue, setRenameValue] = React.useState(course.title);
   const utils = trpc.useUtils();
   const updateCourse = trpc.academy.adminUpdateCourse.useMutation({
     onSuccess: () => {
@@ -1208,13 +1213,20 @@ function SectionRow2({
 
   const sectionTags = parseTagList(course.tags);
 
+  function saveRename() {
+    const trimmed = renameValue.trim();
+    if (!trimmed || trimmed === course.title) { setRenamingTitle(false); return; }
+    updateCourse.mutate({ id: course.id, data: { title: trimmed } });
+    setRenamingTitle(false);
+  }
+
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
       {/* Section header */}
       <div
         className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none"
         style={{ background: "#1a1a1a" }}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => !renamingTitle && setOpen((v) => !v)}
       >
         {/* Expand chevron */}
         <div className="flex-shrink-0 text-gray-500">
@@ -1226,39 +1238,74 @@ function SectionRow2({
           style={{ background: course.published ? "#22c55e" : "#4b5563" }}
         />
         {/* Title + tags */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold text-white">{course.title}</p>
-            {sectionTags.map((tag) => {
-              const def = PRESET_TAGS.find((t) => t.label === tag);
-              return def ? (
-                <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full"
-                  style={{ background: def.bg, color: def.color, border: `1px solid ${def.border}` }}>
-                  {tag}
-                </span>
-              ) : (
-                <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.07)", color: "#d1d5db", border: "1px solid #444" }}>
-                  {tag}
-                </span>
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-              style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>
-              {lessons.length} video{lessons.length !== 1 ? "s" : ""}
-            </span>
-            {!course.published && (
+        <div className="flex-1 min-w-0" onClick={(e) => renamingTitle && e.stopPropagation()}>
+          {renamingTitle ? (
+            <div className="flex items-center gap-2">
+              <input
+                autoFocus
+                className="flex-1 bg-[#111] border border-blue-500 rounded-lg px-2.5 py-1 text-sm text-white outline-none"
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") saveRename(); if (e.key === "Escape") { setRenamingTitle(false); setRenameValue(course.title); } }}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <button type="button" onClick={(e) => { e.stopPropagation(); saveRename(); }}
+                className="p-1.5 rounded-lg transition hover:opacity-80"
+                style={{ background: "rgba(34,197,94,0.15)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.3)" }}
+                title="Save rename"
+              ><Check size={13} /></button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setRenamingTitle(false); setRenameValue(course.title); }}
+                className="p-1.5 rounded-lg transition hover:opacity-80"
+                style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+                title="Cancel"
+              ><X size={13} /></button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm font-semibold text-white">{course.title}</p>
+              {sectionTags.map((tag) => {
+                const def = PRESET_TAGS.find((t) => t.label === tag);
+                return def ? (
+                  <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full"
+                    style={{ background: def.bg, color: def.color, border: `1px solid ${def.border}` }}>
+                    {tag}
+                  </span>
+                ) : (
+                  <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.07)", color: "#d1d5db", border: "1px solid #444" }}>
+                    {tag}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+          {!renamingTitle && (
+            <div className="flex items-center gap-1.5 mt-0.5">
               <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
-                Hidden
+                style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>
+                {lessons.length} video{lessons.length !== 1 ? "s" : ""}
               </span>
-            )}
-          </div>
+              {!course.published && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                  style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
+                  Hidden
+                </span>
+              )}
+            </div>
+          )}
         </div>
         {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          {/* Rename */}
+          <button
+            type="button"
+            onClick={() => { setRenamingTitle(true); setRenameValue(course.title); }}
+            className="p-1.5 rounded-lg transition hover:opacity-80"
+            style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+            title="Rename section"
+          >
+            <Pencil size={13} />
+          </button>
           {/* Tag section */}
           <button
             type="button"
@@ -1282,6 +1329,18 @@ function SectionRow2({
           >
             {course.published ? "Hide" : "Show"}
           </button>
+          {/* Delete — only shown for inactive (hidden) sections */}
+          {!course.published && onDeleteCourse && (
+            <button
+              type="button"
+              onClick={() => onDeleteCourse(course.id, course.title)}
+              className="p-1.5 rounded-lg transition hover:opacity-80"
+              style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
+              title="Permanently delete this section"
+            >
+              <Trash2 size={13} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -1414,10 +1473,27 @@ function ContentTab() {
     },
     onError: () => toast.error("Failed to update content status"),
   });
+  const deleteLesson = trpc.academy.adminDeleteLesson.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetAllLessons.invalidate();
+      toast.success("Video permanently deleted");
+    },
+    onError: () => toast.error("Failed to delete video"),
+  });
+  const deleteCourse = trpc.academy.adminDeleteCourse.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetAllCourses.invalidate();
+      toast.success("Section permanently deleted");
+    },
+    onError: () => toast.error("Failed to delete section"),
+  });
 
   const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
   const [pendingLesson, setPendingLesson] = useState<{ id: number; title: string } | null>(null);
   const [reasonInput, setReasonInput] = useState("");
+
+  // Delete confirmation state
+  const [deleteDialog, setDeleteDialog] = useState<{ type: "lesson" | "course"; id: number; title: string } | null>(null);
 
   function handleDeactivate(lesson: { id: number; title: string }) {
     setPendingLesson(lesson);
@@ -1437,6 +1513,21 @@ function ContentTab() {
 
   function handleActivate(id: number) {
     updateLesson.mutate({ id, data: { published: true, inactiveReason: null } });
+  }
+
+  function handleDeleteLesson(id: number, title: string) {
+    setDeleteDialog({ type: "lesson", id, title });
+  }
+
+  function handleDeleteCourse(id: number, title: string) {
+    setDeleteDialog({ type: "course", id, title });
+  }
+
+  function confirmDelete() {
+    if (!deleteDialog) return;
+    if (deleteDialog.type === "lesson") deleteLesson.mutate({ id: deleteDialog.id });
+    else deleteCourse.mutate({ id: deleteDialog.id });
+    setDeleteDialog(null);
   }
 
   // Group courses by category
@@ -1528,7 +1619,7 @@ function ContentTab() {
         <div className="flex items-center gap-2 mb-4">
           <div className="w-2 h-2 rounded-full" style={{ background: "#4b5563" }} />
           <h2 className="text-sm font-semibold text-white">Inactive Sections / Videos</h2>
-          <span className="text-xs text-gray-500">Hidden from users — sections or videos that have been deactivated</span>
+          <span className="text-xs text-gray-500">Hidden from users — deactivate first, then delete permanently</span>
         </div>
         {!hasInactive ? (
           <div
@@ -1539,62 +1630,81 @@ function ContentTab() {
             <p className="text-xs text-gray-600 mt-1">Use the Hide/Deactivate controls on any section or video above to move it here.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* Inactive sections (courses with published=false) */}
-            {inactiveCourses.length > 0 && (
-              <div
-                className="rounded-xl overflow-hidden"
-                style={{ border: "1px solid #2a2a2a" }}
-              >
-                <div className="px-4 py-2" style={{ background: "#1a1a1a", borderBottom: "1px solid #222" }}>
-                  <p className="text-[11px] font-semibold text-gray-400">Hidden Sections ({inactiveCourses.length})</p>
-                </div>
-                <div className="divide-y" style={{ borderColor: "#222" }}>
-                  {inactiveCourses.map((course) => {
-                    const courseLessons = lessons.filter((l) => l.courseId === course.id);
-                    return (
-                      <div key={course.id} className="px-4 py-3" style={{ background: "#141414" }}>
+          <div className="space-y-6">
+            {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner, videoCount }) => {
+              const catInactiveCourses = inactiveCourses.filter((c) => c.category === key);
+              // Inactive lessons: lesson is inactive AND belongs to a course in this category
+              const catCourseIds = new Set((byCategory[key] ?? []).map((c) => c.id));
+              const catInactiveLessons = inactiveLessons.filter((l) => catCourseIds.has(l.courseId));
+              if (catInactiveCourses.length === 0 && catInactiveLessons.length === 0) return null;
+              const totalInactive = catInactiveCourses.length + catInactiveLessons.length;
+              return (
+                <div key={key}>
+                  {/* Category banner header (dimmed) */}
+                  <div
+                    className="relative overflow-hidden rounded-xl mb-3"
+                    style={{ border: `1px solid ${color}30`, minHeight: "90px", opacity: 0.75 }}
+                  >
+                    {banner && <img src={banner} alt={label} className="absolute inset-0 w-full h-full object-cover" aria-hidden />}
+                    <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.80) 60%, rgba(0,0,0,0.60) 100%)` }} />
+                    <div className="relative flex flex-col justify-center h-full px-6 py-4 gap-0.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color }}>WAVV Academy</p>
+                      <h2 className="text-lg font-extrabold text-white leading-tight">{label}</h2>
+                      {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                          style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
+                          {totalInactive} inactive
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-2 ml-8">
+                    {/* Inactive sections for this category */}
+                    {catInactiveCourses.map((course) => {
+                      const courseLessons = lessons.filter((l) => l.courseId === course.id);
+                      return (
                         <SectionRow2
+                          key={course.id}
                           course={course}
                           lessons={courseLessons}
                           onDeactivateLesson={handleDeactivate}
                           onActivateLesson={handleActivate}
+                          onDeleteCourse={handleDeleteCourse}
                         />
+                      );
+                    })}
+                    {/* Inactive lessons for this category (grouped under their section) */}
+                    {catInactiveLessons.length > 0 && (
+                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+                        <div className="px-4 py-2" style={{ background: "#1a1a1a", borderBottom: "1px solid #222" }}>
+                          <p className="text-[11px] font-semibold text-gray-400">Deactivated Videos ({catInactiveLessons.length})</p>
+                        </div>
+                        <div className="divide-y" style={{ borderColor: "#222" }}>
+                          {catInactiveLessons.map((lesson) => (
+                            <div key={lesson.id} className="px-4 py-3" style={{ background: "#141414" }}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full"
+                                  style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
+                                  Inactive
+                                </span>
+                                <span className="text-[10px] text-gray-500">{lesson.courseTitle ?? ""}</span>
+                              </div>
+                              <LessonRow
+                                lesson={lesson}
+                                isActive={false}
+                                onActivate={() => handleActivate(lesson.id)}
+                                onDelete={() => handleDeleteLesson(lesson.id, lesson.title)}
+                              />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    );
-                  })}
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-            {/* Inactive videos (lessons with published=false) */}
-            {inactiveLessons.length > 0 && (
-              <div
-                className="rounded-xl overflow-hidden"
-                style={{ border: "1px solid #2a2a2a" }}
-              >
-                <div className="px-4 py-2" style={{ background: "#1a1a1a", borderBottom: "1px solid #222" }}>
-                  <p className="text-[11px] font-semibold text-gray-400">Deactivated Videos ({inactiveLessons.length})</p>
-                </div>
-                <div className="divide-y" style={{ borderColor: "#222" }}>
-                  {inactiveLessons.map((lesson) => (
-                    <div key={lesson.id} className="px-4 py-3" style={{ background: "#141414" }}>
-                      <div className="flex items-start gap-2 mb-1">
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0 mt-0.5"
-                          style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
-                          Inactive
-                        </span>
-                        <span className="text-[10px] text-gray-500">{lesson.courseTitle ?? ""}</span>
-                      </div>
-                      <LessonRow
-                        lesson={lesson}
-                        isActive={false}
-                        onActivate={() => handleActivate(lesson.id)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              );
+            })}
           </div>
         )}
       </div>
@@ -1632,6 +1742,36 @@ function ContentTab() {
               className="text-white hover:opacity-90"
             >
               Deactivate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Permanent delete confirmation dialog ── */}
+      <Dialog open={!!deleteDialog} onOpenChange={(open) => !open && setDeleteDialog(null)}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #3a1a1a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <AlertTriangle size={16} style={{ color: "#f87171" }} />
+              Permanently Delete {deleteDialog?.type === "course" ? "Section" : "Video"}
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              <span className="font-medium text-gray-200">"{deleteDialog?.title}"</span> will be permanently removed.
+              {deleteDialog?.type === "course" && " All videos in this section will also be deleted."}
+              {" "}This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDeleteDialog(null)} className="text-gray-400">
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDelete}
+              disabled={deleteLesson.isPending || deleteCourse.isPending}
+              style={{ background: "#dc2626" }}
+              className="text-white hover:opacity-90 disabled:opacity-50"
+            >
+              Delete Permanently
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1738,6 +1878,7 @@ function LessonRow({
   isActive,
   onDeactivate,
   onActivate,
+  onDelete,
 }: {
   lesson: {
     id: number;
@@ -1755,6 +1896,7 @@ function LessonRow({
   isActive: boolean;
   onDeactivate?: () => void;
   onActivate?: () => void;
+  onDelete?: () => void;
 }) {
   const [editing, setEditing] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(lesson.title);
@@ -1763,7 +1905,6 @@ function LessonRow({
   const [editFileUrl, setEditFileUrl] = React.useState(lesson.fileUrl ?? "");
   const [activeTags, setActiveTags] = React.useState<string[]>(() => parseTagList(lesson.tags));
   const [customTagInput, setCustomTagInput] = React.useState("");
-  const [isStarred, setIsStarred] = React.useState(!!lesson.starred);
   const [isHidden, setIsHidden] = React.useState(!!lesson.hidden);
   const utils = trpc.useUtils();
 
@@ -1774,12 +1915,6 @@ function LessonRow({
       setEditing(false);
     },
     onError: () => toast.error("Failed to update lesson"),
-  });
-
-  const toggleStar = trpc.academy.adminUpdateLesson.useMutation({
-    onMutate: () => setIsStarred((v) => !v),
-    onError: () => { setIsStarred((v) => !v); toast.error("Failed to update star"); },
-    onSuccess: () => utils.academy.adminGetAllLessons.invalidate(),
   });
 
   const toggleHide = trpc.academy.adminUpdateLesson.useMutation({
@@ -1986,14 +2121,6 @@ function LessonRow({
                 );
               })}
               {/* Starred indicator */}
-              {isStarred && (
-                <span
-                  className="text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1"
-                  style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
-                >
-                  <Star size={9} fill="#fbbf24" /> Starred
-                </span>
-              )}
               {/* Hidden indicator */}
               {isHidden && (
                 <span
@@ -2024,19 +2151,6 @@ function LessonRow({
           >
             <Pencil size={13} />
           </button>
-          {/* Star toggle */}
-          <button
-            onClick={() => toggleStar.mutate({ id: lesson.id, data: { starred: !isStarred } })}
-            disabled={toggleStar.isPending}
-            className="flex-shrink-0 p-1.5 rounded-lg transition hover:opacity-80 disabled:opacity-50"
-            style={isStarred
-              ? { background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.35)" }
-              : { background: "rgba(255,255,255,0.05)", color: "#4b5563", border: "1px solid #2a2a2a" }
-            }
-            title={isStarred ? "Unstar lesson" : "Star lesson (featured)"}
-          >
-            <Star size={13} fill={isStarred ? "#fbbf24" : "none"} />
-          </button>
           {/* Hide toggle */}
           <button
             onClick={() => toggleHide.mutate({ id: lesson.id, data: { hidden: !isHidden } })}
@@ -2060,13 +2174,25 @@ function LessonRow({
               Deactivate
             </button>
           ) : (
-            <button
-              onClick={onActivate}
-              className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80"
-              style={{ background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }}
-            >
-              Activate
-            </button>
+            <>
+              <button
+                onClick={onActivate}
+                className="flex-shrink-0 text-[11px] font-medium px-3 py-1.5 rounded-lg transition hover:opacity-80"
+                style={{ background: "rgba(34,197,94,0.1)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.2)" }}
+              >
+                Activate
+              </button>
+              {onDelete && (
+                <button
+                  onClick={onDelete}
+                  className="flex-shrink-0 p-1.5 rounded-lg transition hover:opacity-80"
+                  style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
+                  title="Permanently delete this video"
+                >
+                  <Trash2 size={13} />
+                </button>
+              )}
+            </>
           )}
         </div>
       )}

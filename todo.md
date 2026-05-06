@@ -624,3 +624,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Inactive section: shows hidden courses (published=false) and deactivated videos (published=false) separately
 - [x] Inactive section shows empty state when nothing is deactivated
 - [x] DB restructured: each section is its own course row (17 total: 6 Onboarding, 8 How-To, 3 Strategy)
+
+## Admin Academy — Delete, Rename, Hide, Inactive Grouping
+
+- [x] Add adminDeleteLesson tRPC procedure (super_admin only, permanent delete)
+- [x] Add adminDeleteCourse tRPC procedure (super_admin only, permanent delete — only if no lessons)
+- [x] Inactive section: grouped by category (same 3 banners) showing unpublished courses/lessons per category
+- [x] Delete button on inactive lessons (with confirmation dialog) — only visible when lesson is inactive
+- [x] Delete button on inactive courses (with confirmation dialog) — only visible when course is inactive
+- [x] Section inline rename: pencil icon → editable input → save (adminUpdateCourse title)
+- [x] Section hide toggle: hide/show entire section (sets course published=false/true)
+- [x] Remove star (starred) function from SectionRow2 and LessonRow UI
