@@ -3545,16 +3545,39 @@ function TicketGroups({
 function SupportTab() {
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: "rgba(0,116,244,0.15)" }}
+        >
           <Headphones size={18} style={{ color: "#0074F4" }} />
         </div>
         <div>
           <h2 className="text-base font-bold text-white">WAVV Support</h2>
-          <p className="text-xs text-gray-500">Manage and respond to customer support tickets</p>
+          <p className="text-xs text-gray-500">Support analytics and management tools</p>
         </div>
       </div>
-      <SupportSection />
+
+      {/* Coming soon notice */}
+      <div
+        className="flex items-start gap-4 rounded-xl p-5"
+        style={{ background: "rgba(0,116,244,0.07)", border: "1px solid rgba(0,116,244,0.22)" }}
+      >
+        <div
+          className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+          style={{ background: "rgba(0,116,244,0.15)" }}
+        >
+          <AlertCircle size={18} style={{ color: "#0074F4" }} />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-white mb-1">Support Analytics — Coming Soon</p>
+          <p className="text-xs text-gray-400 leading-relaxed">
+            This section will surface AskWAVV AI usage stats, Help Center engagement metrics,
+            and support volume trends. Ticket management is handled separately outside this portal.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
