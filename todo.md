@@ -681,3 +681,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Social proof bar: inline stats row in hero (29 videos, 3 categories, 24/7 AI)
 - [x] Bottom CTA band: full-width dark-to-blue gradient with sign-in button
 - [x] Preserve all auth logic (login modal, form, mutations) exactly as-is
+
+## Dashboard Redesign + Home Page Revert (Current Sprint)
+
+- [x] Revert Home.tsx to original simple pre-login landing page (from git history)
+- [x] Dashboard: hero banner taller with user name prominent + weekly progress strip (circular progress rings per category)
+- [x] Dashboard: quick-access bar (5 icon tiles) moved inside hero, just below greeting
+- [x] Dashboard: featured content section — 1 large hero card (2/3 width) + 2 smaller side cards
+- [x] Dashboard: continue learning — 3 cards with progress bars (larger, more breathing room)
+- [x] Dashboard: what's new — 2-column grid with description text and category labels
+- [x] Dashboard: trending — colored rank badges + category labels; side-by-side with What's New (3/5 + 2/5 grid)
+- [x] Dashboard: removed bottom Navigate tiles (replaced by quick-access bar in hero)
