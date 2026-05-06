@@ -707,3 +707,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] AcademyCategory.tsx: call getCoursesByCategory, build dbCourseMap keyed by normalized section title
 - [x] SectionRow: add courseTags prop; render colored tag pills on section header (same TAG_COLORS style as lesson tags)
 - [x] Lesson-level tags already working via getLessonsByCategory + dbLessonMap
+
+## Continue Learning — Real Data Wiring
+
+- [x] Wire Dashboard Continue Learning to real DB progress data
+- [x] Add empty state: "You're all caught up! Explore the WAVV Success Center for more helpful resources"

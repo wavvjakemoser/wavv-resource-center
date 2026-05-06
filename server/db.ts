@@ -1175,3 +1175,86 @@ export async function reorderGuides(id1: number, id2: number) {
   await db.update(guides).set({ sortOrder: g2.sortOrder }).where(eq(guides.id, id1));
   await db.update(guides).set({ sortOrder: g1.sortOrder }).where(eq(guides.id, id2));
 }
+
+
+/**
+ * Returns up to `limit` courses that the user has started but not fully completed,
+ * ordered by most recently updated progress. Used for the Dashboard "Continue Learning" section.
+ */
+export async function getRecentProgress(userId: number, limit = 3) {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Get all progress rows for this user
+  const progressRows = await db
+    .select()
+    .from(lessonProgress)
+    .where(eq(lessonProgress.userId, userId))
+    .orderBy(desc(lessonProgress.updatedAt));
+
+  if (progressRows.length === 0) return [];
+
+  // Collect unique courseIds in recency order
+  const seenCourseIds: number[] = [];
+  for (const row of progressRows) {
+    if (!seenCourseIds.includes(row.courseId)) {
+      seenCourseIds.push(row.courseId);
+    }
+  }
+
+  // For each course, compute progress percentage
+  const results: Array<{
+    courseId: number;
+    courseTitle: string;
+    category: string;
+    completedLessons: number;
+    totalLessons: number;
+    progressPct: number;
+    lastUpdatedAt: Date;
+  }> = [];
+
+  for (const courseId of seenCourseIds) {
+    if (results.length >= limit) break;
+
+    const [course] = await db
+      .select({ id: courses.id, title: courses.title, category: courses.category })
+      .from(courses)
+      .where(and(eq(courses.id, courseId), eq(courses.published, true)))
+      .limit(1);
+
+    if (!course) continue;
+
+    const totalLessonsRows = await db
+      .select({ id: lessons.id })
+      .from(lessons)
+      .where(and(eq(lessons.courseId, courseId), eq(lessons.published, true)));
+
+    const totalLessons = totalLessonsRows.length;
+    if (totalLessons === 0) continue;
+
+    const completedRows = progressRows.filter(
+      (p) => p.courseId === courseId && p.completed
+    );
+    const completedLessons = completedRows.length;
+    const progressPct = Math.round((completedLessons / totalLessons) * 100);
+
+    // Skip fully completed courses (100%)
+    if (progressPct >= 100) continue;
+
+    const lastUpdatedAt = progressRows
+      .filter((p) => p.courseId === courseId)
+      .reduce((latest, p) => (p.updatedAt > latest ? p.updatedAt : latest), new Date(0));
+
+    results.push({
+      courseId: course.id,
+      courseTitle: course.title,
+      category: course.category,
+      completedLessons,
+      totalLessons,
+      progressPct,
+      lastUpdatedAt,
+    });
+  }
+
+  return results;
+}

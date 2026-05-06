@@ -1,5 +1,6 @@
 import PortalLayout from "@/components/PortalLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import {
   GraduationCap,
   Video,
@@ -65,35 +66,27 @@ const FEATURED_SIDE = [
 ];
 
 // ─── Continue learning ────────────────────────────────────────────────────────
-const CONTINUE_ITEMS = [
-  {
-    type: "Course",
-    title: "Getting Started with WAVV Dialer",
-    progress: 65,
-    lastAccessed: "2 hours ago",
-    href: "/academy/category/Onboarding",
-    color: "#0074F4",
-    icon: GraduationCap,
-  },
-  {
-    type: "Webinar Recording",
-    title: "Power Dialer Best Practices — May 2026",
-    progress: 40,
-    lastAccessed: "Yesterday",
-    href: "/webinars",
-    color: "#00A9E2",
-    icon: Video,
-  },
-  {
-    type: "Course",
-    title: "CRM Integration Setup Guide",
-    progress: 20,
-    lastAccessed: "3 days ago",
-    href: "/academy/category/How-To",
-    color: "#67C728",
-    icon: FileText,
-  },
-];
+// Color + icon mapping per category
+const CATEGORY_META: Record<string, { color: string; icon: typeof GraduationCap }> = {
+  "Onboarding": { color: "#0074F4", icon: GraduationCap },
+  "How-To": { color: "#00A9E2", icon: Wrench },
+  "Strategy and Best Practices": { color: "#67C728", icon: TrendingUp },
+  "Dialer Setup": { color: "#f97316", icon: Zap },
+  "CRM Integrations": { color: "#a855f7", icon: Target },
+  "Spam Protection": { color: "#FF9900", icon: Award },
+};
+
+function formatRelative(d: Date): string {
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 2) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return d.toLocaleDateString();
+}
 
 // ─── What's new ───────────────────────────────────────────────────────────────
 const WHATS_NEW = [
@@ -151,6 +144,7 @@ const TRENDING = [
 export default function Dashboard() {
   const { user } = useAuth();
   const firstName = user?.name?.split(" ")[0] ?? "there";
+  const { data: recentProgress, isLoading: progressLoading } = trpc.academy.getRecentProgress.useQuery({ limit: 3 });
 
   return (
     <PortalLayout title="Home">
@@ -358,57 +352,94 @@ export default function Dashboard() {
               View all <ChevronRight size={12} />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {CONTINUE_ITEMS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className="group flex flex-col p-5 rounded-xl transition-all"
-                  style={{ background: "#141414", border: "1px solid #222", textDecoration: "none" }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = item.color;
-                    e.currentTarget.style.boxShadow = `0 4px 24px ${item.color}18`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#222";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: `${item.color}18` }}>
-                      <Icon size={18} style={{ color: item.color }} />
-                    </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-                      style={{ background: `${item.color}12`, color: item.color }}>
-                      {item.type}
-                    </span>
-                  </div>
-                  <h3 className="text-white text-sm font-semibold leading-snug mb-4 line-clamp-2 flex-1">
-                    {item.title}
-                  </h3>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] text-gray-500 flex items-center gap-1">
-                        <Clock size={10} /> {item.lastAccessed}
+          {/* Loading skeleton */}
+          {progressLoading && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-40 rounded-xl animate-pulse" style={{ background: "#141414", border: "1px solid #222" }} />
+              ))}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!progressLoading && (!recentProgress || recentProgress.length === 0) && (
+            <div
+              className="flex flex-col items-center justify-center gap-3 py-10 rounded-xl text-center"
+              style={{ background: "#141414", border: "1px solid #222" }}
+            >
+              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "#0074F418" }}>
+                <BookOpen size={22} style={{ color: "#0074F4" }} />
+              </div>
+              <p className="text-white text-sm font-semibold">You're all caught up!</p>
+              <p className="text-gray-500 text-xs max-w-xs">
+                Explore the WAVV Success Center for more helpful resources
+              </p>
+              <Link
+                href="/academy"
+                className="mt-1 text-xs font-semibold px-4 py-2 rounded-lg transition-all"
+                style={{ background: "#0074F418", color: "#0074F4", textDecoration: "none", border: "1px solid #0074F430" }}
+              >
+                Browse Academy
+              </Link>
+            </div>
+          )}
+
+          {/* Real progress cards */}
+          {!progressLoading && recentProgress && recentProgress.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {recentProgress.map((item) => {
+                const meta = CATEGORY_META[item.category] ?? { color: "#0074F4", icon: GraduationCap };
+                const Icon = meta.icon;
+                const color = meta.color;
+                return (
+                  <Link
+                    key={item.courseId}
+                    href={`/academy/${item.courseId}`}
+                    className="group flex flex-col p-5 rounded-xl transition-all"
+                    style={{ background: "#141414", border: "1px solid #222", textDecoration: "none" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = color;
+                      e.currentTarget.style.boxShadow = `0 4px 24px ${color}18`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "#222";
+                      e.currentTarget.style.boxShadow = "none";
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ background: `${color}18` }}>
+                        <Icon size={18} style={{ color }} />
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                        style={{ background: `${color}12`, color }}>
+                        {item.category}
                       </span>
-                      <span className="text-[10px] font-bold" style={{ color: item.color }}>{item.progress}%</span>
                     </div>
-                    <div className="w-full h-1.5 rounded-full bg-[#2a2a2a]">
-                      <div className="h-full rounded-full transition-all"
-                        style={{ width: `${item.progress}%`, background: item.color }} />
+                    <h3 className="text-white text-sm font-semibold leading-snug mb-4 line-clamp-2 flex-1">
+                      {item.courseTitle}
+                    </h3>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] text-gray-500 flex items-center gap-1">
+                          <Clock size={10} /> {formatRelative(new Date(item.lastUpdatedAt))}
+                        </span>
+                        <span className="text-[10px] font-bold" style={{ color }}>{item.progressPct}%</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-[#2a2a2a]">
+                        <div className="h-full rounded-full transition-all"
+                          style={{ width: `${item.progressPct}%`, background: color }} />
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-4 text-gray-600 group-hover:text-white transition-colors">
-                    <Play size={12} />
-                    <span className="text-xs font-medium">Resume</span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+                    <div className="flex items-center gap-1.5 mt-4 text-gray-600 group-hover:text-white transition-colors">
+                      <Play size={12} />
+                      <span className="text-xs font-medium">Resume</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* ── What's New + Trending (side by side) ── */}
