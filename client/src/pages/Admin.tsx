@@ -132,15 +132,15 @@ export default function Admin() {
   }
 
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
-    { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={16} /> },
-    { id: "users",            label: "Users",             icon: <UserCircle size={16} /> },
-    { id: "academy",          label: "Academy",           icon: <GraduationCap size={16} /> },
-    { id: "webinars",         label: "Webinars",          icon: <Video size={16} /> },
-    { id: "guides",           label: "Guides & Docs",     icon: <FileText size={16} /> },
-    { id: "playground",       label: "Playground",        icon: <FlaskConical size={16} /> },
-    { id: "support",          label: "Support",           icon: <Headphones size={16} /> },
-    { id: "content_requests", label: "Content Requests",  icon: <MessageSquare size={16} /> },
-    { id: "notifications",    label: "Notifications",     icon: <Bell size={16} /> },
+    { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} /> },
+    { id: "users",            label: "Users",             icon: <UserCircle size={13} /> },
+    { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} /> },
+    { id: "webinars",         label: "Webinars",          icon: <Video size={13} /> },
+    { id: "guides",           label: "Guides & Docs",     icon: <FileText size={13} /> },
+    { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} /> },
+    { id: "support",          label: "Support",           icon: <Headphones size={13} /> },
+    { id: "content_requests", label: "Content Requests",  icon: <MessageSquare size={13} /> },
+    { id: "notifications",    label: "Notifications",     icon: <Bell size={13} /> },
   ];
 
   return (
@@ -159,21 +159,23 @@ export default function Admin() {
 
         {/* ── Tab bar ── */}
         <div
-          className="flex flex-wrap items-center gap-1 p-1 rounded-xl"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+          className="flex items-center gap-0.5 p-1 rounded-xl overflow-x-auto"
+          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", scrollbarWidth: "none" }}
         >
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex-shrink-0"
               style={
                 activeTab === tab.id
                   ? { background: "#0074F4", color: "#fff" }
                   : { color: "#9ca3af" }
               }
             >
-              {tab.icon}
+              <span className="flex-shrink-0" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {tab.icon}
+              </span>
               {tab.label}
             </button>
           ))}
