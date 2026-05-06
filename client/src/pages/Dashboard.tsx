@@ -4,7 +4,7 @@ import {
   GraduationCap,
   Video,
   FileText,
-  LifeBuoy,
+  Headphones,
   FlaskConical,
   Play,
   Clock,
@@ -22,13 +22,13 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 
-// ─── Quick-access tiles ───────────────────────────────────────────────────────
+// ─── Quick-access tiles (matches sidebar order) ───────────────────────────────
 const NAV_TILES = [
-  { href: "/academy", label: "WAVV Academy", icon: GraduationCap, color: "#0074F4", desc: "Courses & lessons" },
-  { href: "/webinars", label: "Webinars", icon: Video, color: "#00A9E2", desc: "Live & on-demand" },
-  { href: "/guides", label: "Guides & Docs", icon: FileText, color: "#67C728", desc: "Step-by-step docs" },
-  { href: "/support", label: "Support", icon: LifeBuoy, color: "#FF9900", desc: "Get help fast" },
-  { href: "/hands-on", label: "Playground", icon: FlaskConical, color: "#a855f7", desc: "Practice & explore" },
+  { href: "/academy", label: "WAVV Academy", icon: GraduationCap, color: "#0074F4" },
+  { href: "/webinars", label: "WAVV Webinars", icon: Video, color: "#00A9E2" },
+  { href: "/guides", label: "Guides & Docs", icon: FileText, color: "#67C728" },
+  { href: "/support", label: "Support", icon: Headphones, color: "#FF9900" },
+  { href: "/hands-on", label: "Playground", icon: FlaskConical, color: "#a855f7" },
 ];
 
 // ─── Featured content (hero card + 2 side cards) ─────────────────────────────
@@ -219,7 +219,7 @@ export default function Dashboard() {
                   <Link
                     key={tile.href}
                     href={tile.href}
-                    className="group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all"
+                    className="group flex items-center gap-3 px-3 py-3 rounded-xl transition-all"
                     style={{
                       background: "rgba(255,255,255,0.04)",
                       border: "1px solid rgba(255,255,255,0.07)",
@@ -234,15 +234,12 @@ export default function Dashboard() {
                       e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
                     }}
                   >
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ background: `${tile.color}20` }}>
-                      <Icon size={14} style={{ color: tile.color }} />
+                      <Icon size={15} style={{ color: tile.color }} />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-white text-xs font-semibold leading-none truncate">{tile.label}</p>
-                      <p className="text-gray-600 text-[10px] mt-0.5 truncate">{tile.desc}</p>
-                    </div>
-                    <ChevronRight size={12} className="text-gray-700 group-hover:text-gray-400 transition-colors ml-auto flex-shrink-0" />
+                    <p className="text-white text-xs font-semibold leading-none truncate flex-1">{tile.label}</p>
+                    <ChevronRight size={12} className="text-gray-700 group-hover:text-gray-400 transition-colors flex-shrink-0" />
                   </Link>
                 );
               })}
