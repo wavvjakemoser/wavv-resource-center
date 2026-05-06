@@ -247,38 +247,33 @@ function AnalyticsTab() {
 }
 
 function AnalyticsContent({ days }: { days: TimeRange }) {
-  const { data: summary, isLoading: summaryLoading } =
-    trpc.analytics.getSummary.useQuery();
   const { data: eventCounts, isLoading: eventsLoading } =
     trpc.analytics.getEventCounts.useQuery({ days });
   const { data: signInTrend } =
     trpc.analytics.getSignInTrend.useQuery({ days });
-  const { data: activeUsers } =
-    trpc.analytics.getActiveUsers.useQuery({ days });
   const { data: topContent } =
-    trpc.analytics.getTopContent.useQuery({ days, limit: 10 });
-  const { data: recentEvents } =
-    trpc.analytics.getRecentEvents.useQuery({ days: Math.min(days, 7), limit: 30 });
+    trpc.analytics.getTopContent.useQuery({ days, limit: 30 });
+
+  // Top-content section tab
+  const [topSection, setTopSection] = useState<"academy" | "webinars" | "guides">("academy");
 
   const stats = useMemo(() => {
     if (!eventCounts) return null;
-    const countMap: Record<string, number> = {};
-    eventCounts.forEach((e) => { countMap[e.eventType] = e.count; });
+    const c: Record<string, number> = {};
+    eventCounts.forEach((e) => { c[e.eventType] = e.count; });
     return {
-      logins: countMap["login"] ?? 0,
-      lessonCompleted: countMap["lesson_completed"] ?? 0,
-      webinarWatched: countMap["webinar_watched"] ?? 0,
-      webinarRegistered: countMap["webinar_registered"] ?? 0,
-      guideDownloaded: countMap["guide_downloaded"] ?? 0,
-      aiChats: countMap["ai_chat"] ?? 0,
-      searches: countMap["search"] ?? 0,
-      ticketsSubmitted: countMap["ticket_submitted"] ?? 0,
+      logins:              c["login"] ?? 0,
+      lessonCompleted:     c["lesson_completed"] ?? 0,
+      evergreenWatched:    c["webinar_evergreen_watched"] ?? 0,
+      exclusiveReg:        c["webinar_registered"] ?? 0,
+      ondemandWatched:     (c["webinar_ondemand_watched"] ?? 0) + (c["webinar_watched"] ?? 0), // legacy compat
+      guideDownloaded:     c["guide_downloaded"] ?? 0,
+      searches:            c["search"] ?? 0,
+      aiChats:             c["ai_chat"] ?? 0,
     };
   }, [eventCounts]);
 
-  const isLoading = summaryLoading || eventsLoading;
-
-  if (isLoading) {
+  if (eventsLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 8 }).map((_, i) => (
@@ -289,36 +284,44 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
     );
   }
 
-  const COLORS = ["#06b6d4","#22c55e","#f59e0b","#ef4444","#8b5cf6","#ec4899","#14b8a6","#f97316"];
-
+  // Donut chart data — right-side legend
+  const CHART_COLORS = ["#06b6d4","#22c55e","#f59e0b","#8b5cf6","#ec4899","#14b8a6","#f97316","#ef4444"];
   const pieData = eventCounts
     ?.filter((e) => e.count > 0)
-    .map((e) => ({ name: formatEventType(e.eventType), value: e.count })) ?? [];
+    .map((e, idx) => ({ name: formatEventType(e.eventType), value: e.count, fill: CHART_COLORS[idx % CHART_COLORS.length] })) ?? [];
+  const pieTotal = pieData.reduce((s, d) => s + d.value, 0);
+
+  // Top content filtered by section
+  const academyContent = (topContent ?? []).filter((i) => i.resourceType === "lesson" || i.resourceType === "course");
+  const webinarContent = (topContent ?? []).filter((i) => i.resourceType === "webinar");
+  const guideContent   = (topContent ?? []).filter((i) => i.resourceType === "guide");
+  const sectionContent = topSection === "academy" ? academyContent : topSection === "webinars" ? webinarContent : guideContent;
+
+  const SECTION_TABS: { key: "academy" | "webinars" | "guides"; label: string; color: string }[] = [
+    { key: "academy",  label: "WAVV Academy",    color: "#22d3ee" },
+    { key: "webinars", label: "Webinars",         color: "#f59e0b" },
+    { key: "guides",   label: "Guides & Docs",    color: "#4ade80" },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Row 1 */}
+      {/* 8 Stat Cards in 2 rows of 4 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Users size={18} />} label="Total Users" value={summary?.totalUsers ?? 0} color="cyan" />
-        <StatCard icon={<Activity size={18} />} label="Active Users" value={activeUsers?.count ?? 0} color="green" subtitle={`last ${days}d`} />
-        <StatCard icon={<LogIn size={18} />} label="Sign-Ins" value={stats?.logins ?? 0} color="blue" subtitle={`last ${days}d`} />
-        <StatCard icon={<MessageSquare size={18} />} label="AI Conversations" value={stats?.aiChats ?? 0} color="purple" subtitle={`last ${days}d`} />
+        <StatCard icon={<LogIn size={18} />}         label="Sign-Ins"                          value={stats?.logins ?? 0}           color="blue"    subtitle={`last ${days}d`} />
+        <StatCard icon={<GraduationCap size={18} />} label="Academy Lessons Completed"         value={stats?.lessonCompleted ?? 0}  color="cyan"    subtitle={`last ${days}d`} />
+        <StatCard icon={<Eye size={18} />}           label="Evergreen Webinars Watched"        value={stats?.evergreenWatched ?? 0} color="amber"   subtitle={`last ${days}d`} />
+        <StatCard icon={<Star size={18} />}          label="Exclusive Webinar Registrations"  value={stats?.exclusiveReg ?? 0}     color="purple"  subtitle={`last ${days}d`} />
       </div>
-      {/* Row 2 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<GraduationCap size={18} />} label="Lessons Completed" value={stats?.lessonCompleted ?? 0} color="emerald" subtitle={`last ${days}d`} />
-        <StatCard icon={<Eye size={18} />} label="Webinars Watched" value={stats?.webinarWatched ?? 0} color="amber" subtitle={`last ${days}d`} />
-        <StatCard icon={<Download size={18} />} label="Guide Downloads" value={stats?.guideDownloaded ?? 0} color="teal" subtitle={`last ${days}d`} />
-        <StatCard icon={<Ticket size={18} />} label="Tickets Submitted" value={stats?.ticketsSubmitted ?? 0} color="red" subtitle={`last ${days}d`} />
-      </div>
-      {/* Row 3 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Search size={18} />} label="Total Searches" value={stats?.searches ?? 0} color="teal" subtitle={`last ${days}d`} />
-        <StatCard icon={<Eye size={18} />} label="Webinar Registrations" value={stats?.webinarRegistered ?? 0} color="amber" subtitle={`last ${days}d`} />
+        <StatCard icon={<Video size={18} />}         label="On-Demand Webinars Watched"        value={stats?.ondemandWatched ?? 0}  color="emerald" subtitle={`last ${days}d`} />
+        <StatCard icon={<Download size={18} />}      label="Guides & Docs Downloads"           value={stats?.guideDownloaded ?? 0}  color="teal"    subtitle={`last ${days}d`} />
+        <StatCard icon={<Search size={18} />}        label="Total Searches"                    value={stats?.searches ?? 0}         color="green"   subtitle={`last ${days}d`} />
+        <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"             value={stats?.aiChats ?? 0}          color="red"     subtitle={`last ${days}d`} />
       </div>
 
-      {/* Charts */}
+      {/* Charts row: Sign-In Trend + Event Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Sign-In Trend */}
         <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
             <TrendingUp size={15} className="text-cyan-400" /> Sign-In Trend
@@ -341,93 +344,107 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
           </div>
         </div>
 
+        {/* Event Distribution — donut + right-side legend */}
         <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
             <Activity size={15} className="text-purple-400" /> Event Distribution
           </h3>
-          <div className="h-52">
-            {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {pieData.map((_, idx) => (
-                      <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500 text-sm">No events recorded yet</div>
-            )}
-          </div>
+          {pieData.length > 0 ? (
+            <div className="flex items-center gap-4 h-52">
+              {/* Donut — no labels on slices */}
+              <div className="shrink-0" style={{ width: 160, height: 160 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={46} outerRadius={72}
+                      dataKey="value" labelLine={false} label={false}
+                    >
+                      {pieData.map((entry, idx) => (
+                        <Cell key={idx} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: "#1f2937", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff" }}
+                      formatter={(value: number, name: string) => [`${value} (${pieTotal > 0 ? ((value / pieTotal) * 100).toFixed(1) : 0}%)`, name]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Right-side legend */}
+              <div className="flex-1 space-y-1.5 overflow-y-auto max-h-52 pr-1">
+                {pieData.map((entry, idx) => {
+                  const pct = pieTotal > 0 ? ((entry.value / pieTotal) * 100).toFixed(1) : "0.0";
+                  return (
+                    <div key={idx} className="flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: entry.fill }} />
+                        <span className="text-gray-300 truncate">{entry.name}</span>
+                      </div>
+                      <span className="text-gray-400 shrink-0 font-medium">{pct}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-52 text-gray-500 text-sm">No events recorded yet</div>
+          )}
         </div>
       </div>
 
-      {/* Top Content + Recent Activity */}
+      {/* Top Content by Section + Search & AI */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Content — sectioned tabs */}
         <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Search size={15} className="text-amber-400" /> Top Content (by interactions)
+          <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <Search size={15} className="text-amber-400" /> Top Content
           </h3>
-          {topContent && topContent.length > 0 ? (
-            <div className="space-y-2">
-              {topContent.slice(0, 8).map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-white/5 transition"
+          {/* Section tabs */}
+          <div className="flex gap-1 mb-4 p-1 rounded-lg" style={{ background: "rgba(255,255,255,0.04)" }}>
+            {SECTION_TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTopSection(t.key)}
+                className="flex-1 py-1 text-xs font-medium rounded-md transition"
+                style={topSection === t.key
+                  ? { background: "rgba(255,255,255,0.1)", color: t.color }
+                  : { color: "#6b7280" }
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          {sectionContent.length > 0 ? (
+            <div className="space-y-1.5">
+              {sectionContent.slice(0, 8).map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between py-2 px-3 rounded-lg"
                   style={{ background: "rgba(255,255,255,0.03)" }}>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-500 w-5 text-right">{idx + 1}.</span>
-                    <span className="text-gray-300 capitalize">{item.resourceType ?? "unknown"}</span>
-                    <span className="text-gray-500">#{item.resourceId}</span>
-                    <span className="text-xs text-gray-500 px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.05)" }}>
+                  <div className="flex items-center gap-2 text-sm min-w-0">
+                    <span className="text-gray-500 w-5 shrink-0 text-right">{idx + 1}.</span>
+                    <span className="text-gray-300 capitalize truncate">
+                      {item.resourceType ?? "unknown"} #{item.resourceId}
+                    </span>
+                    <span className="text-xs text-gray-500 px-1.5 py-0.5 rounded shrink-0"
+                      style={{ background: "rgba(255,255,255,0.05)" }}>
                       {formatEventType(item.eventType)}
                     </span>
                   </div>
-                  <span className="text-sm font-medium text-white">{item.count}</span>
+                  <span className="text-sm font-semibold text-white shrink-0 ml-2">{item.count}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-gray-500 text-sm text-center py-8">No content interactions yet</div>
+            <div className="text-gray-500 text-sm text-center py-8">No interactions yet for this section</div>
           )}
         </div>
 
+        {/* Search & AI Usage Trend */}
         <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
           <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-            <Activity size={15} className="text-green-400" /> Recent Activity
+            <Search size={15} className="text-teal-400" /> Search & AI Usage Trend
           </h3>
-          {recentEvents && recentEvents.length > 0 ? (
-            <div className="space-y-2 max-h-72 overflow-y-auto">
-              {recentEvents.map((event) => (
-                <div key={event.id} className="flex items-center justify-between py-2 px-3 rounded-lg"
-                  style={{ background: "rgba(255,255,255,0.03)" }}>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
-                    <span className="text-gray-300">{formatEventType(event.eventType)}</span>
-                    {event.resourceType && (
-                      <span className="text-xs text-gray-500">({event.resourceType} #{event.resourceId})</span>
-                    )}
-                  </div>
-                  <span className="text-xs text-gray-500 shrink-0">{formatTimeAgo(event.createdAt)}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-gray-500 text-sm text-center py-8">No recent activity</div>
-          )}
+          <SearchAIChart days={days} />
         </div>
-      </div>
-
-      {/* Search & AI chart */}
-      <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-        <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-          <Search size={15} className="text-teal-400" /> Search & AI Usage Trend
-        </h3>
-        <SearchAIChart days={days} />
       </div>
     </div>
   );
@@ -587,16 +604,50 @@ function UsersTab() {
 
   const isPending = updateRole.isPending || removeUser.isPending;
 
+  // Export users filtered by current roleFilter
+  function exportUsersCSV() {
+    const list = roleFilter === "all" ? (users ?? []) : (users ?? []).filter((u) => u.role === roleFilter);
+    const header = ["Name", "Email", "Role", "Registered"].join(",");
+    const rows = list.map((u) =>
+      [
+        `"${(u.name ?? "").replace(/"/g, '""')}"`,
+        `"${(u.email ?? "").replace(/"/g, '""')}"`,
+        u.role,
+        u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
+      ].join(",")
+    );
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const label = roleFilter === "all" ? "all-users" : roleFilter.replace("_", "-");
+    a.href = url;
+    a.download = `wavv-users-${label}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-base font-semibold text-white">User Management</h2>
-        {isSuperAdmin && pendingCount > 0 && (
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-            style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.3)" }}>
-            <Bell className="h-3 w-3" /> {pendingCount} pending promotion{pendingCount > 1 ? "s" : ""}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {isSuperAdmin && pendingCount > 0 && (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+              style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.3)" }}>
+              <Bell className="h-3 w-3" /> {pendingCount} pending promotion{pendingCount > 1 ? "s" : ""}
+            </span>
+          )}
+          <button
+            onClick={exportUsersCSV}
+            disabled={!users || users.length === 0}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition disabled:opacity-40"
+            style={{ background: "rgba(6,182,212,0.1)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.2)" }}
+          >
+            <FileDown size={13} />
+            Export{roleFilter !== "all" ? ` ${roleFilter === "super_admin" ? "Super Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
+          </button>
+        </div>
       </div>
 
       {/* Clickable stat cards */}

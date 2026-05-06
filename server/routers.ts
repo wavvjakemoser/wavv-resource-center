@@ -288,9 +288,15 @@ const webinarsRouter = router({
     .input(z.object({ webinarId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await incrementWebinarView(input.webinarId);
+      const webinar = await getWebinarById(input.webinarId);
+      // Track type-specific event for analytics granularity
+      const eventType =
+        webinar?.type === "evergreen" ? "webinar_evergreen_watched" :
+        webinar?.type === "exclusive" ? "webinar_exclusive_watched" :
+        "webinar_ondemand_watched";
       await trackEvent({
         userId: ctx.user.id,
-        eventType: "webinar_watched",
+        eventType,
         resourceType: "webinar",
         resourceId: input.webinarId,
       });
