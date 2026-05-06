@@ -159,14 +159,14 @@ export default function Admin() {
 
         {/* ── Tab bar ── */}
         <div
-          className="flex items-center gap-0.5 p-1 rounded-xl overflow-x-auto"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", scrollbarWidth: "none" }}
+          className="flex items-center gap-0.5 p-1 rounded-xl"
+          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
         >
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex-shrink-0"
+              className="flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-0"
               style={
                 activeTab === tab.id
                   ? { background: "#0074F4", color: "#fff" }
