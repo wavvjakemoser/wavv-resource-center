@@ -514,6 +514,42 @@ export async function getSignInTrend(sinceDate: Date) {
   return rows;
 }
 
+/** Get detail rows for a specific event type (or multiple), joined with user info */
+export async function getStatDetail(
+  eventTypes: string[],
+  sinceDate: Date,
+  limit = 200
+) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: analyticsEvents.id,
+      eventType: analyticsEvents.eventType,
+      resourceType: analyticsEvents.resourceType,
+      resourceId: analyticsEvents.resourceId,
+      metadata: analyticsEvents.metadata,
+      createdAt: analyticsEvents.createdAt,
+      userId: analyticsEvents.userId,
+      userName: users.name,
+      userEmail: users.email,
+    })
+    .from(analyticsEvents)
+    .leftJoin(users, eq(analyticsEvents.userId, users.id))
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        sql`${analyticsEvents.eventType} IN (${sql.join(
+          eventTypes.map((t) => sql`${t}`),
+          sql`, `
+        )})`
+      )
+    )
+    .orderBy(desc(analyticsEvents.createdAt))
+    .limit(limit);
+  return rows;
+}
+
 /** Get all events for a time range (paginated) */
 export async function getRecentEvents(sinceDate: Date, limit = 50) {
   const db = await getDb();

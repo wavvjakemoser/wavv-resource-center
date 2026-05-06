@@ -641,3 +641,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Inactive section: make category banners collapsible (click to expand/collapse sections within)
 - [x] Live Sections & Courses: increase banner height and font size for stronger visual presence
 - [x] Inactive Sections: increase banner height; add clear visual separator (divider line + spacing) between Live and Inactive blocks
+
+## Admin Stat Cards — Clickable Detail Drill-Down
+
+- [x] Add getStatDetail tRPC procedure: returns event rows (userId, userName, userEmail, eventType, resourceType, resourceId, metadata, createdAt) filtered by eventType(s) and days
+- [x] Make StatCard component accept onClick prop and render as clickable (cursor-pointer, hover ring)
+- [x] Build StatDetailDrawer component: slide-out panel showing a table of individual event rows for the selected metric
+- [x] Wire all 8 stat cards to open the drawer with the correct event type filter
+- [x] Drawer shows: user name/email, event type, resource, timestamp — sortable by date

@@ -337,6 +337,130 @@ function ChartCard({
   );
 }
 
+// ─── StatDetailDrawer ───────────────────────────────────────────────────────
+function StatDetailDrawer({
+  label, eventTypes, color, days, onClose,
+}: {
+  label: string;
+  eventTypes: string[];
+  color: string;
+  days: number;
+  onClose: () => void;
+}) {
+  const { data: rows = [], isLoading } = trpc.analytics.getStatDetail.useQuery(
+    { eventTypes, days, limit: 200 },
+    { staleTime: 30_000 }
+  );
+
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const sorted = useMemo(
+    () => [...rows].sort((a, b) => {
+      const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return sortDir === "desc" ? tb - ta : ta - tb;
+    }),
+    [rows, sortDir]
+  );
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40"
+        style={{ background: "rgba(0,0,0,0.6)" }}
+        onClick={onClose}
+      />
+      {/* Drawer */}
+      <div
+        className="fixed right-0 top-0 bottom-0 z-50 flex flex-col"
+        style={{
+          width: "min(680px, 95vw)",
+          background: "#0f1117",
+          borderLeft: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "-8px 0 40px rgba(0,0,0,0.6)",
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 shrink-0"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color }}>Detail View</p>
+            <h2 className="text-lg font-bold text-white">{label}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Last {days} days · {rows.length} events</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-white/10 transition"
+            style={{ color: "#9ca3af" }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Sort control */}
+        <div className="px-6 py-3 shrink-0 flex items-center gap-3"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <span className="text-xs text-gray-500">Sort by date:</span>
+          <button
+            onClick={() => setSortDir((d) => d === "desc" ? "asc" : "desc")}
+            className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg transition hover:bg-white/10"
+            style={{ color, border: `1px solid ${color}40` }}
+          >
+            {sortDir === "desc" ? "Newest first" : "Oldest first"}
+            <ChevronDown size={12} className={`transition-transform ${sortDir === "asc" ? "rotate-180" : ""}`} />
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-40">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2" style={{ borderColor: color }} />
+            </div>
+          ) : sorted.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 gap-2">
+              <p className="text-gray-500 text-sm">No events recorded in this period</p>
+            </div>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="sticky top-0" style={{ background: "#0f1117", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                <tr>
+                  <th className="text-left px-6 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">User</th>
+                  <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Event</th>
+                  <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Resource</th>
+                  <th className="text-right px-6 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">When</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                {sorted.map((row) => (
+                  <tr key={row.id} className="hover:bg-white/[0.02] transition">
+                    <td className="px-6 py-3">
+                      <div className="font-medium text-white text-sm leading-tight">{row.userName ?? "Anonymous"}</div>
+                      {row.userEmail && <div className="text-[11px] text-gray-500 mt-0.5">{row.userEmail}</div>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-[11px] px-2 py-0.5 rounded-full font-medium"
+                        style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}>
+                        {formatEventType(row.eventType)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">
+                      {row.resourceType ? `${row.resourceType}${row.resourceId ? ` #${row.resourceId}` : ""}` : "—"}
+                    </td>
+                    <td className="px-6 py-3 text-right text-xs text-gray-500 whitespace-nowrap">
+                      {row.createdAt ? new Date(row.createdAt).toLocaleString() : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 function AnalyticsContent({ days }: { days: TimeRange }) {
   const { data: eventCounts, isLoading: eventsLoading } =
     trpc.analytics.getEventCounts.useQuery({ days });
@@ -355,6 +479,11 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
 
   // Top-content section tab
   const [topSection, setTopSection] = useState<"academy" | "webinars" | "guides">("academy");
+
+  // Stat detail drawer
+  const [drawerMeta, setDrawerMeta] = useState<{ label: string; eventTypes: string[]; color: string } | null>(null);
+  const openDrawer = (label: string, eventTypes: string[], color: string) =>
+    setDrawerMeta({ label, eventTypes, color });
 
   const stats = useMemo(() => {
     if (!eventCounts) return null;
@@ -406,24 +535,16 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
     <div className="space-y-6">
       {/* 8 Stat Cards in 2 rows of 4 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Sign-Ins: blue (matches portal sign-in) */}
-        <StatCard icon={<LogIn size={18} />}         label="Sign-Ins"                         value={stats?.logins ?? 0}           color="blue"    subtitle={`last ${days}d`} />
-        {/* Academy: cyan (matches WAVV Academy landing accent) */}
-        <StatCard icon={<GraduationCap size={18} />} label="Academy Lessons Completed"        value={stats?.lessonCompleted ?? 0}  color="cyan"    subtitle={`last ${days}d`} />
-        {/* Evergreen Webinars: amber (matches Webinars landing accent) */}
-        <StatCard icon={<Eye size={18} />}           label="Evergreen Webinars Watched"       value={stats?.evergreenWatched ?? 0} color="amber"   subtitle={`last ${days}d`} />
-        {/* Exclusive Registrations: purple (exclusive badge color) */}
-        <StatCard icon={<Star size={18} />}          label="Exclusive Webinar Registrations" value={stats?.exclusiveReg ?? 0}     color="purple"  subtitle={`last ${days}d`} />
+        <StatCard icon={<LogIn size={18} />}         label="Sign-Ins"                        value={stats?.logins ?? 0}           color="blue"   subtitle={`last ${days}d`} onClick={() => openDrawer("Sign-Ins",                       ["login"],                                                   "#60a5fa")} />
+        <StatCard icon={<GraduationCap size={18} />} label="Academy Lessons Completed"       value={stats?.lessonCompleted ?? 0}  color="cyan"   subtitle={`last ${days}d`} onClick={() => openDrawer("Academy Lessons Completed",       ["lesson_completed"],                                        "#22d3ee")} />
+        <StatCard icon={<Eye size={18} />}           label="Evergreen Webinars Watched"      value={stats?.evergreenWatched ?? 0} color="amber"  subtitle={`last ${days}d`} onClick={() => openDrawer("Evergreen Webinars Watched",      ["webinar_evergreen_watched"],                               "#f59e0b")} />
+        <StatCard icon={<Star size={18} />}          label="Exclusive Webinar Registrations" value={stats?.exclusiveReg ?? 0}     color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("Exclusive Webinar Registrations", ["webinar_registered"],                                       "#a78bfa")} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* On-Demand: amber (same webinar family) */}
-        <StatCard icon={<Video size={18} />}         label="On-Demand Webinars Watched"       value={stats?.ondemandWatched ?? 0}  color="amber"   subtitle={`last ${days}d`} />
-        {/* Guides & Docs: green (matches Guides landing accent) */}
-        <StatCard icon={<Download size={18} />}      label="Guides & Docs Downloads"          value={stats?.guideDownloaded ?? 0}  color="green"   subtitle={`last ${days}d`} />
-        {/* Total Searches: teal (matches search/AI page accent) */}
-        <StatCard icon={<Search size={18} />}        label="Total Searches"                   value={stats?.searches ?? 0}         color="teal"    subtitle={`last ${days}d`} />
-        {/* WAVV AI: purple (matches AI/Playground accent) */}
-        <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"            value={stats?.aiChats ?? 0}          color="purple"  subtitle={`last ${days}d`} />
+        <StatCard icon={<Video size={18} />}         label="On-Demand Webinars Watched"      value={stats?.ondemandWatched ?? 0}  color="amber"  subtitle={`last ${days}d`} onClick={() => openDrawer("On-Demand Webinars Watched",      ["webinar_ondemand_watched", "webinar_watched"],             "#f59e0b")} />
+        <StatCard icon={<Download size={18} />}      label="Guides & Docs Downloads"         value={stats?.guideDownloaded ?? 0}  color="green"  subtitle={`last ${days}d`} onClick={() => openDrawer("Guides & Docs Downloads",         ["guide_downloaded"],                                        "#4ade80")} />
+        <StatCard icon={<Search size={18} />}        label="Total Searches"                  value={stats?.searches ?? 0}         color="teal"   subtitle={`last ${days}d`} onClick={() => openDrawer("Total Searches",                  ["search"],                                                  "#2dd4bf")} />
+        <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"           value={stats?.aiChats ?? 0}          color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("WAVV AI Conversations",           ["ai_chat"],                                                 "#a78bfa")} />
       </div>
 
       {/* Charts row: Sign-In Trend + Event Distribution */}
@@ -481,6 +602,17 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
           {(d, h) => <SearchAIChart days={d} height={h} />}
         </ChartCard>
       </div>
+
+      {/* ── Stat Detail Drawer ── */}
+      {drawerMeta && (
+        <StatDetailDrawer
+          label={drawerMeta.label}
+          eventTypes={drawerMeta.eventTypes}
+          color={drawerMeta.color}
+          days={days}
+          onClose={() => setDrawerMeta(null)}
+        />
+      )}
     </div>
   );
 }
@@ -1009,8 +1141,9 @@ function UsersTab() {
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
-function StatCard({ icon, label, value, color, subtitle }: {
+function StatCard({ icon, label, value, color, subtitle, onClick }: {
   icon: React.ReactNode; label: string; value: number; color: string; subtitle?: string;
+  onClick?: () => void;
 }) {
   const colorMap: Record<string, string> = {
     cyan: "text-cyan-400 bg-cyan-400/10",
@@ -1023,8 +1156,14 @@ function StatCard({ icon, label, value, color, subtitle }: {
     red: "text-red-400 bg-red-400/10",
   };
   return (
-    <div className="rounded-xl p-4 flex items-start gap-3"
-      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+    <div
+      className={`rounded-xl p-4 flex items-start gap-3 transition-all${onClick ? " cursor-pointer hover:ring-2 hover:ring-white/20 hover:scale-[1.02] active:scale-[0.99]" : ""}`}
+      style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
+    >
       <div className={`p-2 rounded-lg ${colorMap[color] ?? "text-gray-400 bg-gray-400/10"}`}>{icon}</div>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-gray-400 leading-snug" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{label}</p>

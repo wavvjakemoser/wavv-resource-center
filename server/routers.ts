@@ -72,6 +72,7 @@ import {
   createContentRequest,
   getContentRequests,
   deleteUser,
+  getStatDetail,
   getNotificationsForUser,
   markNotificationRead,
   markAllNotificationsRead,
@@ -555,6 +556,16 @@ const analyticsRouter = router({
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getEventCountsByType(since);
+    }),
+  getStatDetail: adminProcedure
+    .input(z.object({
+      eventTypes: z.array(z.string()).min(1),
+      days: z.number().min(1).max(365).default(30),
+      limit: z.number().min(1).max(500).default(200),
+    }))
+    .query(({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getStatDetail(input.eventTypes, since, input.limit);
     }),
 
   getSignInTrend: adminProcedure
