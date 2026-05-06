@@ -1412,7 +1412,7 @@ function CategoryBlock({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full relative overflow-hidden rounded-xl mb-3 group"
-        style={{ border: `1px solid ${accentColor}40`, minHeight: "110px" }}
+        style={{ border: `1px solid ${accentColor}55`, minHeight: "140px" }}
       >
         {/* Banner image */}
         {categoryBanner && (
@@ -1423,19 +1423,19 @@ function CategoryBlock({
         {/* Colour glow */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 85% 50%, ${accentColor}22 0%, transparent 60%)` }} />
         {/* Content — mirrors Academy landing page: WAVV ACADEMY label, title, subtitle, section+video badges */}
-        <div className="relative flex flex-col justify-center h-full px-6 py-4 gap-0.5 text-left">
-          <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: accentColor }}>WAVV Academy</p>
+        <div className="relative flex flex-col justify-center h-full px-8 py-5 gap-1 text-left">
+          <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: accentColor }}>WAVV Academy</p>
           <div className="flex items-center gap-2">
-            {open ? <ChevronDown size={13} style={{ color: accentColor }} /> : <ChevronRightIcon size={13} style={{ color: accentColor }} />}
-            <h2 className="text-xl font-extrabold text-white leading-tight">{displayLabel}</h2>
+            {open ? <ChevronDown size={15} style={{ color: accentColor }} /> : <ChevronRightIcon size={15} style={{ color: accentColor }} />}
+            <h2 className="text-2xl font-extrabold text-white leading-tight">{displayLabel}</h2>
           </div>
-          {categorySubtitle && <p className="text-xs text-gray-300 mb-1">{categorySubtitle}</p>}
+          {categorySubtitle && <p className="text-sm text-gray-300 mb-1">{categorySubtitle}</p>}
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: `${accentColor}25`, color: accentColor, border: `1px solid ${accentColor}50` }}>
+            <span className="text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: `${accentColor}25`, color: accentColor, border: `1px solid ${accentColor}50` }}>
               {courses.length} section{courses.length !== 1 ? "s" : ""}
             </span>
             {videoCount !== undefined && (
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}>
+              <span className="text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}>
                 {videoCount} video{videoCount !== 1 ? "s" : ""}
               </span>
             )}
@@ -1456,6 +1456,100 @@ function CategoryBlock({
               />
             );
           })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── InactiveCategoryBlock ────────────────────────────────────────────────
+// Extracted so useState can be called at top level (Rules of Hooks)
+function InactiveCategoryBlock({
+  categoryKey, label, subtitle, color, banner,
+  inactiveCourses, inactiveLessons, allLessons,
+  onDeactivateLesson, onActivateLesson, onDeleteCourse, onDeleteLesson,
+}: {
+  categoryKey: string; label: string; subtitle?: string; color: string; banner?: string;
+  inactiveCourses: Array<{ id: number; title: string; category: string; published: boolean; sortOrder: number | null }>;
+  inactiveLessons: Array<{ id: number; title: string; courseId: number; published: boolean; courseTitle?: string | null; [key: string]: unknown }>;
+  allLessons: Array<{
+    id: number; title: string; description?: string | null; courseTitle?: string;
+    courseCategory?: string; inactiveReason?: string | null; videoUrl?: string | null;
+    fileUrl?: string | null; tags?: string | null; published: boolean; courseId: number;
+  }>;
+  onDeactivateLesson: (lesson: { id: number; title: string }) => void;
+  onActivateLesson: (id: number) => void;
+  onDeleteCourse: (id: number, title: string) => void;
+  onDeleteLesson: (id: number, title: string) => void;
+}) {
+  const [open, setOpen] = React.useState(true);
+  const totalInactive = inactiveCourses.length + inactiveLessons.length;
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full relative overflow-hidden rounded-xl mb-3 group"
+        style={{ border: `1px solid ${color}30`, minHeight: "110px", opacity: 0.80 }}
+      >
+        {banner && <img src={banner} alt={label} className="absolute inset-0 w-full h-full object-cover" aria-hidden />}
+        <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.80) 60%, rgba(0,0,0,0.60) 100%)` }} />
+        <div className="relative flex flex-col justify-center h-full px-8 py-5 gap-1 text-left">
+          <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color }}>WAVV Academy</p>
+          <div className="flex items-center gap-2">
+            {open ? <ChevronDown size={15} style={{ color }} /> : <ChevronRightIcon size={15} style={{ color }} />}
+            <h2 className="text-2xl font-extrabold text-white leading-tight">{label}</h2>
+          </div>
+          {subtitle && <p className="text-sm text-gray-400">{subtitle}</p>}
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[12px] font-semibold px-3 py-1 rounded-full"
+              style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
+              {totalInactive} inactive
+            </span>
+          </div>
+        </div>
+      </button>
+      {open && (
+        <div className="space-y-2 ml-8">
+          {inactiveCourses.map((course) => {
+            const courseLessons = allLessons.filter((l) => l.courseId === course.id);
+            return (
+              <SectionRow2
+                key={course.id}
+                course={course}
+                lessons={courseLessons}
+                onDeactivateLesson={onDeactivateLesson}
+                onActivateLesson={onActivateLesson}
+                onDeleteCourse={onDeleteCourse}
+              />
+            );
+          })}
+          {inactiveLessons.length > 0 && (
+            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+              <div className="px-4 py-2" style={{ background: "#1a1a1a", borderBottom: "1px solid #222" }}>
+                <p className="text-[11px] font-semibold text-gray-400">Deactivated Videos ({inactiveLessons.length})</p>
+              </div>
+              <div className="divide-y" style={{ borderColor: "#222" }}>
+                {inactiveLessons.map((lesson) => (
+                  <div key={lesson.id} className="px-4 py-3" style={{ background: "#141414" }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full"
+                        style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
+                        Inactive
+                      </span>
+                      <span className="text-[10px] text-gray-500">{lesson.courseTitle ?? ""}</span>
+                    </div>
+                    <LessonRow
+                      lesson={lesson as Parameters<typeof LessonRow>[0]["lesson"]}
+                      isActive={false}
+                      onActivate={() => onActivateLesson(lesson.id)}
+                      onDelete={() => onDeleteLesson(lesson.id, lesson.title)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -1583,13 +1677,15 @@ function ContentTab() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-0">
       {/* ── Section 1: Live Sections & Courses ── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-2 h-2 rounded-full" style={{ background: "#22c55e" }} />
-          <h2 className="text-sm font-semibold text-white">Live Sections &amp; Courses</h2>
-          <span className="text-xs text-gray-500">Everything currently visible on WAVV Academy</span>
+      <div className="pb-10">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#22c55e", boxShadow: "0 0 6px #22c55e80" }} />
+            <h2 className="text-base font-bold text-white tracking-tight">Live Sections &amp; Courses</h2>
+          </div>
+          <span className="text-xs text-gray-500 font-medium">Everything currently visible on WAVV Academy</span>
         </div>
         <div className="space-y-6">
           {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner, videoCount }) => {
@@ -1614,12 +1710,24 @@ function ContentTab() {
         </div>
       </div>
 
+      {/* ── Divider between Live and Inactive ── */}
+      <div className="relative flex items-center py-6">
+        <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
+        <div className="mx-4 flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#4b5563" }} />
+          <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Inactive</span>
+        </div>
+        <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
+      </div>
+
       {/* ── Section 2: Inactive Sections / Videos ── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-2 h-2 rounded-full" style={{ background: "#4b5563" }} />
-          <h2 className="text-sm font-semibold text-white">Inactive Sections / Videos</h2>
-          <span className="text-xs text-gray-500">Hidden from users — deactivate first, then delete permanently</span>
+      <div className="pt-2">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#4b5563" }} />
+            <h2 className="text-base font-bold text-white tracking-tight">Inactive Sections / Videos</h2>
+          </div>
+          <span className="text-xs text-gray-500 font-medium">Hidden from users — deactivate first, then delete permanently</span>
         </div>
         {!hasInactive ? (
           <div
@@ -1631,78 +1739,27 @@ function ContentTab() {
           </div>
         ) : (
           <div className="space-y-6">
-            {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner, videoCount }) => {
+            {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner }) => {
               const catInactiveCourses = inactiveCourses.filter((c) => c.category === key);
-              // Inactive lessons: lesson is inactive AND belongs to a course in this category
-              const catCourseIds = new Set((byCategory[key] ?? []).map((c) => c.id));
+              const catCourseIds = new Set([...(byCategory[key] ?? []).map((c) => c.id), ...catInactiveCourses.map((c) => c.id)]);
               const catInactiveLessons = inactiveLessons.filter((l) => catCourseIds.has(l.courseId));
               if (catInactiveCourses.length === 0 && catInactiveLessons.length === 0) return null;
-              const totalInactive = catInactiveCourses.length + catInactiveLessons.length;
               return (
-                <div key={key}>
-                  {/* Category banner header (dimmed) */}
-                  <div
-                    className="relative overflow-hidden rounded-xl mb-3"
-                    style={{ border: `1px solid ${color}30`, minHeight: "90px", opacity: 0.75 }}
-                  >
-                    {banner && <img src={banner} alt={label} className="absolute inset-0 w-full h-full object-cover" aria-hidden />}
-                    <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.80) 60%, rgba(0,0,0,0.60) 100%)` }} />
-                    <div className="relative flex flex-col justify-center h-full px-6 py-4 gap-0.5">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color }}>WAVV Academy</p>
-                      <h2 className="text-lg font-extrabold text-white leading-tight">{label}</h2>
-                      {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                          style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
-                          {totalInactive} inactive
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2 ml-8">
-                    {/* Inactive sections for this category */}
-                    {catInactiveCourses.map((course) => {
-                      const courseLessons = lessons.filter((l) => l.courseId === course.id);
-                      return (
-                        <SectionRow2
-                          key={course.id}
-                          course={course}
-                          lessons={courseLessons}
-                          onDeactivateLesson={handleDeactivate}
-                          onActivateLesson={handleActivate}
-                          onDeleteCourse={handleDeleteCourse}
-                        />
-                      );
-                    })}
-                    {/* Inactive lessons for this category (grouped under their section) */}
-                    {catInactiveLessons.length > 0 && (
-                      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-                        <div className="px-4 py-2" style={{ background: "#1a1a1a", borderBottom: "1px solid #222" }}>
-                          <p className="text-[11px] font-semibold text-gray-400">Deactivated Videos ({catInactiveLessons.length})</p>
-                        </div>
-                        <div className="divide-y" style={{ borderColor: "#222" }}>
-                          {catInactiveLessons.map((lesson) => (
-                            <div key={lesson.id} className="px-4 py-3" style={{ background: "#141414" }}>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-full"
-                                  style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
-                                  Inactive
-                                </span>
-                                <span className="text-[10px] text-gray-500">{lesson.courseTitle ?? ""}</span>
-                              </div>
-                              <LessonRow
-                                lesson={lesson}
-                                isActive={false}
-                                onActivate={() => handleActivate(lesson.id)}
-                                onDelete={() => handleDeleteLesson(lesson.id, lesson.title)}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <InactiveCategoryBlock
+                  key={key}
+                  categoryKey={key}
+                  label={label}
+                  subtitle={subtitle}
+                  color={color}
+                  banner={banner}
+                  inactiveCourses={catInactiveCourses}
+                  inactiveLessons={catInactiveLessons}
+                  allLessons={lessons}
+                  onDeactivateLesson={handleDeactivate}
+                  onActivateLesson={handleActivate}
+                  onDeleteCourse={handleDeleteCourse}
+                  onDeleteLesson={handleDeleteLesson}
+                />
               );
             })}
           </div>

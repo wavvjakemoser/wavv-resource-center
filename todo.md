@@ -635,3 +635,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Section inline rename: pencil icon → editable input → save (adminUpdateCourse title)
 - [x] Section hide toggle: hide/show entire section (sets course published=false/true)
 - [x] Remove star (starred) function from SectionRow2 and LessonRow UI
+
+## Admin Academy — Visual Polish
+
+- [x] Inactive section: make category banners collapsible (click to expand/collapse sections within)
+- [x] Live Sections & Courses: increase banner height and font size for stronger visual presence
+- [x] Inactive Sections: increase banner height; add clear visual separator (divider line + spacing) between Live and Inactive blocks
