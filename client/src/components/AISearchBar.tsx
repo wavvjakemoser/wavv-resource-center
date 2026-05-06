@@ -130,7 +130,7 @@ export default function AISearchBar() {
           )}
 
           {data?.guides && data.guides.length > 0 && (
-            <ResultSection title="Guides & Docs" icon={<FileText size={12} />}>
+            <ResultSection title="WAVV Guides & Docs" icon={<FileText size={12} />}>
               {data.guides.map((g) => (
                 <ResultItem
                   key={g.id}

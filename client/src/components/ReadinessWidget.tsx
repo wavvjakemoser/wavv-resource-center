@@ -8,7 +8,7 @@ type Page = "academy" | "webinars" | "guides" | "playground" | "support";
 const PAGE_LABELS: Record<Page, string> = {
   academy: "WAVV Academy",
   webinars: "WAVV Webinars",
-  guides: "Guides & Docs",
+  guides: "WAVV Guides & Docs",
   playground: "Playground",
   support: "Support",
 };

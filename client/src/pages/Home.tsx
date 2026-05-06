@@ -86,7 +86,7 @@ export default function Home() {
     },
     {
       icon: FileText,
-      label: "Guides & Docs",
+      label: "WAVV Guides & Docs",
       desc: "Playbooks, how-to guides, and documentation to reference anytime",
       color: "#67C728",
     },
