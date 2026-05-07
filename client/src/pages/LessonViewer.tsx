@@ -12,9 +12,11 @@ function getEmbedUrl(url: string): string | null {
   // Vimeo
   const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
   if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-  // Loom
-  const loomMatch = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
-  if (loomMatch) return `https://www.loom.com/embed/${loomMatch[1]}`;
+  // Loom — handle both already-embedded URLs and share URLs
+  const loomEmbedMatch = url.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/);
+  if (loomEmbedMatch) return `https://www.loom.com/embed/${loomEmbedMatch[1]}`;
+  const loomShareMatch = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+  if (loomShareMatch) return `https://www.loom.com/embed/${loomShareMatch[1]}`;
   // Direct video URL
   return null;
 }

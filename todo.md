@@ -539,7 +539,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Academy tab: tree view grouped by section → course → lesson
 - [x] Per-lesson controls: edit video URL, add/edit tags, toggle hidden/visible, toggle starred
 - [x] Per-course controls: edit title, description, reorder, hide/show
-- [ ] Loom embed: update lesson viewer to embed Loom iframes (not redirect links) — BLOCKED on URLs from Jake
+- [x] Loom embed: update lesson viewer to embed Loom iframes — fixed getEmbedUrl to handle loom.com/embed/ passthrough; all 26 lessons have Loom embed URLs in DB
 - [ ] Wire all Loom URLs into lessons once provided
 
 ## Admin Panel Tab Polish
@@ -603,17 +603,17 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## 3-Tier Role System + Admin Users Overhaul
 
-- [ ] Add super_admin to role enum in DB schema (users table)
-- [ ] Migrate DB: ALTER TABLE users MODIFY role enum('super_admin','admin','user')
-- [ ] Update routers.ts: superAdminProcedure gate for write operations; adminProcedure for read-only
-- [ ] Admin panel: super_admin = full read+write; admin = read-only (no edit/delete/promote buttons); user = no access
+- [x] Add super_admin to role enum in DB schema (users table) — already in schema.ts
+- [x] Migrate DB: ALTER TABLE users MODIFY role enum('super_admin','admin','user') — already applied
+- [x] Update routers.ts: superAdminProcedure gate for write operations; adminProcedure for read-only — done in Batch 16
+- [x] Admin panel: super_admin = full read+write; admin = read-only (no edit/delete/promote buttons); user = no access — done in Batch 16
 - [ ] Add admin.removeUser procedure (super_admin only)
 - [ ] UsersTab: clickable stat cards filter table (Total / Admins / Standard Users)
 - [ ] UsersTab: auto-flag firstname.lastname@wavv.com pattern as "Pending Admin Promotion" badge
 - [ ] UsersTab: super_admin can promote pending users to admin or super_admin
 - [ ] UsersTab: Remove User action for all non-self users (super_admin only, with confirmation)
 - [ ] DB cleanup: delete Cassie (cassie@wavv.com) and jake@wavv.com test users
-- [ ] DB: set jake.moser@wavv.com role to super_admin
+- [x] DB: set jake.moser@wavv.com role to super_admin — done
 
 ## Admin Academy Tab — Live/Inactive Restructure
 
@@ -669,7 +669,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Backend: add reorderCourse, reorderLesson, reorderWebinar, reorderGuide tRPC procedures
 - [ ] Migrate AcademyCategory.tsx: replace static CATEGORY_DATA array with DB query (trpc.academy.getCategories) — deferred, backend ready
 - [x] Backend: add getCategories procedure returning courses grouped by category with their published lessons
-- [ ] Ensure Academy page shows Loom embeds from DB loopUrl field (no external redirects) — blocked on Loom URLs from Jake
+- [x] Ensure Academy page shows Loom embeds from DB videoUrl field — LessonViewer now correctly renders all Loom embed URLs
 
 ## Home Page Redesign (Round 8)
 
@@ -715,19 +715,19 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Launch Readiness Pass
 
-- [ ] Remove Guides & Docs from sidebar nav (PortalLayout)
-- [ ] Remove Guides & Docs from Dashboard quick-access tiles
-- [ ] Remove Guides & Docs route from App.tsx
-- [ ] Remove fake progress rings from Dashboard hero (replace with "Start your first course" CTA)
-- [ ] Create exclusive webinar in DB: "Always Know Who to Call with WAVV Call Boards" — May 14 11am MDT, gold accent
-- [ ] Remove all On-Demand Recording webinar placeholders (DEMO-stamped) from DB and UI
-- [ ] Remove all Exclusive webinar placeholders (DEMO-stamped) from DB and UI
-- [ ] Replace all 8 evergreen webinar DB records with 6 clean "Coming Soon" placeholder cards (no DEMO stamps, no countdown)
-- [ ] Support page: remove Chat With Support card
-- [ ] Support page: remove Submit a New Ticket card
-- [ ] Support page: remove My Tickets section / ticket history from Support page
-- [ ] Support page: keep only AskWAVV AI card and Help Center card (2-card layout)
-- [ ] Remove all ticket-related tRPC calls from Support.tsx UI (keep backend dormant)
+- [x] Remove Guides & Docs from sidebar nav (PortalLayout)
+- [x] Remove Guides & Docs from Dashboard quick-access tiles
+- [ ] Remove Guides & Docs route from App.tsx (route kept dormant — page still accessible via URL but not linked)
+- [x] Remove fake progress rings from Dashboard hero — hero already uses CTA button, no rings present
+- [x] Create exclusive webinar in DB: "Always Know Who to Call with WAVV Call Boards" — already exists (ID 60001, May 14 17:00 UTC, registration URL set)
+- [x] Remove all On-Demand Recording webinar placeholders (DEMO-stamped) — 0 on-demand records in DB
+- [x] Remove all Exclusive webinar placeholders (DEMO-stamped) — only 1 exclusive record in DB (ID 60001, real webinar)
+- [x] Evergreen webinar records — 6 clean records in DB (IDs 30006-30011), no DEMO stamps; keeping as "Coming Soon" placeholders per Jake's direction
+- [x] Support page: remove Chat With Support card — already clean
+- [x] Support page: remove Submit a New Ticket card — already clean
+- [x] Support page: remove My Tickets section / ticket history from Support page — already clean
+- [x] Support page: keep only AskWAVV AI card and Help Center card (2-card layout) — already done
+- [x] Remove all ticket-related tRPC calls from Support.tsx UI (keep backend dormant) — already done
 - [ ] Admin — Webinars tab: verify "Create New Webinar" form is fully functional with all fields (title, type, date, host, description, registration URL, video URL, thumbnail URL, accent color picker)
 - [ ] Admin — Webinars tab: ensure accent color picker is a real color input (not just text field)
 - [ ] Admin — Academy tab: verify "Add Section" and "Add Video" flows work end-to-end

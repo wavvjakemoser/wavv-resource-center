@@ -1,0 +1,73 @@
+{
+  "query": "SELECT id, title, type, scheduledAt, registrationUrl, videoUrl, published \nFROM webinars \nORDER BY type, scheduledAt;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT id, title, type, scheduledAt, registrationUrl, videoUrl, published \nFROM webinars \nORDER BY type, scheduledAt;",
+  "rows": [
+    {
+      "id": "60001",
+      "title": "Always Know Who to Call with WAVV Call Boards",
+      "type": "exclusive",
+      "scheduledAt": "2026-05-14 17:00:00",
+      "registrationUrl": "https://try.wavv.com/alwaysknowwhotocallnextwithwavvcallboards/registration",
+      "videoUrl": "NULL",
+      "published": "1"
+    },
+    {
+      "id": "30006",
+      "title": "Getting to Know the WAVV Dialer",
+      "type": "evergreen",
+      "scheduledAt": "NULL",
+      "registrationUrl": "NULL",
+      "videoUrl": "NULL",
+      "published": "1"
+    },
+    {
+      "id": "30007",
+      "title": "Getting to Know WAVV Call Boards",
+      "type": "evergreen",
+      "scheduledAt": "NULL",
+      "registrationUrl": "NULL",
+      "videoUrl": "NULL",
+      "published": "1"
+    },
+    {
+      "id": "30008",
+      "title": "Getting to Know WAVV Settings",
+      "type": "evergreen",
+      "scheduledAt": "NULL",
+      "registrationUrl": "NULL",
+      "videoUrl": "NULL",
+      "published": "1"
+    },
+    {
+      "id": "30009",
+      "title": "Understanding Spam Protection in WAVV",
+      "type": "evergreen",
+      "scheduledAt": "NULL",
+      "registrationUrl": "NULL",
+      "videoUrl": "NULL",
+      "published": "1"
+    },
+    {
+      "id": "30010",
+      "title": "Understanding WAVV Wallet",
+      "type": "evergreen",
+      "scheduledAt": "NULL",
+      "registrationUrl": "NULL",
+      "videoUrl": "NULL",
+      "published": "1"
+    },
+    {
+      "id": "30011",
+      "title": "Dialer Options: Understanding the 3 Dialers",
+      "type": "evergreen",
+      "scheduledAt": "NULL",
+      "registrationUrl": "NULL",
+      "videoUrl": "NULL",
+      "published": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\ttype\tscheduledAt\tregistrationUrl\tvideoUrl\tpublished\n60001\tAlways Know Who to Call with WAVV Call Boards\texclusive\t2026-05-14 17:00:00\thttps://try.wavv.com/alwaysknowwhotocallnextwithwavvcallboards/registration\tNULL\t1\n30006\tGetting to Know the WAVV Dialer\tevergreen\tNULL\tNULL\tNULL\t1\n30007\tGetting to Know WAVV Call Boards\tevergreen\tNULL\tNULL\tNULL\t1\n30008\tGetting to Know WAVV Settings\tevergreen\tNULL\tNULL\tNULL\t1\n30009\tUnderstanding Spam Protection in WAVV\tevergreen\tNULL\tNULL\tNULL\t1\n30010\tUnderstanding WAVV Wallet\tevergreen\tNULL\tNULL\tNULL\t1\n30011\tDialer Options: Understanding the 3 Dialers\tevergreen\tNULL\tNULL\tNULL\t1\n",
+  "stderr": "",
+  "execution_time_ms": 569
+}

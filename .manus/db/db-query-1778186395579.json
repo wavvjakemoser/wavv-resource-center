@@ -1,0 +1,9 @@
+{
+  "query": "SELECT l.id, l.title, l.videoUrl, c.title as course_title \nFROM lessons l \nJOIN courses c ON l.courseId = c.id \nWHERE (l.videoUrl IS NULL OR l.videoUrl = '') AND l.published = 1 AND l.hidden = 0\nORDER BY c.category, l.sortOrder;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT l.id, l.title, l.videoUrl, c.title as course_title \nFROM lessons l \nJOIN courses c ON l.courseId = c.id \nWHERE (l.videoUrl IS NULL OR l.videoUrl = '') AND l.published = 1 AND l.hidden = 0\nORDER BY c.category, l.sortOrder;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 581
+}

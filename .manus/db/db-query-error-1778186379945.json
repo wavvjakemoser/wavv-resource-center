@@ -1,0 +1,8 @@
+{
+  "query": "SELECT l.id, l.title, l.loom_url, c.title as course_title, c.category \nFROM lessons l \nJOIN courses c ON l.course_id = c.id \nORDER BY c.category, c.title, l.sort_order;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT l.id, l.title, l.loom_url, c.title as course_title, c.category \nFROM lessons l \nJOIN courses c ON l.course_id = c.id \nORDER BY c.category, c.title, l.sort_order;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'l.course_id' in 'on clause'"
+  ]
+}
