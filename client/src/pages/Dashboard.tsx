@@ -16,6 +16,7 @@ import {
   ExternalLink,
   BookOpen,
   ChevronRight,
+  Calendar,
   Zap,
   Target,
   Award,
@@ -279,9 +280,9 @@ export default function Dashboard() {
         </div>
         {/* ── Exclusive Live Webinars ── */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Star size={14} style={{ color: "#F5A623" }} />
+              <Star size={14} style={{ color: "#D4AF37" }} />
               <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Upcoming Exclusive Live Webinars</h2>
             </div>
             <Link href="/webinars" className="text-xs text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1" style={{ textDecoration: "none" }}>
@@ -289,10 +290,12 @@ export default function Dashboard() {
             </Link>
           </div>
           {(() => {
-            const exclusive = (exclusiveWebinars ?? []).filter((w) => !w.scheduledAt || new Date(w.scheduledAt) >= new Date()).slice(0, 4);
+            const ACCENT = "#D4AF37";
+            const THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp";
+            const exclusive = (exclusiveWebinars ?? []).filter((w) => !w.scheduledAt || new Date(w.scheduledAt) >= new Date()).slice(0, 3);
             if (exclusive.length === 0) {
               return (
-                <div className="flex items-center justify-center py-6 rounded-xl text-gray-600 text-xs gap-2"
+                <div className="flex items-center justify-center py-8 rounded-xl text-gray-600 text-xs gap-2"
                   style={{ background: "#111", border: "1px solid #1e1e1e" }}>
                   <Star size={14} className="text-gray-700" />
                   No exclusive webinars scheduled — check back soon
@@ -300,29 +303,69 @@ export default function Dashboard() {
               );
             }
             return (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {exclusive.map((w) => (
-                  <Link
+                  <div
                     key={w.id}
-                    href="/webinars"
-                    className="group flex flex-col gap-2 rounded-xl p-3.5 transition-all"
-                    style={{ background: "linear-gradient(135deg, rgba(245,166,35,0.08) 0%, #0d1520 100%)", border: "1px solid rgba(245,166,35,0.2)", textDecoration: "none" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(245,166,35,0.5)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(245,166,35,0.12)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(245,166,35,0.2)"; e.currentTarget.style.boxShadow = "none"; }}
+                    className="flex flex-col rounded-xl overflow-hidden transition-all duration-200"
+                    style={{ background: "#1d2230", border: "1px solid #252d3d" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.boxShadow = `0 4px 20px ${ACCENT}22`; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; e.currentTarget.style.boxShadow = "none"; }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,166,35,0.15)" }}>
-                        <Star size={13} style={{ color: "#F5A623" }} />
+                    {/* Thumbnail */}
+                    <div className="relative flex-shrink-0 overflow-hidden" style={{ height: "130px", borderBottom: `1px solid ${ACCENT}30` }}>
+                      <img src={THUMB} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      {/* EXCLUSIVE badge overlay */}
+                      <div className="absolute top-2.5 right-2.5">
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}50` }}>EXCLUSIVE</span>
                       </div>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(245,166,35,0.12)", color: "#F5A623", border: "1px solid rgba(245,166,35,0.3)" }}>
-                        EXCLUSIVE
-                      </span>
                     </div>
-                    <p className="text-white text-xs font-semibold leading-snug line-clamp-2">{w.title}</p>
-                    <p className="text-[10px] font-medium mt-auto" style={{ color: "rgba(245,166,35,0.8)" }}>
-                      {w.scheduledAt ? `${new Date(w.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/Denver" })} @ ${new Date(w.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Denver", timeZoneName: "short" })}` : "Date TBD"}
-                    </p>
-                  </Link>
+                    {/* Body */}
+                    <div className="p-4 flex flex-col flex-1">
+                      <h3 className="text-white font-bold text-sm leading-snug mb-2">{w.title}</h3>
+                      {w.description && (
+                        <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-2">{w.description}</p>
+                      )}
+                      {w.host && (
+                        <p className="text-gray-500 text-xs mb-2">Host: <span className="text-gray-300">{w.host}</span></p>
+                      )}
+                      {w.scheduledAt && (
+                        <div className="space-y-0.5 mb-3">
+                          <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                            <Calendar size={11} style={{ color: ACCENT }} />
+                            {new Date(w.scheduledAt).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                          </p>
+                          <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                            <Clock size={11} style={{ color: ACCENT }} />
+                            {new Date(w.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })}
+                          </p>
+                        </div>
+                      )}
+                      <div className="mt-auto">
+                        {w.registrationUrl ? (
+                          <a
+                            href={w.registrationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+                          >
+                            <ExternalLink size={12} />
+                            Register Now →
+                          </a>
+                        ) : (
+                          <Link
+                            href="/webinars"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40`, textDecoration: "none" }}
+                          >
+                            <Star size={12} />
+                            View Details →
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             );

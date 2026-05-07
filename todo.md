@@ -152,6 +152,7 @@
 - [x] Welcome banner: "Welcome {first name}!" + "Everything you need to succeed with WAVV starts here!"
 - [x] Add "Continue Where You Left Off" section with 3 placeholder cards (last course/video/recording)
 - [x] Remove "Recommended for You" section from Dashboard (was duplicating Continue Learning content)
+- [x] Redesign Dashboard exclusive webinar tiles: larger cards with thumbnail, description, host, date/time, and direct Register Now → link to registrationUrl (matches Webinars page card design)
 
 ## Admin Analytics Dashboard
 
