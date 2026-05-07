@@ -305,11 +305,9 @@ export default function Dashboard() {
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {exclusive.map((w) => (
-                  <a
+                  <Link
                     key={w.id}
-                    href={w.registrationUrl ?? "/webinars"}
-                    target={w.registrationUrl ? "_blank" : undefined}
-                    rel={w.registrationUrl ? "noopener noreferrer" : undefined}
+                    href="/webinars"
                     className="group flex flex-col rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
                     style={{ background: "#1d2230", border: "1px solid #252d3d", textDecoration: "none" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.boxShadow = `0 4px 20px ${ACCENT}22`; }}
@@ -345,15 +343,28 @@ export default function Dashboard() {
                         </div>
                       )}
                       <div className="mt-auto">
-                        <span
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all group-hover:opacity-80"
-                          style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
-                        >
-                          {w.registrationUrl ? <><ExternalLink size={12} /> Register Now →</> : <><Star size={12} /> View Details →</>}
-                        </span>
+                        {w.registrationUrl ? (
+                          <a
+                            href={w.registrationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+                          >
+                            <ExternalLink size={12} /> Register Now →
+                          </a>
+                        ) : (
+                          <span
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+                          >
+                            <Star size={12} /> View Details →
+                          </span>
+                        )}
                       </div>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             );
