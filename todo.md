@@ -758,3 +758,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Users tab: clickable user profiles with analytics, badges, revoke access, role promotion
 - [x] Analytics: reset button with triple confirmation (zeros all data)
 - [x] Playground notify opt-in: unchecked by default, Notify Me button grayed out until opted in
+
+## Admin Improvements Batch 2 (Current Sprint)
+
+- [x] Content Requests: simplify user-facing submission form to date/topic/description/user only (remove category, format, priority fields)
+- [x] Content Requests: add Delete button per row in admin view (super_admin only, with confirmation)
+- [x] Content Requests: add Flag/Strike button per row — marks user account with a strike, visible in User Profile modal
+- [x] Content Requests: update DB schema to remove category/formatPreference/priority columns (or make optional/hidden)
+- [x] Users tab: Add User button opens a form (name, email, role) — creates account directly
+- [x] Academy Admin: confirmed Add Section and Add Video flows work end-to-end

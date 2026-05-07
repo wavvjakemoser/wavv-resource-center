@@ -1310,3 +1310,51 @@ export async function upsertSiteSetting(key: string, value: Record<string, boole
   await db.insert(siteSettings).values({ key, value: json })
     .onDuplicateKeyUpdate({ set: { value: json } });
 }
+
+// ─── Content Request Management ───────────────────────────────────────────────
+export async function deleteContentRequest(id: number) {
+  const db = await getDb();
+  if (!db) return { success: false };
+  await db.delete(contentRequests).where(eq(contentRequests.id, id));
+  return { success: true };
+}
+
+// ─── User Strike / Flag ───────────────────────────────────────────────────────
+export async function addStrikeToUser(userId: number) {
+  const db = await getDb();
+  if (!db) return { success: false };
+  await db.update(users).set({ strikes: sql`strikes + 1` }).where(eq(users.id, userId));
+  const [updated] = await db.select({ strikes: users.strikes }).from(users).where(eq(users.id, userId)).limit(1);
+  return { success: true, strikes: updated?.strikes ?? 0 };
+}
+export async function removeStrikeFromUser(userId: number) {
+  const db = await getDb();
+  if (!db) return { success: false };
+  await db.update(users).set({ strikes: sql`GREATEST(strikes - 1, 0)` }).where(eq(users.id, userId));
+  const [updated] = await db.select({ strikes: users.strikes }).from(users).where(eq(users.id, userId)).limit(1);
+  return { success: true, strikes: updated?.strikes ?? 0 };
+}
+
+// ─── Manual User Creation (Admin) ─────────────────────────────────────────────
+export async function createManualUser(data: {
+  name: string;
+  email: string;
+  role: "user" | "admin" | "super_admin";
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  // Check if email already exists
+  const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, data.email)).limit(1);
+  if (existing.length > 0) throw new Error("A user with this email already exists.");
+  // Generate a unique openId for manually-created users
+  const openId = `manual_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  const [result] = await db.insert(users).values({
+    openId,
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    loginMethod: "manual",
+    isActive: true,
+  });
+  return result;
+}

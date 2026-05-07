@@ -80,6 +80,7 @@ import {
   ArrowUp,
   ArrowDown,
   ChevronUp,
+  Flag,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -993,6 +994,18 @@ function UsersTab() {
     enabled: currentUser?.role === "admin" || currentUser?.role === "super_admin",
   });
 
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "user" as "user" | "admin" | "super_admin" });
+  const addUserMutation = trpc.admin.addUser.useMutation({
+    onSuccess: () => {
+      toast.success(`User ${addUserForm.name} added successfully.`);
+      setAddUserOpen(false);
+      setAddUserForm({ name: "", email: "", role: "user" });
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
       const action = confirmDialog?.action;
@@ -1129,6 +1142,15 @@ function UsersTab() {
             <FileDown size={13} />
             Export{roleFilter !== "all" ? ` ${roleFilter === "super_admin" ? "Super Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
           </button>
+          {isSuperAdmin && (
+            <button
+              onClick={() => setAddUserOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
+              style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.25)" }}
+            >
+              <UserPlus size={13} /> Add User
+            </button>
+          )}
         </div>
       </div>
 
@@ -1350,6 +1372,64 @@ function UsersTab() {
                   {confirmDialog?.action === "remove" && "Remove User"}
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={addUserOpen} onOpenChange={(open) => { if (!open) { setAddUserOpen(false); setAddUserForm({ name: "", email: "", role: "user" }); } }}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Add User</DialogTitle>
+            <DialogDescription className="text-gray-400">Manually create a user account. They can sign in via OAuth once their email is registered.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Full Name</label>
+              <Input
+                value={addUserForm.name}
+                onChange={(e) => setAddUserForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="Jane Smith"
+                className="bg-[#111] border-[#2a2a2a] text-white placeholder:text-gray-600"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Email Address</label>
+              <Input
+                type="email"
+                value={addUserForm.email}
+                onChange={(e) => setAddUserForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="jane@example.com"
+                className="bg-[#111] border-[#2a2a2a] text-white placeholder:text-gray-600"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Role</label>
+              <select
+                value={addUserForm.role}
+                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "user" | "admin" | "super_admin" }))}
+                className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
+                style={{ background: "#111", border: "1px solid #2a2a2a" }}
+              >
+                <option value="user">Standard User</option>
+                <option value="admin">Admin</option>
+                <option value="super_admin">Super Admin</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddUserOpen(false)} className="text-gray-400">Cancel</Button>
+            <Button
+              onClick={() => {
+                if (!addUserForm.name.trim() || !addUserForm.email.trim()) { toast.error("Name and email are required."); return; }
+                addUserMutation.mutate(addUserForm);
+              }}
+              disabled={addUserMutation.isPending || !addUserForm.name.trim() || !addUserForm.email.trim()}
+              style={{ background: "#4ade80", color: "#000" }}
+              className="font-semibold hover:opacity-90"
+            >
+              {addUserMutation.isPending ? "Adding..." : "Add User"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -4033,39 +4113,46 @@ function SupportTab() {
 
 // ─── Content Requests Tab ─────────────────────────────────────────────────────
 function ContentRequestsTab() {
-  const [filterType, setFilterType] = useState<"video" | "guide" | "webinar" | "">("");
+  const utils = trpc.useUtils();
+  const [filterType, setFilterType] = useState<"video" | "guide" | "webinar" | "">("")
   const { data: requests, isLoading } = trpc.contentRequests.adminList.useQuery({
     requestType: filterType || undefined,
   });
+
+  const deleteRequest = trpc.contentRequests.adminDelete.useMutation({
+    onSuccess: () => { toast.success("Request deleted"); utils.contentRequests.adminList.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const flagUser = trpc.contentRequests.adminFlagUser.useMutation({
+    onSuccess: (data, vars) => {
+      toast.success(`Strike added. User now has ${(data as { strikes: number }).strikes} strike(s).`);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [flagConfirm, setFlagConfirm] = useState<{ userId: number; userName: string } | null>(null);
 
   const TYPE_COLOR: Record<string, string> = {
     video: "#0074F4",
     guide: "#00A9E2",
     webinar: "#67C728",
   };
-  const PRIORITY_COLOR: Record<string, string> = {
-    high: "#ef4444",
-    medium: "#FBBF24",
-    low: "#9ca3af",
-  };
 
   function exportCSV() {
     if (!requests || requests.length === 0) { toast.error("No requests to export"); return; }
-    const header = "Date,Type,Topic,Category,Format Preference,Priority,User,Email,Description";
+    const header = "Date,Type,Topic,User,Email,Description";
     const lines = (requests as Array<{
       createdAt: Date | string;
       requestType: string;
       topic: string;
-      category?: string | null;
-      formatPreference?: string | null;
-      priority: string;
       userName?: string | null;
       userEmail?: string | null;
       description?: string | null;
     }>).map((r) => {
       const date = r.createdAt ? new Date(r.createdAt).toISOString() : "";
       const desc = r.description ? `"${String(r.description).replace(/"/g, '""')}"` : "";
-      return `${date},${r.requestType},"${r.topic}",${r.category ?? ""},${r.formatPreference ?? ""},${r.priority},${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
+      return `${date},${r.requestType},"${r.topic}",${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
     });
     const csv = [header, ...lines].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -4110,19 +4197,66 @@ function ContentRequestsTab() {
           <p className="text-gray-600 text-xs mt-1">Requests submitted by users will appear here.</p>
         </div>
       ) : (
-        <ContentRequestGroups requests={requests as Array<{
-          id: number;
-          createdAt: Date | string;
-          requestType: string;
-          topic: string;
-          description?: string | null;
-          category?: string | null;
-          formatPreference?: string | null;
-          priority: string;
-          userName?: string | null;
-          userEmail?: string | null;
-        }>} TYPE_COLOR={TYPE_COLOR} PRIORITY_COLOR={PRIORITY_COLOR} />
+        <ContentRequestGroups
+          requests={requests as Array<{
+            id: number;
+            userId: number;
+            createdAt: Date | string;
+            requestType: string;
+            topic: string;
+            description?: string | null;
+            userName?: string | null;
+            userEmail?: string | null;
+          }>}
+          TYPE_COLOR={TYPE_COLOR}
+          onDelete={(id) => setDeleteConfirm(id)}
+          onFlag={(userId, userName) => setFlagConfirm({ userId, userName })}
+        />
       )}
+
+      {/* Delete confirm dialog */}
+      <Dialog open={deleteConfirm !== null} onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Delete Request</DialogTitle>
+            <DialogDescription className="text-gray-400">This will permanently remove the request. This cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDeleteConfirm(null)} className="text-gray-400">Cancel</Button>
+            <Button
+              onClick={() => { if (deleteConfirm !== null) { deleteRequest.mutate({ id: deleteConfirm }); setDeleteConfirm(null); } }}
+              disabled={deleteRequest.isPending}
+              style={{ background: "#ef4444" }}
+              className="text-white hover:opacity-90"
+            >
+              {deleteRequest.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Flag/Strike confirm dialog */}
+      <Dialog open={flagConfirm !== null} onOpenChange={(open) => { if (!open) setFlagConfirm(null); }}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Add Strike to User</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              This will add a strike to <span className="font-medium text-gray-300">{flagConfirm?.userName}</span>'s account. Accumulating strikes may result in access revocation.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setFlagConfirm(null)} className="text-gray-400">Cancel</Button>
+            <Button
+              onClick={() => { if (flagConfirm) { flagUser.mutate({ userId: flagConfirm.userId }); setFlagConfirm(null); } }}
+              disabled={flagUser.isPending}
+              style={{ background: "rgba(251,191,36,0.2)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
+              className="hover:opacity-90"
+            >
+              {flagUser.isPending ? "Adding Strike..." : "Add Strike"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -4135,22 +4269,20 @@ const CONTENT_REQUEST_GROUPS: Array<{ key: string; label: string; description: s
 
 function exportGroupCSV(groupKey: string, groupLabel: string, group: Array<{
   id: number;
+  userId: number;
   createdAt: Date | string;
   requestType: string;
   topic: string;
   description?: string | null;
-  category?: string | null;
-  formatPreference?: string | null;
-  priority: string;
   userName?: string | null;
   userEmail?: string | null;
 }>) {
   if (group.length === 0) { toast.error("No requests to export"); return; }
-  const header = "Date,Type,Topic,Category,Format Preference,Priority,User,Email,Description";
+  const header = "Date,Type,Topic,User,Email,Description";
   const lines = group.map((r) => {
     const date = r.createdAt ? new Date(r.createdAt).toISOString() : "";
     const desc = r.description ? `"${String(r.description).replace(/"/g, '""')}"` : "";
-    return `${date},${r.requestType},"${r.topic}",${r.category ?? ""},${r.formatPreference ?? ""},${r.priority},${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
+    return `${date},${r.requestType},"${r.topic}",${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
   });
   const csv = [header, ...lines].join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
@@ -4162,22 +4294,22 @@ function exportGroupCSV(groupKey: string, groupLabel: string, group: Array<{
 function ContentRequestGroups({
   requests,
   TYPE_COLOR,
-  PRIORITY_COLOR,
+  onDelete,
+  onFlag,
 }: {
   requests: Array<{
     id: number;
+    userId: number;
     createdAt: Date | string;
     requestType: string;
     topic: string;
     description?: string | null;
-    category?: string | null;
-    formatPreference?: string | null;
-    priority: string;
     userName?: string | null;
     userEmail?: string | null;
   }>;
   TYPE_COLOR: Record<string, string>;
-  PRIORITY_COLOR: Record<string, string>;
+  onDelete: (id: number) => void;
+  onFlag: (userId: number, userName: string) => void;
 }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [showAll, setShowAll] = useState<Record<string, boolean>>({});
@@ -4187,10 +4319,8 @@ function ContentRequestGroups({
     acc[g.key] = requests.filter(r => r.requestType === g.key);
     return acc;
   }, {} as Record<string, typeof requests>);
-  // Catch-all for unknown types
   const knownKeys = CONTENT_REQUEST_GROUPS.map(g => g.key);
   const otherRequests = requests.filter(r => !knownKeys.includes(r.requestType));
-
   const allGroups = [
     ...CONTENT_REQUEST_GROUPS,
     ...(otherRequests.length > 0 ? [{ key: "other", label: "Other", description: "Miscellaneous requests" }] : []),
@@ -4208,6 +4338,7 @@ function ContentRequestGroups({
         const displayed = isShowAll ? group : group.slice(0, PREVIEW_COUNT);
         return (
           <div key={key} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+            {/* Group header */}
             <div
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition cursor-pointer"
               style={{ background: "#1a1a1a" }}
@@ -4241,32 +4372,44 @@ function ContentRequestGroups({
                     <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
                       <TableHead className="text-gray-400 text-xs">Date</TableHead>
                       <TableHead className="text-gray-400 text-xs">Topic</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Category</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Format</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Priority</TableHead>
+                      <TableHead className="text-gray-400 text-xs">Description</TableHead>
                       <TableHead className="text-gray-400 text-xs">User</TableHead>
+                      <TableHead className="text-gray-400 text-xs w-20">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {displayed.map((r) => (
                       <TableRow key={r.id} style={{ borderColor: "#2a2a2a" }}>
                         <TableCell className="text-gray-500 text-xs whitespace-nowrap">{new Date(r.createdAt).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-white text-xs max-w-[200px]">
-                          <div className="truncate" title={r.topic}>{r.topic}</div>
-                          {r.description && (
-                            <div className="text-gray-600 text-[10px] truncate mt-0.5" title={r.description}>{r.description}</div>
-                          )}
+                        <TableCell className="text-white text-xs max-w-[180px]">
+                          <div className="truncate font-medium" title={r.topic}>{r.topic}</div>
                         </TableCell>
-                        <TableCell className="text-gray-400 text-xs">{r.category ?? "—"}</TableCell>
-                        <TableCell className="text-gray-400 text-xs">{r.formatPreference ?? "—"}</TableCell>
-                        <TableCell>
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize" style={{ background: `${PRIORITY_COLOR[r.priority] ?? "#9ca3af"}20`, color: PRIORITY_COLOR[r.priority] ?? "#9ca3af" }}>
-                            {r.priority}
-                          </span>
+                        <TableCell className="text-gray-400 text-xs max-w-[240px]">
+                          {r.description ? (
+                            <div className="truncate" title={r.description}>{r.description}</div>
+                          ) : <span className="text-gray-600">—</span>}
                         </TableCell>
                         <TableCell className="text-gray-400 text-xs">
-                          <div>{r.userName ?? "—"}</div>
+                          <div className="font-medium text-gray-300">{r.userName ?? "—"}</div>
                           {r.userEmail && <div className="text-gray-600 text-[10px]">{r.userEmail}</div>}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => onFlag(r.userId, r.userName ?? r.userEmail ?? "User")}
+                              className="p-1 rounded hover:bg-amber-500/10 text-gray-500 hover:text-amber-400 transition"
+                              title="Flag user (add strike)"
+                            >
+                              <Flag size={12} />
+                            </button>
+                            <button
+                              onClick={() => onDelete(r.id)}
+                              className="p-1 rounded hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition"
+                              title="Delete request"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

@@ -87,6 +87,10 @@ import {
   createNotification,
   deleteNotification,
   getAllNotifications,
+  deleteContentRequest,
+  addStrikeToUser,
+  removeStrikeFromUser,
+  createManualUser,
 } from "./db";
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
@@ -926,6 +930,17 @@ export const appRouter = router({
         if (!stats) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
         return stats;
       }),
+    addUser: superAdminProcedure
+      .input(z.object({
+        name: z.string().min(1).max(255),
+        email: z.string().email(),
+        role: z.enum(["user", "admin", "super_admin"]).default("user"),
+      }))
+      .mutation(async ({ input }) => {
+        const result = await createManualUser(input);
+        if (!result) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user" });
+        return { success: true };
+      }),
     // Notification management (admin only)
     listNotifications: superAdminProcedure.query(async () => {
       return getAllNotifications();
@@ -1135,13 +1150,28 @@ export const appRouter = router({
     adminExportCsv: superAdminProcedure
       .query(async () => {
         const rows = await getContentRequests();
-        const header = "Date,Type,Topic,Category,Format Preference,Priority,User,Email,Description";
+        const header = "Date,Type,Topic,User,Email,Description";
         const lines = rows.map((r) => {
           const date = r.createdAt ? new Date(r.createdAt).toISOString() : "";
           const desc = r.description ? `"${String(r.description).replace(/"/g, '""')}"` : "";
-          return `${date},${r.requestType},"${r.topic}",${r.category ?? ""},${r.formatPreference ?? ""},${r.priority},${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
+          return `${date},${r.requestType},"${r.topic}",${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
         });
         return [header, ...lines].join("\n");
+      }),
+    adminDelete: superAdminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteContentRequest(input.id);
+      }),
+    adminFlagUser: superAdminProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ input }) => {
+        return addStrikeToUser(input.userId);
+      }),
+    adminUnflagUser: superAdminProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ input }) => {
+        return removeStrikeFromUser(input.userId);
       }),
   }),
 

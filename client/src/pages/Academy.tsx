@@ -493,18 +493,10 @@ export function ContentRequestCTA({
 export function ContentRequestForm({
   requestType,
   accentColor,
-  categoryOptions,
-  formatOptions,
-  categoryLabel,
-  formatLabel,
   onSuccess,
 }: {
   requestType: "video" | "guide" | "webinar";
   accentColor?: string;
-  categoryOptions?: string[];
-  formatOptions?: string[];
-  categoryLabel?: string;
-  formatLabel?: string;
   onSuccess?: () => void;
 }) {
   const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#67C728");
@@ -514,35 +506,14 @@ export function ContentRequestForm({
 
   const [topic, setTopic] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [formatPref, setFormatPref] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [submitted, setSubmitted] = useState(false);
 
   const submit = trpc.contentRequests.submit.useMutation({
     onSuccess: () => {
       setSubmitted(true);
-      // Close modal after a short delay so user sees confirmation
       if (onSuccess) setTimeout(onSuccess, 1800);
     },
   });
-
-  const defaultCategoryOptions = requestType === "video"
-    ? ["Onboarding", "How-To", "Strategy & Best Practices", "Dialer Setup", "CRM Integrations", "Spam Protection"]
-    : requestType === "guide"
-    ? ["Getting Started", "Feature Deep-Dive", "Troubleshooting", "Integrations", "Best Practices"]
-    : ["Product Demo", "Feature Training", "Strategy & Best Practices", "Q&A Session", "Industry Trends"];
-
-  const defaultFormatOptions = requestType === "video"
-    ? ["Short clip (< 5 min)", "Full tutorial (5–15 min)", "Deep dive (15+ min)"]
-    : requestType === "guide"
-    ? ["Step-by-step", "Reference / Cheat sheet", "Checklist", "Playbook"]
-    : ["Live session", "Evergreen recording", "Either"];
-
-  const cats = categoryOptions ?? defaultCategoryOptions;
-  const fmts = formatOptions ?? defaultFormatOptions;
-  const catLabel = categoryLabel ?? (requestType === "video" ? "Category" : requestType === "guide" ? "Topic Area" : "Session Topic");
-  const fmtLabel = formatLabel ?? (requestType === "video" ? "Preferred Length" : requestType === "guide" ? "Format Preference" : "Preferred Format");
 
   if (submitted) {
     return (
@@ -556,7 +527,7 @@ export function ContentRequestForm({
           Thanks for the suggestion. We review all requests and prioritize based on demand.
         </p>
         <button
-          onClick={() => { setSubmitted(false); setTopic(""); setDescription(""); setCategory(""); setFormatPref(""); setPriority("medium"); }}
+          onClick={() => { setSubmitted(false); setTopic(""); setDescription(""); }}
           className="text-xs mt-1 underline"
           style={{ color: accent }}
         >
@@ -596,34 +567,6 @@ export function ContentRequestForm({
         />
       </div>
 
-      {/* Category + Format in a row */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{catLabel}</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-            style={{ background: "#161d2e", border: "1px solid #2a3347" }}
-          >
-            <option value="">Select...</option>
-            {cats.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{fmtLabel}</label>
-          <select
-            value={formatPref}
-            onChange={(e) => setFormatPref(e.target.value)}
-            className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-            style={{ background: "#161d2e", border: "1px solid #2a3347" }}
-          >
-            <option value="">Select...</option>
-            {fmts.map((f) => <option key={f} value={f}>{f}</option>)}
-          </select>
-        </div>
-      </div>
-
       {/* Description */}
       <div className="space-y-1">
         <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
@@ -639,31 +582,12 @@ export function ContentRequestForm({
         />
       </div>
 
-      {/* Priority + Submit */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Priority</label>
-          <div className="flex gap-1">
-            {(["low", "medium", "high"] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPriority(p)}
-                className="text-[11px] font-semibold px-2.5 py-1 rounded-full transition-all"
-                style={{
-                  background: priority === p ? `${accent}25` : "#161d2e",
-                  color: priority === p ? accent : "#666",
-                  border: priority === p ? `1px solid ${accent}60` : "1px solid #2a3347",
-                }}
-              >
-                {p.charAt(0).toUpperCase() + p.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Submit */}
+      <div className="flex justify-end">
         <button
           onClick={() => {
             if (!topic.trim()) return;
-            submit.mutate({ requestType, topic: topic.trim(), description: description.trim() || undefined, category: category || undefined, formatPreference: formatPref || undefined, priority });
+            submit.mutate({ requestType, topic: topic.trim(), description: description.trim() || undefined });
           }}
           disabled={!topic.trim() || submit.isPending}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
