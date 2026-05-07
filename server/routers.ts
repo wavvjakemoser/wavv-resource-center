@@ -122,9 +122,11 @@ const academyRouter = router({
 
   getCourse: protectedProcedure
     .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const course = await getCourseById(input.id);
-      if (!course) throw new TRPCError({ code: "NOT_FOUND" });
+      // Unpublished courses are hidden from regular users; admins can still access
+      const isAdmin = ctx.user.role === "admin" || ctx.user.role === "super_admin";
+      if (!course || (!course.published && !isAdmin)) throw new TRPCError({ code: "NOT_FOUND" });
       const courseLessons = await getLessonsByCourse(input.id, true);
       return { course, lessons: courseLessons };
     }),

@@ -276,21 +276,27 @@ export default function Academy() {
     (progress ?? []).filter((p) => p.completed).map((p) => p.lessonId)
   );
 
-  // Static section/video counts per category (source of truth = AcademyCategory CATEGORY_DATA)
-  // These must stay in sync with the CATEGORY_DATA sections array in AcademyCategory.tsx
-  const STATIC_COUNTS: Record<string, { sections: number; videos: number }> = {
-    "Onboarding": { sections: 6, videos: 12 },
-    "How-To": { sections: 8, videos: 9 },
-    "Strategy and Best Practices": { sections: 3, videos: 8 },
-  };
-
-  // Group live courses by category key (still needed for progress tracking)
+  // Group live (published) courses by category key
+  // getCourses already filters to published=true and includes lessonCount (published lessons only)
   const coursesByCategory = CATEGORIES.reduce(
     (acc, cat) => {
       acc[cat.key] = (courses ?? []).filter((c) => c.category === cat.key);
       return acc;
     },
     {} as Record<string, NonNullable<typeof courses>>
+  );
+
+  // DB-driven counts: sections = published courses in category, videos = sum of published lesson counts
+  const dbCounts = CATEGORIES.reduce(
+    (acc, cat) => {
+      const catCourses = coursesByCategory[cat.key] ?? [];
+      acc[cat.key] = {
+        sections: catCourses.length,
+        videos: catCourses.reduce((sum, c) => sum + ((c as any).lessonCount ?? 0), 0),
+      };
+      return acc;
+    },
+    {} as Record<string, { sections: number; videos: number }>
   );
 
   return (
@@ -391,7 +397,7 @@ export default function Academy() {
                     </h2>
                     <p className="text-sm text-gray-300 mb-2">{cat.subtitle}</p>
                     {(() => {
-                      const counts = STATIC_COUNTS[cat.key];
+                      const counts = dbCounts[cat.key];
                       if (!counts) return null;
                       return (
                         <div className="flex items-center gap-2">

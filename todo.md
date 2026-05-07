@@ -774,3 +774,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Academy Admin: restyle "Add Video" button to a visible color (blue or green, not grey)
 - [x] Content Requests: always show all 3 groups (Video/Webinar/Guide) even when empty, with empty state per group
 - [x] Academy user-facing: deactivated/hidden sections must not appear on the Academy page
+
+## Academy Visibility & Count Fixes (Batch 4)
+
+- [x] Academy landing page: section/video counts must reflect DB published data only (not static CATEGORY_DATA)
+- [x] Academy landing page: hidden/deactivated courses must not be counted or shown
+- [x] AcademyCategory page: confirm hidden sections are excluded (already fixed, verify)
