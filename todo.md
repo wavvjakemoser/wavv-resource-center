@@ -865,3 +865,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Dashboard: webinar date now shows "May 14, 2026 @ 2:00 PM" format
 - [x] AcademyCategory.tsx: removed all 3 placeholder coming-soon lessons and the entire section 6
 - [x] Verified: getLessonsByCourse now filters published=true AND hidden=false; getCourses, getGuides, getWebinars all filter published=true
+
+## Batch 15: Mountain Time Display
+
+- [x] Dashboard: webinar date/time displays in Mountain Time (America/Denver) with MDT or MST abbreviation (e.g. "May 14, 2026 @ 2:00 PM MDT")

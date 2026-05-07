@@ -394,7 +394,7 @@ export default function Dashboard() {
                     </div>
                     <p className="text-white text-xs font-semibold leading-snug line-clamp-2">{w.title}</p>
                     <p className="text-[10px] font-medium mt-auto" style={{ color: "rgba(245,166,35,0.8)" }}>
-                      {w.scheduledAt ? `${new Date(w.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} @ ${new Date(w.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}` : "Date TBD"}
+                      {w.scheduledAt ? `${new Date(w.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/Denver" })} @ ${new Date(w.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "America/Denver", timeZoneName: "short" })}` : "Date TBD"}
                     </p>
                   </Link>
                 ))}
