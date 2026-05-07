@@ -305,13 +305,13 @@ export default function Dashboard() {
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {exclusive.map((w) => (
-                  <Link
+                  <div
                     key={w.id}
-                    href="/webinars"
                     className="group flex flex-col rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
-                    style={{ background: "#1d2230", border: "1px solid #252d3d", textDecoration: "none" }}
+                    style={{ background: "#1d2230", border: "1px solid #252d3d" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.boxShadow = `0 4px 20px ${ACCENT}22`; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; e.currentTarget.style.boxShadow = "none"; }}
+                    onClick={() => { window.location.href = "/webinars"; }}
                   >
                     {/* Thumbnail */}
                     <div className="relative flex-shrink-0 overflow-hidden" style={{ height: "130px", borderBottom: `1px solid ${ACCENT}30` }}>
@@ -364,7 +364,7 @@ export default function Dashboard() {
                         )}
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             );
