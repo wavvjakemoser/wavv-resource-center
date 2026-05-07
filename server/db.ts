@@ -745,12 +745,11 @@ export async function getUserTrophies(userId: number) {
   const db = await getDb();
   if (!db) return { completedCourses: [], totalLessons: 0, badges: [] };
 
-  // Get all completed lessons for this user
+  // Get all completed lessons for this user (exclude in-progress rows)
   const progress = await db
     .select()
     .from(lessonProgress)
-    .where(eq(lessonProgress.userId, userId));
-
+    .where(and(eq(lessonProgress.userId, userId), eq(lessonProgress.completed, true)));
   const totalLessonsCompleted = progress.length;
 
   // Get courses where all lessons are completed
