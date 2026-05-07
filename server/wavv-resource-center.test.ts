@@ -200,8 +200,8 @@ describe("support.adminGetAll", () => {
     await expect(caller.support.adminGetAll()).rejects.toThrow();
   });
 
-  it("allows admin users", async () => {
-    const { ctx } = makeCtx(makeUser({ role: "admin" }));
+  it("allows super_admin users", async () => {
+    const { ctx } = makeCtx(makeUser({ role: "super_admin" }));
     const caller = appRouter.createCaller(ctx);
     const result = await caller.support.adminGetAll();
     expect(Array.isArray(result)).toBe(true);
@@ -215,8 +215,8 @@ describe("academy.adminGetAllCourses", () => {
     await expect(caller.academy.adminGetAllCourses()).rejects.toThrow();
   });
 
-  it("allows admin users", async () => {
-    const { ctx } = makeCtx(makeUser({ role: "admin" }));
+  it("allows super_admin users", async () => {
+    const { ctx } = makeCtx(makeUser({ role: "super_admin" }));
     const caller = appRouter.createCaller(ctx);
     const result = await caller.academy.adminGetAllCourses();
     expect(Array.isArray(result)).toBe(true);

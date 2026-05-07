@@ -146,7 +146,7 @@ const academyRouter = router({
     }),
 
   // Admin CRUD
-  adminCreateCourse: adminProcedure
+  adminCreateCourse: superAdminProcedure
     .input(
       z.object({
         title: z.string().min(1),
@@ -166,7 +166,7 @@ const academyRouter = router({
     )
     .mutation(({ input }) => createCourse(input)),
 
-  adminUpdateCourse: adminProcedure
+  adminUpdateCourse: superAdminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -193,13 +193,13 @@ const academyRouter = router({
     )
     .mutation(({ input }) => updateCourse(input.id, input.data)),
 
-  adminDeleteCourse: adminProcedure
+  adminDeleteCourse: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => deleteCourse(input.id)),
 
-  adminGetAllCourses: adminProcedure.query(() => getCourses(false)),
+  adminGetAllCourses: superAdminProcedure.query(() => getCourses(false)),
 
-  adminCreateLesson: adminProcedure
+  adminCreateLesson: superAdminProcedure
     .input(
       z.object({
         courseId: z.number(),
@@ -212,7 +212,7 @@ const academyRouter = router({
     )
     .mutation(({ input }) => createLesson(input)),
 
-  adminUpdateLesson: adminProcedure
+  adminUpdateLesson: superAdminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -233,18 +233,18 @@ const academyRouter = router({
     )
     .mutation(({ input }) => updateLesson(input.id, input.data)),
 
-  adminDeleteLesson: adminProcedure
+  adminDeleteLesson: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => deleteLesson(input.id)),
 
-  adminRemoveTagFromAll: adminProcedure
+  adminRemoveTagFromAll: superAdminProcedure
     .input(z.object({ tag: z.string().min(1) }))
     .mutation(({ input }) => removeTagFromAllLessons(input.tag)),
 
-  adminGetAllUsedTags: adminProcedure
+  adminGetAllUsedTags: superAdminProcedure
     .query(() => getAllUsedTags()),
 
-  adminGetLessons: adminProcedure
+  adminGetLessons: superAdminProcedure
     .input(z.object({ courseId: z.number() }))
     .query(({ input }) => getLessonsByCourse(input.courseId, false)),
 
@@ -261,7 +261,7 @@ const academyRouter = router({
     }),
 
   // Returns ALL lessons across all courses for the content management view
-  adminGetAllLessons: adminProcedure
+  adminGetAllLessons: superAdminProcedure
     .query(async () => {
       const allCourses = await getCourses(false);
       const results = await Promise.all(
@@ -340,7 +340,7 @@ const webinarsRouter = router({
   ),
 
   // Admin CRUD
-  adminCreate: adminProcedure
+  adminCreate: superAdminProcedure
     .input(
       z.object({
         title: z.string().min(1),
@@ -356,7 +356,7 @@ const webinarsRouter = router({
     )
     .mutation(({ input }) => createWebinar({ ...input, published: true })),
 
-  adminUpdate: adminProcedure
+  adminUpdate: superAdminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -376,12 +376,12 @@ const webinarsRouter = router({
     )
     .mutation(({ input }) => updateWebinar(input.id, input.data)),
 
-  adminDelete: adminProcedure
+  adminDelete: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => deleteWebinar(input.id)),
 
-  adminList: adminProcedure.query(() => getWebinars()),
-  adminExportRegistrants: adminProcedure.query(() => getWebinarRegistrantsExport()),
+  adminList: superAdminProcedure.query(() => getWebinars()),
+  adminExportRegistrants: superAdminProcedure.query(() => getWebinarRegistrantsExport()),
 
   // Reorder: swap sortOrder between two webinars (super_admin only)
   adminReorder: superAdminProcedure
@@ -416,7 +416,7 @@ const guidesRouter = router({
 
   // Admin CRUD
   // Upload a guide file to S3 and return a masked portal URL
-  uploadFile: adminProcedure
+  uploadFile: superAdminProcedure
     .input(z.object({
       base64: z.string(),
       mimeType: z.enum(["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]),
@@ -430,7 +430,7 @@ const guidesRouter = router({
       const { url } = await storagePut(key, buffer, input.mimeType);
       return { url };
     }),
-  adminCreate: adminProcedure
+  adminCreate: superAdminProcedure
     .input(
       z.object({
         title: z.string().min(1),
@@ -443,7 +443,7 @@ const guidesRouter = router({
     )
     .mutation(({ input }) => createGuide({ ...input, published: true })),
 
-  adminUpdate: adminProcedure
+  adminUpdate: superAdminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -459,12 +459,12 @@ const guidesRouter = router({
     )
     .mutation(({ input }) => updateGuide(input.id, input.data)),
 
-  adminDelete: adminProcedure
+  adminDelete: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => deleteGuide(input.id)),
 
-  adminList: adminProcedure.query(() => getGuides(false)),
-  adminExportDownloaders: adminProcedure.query(() => getGuideDownloadersExport()),
+  adminList: superAdminProcedure.query(() => getGuides(false)),
+  adminExportDownloaders: superAdminProcedure.query(() => getGuideDownloadersExport()),
 
   // Reorder: swap sortOrder between two guides (super_admin only)
   adminReorder: superAdminProcedure
@@ -530,9 +530,9 @@ const supportRouter = router({
   getMyTickets: protectedProcedure.query(({ ctx }) => getUserTickets(ctx.user.id)),
 
   // Admin
-  adminGetAll: adminProcedure.query(() => getAllTickets()),
-  adminExportSubmitters: adminProcedure.query(() => getSupportSubmittersExport()),
-  adminUpdateStatus: adminProcedure
+  adminGetAll: superAdminProcedure.query(() => getAllTickets()),
+  adminExportSubmitters: superAdminProcedure.query(() => getSupportSubmittersExport()),
+  adminUpdateStatus: superAdminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -603,20 +603,20 @@ Be concise, direct, and helpful. Use bullet points for step-by-step instructions
 
 // ─── Analytics Router ─────────────────────────────────────────────────
 const analyticsRouter = router({
-  getSummary: adminProcedure.query(() => getAnalyticsSummary()),
-  getUsers: adminProcedure.query(() => getAllUsers()),
-  updateUserRole: adminProcedure
+  getSummary: superAdminProcedure.query(() => getAnalyticsSummary()),
+  getUsers: superAdminProcedure.query(() => getAllUsers()),
+  updateUserRole: superAdminProcedure
     .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
     .mutation(({ input }) => updateUserRole(input.userId, input.role)),
 
   // ── Advanced analytics for admin dashboard ──
-  getEventCounts: adminProcedure
+  getEventCounts: superAdminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getEventCountsByType(since);
     }),
-  getStatDetail: adminProcedure
+  getStatDetail: superAdminProcedure
     .input(z.object({
       eventTypes: z.array(z.string()).min(1),
       days: z.number().min(1).max(365).default(30),
@@ -627,42 +627,42 @@ const analyticsRouter = router({
       return getStatDetail(input.eventTypes, since, input.limit);
     }),
 
-  getSignInTrend: adminProcedure
+  getSignInTrend: superAdminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getSignInTrend(since);
     }),
 
-  getDailyEvents: adminProcedure
+  getDailyEvents: superAdminProcedure
     .input(z.object({ eventType: z.string(), days: z.number().min(1).max(365).default(30) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getDailyEventCounts(input.eventType, since);
     }),
 
-  getActiveUsers: adminProcedure
+  getActiveUsers: superAdminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getActiveUsers(since);
     }),
 
-  getTopContent: adminProcedure
+  getTopContent: superAdminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30), limit: z.number().min(1).max(50).default(10) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getTopContent(since, input.limit);
     }),
 
-  getRecentEvents: adminProcedure
+  getRecentEvents: superAdminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(7), limit: z.number().min(1).max(100).default(50) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getRecentEvents(since, input.limit);
     }),
 
-  exportCSV: adminProcedure
+  exportCSV: superAdminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30) }))
     .query(async ({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
@@ -846,7 +846,7 @@ export const appRouter = router({
         return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
       }),
 
-    createUser: adminProcedure
+    createUser: superAdminProcedure
       .input(z.object({
         email: z.string().email(),
         name: z.string().min(1),
@@ -875,7 +875,7 @@ export const appRouter = router({
   analytics: analyticsRouter,
   scheduled: scheduledRouter,
   admin: router({
-    listUsers: adminProcedure
+    listUsers: superAdminProcedure
       .input(z.object({ search: z.string().optional() }).optional())
       .query(async ({ input }) => {
         const allUsersData = await getAllUsers();
@@ -896,7 +896,7 @@ export const appRouter = router({
         await updateUserRole(input.userId, input.role);
         return { success: true };
       }),
-    removeUser: adminProcedure
+    removeUser: superAdminProcedure
       .input(z.object({ userId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) {
@@ -914,10 +914,10 @@ export const appRouter = router({
         return { success: true };
       }),
     // Notification management (admin only)
-    listNotifications: adminProcedure.query(async () => {
+    listNotifications: superAdminProcedure.query(async () => {
       return getAllNotifications();
     }),
-    createNotification: adminProcedure
+    createNotification: superAdminProcedure
       .input(z.object({
         title: z.string().min(1).max(255),
         message: z.string().min(1),
@@ -937,7 +937,7 @@ export const appRouter = router({
         });
         return { success: true };
       }),
-    deleteNotification: adminProcedure
+    deleteNotification: superAdminProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await deleteNotification(input.id);
@@ -1024,10 +1024,10 @@ export const appRouter = router({
       }),
   }),
   playground: router({
-    getRequests: adminProcedure.query(async () => {
+    getRequests: superAdminProcedure.query(async () => {
       return getPlaygroundRequests();
     }),
-    getStats: adminProcedure.query(async () => {
+    getStats: superAdminProcedure.query(async () => {
       return getPlaygroundStats();
     }),
     submitRequest: protectedProcedure
@@ -1113,13 +1113,13 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    adminList: adminProcedure
+    adminList: superAdminProcedure
       .input(z.object({ requestType: z.enum(["video", "guide", "webinar"]).optional() }))
       .query(async ({ input }) => {
         return getContentRequests(input.requestType);
       }),
 
-    adminExportCsv: adminProcedure
+    adminExportCsv: superAdminProcedure
       .query(async () => {
         const rows = await getContentRequests();
         const header = "Date,Type,Topic,Category,Format Preference,Priority,User,Email,Description";
@@ -1142,7 +1142,7 @@ export const appRouter = router({
     update: protectedProcedure
       .input(z.object({ key: z.string(), value: z.record(z.string(), z.boolean()) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "super_admin") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(async ({ input }) => {
@@ -1155,7 +1155,7 @@ export const appRouter = router({
     getItems: protectedProcedure
       .input(z.object({ page: z.enum(["academy", "webinars", "guides", "playground", "support"]) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "super_admin") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(({ input }) => getReadinessItems(input.page)),
@@ -1163,7 +1163,7 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "super_admin") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => toggleReadinessItem(input.id, input.checked)),
