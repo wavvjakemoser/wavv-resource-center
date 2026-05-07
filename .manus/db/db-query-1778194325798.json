@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `section_resources` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`courseId` int NOT NULL,\n\t`label` varchar(255) NOT NULL,\n\t`fileUrl` text NOT NULL,\n\t`fileName` varchar(255) NOT NULL,\n\t`sortOrder` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `section_resources_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute CREATE TABLE `section_resources` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`courseId` int NOT NULL,\n\t`label` varchar(255) NOT NULL,\n\t`fileUrl` text NOT NULL,\n\t`fileName` varchar(255) NOT NULL,\n\t`sortOrder` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `section_resources_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 660
+}

@@ -84,6 +84,12 @@ import {
   reorderLessons,
   reorderWebinars,
   reorderGuides,
+  getAllSectionResources,
+  getSectionResourcesByCategory,
+  createSectionResource,
+  updateSectionResource,
+  deleteSectionResource,
+  reorderSectionResources,
   getRecentProgress,
   getRecentLessons,
   getNotificationsForUser,
@@ -318,6 +324,63 @@ const academyRouter = router({
   reorderLessons: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderLessons(input.id1, input.id2)),
+
+  // ─── Section Resources (standalone PDFs per section) ─────────────────────
+  // List all section resources (admin view — includes courseTitle + courseCategory)
+  adminGetSectionResources: adminProcedure
+    .query(() => getAllSectionResources()),
+
+  // List section resources for a specific category (user-facing)
+  getSectionResourcesByCategory: protectedProcedure
+    .input(z.object({ category: z.string() }))
+    .query(({ input }) => getSectionResourcesByCategory(input.category)),
+
+  // Upload a PDF and create a section resource record
+  adminUploadSectionResource: superAdminProcedure
+    .input(z.object({
+      courseId: z.number(),
+      label: z.string().min(1),
+      base64: z.string(),
+      mimeType: z.string(),
+      fileName: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      const { storagePut } = await import("./storage");
+      const buffer = Buffer.from(input.base64, "base64");
+      const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").substring(0, 80);
+      const key = `section-resources/${Date.now()}-${safeName}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      const resource = await createSectionResource({
+        courseId: input.courseId,
+        label: input.label,
+        fileUrl: url,
+        fileName: input.fileName,
+        sortOrder: 0,
+      });
+      return resource;
+    }),
+
+  // Update label or move to a different section
+  adminUpdateSectionResource: superAdminProcedure
+    .input(z.object({
+      id: z.number(),
+      label: z.string().min(1).optional(),
+      courseId: z.number().optional(),
+    }))
+    .mutation(({ input }) => updateSectionResource(input.id, {
+      label: input.label,
+      courseId: input.courseId,
+    })),
+
+  // Reorder two section resources by swapping sortOrder
+  adminReorderSectionResources: superAdminProcedure
+    .input(z.object({ id1: z.number(), id2: z.number() }))
+    .mutation(({ input }) => reorderSectionResources(input.id1, input.id2)),
+
+  // Delete a section resource
+  adminDeleteSectionResource: superAdminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => deleteSectionResource(input.id)),
 });
 
 // ─── Webinars Router ──────────────────────────────────────────────────────────

@@ -280,6 +280,20 @@ export const inviteTokens = mysqlTable("invite_tokens", {
 });
 export type InviteToken = typeof inviteTokens.$inferSelect;
 
+// ─── Section Resources (standalone PDFs attached to a course/section) ──────────
+export const sectionResources = mysqlTable("section_resources", {
+  id: int("id").autoincrement().primaryKey(),
+  // courseId links to the courses table (a "section" in Academy parlance)
+  courseId: int("courseId").notNull(),
+  label: varchar("label", { length: 255 }).notNull(),
+  fileUrl: text("fileUrl").notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SectionResource = typeof sectionResources.$inferSelect;
+
 // ─── Site Settings ────────────────────────────────────────────────────────────
 // Key-value store for admin-controlled feature flags and visibility settings.
 // Each row is a single setting. Values are stored as JSON strings.

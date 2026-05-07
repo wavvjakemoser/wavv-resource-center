@@ -155,6 +155,13 @@
       "when": 1778172112343,
       "tag": "0020_special_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1778194319568,
+      "tag": "0021_wooden_senator_kelly",
+      "breakpoints": true
     }
   ]
 }

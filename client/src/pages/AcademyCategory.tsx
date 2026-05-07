@@ -294,6 +294,13 @@ function getEmbedUrl(url: string): string | null {
   return null;
 }
 
+interface SectionPdf {
+  id: number;
+  label: string;
+  fileUrl: string;
+  fileName: string;
+}
+
 function SectionRow({
   section,
   accentColor,
@@ -304,6 +311,7 @@ function SectionRow({
   bookmarkedIds = new Set<number>(),
   onToggleBookmark,
   onPlay,
+  sectionPdfs = [],
 }: {
   section: Section;
   accentColor: string;
@@ -314,6 +322,7 @@ function SectionRow({
   bookmarkedIds?: Set<number>;
   onToggleBookmark?: (contentId: number, title: string, isBookmarked: boolean) => void;
   onPlay?: (embedUrl: string, title: string) => void;
+  sectionPdfs?: SectionPdf[];
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -518,13 +527,45 @@ function SectionRow({
               </div>
             );
           })}
+          {/* ── Section PDF Resources ── */}
+          {sectionPdfs.length > 0 && (
+            <div className="border-t" style={{ borderColor: "#252d3d" }}>
+              <div className="px-5 py-2" style={{ background: "rgba(96,165,250,0.04)", borderBottom: "1px solid #252d3d" }}>
+                <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#60a5fa" }}>Resources</span>
+              </div>
+              {sectionPdfs.map((pdf) => (
+                <a
+                  key={pdf.id}
+                  href={pdf.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-white/5"
+                  style={{ borderBottom: "1px solid #1a1f2e", textDecoration: "none" }}
+                >
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.25)" }}
+                  >
+                    <Download size={12} style={{ color: "#60a5fa" }} />
+                  </div>
+                  <span className="text-sm text-blue-300 hover:text-blue-200 transition-colors flex-1 truncate">{pdf.label}</span>
+                  <span
+                    className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                    style={{ background: "rgba(96,165,250,0.1)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.25)" }}
+                  >
+                    PDF
+                  </span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────
+// ─── Main page ─────────────────────────────────────────────────────────
 export default function AcademyCategory() {
   const params = useParams<{ categoryKey: string }>();
   const categoryKey = decodeURIComponent(params.categoryKey ?? "");
@@ -572,6 +613,31 @@ export default function AcademyCategory() {
     { category: cat?.key ?? "" },
     { enabled: !!cat }
   );
+
+  // Fetch standalone PDF resources for this category
+  const { data: sectionResources = [] } = trpc.academy.getSectionResourcesByCategory.useQuery(
+    { category: cat?.key ?? "" },
+    { enabled: !!cat }
+  );
+
+  // Build a map: normalized course title -> courseId (for PDF resource lookup)
+  const courseTitleToId = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const c of dbCourses) {
+      map[c.title.toLowerCase().trim()] = c.id;
+    }
+    return map;
+  }, [dbCourses]);
+
+  // Build a map: courseId -> SectionPdf[]
+  const pdfsByCourseId = useMemo(() => {
+    const map: Record<number, SectionPdf[]> = {};
+    for (const r of sectionResources) {
+      if (!map[r.courseId]) map[r.courseId] = [];
+      map[r.courseId].push({ id: r.id, label: r.label, fileUrl: r.fileUrl, fileName: r.fileName });
+    }
+    return map;
+  }, [sectionResources]);
 
   // Fetch user bookmarks
   const utils = trpc.useUtils();
@@ -809,6 +875,7 @@ export default function AcademyCategory() {
               bookmarkedIds={bookmarkedIds}
               onToggleBookmark={handleToggleBookmark}
               onPlay={handlePlay}
+              sectionPdfs={pdfsByCourseId[courseTitleToId[section.title.toLowerCase().trim()] ?? -1] ?? []}
             />
           ))}
         </div>

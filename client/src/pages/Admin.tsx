@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import PortalLayout from "@/components/PortalLayout";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -78,6 +79,7 @@ import {
   Maximize2,
   AlertTriangle,
   ArrowUp,
+  FileUp,
   ArrowDown,
   ChevronUp,
   Flag,
@@ -2694,6 +2696,9 @@ function ContentTab() {
         </DialogContent>
       </Dialog>
 
+      {/* ── PDF Resources Section ── */}
+      <SectionResourcesPanel courses={courses} />
+
       {/* ── Permanent delete confirmation dialog ── */}
       <Dialog open={!!deleteDialog} onOpenChange={(open) => !open && setDeleteDialog(null)}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #3a1a1a" }}>
@@ -2726,8 +2731,407 @@ function ContentTab() {
     </div>
   );
 }
+// ─── Section Resources Panel ──────────────────────────────────────────────────
+function SectionResourcesPanel({
+  courses,
+}: {
+  courses: Array<{ id: number; title: string; category: string; published: boolean }>;
+}) {
+  const utils = trpc.useUtils();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === "super_admin";
 
-// ─── Tags Management Panel ─────────────────────────────────────────────────
+  const { data: resources = [], isLoading } = trpc.academy.adminGetSectionResources.useQuery();
+
+  // Upload dialog state
+  const [uploadDialog, setUploadDialog] = React.useState(false);
+  const [uploadForm, setUploadForm] = React.useState({ courseId: "", label: "", fileName: "", base64: "", mimeType: "" });
+  const [uploading, setUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Edit dialog state
+  const [editDialog, setEditDialog] = React.useState<{ id: number; label: string; courseId: number } | null>(null);
+  const [editLabel, setEditLabel] = React.useState("");
+  const [editCourseId, setEditCourseId] = React.useState("");
+
+  const uploadMut = trpc.academy.adminUploadSectionResource.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetSectionResources.invalidate();
+      toast.success("PDF resource uploaded");
+      setUploadDialog(false);
+      setUploadForm({ courseId: "", label: "", fileName: "", base64: "", mimeType: "" });
+    },
+    onError: (e) => toast.error("Upload failed: " + e.message),
+  });
+
+  const updateMut = trpc.academy.adminUpdateSectionResource.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetSectionResources.invalidate();
+      toast.success("PDF resource updated");
+      setEditDialog(null);
+    },
+    onError: () => toast.error("Failed to update"),
+  });
+
+  const deleteMut = trpc.academy.adminDeleteSectionResource.useMutation({
+    onSuccess: () => {
+      utils.academy.adminGetSectionResources.invalidate();
+      toast.success("PDF resource deleted");
+    },
+    onError: () => toast.error("Failed to delete"),
+  });
+
+  const reorderMut = trpc.academy.adminReorderSectionResources.useMutation({
+    onSuccess: () => utils.academy.adminGetSectionResources.invalidate(),
+    onError: () => toast.error("Failed to reorder"),
+  });
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+    if (!allowed.includes(file.type)) { toast.error("Only PDF, DOCX, or XLSX files are supported"); return; }
+    if (file.size > 16 * 1024 * 1024) { toast.error("File must be under 16 MB"); return; }
+    const buf = await file.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...Array.from(new Uint8Array(buf))));
+    const label = uploadForm.label || file.name.replace(/\.[^.]+$/, "").replace(/[_-]/g, " ");
+    setUploadForm((f) => ({ ...f, fileName: file.name, base64, mimeType: file.type, label }));
+    e.target.value = "";
+  }
+
+  async function confirmUpload() {
+    if (!uploadForm.courseId || !uploadForm.label.trim() || !uploadForm.base64) return;
+    setUploading(true);
+    try {
+      await uploadMut.mutateAsync({
+        courseId: parseInt(uploadForm.courseId),
+        label: uploadForm.label.trim(),
+        base64: uploadForm.base64,
+        mimeType: uploadForm.mimeType,
+        fileName: uploadForm.fileName,
+      });
+    } catch { /* handled by onError */ } finally { setUploading(false); }
+  }
+
+  function openEditDialog(r: { id: number; label: string; courseId: number }) {
+    setEditDialog(r);
+    setEditLabel(r.label);
+    setEditCourseId(String(r.courseId));
+  }
+
+  // Group resources by courseId for display
+  const resourcesByCourse = React.useMemo(() => {
+    const map: Record<number, typeof resources> = {};
+    for (const r of resources) {
+      if (!map[r.courseId]) map[r.courseId] = [];
+      map[r.courseId].push(r);
+    }
+    return map;
+  }, [resources]);
+
+  // Published courses only, sorted by category order
+  const CATEGORY_ORDER = ["Onboarding", "How-To", "Strategy and Best Practices"];
+  const publishedCourses = courses
+    .filter((c) => c.published)
+    .sort((a, b) => {
+      const ai = CATEGORY_ORDER.indexOf(a.category);
+      const bi = CATEGORY_ORDER.indexOf(b.category);
+      return ai !== bi ? ai - bi : a.title.localeCompare(b.title);
+    });
+
+  return (
+    <div className="mt-10">
+      {/* Divider */}
+      <div className="relative flex items-center py-6">
+        <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
+        <div className="mx-4 flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#60a5fa" }} />
+          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">PDF Resources</span>
+        </div>
+        <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
+      </div>
+
+      {/* Header + Upload button */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-base font-bold text-white">Section PDF Resources</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Standalone PDFs attached to a section — shown below the video list on the Academy page</p>
+        </div>
+        {isSuperAdmin && (
+          <button
+            type="button"
+            onClick={() => { setUploadForm({ courseId: "", label: "", fileName: "", base64: "", mimeType: "" }); setUploadDialog(true); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(96,165,250,0.12)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.3)" }}
+          >
+            <FileUp size={14} /> Upload PDF Resource
+          </button>
+        )}
+      </div>
+
+      {/* Resource list grouped by section */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-20">
+          <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" />
+        </div>
+      ) : resources.length === 0 ? (
+        <div className="rounded-xl px-5 py-8 text-center" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <FileText size={28} className="text-gray-600 mx-auto mb-2" />
+          <p className="text-sm text-gray-500">No PDF resources yet.</p>
+          <p className="text-xs text-gray-600 mt-1">Click “Upload PDF Resource” to add a standalone PDF to any section.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {publishedCourses
+            .filter((c) => resourcesByCourse[c.id]?.length > 0)
+            .map((course) => {
+              const courseResources = resourcesByCourse[course.id] ?? [];
+              return (
+                <div key={course.id} className="rounded-xl overflow-hidden" style={{ background: "#1d2230", border: "1px solid #252d3d" }}>
+                  {/* Section header */}
+                  <div className="px-4 py-2.5 flex items-center gap-2" style={{ background: "rgba(96,165,250,0.06)", borderBottom: "1px solid #252d3d" }}>
+                    <FolderOpen size={13} style={{ color: "#60a5fa" }} />
+                    <span className="text-xs font-semibold text-gray-300">{course.title}</span>
+                    <span className="text-[10px] text-gray-500 ml-auto">{courseResources.length} PDF{courseResources.length !== 1 ? "s" : ""}</span>
+                  </div>
+                  {/* Resource rows */}
+                  <div className="divide-y" style={{ borderColor: "#252d3d" }}>
+                    {courseResources.map((r, idx) => {
+                      const prev = courseResources[idx - 1];
+                      const next = courseResources[idx + 1];
+                      return (
+                        <div key={r.id} className="flex items-center gap-3 px-4 py-2.5 group/row">
+                          {/* Reorder arrows */}
+                          {isSuperAdmin && (
+                            <div className="flex flex-col gap-0.5 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                disabled={!prev}
+                                onClick={() => prev && reorderMut.mutate({ id1: r.id, id2: prev.id })}
+                                className="p-0.5 rounded text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition"
+                                title="Move up"
+                              ><ArrowUp size={11} /></button>
+                              <button
+                                type="button"
+                                disabled={!next}
+                                onClick={() => next && reorderMut.mutate({ id1: r.id, id2: next.id })}
+                                className="p-0.5 rounded text-gray-500 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition"
+                                title="Move down"
+                              ><ArrowDown size={11} /></button>
+                            </div>
+                          )}
+                          {/* PDF icon */}
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(96,165,250,0.1)", border: "1px solid rgba(96,165,250,0.2)" }}>
+                            <Download size={12} style={{ color: "#60a5fa" }} />
+                          </div>
+                          {/* Label + filename */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white font-medium truncate">{r.label}</p>
+                            <p className="text-[10px] text-gray-500 truncate">{r.fileName}</p>
+                          </div>
+                          {/* Preview link */}
+                          <a
+                            href={r.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg transition hover:opacity-80"
+                            style={{ background: "rgba(255,255,255,0.04)", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+                            title="Open PDF"
+                          >
+                            <ExternalLink size={12} />
+                          </a>
+                          {/* Edit */}
+                          {isSuperAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => openEditDialog({ id: r.id, label: r.label, courseId: r.courseId })}
+                              className="p-1.5 rounded-lg transition hover:opacity-80"
+                              style={{ background: "rgba(255,255,255,0.04)", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+                              title="Edit label / move section"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                          )}
+                          {/* Delete */}
+                          {isSuperAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => deleteMut.mutate({ id: r.id })}
+                              disabled={deleteMut.isPending}
+                              className="p-1.5 rounded-lg transition hover:opacity-80 disabled:opacity-50"
+                              style={{ background: "rgba(239,68,68,0.1)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
+                              title="Delete PDF resource"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      )}
+
+      {/* ── Upload PDF Resource dialog ── */}
+      <Dialog open={uploadDialog} onOpenChange={(open) => !open && setUploadDialog(false)}>
+        <DialogContent className="max-w-md" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <FileUp size={16} style={{ color: "#60a5fa" }} /> Upload PDF Resource
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Upload a standalone PDF and assign it to a section. It will appear below the video list on the Academy page.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {/* Section picker */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Section <span className="text-red-400">*</span></label>
+              <Select value={uploadForm.courseId} onValueChange={(v) => setUploadForm((f) => ({ ...f, courseId: v }))}>
+                <SelectTrigger className="bg-black/30 border-white/10 text-white">
+                  <SelectValue placeholder="Select a section..." />
+                </SelectTrigger>
+                <SelectContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+                  {CATEGORY_ORDER.map((cat) => {
+                    const catCourses = publishedCourses.filter((c) => c.category === cat);
+                    if (catCourses.length === 0) return null;
+                    return (
+                      <React.Fragment key={cat}>
+                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">{cat}</div>
+                        {catCourses.map((c) => (
+                          <SelectItem key={c.id} value={String(c.id)} className="text-white">
+                            {c.title}
+                          </SelectItem>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Label */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Display Label <span className="text-red-400">*</span></label>
+              <Input
+                placeholder="e.g. Connection Rates vs Conversion Rates Flowchart"
+                value={uploadForm.label}
+                onChange={(e) => setUploadForm((f) => ({ ...f, label: e.target.value }))}
+                className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+              />
+            </div>
+
+            {/* File picker */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">File <span className="text-red-400">*</span></label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.xlsx"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+              {uploadForm.fileName ? (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(96,165,250,0.08)", border: "1px solid rgba(96,165,250,0.25)" }}>
+                  <Download size={13} style={{ color: "#60a5fa" }} />
+                  <span className="text-sm text-blue-300 flex-1 truncate">{uploadForm.fileName}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setUploadForm((f) => ({ ...f, fileName: "", base64: "", mimeType: "" })); }}
+                    className="text-gray-500 hover:text-gray-300 transition"
+                  ><X size={13} /></button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm text-gray-400 transition hover:text-gray-200 hover:border-gray-500"
+                  style={{ border: "2px dashed #2a2a2a" }}
+                >
+                  <Upload size={15} /> Choose PDF / DOCX / XLSX (max 16 MB)
+                </button>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setUploadDialog(false)} className="text-gray-400">Cancel</Button>
+            <Button
+              onClick={confirmUpload}
+              disabled={!uploadForm.courseId || !uploadForm.label.trim() || !uploadForm.base64 || uploading || uploadMut.isPending}
+              style={{ background: "#60a5fa" }}
+              className="text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {uploading || uploadMut.isPending ? "Uploading..." : "Upload PDF"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Edit label / move section dialog ── */}
+      <Dialog open={!!editDialog} onOpenChange={(open) => !open && setEditDialog(null)}>
+        <DialogContent className="max-w-md" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit PDF Resource</DialogTitle>
+            <DialogDescription className="text-gray-400">Update the display label or move this PDF to a different section.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Display Label</label>
+              <Input
+                value={editLabel}
+                onChange={(e) => setEditLabel(e.target.value)}
+                className="bg-black/30 border-white/10 text-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Section</label>
+              <Select value={editCourseId} onValueChange={setEditCourseId}>
+                <SelectTrigger className="bg-black/30 border-white/10 text-white">
+                  <SelectValue placeholder="Select a section..." />
+                </SelectTrigger>
+                <SelectContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+                  {CATEGORY_ORDER.map((cat) => {
+                    const catCourses = publishedCourses.filter((c) => c.category === cat);
+                    if (catCourses.length === 0) return null;
+                    return (
+                      <React.Fragment key={cat}>
+                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-500">{cat}</div>
+                        {catCourses.map((c) => (
+                          <SelectItem key={c.id} value={String(c.id)} className="text-white">
+                            {c.title}
+                          </SelectItem>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditDialog(null)} className="text-gray-400">Cancel</Button>
+            <Button
+              onClick={() => {
+                if (!editDialog) return;
+                updateMut.mutate({ id: editDialog.id, label: editLabel.trim() || editDialog.label, courseId: editCourseId ? parseInt(editCourseId) : undefined });
+              }}
+              disabled={updateMut.isPending}
+              style={{ background: "#0074F4" }}
+              className="text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {updateMut.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ─── Tags Management Panel ──────────────────────────────────────────────────
 function TagsManagementPanel() {
   const utils = trpc.useUtils();
   const { data: usedTags = [], isLoading } = trpc.academy.adminGetAllUsedTags.useQuery();

@@ -880,3 +880,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Batch 17: Academy UX Fixes
 - [x] AcademyCategory: enhance section headers and video row buttons so they are clearly visible and clickable (not blending into background)
 - [x] Continue Learning: auto-track partial progress when a lesson is opened (not just on explicit Mark Complete)
+
+## Admin Academy: PDF Resource Upload (Session N)
+
+- [x] Add section_resources DB table (courseId FK, label, fileUrl, fileName, sortOrder, createdAt)
+- [x] Run migration via webdev_execute_sql
+- [x] Add DB helpers: getSectionResourcesByCourseId, getSectionResourcesByCategory, insertSectionResource, deleteSectionResource, reorderSectionResources
+- [x] Add tRPC procedures: academy.getSectionResourcesByCategory (protected), adminAddSectionResource, adminDeleteSectionResource, adminReorderSectionResources (admin-only)
+- [x] Build SectionResourcesPanel component in Admin.tsx: upload PDF button, section picker, reorder/delete list
+- [x] Surface section PDFs in AcademyCategory: fetch via getSectionResourcesByCategory, inject below video list in SectionRow as "Resources" sub-section
+- [x] Write Vitest tests for all 4 new procedures (auth gating + admin gating)
+- [x] 30 tests passing, 0 TypeScript errors

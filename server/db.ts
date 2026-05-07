@@ -1541,3 +1541,107 @@ export async function getUserPlaygroundRequest(userId: number) {
     .limit(1);
   return rows[0] ?? null;
 }
+
+// ─── Section Resources ────────────────────────────────────────────────────────
+import { sectionResources } from "../drizzle/schema";
+
+export async function getSectionResourcesByCourse(courseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(sectionResources)
+    .where(eq(sectionResources.courseId, courseId))
+    .orderBy(asc(sectionResources.sortOrder), asc(sectionResources.createdAt));
+}
+
+export async function getSectionResourcesByCategory(category: string) {
+  const db = await getDb();
+  if (!db) return [];
+  // Join with courses to filter by category
+  const rows = await db
+    .select({
+      id: sectionResources.id,
+      courseId: sectionResources.courseId,
+      label: sectionResources.label,
+      fileUrl: sectionResources.fileUrl,
+      fileName: sectionResources.fileName,
+      sortOrder: sectionResources.sortOrder,
+      createdAt: sectionResources.createdAt,
+      courseTitle: courses.title,
+    })
+    .from(sectionResources)
+    .innerJoin(courses, eq(sectionResources.courseId, courses.id))
+    .where(eq(courses.category, category as "Onboarding" | "How-To" | "Strategy and Best Practices" | "Dialer Setup" | "CRM Integrations" | "Spam Protection"))
+    .orderBy(asc(sectionResources.sortOrder), asc(sectionResources.createdAt));
+  return rows;
+}
+
+export async function createSectionResource(data: {
+  courseId: number;
+  label: string;
+  fileUrl: string;
+  fileName: string;
+  sortOrder?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [result] = await db.insert(sectionResources).values({
+    courseId: data.courseId,
+    label: data.label,
+    fileUrl: data.fileUrl,
+    fileName: data.fileName,
+    sortOrder: data.sortOrder ?? 0,
+  });
+  const id = (result as any).insertId as number;
+  const [row] = await db.select().from(sectionResources).where(eq(sectionResources.id, id)).limit(1);
+  return row;
+}
+
+export async function updateSectionResource(id: number, data: { label?: string; courseId?: number; sortOrder?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(sectionResources).set(data).where(eq(sectionResources.id, id));
+  const [row] = await db.select().from(sectionResources).where(eq(sectionResources.id, id)).limit(1);
+  return row;
+}
+
+export async function deleteSectionResource(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.delete(sectionResources).where(eq(sectionResources.id, id));
+}
+
+export async function reorderSectionResources(id1: number, id2: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const rows = await db
+    .select({ id: sectionResources.id, sortOrder: sectionResources.sortOrder })
+    .from(sectionResources)
+    .where(sql`${sectionResources.id} IN (${id1}, ${id2})`);
+  if (rows.length < 2) return;
+  const [a, b] = rows;
+  await db.update(sectionResources).set({ sortOrder: b.sortOrder }).where(eq(sectionResources.id, a.id));
+  await db.update(sectionResources).set({ sortOrder: a.sortOrder }).where(eq(sectionResources.id, b.id));
+}
+
+export async function getAllSectionResources() {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: sectionResources.id,
+      courseId: sectionResources.courseId,
+      label: sectionResources.label,
+      fileUrl: sectionResources.fileUrl,
+      fileName: sectionResources.fileName,
+      sortOrder: sectionResources.sortOrder,
+      createdAt: sectionResources.createdAt,
+      courseTitle: courses.title,
+      courseCategory: courses.category,
+    })
+    .from(sectionResources)
+    .innerJoin(courses, eq(sectionResources.courseId, courses.id))
+    .orderBy(asc(courses.category), asc(sectionResources.courseId), asc(sectionResources.sortOrder));
+  return rows;
+}
