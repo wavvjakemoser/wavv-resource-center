@@ -79,6 +79,7 @@ import {
   AlertTriangle,
   ArrowUp,
   ArrowDown,
+  ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -2032,15 +2033,13 @@ function ContentTab() {
         {/* Collapsible header — closed by default */}
         <button
           onClick={() => setShowInactive((v) => !v)}
-          className="flex items-center gap-3 mb-5 w-full text-left group"
+          className="flex items-center gap-3 mb-5 w-full text-left"
         >
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#4b5563" }} />
-            <h2 className="text-base font-bold text-white tracking-tight">Inactive Sections / Videos</h2>
-          </div>
-          <span className="text-xs text-gray-500 font-medium">Hidden from users — deactivate first, then delete permanently</span>
-          <span className="ml-auto flex-shrink-0 transition-transform" style={{ color: "#6b7280", transform: showInactive ? "rotate(180deg)" : "rotate(0deg)" }}>
-            <ChevronDown size={15} />
+          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#4b5563" }} />
+          <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections / Videos</h2>
+          <span className="text-xs text-gray-500 font-medium ml-2">Hidden from users — deactivate first, then delete permanently</span>
+          <span className="ml-auto flex-shrink-0" style={{ color: "#6b7280" }}>
+            {showInactive ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
           </span>
         </button>
         {showInactive && (
