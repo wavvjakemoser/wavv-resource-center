@@ -767,3 +767,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Content Requests: update DB schema to remove category/formatPreference/priority columns (or make optional/hidden)
 - [x] Users tab: Add User button opens a form (name, email, role) — creates account directly
 - [x] Academy Admin: confirmed Add Section and Add Video flows work end-to-end
+
+## Admin/Academy Fixes Batch 3
+
+- [x] Academy Admin: move "Add Section" button to top of tab with category selector (assign to category on creation)
+- [x] Academy Admin: restyle "Add Video" button to a visible color (blue or green, not grey)
+- [x] Content Requests: always show all 3 groups (Video/Webinar/Guide) even when empty, with empty state per group
+- [x] Academy user-facing: deactivated/hidden sections must not appear on the Academy page

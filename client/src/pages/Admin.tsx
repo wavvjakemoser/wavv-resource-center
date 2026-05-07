@@ -1843,7 +1843,7 @@ function SectionRow2({
                 type="button"
                 onClick={onAddVideo}
                 className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition hover:opacity-90"
-                style={{ background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px dashed #333" }}
+                style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px dashed rgba(0,116,244,0.4)" }}
               >
                 <Plus size={11} /> Add Video
               </button>
@@ -2287,6 +2287,24 @@ function ContentTab() {
 
   return (
     <div className="space-y-0">
+      {/* ── Top-level Add Section bar ── */}
+      <div className="flex items-center gap-3 mb-6 p-3 rounded-xl" style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.18)" }}>
+        <span className="text-xs font-semibold text-gray-400 whitespace-nowrap">Add Section to:</span>
+        <div className="flex flex-wrap gap-2 flex-1">
+          {ACADEMY_CATEGORIES.map(({ key, label, color }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => handleAddSection(key)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+              style={{ background: `${color}18`, color, border: `1px solid ${color}40` }}
+            >
+              <Plus size={12} /> {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ── Section 1: Live Sections & Courses ── */}
       <div className="pb-10">
         <div className="flex items-center gap-3 mb-5">
@@ -4190,15 +4208,9 @@ function ContentRequestsTab() {
             <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: "#1a1a1a" }} />
           ))}
         </div>
-      ) : !requests || requests.length === 0 ? (
-        <div className="text-center py-16 rounded-xl" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
-          <Bell size={32} className="text-gray-700 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm font-medium">No content requests yet.</p>
-          <p className="text-gray-600 text-xs mt-1">Requests submitted by users will appear here.</p>
-        </div>
       ) : (
         <ContentRequestGroups
-          requests={requests as Array<{
+          requests={(requests ?? []) as Array<{
             id: number;
             userId: number;
             createdAt: Date | string;
@@ -4331,7 +4343,6 @@ function ContentRequestGroups({
     <div className="space-y-3">
       {allGroups.map(({ key, label, description }) => {
         const group = grouped[key] ?? [];
-        if (group.length === 0) return null;
         const color = TYPE_COLOR[key] ?? "#9ca3af";
         const isCollapsed = collapsed[key];
         const isShowAll = showAll[key];
@@ -4367,6 +4378,11 @@ function ContentRequestGroups({
             </div>
             {!isCollapsed && (
               <>
+                {group.length === 0 ? (
+                  <div className="px-5 py-6 text-center" style={{ background: "#111" }}>
+                    <p className="text-xs text-gray-600">No {label.toLowerCase()} submitted yet.</p>
+                  </div>
+                ) : (
                 <Table>
                   <TableHeader>
                     <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
@@ -4415,6 +4431,7 @@ function ContentRequestGroups({
                     ))}
                   </TableBody>
                 </Table>
+                )}
                 {group.length > PREVIEW_COUNT && (
                   <div className="px-5 py-2 border-t border-[#2a2a2a]" style={{ background: "#111" }}>
                     <button

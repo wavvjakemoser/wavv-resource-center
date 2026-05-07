@@ -544,7 +544,8 @@ export default function AcademyCategory() {
   );
 
   // Fetch DB courses (sections) for this category to get section-level tags
-  const { data: dbCourses = [] } = trpc.academy.getCoursesByCategory.useQuery(
+  // Only published courses are returned by getCoursesByCategory (server filters published=true)
+  const { data: dbCourses = [], isLoading: dbCoursesLoading } = trpc.academy.getCoursesByCategory.useQuery(
     { category: cat?.key ?? "" },
     { enabled: !!cat }
   );
@@ -577,6 +578,7 @@ export default function AcademyCategory() {
   }
 
   // Build a map: normalized course title -> { tags }
+  // Only published courses are in dbCourses (server filters published=true)
   const dbCourseMap = useMemo(() => {
     const map: Record<string, { tags: string | null }> = {};
     for (const c of dbCourses) {
@@ -584,6 +586,12 @@ export default function AcademyCategory() {
     }
     return map;
   }, [dbCourses]);
+
+  // Set of published section titles (normalized) — used to hide deactivated sections
+  const publishedSectionTitles = useMemo(
+    () => new Set(dbCourses.map((c) => c.title.toLowerCase().trim())),
+    [dbCourses]
+  );
 
   // Build a map: normalized title -> { tags, createdAt }
   const dbLessonMap = useMemo(() => {
@@ -606,8 +614,13 @@ export default function AcademyCategory() {
   // Filter sections: hide videos that don't match the active filter
   const filteredSections = useMemo(() => {
     if (!cat) return [];
-    if (!activeFilter) return cat.sections;
-    return cat.sections
+    // Hide sections whose DB course is deactivated (not in publishedSectionTitles)
+    // Only apply this filter once dbCourses has loaded (to avoid flash-hiding during load)
+    const visibleSections = dbCoursesLoading
+      ? cat.sections
+      : cat.sections.filter((s) => publishedSectionTitles.has(s.title.toLowerCase().trim()));
+    if (!activeFilter) return visibleSections;
+    return visibleSections
       .map((section) => ({
         ...section,
         videos: section.videos.filter((v) => {
