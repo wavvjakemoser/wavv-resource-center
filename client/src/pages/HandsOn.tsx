@@ -182,7 +182,9 @@ function RequestModal({
 export default function HandsOn() {
   const { data: user } = trpc.auth.me.useQuery();
   const { data: playgroundStats } = trpc.playground.getStats.useQuery();
+  const { data: requestStatus } = trpc.playground.hasRequested.useQuery();
   const [modalOpen, setModalOpen] = useState(false);
+  const alreadyRequested = requestStatus?.hasRequested ?? false;
 
   // Determine the most requested playground (if any requests exist)
   const mostRequested = playgroundStats?.byPlayground?.[0]?.playground ?? null;
@@ -302,14 +304,24 @@ export default function HandsOn() {
               <p className="text-gray-500 text-xs mt-0.5">Sign up and we'll let you know the moment it's ready.</p>
             </div>
           </div>
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
-          >
-            <Bell size={14} />
-            Notify Me
-          </button>
+          {alreadyRequested ? (
+            <div
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 cursor-default"
+              style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.3)", color: "#c084fc" }}
+            >
+              <CheckCircle2 size={14} />
+              Requested
+            </div>
+          ) : (
+            <button
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+            >
+              <Bell size={14} />
+              Notify Me
+            </button>
+          )}
         </div>
 
       </div>

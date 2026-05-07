@@ -65,6 +65,7 @@ import {
   isBookmarked,
   createPlaygroundRequest,
   getPlaygroundRequests,
+  getUserPlaygroundRequest,
   getPlaygroundStats,
   getWebinarRegistrantsExport,
   getGuideDownloadersExport,
@@ -1113,11 +1114,20 @@ export const appRouter = router({
     getStats: superAdminProcedure.query(async () => {
       return getPlaygroundStats();
     }),
+    hasRequested: protectedProcedure.query(async ({ ctx }) => {
+      const existing = await getUserPlaygroundRequest(ctx.user.id);
+      return { hasRequested: existing !== null };
+    }),
     submitRequest: protectedProcedure
       .input(z.object({
-        optIn: z.boolean().default(true),
+        optIn: z.boolean().default(false),
       }))
       .mutation(async ({ ctx, input }) => {
+        // Enforce one-request-per-user
+        const existing = await getUserPlaygroundRequest(ctx.user.id);
+        if (existing) {
+          throw new TRPCError({ code: "CONFLICT", message: "You have already requested access to WAVV Playground." });
+        }
         const userName = ctx.user.name ?? "";
         const userEmail = ctx.user.email ?? "";
         await createPlaygroundRequest({

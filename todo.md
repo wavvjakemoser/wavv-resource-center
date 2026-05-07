@@ -792,3 +792,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Password validation: min 8 chars enforced on register, acceptInvite, and UI forms
 - [x] "Don't have an account? Create one" link on sign-in page already present (verified)
 - [x] Audit and remove any remaining Manus OAuth references from frontend and backend
+
+## Batch 6: Auth Fix, Analytics Export, Playground Dedup
+
+- [x] Fix Manus OAuth re-prompt: removed OAuth route registration from server; all auth redirects go to /login only
+- [x] Analytics per-tile export: added CSV download button (FileDown icon) to Sign-Ins, Academy Lessons Completed, Evergreen Webinars Watched, Webinar Registrations, Guides Downloads tiles
+- [x] Analytics export: raw event rows (user name, email, event type, resource, timestamp) filtered to current time range
+- [x] Analytics export: CSV format with header block (report name, period, generated date, total count) + GHL-friendly column names
+- [x] Playground access request: enforce one request per user (server throws CONFLICT on duplicate)
+- [x] Playground access request: after submission, button changes to "Requested" (purple badge, stays on reload via hasRequested query)

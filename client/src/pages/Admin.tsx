@@ -469,13 +469,25 @@ function StatDetailDrawer({
             <h2 className="text-lg font-bold text-white">{label}</h2>
             <p className="text-xs text-gray-500 mt-0.5">Last {days} days · {rows.length} events</p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/10 transition"
-            style={{ color: "#9ca3af" }}
-          >
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => exportTileCSV(label, rows, days)}
+              disabled={rows.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/10"
+              style={{ color, border: `1px solid ${color}40` }}
+              title="Export this data as CSV"
+            >
+              <FileDown size={13} />
+              Export CSV
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-white/10 transition"
+              style={{ color: "#9ca3af" }}
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Sort control */}
@@ -1541,6 +1553,49 @@ async function exportCSV(days: number) {
   }
 }
 
+function exportTileCSV(
+  label: string,
+  rows: Array<{
+    id: number;
+    eventType: string;
+    resourceType: string | null;
+    resourceId: number | null;
+    metadata: string | null;
+    createdAt: Date | null;
+    userId: number | null;
+    userName: string | null;
+    userEmail: string | null;
+  }>,
+  days: number
+) {
+  const safeName = label.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+  const lines: string[] = [];
+  lines.push(`WAVV Analytics Export: ${label}`);
+  lines.push(`Period: Last ${days} days`);
+  lines.push(`Generated: ${new Date().toLocaleString()}`);
+  lines.push(`Total Events: ${rows.length}`);
+  lines.push("");
+  lines.push("Timestamp,User Name,User Email,Event Type,Resource Type,Resource ID,Metadata");
+  rows.forEach((row) => {
+    const ts = row.createdAt ? new Date(row.createdAt).toLocaleString() : "";
+    const name = (row.userName ?? "Anonymous").replace(/,/g, " ");
+    const email = row.userEmail ?? "";
+    const evtType = row.eventType.replace(/_/g, " ");
+    const resType = row.resourceType ?? "";
+    const resId = row.resourceId != null ? String(row.resourceId) : "";
+    const meta = row.metadata ? `"${String(row.metadata).replace(/"/g, '""')}"` : "";
+    lines.push(`${ts},${name},${email},${evtType},${resType},${resId},${meta}`);
+  });
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `wavv-${safeName}-${days}d-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 function formatTimeAgo(date: Date | string): string {
   const now = Date.now();
   const then = new Date(date).getTime();

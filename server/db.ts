@@ -1454,3 +1454,14 @@ export async function claimInvite(data: {
   const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   return user;
 }
+
+export async function getUserPlaygroundRequest(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(playgroundRequests)
+    .where(eq(playgroundRequests.userId, userId))
+    .limit(1);
+  return rows[0] ?? null;
+}
