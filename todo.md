@@ -715,9 +715,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Launch Readiness Pass
 
-- [x] Remove Guides & Docs from sidebar nav (PortalLayout)
-- [x] Remove Guides & Docs from Dashboard quick-access tiles
-- [ ] Remove Guides & Docs route from App.tsx (route kept dormant — page still accessible via URL but not linked)
+- [x] Guides & Docs restored to sidebar nav (PortalLayout) — between Webinars and Playground
+- [x] Guides & Docs restored to Dashboard quick-access tiles (5-tile grid)
+- [x] Guides & Docs route active in App.tsx
 - [x] Remove fake progress rings from Dashboard hero — hero already uses CTA button, no rings present
 - [x] Create exclusive webinar in DB: "Always Know Who to Call with WAVV Call Boards" — already exists (ID 60001, May 14 17:00 UTC, registration URL set)
 - [x] Remove all On-Demand Recording webinar placeholders (DEMO-stamped) — 0 on-demand records in DB
