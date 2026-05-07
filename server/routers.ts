@@ -68,6 +68,7 @@ import {
   getPlaygroundRequests,
   getUserPlaygroundRequest,
   getPlaygroundStats,
+  deletePlaygroundRequest,
   getWebinarRegistrantsExport,
   getGuideDownloadersExport,
   getSupportSubmittersExport,
@@ -1152,6 +1153,12 @@ export const appRouter = router({
           title: `New Playground Opt-In: ${userName}`,
           content: `User: ${userName} (${userEmail})\nOpt-in to notifications: ${input.optIn ? "Yes" : "No"}`,
         });
+        return { success: true };
+      }),
+    deleteRequest: superAdminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deletePlaygroundRequest(input.id);
         return { success: true };
       }),
   }),

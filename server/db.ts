@@ -954,7 +954,11 @@ export async function getPlaygroundStats() {
     .sort((a, b) => b.count - a.count);
   return { total, byPlayground };
 }
-
+export async function deletePlaygroundRequest(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(playgroundRequests).where(eq(playgroundRequests.id, id));
+}
 // ─── Export helpers ───────────────────────────────────────────────────────────
 
 export async function getWebinarRegistrantsExport() {

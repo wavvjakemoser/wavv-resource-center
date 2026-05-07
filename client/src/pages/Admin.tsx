@@ -2349,7 +2349,7 @@ function ContentTab() {
       label: "Onboarding",
       subtitle: "Get your team up and running with WAVV",
       color: "#0074F4",
-      banner: "/manus-storage/banner-onboarding-v2_ddea462f.png",
+      banner: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663417013740/JHIRajYPPlnohilQ.png",
       videoCount: 12,
     },
     {
@@ -3138,8 +3138,19 @@ function LessonRow({
 
 // ─── Playground Tab ───────────────────────────────────────────────────────────
 function PlaygroundTab() {
+  const utils = trpc.useUtils();
   const { data: stats, isLoading: statsLoading } = trpc.playground.getStats.useQuery();
   const { data: requests, isLoading: reqLoading } = trpc.playground.getRequests.useQuery();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const deleteRequestMutation = trpc.playground.deleteRequest.useMutation({
+    onSuccess: () => {
+      toast.success("Request deleted.");
+      setDeleteConfirmId(null);
+      utils.playground.getRequests.invalidate();
+      utils.playground.getStats.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   function exportCSVRequests() {
     if (!requests || requests.length === 0) { toast.error("No requests to export"); return; }
@@ -3282,6 +3293,7 @@ function PlaygroundTab() {
                 <TableHead className="text-gray-400 text-xs">Playground</TableHead>
                 <TableHead className="text-gray-400 text-xs">Notes</TableHead>
                 <TableHead className="text-gray-400 text-xs">Date</TableHead>
+                <TableHead className="text-gray-400 text-xs w-16"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -3305,6 +3317,34 @@ function PlaygroundTab() {
                   </TableCell>
                   <TableCell className="text-gray-500 text-xs">
                     {new Date(req.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    {deleteConfirmId === req.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => deleteRequestMutation.mutate({ id: req.id })}
+                          disabled={deleteRequestMutation.isPending}
+                          className="text-[10px] px-2 py-0.5 rounded font-semibold"
+                          style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}
+                        >
+                          {deleteRequestMutation.isPending ? "..." : "Confirm"}
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmId(null)}
+                          className="text-[10px] px-2 py-0.5 rounded font-semibold text-gray-500 hover:text-gray-300"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setDeleteConfirmId(req.id)}
+                        className="text-gray-600 hover:text-red-400 transition-colors"
+                        title="Delete request"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

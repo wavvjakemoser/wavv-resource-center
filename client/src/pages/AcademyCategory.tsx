@@ -86,7 +86,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Onboarding",
     subtitle: "Get your team up and running with WAVV quickly and effectively.",
     color: "#0074F4",
-    thumbnail: "/manus-storage/banner-onboarding-v2_ddea462f.png",
+    thumbnail: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663417013740/JHIRajYPPlnohilQ.png",
     sections: [
       {
         id: "onb-1",

@@ -812,3 +812,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Webinars tab: add "Completed" sub-tab showing archived exclusive webinars
 - [x] Admin Webinars tab: Completed webinars have "Publish to On-Demand" and "Keep Archived" actions
 - [x] User-facing Webinars page: archived exclusive webinars no longer appear in the upcoming list
+
+## Batch 8: Webinar Registration Simplification, Onboarding Thumbnail Fix, Playground Delete
+
+- [x] Webinars: remove register/registered state tracking — button is a plain external link that fires a click-tracking analytics event only
+- [x] Webinars: remove getMyRegistrations query and isRegistered state from WebinarCard
+- [x] Webinars: button label is always "Register Now →" (external URL) or "Join Next Session →" (evergreen) — no "Registered ✓" state
+- [x] Academy: investigate and fix Onboarding category thumbnail lag/missing issue
+- [x] Playground admin: add delete button on each access request row (super_admin only, with confirmation)
+- [x] Playground admin: add deletePlaygroundRequest tRPC procedure

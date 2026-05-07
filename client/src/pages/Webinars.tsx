@@ -43,17 +43,11 @@ function WebinarCard({
   variant: WebinarType;
   nextSession?: Date;
 }) {
-  const { data: myRegistrations } = trpc.webinars.getMyRegistrations.useQuery();
-  const registerMutation = trpc.webinars.register.useMutation({
-    onSuccess: (res) => {
-      if (res.alreadyRegistered) toast.info("You're already registered.");
-      else toast.success("Registered! You'll be notified before the session starts.");
-    },
-  });
+  const registerClickMutation = trpc.webinars.register.useMutation();
   const watchMutation = trpc.webinars.watch.useMutation();
 
-  const isRegistered = (myRegistrations ?? []).some((r) => r.webinarId === webinar.id);
-  const countdown = useCountdown(nextSession ?? nextHalfHour());
+  // countdown kept for future use if needed
+  const _countdown = useCountdown(nextSession ?? nextHalfHour());
 
   const SECTION_ACCENT: Record<WebinarType, string> = {
     exclusive: "#D4AF37",
@@ -197,30 +191,14 @@ function WebinarCard({
               href={webinar.registrationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => registerMutation.mutate({ webinarId: webinar.id })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                background: isRegistered ? "rgba(103,199,40,0.15)" : `${accentColor}22`,
-                color: isRegistered ? "#67C728" : accentColor,
-                border: `1px solid ${isRegistered ? "#67C72840" : `${accentColor}40`}`,
-              }}
+              onClick={() => registerClickMutation.mutate({ webinarId: webinar.id })}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
             >
               <ExternalLink size={12} />
-              {isRegistered ? "Registered ✓" : variant === "evergreen" ? "Join Next Session →" : "Register Now →"}
+              {variant === "evergreen" ? "Join Next Session →" : "Register Now →"}
             </a>
-          ) : (
-            <button
-              onClick={() => registerMutation.mutate({ webinarId: webinar.id })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                background: isRegistered ? "rgba(103,199,40,0.15)" : `${accentColor}22`,
-                color: isRegistered ? "#67C728" : accentColor,
-                border: `1px solid ${isRegistered ? "#67C72840" : `${accentColor}40`}`,
-              }}
-            >
-              {isRegistered ? "Registered ✓" : variant === "evergreen" ? "Join Next Session →" : "Register Now →"}
-            </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

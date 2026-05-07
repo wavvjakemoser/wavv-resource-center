@@ -35,7 +35,7 @@ const CATEGORIES = [
     subtitle: "Get your team up and running with WAVV",
     color: "#0074F4",
     icon: Rocket,
-    thumbnail: "/manus-storage/banner-onboarding-v2_ddea462f.png",
+    thumbnail: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663417013740/JHIRajYPPlnohilQ.png",
     placeholders: [
       {
         id: "p-onb-1",
