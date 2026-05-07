@@ -415,6 +415,21 @@ const guidesRouter = router({
     }),
 
   // Admin CRUD
+  // Upload a guide file to S3 and return a masked portal URL
+  uploadFile: adminProcedure
+    .input(z.object({
+      base64: z.string(),
+      mimeType: z.enum(["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]),
+      fileName: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      const { storagePut } = await import("./storage");
+      const buffer = Buffer.from(input.base64, "base64");
+      const ext = input.fileName.split(".").pop() ?? "pdf";
+      const key = `guides/${Date.now()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      return { url };
+    }),
   adminCreate: adminProcedure
     .input(
       z.object({
@@ -422,6 +437,7 @@ const guidesRouter = router({
         description: z.string().optional(),
         category: z.string().optional(),
         fileUrl: z.string().optional(),
+        // fileType maps to the category section: pdf | checklist | playbook | other(=Resource)
         fileType: z.enum(["pdf", "checklist", "playbook", "other"]).optional(),
       })
     )

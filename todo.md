@@ -732,3 +732,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Admin — Webinars tab: ensure accent color picker is a real color input (not just text field)
 - [ ] Admin — Academy tab: verify "Add Section" and "Add Video" flows work end-to-end
 - [ ] Admin — Academy tab: verify edit/delete/reorder all work without developer involvement
+
+## Guides & Docs — File Upload + Category System
+
+- [ ] Add guides.upload tRPC procedure (accepts file buffer, stores in S3, returns masked URL)
+- [ ] Add category dropdown to Admin Guides form (PDF, Checklist, Playbook, Resource)
+- [ ] Add file upload input to Admin Guides form (PDF/DOCX/XLSX, max 16MB)
+- [ ] Add file type selector to Admin Guides form (top 3: PDF, DOCX, XLSX — default PDF)
+- [ ] Update user-facing GuidesAndDocs page to group cards by category with correct color coding

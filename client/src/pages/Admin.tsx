@@ -3142,14 +3142,17 @@ function GuidesTab() {
   const { data: guides = [], isLoading } = trpc.guides.adminList.useQuery();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
-    category: "",
     fileUrl: "",
+    // fileType = the section/category this guide belongs to
     fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other",
   });
-
+  const uploadFileMutation = trpc.guides.uploadFile.useMutation({
+    onError: (e) => toast.error("Upload failed: " + e.message),
+  });
   const createMutation = trpc.guides.adminCreate.useMutation({
     onSuccess: () => { utils.guides.adminList.invalidate(); setShowForm(false); resetForm(); toast.success("Guide created"); },
     onError: (e) => toast.error(e.message),
@@ -3162,28 +3165,48 @@ function GuidesTab() {
     onSuccess: () => { utils.guides.adminList.invalidate(); toast.success("Guide deleted"); },
     onError: (e) => toast.error(e.message),
   });
-
-  function resetForm() { setForm({ title: "", description: "", category: "", fileUrl: "", fileType: "pdf" }); }
-
+  function resetForm() { setForm({ title: "", description: "", fileUrl: "", fileType: "pdf" }); }
   function startEdit(g: typeof guides[0]) {
     setEditId(g.id);
-    setForm({ title: g.title, description: g.description ?? "", category: g.category ?? "", fileUrl: g.fileUrl ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other") ?? "pdf" });
+    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other") ?? "pdf" });
     setShowForm(true);
   }
-
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 16 * 1024 * 1024) { toast.error("File too large — max 16 MB"); return; }
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
+    type AllowedMime = "application/pdf" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document" | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    const mimeMap: Record<string, AllowedMime> = {
+      pdf:  "application/pdf",
+      docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    };
+    const mimeType = mimeMap[ext];
+    if (!mimeType) { toast.error("Unsupported format — use PDF, DOCX, or XLSX"); return; }
+    setUploadingFile(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const result = await uploadFileMutation.mutateAsync({ base64, mimeType, fileName: file.name });
+      setForm(f => ({ ...f, fileUrl: result.url }));
+      toast.success("File uploaded — URL masked by portal storage");
+    } catch { /* handled by onError */ } finally { setUploadingFile(false); }
+  }
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim()) { toast.error("Title is required"); return; }
     if (editId !== null) {
-      updateMutation.mutate({ id: editId, data: { ...form, description: form.description || undefined, category: form.category || undefined, fileUrl: form.fileUrl || undefined } });
+      updateMutation.mutate({ id: editId, data: { title: form.title, description: form.description || undefined, fileType: form.fileType, fileUrl: form.fileUrl || undefined } });
     } else {
-      createMutation.mutate({ ...form, description: form.description || undefined, category: form.category || undefined, fileUrl: form.fileUrl || undefined });
+      createMutation.mutate({ title: form.title, description: form.description || undefined, fileType: form.fileType, fileUrl: form.fileUrl || undefined });
     }
   }
-
-  const FILE_TYPE_COLORS: Record<string, string> = { pdf: "#ef4444", checklist: "#0074F4", playbook: "#67C728", other: "#9ca3af" };
   const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -3211,51 +3234,72 @@ function GuidesTab() {
           </button>
         </div>
       </div>
-
       {showForm && (
         <div className="rounded-xl p-5 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
           <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit Guide" : "New Guide"}</h3>
           <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Row 1: Title + Category */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Title *</label>
                 <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Guide title" />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Category</label>
-                <input style={inputStyle} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} placeholder="e.g. Onboarding, Connection Rates" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Description</label>
-              <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">File Type</label>
+                <label className="block text-xs text-gray-400 mb-1">Category (Section)</label>
                 <select style={{ ...inputStyle, appearance: "none" as const }} value={form.fileType} onChange={e => setForm(f => ({ ...f, fileType: e.target.value as "pdf" | "checklist" | "playbook" | "other" }))}>
                   <option value="pdf">PDF</option>
                   <option value="checklist">Checklist</option>
                   <option value="playbook">Playbook</option>
-                  <option value="other">Other</option>
+                  <option value="other">Resource</option>
                 </select>
               </div>
+            </div>
+            {/* Row 2: Description */}
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Description</label>
+              <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description" />
+            </div>
+            {/* Row 3: File upload + URL preview */}
+            <div className="space-y-2">
+              <label className="block text-xs text-gray-400 mb-1">File Attachment <span className="text-gray-600">(PDF, DOCX, or XLSX — max 16 MB)</span></label>
+              <div className="flex items-center gap-3">
+                <label
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90"
+                  style={{ background: uploadingFile ? "#2a2a2a" : "#1a1a1a", border: "1px solid #3a3a3a", color: uploadingFile ? "#9ca3af" : "#fff" }}
+                >
+                  {uploadingFile ? (
+                    <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                  ) : (
+                    <><FileDown size={13} /> Choose File</>
+                  )}
+                  <input type="file" accept=".pdf,.docx,.xlsx" className="hidden" onChange={handleFileUpload} disabled={uploadingFile} />
+                </label>
+                {form.fileUrl && (
+                  <span className="text-xs text-green-400 flex items-center gap-1 truncate max-w-xs">
+                    <CheckCircle2 size={12} /> File attached
+                    <a href={form.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline ml-1">Preview</a>
+                  </span>
+                )}
+                {!form.fileUrl && (
+                  <span className="text-xs text-gray-600">No file attached</span>
+                )}
+              </div>
+              {/* Fallback: manual URL */}
               <div>
-                <label className="block text-xs text-gray-400 mb-1">File URL</label>
-                <input style={inputStyle} value={form.fileUrl} onChange={e => setForm(f => ({ ...f, fileUrl: e.target.value }))} placeholder="https://..." />
+                <label className="block text-xs text-gray-500 mb-1">Or paste a URL directly</label>
+                <input style={{ ...inputStyle, fontSize: "12px" }} value={form.fileUrl} onChange={e => setForm(f => ({ ...f, fileUrl: e.target.value }))} placeholder="https://..." />
               </div>
             </div>
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#2a2a2a" }}>Cancel</button>
-              <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>
+              <button type="submit" disabled={createMutation.isPending || updateMutation.isPending || uploadingFile} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>
                 {editId !== null ? "Save Changes" : "Create Guide"}
               </button>
             </div>
           </form>
         </div>
       )}
-
-      {/* Grouped by file type */}
+      {/* Grouped by category */}
       {isLoading ? (
         <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
       ) : (
