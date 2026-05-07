@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, useParams } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
@@ -278,7 +278,7 @@ const CATEGORY_DATA: CategoryData[] = [
 ];
 
 /// DB lesson metadata (tags, createdAt) keyed by normalized title
-type DbLessonMeta = { tags: string | null; createdAt: Date | string; fileUrl?: string | null };
+type DbLessonMeta = { id: number; courseId: number; tags: string | null; createdAt: Date | string; fileUrl?: string | null };
 
 // ─── Expandable section row ───────────────────────────────────────────────
 function getEmbedUrl(url: string): string | null {
@@ -320,15 +320,18 @@ function SectionRow({
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+      style={{ background: "#1a1a1a", border: `1px solid ${accentColor}30` }}
     >
       {/* Section header */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-white/5"
+        className="w-full flex items-center gap-3 px-5 py-4 text-left transition-all"
+        style={{ background: open ? `${accentColor}12` : `${accentColor}07` }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = `${accentColor}16`; }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = open ? `${accentColor}12` : `${accentColor}07`; }}
       >
         {(() => { const Icon = CATEGORY_ICONS[categoryKey] ?? Rocket; return <Icon size={16} style={{ color: accentColor, flexShrink: 0 }} />; })()}
-        <span className="text-sm font-semibold text-white">{section.title}</span>
+        <span className="text-sm font-bold text-white tracking-tight">{section.title}</span>
         {courseTags.length > 0 && (
           <div className="flex flex-wrap gap-1 ml-1">
             {courseTags.map((tag) => {
@@ -352,8 +355,8 @@ function SectionRow({
         </span>
         <ChevronDown
           size={16}
-          className="text-gray-500 transition-transform duration-200"
-          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}
+          className="transition-transform duration-200"
+          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0, color: accentColor }}
         />
       </button>
 
@@ -368,7 +371,7 @@ function SectionRow({
               borderBottom: idx < section.videos.length - 1 ? "1px solid #222" : "none",
               textDecoration: "none" as const,
             };
-            const rowClass = "flex items-center gap-3 px-5 py-3 transition-colors hover:bg-white/5";
+            const rowClass = "flex items-center gap-3 px-5 py-3.5 transition-all";
             // Look up DB metadata by title (case-insensitive)
             const dbMeta = dbLessonMap[video.title.toLowerCase().trim()];
             const tagList = dbMeta?.tags ? dbMeta.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
@@ -381,11 +384,11 @@ function SectionRow({
               <>
                 {/* Play / lock icon */}
                 <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: video.status === "available" ? `${accentColor}20` : "rgba(255,255,255,0.04)" }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: video.status === "available" ? `${accentColor}25` : "rgba(255,255,255,0.04)", border: video.status === "available" ? `1px solid ${accentColor}50` : "1px solid #333" }}
                 >
                   {video.status === "available" ? (
-                    <Play size={12} style={{ color: accentColor }} />
+                    <Play size={13} style={{ color: accentColor }} />
                   ) : (
                     <Lock size={11} className="text-gray-600" />
                   )}
@@ -393,8 +396,8 @@ function SectionRow({
                 {/* Title + tag pills */}
                 <div className="flex-1 min-w-0">
                   <span
-                    className="text-sm"
-                    style={{ color: video.status === "available" ? "#e5e7eb" : "#6b7280" }}
+                    className="text-sm font-medium"
+                    style={{ color: video.status === "available" ? "#f3f4f6" : "#6b7280" }}
                   >
                     {video.title}
                   </span>
@@ -438,7 +441,13 @@ function SectionRow({
                     </span>
                   )}
                   {video.status === "available" && (
-                    <ChevronRight size={14} style={{ color: accentColor }} />
+                    <span
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 flex-shrink-0"
+                      style={{ background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}40` }}
+                    >
+                      <Play size={9} style={{ color: accentColor }} />
+                      Watch
+                    </span>
                   )}
                   {onToggleBookmark && video.status === "available" && (() => {
                     const cid = hashTitle(video.title);
@@ -469,6 +478,8 @@ function SectionRow({
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPlay?.(embedUrl, video.title); } }}
                 className={rowClass + " cursor-pointer"}
                 style={effectiveDownloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = `${accentColor}0a`; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = ""; }}
               >
                 {inner}
               </div>
@@ -525,8 +536,16 @@ export default function AcademyCategory() {
 
   // Video player modal state
   const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
-  const handlePlay = (embedUrl: string, title: string) => setPlayingVideo({ embedUrl, title });
-  const handleClosePlayer = () => setPlayingVideo(null);
+  const trackOpen = trpc.academy.trackOpen.useMutation();
+  const handlePlay = (embedUrl: string, title: string) => {
+    setPlayingVideo({ embedUrl, title });
+    // Fire-and-forget: create an in-progress row so this lesson appears in Continue Learning
+    // We look up the lesson by title from the dbLessonMap built below
+    // (handlePlay is called before dbLessonMap is in scope here, so we pass a callback)
+    setPlayingTitle(title);
+  };
+  const [playingTitle, setPlayingTitle] = useState<string | null>(null);
+  const handleClosePlayer = () => { setPlayingVideo(null); setPlayingTitle(null); };
 
   // Fetch DB lessons for this category to get tags + createdAt
   const { data: dbLessons = [] } = trpc.academy.getLessonsByCategory.useQuery(
@@ -588,10 +607,20 @@ export default function AcademyCategory() {
   const dbLessonMap = useMemo(() => {
     const map: Record<string, DbLessonMeta> = {};
     for (const l of dbLessons) {
-      map[l.title.toLowerCase().trim()] = { tags: l.tags ?? null, createdAt: l.createdAt, fileUrl: (l as any).fileUrl ?? null };
+      map[l.title.toLowerCase().trim()] = { id: l.id, courseId: l.courseId, tags: l.tags ?? null, createdAt: l.createdAt, fileUrl: (l as any).fileUrl ?? null };
     }
     return map;
   }, [dbLessons]);
+
+  // When a video is opened, fire trackOpen to create an in-progress row for Continue Learning
+  useEffect(() => {
+    if (!playingTitle) return;
+    const meta = dbLessonMap[playingTitle.toLowerCase().trim()];
+    if (meta?.id && meta?.courseId) {
+      trackOpen.mutate({ lessonId: meta.id, courseId: meta.courseId });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playingTitle]);
 
   // Collect all tags present in this category for the filter bar
   const availableTags = useMemo(() => {

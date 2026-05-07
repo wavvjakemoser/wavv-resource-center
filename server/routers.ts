@@ -47,6 +47,7 @@ import {
   incrementGuideDownload,
   incrementWebinarView,
   markLessonComplete,
+  touchLessonProgress,
   registerForWebinar,
   trackEvent,
   updateCourse,
@@ -146,6 +147,12 @@ const academyRouter = router({
     .input(z.object({ limit: z.number().optional() }))
     .query(({ input }) => getRecentLessons(input.limit ?? 4)),
 
+  trackOpen: protectedProcedure
+    .input(z.object({ lessonId: z.number(), courseId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await touchLessonProgress(ctx.user.id, input.lessonId, input.courseId);
+      return { success: true };
+    }),
   markComplete: protectedProcedure
     .input(z.object({ lessonId: z.number(), courseId: z.number() }))
     .mutation(async ({ ctx, input }) => {

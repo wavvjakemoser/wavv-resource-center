@@ -876,3 +876,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove Readiness Widget entirely from all pages (Academy, Webinars, GuidesAndDocs, HandsOn, Support) and delete the component
 - [x] Profile page: remove support ticket section (not part of this build)
 - [x] Admin analytics: fixed slow load for admin users — changed 8 read-only procedures from superAdminProcedure to adminProcedure; Reset Data + Export CSV buttons hidden for non-super_admin
+
+## Batch 17: Academy UX Fixes
+- [x] AcademyCategory: enhance section headers and video row buttons so they are clearly visible and clickable (not blending into background)
+- [x] Continue Learning: auto-track partial progress when a lesson is opened (not just on explicit Mark Complete)

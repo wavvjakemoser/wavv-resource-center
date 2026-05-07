@@ -237,6 +237,30 @@ export async function getUserProgress(userId: number, courseId?: number) {
   return db.select().from(lessonProgress).where(conditions);
 }
 
+/**
+ * Called when a user opens a lesson (clicks Watch). Creates an in-progress row if none exists.
+ * Does NOT overwrite a completed row — preserves completion state.
+ */
+export async function touchLessonProgress(userId: number, lessonId: number, courseId: number) {
+  const db = await getDb();
+  if (!db) return;
+  const existing = await db
+    .select()
+    .from(lessonProgress)
+    .where(and(eq(lessonProgress.userId, userId), eq(lessonProgress.lessonId, lessonId)))
+    .limit(1);
+  if (existing.length === 0) {
+    // No row yet — insert an in-progress (not completed) row so it shows in Continue Learning
+    await db.insert(lessonProgress).values({
+      userId,
+      lessonId,
+      courseId,
+      completed: false,
+    });
+  }
+  // If row exists (completed or in-progress), leave it untouched
+}
+
 export async function markLessonComplete(userId: number, lessonId: number, courseId: number) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
