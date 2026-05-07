@@ -1850,6 +1850,8 @@ function ContentTab() {
 
   // Delete confirmation state
   const [deleteDialog, setDeleteDialog] = useState<{ type: "lesson" | "course"; id: number; title: string } | null>(null);
+  // Inactive panel collapsed by default
+  const [showInactive, setShowInactive] = useState(false);
 
   function handleAddSection(categoryKey: string) {
     setNewSectionTitle("");
@@ -2027,47 +2029,58 @@ function ContentTab() {
 
       {/* ── Section 2: Inactive Sections / Videos ── */}
       <div className="pt-2">
-        <div className="flex items-center gap-3 mb-5">
+        {/* Collapsible header — closed by default */}
+        <button
+          onClick={() => setShowInactive((v) => !v)}
+          className="flex items-center gap-3 mb-5 w-full text-left group"
+        >
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#4b5563" }} />
             <h2 className="text-base font-bold text-white tracking-tight">Inactive Sections / Videos</h2>
           </div>
           <span className="text-xs text-gray-500 font-medium">Hidden from users — deactivate first, then delete permanently</span>
-        </div>
-        {!hasInactive ? (
-          <div
-            className="rounded-xl px-5 py-6 text-center"
-            style={{ background: "#141414", border: "1px solid #2a2a2a" }}
-          >
-            <p className="text-sm text-gray-500">No inactive sections or videos.</p>
-            <p className="text-xs text-gray-600 mt-1">Use the Hide/Deactivate controls on any section or video above to move it here.</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner }) => {
-              const catInactiveCourses = inactiveCourses.filter((c) => c.category === key);
-              const catCourseIds = new Set([...(byCategory[key] ?? []).map((c) => c.id), ...catInactiveCourses.map((c) => c.id)]);
-              const catInactiveLessons = inactiveLessons.filter((l) => catCourseIds.has(l.courseId));
-              if (catInactiveCourses.length === 0 && catInactiveLessons.length === 0) return null;
-              return (
-                <InactiveCategoryBlock
-                  key={key}
-                  categoryKey={key}
-                  label={label}
-                  subtitle={subtitle}
-                  color={color}
-                  banner={banner}
-                  inactiveCourses={catInactiveCourses}
-                  inactiveLessons={catInactiveLessons}
-                  allLessons={lessons}
-                  onDeactivateLesson={handleDeactivate}
-                  onActivateLesson={handleActivate}
-                  onDeleteCourse={handleDeleteCourse}
-                  onDeleteLesson={handleDeleteLesson}
-                />
-              );
-            })}
-          </div>
+          <span className="ml-auto flex-shrink-0 transition-transform" style={{ color: "#6b7280", transform: showInactive ? "rotate(180deg)" : "rotate(0deg)" }}>
+            <ChevronDown size={15} />
+          </span>
+        </button>
+        {showInactive && (
+          <>
+            {!hasInactive ? (
+              <div
+                className="rounded-xl px-5 py-6 text-center"
+                style={{ background: "#141414", border: "1px solid #2a2a2a" }}
+              >
+                <p className="text-sm text-gray-500">No inactive sections or videos.</p>
+                <p className="text-xs text-gray-600 mt-1">Use the Hide/Deactivate controls on any section or video above to move it here.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner }) => {
+                  const catInactiveCourses = inactiveCourses.filter((c) => c.category === key);
+                  const catCourseIds = new Set([...(byCategory[key] ?? []).map((c) => c.id), ...catInactiveCourses.map((c) => c.id)]);
+                  const catInactiveLessons = inactiveLessons.filter((l) => catCourseIds.has(l.courseId));
+                  if (catInactiveCourses.length === 0 && catInactiveLessons.length === 0) return null;
+                  return (
+                    <InactiveCategoryBlock
+                      key={key}
+                      categoryKey={key}
+                      label={label}
+                      subtitle={subtitle}
+                      color={color}
+                      banner={banner}
+                      inactiveCourses={catInactiveCourses}
+                      inactiveLessons={catInactiveLessons}
+                      allLessons={lessons}
+                      onDeactivateLesson={handleDeactivate}
+                      onActivateLesson={handleActivate}
+                      onDeleteCourse={handleDeleteCourse}
+                      onDeleteLesson={handleDeleteLesson}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
 
