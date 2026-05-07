@@ -258,6 +258,17 @@ const academyRouter = router({
   adminDeleteLesson: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => deleteLesson(input.id)),
+  adminUploadLessonFile: superAdminProcedure
+    .input(z.object({ base64: z.string(), mimeType: z.string(), fileName: z.string() }))
+    .mutation(async ({ input }) => {
+      const { storagePut } = await import("./storage");
+      const buffer = Buffer.from(input.base64, "base64");
+      const ext = input.fileName.split(".").pop() ?? "pdf";
+      const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").substring(0, 80);
+      const key = `lesson-files/${Date.now()}-${safeName}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      return { url, fileName: input.fileName };
+    }),
 
   adminRemoveTagFromAll: superAdminProcedure
     .input(z.object({ tag: z.string().min(1) }))

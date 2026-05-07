@@ -81,6 +81,8 @@ import {
   ArrowDown,
   ChevronUp,
   Flag,
+  Upload,
+  Paperclip,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -2848,6 +2850,26 @@ function LessonRow({
   const [editDesc, setEditDesc] = React.useState(lesson.description ?? "");
   const [editVideoUrl, setEditVideoUrl] = React.useState(lesson.videoUrl ?? "");
   const [editFileUrl, setEditFileUrl] = React.useState(lesson.fileUrl ?? "");
+  const [editFileName, setEditFileName] = React.useState<string | null>(null);
+  const [uploadingFile, setUploadingFile] = React.useState(false);
+  const uploadLessonFileMut = trpc.academy.adminUploadLessonFile.useMutation({
+    onSuccess: (res) => { setEditFileUrl(res.url); setEditFileName(res.fileName); toast.success("File uploaded"); },
+    onError: (e) => toast.error("Upload failed: " + e.message),
+  });
+  async function handleLessonFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+    if (!allowed.includes(file.type)) { toast.error("Only PDF, DOCX, or XLSX files are supported"); return; }
+    if (file.size > 16 * 1024 * 1024) { toast.error("File must be under 16 MB"); return; }
+    setUploadingFile(true);
+    try {
+      const buf = await file.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...Array.from(new Uint8Array(buf))));
+      await uploadLessonFileMut.mutateAsync({ base64, mimeType: file.type, fileName: file.name });
+    } catch { /* handled by onError */ } finally { setUploadingFile(false); }
+    e.target.value = "";
+  }
   const [activeTags, setActiveTags] = React.useState<string[]>(() => parseTagList(lesson.tags));
   const [customTagInput, setCustomTagInput] = React.useState("");
   const [isHidden, setIsHidden] = React.useState(!!lesson.hidden);
@@ -2886,6 +2908,7 @@ function LessonRow({
     setEditDesc(lesson.description ?? "");
     setEditVideoUrl(lesson.videoUrl ?? "");
     setEditFileUrl(lesson.fileUrl ?? "");
+    setEditFileName(null);
     setActiveTags(parseTagList(lesson.tags));
     setCustomTagInput("");
     setEditing(false);
@@ -2932,13 +2955,27 @@ function LessonRow({
             onChange={(e) => setEditVideoUrl(e.target.value)}
             placeholder="Video URL (Loom, YouTube, etc.)"
           />
-          {/* Downloadable file URL field */}
-          <input
-            className="w-full bg-[#111] border border-[#333] rounded-lg px-3 py-1.5 text-xs text-gray-300 outline-none focus:border-blue-500 font-mono"
-            value={editFileUrl}
-            onChange={(e) => setEditFileUrl(e.target.value)}
-            placeholder="Downloadable file URL (PDF, etc.) — leave blank to remove"
-          />
+          {/* Downloadable file attachment */}
+          <div className="rounded-lg p-2.5 space-y-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid #2a2a2a" }}>
+            <p className="text-[11px] text-gray-500 font-medium">Downloadable Attachment (PDF, DOCX, XLSX)</p>
+            {editFileUrl ? (
+              <div className="flex items-center gap-2">
+                <Paperclip size={12} className="text-blue-400 flex-shrink-0" />
+                <span className="text-xs text-blue-300 truncate flex-1">{editFileName ?? editFileUrl.split("/").pop() ?? "Attached file"}</span>
+                <a href={editFileUrl} target="_blank" rel="noreferrer" className="text-[10px] text-gray-500 hover:text-gray-300 underline flex-shrink-0">Preview</a>
+                <button type="button" onClick={() => { setEditFileUrl(""); setEditFileName(null); }} className="text-[10px] text-red-400 hover:text-red-300 flex-shrink-0 flex items-center gap-0.5">
+                  <X size={10} /> Remove
+                </button>
+              </div>
+            ) : (
+              <p className="text-[11px] text-gray-600 italic">No file attached</p>
+            )}
+            <label className="inline-flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium transition-all" style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.3)", color: "#60a5fa" }}>
+              {uploadingFile ? <span className="animate-spin w-3 h-3 border border-blue-400 border-t-transparent rounded-full" /> : <Upload size={12} />}
+              {uploadingFile ? "Uploading..." : editFileUrl ? "Replace File" : "Upload File"}
+              <input type="file" accept=".pdf,.docx,.xlsx" className="hidden" onChange={handleLessonFileUpload} disabled={uploadingFile} />
+            </label>
+          </div>
           {/* Tag editor */}
           <div>
             <p className="text-[11px] text-gray-500 mb-1.5">Tags — click to toggle presets, or type a custom tag</p>
