@@ -401,14 +401,14 @@ export default function Academy() {
                       return (
                         <div className="flex items-center gap-2">
                           <span
-                            className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
-                            style={{ background: `${cat.color}25`, color: cat.color, border: `1px solid ${cat.color}50` }}
+                            className="text-[11px] font-bold px-3 py-1 rounded-full"
+                            style={{ background: `${cat.color}35`, color: cat.color, border: `1px solid ${cat.color}` }}
                           >
                             {counts.sections} {counts.sections === 1 ? "section" : "sections"}
                           </span>
                           <span
-                            className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
-                            style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}
+                            className="text-[11px] font-bold px-3 py-1 rounded-full"
+                            style={{ background: "rgba(255,255,255,0.15)", color: "#f3f4f6", border: "1px solid rgba(255,255,255,0.35)" }}
                           >
                             {counts.videos} {counts.videos === 1 ? "video" : "videos"}
                           </span>
