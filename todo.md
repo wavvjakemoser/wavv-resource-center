@@ -843,3 +843,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Dashboard: add "Exclusive Live Webinars" strip (exclusive type, filtered to future scheduledAt)
 - [x] Dashboard: add "On-Demand Webinars" strip (evergreen + upcoming, 4-column grid)
 - [x] Dashboard: both webinar strips link to /webinars with real data, graceful empty states
+
+## Batch 12: Dashboard Refinements + Placeholder Audit
+
+- [x] Dashboard: remove "On-Demand Webinars" strip entirely
+- [x] Dashboard: change Exclusive Live Webinars accent from purple to gold (#F5A623), swap Sparkles icon to Star
+- [x] Dashboard: Recommended section added (shows in-progress courses or curated fallback)
+- [x] Audit: all pages scanned for placeholders and missing content — rundown delivered to user
