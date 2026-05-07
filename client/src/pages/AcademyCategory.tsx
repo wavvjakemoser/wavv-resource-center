@@ -284,9 +284,9 @@ type DbLessonMeta = { id: number; courseId: number; tags: string | null; created
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
   const loomShare = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
-  if (loomShare) return `https://www.loom.com/embed/${loomShare[1]}`;
+  if (loomShare) return `https://www.loom.com/embed/${loomShare[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true`;
   const loomEmbed = url.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/);
-  if (loomEmbed) return `https://www.loom.com/embed/${loomEmbed[1]}`;
+  if (loomEmbed) return `https://www.loom.com/embed/${loomEmbed[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true`;
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
   if (yt) return `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`;
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
@@ -535,13 +535,17 @@ export default function AcademyCategory() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   // Video player modal state
-  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; lessonId?: number; courseId?: number; completed?: boolean } | null>(null);
   const trackOpen = trpc.academy.trackOpen.useMutation();
+  const markCompleteMut = trpc.academy.markComplete.useMutation({
+    onSuccess: () => {
+      setPlayingVideo(prev => prev ? { ...prev, completed: true } : null);
+    },
+  });
   const handlePlay = (embedUrl: string, title: string) => {
-    setPlayingVideo({ embedUrl, title });
-    // Fire-and-forget: create an in-progress row so this lesson appears in Continue Learning
-    // We look up the lesson by title from the dbLessonMap built below
-    // (handlePlay is called before dbLessonMap is in scope here, so we pass a callback)
+    // Look up DB meta immediately if dbLessonMap is already populated
+    const meta = dbLessonMap[title.toLowerCase().trim()];
+    setPlayingVideo({ embedUrl, title, lessonId: meta?.id, courseId: meta?.courseId, completed: false });
     setPlayingTitle(title);
   };
   const [playingTitle, setPlayingTitle] = useState<string | null>(null);
@@ -837,6 +841,38 @@ export default function AcademyCategory() {
                 className="absolute inset-0 w-full h-full"
                 style={{ border: "none" }}
               />
+            </div>
+            {/* Modal footer — Mark Complete */}
+            <div
+              className="flex items-center justify-between px-5 py-3"
+              style={{ borderTop: "1px solid #2a2a2a", background: "#0d0f14" }}
+            >
+              <p className="text-xs text-gray-500">
+                {playingVideo.completed ? "Lesson marked as complete" : "Finished watching? Mark it complete to track your progress."}
+              </p>
+              {playingVideo.completed ? (
+                <span
+                  className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg"
+                  style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5.5 10L11 3" stroke="#4ade80" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Completed
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (playingVideo.lessonId && playingVideo.courseId) {
+                      markCompleteMut.mutate({ lessonId: playingVideo.lessonId, courseId: playingVideo.courseId });
+                    }
+                  }}
+                  disabled={markCompleteMut.isPending || !playingVideo.lessonId}
+                  className="text-xs font-semibold px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+                  style={{ background: "#0074F4", color: "#fff" }}
+                >
+                  {markCompleteMut.isPending ? "Saving..." : "Mark Complete"}
+                </button>
+              )}
             </div>
           </div>
         </div>
