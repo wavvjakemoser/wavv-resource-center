@@ -205,13 +205,90 @@ export default function Admin() {
 // ─── Analytics Tab ────────────────────────────────────────────────────────────
 function AnalyticsTab() {
   const [days, setDays] = useState<TimeRange>(30);
+  const [resetStep, setResetStep] = useState<0 | 1 | 2 | 3>(0);
+  const [resetConfirmText, setResetConfirmText] = useState("");
+  const utils = trpc.useUtils();
+
+  const resetAnalytics = trpc.analytics.resetAnalytics.useMutation({
+    onSuccess: () => {
+      toast.success("Analytics data has been cleared.");
+      setResetStep(0);
+      setResetConfirmText("");
+      utils.analytics.getSummary.invalidate();
+      utils.analytics.getEventCounts.invalidate();
+      utils.analytics.getDailyEvents.invalidate();
+      utils.analytics.getActiveUsers.invalidate();
+      utils.analytics.getTopContent.invalidate();
+      utils.analytics.getRecentEvents.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   return (
     <div className="space-y-6">
+      {/* Reset confirmation dialog — triple confirmation */}
+      <Dialog open={resetStep > 0} onOpenChange={(open) => { if (!open) { setResetStep(0); setResetConfirmText(""); } }}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <AlertTriangle size={18} style={{ color: "#ef4444" }} />
+              Reset All Analytics
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              {resetStep === 1 && "This will permanently erase all analytics event data. This action cannot be undone."}
+              {resetStep === 2 && "Are you absolutely sure? All historical analytics data will be lost."}
+              {resetStep === 3 && "Type RESET below to confirm. This is your last chance to cancel."}
+            </DialogDescription>
+          </DialogHeader>
+          {resetStep === 3 && (
+            <div className="py-2">
+              <Input
+                placeholder="Type RESET to confirm"
+                value={resetConfirmText}
+                onChange={(e) => setResetConfirmText(e.target.value)}
+                className="bg-black/30 border-red-500/30 text-white placeholder:text-gray-600"
+                autoFocus
+              />
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => { setResetStep(0); setResetConfirmText(""); }} className="text-gray-400">Cancel</Button>
+            {resetStep < 3 ? (
+              <Button
+                variant="destructive"
+                onClick={() => setResetStep((s) => (s + 1) as 1 | 2 | 3)}
+              >
+                {resetStep === 1 ? "Yes, I understand" : "Yes, erase all data"}
+              </Button>
+            ) : (
+              <Button
+                variant="destructive"
+                disabled={resetConfirmText !== "RESET" || resetAnalytics.isPending}
+                onClick={() => resetAnalytics.mutate()}
+              >
+                {resetAnalytics.isPending ? "Resetting..." : "Confirm Reset"}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Controls */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-base font-semibold text-white">Analytics Dashboard</h2>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setResetStep(1)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+            style={{
+              background: "rgba(239,68,68,0.08)",
+              color: "#f87171",
+              border: "1px solid rgba(239,68,68,0.2)",
+            }}
+          >
+            <Trash2 size={13} />
+            Reset Data
+          </button>
           <button
             onClick={() => exportCSV(days)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
@@ -774,11 +851,136 @@ function SuperAdminIcon({ size = 14 }: { size?: number }) {
   return <Shield style={{ width: size, height: size, color: "#e879f9" }} />;
 }
 
+// ─── User Profile Drawer ─────────────────────────────────────────────────────
+function UserProfileDrawer({
+  userId,
+  onClose,
+  onAction,
+  isSuperAdmin,
+  isSelf,
+}: {
+  userId: number;
+  onClose: () => void;
+  onAction: (action: "promote_admin" | "promote_super" | "demote" | "remove", userId: number, userName: string, currentRole: string) => void;
+  isSuperAdmin: boolean;
+  isSelf: boolean;
+}) {
+  const { data: stats, isLoading } = trpc.admin.getUserStats.useQuery({ userId });
+
+  const initials = stats?.name ? stats.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) : "?";
+
+  const statItems = stats ? [
+    { label: "Lessons Started", value: stats.lessonsStarted, color: "#38bdf8" },
+    { label: "Lessons Completed", value: stats.lessonsCompleted, color: "#4ade80" },
+    { label: "Courses Started", value: stats.coursesStarted, color: "#f59e0b" },
+  ] : [];
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-md" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogHeader>
+          <DialogTitle className="text-white">User Profile</DialogTitle>
+          <DialogDescription className="text-gray-500 text-xs">Activity and account details</DialogDescription>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-10">
+            <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
+          </div>
+        ) : stats ? (
+          <div className="space-y-5 py-2">
+            {/* Avatar + name */}
+            <div className="flex items-center gap-4">
+              <div
+                className="h-14 w-14 rounded-2xl flex items-center justify-center text-lg font-bold text-white flex-shrink-0"
+                style={{ background: "linear-gradient(135deg, #0074F4, #67C728)" }}
+              >
+                {initials}
+              </div>
+              <div>
+                <p className="text-white font-semibold text-base">{stats.name ?? "—"}</p>
+                <p className="text-gray-400 text-xs">{stats.email ?? "—"}</p>
+                <div className="mt-1">
+                  {stats.role === "super_admin" ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9" }}>Super Admin</span>
+                  ) : stats.role === "admin" ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24" }}>Admin</span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(156,163,175,0.15)", color: "#9ca3af" }}>User</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Meta */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-gray-500 mb-0.5">Member Since</p>
+                <p className="text-white font-medium">{stats.createdAt ? new Date(stats.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</p>
+              </div>
+              <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <p className="text-gray-500 mb-0.5">Last Active</p>
+                <p className="text-white font-medium">{stats.lastSignedIn ? new Date(stats.lastSignedIn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</p>
+              </div>
+            </div>
+
+            {/* Activity stats */}
+            <div className="grid grid-cols-3 gap-2">
+              {statItems.map(({ label, value, color }) => (
+                <div key={label} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                  <p className="text-2xl font-bold" style={{ color }}>{value}</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            {!isSelf && isSuperAdmin && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {stats.role === "user" && (
+                  <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
+                    onClick={() => { onAction("promote_admin", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                    <Shield className="h-3 w-3 mr-1" /> Make Admin
+                  </Button>
+                )}
+                {stats.role === "admin" && (
+                  <>
+                    <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.3)" }}
+                      onClick={() => { onAction("promote_super", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                      <SuperAdminIcon size={12} /><span className="ml-1">Super Admin</span>
+                    </Button>
+                    <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                      onClick={() => { onAction("demote", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                      <ShieldOff className="h-3 w-3 mr-1" /> Demote
+                    </Button>
+                  </>
+                )}
+                {stats.role === "super_admin" && (
+                  <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    onClick={() => { onAction("demote", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                    <ShieldOff className="h-3 w-3 mr-1" /> Demote
+                  </Button>
+                )}
+                <Button size="sm" className="text-xs h-7 px-3 text-red-400 hover:text-red-300" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}
+                  onClick={() => { onAction("remove", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                  <Trash2 className="h-3 w-3 mr-1" /> Revoke Access
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-sm py-6 text-center">User not found.</p>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function UsersTab() {
   const { user: currentUser } = useAuth();
   const isSuperAdmin = currentUser?.role === "super_admin";
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
+  const [profileUserId, setProfileUserId] = useState<number | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     userId: number;
@@ -1000,7 +1202,7 @@ function UsersTab() {
                 const initials = (u.name ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
                 const pending = isSuperAdmin && u.role === "user" && isPendingPromotion(u.email);
                 return (
-                  <TableRow key={u.id} style={{ borderBottom: "1px solid #1e1e1e", background: isSelf ? "rgba(0,116,244,0.05)" : "transparent" }}>
+                  <TableRow key={u.id} className="cursor-pointer hover:bg-white/5 transition" onClick={() => setProfileUserId(u.id)} style={{ borderBottom: "1px solid #1e1e1e", background: isSelf ? "rgba(0,116,244,0.05)" : "transparent" }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
@@ -1093,6 +1295,19 @@ function UsersTab() {
           </TableBody>
         </Table>
       </div>
+
+      {/* User Profile Drawer */}
+      {profileUserId !== null && (
+        <UserProfileDrawer
+          userId={profileUserId}
+          onClose={() => setProfileUserId(null)}
+          isSuperAdmin={isSuperAdmin}
+          isSelf={profileUserId === currentUser?.id}
+          onAction={(action, userId, userName, currentRole) => {
+            setConfirmDialog({ open: true, userId, userName, currentRole, action });
+          }}
+        />
+      )}
 
       {/* Confirm dialog */}
       <Dialog open={!!confirmDialog?.open} onOpenChange={(open) => { if (!open) setConfirmDialog(null); }}>
@@ -1840,10 +2055,18 @@ function ContentTab() {
   // Dialog state: Add Section
   const [addSectionDialog, setAddSectionDialog] = useState<{ categoryKey: string } | null>(null);
   const [newSectionTitle, setNewSectionTitle] = useState("");
+  const [newSectionDescription, setNewSectionDescription] = useState("");
 
   // Dialog state: Add Video
   const [addVideoDialog, setAddVideoDialog] = useState<{ courseId: number; courseTitle: string } | null>(null);
-  const [newVideoForm, setNewVideoForm] = useState({ title: "", videoUrl: "", description: "" });
+  const [newVideoForm, setNewVideoForm] = useState({ title: "", videoUrl: "", description: "", durationMinutes: "", tags: "" });
+
+  // Derive a Loom embed URL from a share URL for preview
+  function getLoomEmbedUrl(url: string): string | null {
+    const match = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+    if (match) return `https://www.loom.com/embed/${match[1]}`;
+    return null;
+  }
 
   const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
   const [pendingLesson, setPendingLesson] = useState<{ id: number; title: string } | null>(null);
@@ -1856,6 +2079,7 @@ function ContentTab() {
 
   function handleAddSection(categoryKey: string) {
     setNewSectionTitle("");
+    setNewSectionDescription("");
     setAddSectionDialog({ categoryKey });
   }
 
@@ -1864,13 +2088,13 @@ function ContentTab() {
     createCourse.mutate({
       title: newSectionTitle.trim(),
       category: addSectionDialog.categoryKey as "Onboarding" | "How-To" | "Strategy and Best Practices",
-      description: "",
+      description: newSectionDescription.trim() || "",
       sortOrder: 99,
     });
   }
 
   function handleAddVideo(courseId: number, courseTitle: string) {
-    setNewVideoForm({ title: "", videoUrl: "", description: "" });
+    setNewVideoForm({ title: "", videoUrl: "", description: "", durationMinutes: "", tags: "" });
     setAddVideoDialog({ courseId, courseTitle });
   }
 
@@ -1881,6 +2105,7 @@ function ContentTab() {
       title: newVideoForm.title.trim(),
       videoUrl: newVideoForm.videoUrl.trim() || undefined,
       description: newVideoForm.description.trim() || undefined,
+      durationMinutes: newVideoForm.durationMinutes ? parseInt(newVideoForm.durationMinutes) : undefined,
       sortOrder: 99,
     });
   }
@@ -2093,7 +2318,7 @@ function ContentTab() {
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Section Title</label>
+              <label className="text-xs text-gray-400 mb-1 block">Section Title <span className="text-red-400">*</span></label>
               <Input
                 placeholder="e.g. Getting Started, Advanced Settings"
                 value={newSectionTitle}
@@ -2101,6 +2326,16 @@ function ContentTab() {
                 className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
                 onKeyDown={(e) => e.key === "Enter" && confirmAddSection()}
                 autoFocus
+              />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Description (optional)</label>
+              <textarea
+                placeholder="Brief description of what this section covers"
+                value={newSectionDescription}
+                onChange={(e) => setNewSectionDescription(e.target.value)}
+                rows={2}
+                className="w-full rounded-md px-3 py-2 text-sm bg-black/30 border border-white/10 text-white placeholder:text-gray-600 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -2120,7 +2355,7 @@ function ContentTab() {
 
       {/* ── Add Video dialog ── */}
       <Dialog open={!!addVideoDialog} onOpenChange={(open) => !open && setAddVideoDialog(null)}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent className="max-w-lg" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Add Video</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -2128,6 +2363,7 @@ function ContentTab() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
+            {/* Title */}
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Video Title <span className="text-red-400">*</span></label>
               <Input
@@ -2138,23 +2374,64 @@ function ContentTab() {
                 autoFocus
               />
             </div>
+            {/* Loom / Video URL + live embed preview */}
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Loom / Video URL</label>
               <Input
-                placeholder="https://www.loom.com/share/..."
+                placeholder="https://www.loom.com/share/abc123..."
                 value={newVideoForm.videoUrl}
                 onChange={(e) => setNewVideoForm((f) => ({ ...f, videoUrl: e.target.value }))}
                 className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
               />
+              {/* Live embed preview — shows as soon as a valid Loom URL is detected */}
+              {newVideoForm.videoUrl && getLoomEmbedUrl(newVideoForm.videoUrl) && (
+                <div className="mt-2 rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", background: "#000" }}>
+                  <iframe
+                    src={getLoomEmbedUrl(newVideoForm.videoUrl)!}
+                    frameBorder="0"
+                    allowFullScreen
+                    className="w-full h-full"
+                    title="Loom preview"
+                  />
+                </div>
+              )}
+              {newVideoForm.videoUrl && !getLoomEmbedUrl(newVideoForm.videoUrl) && (
+                <p className="text-xs text-amber-400 mt-1">Non-Loom URL — will be stored as a link (no embed preview).</p>
+              )}
             </div>
+            {/* Description */}
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Description (optional)</label>
-              <Input
+              <textarea
                 placeholder="Brief description of what this video covers"
                 value={newVideoForm.description}
                 onChange={(e) => setNewVideoForm((f) => ({ ...f, description: e.target.value }))}
-                className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+                rows={2}
+                className="w-full rounded-md px-3 py-2 text-sm bg-black/30 border border-white/10 text-white placeholder:text-gray-600 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
+            </div>
+            {/* Duration + Tags row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Duration (minutes)</label>
+                <Input
+                  type="number"
+                  placeholder="e.g. 8"
+                  min={1}
+                  value={newVideoForm.durationMinutes}
+                  onChange={(e) => setNewVideoForm((f) => ({ ...f, durationMinutes: e.target.value }))}
+                  className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Tags (comma-separated)</label>
+                <Input
+                  placeholder="NEW, MUST WATCH"
+                  value={newVideoForm.tags}
+                  onChange={(e) => setNewVideoForm((f) => ({ ...f, tags: e.target.value }))}
+                  className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -3693,23 +3970,61 @@ function SupportTab() {
         </div>
       </div>
 
-      {/* Coming soon notice */}
+      {/* Under-construction banner */}
       <div
-        className="flex items-start gap-4 rounded-xl p-5"
-        style={{ background: "rgba(0,116,244,0.07)", border: "1px solid rgba(0,116,244,0.22)" }}
+        className="rounded-2xl overflow-hidden"
+        style={{ background: "rgba(245,158,11,0.07)", border: "2px dashed rgba(245,158,11,0.35)" }}
       >
-        <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-          style={{ background: "rgba(0,116,244,0.15)" }}
-        >
-          <AlertCircle size={18} style={{ color: "#0074F4" }} />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-white mb-1">Support Analytics — Coming Soon</p>
-          <p className="text-xs text-gray-400 leading-relaxed">
-            This section will surface AskWAVV AI usage stats, Help Center engagement metrics,
-            and support volume trends. Ticket management is handled separately outside this portal.
+        <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
+          {/* Icon */}
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center"
+            style={{ background: "rgba(245,158,11,0.15)" }}
+          >
+            <AlertTriangle size={40} style={{ color: "#f59e0b" }} />
+          </div>
+
+          {/* Heading */}
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold text-white tracking-tight">
+              Support Analytics
+            </h3>
+            <div
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+              style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
+            >
+              <AlertTriangle size={11} />
+              Under Construction
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+            This section will surface <span className="text-white font-medium">AskWAVV AI usage stats</span>,{" "}
+            <span className="text-white font-medium">Help Center engagement metrics</span>, and{" "}
+            <span className="text-white font-medium">support volume trends</span> once instrumentation
+            is complete. Ticket management is handled separately outside this portal.
           </p>
+
+          {/* Upcoming features list */}
+          <div
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2"
+          >
+            {[
+              { icon: <Activity size={14} />, label: "AskWAVV AI Stats" },
+              { icon: <TrendingUp size={14} />, label: "Help Center Metrics" },
+              { icon: <BarChart3 size={14} />, label: "Support Volume Trends" },
+            ].map(({ icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
+              >
+                <span style={{ color: "#f59e0b" }}>{icon}</span>
+                {label}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -3818,6 +4133,32 @@ const CONTENT_REQUEST_GROUPS: Array<{ key: string; label: string; description: s
   { key: "guide",   label: "Guide Requests",    description: "Playbook, checklist, and doc requests" },
 ];
 
+function exportGroupCSV(groupKey: string, groupLabel: string, group: Array<{
+  id: number;
+  createdAt: Date | string;
+  requestType: string;
+  topic: string;
+  description?: string | null;
+  category?: string | null;
+  formatPreference?: string | null;
+  priority: string;
+  userName?: string | null;
+  userEmail?: string | null;
+}>) {
+  if (group.length === 0) { toast.error("No requests to export"); return; }
+  const header = "Date,Type,Topic,Category,Format Preference,Priority,User,Email,Description";
+  const lines = group.map((r) => {
+    const date = r.createdAt ? new Date(r.createdAt).toISOString() : "";
+    const desc = r.description ? `"${String(r.description).replace(/"/g, '""')}"` : "";
+    return `${date},${r.requestType},"${r.topic}",${r.category ?? ""},${r.formatPreference ?? ""},${r.priority},${r.userName ?? ""},${r.userEmail ?? ""},${desc}`;
+  });
+  const csv = [header, ...lines].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = `${groupKey}-requests.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
 function ContentRequestGroups({
   requests,
   TYPE_COLOR,
@@ -3879,6 +4220,14 @@ function ContentRequestGroups({
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${color}20`, color }}>{group.length}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); exportGroupCSV(key, label, group); }}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition hover:opacity-80"
+                  style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af", border: "1px solid rgba(255,255,255,0.08)" }}
+                  title={`Export ${label} as CSV`}
+                >
+                  <FileDown size={10} /> CSV
+                </button>
                 <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
               </div>
             </button>

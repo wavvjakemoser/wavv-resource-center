@@ -72,6 +72,8 @@ import {
   createContentRequest,
   getContentRequests,
   deleteUser,
+  getUserStats,
+  clearAllAnalytics,
   getStatDetail,
   getCategories,
   reorderCourses,
@@ -721,10 +723,14 @@ const analyticsRouter = router({
         const resId = evt.resourceId != null ? String(evt.resourceId) : "";
         // Escape metadata for CSV (wrap in quotes if it contains commas)
         const meta = evt.metadata ? `"${String(evt.metadata).replace(/"/g, '""')}"` : "";
-        rows.push(`${ts},${evtType},${userEmail},${resType},${resId},${meta}`);
+         rows.push(`${ts},${evtType},${userEmail},${resType},${resId},${meta}`);
       });
-
       return rows.join("\n");
+    }),
+  resetAnalytics: superAdminProcedure
+    .mutation(async () => {
+      await clearAllAnalytics();
+      return { success: true };
     }),
 });
 
@@ -912,6 +918,13 @@ export const appRouter = router({
         }
         await deleteUser(input.userId);
         return { success: true };
+      }),
+    getUserStats: superAdminProcedure
+      .input(z.object({ userId: z.number() }))
+      .query(async ({ input }) => {
+        const stats = await getUserStats(input.userId);
+        if (!stats) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        return stats;
       }),
     // Notification management (admin only)
     listNotifications: superAdminProcedure.query(async () => {

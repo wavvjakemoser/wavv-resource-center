@@ -94,6 +94,35 @@ export async function deleteUser(userId: number) {
   if (!db) return;
   await db.delete(users).where(eq(users.id, userId));
 }
+export async function getUserStats(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  // Fetch the user
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (!user) return null;
+  // Fetch all progress rows for this user
+  const progress = await db.select().from(lessonProgress).where(eq(lessonProgress.userId, userId));
+  const lessonsStarted = progress.length;
+  const lessonsCompleted = progress.filter(p => p.completed).length;
+  // Distinct courses started
+  const courseIdSet = new Set<number>();
+  progress.forEach(p => courseIdSet.add(p.courseId));
+  const courseIds = Array.from(courseIdSet);
+  const coursesStarted = courseIds.length;
+  // Courses completed: need to know total lessons per course
+  // We'll just return what we have; the UI can show started/completed lessons
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    createdAt: user.createdAt,
+    lastSignedIn: user.lastSignedIn,
+    lessonsStarted,
+    lessonsCompleted,
+    coursesStarted,
+  };
+}
 
 // ─── Academy: Courses ─────────────────────────────────────────────────────────
 export async function getCourses(publishedOnly = true) {
@@ -407,6 +436,11 @@ export async function trackEvent(data: {
   const db = await getDb();
   if (!db) return;
   await db.insert(analyticsEvents).values(data);
+}
+export async function clearAllAnalytics() {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(analyticsEvents);
 }
 
 export async function getAnalyticsSummary() {

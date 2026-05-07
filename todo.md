@@ -749,3 +749,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Admin Guides tab: add visibility toggles for PDF / Checklist / Playbook / Resource sections
 - [ ] User-facing Webinars page: hide tabs/sections where visibility = false
 - [ ] User-facing Guides & Docs page: hide category sections where visibility = false
+
+## Admin Improvements Batch (Current Sprint)
+
+- [x] Academy Admin: full Add/Edit video form with Loom URL auto-embed, category + section assignment, create new section inline
+- [x] Admin Support tab: large "under construction" banner replacing ticket content
+- [x] Requests tab: break down by Academy / Webinars / Guides with per-category CSV export
+- [x] Users tab: clickable user profiles with analytics, badges, revoke access, role promotion
+- [x] Analytics: reset button with triple confirmation (zeros all data)
+- [x] Playground notify opt-in: unchecked by default, Notify Me button grayed out until opted in

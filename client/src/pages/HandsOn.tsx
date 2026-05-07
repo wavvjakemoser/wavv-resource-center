@@ -55,7 +55,7 @@ function RequestModal({
   userEmail?: string | null;
 }) {
   const [submitted, setSubmitted] = useState(false);
-  const [optIn, setOptIn] = useState(true);
+  const [optIn, setOptIn] = useState(false);
 
   const submitMutation = trpc.playground.submitRequest.useMutation({
     onSuccess: () => {
@@ -76,7 +76,7 @@ function RequestModal({
     onClose();
     setTimeout(() => {
       setSubmitted(false);
-      setOptIn(true);
+      setOptIn(false);
     }, 200);
   }
 
