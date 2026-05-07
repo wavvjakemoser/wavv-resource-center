@@ -96,7 +96,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#121212" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#161b22" }}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-[#0074F4] border-t-transparent rounded-full animate-spin" />
           <p className="text-gray-400 text-sm">Loading WAVV Success Center...</p>
@@ -113,7 +113,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     : "U";
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#121212", fontFamily: "'Inter', sans-serif" }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
       {/* ── Demo Banner — ABOVE everything ── */}
       <div
         className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-center w-full flex-shrink-0"
@@ -145,8 +145,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
           }`}
           style={{
             width: "256px",
-            background: "#0d0d0d",
-            borderRight: "1px solid #1e1e1e",
+            background: "#0f1318",
+            borderRight: "1px solid #1e2030",
             flexShrink: 0,
             overflowY: "auto",
           }}
@@ -154,7 +154,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
           {/* Logo — WAVV only */}
           <div
             className="flex items-center gap-2 px-4 py-4"
-            style={{ borderBottom: "1px solid #1e1e1e", minHeight: "60px" }}
+            style={{ borderBottom: "1px solid #1e2030", minHeight: "60px" }}
           >
             <img
               src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
@@ -247,7 +247,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
           {/* ── Top bar ── */}
           <header
             className="flex items-center gap-3 px-4 lg:px-6 py-3 sticky top-0 z-30"
-            style={{ background: "#121212", borderBottom: "1px solid #1e1e1e" }}
+            style={{ background: "#161b22", borderBottom: "1px solid #1e2030" }}
           >
             {/* Mobile hamburger */}
             <button
@@ -299,7 +299,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 {notifOpen && (
                   <div
                     className="absolute right-0 top-full mt-2 w-80 rounded-xl shadow-2xl z-50 overflow-hidden"
-                    style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+                    style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
                   >
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid #2a2a2a" }}>
@@ -402,7 +402,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 {profileOpen && (
                   <div
                     className="absolute right-0 top-full mt-2 w-52 rounded-xl overflow-hidden shadow-2xl z-50"
-                    style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+                    style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
                   >
                     {/* User header */}
                     <div className="px-4 py-3" style={{ borderBottom: "1px solid #2a2a2a" }}>

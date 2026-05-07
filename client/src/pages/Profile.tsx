@@ -175,7 +175,7 @@ export default function Profile() {
           style={{ background: "#111", border: "1px solid #222" }}
         >
           {profileLoading ? (
-            <div className="w-24 h-24 rounded-full animate-pulse" style={{ background: "#1a1a1a" }} />
+            <div className="w-24 h-24 rounded-full animate-pulse" style={{ background: "#1d2230" }} />
           ) : (
             <AvatarSection
               avatarUrl={profile?.avatarUrl ?? null}
@@ -187,8 +187,8 @@ export default function Profile() {
           <div className="flex-1 min-w-0">
             {profileLoading ? (
               <div className="space-y-2">
-                <div className="h-6 w-48 rounded animate-pulse" style={{ background: "#1a1a1a" }} />
-                <div className="h-4 w-64 rounded animate-pulse" style={{ background: "#1a1a1a" }} />
+                <div className="h-6 w-48 rounded animate-pulse" style={{ background: "#1d2230" }} />
+                <div className="h-4 w-64 rounded animate-pulse" style={{ background: "#1d2230" }} />
               </div>
             ) : (
               <>
@@ -253,7 +253,7 @@ export default function Profile() {
           {activityLoading ? (
             <div className="space-y-2">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-12 rounded-xl animate-pulse" style={{ background: "#1a1a1a" }} />
+                <div key={i} className="h-12 rounded-xl animate-pulse" style={{ background: "#1d2230" }} />
               ))}
             </div>
           ) : feedEvents.length === 0 ? (
@@ -368,8 +368,8 @@ export default function Profile() {
                   key={badge.id}
                   className="rounded-xl p-4 flex items-center gap-3"
                   style={{
-                    background: badge.earned ? "#111" : "#0d0d0d",
-                    border: `1px solid ${badge.earned ? "#2a2a2a" : "#1a1a1a"}`,
+                    background: badge.earned ? "#111" : "#0f1318",
+                    border: `1px solid ${badge.earned ? "#252d3d" : "#1d2230"}`,
                     opacity: badge.earned ? 1 : 0.45,
                   }}
                 >

@@ -153,7 +153,7 @@ function LiveCourseCard({
       href={`/academy/${course.id}`}
       className="group flex flex-col rounded-xl overflow-hidden transition-all cursor-pointer hover:scale-[1.01]"
       style={{
-        background: "#1a1a1a",
+        background: "#1d2230",
         border: "1px solid #2a2a2a",
         textDecoration: "none",
       }}
@@ -225,7 +225,7 @@ function PlaceholderCourseCard({
     <div
       className="flex flex-col rounded-xl overflow-hidden opacity-80"
       style={{
-        background: "#1a1a1a",
+        background: "#1d2230",
         border: "1px solid #2a2a2a",
       }}
     >
@@ -343,10 +343,10 @@ export default function Academy() {
           <div className="space-y-10">
             {[0, 1, 2].map((i) => (
               <div key={i} className="space-y-4">
-                <div className="h-40 rounded-2xl animate-pulse" style={{ background: "#1a1a1a" }} />
+                <div className="h-40 rounded-2xl animate-pulse" style={{ background: "#1d2230" }} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[0, 1, 2].map((j) => (
-                    <div key={j} className="h-36 rounded-xl animate-pulse" style={{ background: "#1a1a1a" }} />
+                    <div key={j} className="h-36 rounded-xl animate-pulse" style={{ background: "#1d2230" }} />
                   ))}
                 </div>
               </div>

@@ -64,13 +64,13 @@ export default function Support() {
             const inner = (
               <div
                 className="flex items-start gap-4 p-6 rounded-xl transition-all cursor-pointer h-full"
-                style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+                style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = card.color;
                   e.currentTarget.style.boxShadow = `0 4px 24px ${card.color}18`;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#2a2a2a";
+                  e.currentTarget.style.borderColor = "#252d3d";
                   e.currentTarget.style.boxShadow = "none";
                 }}
                 onClick={card.onClick}

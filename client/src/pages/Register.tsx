@@ -57,7 +57,7 @@ export default function Register() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0d0d0d" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f1318" }}>
         <div className="w-10 h-10 border-2 border-[#0074F4] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -66,7 +66,7 @@ export default function Register() {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "#0d0d0d", fontFamily: "'Inter', sans-serif" }}
+      style={{ background: "#0f1318", fontFamily: "'Inter', sans-serif" }}
     >
       <div
         className="w-full max-w-sm rounded-2xl p-8 flex flex-col items-center"

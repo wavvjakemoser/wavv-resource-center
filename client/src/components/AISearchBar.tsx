@@ -49,7 +49,7 @@ export default function AISearchBar() {
       <div
         className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all"
         style={{
-          background: "#1a1a1a",
+          background: "#1d2230",
           border: open ? "1px solid #0074F4" : "1px solid #2a2a2a",
         }}
       >
@@ -77,7 +77,7 @@ export default function AISearchBar() {
       {open && query.trim().length >= 2 && (
         <div
           className="absolute top-full left-0 right-0 mt-1 rounded-lg overflow-hidden z-50 shadow-2xl"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", maxHeight: "420px", overflowY: "auto" }}
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a", maxHeight: "420px", overflowY: "auto" }}
         >
           {isError && (
             <div className="px-4 py-6 text-center text-sm text-red-400">

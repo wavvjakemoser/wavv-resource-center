@@ -80,7 +80,7 @@ export default function GuidesAndDocs() {
         {/* Search */}
         <div
           className="flex items-center gap-2 px-3 py-2 rounded-lg"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
           <Search size={15} className="text-gray-500" />
           <input
@@ -96,10 +96,10 @@ export default function GuidesAndDocs() {
           <div className="space-y-8">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="space-y-3">
-                <div className="h-6 w-32 rounded animate-pulse" style={{ background: "#1a1a1a" }} />
+                <div className="h-6 w-32 rounded animate-pulse" style={{ background: "#1d2230" }} />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[...Array(3)].map((_, j) => (
-                    <div key={j} className="h-40 rounded-xl animate-pulse" style={{ background: "#1a1a1a" }} />
+                    <div key={j} className="h-40 rounded-xl animate-pulse" style={{ background: "#1d2230" }} />
                   ))}
                 </div>
               </div>
@@ -147,13 +147,13 @@ export default function GuidesAndDocs() {
                       <div
                         key={guide.id}
                         className="relative flex flex-col p-5 rounded-xl transition-all"
-                        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+                        style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.borderColor = meta.color;
                           e.currentTarget.style.boxShadow = `0 4px 20px ${meta.color}15`;
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = "#2a2a2a";
+                          e.currentTarget.style.borderColor = "#252d3d";
                           e.currentTarget.style.boxShadow = "none";
                         }}
                       >
@@ -199,7 +199,7 @@ export default function GuidesAndDocs() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                              style={{ background: "#2a2a2a", color: "#9ca3af" }}
+                              style={{ background: "#252d3d", color: "#9ca3af" }}
                             >
                               <ExternalLink size={11} />
                               View

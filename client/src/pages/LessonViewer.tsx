@@ -60,7 +60,7 @@ export default function LessonViewer() {
         {/* Video player */}
         <div
           className="rounded-2xl overflow-hidden"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
           {embedUrl ? (
             <div className="relative" style={{ paddingBottom: "56.25%" }}>
@@ -127,7 +127,7 @@ export default function LessonViewer() {
           {prevLesson ? (
             <Link href={`/academy/${cId}/lesson/${prevLesson.id}`}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{ background: "#1a1a1a", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+                style={{ background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }}
               >
                 <ArrowLeft size={14} />
                 <span className="truncate max-w-48">{prevLesson.title}</span>

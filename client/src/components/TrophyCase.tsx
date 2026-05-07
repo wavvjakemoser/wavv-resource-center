@@ -101,7 +101,7 @@ export default function TrophyCase({ trigger, externalOpen, onClose }: TrophyCas
                 <span>Progress</span>
                 <span>{totalCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0}%</span>
               </div>
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#2a2a2a" }}>
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#252d3d" }}>
                 <div
                   className="h-full rounded-full transition-all duration-700"
                   style={{

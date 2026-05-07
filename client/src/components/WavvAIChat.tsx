@@ -138,7 +138,7 @@ export default function WavvAIChat({ isOpen, onClose }: WavvAIChatProps) {
                     onClick={() => sendMessage(q)}
                     className="w-full text-left text-xs px-3 py-2 rounded-lg transition-all"
                     style={{
-                      background: "#1a1a1a",
+                      background: "#1d2230",
                       border: "1px solid #2a2a2a",
                       color: "#9ca3af",
                     }}
@@ -147,7 +147,7 @@ export default function WavvAIChat({ isOpen, onClose }: WavvAIChatProps) {
                       e.currentTarget.style.color = "#60a5fa";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "#2a2a2a";
+                      e.currentTarget.style.borderColor = "#252d3d";
                       e.currentTarget.style.color = "#9ca3af";
                     }}
                   >

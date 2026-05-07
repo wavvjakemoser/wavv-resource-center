@@ -62,28 +62,29 @@
   --chart-4: oklch(0.70 0.18 80);
   --chart-5: oklch(0.65 0.20 30);
   --radius: 0.5rem;
-  --background: oklch(0.11 0 0);
+  /* Option A: dark navy-charcoal — lifted from pure black for better readability */
+  --background: oklch(0.148 0.008 256);   /* ~#161b22 dark navy-charcoal */
   --foreground: oklch(0.97 0 0);
-  --card: oklch(0.14 0 0);
+  --card: oklch(0.178 0.008 256);          /* ~#1d2230 card surface */
   --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.14 0 0);
+  --popover: oklch(0.178 0.008 256);
   --popover-foreground: oklch(0.97 0 0);
-  --secondary: oklch(0.18 0 0);
+  --secondary: oklch(0.21 0.008 256);
   --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.18 0 0);
-  --muted-foreground: oklch(0.60 0 0);
+  --muted: oklch(0.21 0.008 256);
+  --muted-foreground: oklch(0.62 0.005 256);
   --accent: oklch(0.62 0.22 145);
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.60 0.22 25);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.22 0 0);
-  --input: oklch(0.20 0 0);
+  --border: oklch(0.24 0.008 256);
+  --input: oklch(0.22 0.008 256);
   --ring: oklch(0.55 0.22 256);
-  --sidebar: oklch(0.09 0 0);
+  --sidebar: oklch(0.118 0.008 256);       /* ~#0f1318 sidebar slightly darker */
   --sidebar-foreground: oklch(0.97 0 0);
-  --sidebar-accent: oklch(0.16 0 0);
+  --sidebar-accent: oklch(0.19 0.008 256);
   --sidebar-accent-foreground: oklch(0.97 0 0);
-  --sidebar-border: oklch(0.18 0 0);
+  --sidebar-border: oklch(0.22 0.008 256);
   --sidebar-ring: oklch(0.55 0.22 256);
 }
 
@@ -129,14 +130,14 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #121212;
+    background-color: #161b22;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
   /* WAVV scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #1a1a1a; }
+  ::-webkit-scrollbar-track { background: #1d2230; }
   ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: #0074F4; }
   button:not(:disabled),

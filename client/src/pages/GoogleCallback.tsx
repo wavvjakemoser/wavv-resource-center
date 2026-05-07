@@ -39,7 +39,7 @@ export default function GoogleCallback() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "#0d0d0d" }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f1318" }}>
       <div className="flex flex-col items-center gap-4">
         <div className="w-10 h-10 border-2 border-[#0074F4] border-t-transparent rounded-full animate-spin" />
         <p className="text-gray-400 text-sm">Completing Google sign-in...</p>

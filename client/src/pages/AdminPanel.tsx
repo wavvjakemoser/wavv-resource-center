@@ -71,7 +71,7 @@ export default function AdminPanel() {
               onClick={() => setTab(key)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all"
               style={{
-                background: tab === key ? "rgba(168, 85, 247, 0.15)" : "#1a1a1a",
+                background: tab === key ? "rgba(168, 85, 247, 0.15)" : "#1d2230",
                 color: tab === key ? "#a855f7" : "#9ca3af",
                 border: tab === key ? "1px solid rgba(168, 85, 247, 0.4)" : "1px solid #2a2a2a",
               }}
@@ -112,7 +112,7 @@ function AdminOverview() {
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="p-4 rounded-xl" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+            <div key={s.label} className="p-4 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-gray-500">{s.label}</p>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${s.color}20` }}>
@@ -124,7 +124,7 @@ function AdminOverview() {
           );
         })}
       </div>
-      <div className="p-5 rounded-xl" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+      <div className="p-5 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <h3 className="text-white font-semibold text-sm mb-3">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
@@ -136,7 +136,7 @@ function AdminOverview() {
             <button
               key={a.label}
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-left transition-all"
-              style={{ background: "#2a2a2a", color: "#9ca3af" }}
+              style={{ background: "#252d3d", color: "#9ca3af" }}
               onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = "#9ca3af"; }}
             >
@@ -191,7 +191,7 @@ function AdminCourses() {
       </div>
 
       {showForm && (
-        <div className="p-5 rounded-xl space-y-3" style={{ background: "#1a1a1a", border: "1px solid #0074F440" }}>
+        <div className="p-5 rounded-xl space-y-3" style={{ background: "#1d2230", border: "1px solid #0074F440" }}>
           <h3 className="text-white font-semibold text-sm">New Course</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input
@@ -259,7 +259,7 @@ function AdminCourses() {
 
       <div className="space-y-2">
         {courses?.map((course) => (
-          <div key={course.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <div key={course.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
             <div className="flex-1">
               <p className="text-white text-sm font-medium">{course.title}</p>
               <p className="text-gray-500 text-xs">{course.category}</p>
@@ -319,7 +319,7 @@ function AdminWebinars() {
       </div>
 
       {showForm && (
-        <div className="p-5 rounded-xl space-y-3" style={{ background: "#1a1a1a", border: "1px solid #00A9E240" }}>
+        <div className="p-5 rounded-xl space-y-3" style={{ background: "#1d2230", border: "1px solid #00A9E240" }}>
           <h3 className="text-white font-semibold text-sm">New Webinar</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title *" className="px-3 py-2 rounded-lg text-sm text-white placeholder-gray-500 outline-none" style={{ background: "#111", border: "1px solid #333" }} />
@@ -358,7 +358,7 @@ function AdminWebinars() {
 
       <div className="space-y-2">
         {webinars?.map((w) => (
-          <div key={w.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <div key={w.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
             <div className="flex-1">
               <p className="text-white text-sm font-medium">{w.title}</p>
               <p className="text-gray-500 text-xs capitalize">{w.type} {w.host ? `· ${w.host}` : ""}</p>
@@ -402,7 +402,7 @@ function AdminGuides() {
       </div>
 
       {showForm && (
-        <div className="p-5 rounded-xl space-y-3" style={{ background: "#1a1a1a", border: "1px solid #67C72840" }}>
+        <div className="p-5 rounded-xl space-y-3" style={{ background: "#1d2230", border: "1px solid #67C72840" }}>
           <h3 className="text-white font-semibold text-sm">New Guide</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title *" className="px-3 py-2 rounded-lg text-sm text-white placeholder-gray-500 outline-none" style={{ background: "#111", border: "1px solid #333" }} />
@@ -432,7 +432,7 @@ function AdminGuides() {
 
       <div className="space-y-2">
         {guides?.map((g) => (
-          <div key={g.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <div key={g.id} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
             <div className="flex-1">
               <p className="text-white text-sm font-medium">{g.title}</p>
               <p className="text-gray-500 text-xs capitalize">{g.fileType} {g.category ? `· ${g.category}` : ""}</p>
@@ -469,7 +469,7 @@ function AdminTickets() {
           <p className="text-gray-500 text-sm text-center py-8">No tickets yet.</p>
         )}
         {(tickets ?? []).map((ticket) => (
-          <div key={ticket.id} className="p-4 rounded-xl" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <div key={ticket.id} className="p-4 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
             <div className="flex items-start justify-between gap-3 mb-2">
               <div>
                 <p className="text-white text-sm font-semibold">{ticket.subject}</p>
@@ -486,7 +486,7 @@ function AdminTickets() {
                 }}
               >
                 {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s} style={{ background: "#1a1a1a", color: "#fff" }}>
+                  <option key={s} value={s} style={{ background: "#1d2230", color: "#fff" }}>
                     {s.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                   </option>
                 ))}

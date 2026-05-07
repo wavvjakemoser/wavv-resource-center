@@ -82,7 +82,7 @@ function RequestModal({
   if (!open) return null;
 
   const readonlyStyle: React.CSSProperties = {
-    background: "#0d0d0d",
+    background: "#0f1318",
     border: "1px solid #1e1e1e",
     color: "#9ca3af",
     borderRadius: "8px",
@@ -246,7 +246,7 @@ export default function HandsOn() {
                   key={tool.label}
                   className="relative flex flex-col gap-3 p-5 rounded-xl overflow-hidden"
                   style={{
-                    background: "#1a1a1a",
+                    background: "#1d2230",
                     border: isMostRequested ? `1px solid ${tool.color}40` : "1px solid #2a2a2a",
                     opacity: 0.85,
                   }}

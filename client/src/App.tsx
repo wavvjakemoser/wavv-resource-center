@@ -59,7 +59,7 @@ function App() {
             theme="dark"
             toastOptions={{
               style: {
-                background: "#1a1a1a",
+                background: "#1d2230",
                 border: "1px solid #2a2a2a",
                 color: "#f5f5f5",
               },

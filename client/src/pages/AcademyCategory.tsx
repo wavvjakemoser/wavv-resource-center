@@ -320,7 +320,7 @@ function SectionRow({
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ background: "#1a1a1a", border: `1px solid ${accentColor}30` }}
+      style={{ background: "#1d2230", border: `1px solid ${accentColor}30` }}
     >
       {/* Section header */}
       <button
@@ -364,7 +364,7 @@ function SectionRow({
       {open && (
         <div
           className="border-t"
-          style={{ borderColor: "#2a2a2a" }}
+          style={{ borderColor: "#252d3d" }}
         >
           {section.videos.map((video, idx) => {
             const rowStyle = {

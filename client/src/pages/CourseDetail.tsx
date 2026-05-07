@@ -37,7 +37,7 @@ export default function CourseDetail() {
       <PortalLayout title="Loading...">
         <div className="px-4 lg:px-6 py-6 max-w-4xl mx-auto space-y-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: "#1a1a1a" }} />
+            <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: "#1d2230" }} />
           ))}
         </div>
       </PortalLayout>
@@ -103,7 +103,7 @@ export default function CourseDetail() {
           </div>
 
           {/* Progress bar */}
-          <div className="h-1.5 rounded-full" style={{ background: "#2a2a2a" }}>
+          <div className="h-1.5 rounded-full" style={{ background: "#252d3d" }}>
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -130,7 +130,7 @@ export default function CourseDetail() {
                 key={lesson.id}
                 className="flex items-center gap-4 p-4 rounded-xl transition-all"
                 style={{
-                  background: "#1a1a1a",
+                  background: "#1d2230",
                   border: isCompleted ? `1px solid ${catColor}40` : "1px solid #2a2a2a",
                 }}
               >
@@ -138,7 +138,7 @@ export default function CourseDetail() {
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
                   style={{
-                    background: isCompleted ? `${catColor}20` : "#2a2a2a",
+                    background: isCompleted ? `${catColor}20` : "#252d3d",
                     color: isCompleted ? catColor : "#666",
                   }}
                 >

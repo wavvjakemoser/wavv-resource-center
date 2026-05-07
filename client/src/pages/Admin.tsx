@@ -166,7 +166,7 @@ export default function Admin() {
         {/* ── Tab bar ── */}
         <div
           className="flex items-center gap-0.5 p-1 rounded-xl"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
           {tabs.map((tab) => (
             <button
@@ -231,7 +231,7 @@ function AnalyticsTab() {
     <div className="space-y-6">
       {/* Reset confirmation dialog — triple confirmation */}
       <Dialog open={resetStep > 0} onOpenChange={(open) => { if (!open) { setResetStep(0); setResetConfirmText(""); } }}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle size={18} style={{ color: "#ef4444" }} />
@@ -896,7 +896,7 @@ function UserProfileDrawer({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+      <DialogContent className="max-w-md" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <DialogHeader>
           <DialogTitle className="text-white">User Profile</DialogTitle>
           <DialogDescription className="text-gray-500 text-xs">Activity and account details</DialogDescription>
@@ -1190,7 +1190,7 @@ function UsersTab() {
               onClick={() => setRoleFilter(active ? "all" : s.filter)}
               className="rounded-xl p-4 text-left transition-all"
               style={{
-                background: "#1a1a1a",
+                background: "#1d2230",
                 border: active ? `1.5px solid ${s.activeBorder}` : "1px solid #2a2a2a",
                 boxShadow: active ? `0 0 12px ${s.activeBorder}33` : "none",
               }}
@@ -1217,7 +1217,7 @@ function UsersTab() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#fff" }}
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}
         />
       </div>
 
@@ -1225,7 +1225,7 @@ function UsersTab() {
       <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
         <Table>
           <TableHeader>
-            <TableRow style={{ background: "#1a1a1a", borderBottom: "1px solid #2a2a2a" }}>
+            <TableRow style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
               <TableHead className="text-gray-400 w-[240px]">Name</TableHead>
               <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Role</TableHead>
@@ -1362,7 +1362,7 @@ function UsersTab() {
 
       {/* Confirm dialog */}
       <Dialog open={!!confirmDialog?.open} onOpenChange={(open) => { if (!open) setConfirmDialog(null); }}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">
               {confirmDialog?.action === "promote_super" && "Promote to Super Admin"}
@@ -1408,7 +1408,7 @@ function UsersTab() {
 
       {/* Add User Dialog */}
       <Dialog open={addUserOpen} onOpenChange={(open) => { if (!open) { setAddUserOpen(false); setAddUserForm({ name: "", email: "", role: "user" }); } }}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Add User</DialogTitle>
             <DialogDescription className="text-gray-400">Manually create a user account. An invite link will be generated for them to set their password.</DialogDescription>
@@ -1466,7 +1466,7 @@ function UsersTab() {
 
       {/* ── Invite Link Modal ── */}
       <Dialog open={inviteLinkModal.open} onOpenChange={(open) => { if (!open) setInviteLinkModal({ open: false, url: "", name: "" }); }}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <UserPlus size={18} style={{ color: "#4ade80" }} />
@@ -1774,7 +1774,7 @@ function SectionRow2({
       {/* Section header */}
       <div
         className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none"
-        style={{ background: "#1a1a1a" }}
+        style={{ background: "#1d2230" }}
         onClick={() => !renamingTitle && setOpen((v) => !v)}
       >
         {/* Expand chevron */}
@@ -1860,7 +1860,7 @@ function SectionRow2({
             type="button"
             onClick={() => setEditingTags((v) => !v)}
             className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition hover:opacity-80"
-            style={{ background: editingTags ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.05)", color: editingTags ? "#fbbf24" : "#9ca3af", border: `1px solid ${editingTags ? "rgba(251,191,36,0.3)" : "#2a2a2a"}` }}
+            style={{ background: editingTags ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.05)", color: editingTags ? "#fbbf24" : "#9ca3af", border: `1px solid ${editingTags ? "rgba(251,191,36,0.3)" : "#252d3d"}` }}
             title="Edit section tags"
           >
             <Tag size={11} /> Tags
@@ -1895,7 +1895,7 @@ function SectionRow2({
 
       {/* Section tag editor (inline, below header) */}
       {editingTags && (
-        <div className="px-4 pb-3" style={{ background: "#1a1a1a" }}>
+        <div className="px-4 pb-3" style={{ background: "#1d2230" }}>
           <SectionTagEditor
             courseId={course.id}
             currentTags={course.tags}
@@ -2154,7 +2154,7 @@ function InactiveCategoryBlock({
           })}
           {inactiveLessons.length > 0 && (
             <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-              <div className="px-4 py-2" style={{ background: "#1a1a1a", borderBottom: "1px solid #222" }}>
+              <div className="px-4 py-2" style={{ background: "#1d2230", borderBottom: "1px solid #222" }}>
                 <p className="text-[11px] font-semibold text-gray-400">Deactivated Videos ({inactiveLessons.length})</p>
               </div>
               <div className="divide-y" style={{ borderColor: "#222" }}>
@@ -2452,7 +2452,7 @@ function ContentTab() {
       {/* ── Divider between Live and Inactive ── */}
       <div className="relative flex items-center py-6">
         <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
-        <div className="mx-4 flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="mx-4 flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#4b5563" }} />
           <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Inactive</span>
         </div>
@@ -2515,7 +2515,7 @@ function ContentTab() {
 
       {/* ── Add Section dialog ── */}
       <Dialog open={!!addSectionDialog} onOpenChange={(open) => !open && setAddSectionDialog(null)}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Add New Section</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -2561,7 +2561,7 @@ function ContentTab() {
 
       {/* ── Add Video dialog ── */}
       <Dialog open={!!addVideoDialog} onOpenChange={(open) => !open && setAddVideoDialog(null)}>
-        <DialogContent className="max-w-lg" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent className="max-w-lg" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Add Video</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -2659,7 +2659,7 @@ function ContentTab() {
 
       {/* ── Deactivate reason dialog ── */}
       <Dialog open={reasonDialogOpen} onOpenChange={setReasonDialogOpen}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Deactivate Content</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -2694,7 +2694,7 @@ function ContentTab() {
 
       {/* ── Permanent delete confirmation dialog ── */}
       <Dialog open={!!deleteDialog} onOpenChange={(open) => !open && setDeleteDialog(null)}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #3a1a1a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #3a1a1a" }}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle size={16} style={{ color: "#f87171" }} />
@@ -2750,7 +2750,7 @@ function TagsManagementPanel() {
       </div>
       <div
         className="rounded-xl p-4"
-        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+        style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
       >
         <div className="flex flex-wrap gap-2">
           {usedTags.map((tag) => (
@@ -2777,7 +2777,7 @@ function TagsManagementPanel() {
       </div>
       {/* Confirm dialog */}
       <Dialog open={!!confirmTag} onOpenChange={() => setConfirmTag(null)}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Remove Tag</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -2907,7 +2907,7 @@ function LessonRow({
   return (
     <div
       className="px-4 py-3 rounded-xl"
-      style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+      style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
     >
       {editing ? (
         /* ── Edit mode ── */
@@ -3203,7 +3203,7 @@ function PlaygroundTab() {
         {/* Total requests */}
         <div
           className="rounded-xl p-4"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
           <div className="flex items-center gap-2 mb-2">
             <Bell size={14} style={{ color: "#a855f7" }} />
@@ -3221,7 +3221,7 @@ function PlaygroundTab() {
               <div
                 key={item.playground}
                 className="rounded-xl p-4"
-                style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+                style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
               >
                 <div className="flex items-center gap-2 mb-2">
                   <FlaskConical
@@ -3242,12 +3242,12 @@ function PlaygroundTab() {
       {!statsLoading && (stats?.byPlayground ?? []).length > 0 && (
         <div
           className="rounded-xl p-5"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
           <h3 className="text-sm font-semibold text-white mb-4">Requests by Playground</h3>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={stats!.byPlayground} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#252d3d" />
               <XAxis
                 dataKey="playground"
                 tick={{ fill: "#9ca3af", fontSize: 10 }}
@@ -3257,7 +3257,7 @@ function PlaygroundTab() {
               />
               <YAxis tick={{ fill: "#9ca3af", fontSize: 10 }} allowDecimals={false} />
               <Tooltip
-                contentStyle={{ background: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "8px" }}
+                contentStyle={{ background: "#1d2230", border: "1px solid #2a2a2a", borderRadius: "8px" }}
                 labelStyle={{ color: "#fff", fontSize: 12 }}
                 itemStyle={{ color: "#a855f7" }}
               />
@@ -3277,7 +3277,7 @@ function PlaygroundTab() {
       {/* ── Requests table ── */}
       <div
         className="rounded-xl overflow-hidden"
-        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+        style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
       >
         <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">All Requests</h3>
@@ -3296,7 +3296,7 @@ function PlaygroundTab() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow style={{ borderColor: "#2a2a2a" }}>
+              <TableRow style={{ borderColor: "#252d3d" }}>
                 <TableHead className="text-gray-400 text-xs">Name</TableHead>
                 <TableHead className="text-gray-400 text-xs">Email</TableHead>
                 <TableHead className="text-gray-400 text-xs">Playground</TableHead>
@@ -3307,7 +3307,7 @@ function PlaygroundTab() {
             </TableHeader>
             <TableBody>
               {requests.map((req) => (
-                <TableRow key={req.id} style={{ borderColor: "#2a2a2a" }}>
+                <TableRow key={req.id} style={{ borderColor: "#252d3d" }}>
                   <TableCell className="text-white text-sm font-medium">{req.name}</TableCell>
                   <TableCell className="text-gray-400 text-xs">{req.email}</TableCell>
                   <TableCell>
@@ -3471,7 +3471,7 @@ function WebinarsTab() {
               const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "webinar-registrants.csv"; a.click();
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#67C728" }}
+            style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#67C728" }}
           >
             <FileDown size={13} /> Export Registrants
           </button>
@@ -3487,7 +3487,7 @@ function WebinarsTab() {
 
       {/* Form */}
       {showForm && (
-        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit Webinar" : "New Webinar"}</h3>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -3555,7 +3555,7 @@ function WebinarsTab() {
               </div>
             </div>
             <div className="flex gap-2 justify-end">
-              <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#2a2a2a" }}>Cancel</button>
+              <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
               <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>
                 {editId !== null ? "Save Changes" : "Create Webinar"}
               </button>
@@ -3565,7 +3565,7 @@ function WebinarsTab() {
       )}
 
       {/* Section Visibility Toggles */}
-      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-2 mb-1">
           <Eye size={13} style={{ color: "#9ca3af" }} />
           <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
@@ -3644,7 +3644,7 @@ function WebinarGroups({
           <div key={type} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <button
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
-              style={{ background: "#1a1a1a" }}
+              style={{ background: "#1d2230" }}
               onClick={() => setCollapsed(c => ({ ...c, [type]: !c[type] }))}
             >
               <div className="flex items-center gap-3">
@@ -3665,7 +3665,7 @@ function WebinarGroups({
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                    <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
                       <TableHead className="text-gray-400 text-xs">Title</TableHead>
                       <TableHead className="text-gray-400 text-xs">Host</TableHead>
                       <TableHead className="text-gray-400 text-xs">Views</TableHead>
@@ -3674,7 +3674,7 @@ function WebinarGroups({
                   </TableHeader>
                   <TableBody>
                     {group.map((w) => (
-                      <TableRow key={w.id} style={{ borderColor: "#2a2a2a" }}>
+                      <TableRow key={w.id} style={{ borderColor: "#252d3d" }}>
                         <TableCell className="text-white text-sm font-medium max-w-xs truncate">{w.title}</TableCell>
                         <TableCell className="text-gray-400 text-xs">{w.host ?? "—"}</TableCell>
                         <TableCell className="text-gray-400 text-xs">{w.viewCount ?? 0}</TableCell>
@@ -3726,7 +3726,7 @@ function CompletedExclusiveWebinars() {
     <div className="rounded-xl overflow-hidden mt-4" style={{ border: "1px solid #2a2a2a" }}>
       <button
         className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
-        style={{ background: "#1a1a1a" }}
+        style={{ background: "#1d2230" }}
         onClick={() => setCollapsed(c => !c)}
       >
         <div className="flex items-center gap-3">
@@ -3753,7 +3753,7 @@ function CompletedExclusiveWebinars() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+              <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
                 <TableHead className="text-gray-400 text-xs">Title</TableHead>
                 <TableHead className="text-gray-400 text-xs">Host</TableHead>
                 <TableHead className="text-gray-400 text-xs">Scheduled Date</TableHead>
@@ -3762,7 +3762,7 @@ function CompletedExclusiveWebinars() {
             </TableHeader>
             <TableBody>
               {archived.map((w) => (
-                <TableRow key={w.id} style={{ borderColor: "#2a2a2a" }}>
+                <TableRow key={w.id} style={{ borderColor: "#252d3d" }}>
                   <TableCell className="text-gray-300 text-sm font-medium max-w-xs truncate">{w.title}</TableCell>
                   <TableCell className="text-gray-500 text-xs">{w.host ?? "—"}</TableCell>
                   <TableCell className="text-gray-500 text-xs">
@@ -3894,7 +3894,7 @@ function GuidesTab() {
               const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "guide-downloaders.csv"; a.click();
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#67C728" }}
+            style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#67C728" }}
           >
             <FileDown size={13} /> Export Downloaders
           </button>
@@ -3908,7 +3908,7 @@ function GuidesTab() {
         </div>
       </div>
       {showForm && (
-        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit Guide" : "New Guide"}</h3>
           <form onSubmit={handleSubmit} className="space-y-3">
             {/* Row 1: Title + Category */}
@@ -3938,7 +3938,7 @@ function GuidesTab() {
               <div className="flex items-center gap-3">
                 <label
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90"
-                  style={{ background: uploadingFile ? "#2a2a2a" : "#1a1a1a", border: "1px solid #3a3a3a", color: uploadingFile ? "#9ca3af" : "#fff" }}
+                  style={{ background: uploadingFile ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingFile ? "#9ca3af" : "#fff" }}
                 >
                   {uploadingFile ? (
                     <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
@@ -3964,7 +3964,7 @@ function GuidesTab() {
               </div>
             </div>
             <div className="flex gap-2 justify-end">
-              <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#2a2a2a" }}>Cancel</button>
+              <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
               <button type="submit" disabled={createMutation.isPending || updateMutation.isPending || uploadingFile} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>
                 {editId !== null ? "Save Changes" : "Create Guide"}
               </button>
@@ -3973,7 +3973,7 @@ function GuidesTab() {
         </div>
       )}
       {/* Section Visibility Toggles */}
-      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-2 mb-1">
           <Eye size={13} style={{ color: "#9ca3af" }} />
           <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
@@ -4052,7 +4052,7 @@ function GuideGroups({
           <div key={type} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <button
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
-              style={{ background: "#1a1a1a" }}
+              style={{ background: "#1d2230" }}
               onClick={() => setCollapsed(c => ({ ...c, [type]: !c[type] }))}
             >
               <div className="flex items-center gap-3">
@@ -4073,7 +4073,7 @@ function GuideGroups({
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                    <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
                       <TableHead className="text-gray-400 text-xs">Title</TableHead>
                       <TableHead className="text-gray-400 text-xs">Category</TableHead>
                       <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
@@ -4083,7 +4083,7 @@ function GuideGroups({
                   </TableHeader>
                   <TableBody>
                     {group.map((g) => (
-                      <TableRow key={g.id} style={{ borderColor: "#2a2a2a" }}>
+                      <TableRow key={g.id} style={{ borderColor: "#252d3d" }}>
                         <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
                         <TableCell className="text-gray-400 text-xs">{g.category ?? "—"}</TableCell>
                         <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
@@ -4159,7 +4159,7 @@ function SupportSection() {
             const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "support-submitters.csv"; a.click();
           }}
           className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-          style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", color: "#67C728" }}
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#67C728" }}
         >
           <FileDown size={13} /> Export Tickets
         </button>
@@ -4225,7 +4225,7 @@ function TicketGroups({
           <div key={cat} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <button
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
-              style={{ background: "#1a1a1a" }}
+              style={{ background: "#1d2230" }}
               onClick={() => setCollapsed(c => ({ ...c, [cat]: !c[cat] }))}
             >
               <div className="flex items-center gap-3">
@@ -4241,7 +4241,7 @@ function TicketGroups({
               <>
                 <Table>
                   <TableHeader>
-                    <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                    <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
                       <TableHead className="text-gray-400 text-xs">Subject</TableHead>
                       <TableHead className="text-gray-400 text-xs">Priority</TableHead>
                       <TableHead className="text-gray-400 text-xs">Status</TableHead>
@@ -4253,7 +4253,7 @@ function TicketGroups({
                     {displayed.map((t) => {
                       const sc = STATUS_CONFIG[t.status] ?? STATUS_CONFIG.open;
                       return (
-                        <TableRow key={t.id} style={{ borderColor: "#2a2a2a" }}>
+                        <TableRow key={t.id} style={{ borderColor: "#252d3d" }}>
                           <TableCell className="text-white text-sm font-medium max-w-xs truncate">{t.subject}</TableCell>
                           <TableCell>
                             <span className="text-[10px] font-semibold uppercase" style={{ color: PRIORITY_COLOR[t.priority] ?? "#9ca3af" }}>{t.priority}</span>
@@ -4455,7 +4455,7 @@ function ContentRequestsTab() {
       {isLoading ? (
         <div className="space-y-2">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: "#1a1a1a" }} />
+            <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: "#1d2230" }} />
           ))}
         </div>
       ) : (
@@ -4478,7 +4478,7 @@ function ContentRequestsTab() {
 
       {/* Delete confirm dialog */}
       <Dialog open={deleteConfirm !== null} onOpenChange={(open) => { if (!open) setDeleteConfirm(null); }}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Delete Request</DialogTitle>
             <DialogDescription className="text-gray-400">This will permanently remove the request. This cannot be undone.</DialogDescription>
@@ -4499,7 +4499,7 @@ function ContentRequestsTab() {
 
       {/* Flag/Strike confirm dialog */}
       <Dialog open={flagConfirm !== null} onOpenChange={(open) => { if (!open) setFlagConfirm(null); }}>
-        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Add Strike to User</DialogTitle>
             <DialogDescription className="text-gray-400">
@@ -4602,7 +4602,7 @@ function ContentRequestGroups({
             {/* Group header */}
             <div
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition cursor-pointer"
-              style={{ background: "#1a1a1a" }}
+              style={{ background: "#1d2230" }}
               onClick={() => setCollapsed(c => ({ ...c, [key]: !c[key] }))}
               role="button"
               tabIndex={0}
@@ -4635,7 +4635,7 @@ function ContentRequestGroups({
                 ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                    <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
                       <TableHead className="text-gray-400 text-xs">Date</TableHead>
                       <TableHead className="text-gray-400 text-xs">Topic</TableHead>
                       <TableHead className="text-gray-400 text-xs">Description</TableHead>
@@ -4645,7 +4645,7 @@ function ContentRequestGroups({
                   </TableHeader>
                   <TableBody>
                     {displayed.map((r) => (
-                      <TableRow key={r.id} style={{ borderColor: "#2a2a2a" }}>
+                      <TableRow key={r.id} style={{ borderColor: "#252d3d" }}>
                         <TableCell className="text-gray-500 text-xs whitespace-nowrap">{new Date(r.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell className="text-white text-xs max-w-[180px]">
                           <div className="truncate font-medium" title={r.topic}>{r.topic}</div>
@@ -4776,7 +4776,7 @@ function NotificationsTab() {
 
       {/* Create form */}
       {showForm && (
-        <div className="rounded-xl p-5 space-y-4" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="rounded-xl p-5 space-y-4" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <h3 className="text-sm font-semibold text-white">Create Notification</h3>
 
           {/* Type selector */}
@@ -4872,7 +4872,7 @@ function NotificationsTab() {
 
       {/* Existing notifications list */}
       <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1a1a1a", borderBottom: "1px solid #2a2a2a" }}>
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
           <span className="text-sm font-semibold text-white">Sent Notifications</span>
           <span className="text-xs text-gray-500">{notifications.length} total</span>
         </div>

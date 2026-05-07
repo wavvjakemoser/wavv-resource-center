@@ -65,7 +65,7 @@ export default function Home() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0d0d0d" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f1318" }}>
         <div className="w-10 h-10 border-2 border-[#0074F4] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -107,7 +107,7 @@ export default function Home() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: "#0d0d0d", fontFamily: "'Inter', sans-serif" }}
+      style={{ background: "#0f1318", fontFamily: "'Inter', sans-serif" }}
     >
       {/* ── Nav ─────────────────────────────────────────────────── */}
       <nav
