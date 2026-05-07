@@ -1,3 +1,6 @@
+// Force browser tab title regardless of platform VITE_APP_TITLE injection
+document.title = "WAVV Success Center";
+
 import { trpc } from "@/lib/trpc";
 import { UNAUTHED_ERR_MSG } from '@shared/const';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
