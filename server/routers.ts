@@ -1132,6 +1132,25 @@ export const appRouter = router({
       }),
   }),
 
+  siteSettings: router({
+    get: publicProcedure
+      .input(z.object({ key: z.string() }))
+      .query(async ({ input }) => {
+        const { getSiteSetting } = await import("./db");
+        return getSiteSetting(input.key);
+      }),
+    update: protectedProcedure
+      .input(z.object({ key: z.string(), value: z.record(z.string(), z.boolean()) }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(async ({ input }) => {
+        const { upsertSiteSetting } = await import("./db");
+        await upsertSiteSetting(input.key, input.value as Record<string, boolean>);
+        return { success: true };
+      }),
+  }),
   readiness: router({
     getItems: protectedProcedure
       .input(z.object({ page: z.enum(["academy", "webinars", "guides", "playground", "support"]) }))

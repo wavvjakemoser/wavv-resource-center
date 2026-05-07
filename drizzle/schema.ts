@@ -257,3 +257,13 @@ export const notificationReads = mysqlTable("notification_reads", {
   readAt: timestamp("readAt").defaultNow().notNull(),
 });
 export type NotificationRead = typeof notificationReads.$inferSelect;
+
+// ─── Site Settings ────────────────────────────────────────────────────────────
+// Key-value store for admin-controlled feature flags and visibility settings.
+// Each row is a single setting. Values are stored as JSON strings.
+export const siteSettings = mysqlTable("site_settings", {
+  key: varchar("key", { length: 100 }).primaryKey(),
+  value: text("value").notNull(), // JSON string
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SiteSetting = typeof siteSettings.$inferSelect;

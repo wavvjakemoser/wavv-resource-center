@@ -740,3 +740,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Add file upload input to Admin Guides form (PDF/DOCX/XLSX, max 16MB)
 - [ ] Add file type selector to Admin Guides form (top 3: PDF, DOCX, XLSX — default PDF)
 - [ ] Update user-facing GuidesAndDocs page to group cards by category with correct color coding
+
+## Section Visibility Controls
+
+- [ ] Add site_settings table to store webinar tab visibility and guides category visibility flags
+- [ ] Add tRPC procedures: admin.getSiteSettings, admin.updateSiteSettings
+- [ ] Admin Webinars tab: add visibility toggles for Evergreen / Exclusive / On-Demand sections
+- [ ] Admin Guides tab: add visibility toggles for PDF / Checklist / Playbook / Resource sections
+- [ ] User-facing Webinars page: hide tabs/sections where visibility = false
+- [ ] User-facing Guides & Docs page: hide category sections where visibility = false

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `site_settings` (\n  `key` varchar(100) NOT NULL,\n  `value` text NOT NULL,\n  `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n  CONSTRAINT `site_settings_key` PRIMARY KEY(`key`)\n);\n\n-- Seed default visibility settings: all sections visible by default\nINSERT INTO `site_settings` (`key`, `value`) VALUES\n  ('webinar_sections_visibility', '{\"evergreen\":true,\"exclusive\":true,\"recordings\":true}'),\n  ('guides_sections_visibility', '{\"pdf\":true,\"checklist\":true,\"playbook\":true,\"other\":true}');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute CREATE TABLE `site_settings` (\n  `key` varchar(100) NOT NULL,\n  `value` text NOT NULL,\n  `updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n  CONSTRAINT `site_settings_key` PRIMARY KEY(`key`)\n);\n\n-- Seed default visibility settings: all sections visible by default\nINSERT INTO `site_settings` (`key`, `value`) VALUES\n  ('webinar_sections_visibility', '{\"evergreen\":true,\"exclusive\":true,\"recordings\":true}'),\n  ('guides_sections_visibility', '{\"pdf\":true,\"checklist\":true,\"playbook\":true,\"other\":true}');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 755
+}

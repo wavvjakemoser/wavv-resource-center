@@ -17,6 +17,7 @@ import {
   pageReadinessItems,
   userNotifications,
   notificationReads,
+  siteSettings,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1257,4 +1258,21 @@ export async function getRecentProgress(userId: number, limit = 3) {
   }
 
   return results;
+}
+
+// ─── Site Settings ────────────────────────────────────────────────────────────
+export async function getSiteSetting(key: string): Promise<Record<string, boolean> | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
+  if (!rows[0]) return null;
+  try { return JSON.parse(rows[0].value) as Record<string, boolean>; } catch { return null; }
+}
+
+export async function upsertSiteSetting(key: string, value: Record<string, boolean>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const json = JSON.stringify(value);
+  await db.insert(siteSettings).values({ key, value: json })
+    .onDuplicateKeyUpdate({ set: { value: json } });
 }

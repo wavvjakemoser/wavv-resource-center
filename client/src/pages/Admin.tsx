@@ -2847,6 +2847,15 @@ function PlaygroundTab() {
 function WebinarsTab() {
   const utils = trpc.useUtils();
   const { data: webinars = [], isLoading } = trpc.webinars.adminList.useQuery();
+  const { data: visibilityRaw } = trpc.siteSettings.get.useQuery({ key: "webinar_sections_visibility" });
+  const visibility: Record<string, boolean> = (visibilityRaw as Record<string, boolean> | null) ?? { evergreen: true, exclusive: true, recordings: true };
+  const updateVisibility = trpc.siteSettings.update.useMutation({
+    onSuccess: () => { utils.siteSettings.get.invalidate(); toast.success("Visibility updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  function toggleSection(key: string) {
+    updateVisibility.mutate({ key: "webinar_sections_visibility", value: { ...visibility, [key]: !visibility[key] } });
+  }
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({
@@ -3032,6 +3041,36 @@ function WebinarsTab() {
         </div>
       )}
 
+      {/* Section Visibility Toggles */}
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-2 mb-1">
+          <Eye size={13} style={{ color: "#9ca3af" }} />
+          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
+        </div>
+        {[
+          { key: "evergreen",  label: "Evergreen Webinars",       color: "#67C728" },
+          { key: "exclusive",  label: "Exclusive / Upcoming",      color: "#0074F4" },
+          { key: "recordings", label: "On-Demand Recordings",      color: "#FF9900" },
+        ].map(({ key, label, color }) => (
+          <div key={key} className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+              <span className="text-xs text-gray-300">{label}</span>
+            </div>
+            <button
+              onClick={() => toggleSection(key)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+              style={visibility[key] !== false
+                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+              }
+            >
+              {visibility[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+            </button>
+          </div>
+        ))}
+      </div>
       {/* Grouped sections */}
       {isLoading ? (
         <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
@@ -3140,6 +3179,15 @@ function WebinarGroups({
 function GuidesTab() {
   const utils = trpc.useUtils();
   const { data: guides = [], isLoading } = trpc.guides.adminList.useQuery();
+  const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
+  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { pdf: true, checklist: true, playbook: true, resource: true };
+  const updateGuideVisibility = trpc.siteSettings.update.useMutation({
+    onSuccess: () => { utils.siteSettings.get.invalidate(); toast.success("Visibility updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  function toggleGuideSection(key: string) {
+    updateGuideVisibility.mutate({ key: "guides_sections_visibility", value: { ...guideVisibility, [key]: !guideVisibility[key] } });
+  }
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -3299,6 +3347,37 @@ function GuidesTab() {
           </form>
         </div>
       )}
+      {/* Section Visibility Toggles */}
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-2 mb-1">
+          <Eye size={13} style={{ color: "#9ca3af" }} />
+          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
+        </div>
+        {[
+          { key: "pdf",       label: "PDFs",       color: "#ef4444" },
+          { key: "checklist", label: "Checklists", color: "#67C728" },
+          { key: "playbook",  label: "Playbooks",  color: "#0074F4" },
+          { key: "resource",  label: "Resources",  color: "#FF9900" },
+        ].map(({ key, label, color }) => (
+          <div key={key} className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+              <span className="text-xs text-gray-300">{label}</span>
+            </div>
+            <button
+              onClick={() => toggleGuideSection(key)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+              style={guideVisibility[key] !== false
+                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+              }
+            >
+              {guideVisibility[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+            </button>
+          </div>
+        ))}
+      </div>
       {/* Grouped by category */}
       {isLoading ? (
         <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>

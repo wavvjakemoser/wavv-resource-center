@@ -20,6 +20,8 @@ const CATEGORY_ORDER = ["pdf", "checklist", "playbook", "other"] as const;
 export default function GuidesAndDocs() {
   const [search, setSearch] = useState("");
   const { data: guides, isLoading } = trpc.guides.list.useQuery();
+  const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
+  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { pdf: true, checklist: true, playbook: true, resource: true };
   const downloadMutation = trpc.guides.download.useMutation();
 
   const handleDownload = async (guide: NonNullable<typeof guides>[0]) => {
@@ -110,6 +112,9 @@ export default function GuidesAndDocs() {
         {!isLoading && hasAnyResults && (
           <div className="space-y-10">
             {CATEGORY_ORDER.map((categoryKey) => {
+              // Map "other" to "resource" for visibility key lookup
+              const visKey = categoryKey === "other" ? "resource" : categoryKey;
+              if (guideVisibility[visKey] === false) return null;
               const items = grouped[categoryKey] ?? [];
               if (items.length === 0) return null;
               const meta = CATEGORY_META[categoryKey];

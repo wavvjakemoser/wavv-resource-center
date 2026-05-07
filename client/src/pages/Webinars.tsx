@@ -265,7 +265,18 @@ function SectionSkeleton() {
 }
 
 export default function Webinars() {
-  const [activeSection, setActiveSection] = useState<WebinarSection>("evergreen");
+  const { data: visibilityRaw } = trpc.siteSettings.get.useQuery({ key: "webinar_sections_visibility" });
+  const visibility: Record<string, boolean> = (visibilityRaw as Record<string, boolean> | null) ?? { evergreen: true, exclusive: true, recordings: true };
+  // Only show tabs the admin has marked visible
+  const visibleSections = (SECTION_ORDER as WebinarSection[]).filter(key => {
+    const vKey = key === "recording" ? "recordings" : key;
+    return visibility[vKey] !== false;
+  });
+  const [activeSectionState, setActiveSection] = useState<WebinarSection>("evergreen");
+  // If the current active tab becomes hidden, fall back to first visible tab
+  const activeSection: WebinarSection = visibleSections.includes(activeSectionState)
+    ? activeSectionState
+    : (visibleSections[0] ?? "evergreen");
 
   const { data: exclusiveWebinars, isLoading: loadingExclusive } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const { data: evergreenWebinars, isLoading: loadingEvergreen } = trpc.webinars.list.useQuery({ type: "evergreen" });
@@ -304,7 +315,7 @@ export default function Webinars() {
 
         {/* ── Section tab bar ── */}
         <div className="flex gap-2 flex-wrap">
-          {(SECTION_ORDER.map(key => [key, SECTION_CONFIG[key]] as [WebinarSection, typeof cfg])).map(([key, c]) => {
+          {(visibleSections.map(key => [key, SECTION_CONFIG[key]] as [WebinarSection, typeof cfg])).map(([key, c]) => {
             const isActive = activeSection === key;
             return (
               <button
