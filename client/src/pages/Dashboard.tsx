@@ -232,7 +232,7 @@ export default function Dashboard() {
                   <Link
                     key={item.courseId}
                     href={`/academy/${item.courseId}`}
-                    className="group flex flex-col p-5 rounded-xl transition-all"
+                    className="group flex flex-col p-5 rounded-xl transition-all min-h-[260px]"
                     style={{ background: "#141414", border: "1px solid #222", textDecoration: "none" }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.borderColor = color;
@@ -305,10 +305,13 @@ export default function Dashboard() {
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {exclusive.map((w) => (
-                  <div
+                  <a
                     key={w.id}
-                    className="flex flex-col rounded-xl overflow-hidden transition-all duration-200"
-                    style={{ background: "#1d2230", border: "1px solid #252d3d" }}
+                    href={w.registrationUrl ?? "/webinars"}
+                    target={w.registrationUrl ? "_blank" : undefined}
+                    rel={w.registrationUrl ? "noopener noreferrer" : undefined}
+                    className="group flex flex-col rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
+                    style={{ background: "#1d2230", border: "1px solid #252d3d", textDecoration: "none" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.boxShadow = `0 4px 20px ${ACCENT}22`; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; e.currentTarget.style.boxShadow = "none"; }}
                   >
@@ -342,30 +345,15 @@ export default function Dashboard() {
                         </div>
                       )}
                       <div className="mt-auto">
-                        {w.registrationUrl ? (
-                          <a
-                            href={w.registrationUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-                            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
-                          >
-                            <ExternalLink size={12} />
-                            Register Now →
-                          </a>
-                        ) : (
-                          <Link
-                            href="/webinars"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-                            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40`, textDecoration: "none" }}
-                          >
-                            <Star size={12} />
-                            View Details →
-                          </Link>
-                        )}
+                        <span
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all group-hover:opacity-80"
+                          style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+                        >
+                          {w.registrationUrl ? <><ExternalLink size={12} /> Register Now →</> : <><Star size={12} /> View Details →</>}
+                        </span>
                       </div>
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             );
