@@ -8,7 +8,6 @@ import {
   BookOpen,
   Video,
   FileText,
-  LifeBuoy,
   Search,
   Award,
   Clock,
@@ -19,8 +18,6 @@ import {
   Bookmark,
   BookmarkCheck,
   Trash2,
-  AlertCircle,
-  Headphones,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,7 +27,6 @@ const EVENT_META: Record<string, { label: string; icon: React.ElementType; color
   webinar_registered: { label: "Registered for a webinar",  icon: Video,        color: "#60a5fa" },
   webinar_watched:    { label: "Watched a webinar",          icon: Video,        color: "#60a5fa" },
   guide_downloaded:   { label: "Downloaded a guide",         icon: Download,     color: "#a78bfa" },
-  ticket_submitted:   { label: "Submitted a support ticket", icon: LifeBuoy,     color: "#fb923c" },
   ai_chat:            { label: "Used WAVV AI",               icon: MessageSquare,color: "#f472b6" },
   search:             { label: "Searched content",           icon: Search,       color: "#94a3b8" },
   login:              { label: "Signed in",                  icon: User,         color: "#64748b" },
@@ -388,100 +384,9 @@ export default function Profile() {
           </section>
         )}
 
-        {/* ── My Support Tickets ── */}
-        <SupportTicketsSection />
-
       </div>
     </PortalLayout>
   );
 }
 
-// ─── Support Tickets section (self-contained) ─────────────────────────────────
-const TICKET_STATUS_META: Record<string, { label: string; color: string }> = {
-  open:        { label: "Open",        color: "#0074F4" },
-  in_progress: { label: "In Progress", color: "#FF9900" },
-  resolved:    { label: "Resolved",    color: "#67C728" },
-  closed:      { label: "Closed",      color: "#6b7280" },
-};
-const TICKET_PRIORITY_META: Record<string, { color: string }> = {
-  low:    { color: "#6b7280" },
-  medium: { color: "#00A9E2" },
-  high:   { color: "#FF9900" },
-  urgent: { color: "#ef4444" },
-};
-function SupportTicketsSection() {
-  const { data: tickets = [] } = trpc.support.getMyTickets.useQuery();
 
-  return (
-    <>
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Headphones size={17} style={{ color: "#FF9900" }} />
-          <h2 className="text-base font-bold text-white">My Support Tickets</h2>
-          {tickets.length > 0 && (
-            <span className="text-xs text-gray-500">({tickets.length})</span>
-          )}
-        </div>
-
-        {tickets.length === 0 ? (
-          <div
-            className="rounded-xl px-5 py-8 text-center"
-            style={{ background: "#111", border: "1px solid #1e1e1e" }}
-          >
-            <Headphones size={28} className="text-gray-700 mx-auto mb-2" />
-            <p className="text-gray-500 text-sm">No tickets yet.</p>
-            <p className="text-gray-600 text-xs mt-1">
-              Submit a ticket from the{" "}
-              <a href="/support" className="underline" style={{ color: "#FF9900" }}>Support page</a>
-              {" "}and it will appear here.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {tickets.map((ticket) => {
-              const sm = TICKET_STATUS_META[ticket.status] ?? TICKET_STATUS_META.open;
-              const pm = TICKET_PRIORITY_META[ticket.priority] ?? TICKET_PRIORITY_META.medium;
-              return (
-                <div
-                  key={ticket.id}
-                  className="p-4 rounded-xl"
-                  style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="text-white text-sm font-semibold leading-snug">{ticket.subject}</h3>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span
-                        className="text-xs px-2 py-0.5 rounded-full font-medium capitalize"
-                        style={{ background: `${pm.color}20`, color: pm.color }}
-                      >
-                        {ticket.priority}
-                      </span>
-                      <span
-                        className="text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1"
-                        style={{ background: `${sm.color}20`, color: sm.color }}
-                      >
-                        {ticket.status === "resolved"
-                          ? <CheckCircle2 size={10} />
-                          : <AlertCircle size={10} />}
-                        {sm.label}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-gray-500 text-xs line-clamp-2 mb-2">{ticket.description}</p>
-                  <div className="flex items-center gap-3 text-xs text-gray-600">
-                    <span>{ticket.category}</span>
-                    <span className="flex items-center gap-1">
-                      <Clock size={10} />
-                      {new Date(ticket.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-    </>
-  );
-}

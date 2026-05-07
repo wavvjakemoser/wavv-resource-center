@@ -298,7 +298,7 @@ export default function Dashboard() {
                   <Link
                     key={p.courseId}
                     href={`/academy/course/${p.courseId}`}
-                    className="group flex items-start gap-3 rounded-xl p-3.5 transition-all"
+                    className="group flex items-start gap-3 rounded-xl p-3.5 transition-all min-h-[110px]"
                     style={{ background: `linear-gradient(135deg, ${meta.color}08 0%, #0d1520 100%)`, border: `1px solid ${meta.color}20`, textDecoration: "none" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${meta.color}45`; e.currentTarget.style.boxShadow = `0 4px 16px ${meta.color}12`; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${meta.color}20`; e.currentTarget.style.boxShadow = "none"; }}
@@ -332,7 +332,7 @@ export default function Dashboard() {
                   <Link
                     key={item.title}
                     href={item.href}
-                    className="group flex items-start gap-3 rounded-xl p-3.5 transition-all"
+                    className="group flex items-start gap-3 rounded-xl p-3.5 transition-all min-h-[110px]"
                     style={{ background: `linear-gradient(135deg, ${item.color}08 0%, #0d1520 100%)`, border: `1px solid ${item.color}20`, textDecoration: "none" }}
                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${item.color}45`; }}
                     onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${item.color}20`; }}

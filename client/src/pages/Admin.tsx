@@ -209,6 +209,8 @@ function AnalyticsTab() {
   const [resetStep, setResetStep] = useState<0 | 1 | 2 | 3>(0);
   const [resetConfirmText, setResetConfirmText] = useState("");
   const utils = trpc.useUtils();
+  const { user: analyticsUser } = useAuth();
+  const isSuperAdmin = analyticsUser?.role === "super_admin";
 
   const resetAnalytics = trpc.analytics.resetAnalytics.useMutation({
     onSuccess: () => {
@@ -278,30 +280,34 @@ function AnalyticsTab() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-base font-semibold text-white">Analytics Dashboard</h2>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setResetStep(1)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-            style={{
-              background: "rgba(239,68,68,0.08)",
-              color: "#f87171",
-              border: "1px solid rgba(239,68,68,0.2)",
-            }}
-          >
-            <Trash2 size={13} />
-            Reset Data
-          </button>
-          <button
-            onClick={() => exportCSV(days)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-            style={{
-              background: "rgba(6,182,212,0.1)",
-              color: "#22d3ee",
-              border: "1px solid rgba(6,182,212,0.2)",
-            }}
-          >
-            <FileDown size={14} />
-            Export CSV
-          </button>
+          {isSuperAdmin && (
+            <button
+              onClick={() => setResetStep(1)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+              style={{
+                background: "rgba(239,68,68,0.08)",
+                color: "#f87171",
+                border: "1px solid rgba(239,68,68,0.2)",
+              }}
+            >
+              <Trash2 size={13} />
+              Reset Data
+            </button>
+          )}
+          {isSuperAdmin && (
+            <button
+              onClick={() => exportCSV(days)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+              style={{
+                background: "rgba(6,182,212,0.1)",
+                color: "#22d3ee",
+                border: "1px solid rgba(6,182,212,0.2)",
+              }}
+            >
+              <FileDown size={14} />
+              Export CSV
+            </button>
+          )}
           <div
             className="flex items-center gap-1 p-1 rounded-lg"
             style={{ background: "rgba(255,255,255,0.05)" }}

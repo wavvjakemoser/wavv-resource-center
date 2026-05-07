@@ -1,5 +1,4 @@
 import PortalLayout from "@/components/PortalLayout";
-import { ReadinessWidget } from "@/components/ReadinessWidget";
 import { Headphones, ExternalLink, Sparkles } from "lucide-react";
 
 const ACTION_CARDS = [
@@ -101,8 +100,6 @@ export default function Support() {
         </div>
 
       </div>
-
-      <ReadinessWidget page="support" />
     </PortalLayout>
   );
 }

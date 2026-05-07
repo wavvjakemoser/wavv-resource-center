@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import PortalLayout from "@/components/PortalLayout";
-import { ReadinessWidget } from "@/components/ReadinessWidget";
 import { trpc } from "@/lib/trpc";
 import {
   Video, Calendar, Clock, ExternalLink, PlayCircle,
@@ -376,7 +375,6 @@ export default function Webinars() {
       <div className="px-4 lg:px-6 pb-10 max-w-5xl mx-auto">
         <ContentRequestCTA requestType="webinar" accentColor="#00A9E2" />
       </div>
-      <ReadinessWidget page="webinars" />
     </PortalLayout>
   );
 }

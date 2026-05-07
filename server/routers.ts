@@ -627,20 +627,20 @@ Be concise, direct, and helpful. Use bullet points for step-by-step instructions
 
 // ─── Analytics Router ─────────────────────────────────────────────────
 const analyticsRouter = router({
-  getSummary: superAdminProcedure.query(() => getAnalyticsSummary()),
+  getSummary: adminProcedure.query(() => getAnalyticsSummary()),
   getUsers: superAdminProcedure.query(() => getAllUsers()),
   updateUserRole: superAdminProcedure
     .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
     .mutation(({ input }) => updateUserRole(input.userId, input.role)),
 
   // ── Advanced analytics for admin dashboard ──
-  getEventCounts: superAdminProcedure
+  getEventCounts: adminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getEventCountsByType(since);
     }),
-  getStatDetail: superAdminProcedure
+  getStatDetail: adminProcedure
     .input(z.object({
       eventTypes: z.array(z.string()).min(1),
       days: z.number().min(1).max(365).default(30),
@@ -651,35 +651,35 @@ const analyticsRouter = router({
       return getStatDetail(input.eventTypes, since, input.limit);
     }),
 
-  getSignInTrend: superAdminProcedure
+  getSignInTrend: adminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getSignInTrend(since);
     }),
 
-  getDailyEvents: superAdminProcedure
+  getDailyEvents: adminProcedure
     .input(z.object({ eventType: z.string(), days: z.number().min(1).max(365).default(30) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getDailyEventCounts(input.eventType, since);
     }),
 
-  getActiveUsers: superAdminProcedure
+  getActiveUsers: adminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getActiveUsers(since);
     }),
 
-  getTopContent: superAdminProcedure
+  getTopContent: adminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(30), limit: z.number().min(1).max(50).default(10) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getTopContent(since, input.limit);
     }),
 
-  getRecentEvents: superAdminProcedure
+  getRecentEvents: adminProcedure
     .input(z.object({ days: z.number().min(1).max(365).default(7), limit: z.number().min(1).max(100).default(50) }))
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);

@@ -1,5 +1,4 @@
 import PortalLayout from "@/components/PortalLayout";
-import { ReadinessWidget } from "@/components/ReadinessWidget";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { FileText, Download, ExternalLink, Search, BookOpen, CheckSquare, Map } from "lucide-react";
@@ -247,7 +246,6 @@ export default function GuidesAndDocs() {
       <div className="px-4 lg:px-6 pb-10 max-w-5xl mx-auto">
         <ContentRequestCTA requestType="guide" accentColor="#67C728" />
       </div>
-      <ReadinessWidget page="guides" />
     </PortalLayout>
   );
 }
