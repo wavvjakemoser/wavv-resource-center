@@ -10,7 +10,6 @@ import {
   Play,
   Clock,
   Star,
-  Compass,
   TrendingUp,
   Rocket,
   Wrench,
@@ -271,79 +270,6 @@ export default function Dashboard() {
                     <div className="flex items-center gap-1.5 mt-4 text-gray-600 group-hover:text-white transition-colors">
                       <Play size={12} />
                       <span className="text-xs font-medium">Resume</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
-        {/* ── Recommended ── */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Compass size={14} style={{ color: "#00A9E2" }} />
-              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Recommended For You</h2>
-            </div>
-            <Link href="/academy" className="text-xs text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1" style={{ textDecoration: "none" }}>
-              View all <ChevronRight size={12} />
-            </Link>
-          </div>
-          {recentProgress && recentProgress.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {recentProgress.map((p) => {
-                const meta = CATEGORY_META[p.category] ?? { color: "#0074F4", icon: GraduationCap };
-                const Icon = meta.icon;
-                return (
-                  <Link
-                    key={p.courseId}
-                    href={`/academy/course/${p.courseId}`}
-                    className="group flex items-start gap-3 rounded-xl p-3.5 transition-all min-h-[110px]"
-                    style={{ background: `linear-gradient(135deg, ${meta.color}08 0%, #0d1520 100%)`, border: `1px solid ${meta.color}20`, textDecoration: "none" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${meta.color}45`; e.currentTarget.style.boxShadow = `0 4px 16px ${meta.color}12`; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${meta.color}20`; e.currentTarget.style.boxShadow = "none"; }}
-                  >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${meta.color}18` }}>
-                      <Icon size={14} style={{ color: meta.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[9px] font-bold tracking-wide" style={{ color: meta.color }}>{p.category}</p>
-                      <p className="text-white text-xs font-semibold leading-snug mt-0.5 line-clamp-2">{p.courseTitle}</p>
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <div className="flex-1 h-1 rounded-full bg-white/10">
-                          <div className="h-1 rounded-full transition-all" style={{ width: `${p.progressPct}%`, background: meta.color }} />
-                        </div>
-                        <span className="text-[10px] text-gray-600">{p.progressPct}%</span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { title: "WAVV Onboarding — Full Series", category: "Onboarding", href: "/academy/category/Onboarding", color: "#0074F4", icon: GraduationCap },
-                { title: "Spam Protection & Number Health", category: "How-To", href: "/academy/category/How-To", color: "#f97316", icon: Target },
-                { title: "Connection Rates Masterclass", category: "Strategy", href: "/academy/category/Strategy and Best Practices", color: "#67C728", icon: TrendingUp },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.title}
-                    href={item.href}
-                    className="group flex items-start gap-3 rounded-xl p-3.5 transition-all min-h-[110px]"
-                    style={{ background: `linear-gradient(135deg, ${item.color}08 0%, #0d1520 100%)`, border: `1px solid ${item.color}20`, textDecoration: "none" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${item.color}45`; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${item.color}20`; }}
-                  >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}18` }}>
-                      <Icon size={14} style={{ color: item.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[9px] font-bold tracking-wide" style={{ color: item.color }}>{item.category}</p>
-                      <p className="text-white text-xs font-semibold leading-snug mt-0.5 line-clamp-2">{item.title}</p>
-                      <p className="text-[10px] text-gray-600 mt-1">Start learning →</p>
                     </div>
                   </Link>
                 );
