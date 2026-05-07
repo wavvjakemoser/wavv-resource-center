@@ -18,6 +18,7 @@ import {
   userNotifications,
   notificationReads,
   siteSettings,
+  inviteTokens,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1357,4 +1358,99 @@ export async function createManualUser(data: {
     isActive: true,
   });
   return result;
+}
+
+// ─── Invite Tokens ─────────────────────────────────────────────────────────────
+export async function generateInvite(data: {
+  email: string;
+  name?: string;
+  role: "user" | "admin" | "super_admin";
+  createdBy: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  // Generate a secure random token (hex string)
+  const { randomBytes } = await import("crypto");
+  const token = randomBytes(32).toString("hex");
+  // Expire in 72 hours
+  const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000);
+  await db.insert(inviteTokens).values({
+    email: data.email,
+    name: data.name,
+    token,
+    role: data.role,
+    used: false,
+    expiresAt,
+    createdBy: data.createdBy,
+  });
+  return { token, expiresAt };
+}
+
+export async function getInviteByToken(token: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db
+    .select()
+    .from(inviteTokens)
+    .where(eq(inviteTokens.token, token))
+    .limit(1);
+  return result[0] ?? null;
+}
+
+export async function claimInvite(data: {
+  token: string;
+  name: string;
+  passwordHash: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const invite = await getInviteByToken(data.token);
+  if (!invite) throw new Error("Invalid invite token.");
+  if (invite.used) throw new Error("This invite has already been used.");
+  if (new Date() > invite.expiresAt) throw new Error("This invite link has expired.");
+
+  // Check if user with this email already exists
+  const existing = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, invite.email))
+    .limit(1);
+
+  let userId: number;
+  if (existing.length > 0) {
+    // Update existing user (manual stub created by admin)
+    userId = existing[0].id;
+    await db
+      .update(users)
+      .set({
+        name: data.name,
+        passwordHash: data.passwordHash,
+        isActive: true,
+        loginMethod: "password",
+      })
+      .where(eq(users.id, userId));
+  } else {
+    // Create fresh user
+    const openId = `invite_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const [result] = await db.insert(users).values({
+      openId,
+      name: data.name,
+      email: invite.email,
+      role: invite.role,
+      passwordHash: data.passwordHash,
+      loginMethod: "password",
+      isActive: true,
+    });
+    userId = (result as any).insertId;
+  }
+
+  // Mark token as used
+  await db
+    .update(inviteTokens)
+    .set({ used: true })
+    .where(eq(inviteTokens.token, data.token));
+
+  // Return the user for session creation
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return user;
 }

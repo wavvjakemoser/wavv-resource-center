@@ -996,12 +996,20 @@ function UsersTab() {
 
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "user" as "user" | "admin" | "super_admin" });
+  const [inviteLinkModal, setInviteLinkModal] = useState<{ open: boolean; url: string; name: string }>({
+    open: false, url: "", name: "",
+  });
   const addUserMutation = trpc.admin.addUser.useMutation({
-    onSuccess: () => {
-      toast.success(`User ${addUserForm.name} added successfully.`);
+    onSuccess: (data) => {
+      const userName = addUserForm.name;
       setAddUserOpen(false);
       setAddUserForm({ name: "", email: "", role: "user" });
       refetch();
+      if (data.inviteUrl) {
+        setInviteLinkModal({ open: true, url: data.inviteUrl, name: userName });
+      } else {
+        toast.success(`User ${userName} added successfully.`);
+      }
     },
     onError: (e) => toast.error(e.message),
   });
@@ -1382,7 +1390,7 @@ function UsersTab() {
         <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Add User</DialogTitle>
-            <DialogDescription className="text-gray-400">Manually create a user account. They can sign in via OAuth once their email is registered.</DialogDescription>
+            <DialogDescription className="text-gray-400">Manually create a user account. An invite link will be generated for them to set their password.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1">
@@ -1423,7 +1431,7 @@ function UsersTab() {
             <Button
               onClick={() => {
                 if (!addUserForm.name.trim() || !addUserForm.email.trim()) { toast.error("Name and email are required."); return; }
-                addUserMutation.mutate(addUserForm);
+                addUserMutation.mutate({ ...addUserForm, origin: window.location.origin });
               }}
               disabled={addUserMutation.isPending || !addUserForm.name.trim() || !addUserForm.email.trim()}
               style={{ background: "#4ade80", color: "#000" }}
@@ -1434,11 +1442,47 @@ function UsersTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ── Invite Link Modal ── */}
+      <Dialog open={inviteLinkModal.open} onOpenChange={(open) => { if (!open) setInviteLinkModal({ open: false, url: "", name: "" }); }}>
+        <DialogContent style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <UserPlus size={18} style={{ color: "#4ade80" }} />
+              User Added — Share Invite Link
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              <strong className="text-white">{inviteLinkModal.name}</strong> has been added. Send them this link to claim their account and set a password. It expires in 72 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 space-y-3">
+            <div
+              className="flex items-center gap-2 p-3 rounded-lg text-xs font-mono break-all"
+              style={{ background: "#0a0a0a", border: "1px solid #2a2a2a", color: "#60a5fa" }}
+            >
+              <span className="flex-1 select-all">{inviteLinkModal.url}</span>
+            </div>
+            <Button
+              className="w-full font-semibold"
+              style={{ background: "#0074F4", color: "#fff" }}
+              onClick={() => {
+                navigator.clipboard.writeText(inviteLinkModal.url);
+                toast.success("Invite link copied to clipboard!");
+              }}
+            >
+              Copy Invite Link
+            </Button>
+            <p className="text-xs text-gray-500 text-center">Paste this link in Slack, email, or any message to the user.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setInviteLinkModal({ open: false, url: "", name: "" })} className="text-gray-400">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
+// ─── Shared helpers ────────────────────────────────────────────────────────────
 function StatCard({ icon, label, value, color, subtitle, onClick }: {
   icon: React.ReactNode; label: string; value: number; color: string; subtitle?: string;
   onClick?: () => void;

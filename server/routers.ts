@@ -9,7 +9,7 @@ import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { hashPassword, verifyPassword, createSessionToken } from "./nativeAuth";
-import { getUserByEmail, createNativeUser, upsertGoogleUser } from "./db";
+import { getUserByEmail, createNativeUser, upsertGoogleUser, generateInvite, getInviteByToken, claimInvite } from "./db";
 import {
   createCourse,
   createGuide,
@@ -813,6 +813,33 @@ export const appRouter = router({
         return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
       }),
 
+    // Validate invite token (for pre-filling the claim form)
+    validateInvite: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .query(async ({ input }) => {
+        const invite = await getInviteByToken(input.token);
+        if (!invite) throw new TRPCError({ code: "NOT_FOUND", message: "Invalid invite link." });
+        if (invite.used) throw new TRPCError({ code: "BAD_REQUEST", message: "This invite has already been used." });
+        if (new Date() > invite.expiresAt) throw new TRPCError({ code: "BAD_REQUEST", message: "This invite link has expired. Ask your admin to resend." });
+        return { email: invite.email, name: invite.name ?? "", role: invite.role };
+      }),
+    // Claim an invite: set name + password, auto-login
+    acceptInvite: publicProcedure
+      .input(z.object({
+        token: z.string(),
+        name: z.string().min(1).max(100),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const passwordHash = await hashPassword(input.password);
+        const user = await claimInvite({ token: input.token, name: input.name, passwordHash });
+        if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to claim invite." });
+        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        await trackEvent({ userId: user.id, eventType: "login" });
+        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+      }),
     googleAuth: publicProcedure
       .input(z.object({ code: z.string(), redirectUri: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -937,11 +964,37 @@ export const appRouter = router({
         name: z.string().min(1).max(255),
         email: z.string().email(),
         role: z.enum(["user", "admin", "super_admin"]).default("user"),
+        origin: z.string().url(),
       }))
-      .mutation(async ({ input }) => {
-        const result = await createManualUser(input);
+      .mutation(async ({ input, ctx }) => {
+        // Create the user stub
+        const result = await createManualUser({ name: input.name, email: input.email, role: input.role });
         if (!result) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user" });
-        return { success: true };
+        // Generate invite token so the user can claim their account
+        const { token } = await generateInvite({
+          email: input.email,
+          name: input.name,
+          role: input.role,
+          createdBy: ctx.user.id,
+        });
+        const inviteUrl = `${input.origin}/accept-invite?token=${token}`;
+        return { success: true, inviteUrl };
+      }),
+    // Generate a fresh invite link for an existing user (resend)
+    resendInvite: superAdminProcedure
+      .input(z.object({
+        email: z.string().email(),
+        role: z.enum(["user", "admin", "super_admin"]).default("user"),
+        origin: z.string().url(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { token } = await generateInvite({
+          email: input.email,
+          role: input.role,
+          createdBy: ctx.user.id,
+        });
+        const inviteUrl = `${input.origin}/accept-invite?token=${token}`;
+        return { success: true, inviteUrl };
       }),
     // Notification management (admin only)
     listNotifications: superAdminProcedure.query(async () => {

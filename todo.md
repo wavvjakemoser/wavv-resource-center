@@ -780,3 +780,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Academy landing page: section/video counts must reflect DB published data only (not static CATEGORY_DATA)
 - [x] Academy landing page: hidden/deactivated courses must not be counted or shown
 - [x] AcademyCategory page: confirm hidden sections are excluded (already fixed, verify)
+
+## Invite Flow & Auth Cleanup (Batch 5)
+
+- [x] Add invite_tokens table (id, email, token, role, used, expiresAt, createdBy)
+- [x] Add generateInvite DB helper (creates token, stores in DB)
+- [x] Add sendInviteEmail server helper — Option B: copy-link modal (no external email dependency)
+- [x] Add admin.addUser tRPC procedure (generates token, returns inviteUrl, called from Add User dialog)
+- [x] Add auth.validateInvite + auth.acceptInvite tRPC procedures (validates token, sets password, creates session, marks token used)
+- [x] Build /accept-invite page (token from URL, name + password + confirm, auto-login on submit)
+- [x] Password validation: min 8 chars enforced on register, acceptInvite, and UI forms
+- [x] "Don't have an account? Create one" link on sign-in page already present (verified)
+- [x] Audit and remove any remaining Manus OAuth references from frontend and backend

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `invite_tokens` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`email` varchar(320) NOT NULL,\n\t`name` varchar(255),\n\t`token` varchar(128) NOT NULL,\n\t`role` enum('user','admin','super_admin') NOT NULL DEFAULT 'user',\n\t`used` boolean NOT NULL DEFAULT false,\n\t`expiresAt` timestamp NOT NULL,\n\t`createdBy` int,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `invite_tokens_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `invite_tokens_token_unique` UNIQUE(`token`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute CREATE TABLE `invite_tokens` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`email` varchar(320) NOT NULL,\n\t`name` varchar(255),\n\t`token` varchar(128) NOT NULL,\n\t`role` enum('user','admin','super_admin') NOT NULL DEFAULT 'user',\n\t`used` boolean NOT NULL DEFAULT false,\n\t`expiresAt` timestamp NOT NULL,\n\t`createdBy` int,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `invite_tokens_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `invite_tokens_token_unique` UNIQUE(`token`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 700
+}

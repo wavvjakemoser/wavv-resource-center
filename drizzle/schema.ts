@@ -259,6 +259,27 @@ export const notificationReads = mysqlTable("notification_reads", {
 });
 export type NotificationRead = typeof notificationReads.$inferSelect;
 
+// ─── Invite Tokens ──────────────────────────────────────────────────────────
+export const inviteTokens = mysqlTable("invite_tokens", {
+  id: int("id").autoincrement().primaryKey(),
+  // Email address the invite was sent to
+  email: varchar("email", { length: 320 }).notNull(),
+  // Name pre-filled for the invitee (optional)
+  name: varchar("name", { length: 255 }),
+  // Secure random token (UUID or crypto hex)
+  token: varchar("token", { length: 128 }).notNull().unique(),
+  // Role to assign on account creation
+  role: mysqlEnum("role", ["user", "admin", "super_admin"]).default("user").notNull(),
+  // Whether the invite has been claimed
+  used: boolean("used").default(false).notNull(),
+  // Token expiry (72 hours from creation)
+  expiresAt: timestamp("expiresAt").notNull(),
+  // Admin who created the invite
+  createdBy: int("createdBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type InviteToken = typeof inviteTokens.$inferSelect;
+
 // ─── Site Settings ────────────────────────────────────────────────────────────
 // Key-value store for admin-controlled feature flags and visibility settings.
 // Each row is a single setting. Values are stored as JSON strings.

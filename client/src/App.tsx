@@ -20,6 +20,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import GoogleCallback from "./pages/GoogleCallback";
+import AcceptInvite from "./pages/AcceptInvite";
 import { usePageTracking } from "./hooks/usePageTracking";
 
 function Router() {
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/admin/legacy" component={AdminPanel} />
       <Route path="/hands-on" component={HandsOn} />
+      <Route path="/accept-invite" component={AcceptInvite} />
       <Route path="/profile" component={Profile} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
