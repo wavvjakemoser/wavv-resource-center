@@ -91,9 +91,9 @@ export default function Dashboard() {
   const { user } = useAuth();
   const firstName = user?.name?.split(" ")[0] ?? "there";
   const { data: recentProgress, isLoading: progressLoading } = trpc.academy.getRecentProgress.useQuery({ limit: 3 });
-  const { data: recentLessons, isLoading: recentLoading } = trpc.academy.getRecentLessons.useQuery({ limit: 4 });
   const { data: upcomingWebinars } = trpc.webinars.list.useQuery({ type: "upcoming" });
   const { data: evergreenWebinars } = trpc.webinars.list.useQuery({ type: "evergreen" });
+  const { data: exclusiveWebinars } = trpc.webinars.list.useQuery({ type: "exclusive" });
 
   return (
     <PortalLayout title="Home">
@@ -177,106 +177,36 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Featured Content ── */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Zap size={15} style={{ color: "#0074F4" }} />
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Featured</h2>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Hero card */}
-            <Link
-              href={FEATURED_HERO.href}
-              className="group lg:col-span-2 relative overflow-hidden rounded-2xl p-6 flex flex-col justify-between min-h-[200px] transition-all"
-              style={{
-                background: `linear-gradient(135deg, ${FEATURED_HERO.color}18 0%, #0d1520 100%)`,
-                border: `1px solid ${FEATURED_HERO.color}30`,
-                textDecoration: "none",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = `${FEATURED_HERO.color}70`;
-                e.currentTarget.style.boxShadow = `0 8px 32px ${FEATURED_HERO.color}20`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = `${FEATURED_HERO.color}30`;
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              <div className="absolute top-0 right-0 w-40 h-40 rounded-full pointer-events-none opacity-10"
-                style={{ background: `radial-gradient(circle, ${FEATURED_HERO.color}, transparent)`, transform: "translate(30%, -30%)" }} />
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full"
-                    style={{ background: `${FEATURED_HERO.color}20`, color: FEATURED_HERO.color, border: `1px solid ${FEATURED_HERO.color}40` }}>
-                    {FEATURED_HERO.label}
-                  </span>
-                  <span className="text-[10px] text-gray-600">{FEATURED_HERO.tag}</span>
+\        {/* ── Quick Category Access ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { label: "START HERE", title: "WAVV Onboarding", desc: "6 sections, 12 videos — everything from setup to your first campaign.", href: "/academy/category/Onboarding", color: "#0074F4", icon: Rocket },
+            { label: "MUST WATCH", title: "Spam Protection & Number Health", desc: "Keep your numbers clean and your connection rates high.", href: "/academy/category/How-To", color: "#f97316", icon: Target },
+            { label: "MOST POPULAR", title: "Connection Rates Masterclass", desc: "Understand what drives connection rates and how to improve them.", href: "/academy/category/Strategy and Best Practices", color: "#67C728", icon: TrendingUp },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.title}
+                href={item.href}
+                className="group relative overflow-hidden rounded-xl p-4 flex items-start gap-3 transition-all"
+                style={{ background: `linear-gradient(135deg, ${item.color}12 0%, #0d1520 100%)`, border: `1px solid ${item.color}25`, textDecoration: "none" }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${item.color}55`; e.currentTarget.style.boxShadow = `0 4px 20px ${item.color}18`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${item.color}25`; e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}20` }}>
+                  <Icon size={16} style={{ color: item.color }} />
                 </div>
-                <h3 className="text-white text-xl font-bold leading-snug mb-2">{FEATURED_HERO.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed max-w-md">{FEATURED_HERO.description}</p>
-              </div>
-              <div className="flex items-center justify-between mt-4">
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <Clock size={12} />
-                  <span className="text-xs">{FEATURED_HERO.duration}</span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[9px] font-bold tracking-wide" style={{ color: item.color }}>{item.label}</span>
+                  <p className="text-white text-xs font-semibold leading-snug mt-0.5">{item.title}</p>
+                  <p className="text-gray-500 text-[11px] mt-1 leading-relaxed line-clamp-2">{item.desc}</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-white group-hover:gap-2.5 transition-all">
-                  <Play size={14} style={{ color: FEATURED_HERO.color }} />
-                  <span className="text-sm font-semibold" style={{ color: FEATURED_HERO.color }}>Start Learning</span>
-                  <ChevronRight size={14} style={{ color: FEATURED_HERO.color }} />
-                </div>
-              </div>
-            </Link>
-
-            {/* Side cards */}
-            <div className="flex flex-col gap-4">
-              {FEATURED_SIDE.map((item) => {
-                const Icon = item.icon;
-                const badgeColor = item.badge === "MUST WATCH" ? "#ef4444" : "#f97316";
-                return (
-                  <Link
-                    key={item.title}
-                    href={item.href}
-                    className="group relative overflow-hidden rounded-xl p-4 flex flex-col gap-3 flex-1 transition-all"
-                    style={{
-                      background: `linear-gradient(135deg, ${item.color}10 0%, #0d1520 100%)`,
-                      border: `1px solid ${item.color}25`,
-                      textDecoration: "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = `${item.color}60`;
-                      e.currentTarget.style.boxShadow = `0 4px 20px ${item.color}18`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = `${item.color}25`;
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{ background: `${item.color}20` }}>
-                        <Icon size={15} style={{ color: item.color }} />
-                      </div>
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: `${badgeColor}18`, color: badgeColor, border: `1px solid ${badgeColor}30` }}>
-                        {item.badge}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-white text-sm font-semibold leading-snug">{item.title}</p>
-                      <p className="text-gray-500 text-xs mt-1 leading-relaxed line-clamp-2">{item.description}</p>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-600 group-hover:text-gray-300 transition-colors mt-auto">
-                      <ExternalLink size={10} />
-                      <span className="text-[10px]">View lesson</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
+                <ChevronRight size={13} className="text-gray-700 group-hover:text-gray-400 transition-colors flex-shrink-0 mt-1" />
+              </Link>
+            );
+          })}
         </div>
-
         {/* ── Continue Learning ── */}
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -377,149 +307,110 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-
-        {/* ── Recently Added + Upcoming Webinars (side by side) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Recently Added — 3/5 width */}
-          <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Sparkles size={15} style={{ color: "#0074F4" }} />
-                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Recently Added</h2>
-              </div>
-              <Link href="/academy" className="text-xs text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1" style={{ textDecoration: "none" }}>
-                View all <ChevronRight size={12} />
-              </Link>
+\        {/* ── Exclusive Live Webinars ── */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles size={14} style={{ color: "#a855f7" }} />
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Exclusive Live Webinars</h2>
             </div>
-            {recentLoading && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: "#141414", border: "1px solid #222" }} />
-                ))}
-              </div>
-            )}
-            {!recentLoading && recentLessons && recentLessons.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {recentLessons.map((lesson) => {
-                  const meta = CATEGORY_META[lesson.category] ?? { color: "#0074F4", icon: GraduationCap };
-                  const Icon = meta.icon;
-                  const color = meta.color;
-                  const tags = lesson.tags ? lesson.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
-                  const badge = tags.find((t: string) => ["New","Must Watch","Most Popular","Featured"].includes(t));
-                  const badgeColor = badge === "Must Watch" ? "#ef4444" : badge === "Most Popular" ? "#f97316" : badge === "Featured" ? "#a855f7" : "#0074F4";
-                  return (
-                    <Link
-                      key={lesson.id}
-                      href={`/academy/${lesson.courseId}`}
-                      className="group flex flex-col gap-3 p-4 rounded-xl transition-all"
-                      style={{ background: "#111", border: "1px solid #1e1e1e", textDecoration: "none" }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = color;
-                        e.currentTarget.style.boxShadow = `0 4px 20px ${color}12`;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "#1e1e1e";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ background: `${color}18` }}>
-                          <Icon size={14} style={{ color }} />
-                        </div>
-                        {badge ? (
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
-                            style={{ background: `${badgeColor}15`, color: badgeColor, border: `1px solid ${badgeColor}30` }}>
-                            {(badge as string).toUpperCase()}
-                          </span>
-                        ) : (
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
-                            style={{ background: "rgba(0,116,244,0.12)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.25)" }}>
-                            NEW
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-white text-xs font-semibold leading-snug line-clamp-2">{lesson.title}</p>
-                        <p className="text-gray-600 text-[10px] mt-0.5 font-medium">{lesson.category}</p>
-                        {lesson.description && (
-                          <p className="text-gray-500 text-[11px] mt-1.5 leading-relaxed line-clamp-2">{lesson.description}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 text-gray-700 group-hover:text-gray-400 transition-colors mt-auto">
-                        <Play size={10} />
-                        <span className="text-[10px]">Watch</span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-            {!recentLoading && (!recentLessons || recentLessons.length === 0) && (
-              <div className="flex items-center justify-center py-10 rounded-xl text-gray-600 text-xs"
-                style={{ background: "#111", border: "1px solid #1e1e1e" }}>
-                No lessons added yet
-              </div>
-            )}
+            <Link href="/webinars" className="text-xs text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1" style={{ textDecoration: "none" }}>
+              View all <ChevronRight size={12} />
+            </Link>
           </div>
-          {/* Upcoming Webinars — 2/5 width */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Video size={15} style={{ color: "#00A9E2" }} />
-                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Upcoming Webinars</h2>
-              </div>
-              <Link href="/webinars" className="text-xs text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1" style={{ textDecoration: "none" }}>
-                View all <ChevronRight size={12} />
-              </Link>
-            </div>
-            {(() => {
-              const combined = [
-                ...(upcomingWebinars ?? []).slice(0, 3),
-                ...(evergreenWebinars ?? []).slice(0, 2),
-              ].slice(0, 5);
-              if (combined.length === 0) {
-                return (
-                  <div className="flex flex-col items-center justify-center gap-3 py-8 rounded-xl text-center"
-                    style={{ background: "#111", border: "1px solid #1e1e1e" }}>
-                    <Video size={20} className="text-gray-700" />
-                    <p className="text-gray-500 text-xs">No upcoming webinars scheduled</p>
-                    <Link href="/webinars" className="text-xs font-semibold px-3 py-1.5 rounded-lg"
-                      style={{ background: "rgba(0,169,226,0.12)", color: "#00A9E2", textDecoration: "none", border: "1px solid rgba(0,169,226,0.25)" }}>
-                      Browse On-Demand
-                    </Link>
-                  </div>
-                );
-              }
+          {(() => {
+            const exclusive = (exclusiveWebinars ?? []).filter((w) => !w.scheduledAt || new Date(w.scheduledAt) >= new Date()).slice(0, 4);
+            if (exclusive.length === 0) {
               return (
-                <div className="rounded-xl overflow-hidden divide-y divide-[#1a1a1a]"
+                <div className="flex items-center justify-center py-6 rounded-xl text-gray-600 text-xs gap-2"
                   style={{ background: "#111", border: "1px solid #1e1e1e" }}>
-                  {combined.map((w) => (
-                    <Link
-                      key={w.id}
-                      href="/webinars"
-                      className="group flex items-start gap-3 px-4 py-3.5 hover:bg-white/[0.03] transition-colors"
-                      style={{ textDecoration: "none" }}
-                    >
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                        style={{ background: "rgba(0,169,226,0.12)", border: "1px solid rgba(0,169,226,0.25)" }}>
-                        <Video size={12} style={{ color: "#00A9E2" }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-gray-300 text-xs font-medium group-hover:text-white transition-colors line-clamp-2">
-                          {w.title}
-                        </p>
-                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: "#00A9E299" }}>
-                          {w.type === "evergreen" ? "On-Demand" : w.scheduledAt ? new Date(w.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Upcoming"}
-                        </p>
-                      </div>
-                      <ChevronRight size={12} className="text-gray-700 group-hover:text-gray-500 transition-colors flex-shrink-0 mt-1" />
-                    </Link>
-                  ))}
+                  <Sparkles size={14} className="text-gray-700" />
+                  No exclusive webinars scheduled — check back soon
                 </div>
               );
-            })()}
+            }
+            return (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {exclusive.map((w) => (
+                  <Link
+                    key={w.id}
+                    href="/webinars"
+                    className="group flex flex-col gap-2 rounded-xl p-3.5 transition-all"
+                    style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, #0d1520 100%)", border: "1px solid rgba(168,85,247,0.2)", textDecoration: "none" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(168,85,247,0.45)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(168,85,247,0.12)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(168,85,247,0.2)"; e.currentTarget.style.boxShadow = "none"; }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(168,85,247,0.15)" }}>
+                        <Sparkles size={13} style={{ color: "#a855f7" }} />
+                      </div>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(168,85,247,0.12)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.25)" }}>
+                        EXCLUSIVE
+                      </span>
+                    </div>
+                    <p className="text-white text-xs font-semibold leading-snug line-clamp-2">{w.title}</p>
+                    <p className="text-[10px] font-medium mt-auto" style={{ color: "rgba(168,85,247,0.7)" }}>
+                      {w.scheduledAt ? new Date(w.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Date TBD"}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+        {/* ── On-Demand Webinars ── */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Video size={14} style={{ color: "#00A9E2" }} />
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">On-Demand Webinars</h2>
+            </div>
+            <Link href="/webinars" className="text-xs text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1" style={{ textDecoration: "none" }}>
+              View all <ChevronRight size={12} />
+            </Link>
           </div>
+          {(() => {
+            const onDemand = [
+              ...(upcomingWebinars ?? []).slice(0, 2),
+              ...(evergreenWebinars ?? []).slice(0, 4),
+            ].slice(0, 4);
+            if (onDemand.length === 0) {
+              return (
+                <div className="flex items-center justify-center py-6 rounded-xl text-gray-600 text-xs gap-2"
+                  style={{ background: "#111", border: "1px solid #1e1e1e" }}>
+                  <Video size={14} className="text-gray-700" />
+                  No recordings available yet
+                </div>
+              );
+            }
+            return (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {onDemand.map((w) => (
+                  <Link
+                    key={w.id}
+                    href="/webinars"
+                    className="group flex flex-col gap-2 rounded-xl p-3.5 transition-all"
+                    style={{ background: "linear-gradient(135deg, rgba(0,169,226,0.08) 0%, #0d1520 100%)", border: "1px solid rgba(0,169,226,0.2)", textDecoration: "none" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(0,169,226,0.45)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,169,226,0.12)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,169,226,0.2)"; e.currentTarget.style.boxShadow = "none"; }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,169,226,0.15)" }}>
+                        <Video size={13} style={{ color: "#00A9E2" }} />
+                      </div>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(0,169,226,0.12)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.25)" }}>
+                        {w.type === "evergreen" ? "ON-DEMAND" : "UPCOMING"}
+                      </span>
+                    </div>
+                    <p className="text-white text-xs font-semibold leading-snug line-clamp-2">{w.title}</p>
+                    <p className="text-[10px] font-medium mt-auto" style={{ color: "rgba(0,169,226,0.7)" }}>
+                      {w.type === "evergreen" ? "Watch anytime" : w.scheduledAt ? new Date(w.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Upcoming"}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
       </div>

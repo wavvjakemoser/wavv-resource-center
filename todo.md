@@ -835,3 +835,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Dashboard What's New section: removed (no auto-populate mechanism; replaced with "Recently Added" from DB)
 - [x] Dashboard Trending Now section: removed (insufficient analytics data at launch; replaced with "Upcoming Webinars" from DB)
 - [x] Dashboard overall: ensure no hardcoded fake content is visible to users
+
+## Batch 11: Dashboard Layout Compaction
+
+- [x] Dashboard Featured section: reduce vertical footprint — replaced tall hero+side cards with compact 3-column category banner
+- [x] Dashboard: remove "Recently Added" lessons section
+- [x] Dashboard: add "Exclusive Live Webinars" strip (exclusive type, filtered to future scheduledAt)
+- [x] Dashboard: add "On-Demand Webinars" strip (evergreen + upcoming, 4-column grid)
+- [x] Dashboard: both webinar strips link to /webinars with real data, graceful empty states
