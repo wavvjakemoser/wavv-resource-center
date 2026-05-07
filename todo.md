@@ -858,3 +858,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Dashboard: change Recommended For You icon from Star to Compass (light blue, distinct from gold star)
 - [x] Dashboard nav tiles: fix WAVV Playground icon color to purple (#a855f7)
 - [x] Located 3 coming-soon Onboarding lessons: in AcademyCategory.tsx section 6 (Common Onboarding Questions) — Troubleshooting Audio & Mic Issues, CRM Connection FAQs, Billing & Account Questions. They ARE rendered with a gray "Coming Soon" badge on the Onboarding category page.
+
+## Batch 14: Webinar Display + Content Cleanup
+
+- [x] Dashboard: renamed to "Upcoming Exclusive Live Webinars"
+- [x] Dashboard: webinar date now shows "May 14, 2026 @ 2:00 PM" format
+- [x] AcademyCategory.tsx: removed all 3 placeholder coming-soon lessons and the entire section 6
+- [x] Verified: getLessonsByCourse now filters published=true AND hidden=false; getCourses, getGuides, getWebinars all filter published=true

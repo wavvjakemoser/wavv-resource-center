@@ -174,7 +174,7 @@ export async function getLessonsByCourse(courseId: number, publishedOnly = true)
   const db = await getDb();
   if (!db) return [];
   const conditions = publishedOnly
-    ? and(eq(lessons.courseId, courseId), eq(lessons.published, true))
+    ? and(eq(lessons.courseId, courseId), eq(lessons.published, true), eq(lessons.hidden, false))
     : eq(lessons.courseId, courseId);
   return db.select().from(lessons).where(conditions).orderBy(lessons.sortOrder, lessons.createdAt);
 }

@@ -172,15 +172,6 @@ const CATEGORY_DATA: CategoryData[] = [
           },
         ],
       },
-      {
-        id: "onb-6",
-        title: "6. Common Onboarding Questions",
-        videos: [
-          { id: "onb-6-1", title: "Troubleshooting Audio & Mic Issues", status: "coming_soon" as const },
-          { id: "onb-6-2", title: "CRM Connection FAQs", status: "coming_soon" as const },
-          { id: "onb-6-3", title: "Billing & Account Questions", status: "coming_soon" as const },
-        ],
-      },
     ],
   },
   {
