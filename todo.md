@@ -801,3 +801,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Analytics export: CSV format with header block (report name, period, generated date, total count) + GHL-friendly column names
 - [x] Playground access request: enforce one request per user (server throws CONFLICT on duplicate)
 - [x] Playground access request: after submission, button changes to "Requested" (purple badge, stays on reload via hasRequested query)
+
+## Batch 7: Webinar Click Tracking & Auto-Archive
+
+- [x] Webinar registration: log `webinar_registered` analytics event when user clicks registration link
+- [x] Webinar registration: update button label to "Register Now →" (external link style)
+- [x] Webinar registration: admin analytics view shows "Registration Clicks" label (not "Confirmed Registrations")
+- [x] Exclusive webinars: auto-archive when scheduledAt timestamp is in the past (silent, on page load)
+- [x] Exclusive webinars: add `status` field (upcoming/archived) or derive from scheduledAt vs now
+- [x] Admin Webinars tab: add "Completed" sub-tab showing archived exclusive webinars
+- [x] Admin Webinars tab: Completed webinars have "Publish to On-Demand" and "Keep Archived" actions
+- [x] User-facing Webinars page: archived exclusive webinars no longer appear in the upcoming list

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, like, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, lt, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   analyticsEvents,
@@ -279,10 +279,27 @@ export async function getCourseCompletionStats() {
 export async function getWebinars(type?: "upcoming" | "recording" | "exclusive" | "evergreen") {
   const db = await getDb();
   if (!db) return [];
+  const now = new Date();
+  // For exclusive webinars (user-facing): only show future/current sessions (scheduledAt > now)
+  if (type === "exclusive") {
+    return db.select().from(webinars).where(
+      and(eq(webinars.type, "exclusive"), eq(webinars.published, true), gt(webinars.scheduledAt, now))
+    ).orderBy(asc(webinars.scheduledAt));
+  }
   const conditions = type
     ? and(eq(webinars.type, type), eq(webinars.published, true))
     : eq(webinars.published, true);
   return db.select().from(webinars).where(conditions).orderBy(desc(webinars.scheduledAt));
+}
+
+export async function getArchivedExclusiveWebinars() {
+  const db = await getDb();
+  if (!db) return [];
+  const now = new Date();
+  // Exclusive webinars whose scheduled time has passed (archived, regardless of published flag)
+  return db.select().from(webinars).where(
+    and(eq(webinars.type, "exclusive"), lt(webinars.scheduledAt, now))
+  ).orderBy(desc(webinars.scheduledAt));
 }
 
 export async function getWebinarById(id: number) {

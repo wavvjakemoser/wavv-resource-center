@@ -206,7 +206,7 @@ function WebinarCard({
               }}
             >
               <ExternalLink size={12} />
-              {isRegistered ? "Registered ✓" : variant === "evergreen" ? "Join Next Session" : "Register Now"}
+              {isRegistered ? "Registered ✓" : variant === "evergreen" ? "Join Next Session →" : "Register Now →"}
             </a>
           ) : (
             <button
@@ -218,7 +218,7 @@ function WebinarCard({
                 border: `1px solid ${isRegistered ? "#67C72840" : `${accentColor}40`}`,
               }}
             >
-              {isRegistered ? "Registered ✓" : variant === "evergreen" ? "Join Next Session" : "Register"}
+              {isRegistered ? "Registered ✓" : variant === "evergreen" ? "Join Next Session →" : "Register Now →"}
             </button>
           )}
         </div>

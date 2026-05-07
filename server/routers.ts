@@ -42,6 +42,7 @@ import {
   getUserTickets,
   getUserWebinarRegistrations,
   getWebinarById,
+  getArchivedExclusiveWebinars,
   getWebinars,
   incrementGuideDownload,
   incrementWebinarView,
@@ -391,7 +392,16 @@ const webinarsRouter = router({
 
   adminList: superAdminProcedure.query(() => getWebinars()),
   adminExportRegistrants: superAdminProcedure.query(() => getWebinarRegistrantsExport()),
-
+  // Archived exclusive webinars (past scheduledAt)
+  archivedExclusive: superAdminProcedure.query(() => getArchivedExclusiveWebinars()),
+  // Publish an archived exclusive webinar to on-demand (type -> recording, published -> true)
+  publishToOnDemand: superAdminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => updateWebinar(input.id, { type: "recording", published: true })),
+  // Keep archived (unpublish so it's invisible to users)
+  keepArchived: superAdminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => updateWebinar(input.id, { published: false })),
   // Reorder: swap sortOrder between two webinars (super_admin only)
   adminReorder: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))

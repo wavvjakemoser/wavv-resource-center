@@ -3555,6 +3555,8 @@ function WebinarsTab() {
           onDelete={(id) => { if (confirm("Delete this webinar?")) deleteMutation.mutate({ id }); }}
         />
       )}
+      {/* Completed Exclusive Webinars (auto-archived) */}
+      <CompletedExclusiveWebinars />
     </div>
   );
 }
@@ -3645,6 +3647,106 @@ function WebinarGroups({
           </div>
         );
       })}
+    </div>
+  );
+}
+// ─── Completed Exclusive Webinars (auto-archived) ────────────────────────────
+function CompletedExclusiveWebinars() {
+  const utils = trpc.useUtils();
+  const [collapsed, setCollapsed] = React.useState(true);
+  const { data: archived = [], isLoading } = trpc.webinars.archivedExclusive.useQuery();
+
+  const publishMutation = trpc.webinars.publishToOnDemand.useMutation({
+    onSuccess: () => {
+      toast.success("Published to On-Demand recordings.");
+      utils.webinars.archivedExclusive.invalidate();
+      utils.webinars.list.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const keepMutation = trpc.webinars.keepArchived.useMutation({
+    onSuccess: () => {
+      toast.success("Webinar kept archived (hidden from users).");
+      utils.webinars.archivedExclusive.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  return (
+    <div className="rounded-xl overflow-hidden mt-4" style={{ border: "1px solid #2a2a2a" }}>
+      <button
+        className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
+        style={{ background: "#1a1a1a" }}
+        onClick={() => setCollapsed(c => !c)}
+      >
+        <div className="flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#6b7280" }} />
+          <span className="text-sm font-semibold text-gray-400">Completed Exclusive Webinars</span>
+          <span className="text-xs text-gray-600">Past-dated exclusive sessions — publish to On-Demand or keep archived</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {!isLoading && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(107,114,128,0.15)", color: "#9ca3af" }}>{archived.length}</span>
+          )}
+          <ChevronDown size={14} className={`text-gray-500 transition-transform ${collapsed ? "" : "rotate-180"}`} />
+        </div>
+      </button>
+      {!collapsed && (
+        isLoading ? (
+          <div className="flex items-center justify-center h-16" style={{ background: "#111" }}>
+            <div className="animate-spin w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full" />
+          </div>
+        ) : archived.length === 0 ? (
+          <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
+            <p className="text-gray-600 text-xs">No completed exclusive webinars yet.</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow style={{ background: "#111", borderColor: "#2a2a2a" }}>
+                <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                <TableHead className="text-gray-400 text-xs">Host</TableHead>
+                <TableHead className="text-gray-400 text-xs">Scheduled Date</TableHead>
+                <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {archived.map((w) => (
+                <TableRow key={w.id} style={{ borderColor: "#2a2a2a" }}>
+                  <TableCell className="text-gray-300 text-sm font-medium max-w-xs truncate">{w.title}</TableCell>
+                  <TableCell className="text-gray-500 text-xs">{w.host ?? "—"}</TableCell>
+                  <TableCell className="text-gray-500 text-xs">
+                    {w.scheduledAt ? new Date(w.scheduledAt).toLocaleDateString() : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => publishMutation.mutate({ id: w.id })}
+                        disabled={publishMutation.isPending}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition"
+                        style={{ background: "rgba(255,153,0,0.12)", color: "#FF9900", border: "1px solid rgba(255,153,0,0.25)" }}
+                      >
+                        <Video size={11} />
+                        Publish to On-Demand
+                      </button>
+                      <button
+                        onClick={() => keepMutation.mutate({ id: w.id })}
+                        disabled={keepMutation.isPending}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition"
+                        style={{ background: "rgba(107,114,128,0.12)", color: "#9ca3af", border: "1px solid rgba(107,114,128,0.25)" }}
+                      >
+                        <EyeOff size={11} />
+                        Keep Archived
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )
+      )}
     </div>
   );
 }
