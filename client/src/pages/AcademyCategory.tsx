@@ -549,7 +549,16 @@ export default function AcademyCategory() {
     setPlayingTitle(title);
   };
   const [playingTitle, setPlayingTitle] = useState<string | null>(null);
-  const handleClosePlayer = () => { setPlayingVideo(null); setPlayingTitle(null); };
+  const [showPulse, setShowPulse] = useState(false);
+  const handleClosePlayer = () => { setPlayingVideo(null); setPlayingTitle(null); setShowPulse(false); };
+
+  // After 30s of watching, pulse the Mark Complete button to draw attention
+  useEffect(() => {
+    if (!playingVideo || playingVideo.completed) { setShowPulse(false); return; }
+    setShowPulse(false);
+    const t = setTimeout(() => setShowPulse(true), 30_000);
+    return () => clearTimeout(t);
+  }, [playingVideo?.embedUrl, playingVideo?.completed]);
 
   // Fetch DB lessons for this category to get tags + createdAt
   const { data: dbLessons = [] } = trpc.academy.getLessonsByCategory.useQuery(
@@ -748,20 +757,22 @@ export default function AcademyCategory() {
         {/* ── Filter bar ── */}
         <div className="flex items-center gap-2 flex-wrap">
             <Filter size={13} className="text-gray-500 flex-shrink-0" />
-            {["All", ...availableTags, "New", "Trending", "Bookmarked"].map((f) => {
+            {["All", "New", "Bookmarked"].map((f) => {
               const isActive = (f === "All" && !activeFilter) || activeFilter === f;
               return (
                 <button
                   key={f}
                   type="button"
                   onClick={() => setActiveFilter(f === "All" ? null : f)}
-                  className="text-[11px] font-semibold px-3 py-1 rounded-full transition-all"
+                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full transition-all"
                   style={isActive
                     ? { background: cat.color, color: "#fff", border: `1px solid ${cat.color}` }
                     : { background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #2a2a2a" }
                   }
                 >
-                  {f === "Bookmarked" ? `★ Bookmarked` : f}
+                  {f === "Bookmarked" ? (
+                    <><Bookmark size={11} /> Bookmarked</>
+                  ) : f}
                 </button>
               );
             })}
@@ -867,9 +878,10 @@ export default function AcademyCategory() {
                     }
                   }}
                   disabled={markCompleteMut.isPending || !playingVideo.lessonId}
-                  className="text-xs font-semibold px-4 py-2 rounded-lg transition-all disabled:opacity-50"
-                  style={{ background: "#0074F4", color: "#fff" }}
+                  className={`text-sm font-semibold px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 flex items-center gap-2 ${showPulse ? "animate-pulse" : ""}`}
+                  style={{ background: showPulse ? "#22c55e" : "#0074F4", color: "#fff", boxShadow: showPulse ? "0 0 16px rgba(34,197,94,0.5)" : "none" }}
                 >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L6 11L12 3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   {markCompleteMut.isPending ? "Saving..." : "Mark Complete"}
                 </button>
               )}
