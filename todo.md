@@ -850,3 +850,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Dashboard: change Exclusive Live Webinars accent from purple to gold (#F5A623), swap Sparkles icon to Star
 - [x] Dashboard: Recommended section added (shows in-progress courses or curated fallback)
 - [x] Audit: all pages scanned for placeholders and missing content — rundown delivered to user
+
+## Batch 13: Dashboard Final Polish
+
+- [x] Dashboard: remove the compact 3-column featured banner (no title, confusing)
+- [x] Dashboard: reorder sections to Continue Learning → Recommended For You → Exclusive Live Webinars
+- [x] Dashboard: change Recommended For You icon from Star to Compass (light blue, distinct from gold star)
+- [x] Dashboard nav tiles: fix WAVV Playground icon color to purple (#a855f7)
+- [x] Located 3 coming-soon Onboarding lessons: in AcademyCategory.tsx section 6 (Common Onboarding Questions) — Troubleshooting Audio & Mic Issues, CRM Connection FAQs, Billing & Account Questions. They ARE rendered with a gray "Coming Soon" badge on the Onboarding category page.

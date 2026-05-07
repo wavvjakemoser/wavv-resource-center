@@ -1,0 +1,100 @@
+{
+  "query": "SELECT l.id, l.title, l.published, l.hidden, l.inactiveReason, l.tags, c.title as course_title, c.category \nFROM lessons l \nJOIN courses c ON l.courseId = c.id \nWHERE c.category = 'Onboarding' \nORDER BY l.sortOrder;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT l.id, l.title, l.published, l.hidden, l.inactiveReason, l.tags, c.title as course_title, c.category \nFROM lessons l \nJOIN courses c ON l.courseId = c.id \nWHERE c.category = 'Onboarding' \nORDER BY l.sortOrder;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Welcome to WAVV Onboarding",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "1. Welcome To The Onboarding Section",
+      "category": "Onboarding"
+    },
+    {
+      "id": "2",
+      "title": "Introducing WAVV Wallet",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "2. NEW: WAVV Wallet",
+      "category": "Onboarding"
+    },
+    {
+      "id": "3",
+      "title": "Getting Started With Your Single Line Dialer",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "3. Individual Single Line Dialer Onboarding",
+      "category": "Onboarding"
+    },
+    {
+      "id": "4",
+      "title": "Getting Started With Your Multi Line Dialer",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "4. Individual Multi Line Dialer Onboarding",
+      "category": "Onboarding"
+    },
+    {
+      "id": "5",
+      "title": "Team Onboarding - Intro",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "5. Team Onboarding",
+      "category": "Onboarding"
+    },
+    {
+      "id": "6",
+      "title": "Manager/Billing Owner Onboarding",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "5. Team Onboarding",
+      "category": "Onboarding"
+    },
+    {
+      "id": "7",
+      "title": "Settings Lock",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "5. Team Onboarding",
+      "category": "Onboarding"
+    },
+    {
+      "id": "8",
+      "title": "Understanding User Roles",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "5. Team Onboarding",
+      "category": "Onboarding"
+    },
+    {
+      "id": "9",
+      "title": "Agent Onboarding",
+      "published": "1",
+      "hidden": "0",
+      "inactiveReason": "NULL",
+      "tags": "NULL",
+      "course_title": "5. Team Onboarding",
+      "category": "Onboarding"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tpublished\thidden\tinactiveReason\ttags\tcourse_title\tcategory\n1\tWelcome to WAVV Onboarding\t1\t0\tNULL\tNULL\t1. Welcome To The Onboarding Section\tOnboarding\n2\tIntroducing WAVV Wallet\t1\t0\tNULL\tNULL\t2. NEW: WAVV Wallet\tOnboarding\n3\tGetting Started With Your Single Line Dialer\t1\t0\tNULL\tNULL\t3. Individual Single Line Dialer Onboarding\tOnboarding\n4\tGetting Started With Your Multi Line Dialer\t1\t0\tNULL\tNULL\t4. Individual Multi Line Dialer Onboarding\tOnboarding\n5\tTeam Onboarding - Intro\t1\t0\tNULL\tNULL\t5. Team Onboarding\tOnboarding\n6\tManager/Billing Owner Onboarding\t1\t0\tNULL\tNULL\t5. Team Onboarding\tOnboarding\n7\tSettings Lock\t1\t0\tNULL\tNULL\t5. Team Onboarding\tOnboarding\n8\tUnderstanding User Roles\t1\t0\tNULL\tNULL\t5. Team Onboarding\tOnboarding\n9\tAgent Onboarding\t1\t0\tNULL\tNULL\t5. Team Onboarding\tOnboarding\n",
+  "stderr": "",
+  "execution_time_ms": 562
+}
