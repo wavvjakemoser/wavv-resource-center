@@ -821,3 +821,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Academy: investigate and fix Onboarding category thumbnail lag/missing issue
 - [x] Playground admin: add delete button on each access request row (super_admin only, with confirmation)
 - [x] Playground admin: add deletePlaygroundRequest tRPC procedure
+
+## Batch 9: Dark/Light Mode Toggle, Super Admin Button Fix
+
+- [x] Profile dropdown: dark/light mode toggle deferred — app is fully hardcoded dark; full refactor required, not worth the effort now
+- [x] Admin users table: fix "Super Admin" promote button — full label "Promote to Super Admin" must be fully visible, not truncated
+- [x] Admin users table: ensure all action buttons (Super Admin, Demote, Remove) are fully readable with no hidden text

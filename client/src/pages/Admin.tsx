@@ -1282,50 +1282,53 @@ function UsersTab() {
                     <TableCell className="text-gray-500 text-sm">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell>
                       {isSelf ? (
                         <span className="text-xs text-gray-600">—</span>
                       ) : (
-                        <div className="flex items-center justify-end gap-1 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           {/* Super admin actions */}
                           {isSuperAdmin && u.role === "user" && (
-                            <Button variant="ghost" size="sm"
-                              className="text-xs h-7 px-2"
-                              style={{ color: "#fbbf24" }}
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
                               onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_admin" })}>
-                              <Shield className="h-3 w-3 mr-1" /> Make Admin
-                            </Button>
+                              <Shield className="h-3 w-3 flex-shrink-0" /> Make Admin
+                            </button>
                           )}
                           {isSuperAdmin && u.role === "admin" && (
                             <>
-                              <Button variant="ghost" size="sm"
-                                className="text-xs h-7 px-2"
-                                style={{ color: "#e879f9" }}
+                              <button
+                                className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                                style={{ background: "rgba(232,121,249,0.12)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.25)" }}
                                 onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_super" })}>
                                 <SuperAdminIcon size={12} />
-                                <span className="ml-1">Super Admin</span>
-                              </Button>
-                              <Button variant="ghost" size="sm"
-                                className="text-xs h-7 px-2 text-gray-400 hover:text-white"
+                                <span>Promote to Super Admin</span>
+                              </button>
+                              <button
+                                className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                                style={{ background: "rgba(156,163,175,0.1)", color: "#9ca3af", border: "1px solid rgba(156,163,175,0.2)" }}
                                 onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "demote" })}>
-                                <ShieldOff className="h-3 w-3 mr-1" /> Demote
-                              </Button>
+                                <ShieldOff className="h-3 w-3 flex-shrink-0" /> Demote
+                              </button>
                             </>
                           )}
                           {isSuperAdmin && u.role === "super_admin" && (
-                            <Button variant="ghost" size="sm"
-                              className="text-xs h-7 px-2 text-gray-400 hover:text-white"
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(156,163,175,0.1)", color: "#9ca3af", border: "1px solid rgba(156,163,175,0.2)" }}
                               onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "demote" })}>
-                              <ShieldOff className="h-3 w-3 mr-1" /> Demote
-                            </Button>
+                              <ShieldOff className="h-3 w-3 flex-shrink-0" /> Demote
+                            </button>
                           )}
                           {/* Remove button — super_admin can remove anyone; admin can only remove users */}
                           {(isSuperAdmin || (!isSuperAdmin && u.role === "user")) && (
-                            <Button variant="ghost" size="sm"
-                              className="text-xs h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
                               onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "remove" })}>
-                              <Trash2 className="h-3 w-3 mr-1" /> Remove
-                            </Button>
+                              <Trash2 className="h-3 w-3 flex-shrink-0" /> Remove
+                            </button>
                           )}
                         </div>
                       )}
