@@ -1707,7 +1707,7 @@ function InactiveCategoryBlock({
   onDeleteCourse: (id: number, title: string) => void;
   onDeleteLesson: (id: number, title: string) => void;
 }) {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const totalInactive = inactiveCourses.length + inactiveLessons.length;
   return (
     <div>
@@ -2058,7 +2058,6 @@ function ContentTab() {
                   const catInactiveCourses = inactiveCourses.filter((c) => c.category === key);
                   const catCourseIds = new Set([...(byCategory[key] ?? []).map((c) => c.id), ...catInactiveCourses.map((c) => c.id)]);
                   const catInactiveLessons = inactiveLessons.filter((l) => catCourseIds.has(l.courseId));
-                  if (catInactiveCourses.length === 0 && catInactiveLessons.length === 0) return null;
                   return (
                     <InactiveCategoryBlock
                       key={key}
