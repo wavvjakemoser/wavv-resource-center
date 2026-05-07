@@ -4208,10 +4208,13 @@ function ContentRequestGroups({
         const displayed = isShowAll ? group : group.slice(0, PREVIEW_COUNT);
         return (
           <div key={key} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-            <button
-              className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
+            <div
+              className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition cursor-pointer"
               style={{ background: "#1a1a1a" }}
               onClick={() => setCollapsed(c => ({ ...c, [key]: !c[key] }))}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setCollapsed(c => ({ ...c, [key]: !c[key] })); }}
             >
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
@@ -4230,7 +4233,7 @@ function ContentRequestGroups({
                 </button>
                 <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
               </div>
-            </button>
+            </div>
             {!isCollapsed && (
               <>
                 <Table>
