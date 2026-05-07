@@ -84,6 +84,7 @@ import {
   reorderWebinars,
   reorderGuides,
   getRecentProgress,
+  getRecentLessons,
   getNotificationsForUser,
   markNotificationRead,
   markAllNotificationsRead,
@@ -141,6 +142,9 @@ const academyRouter = router({
   getRecentProgress: protectedProcedure
     .input(z.object({ limit: z.number().optional() }))
     .query(({ ctx, input }) => getRecentProgress(ctx.user.id, input.limit ?? 3)),
+  getRecentLessons: protectedProcedure
+    .input(z.object({ limit: z.number().optional() }))
+    .query(({ input }) => getRecentLessons(input.limit ?? 4)),
 
   markComplete: protectedProcedure
     .input(z.object({ lessonId: z.number(), courseId: z.number() }))

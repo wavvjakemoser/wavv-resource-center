@@ -1316,6 +1316,38 @@ export async function getRecentProgress(userId: number, limit = 3) {
   return results;
 }
 
+/** Get the N most recently created published lessons (for dashboard "Recently Added") */
+export async function getRecentLessons(limit = 4) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: lessons.id,
+      title: lessons.title,
+      description: lessons.description,
+      courseId: lessons.courseId,
+      tags: lessons.tags,
+      durationMinutes: lessons.durationMinutes,
+      createdAt: lessons.createdAt,
+    })
+    .from(lessons)
+    .where(and(eq(lessons.published, true), eq(lessons.hidden, false)))
+    .orderBy(desc(lessons.createdAt))
+    .limit(limit);
+  // Enrich with course info
+  const enriched = await Promise.all(
+    rows.map(async (l) => {
+      const [course] = await db
+        .select({ title: courses.title, category: courses.category })
+        .from(courses)
+        .where(eq(courses.id, l.courseId))
+        .limit(1);
+      return { ...l, courseTitle: course?.title ?? "", category: course?.category ?? "" };
+    })
+  );
+  return enriched;
+}
+
 // ─── Site Settings ────────────────────────────────────────────────────────────
 export async function getSiteSetting(key: string): Promise<Record<string, boolean> | null> {
   const db = await getDb();

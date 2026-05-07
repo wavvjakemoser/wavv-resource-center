@@ -827,3 +827,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Profile dropdown: dark/light mode toggle deferred — app is fully hardcoded dark; full refactor required, not worth the effort now
 - [x] Admin users table: fix "Super Admin" promote button — full label "Promote to Super Admin" must be fully visible, not truncated
 - [x] Admin users table: ensure all action buttons (Super Admin, Demote, Remove) are fully readable with no hidden text
+
+## Batch 10: Dashboard Homepage Overhaul
+
+- [x] Dashboard nav buttons: fix "WAVV Guides & ..." truncation — show full label "WAVV Guides & Docs"
+- [x] Dashboard feature cards: replace fake/placeholder content with real data from the system (real lessons, webinars, guides)
+- [x] Dashboard What's New section: removed (no auto-populate mechanism; replaced with "Recently Added" from DB)
+- [x] Dashboard Trending Now section: removed (insufficient analytics data at launch; replaced with "Upcoming Webinars" from DB)
+- [x] Dashboard overall: ensure no hardcoded fake content is visible to users

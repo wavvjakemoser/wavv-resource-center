@@ -13,7 +13,6 @@ import {
   TrendingUp,
   Rocket,
   Wrench,
-  Lightbulb,
   ExternalLink,
   BookOpen,
   ChevronRight,
@@ -88,63 +87,13 @@ function formatRelative(d: Date): string {
   return d.toLocaleDateString();
 }
 
-// ─── What's new ───────────────────────────────────────────────────────────────
-const WHATS_NEW = [
-  {
-    title: "How-To Section — Full Guide",
-    category: "How-To",
-    href: "/academy/category/How-To",
-    icon: Wrench,
-    color: "#00A9E2",
-    badge: "NEW",
-    badgeColor: "#0074F4",
-    description: "8 sections covering every core WAVV feature with step-by-step walkthroughs.",
-  },
-  {
-    title: "Strategy & Best Practices",
-    category: "Strategy",
-    href: "/academy/category/Strategy and Best Practices",
-    icon: Lightbulb,
-    color: "#67C728",
-    badge: "NEW",
-    badgeColor: "#0074F4",
-    description: "3 sections on maximizing connection rates, conversions, and team performance.",
-  },
-  {
-    title: "Nuisance Protection Deep Dive",
-    category: "How-To",
-    href: "/academy/category/How-To",
-    icon: Target,
-    color: "#f97316",
-    badge: "UPDATED",
-    badgeColor: "#f97316",
-    description: "Updated guide on protecting your numbers and staying compliant.",
-  },
-  {
-    title: "Number Rotation Strategy",
-    category: "Strategy",
-    href: "/academy/category/Strategy and Best Practices",
-    icon: Award,
-    color: "#a855f7",
-    badge: "POPULAR",
-    badgeColor: "#a855f7",
-    description: "How to use number rotation to maintain healthy connection rates.",
-  },
-];
-
-// ─── Trending ─────────────────────────────────────────────────────────────────
-const TRENDING = [
-  { title: "Spam Protection", href: "/academy/category/How-To", rank: 1, category: "How-To", color: "#f97316" },
-  { title: "Connection Rates Overview", href: "/academy/category/Strategy and Best Practices", rank: 2, category: "Strategy", color: "#67C728" },
-  { title: "Making Calls With WAVV", href: "/academy/category/How-To", rank: 3, category: "How-To", color: "#00A9E2" },
-  { title: "WAVV Call Campaigns", href: "/academy/category/How-To", rank: 4, category: "How-To", color: "#00A9E2" },
-  { title: "Number Rotation Strategy", href: "/academy/category/Strategy and Best Practices", rank: 5, category: "Strategy", color: "#67C728" },
-];
-
 export default function Dashboard() {
   const { user } = useAuth();
   const firstName = user?.name?.split(" ")[0] ?? "there";
   const { data: recentProgress, isLoading: progressLoading } = trpc.academy.getRecentProgress.useQuery({ limit: 3 });
+  const { data: recentLessons, isLoading: recentLoading } = trpc.academy.getRecentLessons.useQuery({ limit: 4 });
+  const { data: upcomingWebinars } = trpc.webinars.list.useQuery({ type: "upcoming" });
+  const { data: evergreenWebinars } = trpc.webinars.list.useQuery({ type: "evergreen" });
 
   return (
     <PortalLayout title="Home">
@@ -219,7 +168,7 @@ export default function Dashboard() {
                       style={{ background: `${tile.color}20` }}>
                       <Icon size={15} style={{ color: tile.color }} />
                     </div>
-                    <p className="text-white text-xs font-semibold leading-none truncate flex-1">{tile.label}</p>
+                    <p className="text-white text-xs font-semibold leading-snug flex-1">{tile.label}</p>
                     <ChevronRight size={12} className="text-gray-700 group-hover:text-gray-400 transition-colors flex-shrink-0" />
                   </Link>
                 );
@@ -429,112 +378,147 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* ── What's New + Trending (side by side) ── */}
+        {/* ── Recently Added + Upcoming Webinars (side by side) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-          {/* What's New — 3/5 width */}
+          {/* Recently Added — 3/5 width */}
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Sparkles size={15} style={{ color: "#0074F4" }} />
-                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">What's New</h2>
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Recently Added</h2>
               </div>
-              <span
-                className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
-              >
-                ⚠ Placeholder — editorial content
-              </span>
+              <Link href="/academy" className="text-xs text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1" style={{ textDecoration: "none" }}>
+                View all <ChevronRight size={12} />
+              </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {WHATS_NEW.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.title}
-                    href={item.href}
-                    className="group flex flex-col gap-3 p-4 rounded-xl transition-all"
-                    style={{ background: "#111", border: "1px solid #1e1e1e", textDecoration: "none" }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = item.color;
-                      e.currentTarget.style.boxShadow = `0 4px 20px ${item.color}12`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "#1e1e1e";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{ background: `${item.color}18` }}>
-                        <Icon size={14} style={{ color: item.color }} />
+            {recentLoading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: "#141414", border: "1px solid #222" }} />
+                ))}
+              </div>
+            )}
+            {!recentLoading && recentLessons && recentLessons.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {recentLessons.map((lesson) => {
+                  const meta = CATEGORY_META[lesson.category] ?? { color: "#0074F4", icon: GraduationCap };
+                  const Icon = meta.icon;
+                  const color = meta.color;
+                  const tags = lesson.tags ? lesson.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [];
+                  const badge = tags.find((t: string) => ["New","Must Watch","Most Popular","Featured"].includes(t));
+                  const badgeColor = badge === "Must Watch" ? "#ef4444" : badge === "Most Popular" ? "#f97316" : badge === "Featured" ? "#a855f7" : "#0074F4";
+                  return (
+                    <Link
+                      key={lesson.id}
+                      href={`/academy/${lesson.courseId}`}
+                      className="group flex flex-col gap-3 p-4 rounded-xl transition-all"
+                      style={{ background: "#111", border: "1px solid #1e1e1e", textDecoration: "none" }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = color;
+                        e.currentTarget.style.boxShadow = `0 4px 20px ${color}12`;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = "#1e1e1e";
+                        e.currentTarget.style.boxShadow = "none";
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ background: `${color}18` }}>
+                          <Icon size={14} style={{ color }} />
+                        </div>
+                        {badge ? (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
+                            style={{ background: `${badgeColor}15`, color: badgeColor, border: `1px solid ${badgeColor}30` }}>
+                            {(badge as string).toUpperCase()}
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
+                            style={{ background: "rgba(0,116,244,0.12)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.25)" }}>
+                            NEW
+                          </span>
+                        )}
                       </div>
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full"
-                        style={{ background: `${item.badgeColor}15`, color: item.badgeColor, border: `1px solid ${item.badgeColor}30` }}>
-                        {item.badge}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-white text-xs font-semibold leading-snug">{item.title}</p>
-                      <p className="text-gray-600 text-[10px] mt-0.5 font-medium">{item.category}</p>
-                      <p className="text-gray-500 text-[11px] mt-1.5 leading-relaxed line-clamp-2">{item.description}</p>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-700 group-hover:text-gray-400 transition-colors mt-auto">
-                      <ExternalLink size={10} />
-                      <span className="text-[10px]">View</span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+                      <div>
+                        <p className="text-white text-xs font-semibold leading-snug line-clamp-2">{lesson.title}</p>
+                        <p className="text-gray-600 text-[10px] mt-0.5 font-medium">{lesson.category}</p>
+                        {lesson.description && (
+                          <p className="text-gray-500 text-[11px] mt-1.5 leading-relaxed line-clamp-2">{lesson.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-700 group-hover:text-gray-400 transition-colors mt-auto">
+                        <Play size={10} />
+                        <span className="text-[10px]">Watch</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+            {!recentLoading && (!recentLessons || recentLessons.length === 0) && (
+              <div className="flex items-center justify-center py-10 rounded-xl text-gray-600 text-xs"
+                style={{ background: "#111", border: "1px solid #1e1e1e" }}>
+                No lessons added yet
+              </div>
+            )}
           </div>
-
-          {/* Trending — 2/5 width */}
+          {/* Upcoming Webinars — 2/5 width */}
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <TrendingUp size={15} style={{ color: "#67C728" }} />
-                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Trending Now</h2>
+                <Video size={15} style={{ color: "#00A9E2" }} />
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Upcoming Webinars</h2>
               </div>
-              <span
-                className="text-[9px] font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
-              >
-                ⚠ Placeholder
-              </span>
+              <Link href="/webinars" className="text-xs text-gray-600 hover:text-gray-400 transition-colors flex items-center gap-1" style={{ textDecoration: "none" }}>
+                View all <ChevronRight size={12} />
+              </Link>
             </div>
-            <div className="rounded-xl overflow-hidden divide-y divide-[#1a1a1a]"
-              style={{ background: "#111", border: "1px solid #1e1e1e" }}>
-              {TRENDING.map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className="group flex items-center gap-3 px-4 py-3.5 hover:bg-white/[0.03] transition-colors"
-                  style={{ textDecoration: "none" }}
-                >
-                  {/* Rank badge */}
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: item.rank <= 3 ? `${item.color}18` : "#1a1a1a",
-                      border: `1px solid ${item.rank <= 3 ? item.color + "30" : "#2a2a2a"}`,
-                    }}>
-                    <span className="text-[10px] font-bold"
-                      style={{ color: item.rank <= 3 ? item.color : "#4b5563" }}>
-                      #{item.rank}
-                    </span>
+            {(() => {
+              const combined = [
+                ...(upcomingWebinars ?? []).slice(0, 3),
+                ...(evergreenWebinars ?? []).slice(0, 2),
+              ].slice(0, 5);
+              if (combined.length === 0) {
+                return (
+                  <div className="flex flex-col items-center justify-center gap-3 py-8 rounded-xl text-center"
+                    style={{ background: "#111", border: "1px solid #1e1e1e" }}>
+                    <Video size={20} className="text-gray-700" />
+                    <p className="text-gray-500 text-xs">No upcoming webinars scheduled</p>
+                    <Link href="/webinars" className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+                      style={{ background: "rgba(0,169,226,0.12)", color: "#00A9E2", textDecoration: "none", border: "1px solid rgba(0,169,226,0.25)" }}>
+                      Browse On-Demand
+                    </Link>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-gray-300 text-xs font-medium group-hover:text-white transition-colors truncate">
-                      {item.title}
-                    </p>
-                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: item.color + "99" }}>
-                      {item.category}
-                    </p>
-                  </div>
-                  <BookOpen size={12} className="text-gray-700 group-hover:text-gray-500 transition-colors flex-shrink-0" />
-                </Link>
-              ))}
-            </div>
+                );
+              }
+              return (
+                <div className="rounded-xl overflow-hidden divide-y divide-[#1a1a1a]"
+                  style={{ background: "#111", border: "1px solid #1e1e1e" }}>
+                  {combined.map((w) => (
+                    <Link
+                      key={w.id}
+                      href="/webinars"
+                      className="group flex items-start gap-3 px-4 py-3.5 hover:bg-white/[0.03] transition-colors"
+                      style={{ textDecoration: "none" }}
+                    >
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                        style={{ background: "rgba(0,169,226,0.12)", border: "1px solid rgba(0,169,226,0.25)" }}>
+                        <Video size={12} style={{ color: "#00A9E2" }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-gray-300 text-xs font-medium group-hover:text-white transition-colors line-clamp-2">
+                          {w.title}
+                        </p>
+                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: "#00A9E299" }}>
+                          {w.type === "evergreen" ? "On-Demand" : w.scheduledAt ? new Date(w.scheduledAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "Upcoming"}
+                        </p>
+                      </div>
+                      <ChevronRight size={12} className="text-gray-700 group-hover:text-gray-500 transition-colors flex-shrink-0 mt-1" />
+                    </Link>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
 
