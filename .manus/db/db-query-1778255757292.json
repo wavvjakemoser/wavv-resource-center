@@ -1,0 +1,9 @@
+{
+  "query": "SELECT sr.id, sr.label, sr.fileName, sr.isHidden, sr.courseId, c.title as courseTitle, c.published FROM section_resources sr LEFT JOIN courses c ON sr.courseId = c.id ORDER BY sr.courseId, sr.sortOrder;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT sr.id, sr.label, sr.fileName, sr.isHidden, sr.courseId, c.title as courseTitle, c.published FROM section_resources sr LEFT JOIN courses c ON sr.courseId = c.id ORDER BY sr.courseId, sr.sortOrder;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 586
+}

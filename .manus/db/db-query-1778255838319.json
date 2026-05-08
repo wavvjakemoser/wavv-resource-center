@@ -1,0 +1,46 @@
+{
+  "query": "SELECT l.id, l.title, l.fileUrl, c.title as courseTitle FROM lessons l JOIN courses c ON l.courseId = c.id WHERE c.title LIKE '%Connection Rates%' ORDER BY l.sortOrder;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT l.id, l.title, l.fileUrl, c.title as courseTitle FROM lessons l JOIN courses c ON l.courseId = c.id WHERE c.title LIKE '%Connection Rates%' ORDER BY l.sortOrder;",
+  "rows": [
+    {
+      "id": "22",
+      "title": "Overview of Connection Rates",
+      "fileUrl": "NULL",
+      "courseTitle": "3. Connection Rates"
+    },
+    {
+      "id": "23",
+      "title": "Connection Rates vs Conversion Rates",
+      "fileUrl": "NULL",
+      "courseTitle": "3. Connection Rates"
+    },
+    {
+      "id": "24",
+      "title": "Using the Reports Tab to Track Connection Rates",
+      "fileUrl": "NULL",
+      "courseTitle": "3. Connection Rates"
+    },
+    {
+      "id": "25",
+      "title": "Beginner Foundational Setup",
+      "fileUrl": "NULL",
+      "courseTitle": "3. Connection Rates"
+    },
+    {
+      "id": "26",
+      "title": "Intermediate Foundational Setup",
+      "fileUrl": "NULL",
+      "courseTitle": "3. Connection Rates"
+    },
+    {
+      "id": "27",
+      "title": "Advanced Foundational Setup",
+      "fileUrl": "NULL",
+      "courseTitle": "3. Connection Rates"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tfileUrl\tcourseTitle\n22\tOverview of Connection Rates\tNULL\t3. Connection Rates\n23\tConnection Rates vs Conversion Rates\tNULL\t3. Connection Rates\n24\tUsing the Reports Tab to Track Connection Rates\tNULL\t3. Connection Rates\n25\tBeginner Foundational Setup\tNULL\t3. Connection Rates\n26\tIntermediate Foundational Setup\tNULL\t3. Connection Rates\n27\tAdvanced Foundational Setup\tNULL\t3. Connection Rates\n",
+  "stderr": "",
+  "execution_time_ms": 567
+}

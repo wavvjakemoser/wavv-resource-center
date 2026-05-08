@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE lessons SET fileUrl = '/manus-storage/2a.ConnectionRatesvsConversationRatesFlowchart_a2f5024c.pdf' WHERE id = 23;\nUPDATE lessons SET fileUrl = '/manus-storage/5a.RestingPhoneNumbersFlowchart_52b791e3.pdf' WHERE id = 25;\nUPDATE lessons SET fileUrl = '/manus-storage/5b.WhentoReplacePhoneNumbersFlowchart_0d74bff6.pdf' WHERE id = 26;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute UPDATE lessons SET fileUrl = '/manus-storage/2a.ConnectionRatesvsConversationRatesFlowchart_a2f5024c.pdf' WHERE id = 23;\nUPDATE lessons SET fileUrl = '/manus-storage/5a.RestingPhoneNumbersFlowchart_52b791e3.pdf' WHERE id = 25;\nUPDATE lessons SET fileUrl = '/manus-storage/5b.WhentoReplacePhoneNumbersFlowchart_0d74bff6.pdf' WHERE id = 26;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 666
+}
