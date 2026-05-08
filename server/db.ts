@@ -1567,12 +1567,13 @@ export async function getSectionResourcesByCategory(category: string) {
       fileUrl: sectionResources.fileUrl,
       fileName: sectionResources.fileName,
       sortOrder: sectionResources.sortOrder,
+      isHidden: sectionResources.isHidden,
       createdAt: sectionResources.createdAt,
       courseTitle: courses.title,
     })
     .from(sectionResources)
     .innerJoin(courses, eq(sectionResources.courseId, courses.id))
-    .where(eq(courses.category, category as "Onboarding" | "How-To" | "Strategy and Best Practices" | "Dialer Setup" | "CRM Integrations" | "Spam Protection"))
+    .where(sql`${courses.category} = ${category} AND ${sectionResources.isHidden} = 0`)
     .orderBy(asc(sectionResources.sortOrder), asc(sectionResources.createdAt));
   return rows;
 }
@@ -1598,7 +1599,7 @@ export async function createSectionResource(data: {
   return row;
 }
 
-export async function updateSectionResource(id: number, data: { label?: string; courseId?: number; sortOrder?: number }) {
+export async function updateSectionResource(id: number, data: { label?: string; courseId?: number; sortOrder?: number; isHidden?: boolean }) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   await db.update(sectionResources).set(data).where(eq(sectionResources.id, id));
@@ -1636,6 +1637,7 @@ export async function getAllSectionResources() {
       fileUrl: sectionResources.fileUrl,
       fileName: sectionResources.fileName,
       sortOrder: sectionResources.sortOrder,
+      isHidden: sectionResources.isHidden,
       createdAt: sectionResources.createdAt,
       courseTitle: courses.title,
       courseCategory: courses.category,

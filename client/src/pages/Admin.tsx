@@ -2786,6 +2786,11 @@ function SectionResourcesPanel({
     onError: () => toast.error("Failed to reorder"),
   });
 
+  const toggleVisibilityMut = trpc.academy.adminToggleSectionResourceVisibility.useMutation({
+    onSuccess: () => utils.academy.adminGetSectionResources.invalidate(),
+    onError: () => toast.error("Failed to update visibility"),
+  });
+
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -2829,10 +2834,9 @@ function SectionResourcesPanel({
     return map;
   }, [resources]);
 
-  // Published courses only, sorted by category order
+  // All courses (published + unpublished), sorted by category order — so PDFs on any course are visible
   const CATEGORY_ORDER = ["Onboarding", "How-To", "Strategy and Best Practices"];
   const publishedCourses = courses
-    .filter((c) => c.published)
     .sort((a, b) => {
       const ai = CATEGORY_ORDER.indexOf(a.category);
       const bi = CATEGORY_ORDER.indexOf(b.category);
@@ -2940,6 +2944,22 @@ function SectionResourcesPanel({
                           >
                             <ExternalLink size={12} />
                           </a>
+                          {/* Visibility toggle */}
+                          {isSuperAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => toggleVisibilityMut.mutate({ id: r.id, isHidden: !r.isHidden })}
+                              disabled={toggleVisibilityMut.isPending}
+                              className="p-1.5 rounded-lg transition hover:opacity-80 disabled:opacity-50"
+                              style={r.isHidden
+                                ? { background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }
+                                : { background: "rgba(255,255,255,0.04)", color: "#9ca3af", border: "1px solid #2a2a2a" }
+                              }
+                              title={r.isHidden ? "Hidden from users — click to show" : "Visible to users — click to hide"}
+                            >
+                              {r.isHidden ? <EyeOff size={12} /> : <Eye size={12} />}
+                            </button>
+                          )}
                           {/* Edit */}
                           {isSuperAdmin && (
                             <button

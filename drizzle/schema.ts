@@ -289,6 +289,7 @@ export const sectionResources = mysqlTable("section_resources", {
   fileUrl: text("fileUrl").notNull(),
   fileName: varchar("fileName", { length: 255 }).notNull(),
   sortOrder: int("sortOrder").default(0).notNull(),
+  isHidden: boolean("isHidden").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

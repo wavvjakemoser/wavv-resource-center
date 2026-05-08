@@ -1,0 +1,1 @@
+ALTER TABLE `section_resources` ADD `isHidden` boolean DEFAULT false NOT NULL;

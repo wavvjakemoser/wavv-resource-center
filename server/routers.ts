@@ -377,6 +377,11 @@ const academyRouter = router({
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderSectionResources(input.id1, input.id2)),
 
+  // Toggle visibility of a section resource
+  adminToggleSectionResourceVisibility: superAdminProcedure
+    .input(z.object({ id: z.number(), isHidden: z.boolean() }))
+    .mutation(({ input }) => updateSectionResource(input.id, { isHidden: input.isHidden })),
+
   // Delete a section resource
   adminDeleteSectionResource: superAdminProcedure
     .input(z.object({ id: z.number() }))
