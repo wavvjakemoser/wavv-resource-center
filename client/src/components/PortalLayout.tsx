@@ -11,8 +11,6 @@ import {
   Home,
   Menu,
   X,
-  ExternalLink,
-  Chrome,
   Sparkles,
   FlaskConical,
   Shield,
@@ -143,24 +141,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               )}
             </div>
 
-            {/* Quick Links */}
-            <div className="mt-6">
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-3 mb-2">
-                Quick Links
-              </p>
-              <div className="space-y-0.5">
-                <a
-                  href="https://chrome.google.com/webstore/search/wavv"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
-                >
-                  <Chrome size={13} />
-                  WAVV Chrome Extension
-                  <ExternalLink size={11} className="ml-auto opacity-50" />
-                </a>
-              </div>
-            </div>
+
           </nav>
         </aside>
 
