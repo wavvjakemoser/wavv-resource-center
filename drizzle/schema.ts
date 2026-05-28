@@ -304,3 +304,19 @@ export const siteSettings = mysqlTable("site_settings", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SiteSetting = typeof siteSettings.$inferSelect;
+
+// ─── Magic Link Tokens ────────────────────────────────────────────────────────
+// Single-use tokens for passwordless login and team member invites.
+export const magicLinkTokens = mysqlTable("magic_link_tokens", {
+  id: int("id").autoincrement().primaryKey(),
+  // userId is null for pending invites (user not yet created)
+  userId: int("userId"),
+  email: varchar("email", { length: 320 }).notNull(),
+  token: varchar("token", { length: 128 }).notNull().unique(),
+  // 'login' = existing user requesting access, 'invite' = new team member invite
+  type: mysqlEnum("type", ["login", "invite"]).default("login").notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  usedAt: timestamp("usedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type MagicLinkToken = typeof magicLinkTokens.$inferSelect;

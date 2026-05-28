@@ -9,7 +9,7 @@ import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { hashPassword, verifyPassword, createSessionToken } from "./nativeAuth";
-import { getUserByEmail, createNativeUser, upsertGoogleUser, generateInvite, getInviteByToken, claimInvite } from "./db";
+import { getUserByEmail, createNativeUser, upsertGoogleUser, generateInvite, getInviteByToken, claimInvite, createMagicToken, validateMagicToken } from "./db";
 import {
   createCourse,
   createGuide,
@@ -1002,6 +1002,42 @@ export const appRouter = router({
         return { success: true, userId: user.id };
       }),
 
+    // ── Magic Link: request a login link (existing users only) ──────────────
+    requestMagicLink: publicProcedure
+      .input(z.object({ email: z.string().email(), next: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const email = input.email.trim().toLowerCase();
+        const user = await getUserByEmail(email);
+        // Always return success to avoid email enumeration
+        if (!user || !user.isActive) return { success: true };
+        const token = await createMagicToken(email, "login", user.id);
+        const baseUrl = process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
+        const nextParam = input.next ? `&next=${encodeURIComponent(input.next)}` : "";
+        const link = `${baseUrl}/auth/magic?token=${token}${nextParam}`;
+        await notifyOwner({
+          title: `Magic link requested by ${user.name ?? email}`,
+          content: `Login link for ${email}:\n${link}\n\nThis link expires in 24 hours.`,
+        });
+        return { success: true };
+      }),
+    // ── Magic Link: verify token and create session ───────────────────────
+    verifyMagicLink: publicProcedure
+      .input(z.object({ token: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const result = await validateMagicToken(input.token);
+        if (!result) throw new TRPCError({ code: "UNAUTHORIZED", message: "This link is invalid or has expired. Please request a new one." });
+        let user = await getUserByEmail(result.email);
+        if (!user) {
+          // Invite flow: create the user account on first use
+          user = await createNativeUser({ email: result.email, name: result.email.split("@")[0], passwordHash: null, role: "admin" });
+        }
+        if (!user.isActive) throw new TRPCError({ code: "FORBIDDEN", message: "This account has been deactivated." });
+        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        await trackEvent({ userId: user.id, eventType: "login" });
+        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+      }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -1097,6 +1133,27 @@ export const appRouter = router({
         });
         const inviteUrl = `${input.origin}/accept-invite?token=${token}`;
         return { success: true, inviteUrl };
+      }),
+    // Magic link invite: create user + send them a login link
+    inviteTeamMember: superAdminProcedure
+      .input(z.object({
+        name: z.string().min(1).max(255),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        const email = input.email.trim().toLowerCase();
+        let user = await getUserByEmail(email);
+        if (!user) {
+          user = await createNativeUser({ email, name: input.name.trim(), passwordHash: null, role: "admin" });
+        }
+        const token = await createMagicToken(email, "invite", user.id);
+        const appUrl = process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
+        const link = `${appUrl}/auth/magic?token=${token}`;
+        await notifyOwner({
+          title: `Team invite sent to ${input.name}`,
+          content: `Invite link for ${email}:\n${link}\n\nThis link expires in 24 hours.`,
+        });
+        return { success: true, inviteLink: link };
       }),
     // Notification management (admin only)
     listNotifications: superAdminProcedure.query(async () => {

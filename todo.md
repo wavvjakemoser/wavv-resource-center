@@ -909,3 +909,33 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Make getRecentLessons a publicProcedure (no auth required)
 - [x] Remove "Continue Learning" section (requires auth/progress tracking)
 - [x] V1 checkpoint preserved in version history for rollback
+
+## Magic Link Auth + Admin Hardening (Step 4)
+
+- [ ] Add magic_link_tokens table to schema (id, userId, token, email, expiresAt, usedAt)
+- [ ] Run migration for magic_link_tokens
+- [ ] Add server-side helpers: createMagicToken, validateMagicToken
+- [ ] Add tRPC procedure: auth.requestMagicLink (public — takes email, sends link if user exists)
+- [ ] Add tRPC procedure: auth.verifyMagicLink (public — validates token, creates session)
+- [ ] Add tRPC procedure: admin.inviteUser (super_admin only — creates user + sends magic link invite email)
+- [ ] Rebuild /login page: email-only input, "Send me a login link" button, no password field
+- [ ] Build /auth/magic page: reads token from URL, calls verifyMagicLink, redirects to /admin on success
+- [ ] Add Invite Team Member button + modal in Admin → Users page
+- [ ] Harden /admin: redirect to /login?next=/admin if no valid session
+- [ ] Remove Admin sidebar link from public portal (only show when logged in as admin/super_admin)
+- [ ] Remove "Create Account" / Register link from /login page
+- [ ] Remove profile, account settings, history, medals, bookmarks from public portal nav
+- [ ] Remove /register route from public routing (invite-only model)
+
+## Magic Link Auth + Admin Hardening (V2)
+
+- [x] Add magic_link_tokens DB table and migration
+- [x] Add createMagicToken and validateMagicToken DB helpers
+- [x] Add requestMagicLink and verifyMagicLink tRPC procedures (public, with optional ?next= param)
+- [x] Rebuild /login as email-only magic link request page (no password)
+- [x] Build /auth/magic token verification + session creation page with ?next= redirect
+- [x] Add Invite Team Member button + dialog in Admin → Users (super_admin only)
+- [x] inviteTeamMember tRPC procedure: creates admin user + generates single-use magic link
+- [x] Harden /admin: redirect to /login?next=/admin if not authenticated
+- [x] Admin link in sidebar already role-gated (no change needed — invisible to public visitors)
+- [x] ?next= param flows through login → magic link → redirect after auth

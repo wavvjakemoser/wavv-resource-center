@@ -1,194 +1,135 @@
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { useState, useEffect } from "react";
-import { useLocation, Link } from "wouter";
-import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
 export default function Login() {
-  const [, navigate] = useLocation();
-  const { data: user, isLoading: authLoading } = trpc.auth.me.useQuery();
-  const utils = trpc.useUtils();
-
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      navigate("/dashboard");
-    }
-  }, [authLoading, user, navigate]);
+  // Capture ?next= so we can redirect after login
+  const nextPath = new URLSearchParams(window.location.search).get("next") || "/admin";
 
-  const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: async () => {
-      await utils.auth.me.invalidate();
-      navigate("/dashboard");
-    },
-    onError: (err) => {
-      setLoginError(err.message || "Invalid email or password. Please try again.");
-    },
+  const requestLink = trpc.auth.requestMagicLink.useMutation({
+    onSuccess: () => setSent(true),
+    onError: (err) => setError(err.message || "Something went wrong. Please try again."),
   });
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoginError("");
-    if (!email || !password) {
-      setLoginError("Please enter your email and password.");
-      return;
-    }
-    loginMutation.mutate({ email: email.trim().toLowerCase(), password });
+    setError("");
+    if (!email.trim()) { setError("Please enter your email address."); return; }
+    requestLink.mutate({ email: email.trim().toLowerCase(), next: nextPath });
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f1318" }}>
-        <div className="w-10 h-10 border-2 border-[#0074F4] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: "#0f1318", fontFamily: "'Inter', sans-serif" }}
+      className="min-h-screen flex flex-col items-center justify-center px-4"
+      style={{ background: "#0d1117", fontFamily: "'Inter', sans-serif" }}
     >
+      {/* Card */}
       <div
-        className="w-full max-w-sm rounded-2xl p-8 flex flex-col items-center"
-        style={{
-          background: "#161616",
-          border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
-        }}
+        className="w-full max-w-md rounded-2xl p-8 flex flex-col gap-6"
+        style={{ background: "#161b22", border: "1px solid rgba(255,255,255,0.08)" }}
       >
-        {/* WAVV logo */}
-        <img
-          src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
-          alt="WAVV"
-          className="h-8 w-auto mb-8"
-        />
-
-        <h2 className="text-white text-xl font-bold mb-1 text-center">Sign in to your account</h2>
-        <p className="text-gray-500 text-sm mb-7 text-center">Enter your WAVV credentials</p>
-
-        <form onSubmit={handleSignIn} className="w-full flex flex-col gap-3">
-          {/* Email */}
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            required
-            className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all placeholder:text-gray-500"
-            style={{
-              background: "#242424",
-              border: "1px solid #333",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#0074F4";
-              e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,116,244,0.15)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "#333";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+        {/* Logo */}
+        <div className="flex flex-col items-center gap-2">
+          <img
+            src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
+            alt="WAVV"
+            className="h-8 w-auto"
           />
+          <p className="text-sm" style={{ color: "#8b949e" }}>Success Center — Team Access</p>
+        </div>
 
-          {/* Password */}
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-              className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all pr-11 placeholder:text-gray-500"
-              style={{
-                background: "#242424",
-                border: "1px solid #333",
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#0074F4";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,116,244,0.15)";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = "#333";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+        {sent ? (
+          /* ── Sent state ── */
+          <div className="flex flex-col items-center gap-4 text-center py-4">
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
+              style={{ background: "rgba(103,199,40,0.12)", color: "#67C728" }}
             >
-              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              ✓
+            </div>
+            <div>
+              <p className="font-semibold text-white text-lg">Check your inbox</p>
+              <p className="text-sm mt-1" style={{ color: "#8b949e" }}>
+                A login link has been sent to{" "}
+                <span className="text-white font-medium">{email}</span>.
+                It expires in 24 hours and can only be used once.
+              </p>
+            </div>
+            <button
+              onClick={() => { setSent(false); setEmail(""); }}
+              className="text-sm underline"
+              style={{ color: "#8b949e" }}
+            >
+              Use a different email
             </button>
           </div>
+        ) : (
+          /* ── Request form ── */
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div>
+              <p className="text-white font-semibold text-lg text-center mb-1">Team Login</p>
+              <p className="text-sm text-center" style={{ color: "#8b949e" }}>
+                Enter your email and we'll send you a one-click login link. No password needed.
+              </p>
+            </div>
 
-          {/* Error message */}
-          {loginError && (
-            <div
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs"
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-medium" style={{ color: "#8b949e" }}>
+                Work Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@wavv.com"
+                autoFocus
+                className="w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all"
+                style={{
+                  background: "#0d1117",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  fontFamily: "inherit",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#0074F4")}
+                onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
+              />
+            </div>
+
+            {error && (
+              <p
+                className="text-xs rounded-lg px-3 py-2"
+                style={{ background: "rgba(248,81,73,0.12)", color: "#f85149" }}
+              >
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={requestLink.isPending}
+              className="w-full rounded-lg py-3 text-sm font-semibold text-white transition-opacity"
               style={{
-                background: "rgba(239,68,68,0.1)",
-                border: "1px solid rgba(239,68,68,0.25)",
-                color: "#f87171",
+                background: "linear-gradient(135deg, #0074F4, #0056b3)",
+                opacity: requestLink.isPending ? 0.6 : 1,
               }}
             >
-              <AlertCircle size={13} className="flex-shrink-0" />
-              {loginError}
-            </div>
-          )}
+              {requestLink.isPending ? "Sending…" : "Send Login Link →"}
+            </button>
 
-          {/* Forgot password */}
-          <div className="flex justify-end">
-            <a
-              href="mailto:support@wavv.com?subject=Password Reset Request"
-              className="text-xs text-[#0074F4] hover:underline"
-            >
-              Forgot password?
-            </a>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loginMutation.isPending}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{
-              background: "linear-gradient(135deg, #0074F4, #00A9E2)",
-              boxShadow: "0 4px 20px rgba(0,116,244,0.3)",
-            }}
-          >
-            {loginMutation.isPending ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Sign In"
-            )}
-          </button>
-        </form>
-
-        <p className="text-gray-500 text-xs mt-6 text-center">
-          Don't have an account?{" "}
-          <Link href="/register" className="text-[#0074F4] hover:underline font-medium">
-            Create one
-          </Link>
-        </p>
-
-        <p className="text-gray-600 text-xs mt-3 text-center">
-          Need help?{" "}
-          <a
-            href="mailto:support@wavv.com"
-            className="text-gray-500 hover:text-gray-400 hover:underline"
-          >
-            Contact support
-          </a>
-        </p>
+            <p className="text-xs text-center" style={{ color: "#8b949e" }}>
+              Only WAVV team members with an active account can log in.
+              Contact your admin if you need access.
+            </p>
+          </form>
+        )}
       </div>
+
+      {/* Footer */}
+      <p className="mt-6 text-xs" style={{ color: "#484f58" }}>
+        © {new Date().getFullYear()} WAVV. All rights reserved.
+      </p>
     </div>
   );
 }

@@ -19,6 +19,7 @@ import {
   notificationReads,
   siteSettings,
   inviteTokens,
+  magicLinkTokens,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -651,8 +652,8 @@ export async function getUserByEmail(email: string) {
 export async function createNativeUser(data: {
   email: string;
   name: string;
-  passwordHash: string;
-  role?: "user" | "admin";
+  passwordHash: string | null;
+  role?: "user" | "admin" | "super_admin";
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -1646,4 +1647,50 @@ export async function getAllSectionResources() {
     .innerJoin(courses, eq(sectionResources.courseId, courses.id))
     .orderBy(asc(courses.category), asc(sectionResources.courseId), asc(sectionResources.sortOrder));
   return rows;
+}
+
+// ─── Magic Link Token Helpers ─────────────────────────────────────────────────
+import crypto from "crypto";
+
+export async function createMagicToken(
+  email: string,
+  type: "login" | "invite",
+  userId?: number
+): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const token = crypto.randomBytes(48).toString("hex");
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  await db.insert(magicLinkTokens).values({
+    email: email.toLowerCase(),
+    token,
+    type,
+    userId: userId ?? null,
+    expiresAt,
+  });
+  return token;
+}
+
+export async function validateMagicToken(token: string): Promise<{
+  email: string;
+  type: "login" | "invite";
+  userId: number | null;
+} | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(magicLinkTokens)
+    .where(eq(magicLinkTokens.token, token))
+    .limit(1);
+  const row = rows[0];
+  if (!row) return null;
+  if (row.usedAt) return null; // already used
+  if (new Date() > row.expiresAt) return null; // expired
+  // Mark as used
+  await db
+    .update(magicLinkTokens)
+    .set({ usedAt: new Date() })
+    .where(eq(magicLinkTokens.id, row.id));
+  return { email: row.email, type: row.type, userId: row.userId ?? null };
 }

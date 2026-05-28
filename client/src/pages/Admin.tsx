@@ -126,6 +126,12 @@ export default function Admin() {
     else if (t === "notifications") setActiveTab("notifications");
     else setActiveTab("analytics");
   }, [location]);
+  // Not logged in at all → send to /login with ?next=/admin
+  if (!loading && !user) {
+    navigate("/login?next=/admin");
+    return null;
+  }
+  // Logged in but not an admin → send back to dashboard
   if (!loading && user && user.role !== "admin" && user.role !== "super_admin") {
     navigate("/dashboard");
     return null;
@@ -1036,6 +1042,19 @@ function UsersTab() {
     onError: (e) => toast.error(e.message),
   });
 
+  // Magic link invite
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ name: "", email: "" });
+  const [inviteResult, setInviteResult] = useState<{ link: string; name: string } | null>(null);
+  const inviteTeamMember = trpc.admin.inviteTeamMember.useMutation({
+    onSuccess: (data) => {
+      setInviteResult({ link: data.inviteLink, name: inviteForm.name });
+      setInviteForm({ name: "", email: "" });
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
       const action = confirmDialog?.action;
@@ -1173,13 +1192,22 @@ function UsersTab() {
             Export{roleFilter !== "all" ? ` ${roleFilter === "super_admin" ? "Super Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
           </button>
           {isSuperAdmin && (
-            <button
-              onClick={() => setAddUserOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
-              style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.25)" }}
-            >
-              <UserPlus size={13} /> Add User
-            </button>
+            <>
+              <button
+                onClick={() => { setInviteOpen(true); setInviteResult(null); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
+                style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.25)" }}
+              >
+                <UserPlus size={13} /> Invite Team Member
+              </button>
+              <button
+                onClick={() => setAddUserOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
+                style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.25)" }}
+              >
+                <UserPlus size={13} /> Add User
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -1501,6 +1529,86 @@ function UsersTab() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setInviteLinkModal({ open: false, url: "", name: "" })} className="text-gray-400">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Invite Team Member Dialog (magic link) ── */}
+      <Dialog open={inviteOpen} onOpenChange={(open) => { if (!open) { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "" }); } }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <UserPlus size={18} style={{ color: "#60a5fa" }} />
+              Invite Team Member
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Enter their name and email. They'll receive a one-click login link — no password needed.
+            </DialogDescription>
+          </DialogHeader>
+
+          {inviteResult ? (
+            <div className="py-2 space-y-3">
+              <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
+                <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
+                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as an admin.</p>
+              </div>
+              <p className="text-xs text-gray-400">Copy this login link and send it to them via Slack or email. It expires in 24 hours and can only be used once.</p>
+              <div
+                className="flex items-center gap-2 p-3 rounded-lg text-xs font-mono break-all"
+                style={{ background: "#0a0a0a", border: "1px solid #2a2a2a", color: "#60a5fa" }}
+              >
+                <span className="flex-1 select-all">{inviteResult.link}</span>
+              </div>
+              <Button
+                className="w-full font-semibold"
+                style={{ background: "#0074F4", color: "#fff" }}
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteResult!.link);
+                  toast.success("Login link copied to clipboard!");
+                }}
+              >
+                Copy Login Link
+              </Button>
+            </div>
+          ) : (
+            <div className="py-2 space-y-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-400">Full Name</label>
+                <Input
+                  value={inviteForm.name}
+                  onChange={(e) => setInviteForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="e.g. John Smith"
+                  className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-400">Work Email</label>
+                <Input
+                  type="email"
+                  value={inviteForm.email}
+                  onChange={(e) => setInviteForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="e.g. john@wavv.com"
+                  className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
+                />
+              </div>
+              <p className="text-xs text-gray-500">They will be added as an <strong className="text-gray-300">Admin</strong> with full content management access.</p>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "" }); }} className="text-gray-400">Close</Button>
+            {!inviteResult && (
+              <Button
+                disabled={inviteTeamMember.isPending || !inviteForm.name.trim() || !inviteForm.email.trim()}
+                onClick={() => {
+                  if (!inviteForm.name.trim() || !inviteForm.email.trim()) { toast.error("Name and email are required."); return; }
+                  inviteTeamMember.mutate({ name: inviteForm.name.trim(), email: inviteForm.email.trim().toLowerCase() });
+                }}
+                style={{ background: "#0074F4", color: "#fff" }}
+              >
+                {inviteTeamMember.isPending ? "Sending…" : "Send Login Link"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
