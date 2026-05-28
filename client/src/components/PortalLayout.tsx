@@ -48,7 +48,7 @@ function NavLink({
         } : {
           background: "transparent",
           border: "1px solid transparent",
-          color: "rgba(255,255,255,0.55)",
+          color: "#ffffff",
         }),
       }}
       onMouseEnter={(e) => {
@@ -62,7 +62,7 @@ function NavLink({
         if (!isActive) {
           e.currentTarget.style.background = "transparent";
           e.currentTarget.style.borderColor = "transparent";
-          e.currentTarget.style.color = "rgba(255,255,255,0.55)";
+          e.currentTarget.style.color = "#ffffff";
         }
       }}
       onClick={onClick}
