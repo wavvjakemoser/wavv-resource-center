@@ -17,9 +17,9 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Home",             icon: Home,         color: "#6366f1" },
+  { href: "/dashboard", label: "Home",             icon: Home,          color: "#6366f1" },
   { href: "/academy",   label: "WAVV Academy",      icon: GraduationCap, color: "#0074F4" },
-  { href: "/webinars",  label: "WAVV Webinars",     icon: Video,         color: "#00A9E2" },
+  { href: "/webinars",  label: "WAVV Webinars",     icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Guides & Docs", icon: FileText,      color: "#67C728" },
   { href: "/hands-on",  label: "WAVV Playground",   icon: FlaskConical,  color: "#a855f7" },
   { href: "/support",   label: "WAVV Support",      icon: Headphones,    color: "#FF9900" },
@@ -116,10 +116,10 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     onClick={() => setSidebarOpen(false)}
                   >
                     <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: isActive ? `${item.color}25` : `${item.color}15` }}
+                      className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: isActive ? `${item.color}28` : `${item.color}18` }}
                     >
-                      <Icon size={14} style={{ color: item.color }} />
+                      <Icon size={17} style={{ color: item.color }} />
                     </div>
                     <span className="truncate">{item.label}</span>
                   </Link>
@@ -152,10 +152,10 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                         onClick={() => setSidebarOpen(false)}
                       >
                         <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{ background: isActive ? `${item.color}25` : `${item.color}15` }}
+                          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: isActive ? `${item.color}28` : `${item.color}18` }}
                         >
-                          <Icon size={14} style={{ color: item.color }} />
+                          <Icon size={17} style={{ color: item.color }} />
                         </div>
                         {item.label}
                       </Link>
