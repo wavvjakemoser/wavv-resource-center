@@ -17,16 +17,16 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/academy", label: "WAVV Academy", icon: GraduationCap },
-  { href: "/webinars", label: "WAVV Webinars", icon: Video },
-  { href: "/guides", label: "WAVV Guides & Docs", icon: FileText },
-  { href: "/hands-on", label: "WAVV Playground", icon: FlaskConical },
-  { href: "/support", label: "WAVV Support", icon: Headphones },
+  { href: "/dashboard", label: "Home",             icon: Home,         color: "#6366f1" },
+  { href: "/academy",   label: "WAVV Academy",      icon: GraduationCap, color: "#0074F4" },
+  { href: "/webinars",  label: "WAVV Webinars",     icon: Video,         color: "#00A9E2" },
+  { href: "/guides",    label: "WAVV Guides & Docs", icon: FileText,      color: "#67C728" },
+  { href: "/hands-on",  label: "WAVV Playground",   icon: FlaskConical,  color: "#a855f7" },
+  { href: "/support",   label: "WAVV Support",      icon: Headphones,    color: "#FF9900" },
 ];
 
 const adminNavItems = [
-  { href: "/admin", label: "WAVV Admin", icon: Shield },
+  { href: "/admin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" },
 ];
 
 interface PortalLayoutProps {
@@ -101,14 +101,26 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
-                      isActive
-                        ? "text-[#0074F4] bg-[#0074F4]/10 border border-[#0074F4]/30"
-                        : "text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer"
+                    style={isActive ? {
+                      background: `${item.color}18`,
+                      border: `1px solid ${item.color}35`,
+                      color: item.color,
+                    } : {
+                      background: "transparent",
+                      border: "1px solid transparent",
+                      color: "#6b7280",
+                    }}
+                    onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = `${item.color}10`; e.currentTarget.style.borderColor = `${item.color}20`; e.currentTarget.style.color = "#e5e7eb"; } }}
+                    onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.color = "#6b7280"; } }}
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <Icon size={16} className="flex-shrink-0" />
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: isActive ? `${item.color}25` : `${item.color}15` }}
+                    >
+                      <Icon size={14} style={{ color: item.color }} />
+                    </div>
                     <span className="truncate">{item.label}</span>
                   </Link>
                 );
@@ -125,14 +137,26 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${
-                          isActive
-                            ? "text-[#0074F4] bg-[#0074F4]/10 border border-[#0074F4]/30"
-                            : "text-gray-400 hover:text-white hover:bg-white/5"
-                        }`}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer"
+                        style={isActive ? {
+                          background: `${item.color}18`,
+                          border: `1px solid ${item.color}35`,
+                          color: item.color,
+                        } : {
+                          background: "transparent",
+                          border: "1px solid transparent",
+                          color: "#6b7280",
+                        }}
+                        onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = `${item.color}10`; e.currentTarget.style.borderColor = `${item.color}20`; e.currentTarget.style.color = "#e5e7eb"; } }}
+                        onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.color = "#6b7280"; } }}
                         onClick={() => setSidebarOpen(false)}
                       >
-                        <Icon size={16} />
+                        <div
+                          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                          style={{ background: isActive ? `${item.color}25` : `${item.color}15` }}
+                        >
+                          <Icon size={14} style={{ color: item.color }} />
+                        </div>
                         {item.label}
                       </Link>
                     );

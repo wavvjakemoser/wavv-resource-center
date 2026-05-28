@@ -265,16 +265,16 @@ export default function Dashboard() {
                   <Link
                     key={lesson.id}
                     href={`/academy/${lesson.courseId}/lesson/${lesson.id}`}
-                    className="group flex items-start gap-4 p-5 rounded-2xl transition-all duration-200"
+                    className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-200"
                     style={{
-                      background: "linear-gradient(160deg, #141824 0%, #0f1318 100%)",
+                      background: "#0f1318",
                       border: "1px solid rgba(255,255,255,0.07)",
                       textDecoration: "none",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = `${color}50`;
-                      e.currentTarget.style.boxShadow = `0 6px 24px ${color}15`;
-                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.borderColor = `${color}55`;
+                      e.currentTarget.style.boxShadow = `0 8px 28px ${color}18`;
+                      e.currentTarget.style.transform = "translateY(-3px)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
@@ -282,36 +282,45 @@ export default function Dashboard() {
                       e.currentTarget.style.transform = "translateY(0)";
                     }}
                   >
-                    {/* Play icon */}
+                    {/* Color bar header */}
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                      style={{ background: `${color}18`, border: `1px solid ${color}25` }}
+                      className="flex items-center gap-3 px-4 py-3"
+                      style={{
+                        background: `linear-gradient(135deg, ${color}22 0%, ${color}08 100%)`,
+                        borderBottom: `1px solid ${color}20`,
+                      }}
                     >
-                      <Play size={14} style={{ color }} />
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${color}25`, border: `1px solid ${color}35` }}
+                      >
+                        <Play size={13} style={{ color }} />
+                      </div>
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase"
+                        style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}
+                      >
+                        {lesson.category}
+                      </span>
+                      <ChevronRight
+                        size={13}
+                        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ color }}
+                      />
                     </div>
 
-                    {/* Text */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-semibold leading-snug line-clamp-2 mb-2 group-hover:text-white transition-colors">
+                    {/* Body */}
+                    <div className="px-4 py-4 flex flex-col flex-1">
+                      <p className="text-white text-sm font-semibold leading-snug line-clamp-2 mb-3">
                         {lesson.title}
                       </p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-                          style={{ background: `${color}15`, color, border: `1px solid ${color}25` }}
-                        >
-                          {lesson.category}
-                        </span>
-                        {lesson.durationMinutes && (
-                          <span className="text-[10px] flex items-center gap-1" style={{ color: "rgba(255,255,255,0.3)" }}>
-                            <Clock size={9} /> {lesson.durationMinutes}m
-                          </span>
-                        )}
-                      </div>
+                      {lesson.durationMinutes && (
+                        <div className="mt-auto flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>
+                          <Clock size={10} />
+                          <span className="text-[11px]">{lesson.durationMinutes} min</span>
+                        </div>
+                      )}
                     </div>
-
-                    {/* Arrow */}
-                    <ChevronRight size={14} className="flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color }} />
                   </Link>
                 );
               })}
