@@ -42,7 +42,7 @@ function WebinarCard({
   variant: WebinarType;
   nextSession?: Date;
 }) {
-  const registerClickMutation = trpc.webinars.register.useMutation();
+  const registerClickMutation = trpc.webinars.trackRegistrationClick.useMutation();
   const watchMutation = trpc.webinars.watch.useMutation();
 
   // countdown kept for future use if needed

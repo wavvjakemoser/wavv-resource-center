@@ -42,7 +42,6 @@ import {
   BarChart3,
   Users,
   UserCircle,
-  LogIn,
   GraduationCap,
   MessageSquare,
   Search,
@@ -88,7 +87,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "notifications";
+type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -107,7 +106,6 @@ export default function Admin() {
     if (t === "playground") return "playground";
     if (t === "support") return "support";
     if (t === "content_requests") return "content_requests";
-    if (t === "notifications") return "notifications";
     return "analytics";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
@@ -123,7 +121,6 @@ export default function Admin() {
     else if (t === "playground") setActiveTab("playground");
     else if (t === "support") setActiveTab("support");
     else if (t === "content_requests") setActiveTab("content_requests");
-    else if (t === "notifications") setActiveTab("notifications");
     else setActiveTab("analytics");
   }, [location]);
   // Not logged in at all → send to /login with ?next=/admin
@@ -156,7 +153,6 @@ export default function Admin() {
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} /> },
     { id: "support",          label: "Support",           icon: <Headphones size={13} /> },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} /> },
-    { id: "notifications",    label: "Notifications",     icon: <Bell size={13} /> },
   ];
 
   return (
@@ -206,8 +202,6 @@ export default function Admin() {
         {activeTab === "playground" && <PlaygroundTab />}
         {activeTab === "support" && <SupportTab />}
         {activeTab === "content_requests" && <ContentRequestsTab />}
-        {activeTab === "notifications" && <NotificationsTab />}
-
       </div>
     </PortalLayout>
   );
@@ -599,10 +593,9 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
     const c: Record<string, number> = {};
     eventCounts.forEach((e) => { c[e.eventType] = e.count; });
     return {
-      logins:              c["login"] ?? 0,
+      pageViews:           c["page_view"] ?? 0,
       lessonCompleted:     c["lesson_completed"] ?? 0,
-      evergreenWatched:    c["webinar_evergreen_watched"] ?? 0,
-      exclusiveReg:        c["webinar_registered"] ?? 0,
+      regClicks:           c["webinar_registration_click"] ?? 0,
       ondemandWatched:     (c["webinar_ondemand_watched"] ?? 0) + (c["webinar_watched"] ?? 0), // legacy compat
       guideDownloaded:     c["guide_downloaded"] ?? 0,
       searches:            c["search"] ?? 0,
@@ -642,18 +635,17 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
 
   return (
     <div className="space-y-6">
-      {/* 8 Stat Cards in 2 rows of 4 */}
+      {/* Stat Cards — public model: site engagement + content interactions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<LogIn size={18} />}         label="Sign-Ins"                        value={stats?.logins ?? 0}           color="blue"   subtitle={`last ${days}d`} onClick={() => openDrawer("Sign-Ins",                       ["login"],                                                   "#60a5fa")} />
-        <StatCard icon={<GraduationCap size={18} />} label="Academy Lessons Completed"       value={stats?.lessonCompleted ?? 0}  color="cyan"   subtitle={`last ${days}d`} onClick={() => openDrawer("Academy Lessons Completed",       ["lesson_completed"],                                        "#22d3ee")} />
-        <StatCard icon={<Eye size={18} />}           label="Evergreen Webinars Watched"      value={stats?.evergreenWatched ?? 0} color="amber"  subtitle={`last ${days}d`} onClick={() => openDrawer("Evergreen Webinars Watched",      ["webinar_evergreen_watched"],                               "#f59e0b")} />
-        <StatCard icon={<Star size={18} />}          label="Exclusive Webinar Registrations" value={stats?.exclusiveReg ?? 0}     color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("Exclusive Webinar Registrations", ["webinar_registered"],                                       "#a78bfa")} />
+        <StatCard icon={<Eye size={18} />}           label="Page Views"                     value={stats?.pageViews ?? 0}        color="blue"   subtitle={`last ${days}d`} onClick={() => openDrawer("Page Views",                     ["page_view"],                                               "#60a5fa")} />
+        <StatCard icon={<GraduationCap size={18} />} label="Academy Lessons Completed"      value={stats?.lessonCompleted ?? 0}  color="cyan"   subtitle={`last ${days}d`} onClick={() => openDrawer("Academy Lessons Completed",       ["lesson_completed"],                                        "#22d3ee")} />
+        <StatCard icon={<ExternalLink size={18} />}  label="Webinar Register Clicks"         value={stats?.regClicks ?? 0}        color="amber"  subtitle={`last ${days}d`} onClick={() => openDrawer("Webinar Register Clicks",         ["webinar_registration_click"],                              "#f59e0b")} />
+        <StatCard icon={<Video size={18} />}         label="On-Demand Webinars Watched"     value={stats?.ondemandWatched ?? 0}  color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("On-Demand Webinars Watched",      ["webinar_ondemand_watched", "webinar_watched"],             "#a78bfa")} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Video size={18} />}         label="On-Demand Webinars Watched"      value={stats?.ondemandWatched ?? 0}  color="amber"  subtitle={`last ${days}d`} onClick={() => openDrawer("On-Demand Webinars Watched",      ["webinar_ondemand_watched", "webinar_watched"],             "#f59e0b")} />
-        <StatCard icon={<Download size={18} />}      label="Guides & Docs Downloads"         value={stats?.guideDownloaded ?? 0}  color="green"  subtitle={`last ${days}d`} onClick={() => openDrawer("Guides & Docs Downloads",         ["guide_downloaded"],                                        "#4ade80")} />
-        <StatCard icon={<Search size={18} />}        label="Total Searches"                  value={stats?.searches ?? 0}         color="teal"   subtitle={`last ${days}d`} onClick={() => openDrawer("Total Searches",                  ["search"],                                                  "#2dd4bf")} />
-        <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"           value={stats?.aiChats ?? 0}          color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("WAVV AI Conversations",           ["ai_chat"],                                                 "#a78bfa")} />
+        <StatCard icon={<Download size={18} />}      label="Guides & Docs Downloads"        value={stats?.guideDownloaded ?? 0}  color="green"  subtitle={`last ${days}d`} onClick={() => openDrawer("Guides & Docs Downloads",         ["guide_downloaded"],                                        "#4ade80")} />
+        <StatCard icon={<Search size={18} />}        label="Total Searches"                 value={stats?.searches ?? 0}         color="teal"   subtitle={`last ${days}d`} onClick={() => openDrawer("Total Searches",                  ["search"],                                                  "#2dd4bf")} />
+        <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"          value={stats?.aiChats ?? 0}          color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("WAVV AI Conversations",           ["ai_chat"],                                                 "#a78bfa")} />
       </div>
 
       {/* Charts row: Sign-In Trend + Event Distribution */}
@@ -962,10 +954,10 @@ function UserProfileDrawer({
               ))}
             </div>
 
-            {/* Actions */}
-            {!isSelf && isSuperAdmin && (
+            {/* Actions — always show for non-self; Demote only for super_admin */}
+            {!isSelf && (
               <div className="flex flex-wrap gap-2 pt-1">
-                {stats.role === "user" && (
+                {isSuperAdmin && stats.role === "user" && (
                   <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
                     onClick={() => { onAction("promote_admin", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
                     <Shield className="h-3 w-3 mr-1" /> Make Admin
@@ -973,17 +965,22 @@ function UserProfileDrawer({
                 )}
                 {stats.role === "admin" && (
                   <>
-                    <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.3)" }}
-                      onClick={() => { onAction("promote_super", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                      <SuperAdminIcon size={12} /><span className="ml-1">Super Admin</span>
-                    </Button>
-                    <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-                      onClick={() => { onAction("demote", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                      <ShieldOff className="h-3 w-3 mr-1" /> Demote
-                    </Button>
+                    {isSuperAdmin && (
+                      <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.3)" }}
+                        onClick={() => { onAction("promote_super", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                        <SuperAdminIcon size={12} /><span className="ml-1">Promote to Super Admin</span>
+                      </Button>
+                    )}
+                    {/* Demote is only available to super_admin — regular admin sees Remove only */}
+                    {isSuperAdmin && (
+                      <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                        onClick={() => { onAction("demote", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                        <ShieldOff className="h-3 w-3 mr-1" /> Demote
+                      </Button>
+                    )}
                   </>
                 )}
-                {stats.role === "super_admin" && (
+                {stats.role === "super_admin" && isSuperAdmin && (
                   <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
                     onClick={() => { onAction("demote", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
                     <ShieldOff className="h-3 w-3 mr-1" /> Demote
@@ -991,7 +988,7 @@ function UserProfileDrawer({
                 )}
                 <Button size="sm" className="text-xs h-7 px-3 text-red-400 hover:text-red-300" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}
                   onClick={() => { onAction("remove", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                  <Trash2 className="h-3 w-3 mr-1" /> Revoke Access
+                  <Trash2 className="h-3 w-3 mr-1" /> Remove
                 </Button>
               </div>
             )}

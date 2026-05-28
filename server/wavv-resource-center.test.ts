@@ -121,10 +121,11 @@ describe("academy.getProgress", () => {
 // ─── Webinars Tests ──────────────────────────────────────────────────────────
 
 describe("webinars.list", () => {
-  it("requires authentication", async () => {
+  it("returns array of webinars for unauthenticated users (public endpoint)", async () => {
     const { ctx } = makeCtx(null);
     const caller = appRouter.createCaller(ctx);
-    await expect(caller.webinars.list({})).rejects.toThrow();
+    const result = await caller.webinars.list({});
+    expect(Array.isArray(result)).toBe(true);
   });
 
   it("returns array of webinars for authenticated user", async () => {

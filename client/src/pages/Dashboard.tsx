@@ -39,6 +39,7 @@ const CATEGORY_COLOR: Record<string, string> = {
 export default function Dashboard() {
   const { data: exclusiveWebinars } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const { data: recentLessons, isLoading: lessonsLoading } = trpc.academy.getRecentLessons.useQuery({ limit: 6 });
+  const trackRegClick = trpc.webinars.trackRegistrationClick.useMutation();
 
   const exclusive = (exclusiveWebinars ?? [])
     .filter((w) => !w.scheduledAt || new Date(w.scheduledAt) >= new Date())
@@ -175,7 +176,7 @@ export default function Dashboard() {
                           href={w.registrationUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); trackRegClick.mutate({ webinarId: w.id }); }}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
                           style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
                         >

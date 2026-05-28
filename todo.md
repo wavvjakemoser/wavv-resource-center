@@ -939,3 +939,16 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Harden /admin: redirect to /login?next=/admin if not authenticated
 - [x] Admin link in sidebar already role-gated (no change needed — invisible to public visitors)
 - [x] ?next= param flows through login → magic link → redirect after auth
+
+## Admin Panel Improvements (Session 3)
+
+- [x] Fix Demote button: only show on super_admin rows when viewer is super_admin; admin rows show only Promote + Remove
+- [x] Remove Notifications tab and NotificationsTab component from Admin.tsx
+- [x] Clean up Analytics tab: remove per-user metrics (logins, user growth, registrations)
+- [x] Analytics tab: keep/add page views, content engagement (video plays, PDF downloads), on-demand webinar watch counts
+- [x] Add tRPC procedure: trackRegistrationClick (public, fires on button click) — uses existing analytics_events table, no schema change needed
+- [x] Register Now button in Dashboard.tsx: fire trackRegistrationClick before opening URL
+- [x] Register Now button in Webinars.tsx: fire trackRegistrationClick (replaced misused register mutation)
+- [x] Surface registration click counts in Admin → Analytics tab (Webinar Register Clicks stat card)
+- [x] Make webinars.list and webinars.watch public procedures (no auth required for public visitors)
+- [x] Update vitest test for webinars.list to reflect public endpoint (30/30 tests passing)

@@ -390,16 +390,28 @@ const academyRouter = router({
 
 // ─── Webinars Router ──────────────────────────────────────────────────────────
 const webinarsRouter = router({
-  list: protectedProcedure
+  list: publicProcedure
     .input(z.object({ type: z.enum(["upcoming", "recording", "exclusive", "evergreen"]).optional() }))
     .query(({ input }) => getWebinars(input.type)),
 
-  get: protectedProcedure
+  get: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const webinar = await getWebinarById(input.id);
       if (!webinar) throw new TRPCError({ code: "NOT_FOUND" });
       return webinar;
+    }),
+
+  /** Public: track when a visitor clicks a Register/Join button (no auth needed) */
+  trackRegistrationClick: publicProcedure
+    .input(z.object({ webinarId: z.number() }))
+    .mutation(async ({ input }) => {
+      await trackEvent({
+        eventType: "webinar_registration_click",
+        resourceType: "webinar",
+        resourceId: input.webinarId,
+      });
+      return { success: true };
     }),
 
   register: protectedProcedure
@@ -417,19 +429,13 @@ const webinarsRouter = router({
       return result;
     }),
 
-  watch: protectedProcedure
+  watch: publicProcedure
     .input(z.object({ webinarId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       await incrementWebinarView(input.webinarId);
-      const webinar = await getWebinarById(input.webinarId);
-      // Track type-specific event for analytics granularity
-      const eventType =
-        webinar?.type === "evergreen" ? "webinar_evergreen_watched" :
-        webinar?.type === "exclusive" ? "webinar_exclusive_watched" :
-        "webinar_ondemand_watched";
+      // Only on-demand (recording) webinars are tracked here; evergreen/exclusive use registration_click
       await trackEvent({
-        userId: ctx.user.id,
-        eventType,
+        eventType: "webinar_ondemand_watched",
         resourceType: "webinar",
         resourceId: input.webinarId,
       });
