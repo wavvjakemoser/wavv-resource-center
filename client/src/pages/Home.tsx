@@ -2,25 +2,16 @@ import { trpc } from "@/lib/trpc";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
-  GraduationCap,
-  Video,
-  FileText,
-  Headphones,
-  ArrowRight,
-  CheckCircle,
-  Sparkles,
-  X,
   Eye,
   EyeOff,
   AlertCircle,
-  FlaskConical,
+  ArrowRight,
 } from "lucide-react";
 
 export default function Home() {
   const [, navigate] = useLocation();
   const { data: user, isLoading: authLoading } = trpc.auth.me.useQuery();
   const utils = trpc.useUtils();
-
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<"signin" | "register">("signin");
 
@@ -101,143 +92,89 @@ export default function Home() {
   };
 
   const inputStyle = {
-    background: "#1e2330",
-    border: "1px solid #2d3548",
+    background: "#1a1a1a",
+    border: "1px solid #2a2a2a",
     fontFamily: "'Inter', sans-serif",
+    color: "#fff",
   };
   const inputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     e.currentTarget.style.borderColor = "#0074F4";
     e.currentTarget.style.boxShadow = "0 0 0 3px rgba(0,116,244,0.15)";
   };
   const inputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.style.borderColor = "#2d3548";
+    e.currentTarget.style.borderColor = "#2a2a2a";
     e.currentTarget.style.boxShadow = "none";
   };
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0f1318" }}>
-        <div className="w-10 h-10 border-2 border-[#0074F4] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0d0d0d" }}>
+        <div className="w-8 h-8 border-2 border-[#0074F4] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  const modules = [
-    {
-      icon: GraduationCap,
-      label: "WAVV Academy",
-      desc: "Structured courses: Onboarding, How-To, Strategy & Best Practices, and more",
-      color: "#0074F4",
-    },
-    {
-      icon: Video,
-      label: "WAVV Webinars",
-      desc: "Evergreen and live sessions to deepen your WAVV expertise",
-      color: "#00A9E2",
-    },
-    {
-      icon: FileText,
-      label: "WAVV Guides & Docs",
-      desc: "Playbooks, how-to guides, and documentation to reference anytime",
-      color: "#67C728",
-    },
-    {
-      icon: FlaskConical,
-      label: "WAVV Playground",
-      desc: "Practice WAVV features in a safe, isolated environment before going live",
-      color: "#a855f7",
-    },
-    {
-      icon: Headphones,
-      label: "WAVV Support",
-      desc: "AI-powered help and direct access to the WAVV support team",
-      color: "#f59e0b",
-    },
-  ];
-
   return (
     <div
-      className="min-h-screen flex flex-col"
-      style={{ background: "#161b22", fontFamily: "'Inter', sans-serif", color: "#f3f4f6" }}
+      className="min-h-screen flex flex-col items-center justify-center"
+      style={{ background: "#0d0d0d", fontFamily: "'Inter', sans-serif" }}
     >
-      {/* ── Nav ── */}
-      <nav
-        className="flex items-center justify-between px-6 py-4 sticky top-0 z-20"
-        style={{ background: "rgba(22,27,34,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-      >
-        <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-7 w-auto" />
-        <button
-          onClick={() => { setModalMode("signin"); setShowModal(true); }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-          style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", boxShadow: "0 4px 16px rgba(0,116,244,0.3)" }}
-        >
-          Sign In <ArrowRight size={14} />
-        </button>
-      </nav>
+      {/* ── Centered hero ── */}
+      <main className="flex flex-col items-center justify-center text-center px-6 w-full max-w-3xl">
 
-      {/* ── Hero ── */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
-        <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold mb-8"
-          style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.3)", color: "#60a5fa" }}
-        >
-          <Sparkles size={12} /> Powered by WAVV AI
-        </div>
+        {/* Logo */}
+        <img
+          src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
+          alt="WAVV"
+          className="h-9 w-auto mb-14"
+        />
 
-        <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
-          <span style={{ color: "#0074F4" }}>WAVV</span>{" "}
-          <span style={{ color: "#00A9E2" }}>Success</span>{" "}
-          <span style={{ color: "#67C728" }}>Center</span>
+        {/* Headline */}
+        <h1
+          className="font-extrabold tracking-tight leading-tight mb-8"
+          style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", color: "#ffffff" }}
+        >
+          Everything You Need to Succeed with WAVV
         </h1>
 
-        <p className="text-gray-400 text-lg max-w-xl mb-10 leading-relaxed">
-          Training, webinars, and dedicated support — everything you need to get the most out of WAVV, all in one place.
+        {/* Gradient accent line — blue to green, matching WAVV brand */}
+        <div
+          className="mb-10"
+          style={{
+            width: "220px",
+            height: "3px",
+            borderRadius: "2px",
+            background: "linear-gradient(to right, #0074F4, #00A9E2, #67C728)",
+          }}
+        />
+
+        {/* Subline */}
+        <p
+          className="mb-12 leading-relaxed"
+          style={{ color: "#9ca3af", fontSize: "1.05rem", maxWidth: "480px" }}
+        >
+          Training, webinars, and dedicated support — all in one place.
         </p>
 
-        <div className="flex items-center gap-3 flex-wrap justify-center">
-          <button
-            onClick={() => { setModalMode("signin"); setShowModal(true); }}
-            className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
-            style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", boxShadow: "0 6px 24px rgba(0,116,244,0.35)" }}
-          >
-            Access Success Center <ArrowRight size={15} />
-          </button>
-          <button
-            onClick={() => { setModalMode("register"); setShowModal(true); }}
-            className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold transition-all hover:bg-white/10 active:scale-95"
-            style={{ border: "1px solid rgba(255,255,255,0.15)", color: "#e5e7eb" }}
-          >
-            Create Account
-          </button>
-        </div>
-
-        {/* Module cards */}
-        <div className="mt-16 w-full max-w-2xl flex flex-col gap-3">
-          {modules.map(({ icon: Icon, label, desc, color }) => (
-            <div
-              key={label}
-              className="flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all hover:scale-[1.01]"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-            >
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: `${color}22`, border: `1px solid ${color}44` }}
-              >
-                <Icon size={18} style={{ color }} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white">{label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
-              </div>
-              <CheckCircle size={16} className="ml-auto flex-shrink-0" style={{ color: `${color}88` }} />
-            </div>
-          ))}
-        </div>
+        {/* CTA */}
+        <button
+          onClick={() => { setModalMode("signin"); setShowModal(true); }}
+          className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95"
+          style={{
+            background: "linear-gradient(135deg, #0074F4, #00A9E2)",
+            boxShadow: "0 6px 28px rgba(0,116,244,0.35)",
+          }}
+        >
+          Sign In <ArrowRight size={15} />
+        </button>
       </main>
 
       {/* ── Footer ── */}
-      <footer className="text-center py-6 text-xs text-gray-600" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-        © {new Date().getFullYear()} WAVV. All rights reserved. &nbsp;·&nbsp;
+      <footer
+        className="absolute bottom-0 w-full text-center py-5 text-xs"
+        style={{ color: "#4b5563", borderTop: "1px solid rgba(255,255,255,0.04)" }}
+      >
+        © {new Date().getFullYear()} WAVV. All rights reserved.&nbsp;·&nbsp;
         <a href="https://wavv.com/privacy" target="_blank" rel="noreferrer" className="hover:text-gray-400 transition-colors">Privacy</a>
         &nbsp;·&nbsp;
         <a href="https://wavv.com/terms" target="_blank" rel="noreferrer" className="hover:text-gray-400 transition-colors">Terms</a>
@@ -247,70 +184,62 @@ export default function Home() {
       {showModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowModal(false);
-          }}
+          style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
           <div
             className="relative w-full max-w-sm rounded-2xl p-8 flex flex-col items-center"
             style={{
-              background: "#161b22",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+              background: "#111111",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 32px 80px rgba(0,0,0,0.7)",
             }}
           >
             {/* Close */}
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition-colors"
+              className="absolute top-4 right-4 transition-colors"
+              style={{ color: "#4b5563" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#9ca3af")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#4b5563")}
             >
-              <X size={18} />
+              ✕
             </button>
 
             {/* WAVV logo */}
             <img
               src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
               alt="WAVV"
-              className="h-8 w-auto mb-6"
+              className="h-7 w-auto mb-7"
             />
 
             {/* Mode tabs */}
             <div
               className="flex w-full mb-6 rounded-xl p-1"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
             >
-              <button
-                type="button"
-                onClick={() => switchMode("signin")}
-                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{
-                  background: modalMode === "signin" ? "linear-gradient(135deg, #0074F4, #00A9E2)" : "transparent",
-                  color: modalMode === "signin" ? "#fff" : "#9ca3af",
-                  boxShadow: modalMode === "signin" ? "0 2px 8px rgba(0,116,244,0.3)" : "none",
-                }}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => switchMode("register")}
-                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{
-                  background: modalMode === "register" ? "linear-gradient(135deg, #0074F4, #00A9E2)" : "transparent",
-                  color: modalMode === "register" ? "#fff" : "#9ca3af",
-                  boxShadow: modalMode === "register" ? "0 2px 8px rgba(0,116,244,0.3)" : "none",
-                }}
-              >
-                Create Account
-              </button>
+              {(["signin", "register"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => switchMode(mode)}
+                  className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                  style={{
+                    background: modalMode === mode ? "linear-gradient(135deg, #0074F4, #00A9E2)" : "transparent",
+                    color: modalMode === mode ? "#fff" : "#6b7280",
+                    boxShadow: modalMode === mode ? "0 2px 8px rgba(0,116,244,0.3)" : "none",
+                  }}
+                >
+                  {mode === "signin" ? "Sign In" : "Create Account"}
+                </button>
+              ))}
             </div>
 
             {/* ── SIGN IN FORM ── */}
             {modalMode === "signin" && (
               <>
                 <h2 className="text-white text-xl font-bold mb-1 text-center">Welcome back</h2>
-                <p className="text-gray-500 text-sm mb-6 text-center">Sign in to your WAVV account</p>
+                <p className="mb-6 text-center text-sm" style={{ color: "#6b7280" }}>Sign in to your WAVV account</p>
                 <form onSubmit={handleSignIn} className="w-full flex flex-col gap-3">
                   <input
                     type="email"
@@ -319,7 +248,7 @@ export default function Home() {
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
                     required
-                    className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all"
+                    className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all"
                     style={inputStyle}
                     onFocus={inputFocus}
                     onBlur={inputBlur}
@@ -332,22 +261,22 @@ export default function Home() {
                       onChange={(e) => setPassword(e.target.value)}
                       autoComplete="current-password"
                       required
-                      className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all pr-11"
+                      className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all pr-11"
                       style={inputStyle}
                       onFocus={inputFocus}
                       onBlur={inputBlur}
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors" style={{ color: "#6b7280" }}>
                       {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
                   {loginError && (
-                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#f87171" }}>
+                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171" }}>
                       <AlertCircle size={13} className="flex-shrink-0" />{loginError}
                     </div>
                   )}
                   <div className="flex justify-end">
-                    <a href="mailto:support@wavv.com?subject=Password Reset Request" className="text-xs text-[#0074F4] hover:underline">Forgot password?</a>
+                    <a href="mailto:support@wavv.com?subject=Password Reset Request" className="text-xs hover:underline" style={{ color: "#0074F4" }}>Forgot password?</a>
                   </div>
                   <button
                     type="submit"
@@ -359,9 +288,9 @@ export default function Home() {
                       <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Signing in...</>
                     ) : "Sign In"}
                   </button>
-                  <p className="text-center text-xs text-gray-500 mt-1">
+                  <p className="text-center text-xs mt-1" style={{ color: "#6b7280" }}>
                     Don't have an account?{" "}
-                    <button type="button" onClick={() => switchMode("register")} className="text-[#0074F4] hover:underline font-medium">Create one</button>
+                    <button type="button" onClick={() => switchMode("register")} className="hover:underline font-medium" style={{ color: "#0074F4" }}>Create one</button>
                   </p>
                 </form>
               </>
@@ -371,7 +300,7 @@ export default function Home() {
             {modalMode === "register" && (
               <>
                 <h2 className="text-white text-xl font-bold mb-1 text-center">Create your account</h2>
-                <p className="text-gray-500 text-sm mb-6 text-center">Get access to the WAVV Success Center</p>
+                <p className="mb-6 text-center text-sm" style={{ color: "#6b7280" }}>Get access to the WAVV Success Center</p>
                 <form onSubmit={handleRegister} className="w-full flex flex-col gap-3">
                   <input
                     type="text"
@@ -380,7 +309,7 @@ export default function Home() {
                     onChange={(e) => setRegName(e.target.value)}
                     autoComplete="name"
                     required
-                    className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all"
+                    className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all"
                     style={inputStyle}
                     onFocus={inputFocus}
                     onBlur={inputBlur}
@@ -392,7 +321,7 @@ export default function Home() {
                     onChange={(e) => setRegEmail(e.target.value)}
                     autoComplete="email"
                     required
-                    className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all"
+                    className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all"
                     style={inputStyle}
                     onFocus={inputFocus}
                     onBlur={inputBlur}
@@ -405,12 +334,12 @@ export default function Home() {
                       onChange={(e) => setRegPassword(e.target.value)}
                       autoComplete="new-password"
                       required
-                      className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all pr-11"
+                      className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all pr-11"
                       style={inputStyle}
                       onFocus={inputFocus}
                       onBlur={inputBlur}
                     />
-                    <button type="button" onClick={() => setShowRegPassword(!showRegPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                    <button type="button" onClick={() => setShowRegPassword(!showRegPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors" style={{ color: "#6b7280" }}>
                       {showRegPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
@@ -421,13 +350,13 @@ export default function Home() {
                     onChange={(e) => setRegConfirm(e.target.value)}
                     autoComplete="new-password"
                     required
-                    className="w-full px-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all"
+                    className="w-full px-4 py-3.5 rounded-xl text-sm outline-none transition-all"
                     style={inputStyle}
                     onFocus={inputFocus}
                     onBlur={inputBlur}
                   />
                   {regError && (
-                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#f87171" }}>
+                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171" }}>
                       <AlertCircle size={13} className="flex-shrink-0" />{regError}
                     </div>
                   )}
@@ -441,9 +370,9 @@ export default function Home() {
                       <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Creating account...</>
                     ) : "Create Account"}
                   </button>
-                  <p className="text-center text-xs text-gray-500 mt-1">
+                  <p className="text-center text-xs mt-1" style={{ color: "#6b7280" }}>
                     Already have an account?{" "}
-                    <button type="button" onClick={() => switchMode("signin")} className="text-[#0074F4] hover:underline font-medium">Sign in</button>
+                    <button type="button" onClick={() => switchMode("signin")} className="hover:underline font-medium" style={{ color: "#0074F4" }}>Sign in</button>
                   </p>
                 </form>
               </>
