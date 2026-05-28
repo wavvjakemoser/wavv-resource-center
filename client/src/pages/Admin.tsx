@@ -149,7 +149,7 @@ export default function Admin() {
 
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
     { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} /> },
-    { id: "users",            label: "Users",             icon: <UserCircle size={13} /> },
+    { id: "users",            label: "Team Access",       icon: <Shield size={13} /> },
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} /> },
     { id: "webinars",         label: "Webinars",          icon: <Video size={13} /> },
     { id: "guides",           label: "Guides",            icon: <FileText size={13} /> },
@@ -1082,7 +1082,8 @@ function UsersTab() {
 
   const filteredUsers = useMemo(() => {
     if (!users) return [];
-    let list = users;
+    // Only show admins and super_admins — no public users in this panel
+    let list = (users ?? []).filter((u) => u.role === "admin" || u.role === "super_admin");
     if (roleFilter !== "all") list = list.filter((u) => u.role === roleFilter);
     if (!search.trim()) return list;
     const q = search.trim().toLowerCase();
@@ -1093,20 +1094,7 @@ function UsersTab() {
 
   const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "super_admin").length, [users]);
   const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "admin").length, [users]);
-  const userCount = useMemo(() => (users ?? []).filter((u) => u.role === "user").length, [users]);
-  const totalCount = users?.length ?? 0;
-  const pendingCount = useMemo(() => isSuperAdmin ? (users ?? []).filter((u) => u.role === "user" && isPendingPromotion(u.email)).length : 0, [users, isSuperAdmin]);
-
   const statCards: { filter: RoleFilter; label: string; value: number; iconEl: React.ReactNode; color: string; bg: string; activeBorder: string }[] = [
-    {
-      filter: "all",
-      label: "Total Users",
-      value: totalCount,
-      iconEl: <Users className="h-5 w-5" style={{ color: "#38bdf8" }} />,
-      color: "#38bdf8",
-      bg: "rgba(56,189,248,0.1)",
-      activeBorder: "#38bdf8",
-    },
     {
       filter: "super_admin",
       label: "Super Admins",
@@ -1124,15 +1112,6 @@ function UsersTab() {
       color: "#fbbf24",
       bg: "rgba(251,191,36,0.1)",
       activeBorder: "#fbbf24",
-    },
-    {
-      filter: "user",
-      label: "Standard Users",
-      value: userCount,
-      iconEl: <UserPlus className="h-5 w-5" style={{ color: "#4ade80" }} />,
-      color: "#4ade80",
-      bg: "rgba(74,222,128,0.1)",
-      activeBorder: "#4ade80",
     },
   ];
 
@@ -1174,14 +1153,9 @@ function UsersTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-base font-semibold text-white">User Management</h2>
+        <h2 className="text-base font-semibold text-white">Team Access</h2>
         <div className="flex items-center gap-2">
-          {isSuperAdmin && pendingCount > 0 && (
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-              style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.3)" }}>
-              <Bell className="h-3 w-3" /> {pendingCount} pending promotion{pendingCount > 1 ? "s" : ""}
-            </span>
-          )}
+
           <button
             onClick={exportUsersCSV}
             disabled={!users || users.length === 0}
@@ -1192,28 +1166,19 @@ function UsersTab() {
             Export{roleFilter !== "all" ? ` ${roleFilter === "super_admin" ? "Super Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
           </button>
           {isSuperAdmin && (
-            <>
-              <button
-                onClick={() => { setInviteOpen(true); setInviteResult(null); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
-                style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.25)" }}
-              >
-                <UserPlus size={13} /> Invite Team Member
-              </button>
-              <button
-                onClick={() => setAddUserOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
-                style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.25)" }}
-              >
-                <UserPlus size={13} /> Add User
-              </button>
-            </>
+            <button
+              onClick={() => { setInviteOpen(true); setInviteResult(null); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
+              style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.25)" }}
+            >
+              <UserPlus size={13} /> Invite Team Member
+            </button>
           )}
         </div>
       </div>
 
       {/* Clickable stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {statCards.map((s) => {
           const active = roleFilter === s.filter;
           return (
@@ -1310,11 +1275,7 @@ function UsersTab() {
                         ) : (
                           <Badge variant="secondary" className="text-[10px]">User</Badge>
                         )}
-                        {pending && (
-                          <Badge className="text-[10px]" style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.3)" }}>
-                            Pending Promotion
-                          </Badge>
-                        )}
+
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-500 text-sm">
@@ -1325,15 +1286,7 @@ function UsersTab() {
                         <span className="text-xs text-gray-600">—</span>
                       ) : (
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          {/* Super admin actions */}
-                          {isSuperAdmin && u.role === "user" && (
-                            <button
-                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
-                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_admin" })}>
-                              <Shield className="h-3 w-3 flex-shrink-0" /> Make Admin
-                            </button>
-                          )}
+
                           {isSuperAdmin && u.role === "admin" && (
                             <>
                               <button
@@ -1359,8 +1312,8 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Demote
                             </button>
                           )}
-                          {/* Remove button — super_admin can remove anyone; admin can only remove users */}
-                          {(isSuperAdmin || (!isSuperAdmin && u.role === "user")) && (
+                          {/* Remove button — super_admin only */}
+                          {isSuperAdmin && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
