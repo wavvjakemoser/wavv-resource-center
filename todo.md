@@ -893,3 +893,19 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Surface section PDFs in AcademyCategory: fetch via getSectionResourcesByCategory, inject below video list in SectionRow as "Resources" sub-section
 - [x] Write Vitest tests for all 4 new procedures (auth gating + admin gating)
 - [x] 30 tests passing, 0 TypeScript errors
+
+## V2 — Public Portal (No Auth Required)
+
+- [x] Remove auth gate from PortalLayout (no redirect to / for unauthenticated visitors)
+- [x] Remove loading spinner gate (layout renders immediately without waiting for auth)
+- [x] Remove notifications bell from public nav
+- [x] Remove user avatar/profile dropdown from public nav
+- [x] Remove "DEMO ENVIRONMENT" yellow banner from public nav
+- [x] Admin nav link in sidebar remains — only visible when logged in as admin/super_admin
+- [x] Rebuild Dashboard home page: centered hero with "WAVV Success Center" headline + tagline + "Powered by WAVV AI" badge
+- [x] Home page: 5 quick-access nav tiles (Academy, Webinars, Guides & Docs, Playground, Support)
+- [x] Home page: conditional Exclusive Live Webinars section (hidden when no active webinars)
+- [x] Home page: Recently Added row (6 latest published lessons, auto-updates on new content)
+- [x] Make getRecentLessons a publicProcedure (no auth required)
+- [x] Remove "Continue Learning" section (requires auth/progress tracking)
+- [x] V1 checkpoint preserved in version history for rollback

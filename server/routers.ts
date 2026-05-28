@@ -149,7 +149,7 @@ const academyRouter = router({
   getRecentProgress: protectedProcedure
     .input(z.object({ limit: z.number().optional() }))
     .query(({ ctx, input }) => getRecentProgress(ctx.user.id, input.limit ?? 3)),
-  getRecentLessons: protectedProcedure
+  getRecentLessons: publicProcedure
     .input(z.object({ limit: z.number().optional() }))
     .query(({ input }) => getRecentLessons(input.limit ?? 4)),
 
