@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import WavvAIChat from "./WavvAIChat";
 import AISearchBar from "./AISearchBar";
@@ -17,21 +17,65 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { href: "/dashboard", label: "Home",             icon: Home,          color: "#6366f1" },
-  { href: "/academy",   label: "WAVV Academy",      icon: GraduationCap, color: "#0074F4" },
-  { href: "/webinars",  label: "WAVV Webinars",     icon: Video,         color: "#10b981" },
-  { href: "/guides",    label: "WAVV Guides & Docs", icon: FileText,      color: "#67C728" },
-  { href: "/hands-on",  label: "WAVV Playground",   icon: FlaskConical,  color: "#a855f7" },
-  { href: "/support",   label: "WAVV Support",      icon: Headphones,    color: "#FF9900" },
+  { href: "/dashboard", label: "Home",              icon: Home,          color: "#6366f1" },
+  { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
+  { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
+  { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
+  { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
+  { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
 ];
 
-const adminNavItems = [
-  { href: "/admin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" },
-];
+const adminItem = { href: "/admin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" };
 
 interface PortalLayoutProps {
   children: React.ReactNode;
   title?: string;
+}
+
+function NavLink({
+  href, label, icon: Icon, color, isActive, onClick,
+}: { href: string; label: string; icon: React.ElementType; color: string; isActive: boolean; onClick: () => void }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
+      style={{
+        fontSize: "15px",
+        ...(isActive ? {
+          background: `${color}18`,
+          border: `1px solid ${color}35`,
+          color: "#ffffff",
+        } : {
+          background: "transparent",
+          border: "1px solid transparent",
+          color: "rgba(255,255,255,0.55)",
+        }),
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.background = `${color}12`;
+          e.currentTarget.style.borderColor = `${color}25`;
+          e.currentTarget.style.color = "#ffffff";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.borderColor = "transparent";
+          e.currentTarget.style.color = "rgba(255,255,255,0.55)";
+        }
+      }}
+      onClick={onClick}
+    >
+      <div
+        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ background: isActive ? `${color}28` : `${color}18` }}
+      >
+        <Icon size={17} style={{ color }} />
+      </div>
+      <span className="truncate">{label}</span>
+    </Link>
+  );
 }
 
 export default function PortalLayout({ children, title }: PortalLayoutProps) {
@@ -40,10 +84,11 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
 
-  // Update document title
   useEffect(() => {
     if (title) document.title = `${title} — WAVV Success Center`;
   }, [title]);
+
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
@@ -64,11 +109,10 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
-            width: "256px",
+            width: "260px",
             background: "#0f1318",
             borderRight: "1px solid #1e2030",
             flexShrink: 0,
-            overflowY: "auto",
           }}
         >
           {/* Logo */}
@@ -89,84 +133,33 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 overflow-y-auto">
-            <div className="space-y-0.5">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive =
-                  location === item.href ||
-                  (item.href !== "/dashboard" && location.startsWith(item.href));
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer"
-                    style={isActive ? {
-                      background: `${item.color}18`,
-                      border: `1px solid ${item.color}35`,
-                      color: item.color,
-                    } : {
-                      background: "transparent",
-                      border: "1px solid transparent",
-                      color: "#6b7280",
-                    }}
-                    onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = `${item.color}10`; e.currentTarget.style.borderColor = `${item.color}20`; e.currentTarget.style.color = "#e5e7eb"; } }}
-                    onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.color = "#6b7280"; } }}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: isActive ? `${item.color}28` : `${item.color}18` }}
-                    >
-                      <Icon size={17} style={{ color: item.color }} />
-                    </div>
-                    <span className="truncate">{item.label}</span>
-                  </Link>
-                );
-              })}
-
-              {/* Admin-only nav items — only shown when logged in as admin */}
-              {(user?.role === "admin" || user?.role === "super_admin") && (
-                <div className="mt-4 pt-4" style={{ borderTop: "1px solid #1e1e1e" }}>
-                  <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Admin</p>
-                  {adminNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.startsWith(item.href);
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer"
-                        style={isActive ? {
-                          background: `${item.color}18`,
-                          border: `1px solid ${item.color}35`,
-                          color: item.color,
-                        } : {
-                          background: "transparent",
-                          border: "1px solid transparent",
-                          color: "#6b7280",
-                        }}
-                        onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = `${item.color}10`; e.currentTarget.style.borderColor = `${item.color}20`; e.currentTarget.style.color = "#e5e7eb"; } }}
-                        onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.color = "#6b7280"; } }}
-                        onClick={() => setSidebarOpen(false)}
-                      >
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{ background: isActive ? `${item.color}28` : `${item.color}18` }}
-                        >
-                          <Icon size={17} style={{ color: item.color }} />
-                        </div>
-                        {item.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-
+          {/* Main navigation — scrollable */}
+          <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
+            {navItems.map((item) => {
+              const isActive =
+                location === item.href ||
+                (item.href !== "/dashboard" && location.startsWith(item.href));
+              return (
+                <NavLink
+                  key={item.href}
+                  {...item}
+                  isActive={isActive}
+                  onClick={() => setSidebarOpen(false)}
+                />
+              );
+            })}
           </nav>
+
+          {/* Admin — pinned to bottom, only for admins */}
+          {isAdmin && (
+            <div className="px-3 pb-4" style={{ borderTop: "1px solid #1e2030", paddingTop: "12px" }}>
+              <NavLink
+                {...adminItem}
+                isActive={location.startsWith(adminItem.href)}
+                onClick={() => setSidebarOpen(false)}
+              />
+            </div>
+          )}
         </aside>
 
         {/* ── Main column ── */}
