@@ -1082,7 +1082,8 @@ function SearchAIChart({ days, height = 192 }: { days: number; height?: number }
 }
 
 // ─── Users Tab ────────────────────────────────────────────────────────────────
-type RoleFilter = "all" | "super_admin" | "admin" | "user";
+type RoleFilter = "all" | "super_admin" | "admin" | "user" | "owner" | "partner_admin";
+type UserRole = "owner" | "super_admin" | "partner_admin" | "admin";
 
 // Super Admin icon: plain Shield in fuchsia, matching Admin amber shield style
 function SuperAdminIcon({ size = 14 }: { size?: number }) {
@@ -1099,7 +1100,7 @@ function UserProfileDrawer({
 }: {
   userId: number;
   onClose: () => void;
-  onAction: (action: "promote_admin" | "promote_super" | "demote" | "remove", userId: number, userName: string, currentRole: string) => void;
+  onAction: (action: "demote" | "remove", userId: number, userName: string, currentRole: string) => void;
   isSuperAdmin: boolean;
   isSelf: boolean;
 }) {
@@ -1171,31 +1172,21 @@ function UserProfileDrawer({
               ))}
             </div>
 
-            {/* Actions — always show for non-self; Demote only for super_admin */}
+            {/* Actions — demote and remove only; promote is handled from the table row */}
             {!isSelf && (
               <div className="flex flex-wrap gap-2 pt-1">
-                {isSuperAdmin && stats.role === "user" && (
-                  <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
-                    onClick={() => { onAction("promote_admin", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                    <Shield className="h-3 w-3 mr-1" /> Make Admin
-                  </Button>
-                )}
-                {stats.role === "admin" && isSuperAdmin && (
-                  <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.3)" }}
-                    onClick={() => { onAction("promote_super", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                    <SuperAdminIcon size={12} /><span className="ml-1">Promote to Super Admin</span>
-                  </Button>
-                )}
-                {stats.role === "super_admin" && isSuperAdmin && (
+                {stats.role !== "admin" && stats.role !== "owner" && isSuperAdmin && (
                   <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
                     onClick={() => { onAction("demote", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
                     <ShieldOff className="h-3 w-3 mr-1" /> Demote
                   </Button>
                 )}
-                <Button size="sm" className="text-xs h-7 px-3 text-red-400 hover:text-red-300" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}
-                  onClick={() => { onAction("remove", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                  <Trash2 className="h-3 w-3 mr-1" /> Remove
-                </Button>
+                {stats.role !== "owner" && (
+                  <Button size="sm" className="text-xs h-7 px-3 text-red-400 hover:text-red-300" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}
+                    onClick={() => { onAction("remove", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                    <Trash2 className="h-3 w-3 mr-1" /> Remove
+                  </Button>
+                )}
               </div>
             )}
           </div>
@@ -1213,12 +1204,21 @@ function UsersTab() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [profileUserId, setProfileUserId] = useState<number | null>(null);
+  // Promote dialog: shows a role picker
+  const [promoteDialog, setPromoteDialog] = useState<{
+    open: boolean;
+    userId: number;
+    userName: string;
+    currentRole: string;
+    selectedRole: UserRole;
+  } | null>(null);
+  // Demote/Remove confirm dialog
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     userId: number;
     userName: string;
     currentRole: string;
-    action: "promote_admin" | "promote_super" | "demote" | "remove";
+    action: "demote" | "remove";
   } | null>(null);
 
   const { data: users, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined, {
@@ -1260,10 +1260,14 @@ function UsersTab() {
 
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
-      const action = confirmDialog?.action;
-      const label = action === "promote_super" ? "a Super Admin" : action === "promote_admin" ? "an Admin" : "a Standard User";
-      toast.success(`${confirmDialog?.userName} is now ${label}.`);
-      setConfirmDialog(null);
+      if (promoteDialog) {
+        const roleLabels: Record<UserRole, string> = { owner: "an Owner", super_admin: "a Super Admin", partner_admin: "a Partner Admin", admin: "an Admin" };
+        toast.success(`${promoteDialog.userName} is now ${roleLabels[promoteDialog.selectedRole]}.`);
+        setPromoteDialog(null);
+      } else {
+        toast.success(`Role updated.`);
+        setConfirmDialog(null);
+      }
       refetch();
     },
     onError: (err) => { toast.error(err.message); },
@@ -1318,14 +1322,30 @@ function UsersTab() {
     },
   ];
 
+  function handlePromoteConfirm() {
+    if (!promoteDialog) return;
+    updateRole.mutate({ userId: promoteDialog.userId, role: promoteDialog.selectedRole });
+  }
+
   function handleConfirm() {
     if (!confirmDialog) return;
     if (confirmDialog.action === "remove") {
       removeUser.mutate({ userId: confirmDialog.userId });
     } else {
-      const role = confirmDialog.action === "promote_super" ? "super_admin" : confirmDialog.action === "promote_admin" ? "admin" : "user";
-      updateRole.mutate({ userId: confirmDialog.userId, role });
+      // demote → drop one level
+      const demotedRole: Record<string, string> = { owner: "super_admin", super_admin: "admin", partner_admin: "admin", admin: "admin" };
+      updateRole.mutate({ userId: confirmDialog.userId, role: (demotedRole[confirmDialog.currentRole] ?? "admin") as any });
     }
+  }
+
+  // Roles the current user can promote someone TO (up to but not above their own level)
+  function getPromotableRoles(targetCurrentRole: string): UserRole[] {
+    const myRole = currentUser?.role;
+    const hierarchy: UserRole[] = ["admin", "partner_admin", "super_admin", "owner"];
+    const myIdx = hierarchy.indexOf(myRole as UserRole);
+    const targetIdx = hierarchy.indexOf(targetCurrentRole as UserRole);
+    // Can only promote to roles strictly above target's current role, up to (and including) own level
+    return hierarchy.filter((r, i) => i > targetIdx && i <= myIdx);
   }
 
   const isPending = updateRole.isPending || removeUser.isPending;
@@ -1498,27 +1518,17 @@ function UsersTab() {
                       ) : (
                         <div className="flex items-center gap-1.5 flex-wrap">
 
-                          {/* Promote to Super Admin: from admin or partner_admin */}
-                          {isSuperAdmin && (u.role === "admin" || u.role === "partner_admin") && (
+                          {/* Promote — only if there are roles above the target's current role within caller's reach */}
+                          {getPromotableRoles(u.role).length > 0 && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(232,121,249,0.12)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.25)" }}
-                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_super" })}>
-                              <SuperAdminIcon size={12} />
-                              <span>Promote to Super Admin</span>
+                              style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
+                              onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: getPromotableRoles(u.role)[0] })}>
+                              <ArrowUp className="h-3 w-3 flex-shrink-0" /> Promote
                             </button>
                           )}
-                          {/* Promote to Admin: from super_admin */}
-                          {isSuperAdmin && u.role === "super_admin" && (
-                            <button
-                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
-                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_admin" })}>
-                              <Shield className="h-3 w-3 flex-shrink-0" /> Change to Admin
-                            </button>
-                          )}
-                          {/* Demote to Admin: from super_admin */}
-                          {isSuperAdmin && u.role === "super_admin" && (
+                          {/* Demote — only if not already at admin (lowest internal role) and not owner demoting owner */}
+                          {isSuperAdmin && u.role !== "admin" && u.role !== "owner" && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(156,163,175,0.1)", color: "#9ca3af", border: "1px solid rgba(156,163,175,0.2)" }}
@@ -1526,7 +1536,7 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Demote
                             </button>
                           )}
-                          {/* Remove button — super_admin/owner only, cannot remove owner */}
+                          {/* Remove — super_admin/owner only, cannot remove owner */}
                           {isSuperAdmin && u.role !== "owner" && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
@@ -1554,30 +1564,73 @@ function UsersTab() {
           isSuperAdmin={isSuperAdmin}
           isSelf={profileUserId === currentUser?.id}
           onAction={(action, userId, userName, currentRole) => {
-            setConfirmDialog({ open: true, userId, userName, currentRole, action });
+            if (action === "demote" || action === "remove") {
+              setConfirmDialog({ open: true, userId, userName, currentRole, action });
+            }
           }}
         />
       )}
 
-      {/* Confirm dialog */}
+      {/* Promote dialog — role picker */}
+      <Dialog open={!!promoteDialog?.open} onOpenChange={(open) => { if (!open) setPromoteDialog(null); }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Promote {promoteDialog?.userName}</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Select the role to promote <strong className="text-white">{promoteDialog?.userName}</strong> to.
+              Current role: <span className="text-gray-300 capitalize">{promoteDialog?.currentRole?.replace("_", " ")}</span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            {promoteDialog && getPromotableRoles(promoteDialog.currentRole).map((role) => {
+              const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
+                owner:        { label: "Owner",        color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
+                super_admin:  { label: "Super Admin",  color: "#e879f9", bg: "rgba(232,121,249,0.12)", border: "rgba(232,121,249,0.35)" },
+                partner_admin:{ label: "Partner Admin",color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
+                admin:        { label: "Admin",        color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
+              };
+              const cfg = roleConfig[role];
+              const isSelected = promoteDialog.selectedRole === role;
+              return (
+                <button
+                  key={role}
+                  onClick={() => setPromoteDialog(d => d ? { ...d, selectedRole: role } : d)}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left"
+                  style={{
+                    background: isSelected ? cfg.bg : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${isSelected ? cfg.color : "#2a2a2a"}`,
+                    color: isSelected ? cfg.color : "#9ca3af",
+                  }}
+                >
+                  <span className="flex-1">{cfg.label}</span>
+                  {isSelected && <CheckCircle2 className="h-4 w-4" style={{ color: cfg.color }} />}
+                </button>
+              );
+            })}
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setPromoteDialog(null)} disabled={isPending}>Cancel</Button>
+            <Button
+              onClick={handlePromoteConfirm}
+              disabled={isPending}
+              style={{ background: "#0074F4", color: "#fff" }}
+            >
+              {isPending ? "Promoting..." : `Promote to ${promoteDialog?.selectedRole?.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Demote / Remove confirm dialog */}
       <Dialog open={!!confirmDialog?.open} onOpenChange={(open) => { if (!open) setConfirmDialog(null); }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">
-              {confirmDialog?.action === "promote_super" && "Promote to Super Admin"}
-              {confirmDialog?.action === "promote_admin" && "Promote to Admin"}
-              {confirmDialog?.action === "demote" && "Demote User"}
-              {confirmDialog?.action === "remove" && "Remove User"}
+              {confirmDialog?.action === "demote" ? "Demote User" : "Remove User"}
             </DialogTitle>
             <DialogDescription className="text-gray-400">
-              {confirmDialog?.action === "promote_super" && (
-                <><strong className="text-white">{confirmDialog.userName}</strong> will become a Super Admin with full access to all admin tools and user management.</>
-              )}
-              {confirmDialog?.action === "promote_admin" && (
-                <><strong className="text-white">{confirmDialog.userName}</strong> will gain access to the admin dashboard and content management tools.</>
-              )}
               {confirmDialog?.action === "demote" && (
-                <><strong className="text-white">{confirmDialog?.userName}</strong> will be demoted to a standard user and lose all admin access.</>
+                <><strong className="text-white">{confirmDialog.userName}</strong> will be demoted one level (from {confirmDialog.currentRole.replace("_", " ")}).</>
               )}
               {confirmDialog?.action === "remove" && (
                 <><strong className="text-white">{confirmDialog?.userName}</strong> will be permanently removed from the platform. This cannot be undone.</>
@@ -1586,20 +1639,8 @@ function UsersTab() {
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setConfirmDialog(null)} disabled={isPending}>Cancel</Button>
-            <Button
-              variant={confirmDialog?.action === "remove" || confirmDialog?.action === "demote" ? "destructive" : "default"}
-              style={confirmDialog?.action === "promote_super" ? { background: "#c026d3", color: "#fff" } : undefined}
-              onClick={handleConfirm}
-              disabled={isPending}
-            >
-              {isPending ? "Processing..." : (
-                <>
-                  {confirmDialog?.action === "promote_super" && "Promote to Super Admin"}
-                  {confirmDialog?.action === "promote_admin" && "Promote to Admin"}
-                  {confirmDialog?.action === "demote" && "Demote to User"}
-                  {confirmDialog?.action === "remove" && "Remove User"}
-                </>
-              )}
+            <Button variant="destructive" onClick={handleConfirm} disabled={isPending}>
+              {isPending ? "Processing..." : confirmDialog?.action === "demote" ? "Demote" : "Remove User"}
             </Button>
           </DialogFooter>
         </DialogContent>
