@@ -1017,3 +1017,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] When partner_admin initiates invite, role is locked to "partner" — no other role options shown
 - [ ] Server: allow partner_admin to call admin.addUser but only with role="partner"
 - [ ] Server: allow partner_admin to call admin.listUsers (filtered to partner/partner_admin rows only)
+
+## Partner Model Restructure
+- [ ] Team Access: remove partner role from role selector (only Super Admin, Admin, Partner Admin)
+- [ ] Admin panel: move Partners tab to far right position
+- [ ] Admin panel: partner_admin sees WAVV Knowledge + Partners tab only (Partners far right)
+- [ ] Create /wavv-partner dedicated portal page (course + content placeholder, WAVV-branded)
+- [ ] AcceptInvite: redirect partner role to /wavv-partner instead of /admin
+- [ ] Gate /wavv-partner route to partner role only (redirect others away)
+- [ ] Register /wavv-partner route in App.tsx

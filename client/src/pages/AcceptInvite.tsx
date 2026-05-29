@@ -31,9 +31,12 @@ export default function AcceptInvite() {
   const acceptMutation = trpc.auth.acceptInvite.useMutation({
     onSuccess: (data) => {
       setClaimed(true);
-      // Admins go to /admin, everyone else to /dashboard
+      // Route by role: admins → /admin, partners → /wavv-partner, everyone else → /dashboard
       const role = data?.user?.role;
-      const dest = (role === "admin" || role === "super_admin") ? "/admin" : "/dashboard";
+      const dest =
+        (role === "admin" || role === "super_admin" || role === "partner_admin") ? "/admin" :
+        role === "partner" ? "/wavv-partner" :
+        "/dashboard";
       setTimeout(() => navigate(dest), 2000);
     },
     onError: (e) => toast.error(e.message),

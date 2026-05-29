@@ -178,7 +178,6 @@ export default function Admin() {
 
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode; superAdminOnly?: boolean; partnerAdminAllowed?: boolean }[] = [
     { id: "knowledge",        label: "WAVV Knowledge",    icon: <Sparkles size={13} />,       superAdminOnly: false },
-    { id: "partner_analytics", label: "Partners",         icon: <Users size={13} />,           superAdminOnly: false, partnerAdminAllowed: true },
     { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} />,      superAdminOnly: true },
     { id: "users",            label: "Team Access",       icon: <Shield size={13} />,         superAdminOnly: true },
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />,  superAdminOnly: true },
@@ -187,6 +186,7 @@ export default function Admin() {
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,   superAdminOnly: true },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,     superAdminOnly: true },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />,  superAdminOnly: true },
+    { id: "partner_analytics", label: "Partners",         icon: <Users size={13} />,           superAdminOnly: false, partnerAdminAllowed: true },
   ];
 
   return (
@@ -1229,7 +1229,7 @@ function UsersTab() {
   });
 
   const [addUserOpen, setAddUserOpen] = useState(false);
-  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "user" as "user" | "admin" | "super_admin" | "partner_admin" | "partner" });
+  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "admin" as "admin" | "super_admin" | "partner_admin" });
   const [inviteLinkModal, setInviteLinkModal] = useState<{ open: boolean; url: string; name: string }>({
     open: false, url: "", name: "",
   });
@@ -1237,7 +1237,7 @@ function UsersTab() {
     onSuccess: (data) => {
       const userName = addUserForm.name;
       setAddUserOpen(false);
-      setAddUserForm({ name: "", email: "", role: "user" });
+      setAddUserForm({ name: "", email: "", role: "admin" });
       refetch();
       if (data.inviteUrl) {
         setInviteLinkModal({ open: true, url: data.inviteUrl, name: userName });
@@ -1590,7 +1590,7 @@ function UsersTab() {
       </Dialog>
 
       {/* Add User Dialog */}
-      <Dialog open={addUserOpen} onOpenChange={(open) => { if (!open) { setAddUserOpen(false); setAddUserForm({ name: "", email: "", role: "user" }); } }}>
+      <Dialog open={addUserOpen} onOpenChange={(open) => { if (!open) { setAddUserOpen(false); setAddUserForm({ name: "", email: "", role: "admin" }); } }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Add User</DialogTitle>
@@ -1620,15 +1620,13 @@ function UsersTab() {
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Role</label>
               <select
                 value={addUserForm.role}
-                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "user" | "admin" | "super_admin" | "partner_admin" | "partner" }))}
+                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "admin" | "super_admin" | "partner_admin" }))}
                 className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                 style={{ background: "#111", border: "1px solid #2a2a2a" }}
               >
-                <option value="user">Standard User</option>
                 <option value="admin">Admin</option>
                 <option value="super_admin">Super Admin</option>
                 <option value="partner_admin">Partner Admin</option>
-                <option value="partner">WAVV Partner</option>
               </select>
             </div>
           </div>
