@@ -88,6 +88,7 @@ import {
   Sparkles,
   Bot,
   Send,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -258,15 +259,6 @@ function WavvKnowledgeTab() {
     }
   };
 
-  const TOPIC_SHORTCUTS = [
-    { label: "Onboarding",        icon: "🚀", query: "How do I get started with WAVV onboarding?" },
-    { label: "Call Boards",       icon: "📋", query: "How do Call Boards work and how do I set them up?" },
-    { label: "Connection Rates",  icon: "📈", query: "How can I improve connection rates?" },
-    { label: "CRM Setup",         icon: "🔗", query: "How do I integrate WAVV with my CRM?" },
-    { label: "Billing & Wallet",  icon: "💳", query: "How does WAVV Wallet and billing work?" },
-    { label: "Spam Protection",   icon: "🛡️", query: "How do I protect my numbers from spam flagging?" },
-  ];
-
   return (
     <div className="rounded-2xl overflow-hidden" style={{ background: "#141414", border: "1px solid #2a2a2a", minHeight: "600px", display: "flex", flexDirection: "column" }}>
       {/* Header */}
@@ -307,25 +299,49 @@ function WavvKnowledgeTab() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-4">
         {messages.length === 0 && (
-          <div className="space-y-4">
-            <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>Quick topics</p>
-            <div className="grid grid-cols-2 gap-2">
-              {TOPIC_SHORTCUTS.map((t) => (
-                <button
-                  key={t.label}
-                  onClick={() => sendMessage(t.query)}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all"
-                  style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#9ca3af" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0074F4"; e.currentTarget.style.color = "#60a5fa"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2a2a2a"; e.currentTarget.style.color = "#9ca3af"; }}
+          <div
+            className="rounded-2xl overflow-hidden mt-2"
+            style={{ background: "rgba(245,158,11,0.07)", border: "2px dashed rgba(245,158,11,0.35)" }}
+          >
+            <div className="flex flex-col items-center justify-center text-center py-14 px-8 gap-5">
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                style={{ background: "rgba(245,158,11,0.15)" }}
+              >
+                <AlertTriangle size={32} style={{ color: "#f59e0b" }} />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-white tracking-tight">WAVV Knowledge</h3>
+                <div
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+                  style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
                 >
-                  <span style={{ fontSize: "16px" }}>{t.icon}</span>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-            <div className="mt-2 px-3 py-2 rounded-lg text-xs text-center" style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.12)", color: "rgba(255,255,255,0.35)" }}>
-              Content curation in progress — answers will improve as the knowledge base is built out
+                  <AlertTriangle size={11} />
+                  Under Construction
+                </div>
+              </div>
+              <p className="text-sm text-gray-400 leading-relaxed max-w-md">
+                The internal knowledge base is being curated. Once content is added, this will be your
+                go-to for finding answers without digging through{" "}
+                <span className="text-white font-medium">Slack</span> or{" "}
+                <span className="text-white font-medium">Google Drive</span>.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg mt-1">
+                {[
+                  { icon: <BookOpen size={14} />, label: "Onboarding Guides" },
+                  { icon: <MessageSquare size={14} />, label: "Product FAQs" },
+                  { icon: <TrendingUp size={14} />, label: "Best Practices" },
+                ].map(({ icon, label }) => (
+                  <div
+                    key={label}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
+                  >
+                    <span style={{ color: "#f59e0b" }}>{icon}</span>
+                    {label}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

@@ -200,22 +200,22 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
         </div>
       </div>
 
-      {/* Ask WAVV floating bubble — customer pages only */}
+      {/* Ask WAVV floating bubble — customer pages only, bottom-center */}
       {!isAdminPage && !aiOpen && (
         <button
           onClick={() => setAiOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
+          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-5 py-2.5 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
           style={{
             background: "linear-gradient(135deg, #0074F4, #00A9E2)",
             color: "white",
-            boxShadow: "0 4px 24px rgba(0, 116, 244, 0.45)",
+            boxShadow: "0 4px 28px rgba(0, 116, 244, 0.4)",
             fontWeight: 600,
             fontSize: "14px",
             whiteSpace: "nowrap",
           }}
           title="Ask WAVV"
         >
-          <Sparkles size={16} />
+          <Sparkles size={15} />
           <span>Ask WAVV</span>
         </button>
       )}
