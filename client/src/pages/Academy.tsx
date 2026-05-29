@@ -1,5 +1,6 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import { useState } from "react";
 import {
@@ -268,8 +269,9 @@ function PlaceholderCourseCard({
 
 // ─── Main component ───────────────────────────────────────────────────────
 export default function Academy() {
+  const { user } = useAuth();
   const { data: courses, isLoading } = trpc.academy.getCourses.useQuery();
-  const { data: progress } = trpc.academy.getProgress.useQuery({});
+  const { data: progress } = trpc.academy.getProgress.useQuery({}, { enabled: !!user });
 
   const completedLessonIds = new Set(
     (progress ?? []).filter((p) => p.completed).map((p) => p.lessonId)

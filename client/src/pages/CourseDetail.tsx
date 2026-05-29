@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Link, useParams } from "wouter";
 import { ArrowLeft, PlayCircle, CheckCircle, Clock, BookOpen, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Onboarding: "#0074F4",
@@ -16,9 +17,10 @@ const CATEGORY_COLORS: Record<string, string> = {
 export default function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
   const id = parseInt(courseId ?? "0");
+  const { user } = useAuth();
 
   const { data, isLoading } = trpc.academy.getCourse.useQuery({ id });
-  const { data: progress, refetch: refetchProgress } = trpc.academy.getProgress.useQuery({ courseId: id });
+  const { data: progress, refetch: refetchProgress } = trpc.academy.getProgress.useQuery({ courseId: id }, { enabled: !!user });
   const markComplete = trpc.academy.markComplete.useMutation({
     onSuccess: () => {
       refetchProgress();

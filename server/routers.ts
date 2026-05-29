@@ -106,13 +106,13 @@ import {
 
 // ─── Admin guard ──────────────────────────────────────────────────────────────
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin" && ctx.user.role !== "super_admin") {
+  if (ctx.user.role !== "admin" && ctx.user.role !== "super_admin" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
   }
   return next({ ctx });
 });
 const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "super_admin") {
+  if (ctx.user.role !== "super_admin" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Super admin access required" });
   }
   return next({ ctx });
@@ -120,7 +120,7 @@ const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 // Procedure accessible by partner_admin (can only invite partner role) OR super_admin
 const partnerAdminOrSuperProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "super_admin" && ctx.user.role !== "partner_admin") {
+  if (ctx.user.role !== "super_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Partner admin or super admin access required" });
   }
   return next({ ctx });
@@ -128,7 +128,7 @@ const partnerAdminOrSuperProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 // ─── Academy Router ───────────────────────────────────────────────────────────
 const academyRouter = router({
-  getCourses: protectedProcedure.query(async () => {
+  getCourses: publicProcedure.query(async () => {
     const allCourses = await getCourses(true);
     const enriched = await Promise.all(
       allCourses.map(async (c) => {
@@ -139,13 +139,11 @@ const academyRouter = router({
     return enriched;
   }),
 
-  getCourse: protectedProcedure
+  getCourse: publicProcedure
     .input(z.object({ id: z.number() }))
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input }) => {
       const course = await getCourseById(input.id);
-      // Unpublished courses are hidden from regular users; admins can still access
-      const isAdmin = ctx.user.role === "admin" || ctx.user.role === "super_admin";
-      if (!course || (!course.published && !isAdmin)) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!course || !course.published) throw new TRPCError({ code: "NOT_FOUND" });
       const courseLessons = await getLessonsByCourse(input.id, true);
       return { course, lessons: courseLessons };
     }),
@@ -295,12 +293,12 @@ const academyRouter = router({
     .input(z.object({ courseId: z.number() }))
     .query(({ input }) => getLessonsByCourse(input.courseId, false)),
 
-  getLessonsByCategory: protectedProcedure
+  getLessonsByCategory: publicProcedure
     .input(z.object({ category: z.string() }))
     .query(({ input }) => getLessonsByCategory(input.category)),
 
   // Returns courses (sections) for a given category — includes tags field for user-facing display
-  getCoursesByCategory: protectedProcedure
+  getCoursesByCategory: publicProcedure
     .input(z.object({ category: z.string() }))
     .query(async ({ input }) => {
       const allCourses = await getCourses(true);
@@ -321,7 +319,7 @@ const academyRouter = router({
     }),
 
   // DB-driven Academy page: courses grouped by category with their published lessons
-  getCategories: protectedProcedure.query(() => getCategories()),
+  getCategories: publicProcedure.query(() => getCategories()),
 
   // Reorder: swap sortOrder between two courses (super_admin only)
   reorderCourses: superAdminProcedure
@@ -339,7 +337,7 @@ const academyRouter = router({
     .query(() => getAllSectionResources()),
 
   // List section resources for a specific category (user-facing)
-  getSectionResourcesByCategory: protectedProcedure
+  getSectionResourcesByCategory: publicProcedure
     .input(z.object({ category: z.string() }))
     .query(({ input }) => getSectionResourcesByCategory(input.category)),
 
@@ -529,9 +527,9 @@ const webinarsRouter = router({
 
 // ─── Guides Router ────────────────────────────────────────────────────────────
 const guidesRouter = router({
-  list: protectedProcedure.query(() => getGuides(true)),
+  list: publicProcedure.query(() => getGuides(true)),
 
-  get: protectedProcedure
+  get: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const guide = await getGuideById(input.id);
@@ -539,12 +537,11 @@ const guidesRouter = router({
       return guide;
     }),
 
-  download: protectedProcedure
+  download: publicProcedure
     .input(z.object({ guideId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       await incrementGuideDownload(input.guideId);
       await trackEvent({
-        userId: ctx.user.id,
         eventType: "guide_downloaded",
         resourceType: "guide",
         resourceId: input.guideId,
@@ -1486,7 +1483,7 @@ export const appRouter = router({
     update: protectedProcedure
       .input(z.object({ key: z.string(), value: z.record(z.string(), z.boolean()) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "super_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "super_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(async ({ input }) => {
@@ -1499,7 +1496,7 @@ export const appRouter = router({
     getItems: protectedProcedure
       .input(z.object({ page: z.enum(["academy", "webinars", "guides", "playground", "support"]) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "super_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "super_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(({ input }) => getReadinessItems(input.page)),
@@ -1507,7 +1504,7 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "super_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "super_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => toggleReadinessItem(input.id, input.checked)),

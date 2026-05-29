@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Link, useParams } from "wouter";
 import { ArrowLeft, CheckCircle, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
@@ -26,8 +27,9 @@ export default function LessonViewer() {
   const cId = parseInt(courseId ?? "0");
   const lId = parseInt(lessonId ?? "0");
 
+  const { user } = useAuth();
   const { data: courseData } = trpc.academy.getCourse.useQuery({ id: cId });
-  const { data: progress, refetch: refetchProgress } = trpc.academy.getProgress.useQuery({ courseId: cId });
+  const { data: progress, refetch: refetchProgress } = trpc.academy.getProgress.useQuery({ courseId: cId }, { enabled: !!user });
 
   const markComplete = trpc.academy.markComplete.useMutation({
     onSuccess: () => {
