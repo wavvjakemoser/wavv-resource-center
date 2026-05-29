@@ -1,0 +1,2 @@
+ALTER TABLE `invite_tokens` MODIFY COLUMN `role` enum('user','admin','customer_admin','partner_admin','owner') NOT NULL DEFAULT 'user';--> statement-breakpoint
+ALTER TABLE `users` MODIFY COLUMN `role` enum('user','admin','customer_admin','partner_admin','owner') NOT NULL DEFAULT 'user';

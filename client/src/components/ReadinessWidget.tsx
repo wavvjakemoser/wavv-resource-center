@@ -22,7 +22,7 @@ export function ReadinessWidget({ page }: Props) {
   const [expanded, setExpanded] = useState(false);
 
   // Only render for admins and super admins
-  if (!user || (user.role !== "admin" && user.role !== "super_admin")) return null;
+  if (!user || (user.role !== "admin" && user.role !== "customer_admin" && user.role !== "partner_admin" && user.role !== "owner")) return null;
 
   return <ReadinessWidgetInner page={page} expanded={expanded} setExpanded={setExpanded} />;
 }

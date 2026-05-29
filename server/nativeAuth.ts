@@ -21,7 +21,7 @@ export async function verifyPassword(plain: string, hash: string): Promise<boole
 export interface SessionPayload {
   userId: number;
   email: string;
-  role: "user" | "admin" | "super_admin" | "partner_admin" | "partner" | "owner";
+  role: "user" | "admin" | "customer_admin" | "partner_admin" | "owner";
 }
 
 export async function createSessionToken(payload: SessionPayload): Promise<string> {
@@ -38,7 +38,7 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
     return {
       userId: payload.userId as number,
       email: payload.email as string,
-      role: payload.role as "user" | "admin" | "super_admin" | "partner_admin" | "partner" | "owner",
+      role: payload.role as "user" | "admin" | "customer_admin" | "partner_admin" | "owner",
     };
   } catch {
     return null;

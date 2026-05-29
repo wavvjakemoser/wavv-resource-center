@@ -90,7 +90,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     if (title) document.title = `${title} — WAVV Success Center`;
   }, [title]);
 
-  const isAdmin = user?.role === "admin" || user?.role === "super_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");
 
   return (

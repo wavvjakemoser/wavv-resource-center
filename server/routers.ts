@@ -104,28 +104,34 @@ import {
   createManualUser,
 } from "./db";
 
-// ─── Admin guard ──────────────────────────────────────────────────────────────
-const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin" && ctx.user.role !== "super_admin" && ctx.user.role !== "owner") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+// // ─── Role guards ─────────────────────────────────────────────────────
+// Owner only — full access, promote/demote, remove users
+const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== "owner") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Owner access required" });
   }
   return next({ ctx });
 });
+// Customer Admin or Owner — edit all content except Partners
 const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "super_admin" && ctx.user.role !== "owner") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Super admin access required" });
+  if (ctx.user.role !== "customer_admin" && ctx.user.role !== "owner") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Customer admin access required" });
   }
   return next({ ctx });
 });
-
-// Procedure accessible by partner_admin (can only invite partner role) OR super_admin
+// Any internal role (admin, customer_admin, partner_admin, owner) — read-only admin panel access
+const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== "admin" && ctx.user.role !== "customer_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+  }  return next({ ctx });
+});
+// Partner Admin, Customer Admin, or Owner — can manage team invites
 const partnerAdminOrSuperProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "super_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Partner admin or super admin access required" });
+  if (ctx.user.role !== "customer_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Partner admin or customer admin access required" });
   }
   return next({ ctx });
 });
-
 // ─── Academy Router ───────────────────────────────────────────────────────────
 const academyRouter = router({
   getCourses: publicProcedure.query(async () => {
@@ -321,12 +327,12 @@ const academyRouter = router({
   // DB-driven Academy page: courses grouped by category with their published lessons
   getCategories: publicProcedure.query(() => getCategories()),
 
-  // Reorder: swap sortOrder between two courses (super_admin only)
+  // Reorder: swap sortOrder between two courses (customer_admin only)
   reorderCourses: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderCourses(input.id1, input.id2)),
 
-  // Reorder: swap sortOrder between two lessons (super_admin only)
+  // Reorder: swap sortOrder between two lessons (customer_admin only)
   reorderLessons: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderLessons(input.id1, input.id2)),
@@ -505,7 +511,7 @@ const webinarsRouter = router({
   keepArchived: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => updateWebinar(input.id, { published: false })),
-  // Reorder: swap sortOrder between two webinars (super_admin only)
+  // Reorder: swap sortOrder between two webinars (customer_admin only)
   adminReorder: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderWebinars(input.id1, input.id2)),
@@ -601,7 +607,7 @@ const guidesRouter = router({
   adminList: superAdminProcedure.query(() => getGuides(false)),
   adminExportDownloaders: superAdminProcedure.query(() => getGuideDownloadersExport()),
 
-  // Reorder: swap sortOrder between two guides (super_admin only)
+  // Reorder: swap sortOrder between two guides (customer_admin only)
   adminReorder: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderGuides(input.id1, input.id2)),
@@ -1097,10 +1103,8 @@ export const appRouter = router({
       .input(z.object({ search: z.string().optional() }).optional())
       .query(async ({ input, ctx }) => {
         const allUsersData = await getAllUsers();
-        // partner_admin only sees partner and partner_admin accounts
-        const filtered = ctx.user.role === "partner_admin"
-          ? allUsersData.filter((u: any) => u.role === "partner" || u.role === "partner_admin")
-          : allUsersData;
+        // All internal roles see all internal accounts
+        const filtered = allUsersData;
         const search = input?.search?.trim().toLowerCase();
         if (!search) return filtered;
         return allUsersData.filter(
@@ -1109,8 +1113,8 @@ export const appRouter = router({
             (u.email ?? "").toLowerCase().includes(search)
         );
       }),
-    updateRole: superAdminProcedure
-      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner", "owner"]) }))
+    updateRole: ownerProcedure
+      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "customer_admin", "partner_admin", "owner"]) }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own role" });
@@ -1118,24 +1122,24 @@ export const appRouter = router({
         await updateUserRole(input.userId, input.role);
         return { success: true };
       }),
-    removeUser: superAdminProcedure
+    removeUser: ownerProcedure
       .input(z.object({ userId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot remove yourself" });
         }
-        // Admins can only remove users (not other admins or super_admins)
+        // Admins can only remove users (not other admins or customer_admins)
         // Super admins can remove anyone
         const allUsers = await getAllUsers();
         const target = allUsers.find(u => u.id === input.userId);
         if (!target) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-        if (ctx.user.role === "admin" && (target.role === "admin" || target.role === "super_admin")) {
+        if (ctx.user.role === "admin" && (target.role === "admin" || target.role === "customer_admin")) {
           throw new TRPCError({ code: "FORBIDDEN", message: "Admins can only remove standard users" });
         }
         await deleteUser(input.userId);
         return { success: true };
       }),
-    getUserStats: superAdminProcedure
+    getUserStats: ownerProcedure
       .input(z.object({ userId: z.number() }))
       .query(async ({ input }) => {
         const stats = await getUserStats(input.userId);
@@ -1146,14 +1150,10 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
-        role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner", "owner"]).default("user"),
+        role: z.enum(["admin", "customer_admin", "partner_admin", "owner"]).default("admin"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
-        // partner_admin can only invite partner role — enforce server-side
-        if (ctx.user.role === "partner_admin" && input.role !== "partner") {
-          throw new TRPCError({ code: "FORBIDDEN", message: "Partner admins can only invite WAVV Partners" });
-        }
         // Create the user stub
         const result = await createManualUser({ name: input.name, email: input.email, role: input.role });
         if (!result) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user" });
@@ -1171,7 +1171,7 @@ export const appRouter = router({
     resendInvite: superAdminProcedure
       .input(z.object({
         email: z.string().email(),
-        role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner", "owner"]).default("user"),
+        role: z.enum(["admin", "customer_admin", "partner_admin", "owner"]).default("admin"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1483,7 +1483,7 @@ export const appRouter = router({
     update: protectedProcedure
       .input(z.object({ key: z.string(), value: z.record(z.string(), z.boolean()) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "super_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "customer_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(async ({ input }) => {
@@ -1496,7 +1496,7 @@ export const appRouter = router({
     getItems: protectedProcedure
       .input(z.object({ page: z.enum(["academy", "webinars", "guides", "playground", "support"]) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "super_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "customer_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(({ input }) => getReadinessItems(input.page)),
@@ -1504,7 +1504,7 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "super_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "customer_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => toggleReadinessItem(input.id, input.checked)),

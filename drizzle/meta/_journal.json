@@ -190,6 +190,13 @@
       "when": 1780092333565,
       "tag": "0025_chilly_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1780096996672,
+      "tag": "0026_third_exodus",
+      "breakpoints": true
     }
   ]
 }
