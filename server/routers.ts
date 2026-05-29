@@ -503,6 +503,20 @@ const webinarsRouter = router({
   adminReorder: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderWebinars(input.id1, input.id2)),
+  // Upload a video file to S3 for on-demand/evergreen webinars
+  uploadVideo: superAdminProcedure
+    .input(z.object({
+      base64: z.string(),
+      mimeType: z.enum(["video/mp4", "video/webm", "video/ogg", "video/quicktime"]),
+      fileName: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      const { storagePut } = await import("./storage");
+      const buffer = Buffer.from(input.base64, "base64");
+      const key = `webinars/videos/${Date.now()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      return { url };
+    }),
 });
 
 // ─── Guides Router ────────────────────────────────────────────────────────────

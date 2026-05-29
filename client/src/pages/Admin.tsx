@@ -1,5 +1,22 @@
 import { useState, useMemo, useEffect } from "react";
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -1159,22 +1176,11 @@ function UserProfileDrawer({
                     <Shield className="h-3 w-3 mr-1" /> Make Admin
                   </Button>
                 )}
-                {stats.role === "admin" && (
-                  <>
-                    {isSuperAdmin && (
-                      <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.3)" }}
-                        onClick={() => { onAction("promote_super", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                        <SuperAdminIcon size={12} /><span className="ml-1">Promote to Super Admin</span>
-                      </Button>
-                    )}
-                    {/* Demote is only available to super_admin — regular admin sees Remove only */}
-                    {isSuperAdmin && (
-                      <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-                        onClick={() => { onAction("demote", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                        <ShieldOff className="h-3 w-3 mr-1" /> Demote
-                      </Button>
-                    )}
-                  </>
+                {stats.role === "admin" && isSuperAdmin && (
+                  <Button size="sm" className="text-xs h-7 px-3" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.3)" }}
+                    onClick={() => { onAction("promote_super", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
+                    <SuperAdminIcon size={12} /><span className="ml-1">Promote to Super Admin</span>
+                  </Button>
                 )}
                 {stats.role === "super_admin" && isSuperAdmin && (
                   <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
@@ -1481,21 +1487,13 @@ function UsersTab() {
                         <div className="flex items-center gap-1.5 flex-wrap">
 
                           {isSuperAdmin && u.role === "admin" && (
-                            <>
-                              <button
-                                className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                                style={{ background: "rgba(232,121,249,0.12)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.25)" }}
-                                onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_super" })}>
-                                <SuperAdminIcon size={12} />
-                                <span>Promote to Super Admin</span>
-                              </button>
-                              <button
-                                className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                                style={{ background: "rgba(156,163,175,0.1)", color: "#9ca3af", border: "1px solid rgba(156,163,175,0.2)" }}
-                                onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "demote" })}>
-                                <ShieldOff className="h-3 w-3 flex-shrink-0" /> Demote
-                              </button>
-                            </>
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(232,121,249,0.12)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.25)" }}
+                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_super" })}>
+                              <SuperAdminIcon size={12} />
+                              <span>Promote to Super Admin</span>
+                            </button>
                           )}
                           {isSuperAdmin && u.role === "super_admin" && (
                             <button
@@ -4120,6 +4118,34 @@ function WebinarsTab() {
     onSuccess: () => { utils.webinars.adminList.invalidate(); toast.success("Webinar deleted"); },
     onError: (e) => toast.error(e.message),
   });
+  const uploadVideoMutation = trpc.webinars.uploadVideo.useMutation({
+    onError: (e) => toast.error("Video upload failed: " + e.message),
+  });
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+
+  async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const maxMb = 500;
+    if (file.size > maxMb * 1024 * 1024) { toast.error(`Video too large — max ${maxMb} MB`); return; }
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "mp4";
+    type AllowedMime = "video/mp4" | "video/webm" | "video/ogg" | "video/quicktime";
+    const mimeMap: Record<string, AllowedMime> = { mp4: "video/mp4", webm: "video/webm", ogg: "video/ogg", mov: "video/quicktime" };
+    const mimeType = mimeMap[ext];
+    if (!mimeType) { toast.error("Unsupported format — use MP4, WebM, OGG, or MOV"); return; }
+    setUploadingVideo(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const result = await uploadVideoMutation.mutateAsync({ base64, mimeType, fileName: file.name });
+      setForm(f => ({ ...f, videoUrl: result.url }));
+      toast.success("Video uploaded to platform storage");
+    } catch { /* handled by onError */ } finally { setUploadingVideo(false); }
+  }
 
   function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", thumbnailUrl: "" }); }
 
@@ -4223,14 +4249,43 @@ function WebinarsTab() {
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Type</label>
                 <select style={{ ...inputStyle, appearance: "none" as const }} value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as "upcoming" | "recording" | "exclusive" | "evergreen" }))}>
-                  <option value="exclusive">Upcoming Exclusive</option>
-                  <option value="evergreen">Evergreen</option>
-                  <option value="recording">On-Demand Recording</option>
+                  <option value="exclusive">Upcoming WAVV Exclusive Live Webinars</option>
+                   <option value="evergreen">WAVV On-Demand Series</option>
+                   <option value="recording">WAVV Exclusive On-Demand Webinars</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">{form.type === "recording" ? "Video URL" : "Registration URL"}</label>
-                <input style={inputStyle} value={form.type === "recording" ? form.videoUrl : form.registrationUrl} onChange={e => setForm(f => form.type === "recording" ? { ...f, videoUrl: e.target.value } : { ...f, registrationUrl: e.target.value })} placeholder="https://..." />
+                {(form.type === "recording" || form.type === "evergreen") ? (
+                  <>
+                    <label className="block text-xs text-gray-400 mb-1">Video <span className="text-gray-600">(upload or paste URL)</span></label>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <label
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                          style={{ background: uploadingVideo ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingVideo ? "#9ca3af" : "#fff" }}
+                        >
+                          {uploadingVideo ? (
+                            <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                          ) : (
+                            <><FileDown size={13} /> Upload Video</>
+                          )}
+                          <input type="file" accept=".mp4,.webm,.ogg,.mov" className="hidden" onChange={handleVideoUpload} disabled={uploadingVideo} />
+                        </label>
+                        {form.videoUrl && form.videoUrl.startsWith("/manus-storage") && (
+                          <span className="text-xs text-green-400 flex items-center gap-1">
+                            <CheckCircle2 size={12} /> Hosted on platform
+                          </span>
+                        )}
+                      </div>
+                      <input style={inputStyle} value={form.videoUrl} onChange={e => setForm(f => ({ ...f, videoUrl: e.target.value }))} placeholder="Or paste external URL (YouTube, Vimeo, etc.)" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <label className="block text-xs text-gray-400 mb-1">Registration URL</label>
+                    <input style={inputStyle} value={form.registrationUrl} onChange={e => setForm(f => ({ ...f, registrationUrl: e.target.value }))} placeholder="https://..." />
+                  </>
+                )}
               </div>
             </div>
             {/* Scheduled date — only for exclusive/upcoming */}
@@ -4287,9 +4342,9 @@ function WebinarsTab() {
           <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
         </div>
         {[
-          { key: "evergreen",  label: "Evergreen Webinars",       color: "#67C728" },
-          { key: "exclusive",  label: "Exclusive / Upcoming",      color: "#0074F4" },
-          { key: "recordings", label: "On-Demand Recordings",      color: "#FF9900" },
+          { key: "evergreen",  label: "WAVV On-Demand Series",                    color: "#67C728" },
+          { key: "exclusive",  label: "Upcoming WAVV Exclusive Live Webinars",     color: "#0074F4" },
+          { key: "recordings", label: "WAVV Exclusive On-Demand Webinars",         color: "#FF9900" },
         ].map(({ key, label, color }) => (
           <div key={key} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -4332,6 +4387,28 @@ const WEBINAR_GROUP_META: Record<string, { label: string; color: string; descrip
   upcoming:   { label: "Upcoming (Legacy)",    color: "#6b7280", description: "Legacy upcoming entries" },
 };
 
+// ─── Sortable row wrapper (shared by webinars + guides) ───────────────────────
+function SortableTableRow({ id, children }: { id: number; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <TableRow
+      ref={setNodeRef}
+      style={{
+        borderColor: "#252d3d",
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        background: isDragging ? "rgba(0,116,244,0.08)" : "transparent",
+        cursor: "grab",
+      }}
+      {...attributes}
+      {...listeners}
+    >
+      {children}
+    </TableRow>
+  );
+}
+
 function WebinarGroups({
   webinars,
   onEdit,
@@ -4341,20 +4418,51 @@ function WebinarGroups({
   onEdit: (w: import("../../../drizzle/schema").Webinar) => void;
   onDelete: (id: number) => void;
 }) {
+  const utils = trpc.useUtils();
+  const reorderMutation = trpc.webinars.adminReorder.useMutation({
+    onSuccess: () => utils.webinars.adminList.invalidate(),
+    onError: (e) => toast.error("Reorder failed: " + e.message),
+  });
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  // Local order state per group for optimistic drag feedback
+  const [localOrder, setLocalOrder] = useState<Record<string, number[]>>({});
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
   const groupOrder = ["evergreen", "exclusive", "recording", "upcoming"];
   const grouped = groupOrder.reduce((acc, type) => {
     acc[type] = webinars.filter(w => w.type === type);
     return acc;
   }, {} as Record<string, typeof webinars>);
 
+  const getOrderedGroup = useCallback((type: string, group: typeof webinars) => {
+    const order = localOrder[type];
+    if (!order) return [...group].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    return order.map(id => group.find(w => w.id === id)).filter(Boolean) as typeof webinars;
+  }, [localOrder]);
+
+  function handleDragEnd(type: string, group: typeof webinars, event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const ordered = getOrderedGroup(type, group);
+    const oldIndex = ordered.findIndex(w => w.id === active.id);
+    const newIndex = ordered.findIndex(w => w.id === over.id);
+    const newOrder = arrayMove(ordered, oldIndex, newIndex);
+    setLocalOrder(prev => ({ ...prev, [type]: newOrder.map(w => w.id) }));
+    // Persist: swap sortOrder of the two moved items
+    reorderMutation.mutate({ id1: Number(active.id), id2: Number(over.id) });
+  }
+
   return (
     <div className="space-y-4">
       {groupOrder.map((type) => {
         const group = grouped[type];
-        if (group.length === 0 && type === "upcoming") return null; // hide empty legacy
+        if (group.length === 0 && type === "upcoming") return null;
         const meta = WEBINAR_GROUP_META[type];
         const isCollapsed = collapsed[type];
+        const orderedGroup = getOrderedGroup(type, group);
         return (
           <div key={type} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <button
@@ -4378,34 +4486,40 @@ function WebinarGroups({
                   <p className="text-gray-600 text-xs">No {meta.label.toLowerCase()} webinars yet. Click "Add Webinar" above and set the type.</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
-                      <TableHead className="text-gray-400 text-xs">Title</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Host</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Views</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {group.map((w) => (
-                      <TableRow key={w.id} style={{ borderColor: "#252d3d" }}>
-                        <TableCell className="text-white text-sm font-medium max-w-xs truncate">{w.title}</TableCell>
-                        <TableCell className="text-gray-400 text-xs">{w.host ?? "—"}</TableCell>
-                        <TableCell className="text-gray-400 text-xs">{w.viewCount ?? 0}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {(w.registrationUrl || w.videoUrl) && (
-                              <a href={(w.registrationUrl || w.videoUrl)!} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
-                            )}
-                            <button onClick={() => onEdit(w as Parameters<typeof onEdit>[0])} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
-                            <button onClick={() => onDelete(w.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(type, group, e)}>
+                  <SortableContext items={orderedGroup.map(w => w.id)} strategy={verticalListSortingStrategy}>
+                    <Table>
+                      <TableHeader>
+                        <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
+                          <TableHead className="text-gray-400 text-xs w-6"></TableHead>
+                          <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Host</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Views</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {orderedGroup.map((w) => (
+                          <SortableTableRow key={w.id} id={w.id}>
+                            <TableCell className="text-gray-600 text-xs w-6" style={{ cursor: "grab" }}>⠿</TableCell>
+                            <TableCell className="text-white text-sm font-medium max-w-xs truncate">{w.title}</TableCell>
+                            <TableCell className="text-gray-400 text-xs">{w.host ?? "—"}</TableCell>
+                            <TableCell className="text-gray-400 text-xs">{w.viewCount ?? 0}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2" onPointerDown={e => e.stopPropagation()}>
+                                {(w.registrationUrl || w.videoUrl) && (
+                                  <a href={(w.registrationUrl || w.videoUrl)!} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
+                                )}
+                                <button onClick={() => onEdit(w as Parameters<typeof onEdit>[0])} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+                                <button onClick={() => onDelete(w.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+                              </div>
+                            </TableCell>
+                          </SortableTableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </SortableContext>
+                </DndContext>
               )
             )}
           </div>
@@ -4749,12 +4863,39 @@ function GuideGroups({
   onEdit: (g: import("../../../drizzle/schema").Guide) => void;
   onDelete: (id: number) => void;
 }) {
+  const utils = trpc.useUtils();
+  const reorderMutation = trpc.guides.adminReorder.useMutation({
+    onSuccess: () => utils.guides.adminList.invalidate(),
+    onError: (e) => toast.error("Reorder failed: " + e.message),
+  });
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [localOrder, setLocalOrder] = useState<Record<string, number[]>>({});
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   const groupOrder = ["pdf", "checklist", "playbook", "resource", "other"];
   const grouped = groupOrder.reduce((acc, type) => {
     acc[type] = guides.filter(g => (g.fileType ?? "other") === type);
     return acc;
   }, {} as Record<string, typeof guides>);
+
+  const getOrderedGroup = useCallback((type: string, group: typeof guides) => {
+    const order = localOrder[type];
+    if (!order) return [...group].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    return order.map(id => group.find(g => g.id === id)).filter(Boolean) as typeof guides;
+  }, [localOrder]);
+
+  function handleDragEnd(type: string, group: typeof guides, event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const ordered = getOrderedGroup(type, group);
+    const oldIndex = ordered.findIndex(g => g.id === active.id);
+    const newIndex = ordered.findIndex(g => g.id === over.id);
+    const newOrder = arrayMove(ordered, oldIndex, newIndex);
+    setLocalOrder(prev => ({ ...prev, [type]: newOrder.map(g => g.id) }));
+    reorderMutation.mutate({ id1: Number(active.id), id2: Number(over.id) });
+  }
 
   return (
     <div className="space-y-4">
@@ -4763,6 +4904,7 @@ function GuideGroups({
         if (group.length === 0 && type === "other") return null;
         const meta = GUIDE_GROUP_META[type];
         const isCollapsed = collapsed[type];
+        const orderedGroup = getOrderedGroup(type, group);
         return (
           <div key={type} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <button
@@ -4786,40 +4928,46 @@ function GuideGroups({
                   <p className="text-gray-600 text-xs">No {meta.label.toLowerCase()} guides yet. Click "Add Guide" above and set the type.</p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
-                      <TableHead className="text-gray-400 text-xs">Title</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Category</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Status</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {group.map((g) => (
-                      <TableRow key={g.id} style={{ borderColor: "#252d3d" }}>
-                        <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
-                        <TableCell className="text-gray-400 text-xs">{g.category ?? "—"}</TableCell>
-                        <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
-                        <TableCell>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: g.published ? "rgba(103,199,40,0.15)" : "rgba(239,68,68,0.15)", color: g.published ? "#67C728" : "#f87171" }}>
-                            {g.published ? "Published" : "Hidden"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {g.fileUrl && (
-                              <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
-                            )}
-                            <button onClick={() => onEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
-                            <button onClick={() => onDelete(g.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(type, group, e)}>
+                  <SortableContext items={orderedGroup.map(g => g.id)} strategy={verticalListSortingStrategy}>
+                    <Table>
+                      <TableHeader>
+                        <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
+                          <TableHead className="text-gray-400 text-xs w-6"></TableHead>
+                          <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Category</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Status</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {orderedGroup.map((g) => (
+                          <SortableTableRow key={g.id} id={g.id}>
+                            <TableCell className="text-gray-600 text-xs w-6" style={{ cursor: "grab" }}>⠿</TableCell>
+                            <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
+                            <TableCell className="text-gray-400 text-xs">{g.category ?? "—"}</TableCell>
+                            <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
+                            <TableCell>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: g.published ? "rgba(103,199,40,0.15)" : "rgba(239,68,68,0.15)", color: g.published ? "#67C728" : "#f87171" }}>
+                                {g.published ? "Published" : "Hidden"}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2" onPointerDown={e => e.stopPropagation()}>
+                                {g.fileUrl && (
+                                  <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
+                                )}
+                                <button onClick={() => onEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+                                <button onClick={() => onDelete(g.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+                              </div>
+                            </TableCell>
+                          </SortableTableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </SortableContext>
+                </DndContext>
               )
             )}
           </div>

@@ -170,21 +170,34 @@ function WebinarCard({
         )}
 
         <div className="mt-auto">
-          {variant === "recording" ? (
-            webinar.videoUrl ? (
+          {(variant === "recording" || variant === "evergreen") && webinar.videoUrl ? (
+            // Platform-hosted video: render inline native player; external URL: open in new tab
+            webinar.videoUrl.startsWith("/manus-storage") ? (
+              <div className="mt-2">
+                <video
+                  controls
+                  className="w-full rounded-lg"
+                  style={{ maxHeight: "180px", background: "#000" }}
+                  onPlay={() => watchMutation.mutate({ webinarId: webinar.id })}
+                >
+                  <source src={webinar.videoUrl} />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            ) : (
               <a
                 href={webinar.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => watchMutation.mutate({ webinarId: webinar.id })}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}
+                style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
               >
-                <PlayCircle size={12} /> Watch Recording
+                <PlayCircle size={12} /> Watch Now
               </a>
-            ) : (
-              <span className="text-xs text-gray-600">Recording coming soon</span>
             )
+          ) : variant === "recording" ? (
+            <span className="text-xs text-gray-600">Recording coming soon</span>
           ) : webinar.registrationUrl ? (
             <a
               href={webinar.registrationUrl}
@@ -207,24 +220,24 @@ function WebinarCard({
 // ─── Main page ────────────────────────────────────────────────────────────────
 type WebinarSection = "exclusive" | "evergreen" | "recording";
 
-// Tab order: Evergreen → Exclusive → On-Demand Recordings
+// Tab order: On-Demand Series → Upcoming Exclusive Live → On-Demand Webinars
 const SECTION_ORDER: WebinarSection[] = ["evergreen", "exclusive", "recording"];
 
 const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactNode; accent: string; description: string }> = {
   evergreen: {
-    label: "Evergreen Webinars",
+    label: "WAVV On-Demand Series",
     icon: <RefreshCw size={14} />,
     accent: "#0074F4",
     description: "Always-on sessions running every 30 minutes — join anytime",
   },
   exclusive: {
-    label: "Upcoming Exclusive Webinars",
+    label: "Upcoming WAVV Exclusive Live Webinars",
     icon: <Star size={14} />,
     accent: "#D4AF37",
     description: "Single-topic, focused live sessions — limited availability",
   },
   recording: {
-    label: "On-Demand Recordings",
+    label: "WAVV Exclusive On-Demand Webinars",
     icon: <PlayCircle size={14} />,
     accent: "#00A9E2",
     description: "Watch past webinars and sessions at your own pace",

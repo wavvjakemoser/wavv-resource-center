@@ -981,3 +981,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove floating Ask WAVV bubble and top-bar button entirely from admin pages (/admin)
 - [x] Fix WAVV Knowledge tab layout/formatting so label fits correctly in tab bar
 - [x] Replace WAVV Knowledge blank space with: search bar + topic shortcut cards (Onboarding, Call Boards, Connection Rates, CRM Setup, Billing)
+
+## Team Access, Webinars, Guides, On-Demand Hosting
+
+- [x] Team Access: remove all roles except Super Admin and Admin from role selector
+- [x] Team Access: hide demote button on Admin-role users (only show on Super Admins)
+- [x] Rename webinar tabs: "WAVV On-Demand Series", "Upcoming WAVV Exclusive Live Webinars", "WAVV Exclusive On-Demand Webinars"
+- [x] Brand the webinar screenshot/tile cards with WAVV styling
+- [x] Admin Webinars: drag-to-reorder videos within each tab
+- [x] Admin Guides: drag-to-reorder content items as Super Admin sees fit
+- [x] On-Demand Series: native video hosting on platform (upload via admin, S3 storage, video player on customer side)
+- [ ] On-Demand Series: analytics tracking (view count per video)
