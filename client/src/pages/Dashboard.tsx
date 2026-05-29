@@ -560,38 +560,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* ── Footer ── */}
-        <footer
-          className="pt-6 mt-4"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
-        >
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-              © {new Date().getFullYear()} WAVV Communications. All rights reserved.
-            </p>
-            <div className="flex items-center gap-5">
-              <a
-                href="https://www.wavv.com/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs transition-colors hover:text-white"
-                style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
-              >
-                Privacy Policy
-              </a>
-              <a
-                href="https://www.wavv.com/terms-of-service"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs transition-colors hover:text-white"
-                style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
-              >
-                Terms &amp; Conditions
-              </a>
 
-            </div>
-          </div>
-        </footer>
 
       </div>
     </PortalLayout>
