@@ -973,3 +973,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin panel: regular admins default to WAVV Knowledge tab; all other tabs grayed out and non-clickable
 - [x] Admin panel: super_admin sees all tabs fully accessible
 - [x] Update initialTab() to default to "knowledge" for admin role, "analytics" for super_admin
+
+## Admin UX + Ask WAVV Cleanup
+
+- [x] Admin invite accepted → redirect to /admin instead of home page
+- [x] Remove top-bar "Ask WAVV" button (keep only floating bubble on customer pages)
+- [x] Remove floating Ask WAVV bubble and top-bar button entirely from admin pages (/admin)
+- [x] Fix WAVV Knowledge tab layout/formatting so label fits correctly in tab bar
+- [x] Replace WAVV Knowledge blank space with: search bar + topic shortcut cards (Onboarding, Call Boards, Connection Rates, CRM Setup, Billing)

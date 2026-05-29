@@ -258,12 +258,21 @@ function WavvKnowledgeTab() {
     }
   };
 
+  const TOPIC_SHORTCUTS = [
+    { label: "Onboarding",        icon: "🚀", query: "How do I get started with WAVV onboarding?" },
+    { label: "Call Boards",       icon: "📋", query: "How do Call Boards work and how do I set them up?" },
+    { label: "Connection Rates",  icon: "📈", query: "How can I improve connection rates?" },
+    { label: "CRM Setup",         icon: "🔗", query: "How do I integrate WAVV with my CRM?" },
+    { label: "Billing & Wallet",  icon: "💳", query: "How does WAVV Wallet and billing work?" },
+    { label: "Spam Protection",   icon: "🛡️", query: "How do I protect my numbers from spam flagging?" },
+  ];
+
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: "#141414", border: "1px solid #2a2a2a", height: "600px", display: "flex", flexDirection: "column" }}>
+    <div className="rounded-2xl overflow-hidden" style={{ background: "#141414", border: "1px solid #2a2a2a", minHeight: "600px", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4 flex-shrink-0" style={{ background: "linear-gradient(135deg, #1a1f2e, #1d2230)", borderBottom: "1px solid #2a2a2a" }}>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}>
-          <Sparkles size={17} className="text-white" />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}>
+          <Sparkles size={15} className="text-white" />
         </div>
         <div>
           <p className="text-white font-semibold text-sm">WAVV Knowledge</p>
@@ -271,21 +280,52 @@ function WavvKnowledgeTab() {
         </div>
       </div>
 
+      {/* Search bar — always visible at top */}
+      <div className="px-5 pt-5 pb-3 flex-shrink-0">
+        <div className="flex items-center gap-2 rounded-xl px-4 py-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+          <Search size={16} style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }} />
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
+            placeholder="Search the WAVV knowledge base..."
+            className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
+            disabled={isLoading}
+          />
+          {input.trim() && (
+            <button onClick={() => sendMessage(input)} disabled={isLoading}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all disabled:opacity-40"
+              style={{ background: "#0074F4", color: "white" }}>
+              <Send size={11} />
+              Ask
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-4">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.1)", border: "1px solid rgba(0,116,244,0.2)" }}>
-              <Sparkles size={24} style={{ color: "#0074F4" }} />
+          <div className="space-y-4">
+            <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>Quick topics</p>
+            <div className="grid grid-cols-2 gap-2">
+              {TOPIC_SHORTCUTS.map((t) => (
+                <button
+                  key={t.label}
+                  onClick={() => sendMessage(t.query)}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-xs font-medium transition-all"
+                  style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#9ca3af" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0074F4"; e.currentTarget.style.color = "#60a5fa"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2a2a2a"; e.currentTarget.style.color = "#9ca3af"; }}
+                >
+                  <span style={{ fontSize: "16px" }}>{t.icon}</span>
+                  {t.label}
+                </button>
+              ))}
             </div>
-            <div>
-              <p className="text-white font-semibold text-sm mb-1">WAVV Knowledge</p>
-              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.4)", maxWidth: "320px" }}>
-                Your internal knowledge base is being set up. Once content is curated, this will be your go-to for finding answers without digging through Slack or Google Drive.
-              </p>
-            </div>
-            <div className="px-4 py-2 rounded-lg text-xs" style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.15)", color: "rgba(255,255,255,0.5)" }}>
-              Content curation coming soon
+            <div className="mt-2 px-3 py-2 rounded-lg text-xs text-center" style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.12)", color: "rgba(255,255,255,0.35)" }}>
+              Content curation in progress — answers will improve as the knowledge base is built out
             </div>
           </div>
         )}
@@ -318,26 +358,31 @@ function WavvKnowledgeTab() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 flex-shrink-0" style={{ borderTop: "1px solid #2a2a2a" }}>
-        <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}>
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-            placeholder="Search the WAVV knowledge base..."
-            className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
-            disabled={isLoading}
-          />
-          <button onClick={() => sendMessage(input)} disabled={!input.trim() || isLoading}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-40"
-            style={{ background: "#0074F4" }}>
-            <Send size={13} className="text-white" />
-          </button>
+      {/* Follow-up input — shown after conversation starts */}
+      {messages.length > 0 && (
+        <div className="px-5 py-3 flex-shrink-0" style={{ borderTop: "1px solid #2a2a2a" }}>
+          <div className="flex items-center gap-2 rounded-xl px-4 py-2.5" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
+            <Search size={14} style={{ color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
+              placeholder="Ask a follow-up..."
+              className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
+              disabled={isLoading}
+              autoFocus
+            />
+            {input.trim() && (
+              <button onClick={() => sendMessage(input)} disabled={isLoading}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all disabled:opacity-40"
+                style={{ background: "#0074F4", color: "white" }}>
+                <Send size={11} />
+                Ask
+              </button>
+            )}
+          </div>
         </div>
-        <p className="text-xs text-center mt-2" style={{ color: "rgba(255,255,255,0.2)" }}>WAVV Knowledge · Internal use only</p>
-      </div>
+      )}
     </div>
   );
 }

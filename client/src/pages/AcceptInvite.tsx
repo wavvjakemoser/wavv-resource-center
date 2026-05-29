@@ -29,10 +29,12 @@ export default function AcceptInvite() {
   }, [invite?.name]);
 
   const acceptMutation = trpc.auth.acceptInvite.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       setClaimed(true);
-      // Redirect to dashboard after 2 seconds
-      setTimeout(() => navigate("/dashboard"), 2000);
+      // Admins go to /admin, everyone else to /dashboard
+      const role = data?.user?.role;
+      const dest = (role === "admin" || role === "super_admin") ? "/admin" : "/dashboard";
+      setTimeout(() => navigate(dest), 2000);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -111,7 +113,7 @@ export default function AcceptInvite() {
             <div className="text-center space-y-3">
               <CheckCircle2 size={48} className="mx-auto text-green-400" />
               <h1 className="text-xl font-bold text-white">Account Activated!</h1>
-              <p className="text-sm text-gray-400">Welcome to WAVV Success Center. Redirecting you to the dashboard…</p>
+              <p className="text-sm text-gray-400">Welcome to WAVV Success Center. Redirecting you now…</p>
             </div>
           )}
 

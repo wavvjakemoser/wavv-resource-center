@@ -89,6 +89,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   }, [title]);
 
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
+  const isAdminPage = location.startsWith("/admin");
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
@@ -189,20 +190,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <AISearchBar />
             </div>
 
-            {/* Ask WAVV button (top bar) */}
-            <button
-              onClick={() => setAiOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex-shrink-0"
-              style={{
-                background: "linear-gradient(135deg, #0074F4, #00A9E2)",
-                color: "white",
-                whiteSpace: "nowrap",
-              }}
-              title="Open Ask WAVV"
-            >
-              <Sparkles size={14} />
-              <span className="hidden sm:inline">Ask WAVV</span>
-            </button>
+
           </header>
 
           {/* Page content */}
@@ -212,8 +200,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
         </div>
       </div>
 
-      {/* Ask WAVV floating bubble (bottom-right) */}
-      {!aiOpen && (
+      {/* Ask WAVV floating bubble — customer pages only */}
+      {!isAdminPage && !aiOpen && (
         <button
           onClick={() => setAiOpen(true)}
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
@@ -232,8 +220,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
         </button>
       )}
 
-      {/* Ask WAVV Chat Panel */}
-      <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />
+      {/* Ask WAVV Chat Panel — customer pages only */}
+      {!isAdminPage && <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />}
 
     </div>
   );
