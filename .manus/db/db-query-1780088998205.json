@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `invite_tokens` MODIFY COLUMN `role` enum('user','admin','super_admin','partner_admin','partner') NOT NULL DEFAULT 'user';\nALTER TABLE `users` MODIFY COLUMN `role` enum('user','admin','super_admin','partner_admin','partner') NOT NULL DEFAULT 'user';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute ALTER TABLE `invite_tokens` MODIFY COLUMN `role` enum('user','admin','super_admin','partner_admin','partner') NOT NULL DEFAULT 'user';\nALTER TABLE `users` MODIFY COLUMN `role` enum('user','admin','super_admin','partner_admin','partner') NOT NULL DEFAULT 'user';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 761
+}

@@ -86,7 +86,7 @@ export async function getAllUsers() {
   return db.select().from(users).orderBy(desc(users.createdAt));
 }
 
-export async function updateUserRole(userId: number, role: "user" | "admin" | "super_admin") {
+export async function updateUserRole(userId: number, role: "user" | "admin" | "super_admin" | "partner_admin" | "partner") {
   const db = await getDb();
   if (!db) return;
   await db.update(users).set({ role }).where(eq(users.id, userId));
@@ -1417,7 +1417,7 @@ export async function removeStrikeFromUser(userId: number) {
 export async function createManualUser(data: {
   name: string;
   email: string;
-  role: "user" | "admin" | "super_admin";
+  role: "user" | "admin" | "super_admin" | "partner_admin" | "partner";
 }) {
   const db = await getDb();
   if (!db) return null;
@@ -1441,7 +1441,7 @@ export async function createManualUser(data: {
 export async function generateInvite(data: {
   email: string;
   name?: string;
-  role: "user" | "admin" | "super_admin";
+  role: "user" | "admin" | "super_admin" | "partner_admin" | "partner";
   createdBy: number;
 }) {
   const db = await getDb();

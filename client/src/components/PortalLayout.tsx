@@ -196,17 +196,48 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-y-auto">
-            {children}
+          <main className="flex-1 overflow-y-auto flex flex-col">
+            <div className="flex-1">{children}</div>
+            {/* Footer */}
+            <footer className="mt-auto px-6 py-8 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+                &copy; 2026 WAVV. All rights reserved.
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <a
+                  href="https://www.wavv.com/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs transition-colors duration-150"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.35)"; }}
+                >
+                  Privacy Policy
+                </a>
+                <span className="text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>&bull;</span>
+                <a
+                  href="https://www.wavv.com/terms-of-service"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs transition-colors duration-150"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.35)"; }}
+                >
+                  Terms &amp; Conditions
+                </a>
+              </div>
+            </footer>
           </main>
         </div>
       </div>
 
-      {/* Ask WAVV floating bubble — customer pages only, bottom-center */}
+      {/* Ask WAVV floating bubble — customer pages only, bottom-right */}
       {!isAdminPage && !aiOpen && (
         <button
           onClick={() => setAiOpen(true)}
-          className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-5 py-2.5 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-2.5 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
           style={{
             background: "linear-gradient(135deg, #0074F4, #00A9E2)",
             color: "white",

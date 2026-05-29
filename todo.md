@@ -998,3 +998,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add WAVV Partners nav tile to home page below WAVV Support (Users icon, teal/cyan color)
 - [x] Add WAVV Partners link to sidebar navigation in PortalLayout
 - [x] Register /partners route in App.tsx
+
+## Partners Page + Role + Analytics (Session N)
+- [ ] Partners page: CTA buttons → "Apply Now" (remove "at wavv.com" text)
+- [ ] Partners page: Step 02 → "Complete a Course" (remove approval timeline/portal language)
+- [ ] Partners page: hero → match dashboard hero style (gradient background, badge pill, gradient headline)
+- [ ] Ask WAVV bubble → move back to bottom-right corner
+- [ ] PortalLayout footer → stacked vertically, centered: "© 2026 WAVV, All rights reserved." then Privacy Policy link then Terms & Conditions link
+- [ ] Add partner_admin role to schema (can invite/manage partners)
+- [ ] Add partner role to schema (WAVV Partners access only)
+- [ ] Team Access: partner_admin can invite partner-role users
+- [ ] Partner Analytics tab in Admin: active partners, course completion rate, Apply Now CTA clicks, partner logins (7d/30d)

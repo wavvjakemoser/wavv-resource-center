@@ -176,6 +176,13 @@
       "when": 1779989338010,
       "tag": "0023_low_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1780088985520,
+      "tag": "0024_magenta_boomer",
+      "breakpoints": true
     }
   ]
 }

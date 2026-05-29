@@ -35,8 +35,8 @@ const HOW_IT_WORKS = [
   {
     step: "02",
     color: "#10b981",
-    title: "Get Approved",
-    body: "Our partnerships team reviews your application and reaches out within 3–5 business days. Once approved, you'll get access to your partner portal, tracking links, and onboarding materials.",
+    title: "Complete a Course",
+    body: "Once approved, you'll get access to the WAVV Partners portal. Complete the required onboarding course to unlock your partner resources, tracking link, and co-marketing materials.",
   },
   {
     step: "03",
@@ -102,45 +102,89 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 export default function Partners() {
   return (
     <PortalLayout title="WAVV Partners">
-      <div className="px-4 lg:px-8 py-8 space-y-16 max-w-4xl">
+      <div className="px-4 lg:px-8 py-8 space-y-16">
 
         {/* ── Hero ── */}
-        <div className="space-y-5">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase"
-            style={{ background: "rgba(0,169,226,0.12)", border: "1px solid rgba(0,169,226,0.25)", color: "#00A9E2" }}>
-            <Users size={13} />
-            WAVV Partner Program
+        <div
+          className="relative overflow-hidden rounded-2xl"
+          style={{
+            background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,169,226,0.28) 0%, rgba(0,116,244,0.14) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
+            border: "1px solid rgba(0,169,226,0.2)",
+            minHeight: "300px",
+          }}
+        >
+          {/* Subtle grid */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.025]"
+            style={{
+              backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+              backgroundSize: "48px 48px",
+            }}
+          />
+          {/* Glow orbs */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(0,169,226,0.16), transparent 65%)", transform: "translate(25%, -30%)" }} />
+          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
+
+          <div className="relative z-10 px-6 lg:px-16 py-14 text-center">
+            {/* Eyebrow */}
+            <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
+              style={{ background: "rgba(0,169,226,0.12)", border: "1px solid rgba(0,169,226,0.25)" }}>
+              <Users size={12} style={{ color: "#00A9E2" }} />
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#00A9E2" }}>
+                WAVV Partner Program
+              </span>
+            </div>
+
+            {/* Headline */}
+            <h1
+              className="font-extrabold tracking-tight leading-[1.05] mb-4"
+              style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)" }}
+            >
+              <span style={{
+                background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                Grow Together with WAVV
+              </span>
+            </h1>
+
+            {/* Accent line */}
+            <div className="flex justify-center mb-6">
+              <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
+            </div>
+
+            {/* Subline */}
+            <p
+              className="mx-auto mb-3 leading-relaxed font-medium"
+              style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(0.95rem, 2vw, 1.15rem)", maxWidth: "600px" }}
+            >
+              Refer customers to WAVV and earn recurring revenue for every active account you bring in.
+            </p>
+            <p
+              className="mx-auto mb-8 leading-relaxed"
+              style={{ color: "rgba(255,255,255,0.45)", fontSize: "clamp(0.82rem, 1.4vw, 0.95rem)", maxWidth: "540px" }}
+            >
+              Built for consultants, coaches, and CRM professionals who want to turn their network into a revenue stream — with real support behind them.
+            </p>
+
+            {/* CTA */}
+            <a
+              href="https://www.wavv.com/partner-program"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+              style={{ background: "linear-gradient(135deg, #0074F4, #0056b3)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+            >
+              Apply Now
+              <ArrowRight size={15} />
+            </a>
           </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white">
-            Grow Together with{" "}
-            <span style={{ background: "linear-gradient(90deg, #0074F4, #00A9E2, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              WAVV
-            </span>
-          </h1>
-
-          {/* Sub */}
-          <p className="text-base leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.6)" }}>
-            Refer customers to WAVV and earn recurring revenue for every active account you bring in.
-            The WAVV Partner Program is built for consultants, coaches, and CRM professionals who want
-            to turn their network into a revenue stream — with real support behind them.
-          </p>
-
-          {/* CTA */}
-          <a
-            href="https://www.wavv.com/partner-program"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-            style={{ background: "linear-gradient(135deg, #0074F4, #0056b3)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-          >
-            Apply to Become a Partner
-            <ArrowRight size={15} />
-          </a>
         </div>
 
         {/* ── Why Partner with WAVV ── */}
@@ -285,7 +329,7 @@ export default function Partners() {
             onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
-            Apply Now at wavv.com
+            Apply Now
             <ArrowRight size={15} />
           </a>
         </div>

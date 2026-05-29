@@ -109,7 +109,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "knowledge" | "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests";
+type AdminTab = "knowledge" | "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -183,6 +183,7 @@ export default function Admin() {
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,   superAdminOnly: true },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,     superAdminOnly: true },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />,  superAdminOnly: true },
+    { id: "partner_analytics", label: "Partners",         icon: <Users size={13} />,           superAdminOnly: true },
   ];
 
   return (
@@ -240,6 +241,7 @@ export default function Admin() {
         {activeTab === "playground" && <PlaygroundTab />}
         {activeTab === "support" && <SupportTab />}
         {activeTab === "content_requests" && <ContentRequestsTab />}
+        {activeTab === "partner_analytics" && isSuperAdmin && <PartnerAnalyticsTab />}
       </div>
     </PortalLayout>
   );
@@ -1222,7 +1224,7 @@ function UsersTab() {
   });
 
   const [addUserOpen, setAddUserOpen] = useState(false);
-  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "user" as "user" | "admin" | "super_admin" });
+  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "user" as "user" | "admin" | "super_admin" | "partner_admin" | "partner" });
   const [inviteLinkModal, setInviteLinkModal] = useState<{ open: boolean; url: string; name: string }>({
     open: false, url: "", name: "",
   });
@@ -1613,13 +1615,15 @@ function UsersTab() {
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Role</label>
               <select
                 value={addUserForm.role}
-                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "user" | "admin" | "super_admin" }))}
+                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "user" | "admin" | "super_admin" | "partner_admin" | "partner" }))}
                 className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                 style={{ background: "#111", border: "1px solid #2a2a2a" }}
               >
                 <option value="user">Standard User</option>
                 <option value="admin">Admin</option>
                 <option value="super_admin">Super Admin</option>
+                <option value="partner_admin">Partner Admin</option>
+                <option value="partner">WAVV Partner</option>
               </select>
             </div>
           </div>
@@ -5801,6 +5805,193 @@ function NotificationsTab() {
             ))}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Partner Analytics Tab ────────────────────────────────────────────────────
+function PartnerAnalyticsTab() {
+  const { data: allUsers = [], isLoading } = trpc.admin.listUsers.useQuery();
+
+  const partnerAdmins = allUsers.filter((u: any) => u.role === "partner_admin");
+  const partners = allUsers.filter((u: any) => u.role === "partner");
+  const totalPartnerAccounts = partnerAdmins.length + partners.length;
+
+  const recentPartners = [...partners, ...partnerAdmins]
+    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10);
+
+  const STAT_CARDS = [
+    {
+      label: "Total Partner Accounts",
+      value: totalPartnerAccounts,
+      icon: <Users size={18} />,
+      color: "#0074F4",
+      description: "Active partner + partner admin accounts",
+    },
+    {
+      label: "WAVV Partners",
+      value: partners.length,
+      icon: <UserCircle size={18} />,
+      color: "#22d3ee",
+      description: "Referral/affiliate partners",
+    },
+    {
+      label: "Partner Admins",
+      value: partnerAdmins.length,
+      icon: <Shield size={18} />,
+      color: "#a78bfa",
+      description: "Internal partner managers",
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-white flex items-center gap-2">
+            <Users size={16} style={{ color: "#0074F4" }} />
+            Partner Analytics
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">Track partner accounts, engagement, and program health</p>
+        </div>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {STAT_CARDS.map((card) => (
+          <div
+            key={card.label}
+            className="rounded-xl p-5"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-medium text-gray-400">{card.label}</span>
+              <span style={{ color: card.color }}>{card.icon}</span>
+            </div>
+            <div className="text-3xl font-bold text-white mb-1">
+              {isLoading ? "—" : card.value}
+            </div>
+            <p className="text-xs text-gray-600">{card.description}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Funnel note */}
+      <div
+        className="rounded-xl p-5"
+        style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.15)" }}
+      >
+        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+          <TrendingUp size={14} style={{ color: "#0074F4" }} />
+          Partner Funnel
+        </h3>
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full" style={{ background: "#0074F4" }} />
+            <span className="text-gray-400">Applied</span>
+            <span className="text-white font-semibold">→ wavv.com/partner-program</span>
+          </div>
+          <div className="text-gray-600">•</div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full" style={{ background: "#22d3ee" }} />
+            <span className="text-gray-400">Approved &amp; in system</span>
+            <span className="text-white font-semibold">{totalPartnerAccounts}</span>
+          </div>
+        </div>
+        <p className="text-xs text-gray-600 mt-3">
+          Course completion tracking and referral link analytics will be added once the partner onboarding course is live.
+        </p>
+      </div>
+
+      {/* Recent partner accounts */}
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ background: "#141414", border: "1px solid #2a2a2a" }}
+      >
+        <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid #2a2a2a" }}>
+          <h3 className="text-sm font-semibold text-white">Recent Partner Accounts</h3>
+          <span className="text-xs text-gray-500">{totalPartnerAccounts} total</span>
+        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
+          </div>
+        ) : recentPartners.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center px-6">
+            <Users size={32} className="mb-3" style={{ color: "#374151" }} />
+            <p className="text-sm font-medium text-gray-400">No partner accounts yet</p>
+            <p className="text-xs text-gray-600 mt-1">
+              Invite partners via Team Access using the "WAVV Partner" or "Partner Admin" role.
+            </p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow style={{ borderColor: "#2a2a2a" }}>
+                <TableHead className="text-gray-500 text-xs">Name</TableHead>
+                <TableHead className="text-gray-500 text-xs">Email</TableHead>
+                <TableHead className="text-gray-500 text-xs">Role</TableHead>
+                <TableHead className="text-gray-500 text-xs">Joined</TableHead>
+                <TableHead className="text-gray-500 text-xs">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentPartners.map((u: any) => (
+                <TableRow key={u.id} style={{ borderColor: "#1f1f1f" }}>
+                  <TableCell className="text-white text-xs font-medium">{u.name ?? "—"}</TableCell>
+                  <TableCell className="text-gray-400 text-xs">{u.email ?? "—"}</TableCell>
+                  <TableCell>
+                    <Badge
+                      className="text-[10px] px-2 py-0.5"
+                      style={{
+                        background: u.role === "partner_admin" ? "rgba(167,139,250,0.15)" : "rgba(0,116,244,0.15)",
+                        color: u.role === "partner_admin" ? "#a78bfa" : "#60a5fa",
+                        border: "none",
+                      }}
+                    >
+                      {u.role === "partner_admin" ? "Partner Admin" : "WAVV Partner"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-gray-500 text-xs">
+                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className="text-[10px] px-2 py-0.5"
+                      style={{
+                        background: u.isActive ? "rgba(74,222,128,0.12)" : "rgba(239,68,68,0.12)",
+                        color: u.isActive ? "#4ade80" : "#f87171",
+                        border: "none",
+                      }}
+                    >
+                      {u.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
+
+      {/* Placeholder for future metrics */}
+      <div
+        className="rounded-xl p-6 text-center"
+        style={{ background: "#141414", border: "1px solid #2a2a2a" }}
+      >
+        <div
+          className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
+          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}
+        >
+          <AlertTriangle size={20} style={{ color: "#f59e0b" }} />
+        </div>
+        <h3 className="text-sm font-semibold text-white mb-1">Additional Metrics Coming Soon</h3>
+        <p className="text-xs text-gray-500 max-w-sm mx-auto">
+          Referral link click tracking, course completion rates, and time-to-activation will be available once the partner onboarding course is published.
+        </p>
       </div>
     </div>
   );
