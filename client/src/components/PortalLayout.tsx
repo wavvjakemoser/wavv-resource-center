@@ -120,11 +120,18 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             className="flex items-center gap-2 px-4 py-4"
             style={{ borderBottom: "1px solid #1e2030", minHeight: "60px" }}
           >
-            <img
-              src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
-              alt="WAVV"
-              style={{ height: "22px", width: "auto", flexShrink: 0 }}
-            />
+            <a
+              href="https://www.wavv.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "flex", alignItems: "center", flexShrink: 0 }}
+            >
+              <img
+                src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
+                alt="WAVV"
+                style={{ height: "22px", width: "auto" }}
+              />
+            </a>
             <button
               className="ml-auto lg:hidden text-gray-400 hover:text-white flex-shrink-0"
               onClick={() => setSidebarOpen(false)}

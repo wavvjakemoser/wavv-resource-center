@@ -18,9 +18,9 @@ import {
   CheckCircle2,
   X,
   Bell,
-  Zap,
-  TrendingUp,
-  Shield,
+  PhoneCall,
+  BarChart3,
+  Users,
 } from "lucide-react";
 import { Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
@@ -69,7 +69,7 @@ const START_HERE_CARDS = [
     label: "WAVV Playground",
     icon: FlaskConical,
     color: "#a855f7",
-    description: "Practice in a live WAVV environment without affecting real data. Test workflows, explore features, and build confidence before going live.",
+    description: "Coming soon — a sandbox environment where you can explore WAVV features, test workflows, and build confidence without touching live data. Join the waitlist to be first in.",
     cta: "Get Notified",
     ctaIcon: Bell,
     badge: "Coming Soon",
@@ -87,12 +87,26 @@ const START_HERE_CARDS = [
   },
 ];
 
-// ─── Hero benefit pills ───────────────────────────────────────────────────────
-const BENEFITS = [
-  { icon: Zap, label: "Onboard faster" },
-  { icon: TrendingUp, label: "Connect more" },
-  { icon: Shield, label: "Stay spam-free" },
-  { icon: BookOpen, label: "Master every feature" },
+// ─── What is WAVV pillars ─────────────────────────────────────────────────────
+const WAVV_PILLARS = [
+  {
+    icon: PhoneCall,
+    color: "#0074F4",
+    title: "Power Dialing, Built In",
+    body: "WAVV is a native multi-line power dialer that lives inside your CRM. No tab-switching, no copy-pasting — just faster, smarter outreach from the tools you already use.",
+  },
+  {
+    icon: BarChart3,
+    color: "#10b981",
+    title: "More Connections, Less Wasted Time",
+    body: "Dial multiple lines simultaneously, skip voicemails automatically, and let WAVV's call boards keep your team focused on the contacts most likely to answer.",
+  },
+  {
+    icon: Users,
+    color: "#67C728",
+    title: "Built for Sales & CS Teams",
+    body: "Whether you're onboarding new reps or running a high-volume outreach campaign, WAVV gives your team the speed and visibility to hit their numbers every day.",
+  },
 ];
 
 // ─── Playground Interest Modal ────────────────────────────────────────────────
@@ -293,27 +307,55 @@ export default function Dashboard() {
               Whether you're just getting started or looking to sharpen your edge, the WAVV Success Center gives you the training, tools, and resources to dial smarter, connect more, and close faster.
             </p>
 
-            {/* Benefit pills */}
-            <div className="flex flex-wrap justify-center gap-3">
-              {BENEFITS.map(({ icon: BIcon, label }) => (
-                <div
-                  key={label}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    color: "rgba(255,255,255,0.65)",
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                  }}
-                >
-                  <BIcon size={12} style={{ color: "#0074F4" }} />
-                  {label}
-                </div>
-              ))}
-            </div>
+        
           </div>
         </div>
+
+        {/* ── What is WAVV ── */}
+        <section>
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
+            <h2 className="text-sm font-bold text-white tracking-wide">What is WAVV?</h2>
+          </div>
+          <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.45)", maxWidth: "680px" }}>
+            WAVV is a power dialer built natively inside your CRM — designed to help sales and customer success teams dial more contacts, connect more often, and close more deals without ever leaving their workflow.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {WAVV_PILLARS.map((p) => {
+              const PIcon = p.icon;
+              return (
+                <div
+                  key={p.title}
+                  className="rounded-2xl p-5"
+                  style={{
+                    background: `linear-gradient(135deg, ${p.color}0d 0%, #0c1018 70%)`,
+                    border: `1px solid ${p.color}22`,
+                  }}
+                >
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: `${p.color}18`, border: `1px solid ${p.color}30` }}
+                  >
+                    <PIcon size={18} style={{ color: p.color }} />
+                  </div>
+                  <p className="text-white font-bold text-sm mb-2">{p.title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{p.body}</p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-5 flex items-center gap-2">
+            <a
+              href="https://www.wavv.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80"
+              style={{ color: "#0074F4", textDecoration: "none" }}
+            >
+              Learn more at wavv.com <ArrowRight size={12} />
+            </a>
+          </div>
+        </section>
 
         {/* ── Exclusive Live Webinars (conditional) ── */}
         {exclusive.length > 0 && (
@@ -542,13 +584,7 @@ export default function Dashboard() {
               >
                 Terms &amp; Conditions
               </a>
-              <a
-                href="mailto:support@wavv.com"
-                className="text-xs transition-colors hover:text-white"
-                style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
-              >
-                support@wavv.com
-              </a>
+
             </div>
           </div>
         </footer>
