@@ -312,57 +312,45 @@ export default function Dashboard() {
         </div>
 
         {/* ── What is WAVV ── */}
-        <section
-          className="rounded-2xl overflow-hidden"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
-        >
-          {/* Header row */}
-          <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-1 h-4 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
-                <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>What is WAVV?</span>
-              </div>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)", maxWidth: "560px" }}>
-                A native multi-line power dialer built inside your CRM — dial smarter, connect more, and close faster without ever leaving your workflow.
-              </p>
+        <section>
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
+              <h2 className="text-sm font-bold text-white tracking-wide">What is WAVV?</h2>
             </div>
             <a
               href="https://www.wavv.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-70 mt-1"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-70"
               style={{ color: "#0074F4", textDecoration: "none" }}
             >
               Learn More <ArrowRight size={11} />
             </a>
           </div>
-
-          {/* Divider */}
-          <div style={{ height: "1px", background: "rgba(255,255,255,0.06)" }} />
-
-          {/* Three pillars in a horizontal row */}
-          <div className="grid grid-cols-1 md:grid-cols-3">
-            {WAVV_PILLARS.map((p, i) => {
+          <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.45)", maxWidth: "680px" }}>
+            WAVV is a power dialer built natively inside your CRM — designed to help sales and customer success teams dial more contacts, connect more often, and close more deals without ever leaving their workflow.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {WAVV_PILLARS.map((p) => {
               const PIcon = p.icon;
               return (
                 <div
                   key={p.title}
-                  className="flex flex-col gap-3 px-6 py-5"
+                  className="rounded-2xl p-5"
                   style={{
-                    borderRight: i < 2 ? "1px solid rgba(255,255,255,0.06)" : undefined,
+                    background: `linear-gradient(135deg, ${p.color}0d 0%, #0c1018 70%)`,
+                    border: `1px solid ${p.color}22`,
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: `${p.color}18` }}
-                    >
-                      <PIcon size={15} style={{ color: p.color }} />
-                    </div>
-                    <p className="text-white font-semibold text-sm leading-snug">{p.title}</p>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: `${p.color}18`, border: `1px solid ${p.color}30` }}
+                  >
+                    <PIcon size={18} style={{ color: p.color }} />
                   </div>
-                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{p.body}</p>
+                  <p className="text-white font-bold text-sm mb-2">{p.title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{p.body}</p>
                 </div>
               );
             })}
