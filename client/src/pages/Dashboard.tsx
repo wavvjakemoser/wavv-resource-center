@@ -7,19 +7,20 @@ import {
   Headphones,
   FlaskConical,
   Star,
-  ChevronRight,
   Calendar,
   Clock,
   ExternalLink,
   ArrowRight,
   Sparkles,
   BookOpen,
-  Zap,
   MessageCircle,
   Send,
   CheckCircle2,
   X,
   Bell,
+  Zap,
+  TrendingUp,
+  Shield,
 } from "lucide-react";
 import { Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
@@ -35,7 +36,6 @@ const START_HERE_CARDS = [
     label: "WAVV Academy",
     icon: GraduationCap,
     color: "#0074F4",
-    tagline: "New to WAVV? Start here.",
     description: "Step-by-step video courses covering onboarding, how-to guides, and advanced strategy — built to get you productive fast.",
     cta: "Start Learning",
     ctaIcon: BookOpen,
@@ -47,7 +47,6 @@ const START_HERE_CARDS = [
     label: "WAVV Webinars",
     icon: Video,
     color: "#10b981",
-    tagline: "See WAVV in action.",
     description: "Live and on-demand sessions hosted by the WAVV team. Watch replays, register for upcoming events, and sharpen your skills.",
     cta: "Browse Webinars",
     ctaIcon: Video,
@@ -59,7 +58,6 @@ const START_HERE_CARDS = [
     label: "Guides & Docs",
     icon: FileText,
     color: "#67C728",
-    tagline: "Step-by-step answers.",
     description: "Downloadable playbooks, checklists, and quick-reference guides for every part of the WAVV platform.",
     cta: "View Guides",
     ctaIcon: FileText,
@@ -71,7 +69,6 @@ const START_HERE_CARDS = [
     label: "WAVV Playground",
     icon: FlaskConical,
     color: "#a855f7",
-    tagline: "Hands-on sandbox. Coming soon.",
     description: "Practice in a live WAVV environment without affecting real data. Test workflows, explore features, and build confidence before going live.",
     cta: "Get Notified",
     ctaIcon: Bell,
@@ -83,12 +80,19 @@ const START_HERE_CARDS = [
     label: "WAVV Support",
     icon: Headphones,
     color: "#FF9900",
-    tagline: "Stuck? Get help fast.",
     description: "Browse help articles, ask WAVV AI for an instant answer, or connect directly with a support rep through the Help Center.",
     cta: "Get Support",
     ctaIcon: MessageCircle,
     badge: null,
   },
+];
+
+// ─── Hero benefit pills ───────────────────────────────────────────────────────
+const BENEFITS = [
+  { icon: Zap, label: "Onboard faster" },
+  { icon: TrendingUp, label: "Connect more" },
+  { icon: Shield, label: "Stay spam-free" },
+  { icon: BookOpen, label: "Master every feature" },
 ];
 
 // ─── Playground Interest Modal ────────────────────────────────────────────────
@@ -169,10 +173,7 @@ function PlaygroundModal({ onClose }: { onClose: () => void }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 outline-none"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                }}
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}
               />
               <input
                 type="email"
@@ -181,10 +182,7 @@ function PlaygroundModal({ onClose }: { onClose: () => void }) {
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && name.trim() && email.trim()) submit.mutate({ name: name.trim(), email: email.trim() }); }}
                 className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 outline-none"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                }}
+                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}
               />
               {error && <p className="text-xs text-red-400">{error}</p>}
               <button
@@ -220,37 +218,49 @@ export default function Dashboard() {
     <PortalLayout title="Home">
       {showPlaygroundModal && <PlaygroundModal onClose={() => setShowPlaygroundModal(false)} />}
 
-      <div className="px-4 lg:px-6 py-8 max-w-5xl mx-auto space-y-14">
+      {/* Full-width content — no max-width cap on the outer wrapper */}
+      <div className="px-4 lg:px-8 py-8 space-y-12">
 
         {/* ── Hero ── */}
         <div
           className="relative overflow-hidden rounded-2xl"
           style={{
-            background: "radial-gradient(ellipse 90% 80% at 50% 0%, rgba(0,116,244,0.22) 0%, rgba(0,169,226,0.10) 45%, transparent 70%), #0a0e18",
-            border: "1px solid rgba(0,116,244,0.2)",
-            minHeight: "260px",
+            background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,116,244,0.28) 0%, rgba(0,169,226,0.12) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
+            border: "1px solid rgba(0,116,244,0.18)",
+            minHeight: "320px",
           }}
         >
-          {/* Grid overlay */}
+          {/* Subtle grid */}
           <div
-            className="absolute inset-0 pointer-events-none opacity-[0.03]"
+            className="absolute inset-0 pointer-events-none opacity-[0.025]"
             style={{
-              backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-              backgroundSize: "40px 40px",
+              backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+              backgroundSize: "48px 48px",
             }}
           />
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(0,116,244,0.12), transparent 70%)", transform: "translate(20%, -20%)" }} />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.07), transparent 70%)", transform: "translate(-20%, 20%)" }} />
+          {/* Glow orbs */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(0,116,244,0.14), transparent 65%)", transform: "translate(25%, -30%)" }} />
+          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
-          <div className="relative z-10 px-6 lg:px-12 py-12 lg:py-14 text-center">
+          <div className="relative z-10 px-6 lg:px-16 py-14 lg:py-18 text-center">
+            {/* Eyebrow */}
+            <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
+              style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.25)" }}>
+              <Sparkles size={12} style={{ color: "#0074F4" }} />
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#0074F4" }}>
+                Your WAVV Knowledge Hub
+              </span>
+            </div>
+
+            {/* Headline */}
             <h1
-              className="font-extrabold tracking-tight leading-[1.06] mb-4"
-              style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)" }}
+              className="font-extrabold tracking-tight leading-[1.05] mb-4"
+              style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}
             >
               <span style={{
-                background: "linear-gradient(135deg, #ffffff 0%, #c7d9ff 35%, #93c5fd 65%, #67C728 100%)",
+                background: "linear-gradient(135deg, #ffffff 0%, #c7d9ff 30%, #93c5fd 60%, #67C728 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -259,18 +269,49 @@ export default function Dashboard() {
               </span>
             </h1>
 
-            <div className="flex justify-center mb-5">
+            {/* Gradient accent line */}
+            <div className="flex justify-center mb-6">
               <div style={{
-                width: "160px",
+                width: "200px",
                 height: "3px",
                 borderRadius: "2px",
                 background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)",
               }} />
             </div>
 
-            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.05rem", maxWidth: "460px", margin: "0 auto" }}>
-              Build skills and get the most out of every call.
+            {/* Subline */}
+            <p
+              className="mx-auto mb-3 leading-relaxed font-medium"
+              style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
+            >
+              Everything you need to get the most out of WAVV — in one place.
             </p>
+            <p
+              className="mx-auto mb-8 leading-relaxed"
+              style={{ color: "rgba(255,255,255,0.45)", fontSize: "clamp(0.85rem, 1.5vw, 1rem)", maxWidth: "560px" }}
+            >
+              Whether you're just getting started or looking to sharpen your edge, the WAVV Success Center gives you the training, tools, and resources to dial smarter, connect more, and close faster.
+            </p>
+
+            {/* Benefit pills */}
+            <div className="flex flex-wrap justify-center gap-3">
+              {BENEFITS.map(({ icon: BIcon, label }) => (
+                <div
+                  key={label}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    color: "rgba(255,255,255,0.65)",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                  }}
+                >
+                  <BIcon size={12} style={{ color: "#0074F4" }} />
+                  {label}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -378,8 +419,8 @@ export default function Dashboard() {
             <h2 className="text-sm font-bold text-white tracking-wide">Start Here</h2>
           </div>
 
-          {/* Single-column stacked layout */}
-          <div className="flex flex-col gap-4">
+          {/* Full-width single-column stack */}
+          <div className="flex flex-col gap-3">
             {START_HERE_CARDS.map((card) => {
               const Icon = card.icon;
               const CtaIcon = card.ctaIcon;
@@ -387,22 +428,22 @@ export default function Dashboard() {
 
               const cardInner = (
                 <div
-                  className="group flex items-center gap-5 rounded-2xl px-6 py-5 transition-all duration-200"
+                  className="group flex items-center gap-5 rounded-2xl px-6 py-5 transition-all duration-200 w-full"
                   style={{
-                    background: `linear-gradient(135deg, ${card.color}0d 0%, #0f1318 70%)`,
-                    border: `1px solid ${card.color}22`,
+                    background: `linear-gradient(135deg, ${card.color}0d 0%, #0c1018 60%)`,
+                    border: `1px solid ${card.color}20`,
                     cursor: isPlayground ? "default" : "pointer",
                   }}
                   onMouseEnter={(e) => {
                     if (!isPlayground) {
                       e.currentTarget.style.borderColor = `${card.color}50`;
-                      e.currentTarget.style.boxShadow = `0 4px 24px ${card.color}15`;
-                      e.currentTarget.style.transform = "translateX(3px)";
+                      e.currentTarget.style.boxShadow = `0 4px 28px ${card.color}18`;
+                      e.currentTarget.style.transform = "translateX(4px)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isPlayground) {
-                      e.currentTarget.style.borderColor = `${card.color}22`;
+                      e.currentTarget.style.borderColor = `${card.color}20`;
                       e.currentTarget.style.boxShadow = "none";
                       e.currentTarget.style.transform = "translateX(0)";
                     }
@@ -411,14 +452,14 @@ export default function Dashboard() {
                   {/* Icon badge */}
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${card.color}20`, border: `1px solid ${card.color}35` }}
+                    style={{ background: `${card.color}18`, border: `1px solid ${card.color}30` }}
                   >
                     <Icon size={20} style={{ color: card.color }} />
                   </div>
 
                   {/* Text content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
+                    <div className="flex items-center gap-2 mb-1">
                       <p className="text-white font-bold text-sm">{card.label}</p>
                       {card.badge && (
                         <span
@@ -434,7 +475,7 @@ export default function Dashboard() {
                     </p>
                   </div>
 
-                  {/* CTA button — fixed width so all buttons are the same size */}
+                  {/* CTA button — uniform width, no wrap */}
                   <div className="flex-shrink-0" style={{ width: "175px" }}>
                     {isPlayground ? (
                       <button
@@ -459,8 +500,6 @@ export default function Dashboard() {
                       </span>
                     )}
                   </div>
-
-
                 </div>
               );
 
@@ -474,6 +513,45 @@ export default function Dashboard() {
             })}
           </div>
         </section>
+
+        {/* ── Footer ── */}
+        <footer
+          className="pt-6 mt-4"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
+        >
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+              © {new Date().getFullYear()} WAVV Communications. All rights reserved.
+            </p>
+            <div className="flex items-center gap-5">
+              <a
+                href="https://www.wavv.com/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs transition-colors hover:text-white"
+                style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
+              >
+                Privacy Policy
+              </a>
+              <a
+                href="https://www.wavv.com/terms-of-service"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs transition-colors hover:text-white"
+                style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
+              >
+                Terms &amp; Conditions
+              </a>
+              <a
+                href="mailto:support@wavv.com"
+                className="text-xs transition-colors hover:text-white"
+                style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}
+              >
+                support@wavv.com
+              </a>
+            </div>
+          </div>
+        </footer>
 
       </div>
     </PortalLayout>
