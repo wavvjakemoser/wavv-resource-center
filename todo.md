@@ -952,3 +952,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Surface registration click counts in Admin → Analytics tab (Webinar Register Clicks stat card)
 - [x] Make webinars.list and webinars.watch public procedures (no auth required for public visitors)
 - [x] Update vitest test for webinars.list to reflect public endpoint (30/30 tests passing)
+
+## Dashboard Home Redesign (Session 4)
+
+- [x] Dashboard hero: update subline to "Build skills and get the most out of every call"
+- [x] Dashboard hero: remove all nav tiles (Academy, Webinars, Guides, Playground, Support)
+- [x] Dashboard: remove Recently Added section entirely
+- [x] Dashboard: add "Start Here" section with 5 curated cards (Academy, Webinars, Guides & Docs, Support, Playground)
+- [x] Playground card: Coming Soon treatment with interest-capture CTA (name + email + Notify Me button)
+- [x] Support card: description pointing to help articles + link to external help center
+- [x] Reuse existing playground_requests table for public interest capture (no new table needed)
+- [x] Add tRPC publicProcedure: playground.submitPublicInterest (name + email, no auth required)

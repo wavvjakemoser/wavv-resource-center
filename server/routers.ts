@@ -1314,6 +1314,26 @@ export const appRouter = router({
         await deletePlaygroundRequest(input.id);
         return { success: true };
       }),
+    submitPublicInterest: publicProcedure
+      .input(z.object({
+        name: z.string().min(1).max(255),
+        email: z.string().email().max(320),
+      }))
+      .mutation(async ({ input }) => {
+        await createPlaygroundRequest({
+          userId: undefined,
+          name: input.name,
+          email: input.email,
+          playground: "WAVV Playground",
+          optIn: true,
+          message: null,
+        });
+        await notifyOwner({
+          title: `New Playground Interest: ${input.name}`,
+          content: `Name: ${input.name}\nEmail: ${input.email}\nSource: Public Home Page`,
+        });
+        return { success: true };
+      }),
   }),
   bookmarks: router({
     getAll: protectedProcedure.query(async ({ ctx }) => {

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import {
   GraduationCap,
@@ -10,37 +11,149 @@ import {
   Calendar,
   Clock,
   ExternalLink,
-  Play,
   ArrowRight,
+  Sparkles,
+  BookOpen,
+  Zap,
+  MessageCircle,
+  Send,
+  CheckCircle2,
 } from "lucide-react";
 import { Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
 
-// ─── Quick-access tiles ───────────────────────────────────────────────────────
-const NAV_TILES = [
-  { href: "/academy",  label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
-  { href: "/webinars", label: "WAVV Webinars",       icon: Video,         color: "#00A9E2" },
-  { href: "/guides",   label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
-  { href: "/hands-on", label: "WAVV Playground",     icon: FlaskConical,  color: "#a855f7" },
-  { href: "/support",  label: "WAVV Support",        icon: Headphones,    color: "#FF9900" },
-];
-
-// ─── Category color map ───────────────────────────────────────────────────────
-const CATEGORY_COLOR: Record<string, string> = {
-  "Onboarding":                  "#0074F4",
-  "How-To":                      "#00A9E2",
-  "Strategy and Best Practices": "#67C728",
-  "Dialer Setup":                "#f97316",
-  "CRM Integrations":            "#F5A623",
-  "Spam Protection":             "#FF9900",
-};
-
 const ACCENT = "#D4AF37";
 const THUMB  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp";
 
+// ─── Start Here card definitions ─────────────────────────────────────────────
+const START_HERE_CARDS = [
+  {
+    id: "academy",
+    href: "/academy",
+    label: "WAVV Academy",
+    icon: GraduationCap,
+    color: "#0074F4",
+    tagline: "New to WAVV? Start here.",
+    description: "Step-by-step video courses covering onboarding, how-to guides, and advanced strategy — built to get you productive fast.",
+    cta: "Start Learning",
+    badge: null,
+  },
+  {
+    id: "webinars",
+    href: "/webinars",
+    label: "WAVV Webinars",
+    icon: Video,
+    color: "#10b981",
+    tagline: "See WAVV in action.",
+    description: "Live and on-demand sessions hosted by the WAVV team. Watch replays, register for upcoming events, and sharpen your skills.",
+    cta: "Browse Webinars",
+    badge: null,
+  },
+  {
+    id: "guides",
+    href: "/guides",
+    label: "Guides & Docs",
+    icon: FileText,
+    color: "#67C728",
+    tagline: "Step-by-step answers.",
+    description: "Downloadable playbooks, checklists, and quick-reference guides for every part of the WAVV platform.",
+    cta: "View Guides",
+    badge: null,
+  },
+  {
+    id: "support",
+    href: "/support",
+    label: "WAVV Support",
+    icon: Headphones,
+    color: "#FF9900",
+    tagline: "Stuck? Get help fast.",
+    description: "Ask WAVV AI for an instant answer, browse the Help Center, or connect directly with a support rep.",
+    cta: "Get Support",
+    badge: null,
+  },
+  {
+    id: "playground",
+    href: null,
+    label: "WAVV Playground",
+    icon: FlaskConical,
+    color: "#a855f7",
+    tagline: "Hands-on sandbox. Coming soon.",
+    description: "Practice in a live WAVV environment without affecting real data. Test workflows, explore features, and build confidence.",
+    cta: null,
+    badge: "Coming Soon",
+  },
+];
+
+// ─── Playground Interest Card ─────────────────────────────────────────────────
+function PlaygroundInterestCard({ color }: { color: string }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = trpc.playground.submitPublicInterest.useMutation({
+    onSuccess: () => setSubmitted(true),
+    onError: (e) => setError(e.message),
+  });
+
+  if (submitted) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-6 text-center">
+        <CheckCircle2 size={28} style={{ color }} />
+        <p className="text-white font-semibold text-sm">You're on the list!</p>
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+          We'll let you know when WAVV Playground is ready.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 space-y-2.5">
+      <p className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
+        Get notified when it's ready
+      </p>
+      <input
+        type="text"
+        placeholder="Your name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-full px-3 py-2 rounded-lg text-xs text-white placeholder-gray-500 outline-none focus:ring-1"
+        style={{
+          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.12)",
+        }}
+      />
+      <input
+        type="email"
+        placeholder="Work email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full px-3 py-2 rounded-lg text-xs text-white placeholder-gray-500 outline-none focus:ring-1"
+        style={{
+          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.12)",
+        }}
+      />
+      {error && <p className="text-xs text-red-400">{error}</p>}
+      <button
+        disabled={!name.trim() || !email.trim() || submit.isPending}
+        onClick={() => submit.mutate({ name: name.trim(), email: email.trim() })}
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-40"
+        style={{ background: `${color}22`, color, border: `1px solid ${color}45` }}
+        onMouseEnter={(e) => { if (!submit.isPending) e.currentTarget.style.background = `${color}35`; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = `${color}22`; }}
+      >
+        <Send size={11} />
+        {submit.isPending ? "Sending…" : "Notify Me"}
+      </button>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { data: exclusiveWebinars } = trpc.webinars.list.useQuery({ type: "exclusive" });
-  const { data: recentLessons, isLoading: lessonsLoading } = trpc.academy.getRecentLessons.useQuery({ limit: 6 });
   const trackRegClick = trpc.webinars.trackRegistrationClick.useMutation();
 
   const exclusive = (exclusiveWebinars ?? [])
@@ -49,7 +162,7 @@ export default function Dashboard() {
 
   return (
     <PortalLayout title="Home">
-      <div className="px-4 lg:px-6 py-8 max-w-6xl mx-auto space-y-12">
+      <div className="px-4 lg:px-6 py-8 max-w-6xl mx-auto space-y-14">
 
         {/* ── Hero ── */}
         <div
@@ -57,10 +170,10 @@ export default function Dashboard() {
           style={{
             background: "radial-gradient(ellipse 90% 80% at 50% 0%, rgba(0,116,244,0.22) 0%, rgba(0,169,226,0.10) 45%, transparent 70%), #0a0e18",
             border: "1px solid rgba(0,116,244,0.2)",
-            minHeight: "320px",
+            minHeight: "260px",
           }}
         >
-          {/* Subtle grid overlay */}
+          {/* Grid overlay */}
           <div
             className="absolute inset-0 pointer-events-none opacity-[0.03]"
             style={{
@@ -68,18 +181,15 @@ export default function Dashboard() {
               backgroundSize: "40px 40px",
             }}
           />
-          {/* Right glow */}
           <div className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none"
             style={{ background: "radial-gradient(circle, rgba(0,116,244,0.12), transparent 70%)", transform: "translate(20%, -20%)" }} />
-          {/* Left green glow */}
           <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full pointer-events-none"
             style={{ background: "radial-gradient(circle, rgba(103,199,40,0.07), transparent 70%)", transform: "translate(-20%, 20%)" }} />
 
-          <div className="relative z-10 px-6 lg:px-12 py-12 lg:py-16 text-center">
-            {/* Headline */}
+          <div className="relative z-10 px-6 lg:px-12 py-12 lg:py-14 text-center">
             <h1
               className="font-extrabold tracking-tight leading-[1.06] mb-4"
-              style={{ fontSize: "clamp(2.4rem, 5vw, 4rem)" }}
+              style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)" }}
             >
               <span style={{
                 background: "linear-gradient(135deg, #ffffff 0%, #c7d9ff 35%, #93c5fd 65%, #67C728 100%)",
@@ -91,54 +201,18 @@ export default function Dashboard() {
               </span>
             </h1>
 
-            {/* Gradient line */}
-            <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-5">
               <div style={{
-                width: "180px",
+                width: "160px",
                 height: "3px",
                 borderRadius: "2px",
                 background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)",
               }} />
             </div>
 
-            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "1rem", maxWidth: "480px", margin: "0 auto 2.5rem" }}>
-              Training, webinars, and dedicated support — everything you need to get the most out of WAVV.
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "1.05rem", maxWidth: "460px", margin: "0 auto" }}>
+              Build skills and get the most out of every call.
             </p>
-
-            {/* Quick-access tiles */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 max-w-3xl mx-auto">
-              {NAV_TILES.map((tile) => {
-                const Icon = tile.icon;
-                return (
-                  <Link
-                    key={tile.href}
-                    href={tile.href}
-                    className="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl transition-all duration-200"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      textDecoration: "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = `${tile.color}14`;
-                      e.currentTarget.style.borderColor = `${tile.color}45`;
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
-                      e.currentTarget.style.transform = "translateY(0)";
-                    }}
-                  >
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                      style={{ background: `${tile.color}22` }}>
-                      <Icon size={16} style={{ color: tile.color }} />
-                    </div>
-                    <p className="text-white text-xs font-semibold leading-snug text-center">{tile.label}</p>
-                  </Link>
-                );
-              })}
-            </div>
           </div>
         </div>
 
@@ -202,11 +276,11 @@ export default function Dashboard() {
                       <div className="space-y-1 mb-4">
                         <p className="text-xs flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>
                           <Calendar size={11} style={{ color: ACCENT }} />
-                          {new Date(w.scheduledAt).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                          {new Date(w.scheduledAt).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "America/Denver" })}
                         </p>
                         <p className="text-xs flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>
                           <Clock size={11} style={{ color: ACCENT }} />
-                          {new Date(w.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })}
+                          {new Date(w.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Denver", timeZoneName: "short" })}
                         </p>
                       </div>
                     )}
@@ -236,103 +310,114 @@ export default function Dashboard() {
           </section>
         )}
 
-        {/* ── Recently Added ── */}
+        {/* ── Start Here ── */}
         <section>
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #00A9E2)" }} />
-              <h2 className="text-sm font-bold text-white tracking-wide">Recently Added</h2>
-            </div>
-            <Link href="/academy" className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-white"
-              style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
-              Browse all <ArrowRight size={12} />
-            </Link>
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
+            <Sparkles size={14} style={{ color: "#0074F4" }} />
+            <h2 className="text-sm font-bold text-white tracking-wide">Start Here</h2>
           </div>
 
-          {lessonsLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1,2,3,4,5,6].map((i) => (
-                <div key={i} className="h-28 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }} />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {START_HERE_CARDS.map((card) => {
+              const Icon = card.icon;
+              const isPlayground = card.id === "playground";
 
-          {!lessonsLoading && recentLessons && recentLessons.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentLessons.map((lesson) => {
-                const color = CATEGORY_COLOR[lesson.category] ?? "#0074F4";
-                return (
-                  <Link
-                    key={lesson.id}
-                    href={`/academy/${lesson.courseId}/lesson/${lesson.id}`}
-                    className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-200"
-                    style={{
-                      background: "#0f1318",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      textDecoration: "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = `${color}55`;
-                      e.currentTarget.style.boxShadow = `0 8px 28px ${color}18`;
+              const cardInner = (
+                <div
+                  className="group flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-200"
+                  style={{
+                    background: `linear-gradient(145deg, ${card.color}0d 0%, #0f1318 60%)`,
+                    border: `1px solid ${card.color}25`,
+                    cursor: isPlayground ? "default" : "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isPlayground) {
+                      e.currentTarget.style.borderColor = `${card.color}55`;
+                      e.currentTarget.style.boxShadow = `0 8px 32px ${card.color}18`;
                       e.currentTarget.style.transform = "translateY(-3px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isPlayground) {
+                      e.currentTarget.style.borderColor = `${card.color}25`;
                       e.currentTarget.style.boxShadow = "none";
                       e.currentTarget.style.transform = "translateY(0)";
+                    }
+                  }}
+                >
+                  {/* Card header strip */}
+                  <div
+                    className="flex items-center gap-3 px-5 py-4"
+                    style={{
+                      background: `linear-gradient(135deg, ${card.color}18 0%, ${card.color}06 100%)`,
+                      borderBottom: `1px solid ${card.color}20`,
                     }}
                   >
-                    {/* Color bar header */}
                     <div
-                      className="flex items-center gap-3 px-4 py-3"
-                      style={{
-                        background: `linear-gradient(135deg, ${color}22 0%, ${color}08 100%)`,
-                        borderBottom: `1px solid ${color}20`,
-                      }}
+                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: `${card.color}22`, border: `1px solid ${card.color}35` }}
                     >
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ background: `${color}25`, border: `1px solid ${color}35` }}
-                      >
-                        <Play size={13} style={{ color }} />
+                      <Icon size={18} style={{ color: card.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-white font-bold text-sm truncate">{card.label}</p>
+                        {card.badge && (
+                          <span
+                            className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide flex-shrink-0"
+                            style={{ background: `${card.color}20`, color: card.color, border: `1px solid ${card.color}40` }}
+                          >
+                            {card.badge}
+                          </span>
+                        )}
                       </div>
-                      <span
-                        className="text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase"
-                        style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}
-                      >
-                        {lesson.category}
-                      </span>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: card.color }}>{card.tagline}</p>
+                    </div>
+                    {!isPlayground && (
                       <ChevronRight
-                        size={13}
-                        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ color }}
+                        size={14}
+                        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ color: card.color }}
                       />
-                    </div>
+                    )}
+                  </div>
 
-                    {/* Body */}
-                    <div className="px-4 py-4 flex flex-col flex-1">
-                      <p className="text-white text-sm font-semibold leading-snug line-clamp-2 mb-3">
-                        {lesson.title}
-                      </p>
-                      {lesson.durationMinutes && (
-                        <div className="mt-auto flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.3)" }}>
-                          <Clock size={10} />
-                          <span className="text-[11px]">{lesson.durationMinutes} min</span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
+                  {/* Card body */}
+                  <div className="px-5 py-4 flex flex-col flex-1">
+                    <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      {card.description}
+                    </p>
 
-          {!lessonsLoading && (!recentLessons || recentLessons.length === 0) && (
-            <div className="flex items-center justify-center py-12 rounded-2xl text-xs"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.25)" }}>
-              No content yet — check back soon.
-            </div>
-          )}
+                    {isPlayground ? (
+                      <PlaygroundInterestCard color={card.color} />
+                    ) : (
+                      <div className="mt-auto">
+                        <span
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+                          style={{ background: `${card.color}18`, color: card.color, border: `1px solid ${card.color}35` }}
+                        >
+                          {card.id === "academy" && <BookOpen size={11} />}
+                          {card.id === "webinars" && <Video size={11} />}
+                          {card.id === "guides" && <FileText size={11} />}
+                          {card.id === "support" && <MessageCircle size={11} />}
+                          {card.cta} <ArrowRight size={10} />
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+
+              return isPlayground ? (
+                <div key={card.id}>{cardInner}</div>
+              ) : (
+                <Link key={card.id} href={card.href!} style={{ textDecoration: "none", display: "block" }}>
+                  {cardInner}
+                </Link>
+              );
+            })}
+          </div>
         </section>
 
       </div>
