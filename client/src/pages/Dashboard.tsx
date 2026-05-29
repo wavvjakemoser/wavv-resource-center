@@ -435,11 +435,11 @@ export default function Dashboard() {
                   </div>
 
                   {/* CTA button — fixed width so all buttons are the same size */}
-                  <div className="flex-shrink-0" style={{ width: "160px" }}>
+                  <div className="flex-shrink-0" style={{ width: "175px" }}>
                     {isPlayground ? (
                       <button
                         onClick={() => setShowPlaygroundModal(true)}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                         style={{ background: `${card.color}20`, color: card.color, border: `1px solid ${card.color}40` }}
                         onMouseEnter={(e) => { e.currentTarget.style.background = `${card.color}35`; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = `${card.color}20`; }}
@@ -450,7 +450,7 @@ export default function Dashboard() {
                       </button>
                     ) : (
                       <span
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                         style={{ background: `${card.color}18`, color: card.color, border: `1px solid ${card.color}35` }}
                       >
                         <CtaIcon size={12} />
