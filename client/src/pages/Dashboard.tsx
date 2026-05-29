@@ -328,10 +328,7 @@ export default function Dashboard() {
               Learn More <ArrowRight size={11} />
             </a>
           </div>
-          <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "720px" }}>
-            WAVV is a native multi-line power dialer that lives directly inside your CRM — no tab-switching, no copy-pasting, no context loss. It's built for sales and customer success teams who need to move fast: dial multiple contacts simultaneously, skip voicemails automatically, and stay focused on the conversations that actually move deals forward. Whether you're a solo rep ramping up or a team running high-volume outbound, WAVV is designed to help you connect more often and close more deals without ever leaving your workflow.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-4">
             {WAVV_PILLARS.map((p) => {
               const PIcon = p.icon;
               return (
