@@ -1000,29 +1000,41 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Register /partners route in App.tsx
 
 ## Partners Page + Role + Analytics (Session N)
-- [ ] Partners page: CTA buttons → "Apply Now" (remove "at wavv.com" text)
-- [ ] Partners page: Step 02 → "Complete a Course" (remove approval timeline/portal language)
-- [ ] Partners page: hero → match dashboard hero style (gradient background, badge pill, gradient headline)
-- [ ] Ask WAVV bubble → move back to bottom-right corner
-- [ ] PortalLayout footer → stacked vertically, centered: "© 2026 WAVV, All rights reserved." then Privacy Policy link then Terms & Conditions link
-- [ ] Add partner_admin role to schema (can invite/manage partners)
-- [ ] Add partner role to schema (WAVV Partners access only)
-- [ ] Team Access: partner_admin can invite partner-role users
-- [ ] Partner Analytics tab in Admin: active partners, course completion rate, Apply Now CTA clicks, partner logins (7d/30d)
+- [x] Partners page: CTA buttons → "Apply Now" (remove "at wavv.com" text)
+- [x] Partners page: Step 02 → "Complete a Course" (remove approval timeline/portal language)
+- [x] Partners page: hero → match dashboard hero style (gradient background, badge pill, gradient headline)
+- [x] Ask WAVV bubble → move back to bottom-right corner
+- [x] PortalLayout footer → stacked vertically, centered: "© 2026 WAVV, All rights reserved." then Privacy Policy link then Terms & Conditions link
+- [x] Add partner_admin role to schema (can invite/manage partners)
+- [x] Add partner role to schema (WAVV Partners access only)
+- [x] Team Access: partner_admin can invite partner-role users
+- [x] Partner Analytics tab in Admin: active partners, course completion rate, Apply Now CTA clicks, partner logins (7d/30d)
 
 ## Partner Admin Access Control
-- [ ] partner_admin sees only WAVV Knowledge + Partner Analytics tabs in Admin panel (all others grayed/locked)
-- [ ] partner_admin defaults to Partner Analytics tab on login
-- [ ] Invite Partner button in Partner Analytics tab (visible to super_admin and partner_admin)
-- [ ] When partner_admin initiates invite, role is locked to "partner" — no other role options shown
-- [ ] Server: allow partner_admin to call admin.addUser but only with role="partner"
-- [ ] Server: allow partner_admin to call admin.listUsers (filtered to partner/partner_admin rows only)
+- [x] partner_admin sees only WAVV Knowledge + Partner Analytics tabs in Admin panel (all others grayed/locked)
+- [x] partner_admin defaults to Partner Analytics tab on login
+- [x] Invite Partner button in Partner Analytics tab (visible to super_admin and partner_admin)
+- [x] When partner_admin initiates invite, role is locked to "partner" — no other role options shown
+- [x] Server: allow partner_admin to call admin.addUser but only with role="partner"
+- [x] Server: allow partner_admin to call admin.listUsers (filtered to partner/partner_admin rows only)
 
 ## Partner Model Restructure
-- [ ] Team Access: remove partner role from role selector (only Super Admin, Admin, Partner Admin)
-- [ ] Admin panel: move Partners tab to far right position
-- [ ] Admin panel: partner_admin sees WAVV Knowledge + Partners tab only (Partners far right)
-- [ ] Create /wavv-partner dedicated portal page (course + content placeholder, WAVV-branded)
-- [ ] AcceptInvite: redirect partner role to /wavv-partner instead of /admin
-- [ ] Gate /wavv-partner route to partner role only (redirect others away)
-- [ ] Register /wavv-partner route in App.tsx
+- [x] Team Access: remove partner role from role selector (only Super Admin, Admin, Partner Admin)
+- [x] Admin panel: move Partners tab to far right position
+- [x] Admin panel: partner_admin sees WAVV Knowledge + Partners tab only (Partners far right)
+- [x] Create /wavv-partner dedicated portal page (course + content placeholder, WAVV-branded)
+- [x] AcceptInvite: redirect partner role to /wavv-partner instead of /admin
+- [x] Gate /wavv-partner route to partner role only (redirect others away)
+- [x] Register /wavv-partner route in App.tsx
+
+## 4-Tier Role Hierarchy + Owner Role
+- [x] Add owner role to schema enum (migration 0025 applied)
+- [x] Add owner to all role type definitions: nativeAuth.ts, routers.ts, db.ts
+- [x] Promote jake.moser@wavv.com to owner role in database
+- [x] Admin.tsx: isOwner/isSuperAdmin/isPartnerAdmin variables updated (owner inherits all access)
+- [x] Admin.tsx: initialTab() and useEffect tab sync updated for 4-tier hierarchy
+- [x] Admin.tsx: tabs array updated with requiresSuperAdmin/requiresPartnerAdmin flags
+- [x] Admin.tsx: tab locked logic updated (owner bypasses all locks)
+- [x] Admin.tsx: tab content rendering updated (content tabs gated to isSuperAdmin)
+- [x] Admin.tsx: addUserForm state type updated to include owner
+- [x] Admin.tsx: Team Access role selector now has Owner/Super Admin/Partner Admin/Admin options

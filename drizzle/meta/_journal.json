@@ -183,6 +183,13 @@
       "when": 1780088985520,
       "tag": "0024_magenta_boomer",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1780092333565,
+      "tag": "0025_chilly_shooting_star",
+      "breakpoints": true
     }
   ]
 }

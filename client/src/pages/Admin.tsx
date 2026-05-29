@@ -117,8 +117,9 @@ export default function Admin() {
   const { user, loading } = useAuth();
   const [location, navigate] = useLocation();
 
-  const isSuperAdmin = user?.role === "super_admin";
-  const isPartnerAdmin = user?.role === "partner_admin";
+  const isOwner = user?.role === "owner";
+  const isSuperAdmin = user?.role === "super_admin" || isOwner;
+  const isPartnerAdmin = user?.role === "partner_admin" || isOwner;
 
   // Read ?tab= from the URL to set the initial active tab
   const initialTab = (): AdminTab => {
@@ -134,8 +135,10 @@ export default function Admin() {
     if (t === "support" && isSuperAdmin) return "support";
     if (t === "content_requests" && isSuperAdmin) return "content_requests";
     if (t === "analytics" && isSuperAdmin) return "analytics";
-    // partner_admin defaults to Partners tab; regular admins land on knowledge
-    return isSuperAdmin ? "analytics" : isPartnerAdmin ? "partner_analytics" : "knowledge";
+    // owner/super_admin → analytics; partner_admin → partners; admin → knowledge
+    if (isOwner || (isSuperAdmin && !isPartnerAdmin)) return "analytics";
+    if (isPartnerAdmin && !isOwner) return "partner_analytics";
+    return "knowledge";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
@@ -153,7 +156,9 @@ export default function Admin() {
     else if (t === "support" && isSuperAdmin) setActiveTab("support");
     else if (t === "content_requests" && isSuperAdmin) setActiveTab("content_requests");
     else if (t === "analytics" && isSuperAdmin) setActiveTab("analytics");
-    else setActiveTab(isSuperAdmin ? "analytics" : isPartnerAdmin ? "partner_analytics" : "knowledge");
+    else if (isOwner || (isSuperAdmin && !isPartnerAdmin)) setActiveTab("analytics");
+    else if (isPartnerAdmin && !isOwner) setActiveTab("partner_analytics");
+    else setActiveTab("knowledge");
   }, [location]);
   // Not logged in at all → send to /login with ?next=/admin
   if (!loading && !user) {
@@ -161,7 +166,7 @@ export default function Admin() {
     return null;
   }
   // Logged in but not an admin → send back to dashboard
-  if (!loading && user && user.role !== "admin" && user.role !== "super_admin" && user.role !== "partner_admin") {
+  if (!loading && user && user.role !== "admin" && user.role !== "super_admin" && user.role !== "partner_admin" && user.role !== "owner") {
     navigate("/dashboard");
     return null;
   }
@@ -176,17 +181,22 @@ export default function Admin() {
     );
   }
 
-  const tabs: { id: AdminTab; label: string; icon: React.ReactNode; superAdminOnly?: boolean; partnerAdminAllowed?: boolean }[] = [
-    { id: "knowledge",        label: "WAVV Knowledge",    icon: <Sparkles size={13} />,       superAdminOnly: false },
-    { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} />,      superAdminOnly: true },
-    { id: "users",            label: "Team Access",       icon: <Shield size={13} />,         superAdminOnly: true },
-    { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />,  superAdminOnly: true },
-    { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,          superAdminOnly: true },
-    { id: "guides",           label: "Guides",            icon: <FileText size={13} />,       superAdminOnly: true },
-    { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,   superAdminOnly: true },
-    { id: "support",          label: "Support",           icon: <Headphones size={13} />,     superAdminOnly: true },
-    { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />,  superAdminOnly: true },
-    { id: "partner_analytics", label: "Partners",         icon: <Users size={13} />,           superAdminOnly: false, partnerAdminAllowed: true },
+  // Tab access per role:
+  // owner: all tabs
+  // super_admin: knowledge, analytics, users, academy, webinars, guides, playground, support, content_requests (NO partners)
+  // partner_admin: knowledge + partners only
+  // admin: knowledge only
+  const tabs: { id: AdminTab; label: string; icon: React.ReactNode; requiresSuperAdmin?: boolean; requiresPartnerAdmin?: boolean; requiresOwner?: boolean }[] = [
+    { id: "knowledge",         label: "WAVV Knowledge",  icon: <Sparkles size={13} /> },
+    { id: "analytics",         label: "Analytics",       icon: <BarChart3 size={13} />,     requiresSuperAdmin: true },
+    { id: "users",             label: "Team Access",     icon: <Shield size={13} />,        requiresSuperAdmin: true },
+    { id: "academy",           label: "Academy",         icon: <GraduationCap size={13} />, requiresSuperAdmin: true },
+    { id: "webinars",          label: "Webinars",        icon: <Video size={13} />,         requiresSuperAdmin: true },
+    { id: "guides",            label: "Guides",          icon: <FileText size={13} />,      requiresSuperAdmin: true },
+    { id: "playground",        label: "Playground",      icon: <FlaskConical size={13} />,  requiresSuperAdmin: true },
+    { id: "support",           label: "Support",         icon: <Headphones size={13} />,    requiresSuperAdmin: true },
+    { id: "content_requests",  label: "Requests",        icon: <MessageSquare size={13} />, requiresSuperAdmin: true },
+    { id: "partner_analytics", label: "Partners",        icon: <Users size={13} />,         requiresPartnerAdmin: true },
   ];
 
   return (
@@ -209,14 +219,19 @@ export default function Admin() {
           style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
           {tabs.map((tab) => {
-            // Locked if: superAdminOnly and not super_admin, OR partnerAdminAllowed but user is neither super_admin nor partner_admin
-            const locked = (tab.superAdminOnly && !isSuperAdmin && !tab.partnerAdminAllowed) ||
-                           (tab.superAdminOnly && !isSuperAdmin && !isPartnerAdmin);
+            // 4-tier access model:
+            // owner: all tabs
+            // super_admin: all except partner_analytics
+            // partner_admin: knowledge + partner_analytics
+            // admin: knowledge only
+            let locked = false;
+            if (tab.requiresSuperAdmin) locked = !isSuperAdmin;
+            if (tab.requiresPartnerAdmin) locked = !isPartnerAdmin;
             return (
               <button
                 key={tab.id}
                 onClick={() => { if (!locked) setActiveTab(tab.id); }}
-                title={locked ? "Super admin access required" : undefined}
+                title={locked ? "Access restricted" : undefined}
                 className="flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-0"
                 style={
                   locked
@@ -239,14 +254,14 @@ export default function Admin() {
         {/* ── Tab content ── */}
         {activeTab === "knowledge" && <WavvKnowledgeTab />}
         {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab />}
-        {activeTab === "users" && <UsersTab />}
-        {activeTab === "academy" && <ContentTab />}
-        {activeTab === "webinars" && <WebinarsTab />}
-        {activeTab === "guides" && <GuidesTab />}
-        {activeTab === "playground" && <PlaygroundTab />}
-        {activeTab === "support" && <SupportTab />}
-        {activeTab === "content_requests" && <ContentRequestsTab />}
-        {activeTab === "partner_analytics" && (isSuperAdmin || isPartnerAdmin) && <PartnerAnalyticsTab isPartnerAdmin={isPartnerAdmin} />}
+        {activeTab === "users" && isSuperAdmin && <UsersTab />}
+        {activeTab === "academy" && isSuperAdmin && <ContentTab />}
+        {activeTab === "webinars" && isSuperAdmin && <WebinarsTab />}
+        {activeTab === "guides" && isSuperAdmin && <GuidesTab />}
+        {activeTab === "playground" && isSuperAdmin && <PlaygroundTab />}
+        {activeTab === "support" && isSuperAdmin && <SupportTab />}
+        {activeTab === "content_requests" && isSuperAdmin && <ContentRequestsTab />}
+        {activeTab === "partner_analytics" && (isSuperAdmin || isPartnerAdmin) && <PartnerAnalyticsTab isPartnerAdmin={isPartnerAdmin && !isOwner} />}
       </div>
     </PortalLayout>
   );
@@ -1229,7 +1244,7 @@ function UsersTab() {
   });
 
   const [addUserOpen, setAddUserOpen] = useState(false);
-  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "admin" as "admin" | "super_admin" | "partner_admin" });
+  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "admin" as "admin" | "super_admin" | "partner_admin" | "owner" });
   const [inviteLinkModal, setInviteLinkModal] = useState<{ open: boolean; url: string; name: string }>({
     open: false, url: "", name: "",
   });
@@ -1620,13 +1635,14 @@ function UsersTab() {
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Role</label>
               <select
                 value={addUserForm.role}
-                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "admin" | "super_admin" | "partner_admin" }))}
+                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "admin" | "super_admin" | "partner_admin" | "owner" }))}
                 className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                 style={{ background: "#111", border: "1px solid #2a2a2a" }}
               >
-                <option value="admin">Admin</option>
+                <option value="owner">Owner</option>
                 <option value="super_admin">Super Admin</option>
                 <option value="partner_admin">Partner Admin</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
           </div>

@@ -1113,7 +1113,7 @@ export const appRouter = router({
         );
       }),
     updateRole: superAdminProcedure
-      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner"]) }))
+      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner", "owner"]) }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own role" });
@@ -1149,7 +1149,7 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
-        role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner"]).default("user"),
+        role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner", "owner"]).default("user"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1174,7 +1174,7 @@ export const appRouter = router({
     resendInvite: superAdminProcedure
       .input(z.object({
         email: z.string().email(),
-        role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner"]).default("user"),
+        role: z.enum(["user", "admin", "super_admin", "partner_admin", "partner", "owner"]).default("user"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
