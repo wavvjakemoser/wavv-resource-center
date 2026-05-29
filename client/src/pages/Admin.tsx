@@ -106,6 +106,7 @@ import {
   Bot,
   Send,
   BookOpen,
+  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -135,8 +136,8 @@ export default function Admin() {
     if (t === "support" && isSuperAdmin) return "support";
     if (t === "content_requests" && isSuperAdmin) return "content_requests";
     if (t === "analytics" && isSuperAdmin) return "analytics";
-    // owner/super_admin → analytics; partner_admin → partners; admin → knowledge
-    if (isOwner || (isSuperAdmin && !isPartnerAdmin)) return "analytics";
+    // owner/super_admin → users (Team Access); partner_admin → partner_analytics; admin → knowledge
+    if (isOwner || (isSuperAdmin && !isPartnerAdmin)) return "users";
     if (isPartnerAdmin && !isOwner) return "partner_analytics";
     return "knowledge";
   };
@@ -156,7 +157,7 @@ export default function Admin() {
     else if (t === "support" && isSuperAdmin) setActiveTab("support");
     else if (t === "content_requests" && isSuperAdmin) setActiveTab("content_requests");
     else if (t === "analytics" && isSuperAdmin) setActiveTab("analytics");
-    else if (isOwner || (isSuperAdmin && !isPartnerAdmin)) setActiveTab("analytics");
+    else if (isOwner || (isSuperAdmin && !isPartnerAdmin)) setActiveTab("users");
     else if (isPartnerAdmin && !isOwner) setActiveTab("partner_analytics");
     else setActiveTab("knowledge");
   }, [location]);
@@ -201,16 +202,6 @@ export default function Admin() {
   return (
     <PortalLayout title="Admin">
       <div className="px-4 lg:px-6 py-6 max-w-7xl mx-auto space-y-6">
-
-        {/* ── Page header ── */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-white">Admin</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Visible to admins only
-            </p>
-          </div>
-        </div>
 
         {/* ── WAVV Knowledge standalone button ── */}
         <div className="flex items-center gap-3">
@@ -1218,7 +1209,7 @@ function UserProfileDrawer({
 
 function UsersTab() {
   const { user: currentUser } = useAuth();
-  const isSuperAdmin = currentUser?.role === "super_admin";
+  const isSuperAdmin = currentUser?.role === "super_admin" || currentUser?.role === "owner";
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [profileUserId, setProfileUserId] = useState<number | null>(null);
@@ -1231,7 +1222,7 @@ function UsersTab() {
   } | null>(null);
 
   const { data: users, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined, {
-    enabled: currentUser?.role === "admin" || currentUser?.role === "super_admin",
+    enabled: currentUser?.role === "admin" || currentUser?.role === "super_admin" || currentUser?.role === "partner_admin" || currentUser?.role === "owner",
   });
 
   const [addUserOpen, setAddUserOpen] = useState(false);
@@ -1294,8 +1285,8 @@ function UsersTab() {
 
   const filteredUsers = useMemo(() => {
     if (!users) return [];
-    // Only show admins and super_admins — no public users in this panel
-    let list = (users ?? []).filter((u) => u.role === "admin" || u.role === "super_admin");
+    // Only show internal team members — no public users or partners in this panel
+    let list = (users ?? []).filter((u) => u.role === "admin" || u.role === "super_admin" || u.role === "partner_admin" || u.role === "owner");
     if (roleFilter !== "all") list = list.filter((u) => u.role === roleFilter);
     if (!search.trim()) return list;
     const q = search.trim().toLowerCase();
@@ -1475,10 +1466,18 @@ function UsersTab() {
                     <TableCell className="text-gray-400 text-sm">{u.email ?? "—"}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        {u.role === "super_admin" ? (
+                        {u.role === "owner" ? (
+                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.4)" }}>
+                            <Crown className="h-3 w-3" /> Owner
+                          </Badge>
+                        ) : u.role === "super_admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.4)", boxShadow: "0 0 8px rgba(232,121,249,0.2)" }}>
                             <SuperAdminIcon size={12} />
                             Super Admin
+                          </Badge>
+                        ) : u.role === "partner_admin" ? (
+                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
+                            <Users className="h-3 w-3" /> Partner Admin
                           </Badge>
                         ) : u.role === "admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
@@ -1499,7 +1498,8 @@ function UsersTab() {
                       ) : (
                         <div className="flex items-center gap-1.5 flex-wrap">
 
-                          {isSuperAdmin && u.role === "admin" && (
+                          {/* Promote to Super Admin: from admin or partner_admin */}
+                          {isSuperAdmin && (u.role === "admin" || u.role === "partner_admin") && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(232,121,249,0.12)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.25)" }}
@@ -1508,6 +1508,16 @@ function UsersTab() {
                               <span>Promote to Super Admin</span>
                             </button>
                           )}
+                          {/* Promote to Admin: from super_admin */}
+                          {isSuperAdmin && u.role === "super_admin" && (
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
+                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "promote_admin" })}>
+                              <Shield className="h-3 w-3 flex-shrink-0" /> Change to Admin
+                            </button>
+                          )}
+                          {/* Demote to Admin: from super_admin */}
                           {isSuperAdmin && u.role === "super_admin" && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
@@ -1516,8 +1526,8 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Demote
                             </button>
                           )}
-                          {/* Remove button — super_admin only */}
-                          {isSuperAdmin && (
+                          {/* Remove button — super_admin/owner only, cannot remove owner */}
+                          {isSuperAdmin && u.role !== "owner" && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}

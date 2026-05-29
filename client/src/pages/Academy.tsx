@@ -331,11 +331,7 @@ export default function Academy() {
                 Every lesson is designed to solve a specific problem — faster onboarding, higher
                 connection rates, and better team performance.
               </p>
-              {completedLessonIds.size > 0 && (
-                <p className="text-[#67C728] text-xs mt-2 font-medium">
-                  ✓ {completedLessonIds.size} lesson{completedLessonIds.size !== 1 ? "s" : ""} completed
-                </p>
-              )}
+
             </div>
           </div>
         </div>
