@@ -21,6 +21,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import GoogleCallback from "./pages/GoogleCallback";
 import AcceptInvite from "./pages/AcceptInvite";
+import Partners from "./pages/Partners";
 import MagicAuth from "./pages/MagicAuth";
 import { usePageTracking } from "./hooks/usePageTracking";
 
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
+      <Route path="/partners" component={Partners} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/legacy" component={AdminPanel} />
       <Route path="/hands-on" component={HandsOn} />

@@ -85,6 +85,17 @@ const START_HERE_CARDS = [
     ctaIcon: MessageCircle,
     badge: null,
   },
+  {
+    id: "partners",
+    href: "/partners",
+    label: "WAVV Partners",
+    icon: Users,
+    color: "#00A9E2",
+    description: "Refer customers to WAVV and earn recurring revenue. The WAVV Partner Program is built for consultants, coaches, and CRM professionals who want to turn their network into a revenue stream.",
+    cta: "Learn More",
+    ctaIcon: ArrowRight,
+    badge: null,
+  },
 ];
 
 // ─── What is WAVV pillars ─────────────────────────────────────────────────────

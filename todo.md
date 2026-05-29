@@ -992,3 +992,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Guides: drag-to-reorder content items as Super Admin sees fit
 - [x] On-Demand Series: native video hosting on platform (upload via admin, S3 storage, video player on customer side)
 - [ ] On-Demand Series: analytics tracking (view count per video)
+
+## WAVV Partners Page
+- [x] Create /partners route and page with: hero, 3 value pillars, how it works (3 steps), FAQ, CTA → wavv.com/partner-program
+- [x] Add WAVV Partners nav tile to home page below WAVV Support (Users icon, teal/cyan color)
+- [x] Add WAVV Partners link to sidebar navigation in PortalLayout
+- [x] Register /partners route in App.tsx

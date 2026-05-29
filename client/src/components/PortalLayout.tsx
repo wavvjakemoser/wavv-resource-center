@@ -14,6 +14,7 @@ import {
   Sparkles,
   FlaskConical,
   Shield,
+  Users,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
   { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
   { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
+  { href: "/partners",  label: "WAVV Partners",      icon: Users,         color: "#00A9E2" },
 ];
 
 const adminItem = { href: "/admin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" };
