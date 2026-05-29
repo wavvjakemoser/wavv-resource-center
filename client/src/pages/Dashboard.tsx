@@ -18,6 +18,8 @@ import {
   MessageCircle,
   Send,
   CheckCircle2,
+  X,
+  Bell,
 } from "lucide-react";
 import { Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
@@ -36,6 +38,7 @@ const START_HERE_CARDS = [
     tagline: "New to WAVV? Start here.",
     description: "Step-by-step video courses covering onboarding, how-to guides, and advanced strategy — built to get you productive fast.",
     cta: "Start Learning",
+    ctaIcon: BookOpen,
     badge: null,
   },
   {
@@ -47,6 +50,7 @@ const START_HERE_CARDS = [
     tagline: "See WAVV in action.",
     description: "Live and on-demand sessions hosted by the WAVV team. Watch replays, register for upcoming events, and sharpen your skills.",
     cta: "Browse Webinars",
+    ctaIcon: Video,
     badge: null,
   },
   {
@@ -58,6 +62,7 @@ const START_HERE_CARDS = [
     tagline: "Step-by-step answers.",
     description: "Downloadable playbooks, checklists, and quick-reference guides for every part of the WAVV platform.",
     cta: "View Guides",
+    ctaIcon: FileText,
     badge: null,
   },
   {
@@ -67,8 +72,9 @@ const START_HERE_CARDS = [
     icon: Headphones,
     color: "#FF9900",
     tagline: "Stuck? Get help fast.",
-    description: "Ask WAVV AI for an instant answer, browse the Help Center, or connect directly with a support rep.",
+    description: "Browse help articles, ask WAVV AI for an instant answer, or connect directly with a support rep through the Help Center.",
     cta: "Get Support",
+    ctaIcon: MessageCircle,
     badge: null,
   },
   {
@@ -78,14 +84,16 @@ const START_HERE_CARDS = [
     icon: FlaskConical,
     color: "#a855f7",
     tagline: "Hands-on sandbox. Coming soon.",
-    description: "Practice in a live WAVV environment without affecting real data. Test workflows, explore features, and build confidence.",
-    cta: null,
+    description: "Practice in a live WAVV environment without affecting real data. Test workflows, explore features, and build confidence before going live.",
+    cta: "Get Notified",
+    ctaIcon: Bell,
     badge: "Coming Soon",
   },
 ];
 
-// ─── Playground Interest Card ─────────────────────────────────────────────────
-function PlaygroundInterestCard({ color }: { color: string }) {
+// ─── Playground Interest Modal ────────────────────────────────────────────────
+function PlaygroundModal({ onClose }: { onClose: () => void }) {
+  const color = "#a855f7";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -96,57 +104,104 @@ function PlaygroundInterestCard({ color }: { color: string }) {
     onError: (e) => setError(e.message),
   });
 
-  if (submitted) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 py-6 text-center">
-        <CheckCircle2 size={28} style={{ color }} />
-        <p className="text-white font-semibold text-sm">You're on the list!</p>
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
-          We'll let you know when WAVV Playground is ready.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="mt-4 space-y-2.5">
-      <p className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.55)" }}>
-        Get notified when it's ready
-      </p>
-      <input
-        type="text"
-        placeholder="Your name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg text-xs text-white placeholder-gray-500 outline-none focus:ring-1"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.72)", backdropFilter: "blur(6px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative w-full max-w-sm rounded-2xl p-6"
         style={{
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.12)",
+          background: "linear-gradient(145deg, #1a0d2e 0%, #0f1318 100%)",
+          border: `1px solid ${color}35`,
+          boxShadow: `0 24px 64px ${color}20`,
         }}
-      />
-      <input
-        type="email"
-        placeholder="Work email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg text-xs text-white placeholder-gray-500 outline-none focus:ring-1"
-        style={{
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.12)",
-        }}
-      />
-      {error && <p className="text-xs text-red-400">{error}</p>}
-      <button
-        disabled={!name.trim() || !email.trim() || submit.isPending}
-        onClick={() => submit.mutate({ name: name.trim(), email: email.trim() })}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-40"
-        style={{ background: `${color}22`, color, border: `1px solid ${color}45` }}
-        onMouseEnter={(e) => { if (!submit.isPending) e.currentTarget.style.background = `${color}35`; }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = `${color}22`; }}
       >
-        <Send size={11} />
-        {submit.isPending ? "Sending…" : "Notify Me"}
-      </button>
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1 rounded-lg transition-colors hover:bg-white/10"
+          style={{ color: "rgba(255,255,255,0.4)" }}
+        >
+          <X size={16} />
+        </button>
+
+        {submitted ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-4 text-center">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: `${color}20`, border: `1px solid ${color}40` }}>
+              <CheckCircle2 size={28} style={{ color }} />
+            </div>
+            <div>
+              <p className="text-white font-bold text-base mb-1">You're on the list!</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+                We'll notify you when WAVV Playground is ready.
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="mt-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+              style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}
+            >
+              Close
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: `${color}20`, border: `1px solid ${color}35` }}>
+                <FlaskConical size={18} style={{ color }} />
+              </div>
+              <div>
+                <p className="text-white font-bold text-sm">WAVV Playground</p>
+                <p className="text-xs" style={{ color }}>Get notified when it's ready</p>
+              </div>
+            </div>
+
+            <p className="text-sm leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Be the first to know when WAVV Playground launches. Enter your name and work email below.
+            </p>
+
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                }}
+              />
+              <input
+                type="email"
+                placeholder="Work email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && name.trim() && email.trim()) submit.mutate({ name: name.trim(), email: email.trim() }); }}
+                className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                }}
+              />
+              {error && <p className="text-xs text-red-400">{error}</p>}
+              <button
+                disabled={!name.trim() || !email.trim() || submit.isPending}
+                onClick={() => submit.mutate({ name: name.trim(), email: email.trim() })}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all disabled:opacity-40"
+                style={{ background: `${color}25`, color, border: `1px solid ${color}50` }}
+                onMouseEnter={(e) => { if (!submit.isPending) e.currentTarget.style.background = `${color}40`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = `${color}25`; }}
+              >
+                <Send size={13} />
+                {submit.isPending ? "Sending…" : "Notify Me"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -155,6 +210,7 @@ function PlaygroundInterestCard({ color }: { color: string }) {
 export default function Dashboard() {
   const { data: exclusiveWebinars } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const trackRegClick = trpc.webinars.trackRegistrationClick.useMutation();
+  const [showPlaygroundModal, setShowPlaygroundModal] = useState(false);
 
   const exclusive = (exclusiveWebinars ?? [])
     .filter((w) => !w.scheduledAt || new Date(w.scheduledAt) >= new Date())
@@ -162,7 +218,9 @@ export default function Dashboard() {
 
   return (
     <PortalLayout title="Home">
-      <div className="px-4 lg:px-6 py-8 max-w-6xl mx-auto space-y-14">
+      {showPlaygroundModal && <PlaygroundModal onClose={() => setShowPlaygroundModal(false)} />}
+
+      <div className="px-4 lg:px-6 py-8 max-w-5xl mx-auto space-y-14">
 
         {/* ── Hero ── */}
         <div
@@ -265,7 +323,9 @@ export default function Dashboard() {
                   <div className="p-5 flex flex-col flex-1">
                     <h3 className="text-white font-bold text-sm leading-snug mb-2">{w.title}</h3>
                     {w.description && (
-                      <p className="text-xs leading-relaxed line-clamp-2 mb-3" style={{ color: "rgba(255,255,255,0.4)" }}>{w.description}</p>
+                      <p className="text-xs leading-relaxed line-clamp-2 mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>
+                        {w.description}
+                      </p>
                     )}
                     {w.host && (
                       <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>
@@ -318,94 +378,95 @@ export default function Dashboard() {
             <h2 className="text-sm font-bold text-white tracking-wide">Start Here</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Single-column stacked layout */}
+          <div className="flex flex-col gap-4">
             {START_HERE_CARDS.map((card) => {
               const Icon = card.icon;
+              const CtaIcon = card.ctaIcon;
               const isPlayground = card.id === "playground";
 
               const cardInner = (
                 <div
-                  className="group flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-200"
+                  className="group flex items-center gap-5 rounded-2xl px-6 py-5 transition-all duration-200"
                   style={{
-                    background: `linear-gradient(145deg, ${card.color}0d 0%, #0f1318 60%)`,
-                    border: `1px solid ${card.color}25`,
+                    background: `linear-gradient(135deg, ${card.color}0d 0%, #0f1318 70%)`,
+                    border: `1px solid ${card.color}22`,
                     cursor: isPlayground ? "default" : "pointer",
                   }}
                   onMouseEnter={(e) => {
                     if (!isPlayground) {
-                      e.currentTarget.style.borderColor = `${card.color}55`;
-                      e.currentTarget.style.boxShadow = `0 8px 32px ${card.color}18`;
-                      e.currentTarget.style.transform = "translateY(-3px)";
+                      e.currentTarget.style.borderColor = `${card.color}50`;
+                      e.currentTarget.style.boxShadow = `0 4px 24px ${card.color}15`;
+                      e.currentTarget.style.transform = "translateX(3px)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isPlayground) {
-                      e.currentTarget.style.borderColor = `${card.color}25`;
+                      e.currentTarget.style.borderColor = `${card.color}22`;
                       e.currentTarget.style.boxShadow = "none";
-                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.transform = "translateX(0)";
                     }
                   }}
                 >
-                  {/* Card header strip */}
+                  {/* Icon badge */}
                   <div
-                    className="flex items-center gap-3 px-5 py-4"
-                    style={{
-                      background: `linear-gradient(135deg, ${card.color}18 0%, ${card.color}06 100%)`,
-                      borderBottom: `1px solid ${card.color}20`,
-                    }}
+                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${card.color}20`, border: `1px solid ${card.color}35` }}
                   >
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: `${card.color}22`, border: `1px solid ${card.color}35` }}
-                    >
-                      <Icon size={18} style={{ color: card.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-white font-bold text-sm truncate">{card.label}</p>
-                        {card.badge && (
-                          <span
-                            className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide flex-shrink-0"
-                            style={{ background: `${card.color}20`, color: card.color, border: `1px solid ${card.color}40` }}
-                          >
-                            {card.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs mt-0.5 truncate" style={{ color: card.color }}>{card.tagline}</p>
-                    </div>
-                    {!isPlayground && (
-                      <ChevronRight
-                        size={14}
-                        className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ color: card.color }}
-                      />
-                    )}
+                    <Icon size={20} style={{ color: card.color }} />
                   </div>
 
-                  {/* Card body */}
-                  <div className="px-5 py-4 flex flex-col flex-1">
-                    <p className="text-sm leading-relaxed mb-4" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  {/* Text content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="text-white font-bold text-sm">{card.label}</p>
+                      {card.badge && (
+                        <span
+                          className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide flex-shrink-0"
+                          style={{ background: `${card.color}20`, color: card.color, border: `1px solid ${card.color}40` }}
+                        >
+                          {card.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
                       {card.description}
                     </p>
+                  </div>
 
+                  {/* CTA button */}
+                  <div className="flex-shrink-0">
                     {isPlayground ? (
-                      <PlaygroundInterestCard color={card.color} />
+                      <button
+                        onClick={() => setShowPlaygroundModal(true)}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                        style={{ background: `${card.color}20`, color: card.color, border: `1px solid ${card.color}40` }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = `${card.color}35`; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = `${card.color}20`; }}
+                      >
+                        <CtaIcon size={12} />
+                        {card.cta}
+                      </button>
                     ) : (
-                      <div className="mt-auto">
-                        <span
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
-                          style={{ background: `${card.color}18`, color: card.color, border: `1px solid ${card.color}35` }}
-                        >
-                          {card.id === "academy" && <BookOpen size={11} />}
-                          {card.id === "webinars" && <Video size={11} />}
-                          {card.id === "guides" && <FileText size={11} />}
-                          {card.id === "support" && <MessageCircle size={11} />}
-                          {card.cta} <ArrowRight size={10} />
-                        </span>
-                      </div>
+                      <span
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all group-hover:gap-2"
+                        style={{ background: `${card.color}18`, color: card.color, border: `1px solid ${card.color}35` }}
+                      >
+                        <CtaIcon size={12} />
+                        {card.cta}
+                        <ArrowRight size={10} className="opacity-0 group-hover:opacity-100 transition-opacity -ml-1" />
+                      </span>
                     )}
                   </div>
+
+                  {/* Trailing chevron for non-playground */}
+                  {!isPlayground && (
+                    <ChevronRight
+                      size={14}
+                      className="flex-shrink-0 opacity-0 group-hover:opacity-60 transition-opacity"
+                      style={{ color: card.color }}
+                    />
+                  )}
                 </div>
               );
 
