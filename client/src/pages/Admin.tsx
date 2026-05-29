@@ -162,7 +162,7 @@ export default function Admin() {
   }, [location]);
   // Not logged in at all → send to /login with ?next=/admin
   if (!loading && !user) {
-    navigate("/login?next=/admin");
+    navigate("/login?next=/wavvadmin");
     return null;
   }
   // Logged in but not an admin → send back to dashboard

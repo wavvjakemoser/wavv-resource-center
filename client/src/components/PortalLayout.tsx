@@ -27,7 +27,7 @@ const navItems = [
   { href: "/partners",  label: "WAVV Partners",      icon: Users,         color: "#00A9E2" },
 ];
 
-const adminItem = { href: "/admin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" };
+const adminItem = { href: "/wavvadmin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" };
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -90,8 +90,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     if (title) document.title = `${title} — WAVV Success Center`;
   }, [title]);
 
-  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
-  const isAdminPage = location.startsWith("/admin");
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const isAdminPage = location.startsWith("/wavvadmin");
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>

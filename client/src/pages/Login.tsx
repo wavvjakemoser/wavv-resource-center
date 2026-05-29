@@ -7,7 +7,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [, navigate] = useLocation();
 
-  const nextPath = new URLSearchParams(window.location.search).get("next") || "/admin";
+  const nextPath = new URLSearchParams(window.location.search).get("next") || "/wavvadmin";
 
   const checkEmail = trpc.auth.checkEmail.useMutation({
     onSuccess: () => {

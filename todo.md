@@ -1038,3 +1038,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin.tsx: tab content rendering updated (content tabs gated to isSuperAdmin)
 - [x] Admin.tsx: addUserForm state type updated to include owner
 - [x] Admin.tsx: Team Access role selector now has Owner/Super Admin/Partner Admin/Admin options
+
+## URL Restructure (3 Portals)
+
+- [x] App.tsx: rename /admin → /wavvadmin, /wavv-partner → /wavvpartner
+- [x] Admin.tsx: update navigate("/login?next=/admin") → /wavvadmin
+- [x] WavvPartnerPortal.tsx: update /login?next=/wavv-partner → /wavvpartner, /admin → /wavvadmin
+- [x] AcceptInvite.tsx: update /admin → /wavvadmin, /wavv-partner → /wavvpartner, /sign-in → /login
+- [x] Login.tsx: update default nextPath from /admin → /wavvadmin
+- [x] MagicAuth.tsx: update default nextPath from /admin → /wavvadmin
+- [x] PortalLayout.tsx: update adminItem href /admin → /wavvadmin, isAdminPage check, isAdmin to include owner/partner_admin

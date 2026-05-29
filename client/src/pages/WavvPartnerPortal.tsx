@@ -77,13 +77,13 @@ export default function WavvPartnerPortal() {
 
   // Gate: only partner role can access this page
   if (!isLoading && !user) {
-    navigate("/login?next=/wavv-partner");
+    navigate("/login?next=/wavvpartner");
     return null;
   }
   if (!isLoading && user && user.role !== "partner") {
     // Admins go to /admin, everyone else to /dashboard
-    if (user.role === "admin" || user.role === "super_admin" || user.role === "partner_admin") {
-      navigate("/admin");
+    if (user.role === "admin" || user.role === "super_admin" || user.role === "partner_admin" || user.role === "owner") {
+      navigate("/wavvadmin");
     } else {
       navigate("/dashboard");
     }

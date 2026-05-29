@@ -8,7 +8,7 @@ export default function MagicAuth() {
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const nextPath = new URLSearchParams(window.location.search).get("next") || "/admin";
+  const nextPath = new URLSearchParams(window.location.search).get("next") || "/wavvadmin";
 
   const verify = trpc.auth.verifyMagicLink.useMutation({
     onSuccess: async () => {

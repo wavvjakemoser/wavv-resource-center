@@ -34,8 +34,8 @@ export default function AcceptInvite() {
       // Route by role: admins → /admin, partners → /wavv-partner, everyone else → /dashboard
       const role = data?.user?.role;
       const dest =
-        (role === "admin" || role === "super_admin" || role === "partner_admin") ? "/admin" :
-        role === "partner" ? "/wavv-partner" :
+        (role === "admin" || role === "super_admin" || role === "partner_admin" || role === "owner") ? "/wavvadmin" :
+        role === "partner" ? "/wavvpartner" :
         "/dashboard";
       setTimeout(() => navigate(dest), 2000);
     },
@@ -85,7 +85,7 @@ export default function AcceptInvite() {
               <AlertCircle size={40} className="mx-auto text-red-400" />
               <h1 className="text-xl font-bold text-white">Invalid Link</h1>
               <p className="text-sm text-gray-400">This invite link is missing a token. Ask your admin to resend the invite.</p>
-              <Button onClick={() => navigate("/sign-in")} style={{ background: "#0074F4", color: "#fff" }} className="w-full font-semibold">
+              <Button onClick={() => navigate("/login")} style={{ background: "#0074F4", color: "#fff" }} className="w-full font-semibold">
                 Go to Sign In
               </Button>
             </div>
@@ -105,7 +105,7 @@ export default function AcceptInvite() {
               <AlertCircle size={40} className="mx-auto text-red-400" />
               <h1 className="text-xl font-bold text-white">Link Invalid or Expired</h1>
               <p className="text-sm text-gray-400">{validateError.message}</p>
-              <Button onClick={() => navigate("/sign-in")} style={{ background: "#0074F4", color: "#fff" }} className="w-full font-semibold">
+              <Button onClick={() => navigate("/login")} style={{ background: "#0074F4", color: "#fff" }} className="w-full font-semibold">
                 Go to Sign In
               </Button>
             </div>
@@ -229,7 +229,7 @@ export default function AcceptInvite() {
 
               <p className="text-center text-xs text-gray-600">
                 Already have an account?{" "}
-                <button onClick={() => navigate("/sign-in")} className="text-[#0074F4] hover:underline">
+                <button onClick={() => navigate("/login")} className="text-[#0074F4] hover:underline">
                   Sign in
                 </button>
               </p>
