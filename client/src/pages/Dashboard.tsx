@@ -474,18 +474,14 @@ export default function Dashboard() {
                     cursor: isPlayground ? "default" : "pointer",
                   }}
                   onMouseEnter={(e) => {
-                    if (!isPlayground) {
-                      e.currentTarget.style.borderColor = `${card.color}50`;
-                      e.currentTarget.style.boxShadow = `0 4px 28px ${card.color}18`;
-                      e.currentTarget.style.transform = "translateX(4px)";
-                    }
+                    e.currentTarget.style.borderColor = `${card.color}50`;
+                    e.currentTarget.style.boxShadow = `0 4px 28px ${card.color}18`;
+                    e.currentTarget.style.transform = "translateX(4px)";
                   }}
                   onMouseLeave={(e) => {
-                    if (!isPlayground) {
-                      e.currentTarget.style.borderColor = `${card.color}20`;
-                      e.currentTarget.style.boxShadow = "none";
-                      e.currentTarget.style.transform = "translateX(0)";
-                    }
+                    e.currentTarget.style.borderColor = `${card.color}20`;
+                    e.currentTarget.style.boxShadow = "none";
+                    e.currentTarget.style.transform = "translateX(0)";
                   }}
                 >
                   {/* Icon badge */}
