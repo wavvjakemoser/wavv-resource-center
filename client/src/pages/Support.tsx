@@ -4,16 +4,16 @@ import { Headphones, ExternalLink, Sparkles } from "lucide-react";
 const ACTION_CARDS = [
   {
     key: "ai",
-    title: "Ask WAVV AI",
+    title: "Ask WAVV",
     description: "Get an instant answer from our AI assistant — available 24/7",
     icon: Sparkles,
     color: "#0074F4",
     href: undefined as string | undefined,
     onClick: () => {
-      // Find and click the WAVV AI button in the top bar
+      // Find and click the Ask WAVV button (top bar or floating bubble)
       const btns = Array.from(document.querySelectorAll("button"));
       for (const btn of btns) {
-        if (btn.textContent?.includes("WAVV AI")) { btn.click(); break; }
+        if (btn.textContent?.includes("Ask WAVV")) { btn.click(); break; }
       }
     },
   },

@@ -100,7 +100,7 @@ export default function WavvAIChat({ isOpen, onClose }: WavvAIChatProps) {
             <Sparkles size={16} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-semibold text-sm">WAVV AI</p>
+            <p className="text-white font-semibold text-sm">Ask WAVV</p>
             <p className="text-white/70 text-xs">Ask me anything about WAVV</p>
           </div>
           <button
@@ -126,7 +126,7 @@ export default function WavvAIChat({ isOpen, onClose }: WavvAIChatProps) {
                   className="rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-gray-200"
                   style={{ background: "#1e1e1e", maxWidth: "85%" }}
                 >
-                  Hi! I'm WAVV AI. I can help you with product questions, walk you through features, and point you to the right resources. What can I help you with?
+                  Hi! I'm Ask WAVV. I can help you with product questions, walk you through features, and point you to the right resources. What can I help you with?
                 </div>
               </div>
 
@@ -230,7 +230,7 @@ export default function WavvAIChat({ isOpen, onClose }: WavvAIChatProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask WAVV AI anything..."
+              placeholder="Ask me anything about WAVV..."
               className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
               disabled={isLoading}
             />
@@ -244,7 +244,7 @@ export default function WavvAIChat({ isOpen, onClose }: WavvAIChatProps) {
             </button>
           </div>
           <p className="text-xs text-gray-600 text-center mt-2">
-            WAVV AI · Powered by your knowledge base
+            Ask WAVV · Powered by your knowledge base
           </p>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import React from "react";
+import React, { useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -84,10 +84,14 @@ import {
   Flag,
   Upload,
   Paperclip,
+  Lock,
+  Sparkles,
+  Bot,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests";
+type AdminTab = "knowledge" | "analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -95,18 +99,23 @@ export default function Admin() {
   const { user, loading } = useAuth();
   const [location, navigate] = useLocation();
 
+  const isSuperAdmin = user?.role === "super_admin";
+
   // Read ?tab= from the URL to set the initial active tab
   const initialTab = (): AdminTab => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
-    if (t === "users") return "users";
-    if (t === "academy" || t === "content") return "academy";
-    if (t === "webinars") return "webinars";
-    if (t === "guides") return "guides";
-    if (t === "playground") return "playground";
-    if (t === "support") return "support";
-    if (t === "content_requests") return "content_requests";
-    return "analytics";
+    if (t === "knowledge") return "knowledge";
+    if (t === "users" && isSuperAdmin) return "users";
+    if ((t === "academy" || t === "content") && isSuperAdmin) return "academy";
+    if (t === "webinars" && isSuperAdmin) return "webinars";
+    if (t === "guides" && isSuperAdmin) return "guides";
+    if (t === "playground" && isSuperAdmin) return "playground";
+    if (t === "support" && isSuperAdmin) return "support";
+    if (t === "content_requests" && isSuperAdmin) return "content_requests";
+    if (t === "analytics" && isSuperAdmin) return "analytics";
+    // Regular admins always land on knowledge
+    return isSuperAdmin ? "analytics" : "knowledge";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
@@ -114,14 +123,16 @@ export default function Admin() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
-    if (t === "users") setActiveTab("users");
-    else if (t === "academy" || t === "content") setActiveTab("academy");
-    else if (t === "webinars") setActiveTab("webinars");
-    else if (t === "guides") setActiveTab("guides");
-    else if (t === "playground") setActiveTab("playground");
-    else if (t === "support") setActiveTab("support");
-    else if (t === "content_requests") setActiveTab("content_requests");
-    else setActiveTab("analytics");
+    if (t === "knowledge") setActiveTab("knowledge");
+    else if (t === "users" && isSuperAdmin) setActiveTab("users");
+    else if ((t === "academy" || t === "content") && isSuperAdmin) setActiveTab("academy");
+    else if (t === "webinars" && isSuperAdmin) setActiveTab("webinars");
+    else if (t === "guides" && isSuperAdmin) setActiveTab("guides");
+    else if (t === "playground" && isSuperAdmin) setActiveTab("playground");
+    else if (t === "support" && isSuperAdmin) setActiveTab("support");
+    else if (t === "content_requests" && isSuperAdmin) setActiveTab("content_requests");
+    else if (t === "analytics" && isSuperAdmin) setActiveTab("analytics");
+    else setActiveTab(isSuperAdmin ? "analytics" : "knowledge");
   }, [location]);
   // Not logged in at all → send to /login with ?next=/admin
   if (!loading && !user) {
@@ -144,15 +155,16 @@ export default function Admin() {
     );
   }
 
-  const tabs: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
-    { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} /> },
-    { id: "users",            label: "Team Access",       icon: <Shield size={13} /> },
-    { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} /> },
-    { id: "webinars",         label: "Webinars",          icon: <Video size={13} /> },
-    { id: "guides",           label: "Guides",            icon: <FileText size={13} /> },
-    { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} /> },
-    { id: "support",          label: "Support",           icon: <Headphones size={13} /> },
-    { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} /> },
+  const tabs: { id: AdminTab; label: string; icon: React.ReactNode; superAdminOnly?: boolean }[] = [
+    { id: "knowledge",        label: "WAVV Knowledge",    icon: <Sparkles size={13} />,       superAdminOnly: false },
+    { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} />,      superAdminOnly: true },
+    { id: "users",            label: "Team Access",       icon: <Shield size={13} />,         superAdminOnly: true },
+    { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />,  superAdminOnly: true },
+    { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,          superAdminOnly: true },
+    { id: "guides",           label: "Guides",            icon: <FileText size={13} />,       superAdminOnly: true },
+    { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,   superAdminOnly: true },
+    { id: "support",          label: "Support",           icon: <Headphones size={13} />,     superAdminOnly: true },
+    { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />,  superAdminOnly: true },
   ];
 
   return (
@@ -174,27 +186,35 @@ export default function Admin() {
           className="flex items-center gap-0.5 p-1 rounded-xl"
           style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-0"
-              style={
-                activeTab === tab.id
-                  ? { background: "#0074F4", color: "#fff" }
-                  : { color: "#9ca3af" }
-              }
-            >
-              <span className="flex-shrink-0" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {tab.icon}
-              </span>
-              {tab.label}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const locked = tab.superAdminOnly && !isSuperAdmin;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => { if (!locked) setActiveTab(tab.id); }}
+                title={locked ? "Super admin access required" : undefined}
+                className="flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-0"
+                style={
+                  locked
+                    ? { color: "rgba(255,255,255,0.2)", cursor: "not-allowed" }
+                    : activeTab === tab.id
+                    ? { background: "#0074F4", color: "#fff" }
+                    : { color: "#9ca3af" }
+                }
+              >
+                <span className="flex-shrink-0" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {tab.icon}
+                </span>
+                {tab.label}
+                {locked && <Lock size={10} style={{ marginLeft: 2, opacity: 0.5 }} />}
+              </button>
+            );
+          })}
         </div>
 
         {/* ── Tab content ── */}
-        {activeTab === "analytics" && <AnalyticsTab />}
+        {activeTab === "knowledge" && <WavvKnowledgeTab />}
+        {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "academy" && <ContentTab />}
         {activeTab === "webinars" && <WebinarsTab />}
@@ -204,6 +224,121 @@ export default function Admin() {
         {activeTab === "content_requests" && <ContentRequestsTab />}
       </div>
     </PortalLayout>
+  );
+}
+
+// ─── WAVV Knowledge Tab ──────────────────────────────────────────────────────
+function WavvKnowledgeTab() {
+  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const chatMutation = trpc.wavvAi.chat.useMutation();
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = async (content: string) => {
+    if (!content.trim() || isLoading) return;
+    const userMsg = { role: "user" as const, content: content.trim() };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setIsLoading(true);
+    try {
+      const response = await chatMutation.mutateAsync({ messages: newMessages });
+      const aiContent = typeof response.content === "string" ? response.content : String(response.content);
+      setMessages([...newMessages, { role: "assistant", content: aiContent }]);
+    } catch {
+      setMessages([...newMessages, { role: "assistant", content: "Unable to connect. Please try again." }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ background: "#141414", border: "1px solid #2a2a2a", height: "600px", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 py-4 flex-shrink-0" style={{ background: "linear-gradient(135deg, #1a1f2e, #1d2230)", borderBottom: "1px solid #2a2a2a" }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}>
+          <Sparkles size={17} className="text-white" />
+        </div>
+        <div>
+          <p className="text-white font-semibold text-sm">WAVV Knowledge</p>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Internal knowledge base — admin access only</p>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.1)", border: "1px solid rgba(0,116,244,0.2)" }}>
+              <Sparkles size={24} style={{ color: "#0074F4" }} />
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm mb-1">WAVV Knowledge</p>
+              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.4)", maxWidth: "320px" }}>
+                Your internal knowledge base is being set up. Once content is curated, this will be your go-to for finding answers without digging through Slack or Google Drive.
+              </p>
+            </div>
+            <div className="px-4 py-2 rounded-lg text-xs" style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.15)", color: "rgba(255,255,255,0.5)" }}>
+              Content curation coming soon
+            </div>
+          </div>
+        )}
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex items-start gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+              style={{ background: msg.role === "user" ? "linear-gradient(135deg, #67C728, #00A9E2)" : "linear-gradient(135deg, #0074F4, #00A9E2)" }}>
+              {msg.role === "user" ? <Users size={13} className="text-white" /> : <Bot size={13} className="text-white" />}
+            </div>
+            <div className="rounded-2xl px-4 py-3 text-sm" style={{
+              background: msg.role === "user" ? "rgba(0,116,244,0.12)" : "#1e1e1e",
+              border: msg.role === "user" ? "1px solid rgba(0,116,244,0.25)" : "1px solid #2a2a2a",
+              color: "#e5e7eb", maxWidth: "80%",
+              borderRadius: msg.role === "user" ? "1rem 1rem 0.25rem 1rem" : "1rem 1rem 1rem 0.25rem",
+            }}>{msg.content}</div>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex items-start gap-3">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}>
+              <Bot size={13} className="text-white" />
+            </div>
+            <div className="rounded-2xl rounded-tl-sm px-4 py-3" style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}>
+              <div className="flex gap-1">
+                {[0,1,2].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />)}
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div className="px-4 py-3 flex-shrink-0" style={{ borderTop: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}>
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
+            placeholder="Search the WAVV knowledge base..."
+            className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
+            disabled={isLoading}
+          />
+          <button onClick={() => sendMessage(input)} disabled={!input.trim() || isLoading}
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-40"
+            style={{ background: "#0074F4" }}>
+            <Send size={13} className="text-white" />
+          </button>
+        </div>
+        <p className="text-xs text-center mt-2" style={{ color: "rgba(255,255,255,0.2)" }}>WAVV Knowledge · Internal use only</p>
+      </div>
+    </div>
   );
 }
 

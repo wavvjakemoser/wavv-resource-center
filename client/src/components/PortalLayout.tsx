@@ -189,7 +189,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <AISearchBar />
             </div>
 
-            {/* WAVV AI button */}
+            {/* Ask WAVV button (top bar) */}
             <button
               onClick={() => setAiOpen(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex-shrink-0"
@@ -198,10 +198,10 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 color: "white",
                 whiteSpace: "nowrap",
               }}
-              title="Open WAVV AI Chat"
+              title="Open Ask WAVV"
             >
               <Sparkles size={14} />
-              <span className="hidden sm:inline">WAVV AI</span>
+              <span className="hidden sm:inline">Ask WAVV</span>
             </button>
           </header>
 
@@ -212,7 +212,27 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
         </div>
       </div>
 
-      {/* WAVV AI Chat */}
+      {/* Ask WAVV floating bubble (bottom-right) */}
+      {!aiOpen && (
+        <button
+          onClick={() => setAiOpen(true)}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
+          style={{
+            background: "linear-gradient(135deg, #0074F4, #00A9E2)",
+            color: "white",
+            boxShadow: "0 4px 24px rgba(0, 116, 244, 0.45)",
+            fontWeight: 600,
+            fontSize: "14px",
+            whiteSpace: "nowrap",
+          }}
+          title="Ask WAVV"
+        >
+          <Sparkles size={16} />
+          <span>Ask WAVV</span>
+        </button>
+      )}
+
+      {/* Ask WAVV Chat Panel */}
       <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />
 
     </div>

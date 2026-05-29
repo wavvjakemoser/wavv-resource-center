@@ -963,3 +963,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Support card: description pointing to help articles + link to external help center
 - [x] Reuse existing playground_requests table for public interest capture (no new table needed)
 - [x] Add tRPC publicProcedure: playground.submitPublicInterest (name + email, no auth required)
+
+## Ask WAVV + WAVV Knowledge + Admin Gating
+
+- [x] Rename top-bar "WAVV AI" button to "Ask WAVV" and keep it as the trigger
+- [x] Add persistent floating "Ask WAVV" bubble in bottom-right corner of PortalLayout (replaces or supplements top-bar button)
+- [x] Rename WavvAIChat header from "WAVV AI" to "Ask WAVV" with updated subtitle
+- [x] Add WAVV Knowledge tab as leftmost tab in Admin panel (empty chat shell for now)
+- [x] Admin panel: regular admins default to WAVV Knowledge tab; all other tabs grayed out and non-clickable
+- [x] Admin panel: super_admin sees all tabs fully accessible
+- [x] Update initialTab() to default to "knowledge" for admin role, "analytics" for super_admin
