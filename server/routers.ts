@@ -1022,6 +1022,22 @@ export const appRouter = router({
         return { success: true, userId: user.id };
       }),
 
+    // ── Check if email exists (for login page — no email sent) ──────────────
+    checkEmail: publicProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ ctx, input }) => {
+        const email = input.email.trim().toLowerCase();
+        const user = await getUserByEmail(email);
+        if (!user || !user.isActive) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "No account found for this email. Contact your admin if you need access." });
+        }
+        // Create session directly — no email needed
+        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        await trackEvent({ userId: user.id, eventType: "login" });
+        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+      }),
     // ── Magic Link: request a login link (existing users only) ──────────────
     requestMagicLink: publicProcedure
       .input(z.object({ email: z.string().email(), next: z.string().optional() }))

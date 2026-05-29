@@ -1,24 +1,28 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 
 export default function Login() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [, navigate] = useLocation();
 
-  // Capture ?next= so we can redirect after login
   const nextPath = new URLSearchParams(window.location.search).get("next") || "/admin";
 
-  const requestLink = trpc.auth.requestMagicLink.useMutation({
-    onSuccess: () => setSent(true),
-    onError: (err) => setError(err.message || "Something went wrong. Please try again."),
+  const checkEmail = trpc.auth.checkEmail.useMutation({
+    onSuccess: () => {
+      navigate(nextPath);
+    },
+    onError: (err) => {
+      setError(err.message || "No account found for this email. Contact your admin if you need access.");
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!email.trim()) { setError("Please enter your email address."); return; }
-    requestLink.mutate({ email: email.trim().toLowerCase(), next: nextPath });
+    checkEmail.mutate({ email: email.trim().toLowerCase() });
   };
 
   return (
@@ -41,89 +45,62 @@ export default function Login() {
           <p className="text-sm" style={{ color: "#8b949e" }}>Success Center — Team Access</p>
         </div>
 
-        {sent ? (
-          /* ── Sent state ── */
-          <div className="flex flex-col items-center gap-4 text-center py-4">
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
-              style={{ background: "rgba(103,199,40,0.12)", color: "#67C728" }}
-            >
-              ✓
-            </div>
-            <div>
-              <p className="font-semibold text-white text-lg">Check your inbox</p>
-              <p className="text-sm mt-1" style={{ color: "#8b949e" }}>
-                A login link has been sent to{" "}
-                <span className="text-white font-medium">{email}</span>.
-                It expires in 24 hours and can only be used once.
-              </p>
-            </div>
-            <button
-              onClick={() => { setSent(false); setEmail(""); }}
-              className="text-sm underline"
-              style={{ color: "#8b949e" }}
-            >
-              Use a different email
-            </button>
-          </div>
-        ) : (
-          /* ── Request form ── */
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <p className="text-white font-semibold text-lg text-center mb-1">Team Login</p>
-              <p className="text-sm text-center" style={{ color: "#8b949e" }}>
-                Enter your email and we'll send you a one-click login link. No password needed.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium" style={{ color: "#8b949e" }}>
-                Work Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@wavv.com"
-                autoFocus
-                className="w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all"
-                style={{
-                  background: "#0d1117",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  fontFamily: "inherit",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#0074F4")}
-                onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
-              />
-            </div>
-
-            {error && (
-              <p
-                className="text-xs rounded-lg px-3 py-2"
-                style={{ background: "rgba(248,81,73,0.12)", color: "#f85149" }}
-              >
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={requestLink.isPending}
-              className="w-full rounded-lg py-3 text-sm font-semibold text-white transition-opacity"
-              style={{
-                background: "linear-gradient(135deg, #0074F4, #0056b3)",
-                opacity: requestLink.isPending ? 0.6 : 1,
-              }}
-            >
-              {requestLink.isPending ? "Sending…" : "Send Login Link →"}
-            </button>
-
-            <p className="text-xs text-center" style={{ color: "#8b949e" }}>
-              Only WAVV team members with an active account can log in.
-              Contact your admin if you need access.
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <p className="text-white font-semibold text-lg text-center mb-1">Team Login</p>
+            <p className="text-sm text-center" style={{ color: "#8b949e" }}>
+              Enter your work email to access the WAVV Admin panel.
             </p>
-          </form>
-        )}
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium" style={{ color: "#8b949e" }}>
+              Work Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
+              placeholder="you@wavv.com"
+              autoFocus
+              className="w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all"
+              style={{
+                background: "#0d1117",
+                border: `1px solid ${error ? "rgba(248,81,73,0.5)" : "rgba(255,255,255,0.12)"}`,
+                fontFamily: "inherit",
+              }}
+              onFocus={(e) => { if (!error) e.target.style.borderColor = "#0074F4"; }}
+              onBlur={(e) => { if (!error) e.target.style.borderColor = "rgba(255,255,255,0.12)"; }}
+            />
+          </div>
+
+          {error && (
+            <p
+              className="text-xs rounded-lg px-3 py-2"
+              style={{ background: "rgba(248,81,73,0.12)", color: "#f85149" }}
+            >
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={checkEmail.isPending}
+            className="w-full rounded-lg py-3 text-sm font-semibold text-white transition-opacity"
+            style={{
+              background: "linear-gradient(135deg, #0074F4, #0056b3)",
+              opacity: checkEmail.isPending ? 0.6 : 1,
+            }}
+          >
+            {checkEmail.isPending ? "Verifying…" : "Sign In →"}
+          </button>
+
+          <p className="text-xs text-center" style={{ color: "#8b949e" }}>
+            Only WAVV team members with an active account can log in.
+            Contact your admin if you need access.
+          </p>
+        </form>
       </div>
 
       {/* Footer */}

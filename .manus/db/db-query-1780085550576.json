@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, name, email, role FROM users ORDER BY id LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT id, name, email, role FROM users ORDER BY id LIMIT 20;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Jake Moser",
+      "email": "jake.moser@wavv.com",
+      "role": "super_admin"
+    },
+    {
+      "id": "90001",
+      "name": "Spencer Harman",
+      "email": "spencer.harman@wavv.com",
+      "role": "super_admin"
+    },
+    {
+      "id": "120001",
+      "name": "Steve Keiser",
+      "email": "steve.keiser@wavv.com",
+      "role": "super_admin"
+    },
+    {
+      "id": "180001",
+      "name": "Cassie Bogart",
+      "email": "casse.bogart@wavv.com",
+      "role": "admin"
+    },
+    {
+      "id": "210001",
+      "name": "Malia Robinson",
+      "email": "malia.robinson@wavv.com",
+      "role": "admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\tJake Moser\tjake.moser@wavv.com\tsuper_admin\n90001\tSpencer Harman\tspencer.harman@wavv.com\tsuper_admin\n120001\tSteve Keiser\tsteve.keiser@wavv.com\tsuper_admin\n180001\tCassie Bogart\tcasse.bogart@wavv.com\tadmin\n210001\tMalia Robinson\tmalia.robinson@wavv.com\tadmin\n",
+  "stderr": "",
+  "execution_time_ms": 576
+}
