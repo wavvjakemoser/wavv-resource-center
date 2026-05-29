@@ -104,7 +104,7 @@ const WAVV_PILLARS = [
   {
     icon: Users,
     color: "#67C728",
-    title: "Built for Sales & CS Teams",
+    title: "Built for Anyone Making Outbound Calls",
     body: "Whether you're onboarding new reps or running a high-volume outreach campaign, WAVV gives your team the speed and visibility to hit their numbers every day.",
   },
 ];
@@ -352,7 +352,7 @@ export default function Dashboard() {
               className="inline-flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-80"
               style={{ color: "#0074F4", textDecoration: "none" }}
             >
-              Learn more at wavv.com <ArrowRight size={12} />
+              Just learn more <ArrowRight size={12} />
             </a>
           </div>
         </section>
@@ -458,7 +458,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2.5 mb-6">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
             <Sparkles size={14} style={{ color: "#0074F4" }} />
-            <h2 className="text-sm font-bold text-white tracking-wide">Start Here</h2>
+            <h2 className="text-sm font-bold text-white tracking-wide">Explore the Center</h2>
           </div>
 
           {/* Full-width single-column stack */}
