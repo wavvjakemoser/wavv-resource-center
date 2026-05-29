@@ -1090,120 +1090,12 @@ function SuperAdminIcon({ size = 14 }: { size?: number }) {
   return <Shield style={{ width: size, height: size, color: "#e879f9" }} />;
 }
 
-// ─── User Profile Drawer ─────────────────────────────────────────────────────
-function UserProfileDrawer({
-  userId,
-  onClose,
-  onAction,
-  isSuperAdmin,
-  isSelf,
-}: {
-  userId: number;
-  onClose: () => void;
-  onAction: (action: "demote" | "remove", userId: number, userName: string, currentRole: string) => void;
-  isSuperAdmin: boolean;
-  isSelf: boolean;
-}) {
-  const { data: stats, isLoading } = trpc.admin.getUserStats.useQuery({ userId });
-
-  const initials = stats?.name ? stats.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) : "?";
-
-  const statItems = stats ? [
-    { label: "Lessons Started", value: stats.lessonsStarted, color: "#38bdf8" },
-    { label: "Lessons Completed", value: stats.lessonsCompleted, color: "#4ade80" },
-    { label: "Courses Started", value: stats.coursesStarted, color: "#f59e0b" },
-  ] : [];
-
-  return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-        <DialogHeader>
-          <DialogTitle className="text-white">User Profile</DialogTitle>
-          <DialogDescription className="text-gray-500 text-xs">Activity and account details</DialogDescription>
-        </DialogHeader>
-        {isLoading ? (
-          <div className="flex items-center justify-center py-10">
-            <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
-          </div>
-        ) : stats ? (
-          <div className="space-y-5 py-2">
-            {/* Avatar + name */}
-            <div className="flex items-center gap-4">
-              <div
-                className="h-14 w-14 rounded-2xl flex items-center justify-center text-lg font-bold text-white flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #0074F4, #67C728)" }}
-              >
-                {initials}
-              </div>
-              <div>
-                <p className="text-white font-semibold text-base">{stats.name ?? "—"}</p>
-                <p className="text-gray-400 text-xs">{stats.email ?? "—"}</p>
-                <div className="mt-1">
-                  {stats.role === "super_admin" ? (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9" }}>Super Admin</span>
-                  ) : stats.role === "admin" ? (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24" }}>Admin</span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(156,163,175,0.15)", color: "#9ca3af" }}>User</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Meta */}
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <p className="text-gray-500 mb-0.5">Member Since</p>
-                <p className="text-white font-medium">{stats.createdAt ? new Date(stats.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</p>
-              </div>
-              <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <p className="text-gray-500 mb-0.5">Last Active</p>
-                <p className="text-white font-medium">{stats.lastSignedIn ? new Date(stats.lastSignedIn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</p>
-              </div>
-            </div>
-
-            {/* Activity stats */}
-            <div className="grid grid-cols-3 gap-2">
-              {statItems.map(({ label, value, color }) => (
-                <div key={label} className="rounded-xl p-3 text-center" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <p className="text-2xl font-bold" style={{ color }}>{value}</p>
-                  <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Actions — demote and remove only; promote is handled from the table row */}
-            {!isSelf && (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {stats.role !== "admin" && stats.role !== "owner" && isSuperAdmin && (
-                  <Button size="sm" className="text-xs h-7 px-3 text-gray-400 hover:text-white" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-                    onClick={() => { onAction("demote", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                    <ShieldOff className="h-3 w-3 mr-1" /> Demote
-                  </Button>
-                )}
-                {stats.role !== "owner" && (
-                  <Button size="sm" className="text-xs h-7 px-3 text-red-400 hover:text-red-300" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}
-                    onClick={() => { onAction("remove", stats.id, stats.name ?? stats.email ?? "User", stats.role); onClose(); }}>
-                    <Trash2 className="h-3 w-3 mr-1" /> Remove
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-gray-500 text-sm py-6 text-center">User not found.</p>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 function UsersTab() {
   const { user: currentUser } = useAuth();
   const isSuperAdmin = currentUser?.role === "super_admin" || currentUser?.role === "owner";
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
-  const [profileUserId, setProfileUserId] = useState<number | null>(null);
   // Promote dialog: shows a role picker
   const [promoteDialog, setPromoteDialog] = useState<{
     open: boolean;
@@ -1338,14 +1230,32 @@ function UsersTab() {
     }
   }
 
-  // Roles the current user can promote someone TO (up to but not above their own level)
+  // Roles the current user can promote someone TO — per defined hierarchy rules:
+  // Owner: can promote anyone to owner, super_admin, or partner_admin
+  // Super Admin: can promote admin → super_admin only
+  // Partner Admin: can promote admin → super_admin or partner_admin; super_admin → partner_admin
   function getPromotableRoles(targetCurrentRole: string): UserRole[] {
     const myRole = currentUser?.role;
-    const hierarchy: UserRole[] = ["admin", "partner_admin", "super_admin", "owner"];
-    const myIdx = hierarchy.indexOf(myRole as UserRole);
-    const targetIdx = hierarchy.indexOf(targetCurrentRole as UserRole);
-    // Can only promote to roles strictly above target's current role, up to (and including) own level
-    return hierarchy.filter((r, i) => i > targetIdx && i <= myIdx);
+    if (myRole === "owner") {
+      // Owner can promote to owner, super_admin, or partner_admin (anything above admin, up to owner)
+      const all: UserRole[] = ["partner_admin", "super_admin", "owner"];
+      // Only show roles strictly above the target's current role
+      const hierarchy: UserRole[] = ["admin", "partner_admin", "super_admin", "owner"];
+      const targetIdx = hierarchy.indexOf(targetCurrentRole as UserRole);
+      return all.filter(r => hierarchy.indexOf(r) > targetIdx);
+    }
+    if (myRole === "super_admin") {
+      // Super Admin can only promote admin → super_admin
+      if (targetCurrentRole === "admin") return ["super_admin"];
+      return [];
+    }
+    if (myRole === "partner_admin") {
+      // Partner Admin can promote admin → super_admin or partner_admin; super_admin → partner_admin
+      if (targetCurrentRole === "admin") return ["super_admin", "partner_admin"];
+      if (targetCurrentRole === "super_admin") return ["partner_admin"];
+      return [];
+    }
+    return [];
   }
 
   const isPending = updateRole.isPending || removeUser.isPending;
@@ -1470,7 +1380,7 @@ function UsersTab() {
                 const initials = (u.name ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
                 const pending = isSuperAdmin && u.role === "user" && isPendingPromotion(u.email);
                 return (
-                  <TableRow key={u.id} className="cursor-pointer hover:bg-white/5 transition" onClick={() => setProfileUserId(u.id)} style={{ borderBottom: "1px solid #1e1e1e", background: isSelf ? "rgba(0,116,244,0.05)" : "transparent" }}>
+                  <TableRow key={u.id} className="hover:bg-white/5 transition" style={{ borderBottom: "1px solid #1e1e1e", background: isSelf ? "rgba(0,116,244,0.05)" : "transparent" }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
@@ -1556,20 +1466,6 @@ function UsersTab() {
         </Table>
       </div>
 
-      {/* User Profile Drawer */}
-      {profileUserId !== null && (
-        <UserProfileDrawer
-          userId={profileUserId}
-          onClose={() => setProfileUserId(null)}
-          isSuperAdmin={isSuperAdmin}
-          isSelf={profileUserId === currentUser?.id}
-          onAction={(action, userId, userName, currentRole) => {
-            if (action === "demote" || action === "remove") {
-              setConfirmDialog({ open: true, userId, userName, currentRole, action });
-            }
-          }}
-        />
-      )}
 
       {/* Promote dialog — role picker */}
       <Dialog open={!!promoteDialog?.open} onOpenChange={(open) => { if (!open) setPromoteDialog(null); }}>
