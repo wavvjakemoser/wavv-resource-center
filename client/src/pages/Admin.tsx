@@ -187,9 +187,8 @@ export default function Admin() {
   // partner_admin: knowledge + partners only
   // admin: knowledge only
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode; requiresSuperAdmin?: boolean; requiresPartnerAdmin?: boolean; requiresOwner?: boolean }[] = [
-    { id: "knowledge",         label: "WAVV Knowledge",  icon: <Sparkles size={13} /> },
-    { id: "analytics",         label: "Analytics",       icon: <BarChart3 size={13} />,     requiresSuperAdmin: true },
     { id: "users",             label: "Team Access",     icon: <Shield size={13} />,        requiresSuperAdmin: true },
+    { id: "analytics",         label: "Analytics",       icon: <BarChart3 size={13} />,     requiresSuperAdmin: true },
     { id: "academy",           label: "Academy",         icon: <GraduationCap size={13} />, requiresSuperAdmin: true },
     { id: "webinars",          label: "Webinars",        icon: <Video size={13} />,         requiresSuperAdmin: true },
     { id: "guides",            label: "Guides",          icon: <FileText size={13} />,      requiresSuperAdmin: true },
@@ -211,6 +210,22 @@ export default function Admin() {
               Visible to admins only
             </p>
           </div>
+        </div>
+
+        {/* ── WAVV Knowledge standalone button ── */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setActiveTab("knowledge")}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+            style={
+              activeTab === "knowledge"
+                ? { background: "#0074F4", color: "#fff", border: "1px solid #0074F4" }
+                : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
+            }
+          >
+            <Sparkles size={14} />
+            WAVV Knowledge
+          </button>
         </div>
 
         {/* ── Tab bar ── */}
@@ -445,17 +460,15 @@ function WavvKnowledgeTab() {
 // ─── Analytics Tab ────────────────────────────────────────────────────────────
 function AnalyticsTab() {
   const [days, setDays] = useState<TimeRange>(30);
-  const [resetStep, setResetStep] = useState<0 | 1 | 2 | 3>(0);
-  const [resetConfirmText, setResetConfirmText] = useState("");
+  const [resetOpen, setResetOpen] = useState(false);
   const utils = trpc.useUtils();
   const { user: analyticsUser } = useAuth();
-  const isSuperAdmin = analyticsUser?.role === "super_admin";
+  const isSuperAdmin = analyticsUser?.role === "super_admin" || analyticsUser?.role === "owner";
 
   const resetAnalytics = trpc.analytics.resetAnalytics.useMutation({
     onSuccess: () => {
       toast.success("Analytics data has been cleared.");
-      setResetStep(0);
-      setResetConfirmText("");
+      setResetOpen(false);
       utils.analytics.getSummary.invalidate();
       utils.analytics.getEventCounts.invalidate();
       utils.analytics.getDailyEvents.invalidate();
@@ -468,8 +481,8 @@ function AnalyticsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Reset confirmation dialog — triple confirmation */}
-      <Dialog open={resetStep > 0} onOpenChange={(open) => { if (!open) { setResetStep(0); setResetConfirmText(""); } }}>
+      {/* Reset confirmation dialog — single confirmation */}
+      <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
@@ -477,40 +490,18 @@ function AnalyticsTab() {
               Reset All Analytics
             </DialogTitle>
             <DialogDescription className="text-gray-400">
-              {resetStep === 1 && "This will permanently erase all analytics event data. This action cannot be undone."}
-              {resetStep === 2 && "Are you absolutely sure? All historical analytics data will be lost."}
-              {resetStep === 3 && "Type RESET below to confirm. This is your last chance to cancel."}
+              This will permanently erase all analytics event data. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          {resetStep === 3 && (
-            <div className="py-2">
-              <Input
-                placeholder="Type RESET to confirm"
-                value={resetConfirmText}
-                onChange={(e) => setResetConfirmText(e.target.value)}
-                className="bg-black/30 border-red-500/30 text-white placeholder:text-gray-600"
-                autoFocus
-              />
-            </div>
-          )}
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => { setResetStep(0); setResetConfirmText(""); }} className="text-gray-400">Cancel</Button>
-            {resetStep < 3 ? (
-              <Button
-                variant="destructive"
-                onClick={() => setResetStep((s) => (s + 1) as 1 | 2 | 3)}
-              >
-                {resetStep === 1 ? "Yes, I understand" : "Yes, erase all data"}
-              </Button>
-            ) : (
-              <Button
-                variant="destructive"
-                disabled={resetConfirmText !== "RESET" || resetAnalytics.isPending}
-                onClick={() => resetAnalytics.mutate()}
-              >
-                {resetAnalytics.isPending ? "Resetting..." : "Confirm Reset"}
-              </Button>
-            )}
+            <Button variant="ghost" onClick={() => setResetOpen(false)} className="text-gray-400">Cancel</Button>
+            <Button
+              variant="destructive"
+              disabled={resetAnalytics.isPending}
+              onClick={() => resetAnalytics.mutate()}
+            >
+              {resetAnalytics.isPending ? "Resetting..." : "Reset Analytics"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -521,7 +512,7 @@ function AnalyticsTab() {
         <div className="flex items-center gap-3">
           {isSuperAdmin && (
             <button
-              onClick={() => setResetStep(1)}
+              onClick={() => setResetOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
               style={{
                 background: "rgba(239,68,68,0.08)",
