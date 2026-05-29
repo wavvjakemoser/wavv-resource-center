@@ -118,12 +118,14 @@ export default function Admin() {
   const [location, navigate] = useLocation();
 
   const isSuperAdmin = user?.role === "super_admin";
+  const isPartnerAdmin = user?.role === "partner_admin";
 
   // Read ?tab= from the URL to set the initial active tab
   const initialTab = (): AdminTab => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
     if (t === "knowledge") return "knowledge";
+    if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) return "partner_analytics";
     if (t === "users" && isSuperAdmin) return "users";
     if ((t === "academy" || t === "content") && isSuperAdmin) return "academy";
     if (t === "webinars" && isSuperAdmin) return "webinars";
@@ -132,8 +134,8 @@ export default function Admin() {
     if (t === "support" && isSuperAdmin) return "support";
     if (t === "content_requests" && isSuperAdmin) return "content_requests";
     if (t === "analytics" && isSuperAdmin) return "analytics";
-    // Regular admins always land on knowledge
-    return isSuperAdmin ? "analytics" : "knowledge";
+    // partner_admin defaults to Partners tab; regular admins land on knowledge
+    return isSuperAdmin ? "analytics" : isPartnerAdmin ? "partner_analytics" : "knowledge";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
@@ -142,6 +144,7 @@ export default function Admin() {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
     if (t === "knowledge") setActiveTab("knowledge");
+    else if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("partner_analytics");
     else if (t === "users" && isSuperAdmin) setActiveTab("users");
     else if ((t === "academy" || t === "content") && isSuperAdmin) setActiveTab("academy");
     else if (t === "webinars" && isSuperAdmin) setActiveTab("webinars");
@@ -150,7 +153,7 @@ export default function Admin() {
     else if (t === "support" && isSuperAdmin) setActiveTab("support");
     else if (t === "content_requests" && isSuperAdmin) setActiveTab("content_requests");
     else if (t === "analytics" && isSuperAdmin) setActiveTab("analytics");
-    else setActiveTab(isSuperAdmin ? "analytics" : "knowledge");
+    else setActiveTab(isSuperAdmin ? "analytics" : isPartnerAdmin ? "partner_analytics" : "knowledge");
   }, [location]);
   // Not logged in at all → send to /login with ?next=/admin
   if (!loading && !user) {
@@ -158,7 +161,7 @@ export default function Admin() {
     return null;
   }
   // Logged in but not an admin → send back to dashboard
-  if (!loading && user && user.role !== "admin" && user.role !== "super_admin") {
+  if (!loading && user && user.role !== "admin" && user.role !== "super_admin" && user.role !== "partner_admin") {
     navigate("/dashboard");
     return null;
   }
@@ -173,8 +176,9 @@ export default function Admin() {
     );
   }
 
-  const tabs: { id: AdminTab; label: string; icon: React.ReactNode; superAdminOnly?: boolean }[] = [
+  const tabs: { id: AdminTab; label: string; icon: React.ReactNode; superAdminOnly?: boolean; partnerAdminAllowed?: boolean }[] = [
     { id: "knowledge",        label: "WAVV Knowledge",    icon: <Sparkles size={13} />,       superAdminOnly: false },
+    { id: "partner_analytics", label: "Partners",         icon: <Users size={13} />,           superAdminOnly: false, partnerAdminAllowed: true },
     { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} />,      superAdminOnly: true },
     { id: "users",            label: "Team Access",       icon: <Shield size={13} />,         superAdminOnly: true },
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />,  superAdminOnly: true },
@@ -183,7 +187,6 @@ export default function Admin() {
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,   superAdminOnly: true },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,     superAdminOnly: true },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />,  superAdminOnly: true },
-    { id: "partner_analytics", label: "Partners",         icon: <Users size={13} />,           superAdminOnly: true },
   ];
 
   return (
@@ -206,7 +209,9 @@ export default function Admin() {
           style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
           {tabs.map((tab) => {
-            const locked = tab.superAdminOnly && !isSuperAdmin;
+            // Locked if: superAdminOnly and not super_admin, OR partnerAdminAllowed but user is neither super_admin nor partner_admin
+            const locked = (tab.superAdminOnly && !isSuperAdmin && !tab.partnerAdminAllowed) ||
+                           (tab.superAdminOnly && !isSuperAdmin && !isPartnerAdmin);
             return (
               <button
                 key={tab.id}
@@ -241,7 +246,7 @@ export default function Admin() {
         {activeTab === "playground" && <PlaygroundTab />}
         {activeTab === "support" && <SupportTab />}
         {activeTab === "content_requests" && <ContentRequestsTab />}
-        {activeTab === "partner_analytics" && isSuperAdmin && <PartnerAnalyticsTab />}
+        {activeTab === "partner_analytics" && (isSuperAdmin || isPartnerAdmin) && <PartnerAnalyticsTab isPartnerAdmin={isPartnerAdmin} />}
       </div>
     </PortalLayout>
   );
@@ -5811,8 +5816,14 @@ function NotificationsTab() {
 }
 
 // ─── Partner Analytics Tab ────────────────────────────────────────────────────
-function PartnerAnalyticsTab() {
-  const { data: allUsers = [], isLoading } = trpc.admin.listUsers.useQuery();
+function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: boolean }) {
+  const { data: allUsers = [], isLoading, refetch } = trpc.admin.listUsers.useQuery();
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName, setInviteName] = useState("");
+  const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [inviteError, setInviteError] = useState("");
+  const addUserMutation = trpc.admin.addUser.useMutation();
 
   const partnerAdmins = allUsers.filter((u: any) => u.role === "partner_admin");
   const partners = allUsers.filter((u: any) => u.role === "partner");
@@ -5857,7 +5868,98 @@ function PartnerAnalyticsTab() {
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">Track partner accounts, engagement, and program health</p>
         </div>
+        <button
+          onClick={() => { setShowInvite(true); setInviteStatus("idle"); setInviteError(""); setInviteEmail(""); setInviteName(""); }}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+          style={{ background: "#0074F4", color: "#fff" }}
+        >
+          <UserPlus size={13} />
+          Invite Partner
+        </button>
       </div>
+
+      {/* Invite modal */}
+      {showInvite && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.7)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowInvite(false); }}
+        >
+          <div className="rounded-2xl p-6 w-full max-w-sm space-y-4" style={{ background: "#1a1a2e", border: "1px solid #2a2a2a" }}>
+            <h3 className="text-base font-semibold text-white">Invite WAVV Partner</h3>
+            <p className="text-xs text-gray-500">They will receive access to the WAVV Partners section and required onboarding content.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Full Name</label>
+                <input
+                  className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
+                  style={{ background: "#0d0d0d", border: "1px solid #333" }}
+                  placeholder="Jane Smith"
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Email Address</label>
+                <input
+                  className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
+                  style={{ background: "#0d0d0d", border: "1px solid #333" }}
+                  placeholder="jane@company.com"
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Role</label>
+                <div
+                  className="w-full rounded-lg px-3 py-2 text-sm flex items-center gap-2"
+                  style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.2)", color: "#60a5fa" }}
+                >
+                  <Users size={13} />
+                  WAVV Partner
+                  <span className="ml-auto text-[10px] text-gray-600">{isPartnerAdmin ? "Partner Admin can only assign this role" : "Fixed"}</span>
+                </div>
+              </div>
+            </div>
+            {inviteStatus === "error" && (
+              <p className="text-xs text-red-400">{inviteError}</p>
+            )}
+            {inviteStatus === "success" && (
+              <p className="text-xs text-green-400">Partner invited successfully.</p>
+            )}
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => setShowInvite(false)}
+                className="flex-1 rounded-lg py-2 text-sm font-medium text-gray-400 transition-all"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #333" }}
+              >
+                Cancel
+              </button>
+              <button
+                disabled={inviteStatus === "loading" || !inviteEmail.trim() || !inviteName.trim()}
+                onClick={async () => {
+                  setInviteStatus("loading");
+                  setInviteError("");
+                  try {
+                    await addUserMutation.mutateAsync({ name: inviteName.trim(), email: inviteEmail.trim(), role: "partner", origin: window.location.origin });
+                    setInviteStatus("success");
+                    refetch();
+                    setTimeout(() => setShowInvite(false), 1500);
+                  } catch (err: any) {
+                    setInviteStatus("error");
+                    setInviteError(err?.message ?? "Failed to invite partner. Please try again.");
+                  }
+                }}
+                className="flex-1 rounded-lg py-2 text-sm font-medium transition-all disabled:opacity-50"
+                style={{ background: "#0074F4", color: "#fff" }}
+              >
+                {inviteStatus === "loading" ? "Inviting..." : "Send Invite"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

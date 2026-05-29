@@ -1009,3 +1009,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Add partner role to schema (WAVV Partners access only)
 - [ ] Team Access: partner_admin can invite partner-role users
 - [ ] Partner Analytics tab in Admin: active partners, course completion rate, Apply Now CTA clicks, partner logins (7d/30d)
+
+## Partner Admin Access Control
+- [ ] partner_admin sees only WAVV Knowledge + Partner Analytics tabs in Admin panel (all others grayed/locked)
+- [ ] partner_admin defaults to Partner Analytics tab on login
+- [ ] Invite Partner button in Partner Analytics tab (visible to super_admin and partner_admin)
+- [ ] When partner_admin initiates invite, role is locked to "partner" — no other role options shown
+- [ ] Server: allow partner_admin to call admin.addUser but only with role="partner"
+- [ ] Server: allow partner_admin to call admin.listUsers (filtered to partner/partner_admin rows only)

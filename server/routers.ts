@@ -118,6 +118,14 @@ const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
   return next({ ctx });
 });
 
+// Procedure accessible by partner_admin (can only invite partner role) OR super_admin
+const partnerAdminOrSuperProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== "super_admin" && ctx.user.role !== "partner_admin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Partner admin or super admin access required" });
+  }
+  return next({ ctx });
+});
+
 // ─── Academy Router ───────────────────────────────────────────────────────────
 const academyRouter = router({
   getCourses: protectedProcedure.query(async () => {
@@ -1088,12 +1096,16 @@ export const appRouter = router({
   analytics: analyticsRouter,
   scheduled: scheduledRouter,
   admin: router({
-    listUsers: superAdminProcedure
+    listUsers: partnerAdminOrSuperProcedure
       .input(z.object({ search: z.string().optional() }).optional())
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
         const allUsersData = await getAllUsers();
+        // partner_admin only sees partner and partner_admin accounts
+        const filtered = ctx.user.role === "partner_admin"
+          ? allUsersData.filter((u: any) => u.role === "partner" || u.role === "partner_admin")
+          : allUsersData;
         const search = input?.search?.trim().toLowerCase();
-        if (!search) return allUsersData;
+        if (!search) return filtered;
         return allUsersData.filter(
           (u) =>
             (u.name ?? "").toLowerCase().includes(search) ||
@@ -1133,7 +1145,7 @@ export const appRouter = router({
         if (!stats) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
         return stats;
       }),
-    addUser: superAdminProcedure
+    addUser: partnerAdminOrSuperProcedure
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
@@ -1141,6 +1153,10 @@ export const appRouter = router({
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
+        // partner_admin can only invite partner role — enforce server-side
+        if (ctx.user.role === "partner_admin" && input.role !== "partner") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Partner admins can only invite WAVV Partners" });
+        }
         // Create the user stub
         const result = await createManualUser({ name: input.name, email: input.email, role: input.role });
         if (!result) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user" });
