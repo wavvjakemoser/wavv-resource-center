@@ -66,18 +66,6 @@ const START_HERE_CARDS = [
     badge: null,
   },
   {
-    id: "support",
-    href: "/support",
-    label: "WAVV Support",
-    icon: Headphones,
-    color: "#FF9900",
-    tagline: "Stuck? Get help fast.",
-    description: "Browse help articles, ask WAVV AI for an instant answer, or connect directly with a support rep through the Help Center.",
-    cta: "Get Support",
-    ctaIcon: MessageCircle,
-    badge: null,
-  },
-  {
     id: "playground",
     href: null,
     label: "WAVV Playground",
@@ -88,6 +76,18 @@ const START_HERE_CARDS = [
     cta: "Get Notified",
     ctaIcon: Bell,
     badge: "Coming Soon",
+  },
+  {
+    id: "support",
+    href: "/support",
+    label: "WAVV Support",
+    icon: Headphones,
+    color: "#FF9900",
+    tagline: "Stuck? Get help fast.",
+    description: "Browse help articles, ask WAVV AI for an instant answer, or connect directly with a support rep through the Help Center.",
+    cta: "Get Support",
+    ctaIcon: MessageCircle,
+    badge: null,
   },
 ];
 
@@ -434,39 +434,33 @@ export default function Dashboard() {
                     </p>
                   </div>
 
-                  {/* CTA button */}
-                  <div className="flex-shrink-0">
+                  {/* CTA button — fixed width so all buttons are the same size */}
+                  <div className="flex-shrink-0" style={{ width: "160px" }}>
                     {isPlayground ? (
                       <button
                         onClick={() => setShowPlaygroundModal(true)}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all"
                         style={{ background: `${card.color}20`, color: card.color, border: `1px solid ${card.color}40` }}
                         onMouseEnter={(e) => { e.currentTarget.style.background = `${card.color}35`; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = `${card.color}20`; }}
                       >
                         <CtaIcon size={12} />
                         {card.cta}
+                        <ArrowRight size={11} className="ml-auto" />
                       </button>
                     ) : (
                       <span
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all group-hover:gap-2"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all"
                         style={{ background: `${card.color}18`, color: card.color, border: `1px solid ${card.color}35` }}
                       >
                         <CtaIcon size={12} />
                         {card.cta}
-                        <ArrowRight size={10} className="opacity-0 group-hover:opacity-100 transition-opacity -ml-1" />
+                        <ArrowRight size={11} className="ml-auto" />
                       </span>
                     )}
                   </div>
 
-                  {/* Trailing chevron for non-playground */}
-                  {!isPlayground && (
-                    <ChevronRight
-                      size={14}
-                      className="flex-shrink-0 opacity-0 group-hover:opacity-60 transition-opacity"
-                      style={{ color: card.color }}
-                    />
-                  )}
+
                 </div>
               );
 
