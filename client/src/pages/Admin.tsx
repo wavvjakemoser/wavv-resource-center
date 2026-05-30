@@ -1094,6 +1094,7 @@ function SuperAdminIcon({ size = 14 }: { size?: number }) {
 function UsersTab() {
   const { user: currentUser } = useAuth();
   const isSuperAdmin = currentUser?.role === "customer_admin" || currentUser?.role === "owner";
+  const isOwner = currentUser?.role === "owner";
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   // Promote dialog: shows a role picker
@@ -1153,7 +1154,7 @@ function UsersTab() {
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
       if (promoteDialog) {
-        const roleLabels: Record<UserRole, string> = { owner: "an Owner", customer_admin: "a Super Admin", partner_admin: "a Partner Admin", admin: "an Admin" };
+        const roleLabels: Record<UserRole, string> = { owner: "an Owner", customer_admin: "a Customer Admin", partner_admin: "a Partner Admin", admin: "an Admin" };
         toast.success(`${promoteDialog.userName} is now ${roleLabels[promoteDialog.selectedRole]}.`);
         setPromoteDialog(null);
       } else {
@@ -1191,9 +1192,20 @@ function UsersTab() {
     );
   }, [users, search, roleFilter]);
 
+  const ownerCount = useMemo(() => (users ?? []).filter((u) => u.role === "owner").length, [users]);
   const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "customer_admin").length, [users]);
+  const partnerAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "partner_admin").length, [users]);
   const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "admin").length, [users]);
   const statCards: { filter: RoleFilter; label: string; value: number; iconEl: React.ReactNode; color: string; bg: string; activeBorder: string }[] = [
+    {
+      filter: "owner",
+      label: "Owners",
+      value: ownerCount,
+      iconEl: <Crown className="h-5 w-5" style={{ color: "#fb923c" }} />,
+      color: "#fb923c",
+      bg: "rgba(251,146,60,0.1)",
+      activeBorder: "#fb923c",
+    },
     {
       filter: "customer_admin",
       label: "Customer Admins",
@@ -1202,6 +1214,15 @@ function UsersTab() {
       color: "#e879f9",
       bg: "rgba(232,121,249,0.1)",
       activeBorder: "#e879f9",
+    },
+    {
+      filter: "partner_admin",
+      label: "Partner Admins",
+      value: partnerAdminCount,
+      iconEl: <Shield className="h-5 w-5" style={{ color: "#00A9E2" }} />,
+      color: "#00A9E2",
+      bg: "rgba(0,169,226,0.1)",
+      activeBorder: "#00A9E2",
     },
     {
       filter: "admin",
@@ -1311,7 +1332,7 @@ function UsersTab() {
       </div>
 
       {/* Clickable stat cards */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {statCards.map((s) => {
           const active = roleFilter === s.filter;
           return (
@@ -1401,9 +1422,9 @@ function UsersTab() {
                             <Crown className="h-3 w-3" /> Owner
                           </Badge>
                         ) : u.role === "customer_admin" ? (
-                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(232,121,249,0.15)", color: "#e879f9", border: "1px solid rgba(232,121,249,0.4)", boxShadow: "0 0 8px rgba(232,121,249,0.2)" }}>
+                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(56,189,248,0.15)", color: "#38bdf8", border: "1px solid rgba(56,189,248,0.4)" }}>
                             <SuperAdminIcon size={12} />
-                            Super Admin
+                            Customer Admin
                           </Badge>
                         ) : u.role === "partner_admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
@@ -1428,26 +1449,17 @@ function UsersTab() {
                       ) : (
                         <div className="flex items-center gap-1.5 flex-wrap">
 
-                          {/* Promote — only if there are roles above the target's current role within caller's reach */}
-                          {getPromotableRoles(u.role).length > 0 && (
+                          {/* Change Role — owner only, full dropdown for any role */}
+                          {isOwner && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
-                              onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: getPromotableRoles(u.role)[0] })}>
-                              <ArrowUp className="h-3 w-3 flex-shrink-0" /> Promote
+                              onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole })}>
+                              <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                             </button>
                           )}
-                          {/* Demote — only if not already at admin (lowest internal role) and not owner demoting owner */}
-                          {isSuperAdmin && u.role !== "admin" && u.role !== "owner" && (
-                            <button
-                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(156,163,175,0.1)", color: "#9ca3af", border: "1px solid rgba(156,163,175,0.2)" }}
-                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "demote" })}>
-                              <ShieldOff className="h-3 w-3 flex-shrink-0" /> Demote
-                            </button>
-                          )}
-                          {/* Remove — customer_admin/owner only, cannot remove owner */}
-                          {isSuperAdmin && u.role !== "owner" && (
+                          {/* Remove — owner only, cannot remove self */}
+                          {isOwner && !isSelf && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
@@ -1471,14 +1483,14 @@ function UsersTab() {
       <Dialog open={!!promoteDialog?.open} onOpenChange={(open) => { if (!open) setPromoteDialog(null); }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
-            <DialogTitle className="text-white">Promote {promoteDialog?.userName}</DialogTitle>
+            <DialogTitle className="text-white">Change Role — {promoteDialog?.userName}</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Select the role to promote <strong className="text-white">{promoteDialog?.userName}</strong> to.
-              Current role: <span className="text-gray-300 capitalize">{promoteDialog?.currentRole?.replace("_", " ")}</span>
+              Select a new role for <strong className="text-white">{promoteDialog?.userName}</strong>.
+              Current role: <span className="text-gray-300 capitalize">{promoteDialog?.currentRole?.replace(/_/g, " ")}</span>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            {promoteDialog && getPromotableRoles(promoteDialog.currentRole).map((role) => {
+            {promoteDialog && (["owner", "customer_admin", "partner_admin", "admin"] as UserRole[]).map((role) => {
               const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
                 owner:        { label: "Owner",        color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
                 customer_admin:  { label: "Customer Admin",  color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
@@ -1508,10 +1520,10 @@ function UsersTab() {
             <Button variant="outline" onClick={() => setPromoteDialog(null)} disabled={isPending}>Cancel</Button>
             <Button
               onClick={handlePromoteConfirm}
-              disabled={isPending}
+              disabled={isPending || promoteDialog?.selectedRole === promoteDialog?.currentRole}
               style={{ background: "#0074F4", color: "#fff" }}
             >
-              {isPending ? "Promoting..." : `Promote to ${promoteDialog?.selectedRole?.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}`}
+              {isPending ? "Saving..." : `Set Role: ${promoteDialog?.selectedRole?.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}`}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -5777,35 +5789,21 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
   const [inviteError, setInviteError] = useState("");
   const addUserMutation = trpc.admin.addUser.useMutation();
 
-  const partnerAdmins = allUsers.filter((u: any) => u.role === "partner_admin");
-  const partners = allUsers.filter((u: any) => u.role === "partner");
-  const totalPartnerAccounts = partnerAdmins.length + partners.length;
+  // Approved partners = users with partner_admin role
+  const approvedPartners = allUsers.filter((u: any) => u.role === "partner_admin");
+  const totalPartnerAccounts = approvedPartners.length;
 
-  const recentPartners = [...partners, ...partnerAdmins]
+  const recentPartners = [...approvedPartners]
     .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 10);
 
   const STAT_CARDS = [
     {
-      label: "Total Partner Accounts",
+      label: "Approved Partners",
       value: totalPartnerAccounts,
       icon: <Users size={18} />,
       color: "#0074F4",
-      description: "Active partner + partner admin accounts",
-    },
-    {
-      label: "WAVV Partners",
-      value: partners.length,
-      icon: <UserCircle size={18} />,
-      color: "#22d3ee",
-      description: "Referral/affiliate partners",
-    },
-    {
-      label: "Partner Admins",
-      value: partnerAdmins.length,
-      icon: <Shield size={18} />,
-      color: "#a78bfa",
-      description: "Internal partner managers",
+      description: "Active approved WAVV partner accounts",
     },
   ];
 
@@ -5914,7 +5912,7 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
       )}
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
         {STAT_CARDS.map((card) => (
           <div
             key={card.label}
@@ -5978,7 +5976,7 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
             <Users size={32} className="mb-3" style={{ color: "#374151" }} />
             <p className="text-sm font-medium text-gray-400">No partner accounts yet</p>
             <p className="text-xs text-gray-600 mt-1">
-              Invite partners via Team Access using the "WAVV Partner" or "Partner Admin" role.
+              Invite approved partners using the "Invite WAVV Partner" button above.
             </p>
           </div>
         ) : (
@@ -6001,12 +5999,12 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
                     <Badge
                       className="text-[10px] px-2 py-0.5"
                       style={{
-                        background: u.role === "partner_admin" ? "rgba(167,139,250,0.15)" : "rgba(0,116,244,0.15)",
-                        color: u.role === "partner_admin" ? "#a78bfa" : "#60a5fa",
+                        background: "rgba(0,169,226,0.15)",
+                        color: "#00A9E2",
                         border: "none",
                       }}
                     >
-                      {u.role === "partner_admin" ? "Partner Admin" : "WAVV Partner"}
+                      Partner Admin
                     </Badge>
                   </TableCell>
                   <TableCell className="text-gray-500 text-xs">

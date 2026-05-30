@@ -17,15 +17,16 @@ import {
   Users,
 } from "lucide-react";
 
-const navItems = [
+const baseNavItems = [
   { href: "/dashboard", label: "Home",              icon: Home,          color: "#6366f1" },
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
   { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
   { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
-  { href: "/partners",  label: "WAVV Partners",      icon: Users,         color: "#00A9E2" },
 ];
+const publicPartnerItem = { href: "/partners",     label: "WAVV Partners",      icon: Users,         color: "#00A9E2" };
+const approvedPartnerItem = { href: "/wavvpartner", label: "WAVV Partners",      icon: Users,         color: "#00A9E2" };
 
 const adminItem = { href: "/wavvadmin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" };
 
@@ -91,7 +92,9 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   }, [title]);
 
   const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const isApprovedPartner = user?.role === "partner_admin" || user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");
+  const navItems = [...baseNavItems, isApprovedPartner ? approvedPartnerItem : publicPartnerItem];
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
