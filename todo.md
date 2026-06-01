@@ -1119,3 +1119,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Guides & Docs: add "Help Articles" as a new category (DB enum + schema.ts + routers.ts + GuidesAndDocs.tsx + Admin.tsx)
 - [x] Guides & Docs admin: Help Articles section visible in Section Visibility toggles and Add Guide dropdown
 - [x] WAVV Knowledge disabled: blocks ALL users (including owners) from clicking the button
+
+## Webinar Inline Video Player (Session 9)
+- [x] Webinars: add getEmbedUrl() utility (Loom share→embed URL conversion, same as Academy)
+- [x] Webinars: replace "Watch Now" external link with inline modal (Loom iframe, 16:9, dark theme)
+- [x] Webinars: modal applies to both On-Demand (recording) and Exclusive (evergreen) webinar types
+- [x] Webinars: Exclusive webinar modal includes PiP button (Chrome/Edge only, hidden on unsupported browsers)
+- [x] Webinars: PiP uses Document Picture-in-Picture API to float the iframe in an always-on-top window
+- [x] Webinars: view count tracking fires on modal open (same as current watchMutation)

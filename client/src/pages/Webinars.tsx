@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import {
   Video, Calendar, Clock, ExternalLink, PlayCircle,
-  Users, Star, RefreshCw, Timer
+  Users, Star, RefreshCw, Timer, X, PictureInPicture2, Maximize2
 } from "lucide-react";
 import { toast } from "sonner";
 import { ContentRequestCTA } from "./Academy";
 
 // ─── Countdown helper ─────────────────────────────────────────────────────────
-// Returns the next 30-min boundary from now (e.g. :00 or :30)
 function nextHalfHour(): Date {
   const now = new Date();
   const ms = now.getTime();
@@ -30,6 +29,166 @@ function useCountdown(target: Date) {
   return `${m}:${s}`;
 }
 
+// ─── Loom embed URL converter ─────────────────────────────────────────────────
+function getEmbedUrl(url: string): string | null {
+  if (!url) return null;
+  // Loom share URL → embed URL
+  const loomShare = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+  if (loomShare) return `https://www.loom.com/embed/${loomShare[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true&hideEmbedTopBar=true`;
+  // Already an embed URL
+  const loomEmbed = url.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/);
+  if (loomEmbed) return `https://www.loom.com/embed/${loomEmbed[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true&hideEmbedTopBar=true`;
+  // YouTube
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`;
+  // Vimeo
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return null;
+}
+
+// ─── Video Modal ──────────────────────────────────────────────────────────────
+interface VideoModalProps {
+  title: string;
+  embedUrl: string;
+  accentColor: string;
+  showPip?: boolean;
+  onClose: () => void;
+}
+
+function VideoModal({ title, embedUrl, accentColor, showPip = false, onClose }: VideoModalProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [pipSupported, setPipSupported] = useState(false);
+  const [pipActive, setPipActive] = useState(false);
+
+  // Detect Document PiP API support (Chrome 116+)
+  useEffect(() => {
+    setPipSupported(showPip && "documentPictureInPicture" in window);
+  }, [showPip]);
+
+  async function handlePip() {
+    if (!("documentPictureInPicture" in window)) return;
+    try {
+      // Open a small always-on-top PiP window
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pipWindow = await (window as any).documentPictureInPicture.requestWindow({
+        width: 480,
+        height: 270,
+      });
+
+      // Copy base styles so the iframe renders correctly
+      Array.from(document.styleSheets).forEach((sheet) => {
+        try {
+          const cssRules = Array.from(sheet.cssRules).map((r) => r.cssText).join("");
+          const style = pipWindow.document.createElement("style");
+          style.textContent = cssRules;
+          pipWindow.document.head.appendChild(style);
+        } catch {
+          // Cross-origin stylesheets — skip silently
+        }
+      });
+
+      // Build the iframe inside the PiP window
+      const iframe = pipWindow.document.createElement("iframe");
+      iframe.src = embedUrl;
+      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = "width:100%;height:100%;border:none;display:block;";
+      pipWindow.document.body.style.cssText = "margin:0;padding:0;background:#000;overflow:hidden;";
+      pipWindow.document.body.appendChild(iframe);
+
+      setPipActive(true);
+      pipWindow.addEventListener("pagehide", () => {
+        setPipActive(false);
+      });
+
+      // Close the main modal — user is now watching in the floating window
+      onClose();
+    } catch (err) {
+      console.error("PiP failed:", err);
+      toast.error("Picture-in-Picture is not available in this browser.");
+    }
+  }
+
+  // Close on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.88)" }}
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-4xl rounded-2xl overflow-hidden"
+        style={{ background: "#111", border: "1px solid #2a2a2a", boxShadow: "0 25px 80px rgba(0,0,0,0.7)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-5 py-3 gap-3"
+          style={{ borderBottom: "1px solid #2a2a2a" }}
+        >
+          <p className="text-sm font-semibold text-white truncate flex-1">{title}</p>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {pipSupported && !pipActive && (
+              <button
+                type="button"
+                onClick={handlePip}
+                title="Pop out to floating window (Picture-in-Picture)"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+                style={{ background: `${accentColor}20`, color: accentColor, border: `1px solid ${accentColor}40` }}
+              >
+                <PictureInPicture2 size={13} />
+                <span className="hidden sm:inline">Pop out</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
+              aria-label="Close video"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* 16:9 iframe */}
+        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+          <iframe
+            ref={iframeRef}
+            src={embedUrl}
+            title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+            className="absolute inset-0 w-full h-full"
+            style={{ border: "none" }}
+          />
+        </div>
+
+        {/* Footer */}
+        <div
+          className="flex items-center justify-between px-5 py-3"
+          style={{ borderTop: "1px solid #2a2a2a", background: "#0d0f14" }}
+        >
+          <p className="text-xs text-gray-500">Click outside or press Esc to close</p>
+          {pipSupported && (
+            <p className="text-xs text-gray-600 flex items-center gap-1">
+              <PictureInPicture2 size={11} />
+              Pop out to keep watching while you browse
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Shared card component ────────────────────────────────────────────────────
 type WebinarType = "exclusive" | "evergreen" | "recording";
 
@@ -37,10 +196,12 @@ function WebinarCard({
   webinar,
   variant,
   nextSession,
+  onPlay,
 }: {
   webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null };
   variant: WebinarType;
   nextSession?: Date;
+  onPlay?: (embedUrl: string, title: string, variant: WebinarType) => void;
 }) {
   const registerClickMutation = trpc.webinars.trackRegistrationClick.useMutation();
   const watchMutation = trpc.webinars.watch.useMutation();
@@ -53,7 +214,6 @@ function WebinarCard({
     evergreen: "#0074F4",
     recording: "#00A9E2",
   };
-  // Use per-card color for evergreen, section default otherwise
   const accentColor = (variant === "evergreen" && webinar.accentColor) ? webinar.accentColor : SECTION_ACCENT[variant];
 
   const SECTION_BG: Record<WebinarType, string> = {
@@ -61,11 +221,20 @@ function WebinarCard({
     exclusive: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp",
     recording: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-recording-v2-3C9ghU23nQyUUDrjZs5iVM.webp",
   };
-  // Evergreen: use per-webinar thumbnail (unique per topic); exclusive/recording: use section background
   const thumbBg = variant === 'evergreen' && webinar.thumbnailUrl
     ? webinar.thumbnailUrl
     : SECTION_BG[variant];
-  const isDemo = false; // No DEMO stamps — all content is real or Coming Soon
+
+  // Determine if this card has an embeddable video
+  const embedUrl = webinar.videoUrl ? getEmbedUrl(webinar.videoUrl) : null;
+  const isHostedVideo = webinar.videoUrl?.startsWith("/manus-storage");
+
+  function handleWatchClick() {
+    watchMutation.mutate({ webinarId: webinar.id });
+    if (embedUrl && onPlay) {
+      onPlay(embedUrl, webinar.title, variant);
+    }
+  }
 
   return (
     <div
@@ -80,55 +249,31 @@ function WebinarCard({
         e.currentTarget.style.boxShadow = "none";
       }}
     >
-      {/* Thumbnail — image only, no text */}
+      {/* Thumbnail */}
       <div
         className="relative flex-shrink-0 overflow-hidden"
-        style={{
-          height: "120px",
-          borderBottom: `1px solid ${accentColor}30`,
-        }}
+        style={{ height: "120px", borderBottom: `1px solid ${accentColor}30` }}
       >
-        {/* Background image */}
-        <img
-          src={thumbBg}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        {/* Red rubber-stamp DEMO overlay for placeholder content */}
-        {isDemo && (
+        <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        {/* Play overlay for cards with video */}
+        {(embedUrl || isHostedVideo) && (
           <div
-            className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none demo-stamp-overlay"
-            style={{ opacity: 0.4, transition: "opacity 200ms ease" }}
+            className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+            style={{ background: "rgba(0,0,0,0.55)" }}
+            onClick={handleWatchClick}
           >
             <div
-              style={{
-                border: "4px double #cc0000",
-                borderRadius: "4px",
-                padding: "10px 28px",
-                transform: "rotate(-12deg)",
-              }}
+              className="w-12 h-12 rounded-full flex items-center justify-center"
+              style={{ background: `${accentColor}cc`, boxShadow: `0 0 20px ${accentColor}66` }}
             >
-              <span
-                style={{
-                  fontFamily: "Impact, 'Arial Black', sans-serif",
-                  fontSize: "3.2rem",
-                  fontWeight: 900,
-                  letterSpacing: "0.12em",
-                  color: "#cc0000",
-                  textShadow: "1px 1px 0 #8b000040",
-                  display: "block",
-                  lineHeight: 1,
-                }}
-              >
-                DEMO
-              </span>
+              <PlayCircle size={24} className="text-white" />
             </div>
           </div>
         )}
       </div>
 
-      {/* Coming Soon bar for evergreen — replaces countdown until real sessions are live */}
-      {variant === "evergreen" && (
+      {/* Coming Soon bar for evergreen without video */}
+      {variant === "evergreen" && !embedUrl && !isHostedVideo && (
         <div
           className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
           style={{ background: `${accentColor}22`, color: accentColor, borderBottom: `1px solid ${accentColor}40` }}
@@ -140,7 +285,6 @@ function WebinarCard({
 
       {/* Body */}
       <div className="p-4 flex flex-col flex-1">
-        {/* Title — shown here, not on thumbnail */}
         <h3 className="text-white font-bold text-sm leading-snug mb-2">{webinar.title}</h3>
         {webinar.description && (
           <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-2">{webinar.description}</p>
@@ -162,7 +306,7 @@ function WebinarCard({
             </p>
           </div>
         )}
-        {variant === "evergreen" && (
+        {variant === "evergreen" && !embedUrl && !isHostedVideo && (
           <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
             <RefreshCw size={11} style={{ color: accentColor }} />
             Session details coming soon
@@ -170,35 +314,40 @@ function WebinarCard({
         )}
 
         <div className="mt-auto">
-          {(variant === "recording" || variant === "evergreen") && webinar.videoUrl ? (
-            // Platform-hosted video: render inline native player; external URL: open in new tab
-            webinar.videoUrl.startsWith("/manus-storage") ? (
-              <div className="mt-2">
-                <video
-                  controls
-                  className="w-full rounded-lg"
-                  style={{ maxHeight: "180px", background: "#000" }}
-                  onPlay={() => watchMutation.mutate({ webinarId: webinar.id })}
-                >
-                  <source src={webinar.videoUrl} />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            ) : (
-              <a
-                href={webinar.videoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => watchMutation.mutate({ webinarId: webinar.id })}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
+          {/* Platform-hosted (manus-storage) video */}
+          {isHostedVideo && webinar.videoUrl && (
+            <div className="mt-2">
+              <video
+                controls
+                className="w-full rounded-lg"
+                style={{ maxHeight: "180px", background: "#000" }}
+                onPlay={() => watchMutation.mutate({ webinarId: webinar.id })}
               >
-                <PlayCircle size={12} /> Watch Now
-              </a>
-            )
-          ) : variant === "recording" ? (
+                <source src={webinar.videoUrl} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+
+          {/* Embeddable video (Loom / YouTube / Vimeo) */}
+          {!isHostedVideo && embedUrl && (
+            <button
+              type="button"
+              onClick={handleWatchClick}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
+            >
+              <PlayCircle size={12} /> Watch Now
+            </button>
+          )}
+
+          {/* No video yet — recording coming soon */}
+          {!isHostedVideo && !embedUrl && variant === "recording" && (
             <span className="text-xs text-gray-600">Recording coming soon</span>
-          ) : webinar.registrationUrl ? (
+          )}
+
+          {/* Registration link (exclusive live, no video yet) */}
+          {!isHostedVideo && !embedUrl && variant !== "recording" && webinar.registrationUrl && (
             <a
               href={webinar.registrationUrl}
               target="_blank"
@@ -210,7 +359,7 @@ function WebinarCard({
               <ExternalLink size={12} />
               {variant === "evergreen" ? "Join Next Session →" : "Register Now →"}
             </a>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
@@ -220,7 +369,6 @@ function WebinarCard({
 // ─── Main page ────────────────────────────────────────────────────────────────
 type WebinarSection = "exclusive" | "evergreen" | "recording";
 
-// Tab order: On-Demand Series → Upcoming Exclusive Live → On-Demand Webinars
 const SECTION_ORDER: WebinarSection[] = ["evergreen", "exclusive", "recording"];
 
 const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactNode; accent: string; description: string }> = {
@@ -257,13 +405,11 @@ function SectionSkeleton() {
 export default function Webinars() {
   const { data: visibilityRaw } = trpc.siteSettings.get.useQuery({ key: "webinar_sections_visibility" });
   const visibility: Record<string, boolean> = (visibilityRaw as Record<string, boolean> | null) ?? { evergreen: true, exclusive: true, recordings: true };
-  // Only show tabs the admin has marked visible
   const visibleSections = (SECTION_ORDER as WebinarSection[]).filter(key => {
     const vKey = key === "recording" ? "recordings" : key;
     return visibility[vKey] !== false;
   });
   const [activeSectionState, setActiveSection] = useState<WebinarSection>("evergreen");
-  // If the current active tab becomes hidden, fall back to first visible tab
   const activeSection: WebinarSection = visibleSections.includes(activeSectionState)
     ? activeSectionState
     : (visibleSections[0] ?? "evergreen");
@@ -272,9 +418,22 @@ export default function Webinars() {
   const { data: evergreenWebinars, isLoading: loadingEvergreen } = trpc.webinars.list.useQuery({ type: "evergreen" });
   const { data: recordingWebinars, isLoading: loadingRecording } = trpc.webinars.list.useQuery({ type: "recording" });
 
-  // All 8 evergreen cards share the same countdown — next :00 or :30 boundary
-  // Use useState to stabilize reference and avoid infinite re-renders
   const [sharedNextSession] = useState(() => nextHalfHour());
+
+  // ── Video modal state ──────────────────────────────────────────────────────
+  const [playingVideo, setPlayingVideo] = useState<{
+    embedUrl: string;
+    title: string;
+    variant: WebinarType;
+  } | null>(null);
+
+  function handlePlay(embedUrl: string, title: string, variant: WebinarType) {
+    setPlayingVideo({ embedUrl, title, variant });
+  }
+
+  function handleCloseModal() {
+    setPlayingVideo(null);
+  }
 
   const cfg = SECTION_CONFIG[activeSection];
 
@@ -297,7 +456,7 @@ export default function Webinars() {
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#00A9E2" }}>WAVV Webinars</h1>
               <p className="text-gray-400 text-sm">
-                Join exclusive live sessions and evergreen workshops from the WAVV team.
+                Join exclusive live sessions and on-demand content from the WAVV team.
               </p>
             </div>
           </div>
@@ -337,7 +496,7 @@ export default function Webinars() {
           exclusiveWebinars && exclusiveWebinars.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {exclusiveWebinars.map((w) => (
-                <WebinarCard key={w.id} webinar={w} variant="exclusive" />
+                <WebinarCard key={w.id} webinar={w} variant="exclusive" onPlay={handlePlay} />
               ))}
             </div>
           ) : (
@@ -354,13 +513,13 @@ export default function Webinars() {
           (evergreenWebinars ?? []).length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {(evergreenWebinars ?? []).map((w) => (
-                <WebinarCard key={w.id} webinar={w} variant="evergreen" nextSession={sharedNextSession} />
+                <WebinarCard key={w.id} webinar={w} variant="evergreen" nextSession={sharedNextSession} onPlay={handlePlay} />
               ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <RefreshCw size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-400 text-sm font-medium">No evergreen webinars available yet.</p>
+              <p className="text-gray-400 text-sm font-medium">No on-demand videos available yet.</p>
             </div>
           )
         )}
@@ -370,7 +529,7 @@ export default function Webinars() {
           (recordingWebinars ?? []).length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {(recordingWebinars ?? []).map((w) => (
-                <WebinarCard key={w.id} webinar={w} variant="recording" />
+                <WebinarCard key={w.id} webinar={w} variant="recording" onPlay={handlePlay} />
               ))}
             </div>
           ) : (
@@ -388,6 +547,20 @@ export default function Webinars() {
       <div className="px-4 lg:px-6 pb-10 max-w-5xl mx-auto">
         <ContentRequestCTA requestType="webinar" accentColor="#00A9E2" />
       </div>
+
+      {/* ── Inline Video Modal ── */}
+      {playingVideo && (
+        <VideoModal
+          title={playingVideo.title}
+          embedUrl={playingVideo.embedUrl}
+          accentColor={
+            playingVideo.variant === "exclusive" ? "#D4AF37" :
+            playingVideo.variant === "evergreen" ? "#0074F4" : "#00A9E2"
+          }
+          showPip={playingVideo.variant === "exclusive" || playingVideo.variant === "recording"}
+          onClose={handleCloseModal}
+        />
+      )}
     </PortalLayout>
   );
 }
