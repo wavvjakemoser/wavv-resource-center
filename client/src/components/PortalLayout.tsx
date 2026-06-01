@@ -15,6 +15,7 @@ import {
   FlaskConical,
   Shield,
   Users,
+  ExternalLink,
 } from "lucide-react";
 
 const baseNavItems = [
@@ -25,8 +26,7 @@ const baseNavItems = [
   { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
   { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
 ];
-const publicPartnerItem = { href: "/partners",     label: "WAVV Partners",      icon: Users,         color: "#00A9E2" };
-const approvedPartnerItem = { href: "/wavvpartner", label: "WAVV Partners",      icon: Users,         color: "#00A9E2" };
+const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
 
 const adminItem = { href: "/wavvadmin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" };
 
@@ -92,9 +92,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   }, [title]);
 
   const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
-  const isApprovedPartner = user?.role === "partner_admin" || user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");
-  const navItems = [...baseNavItems, isApprovedPartner ? approvedPartnerItem : publicPartnerItem];
+  const navItems = [...baseNavItems, publicPartnerItem];
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
@@ -165,12 +164,44 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
 
           {/* Admin — pinned to bottom, only for admins */}
           {isAdmin && (
-            <div className="px-3 pb-4" style={{ borderTop: "1px solid #1e2030", paddingTop: "12px" }}>
+            <div className="px-3 pb-4 space-y-1" style={{ borderTop: "1px solid #1e2030", paddingTop: "12px" }}>
               <NavLink
                 {...adminItem}
                 isActive={location.startsWith(adminItem.href)}
                 onClick={() => setSidebarOpen(false)}
               />
+              {/* Partner portal preview link — only visible on /wavvadmin, opens in new tab */}
+              {isAdminPage && (user?.role === "owner" || user?.role === "partner_admin" || user?.role === "customer_admin") && (
+                <a
+                  href="/wavvpartner"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
+                  style={{
+                    fontSize: "15px",
+                    background: "rgba(0,169,226,0.08)",
+                    border: "1px solid rgba(0,169,226,0.18)",
+                    color: "#00A9E2",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(0,169,226,0.14)";
+                    e.currentTarget.style.borderColor = "rgba(0,169,226,0.3)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(0,169,226,0.08)";
+                    e.currentTarget.style.borderColor = "rgba(0,169,226,0.18)";
+                  }}
+                >
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(0,169,226,0.15)" }}
+                  >
+                    <Users size={17} style={{ color: "#00A9E2" }} />
+                  </div>
+                  <span className="truncate flex-1">Partner Portal</span>
+                  <ExternalLink size={13} style={{ color: "rgba(0,169,226,0.6)", flexShrink: 0 }} />
+                </a>
+              )}
             </div>
           )}
         </aside>

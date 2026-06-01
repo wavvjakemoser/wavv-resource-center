@@ -5787,15 +5787,27 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
   const [inviteName, setInviteName] = useState("");
   const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [inviteError, setInviteError] = useState("");
+  const [partnerSearch, setPartnerSearch] = useState("");
   const addUserMutation = trpc.admin.addUser.useMutation();
+  const toggleStatus = trpc.admin.toggleUserStatus.useMutation({
+    onSuccess: () => { refetch(); toast.success("Partner status updated."); },
+    onError: (e) => toast.error(e.message),
+  });
+  const removePartner = trpc.admin.removeUser.useMutation({
+    onSuccess: () => { refetch(); toast.success("Partner removed."); },
+    onError: (e) => toast.error(e.message),
+  });
 
   // Approved partners = users with partner_admin role
   const approvedPartners = allUsers.filter((u: any) => u.role === "partner_admin");
   const totalPartnerAccounts = approvedPartners.length;
+  const activePartnerCount = approvedPartners.filter((u: any) => u.isActive).length;
 
-  const recentPartners = [...approvedPartners]
-    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 10);
+  const filteredPartners = useMemo(() => {
+    if (!partnerSearch.trim()) return [...approvedPartners].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const q = partnerSearch.trim().toLowerCase();
+    return approvedPartners.filter((u: any) => (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q));
+  }, [approvedPartners, partnerSearch]);
 
   const STAT_CARDS = [
     {
@@ -5958,25 +5970,37 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
         </p>
       </div>
 
-      {/* Recent partner accounts */}
+      {/* Approved Partners list */}
       <div
         className="rounded-xl overflow-hidden"
         style={{ background: "#141414", border: "1px solid #2a2a2a" }}
       >
         <div className="px-5 py-4 flex items-center justify-between" style={{ borderBottom: "1px solid #2a2a2a" }}>
-          <h3 className="text-sm font-semibold text-white">Recent Partner Accounts</h3>
-          <span className="text-xs text-gray-500">{totalPartnerAccounts} total</span>
+          <div>
+            <h3 className="text-sm font-semibold text-white">Approved Partners</h3>
+            <p className="text-xs text-gray-500 mt-0.5">{activePartnerCount} active · {totalPartnerAccounts} total</p>
+          </div>
+          <div className="relative">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
+            <input
+              className="pl-8 pr-3 py-1.5 rounded-lg text-xs text-white outline-none w-48"
+              style={{ background: "#0d0d0d", border: "1px solid #333" }}
+              placeholder="Search partners..."
+              value={partnerSearch}
+              onChange={(e) => setPartnerSearch(e.target.value)}
+            />
+          </div>
         </div>
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
             <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
           </div>
-        ) : recentPartners.length === 0 ? (
+        ) : filteredPartners.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center px-6">
             <Users size={32} className="mb-3" style={{ color: "#374151" }} />
-            <p className="text-sm font-medium text-gray-400">No partner accounts yet</p>
+            <p className="text-sm font-medium text-gray-400">{partnerSearch ? "No partners match your search" : "No partner accounts yet"}</p>
             <p className="text-xs text-gray-600 mt-1">
-              Invite approved partners using the "Invite WAVV Partner" button above.
+              {partnerSearch ? "" : "Invite approved partners using the \"Invite WAVV Partner\" button above."}
             </p>
           </div>
         ) : (
@@ -5985,28 +6009,16 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
               <TableRow style={{ borderColor: "#2a2a2a" }}>
                 <TableHead className="text-gray-500 text-xs">Name</TableHead>
                 <TableHead className="text-gray-500 text-xs">Email</TableHead>
-                <TableHead className="text-gray-500 text-xs">Role</TableHead>
                 <TableHead className="text-gray-500 text-xs">Joined</TableHead>
                 <TableHead className="text-gray-500 text-xs">Status</TableHead>
+                <TableHead className="text-gray-500 text-xs text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentPartners.map((u: any) => (
+              {filteredPartners.map((u: any) => (
                 <TableRow key={u.id} style={{ borderColor: "#1f1f1f" }}>
                   <TableCell className="text-white text-xs font-medium">{u.name ?? "—"}</TableCell>
                   <TableCell className="text-gray-400 text-xs">{u.email ?? "—"}</TableCell>
-                  <TableCell>
-                    <Badge
-                      className="text-[10px] px-2 py-0.5"
-                      style={{
-                        background: "rgba(0,169,226,0.15)",
-                        color: "#00A9E2",
-                        border: "none",
-                      }}
-                    >
-                      Partner Admin
-                    </Badge>
-                  </TableCell>
                   <TableCell className="text-gray-500 text-xs">
                     {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                   </TableCell>
@@ -6021,6 +6033,30 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
                     >
                       {u.isActive ? "Active" : "Inactive"}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => toggleStatus.mutate({ userId: u.id, isActive: !u.isActive })}
+                        disabled={toggleStatus.isPending}
+                        className="px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all disabled:opacity-50"
+                        style={{
+                          background: u.isActive ? "rgba(239,68,68,0.1)" : "rgba(74,222,128,0.1)",
+                          color: u.isActive ? "#f87171" : "#4ade80",
+                          border: `1px solid ${u.isActive ? "rgba(239,68,68,0.2)" : "rgba(74,222,128,0.2)"}`,
+                        }}
+                      >
+                        {u.isActive ? "Deactivate" : "Activate"}
+                      </button>
+                      <button
+                        onClick={() => { if (confirm(`Remove ${u.name ?? u.email}?`)) removePartner.mutate({ userId: u.id }); }}
+                        disabled={removePartner.isPending}
+                        className="px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all disabled:opacity-50"
+                        style={{ background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.15)" }}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

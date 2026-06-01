@@ -76,6 +76,7 @@ import {
   createContentRequest,
   getContentRequests,
   deleteUser,
+  updateUserStatus,
   getUserStats,
   clearAllAnalytics,
   getStatDetail,
@@ -1128,15 +1129,19 @@ export const appRouter = router({
         if (input.userId === ctx.user.id) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot remove yourself" });
         }
-        // Admins can only remove users (not other admins or customer_admins)
-        // Super admins can remove anyone
         const allUsers = await getAllUsers();
         const target = allUsers.find(u => u.id === input.userId);
         if (!target) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-        if (ctx.user.role === "admin" && (target.role === "admin" || target.role === "customer_admin")) {
-          throw new TRPCError({ code: "FORBIDDEN", message: "Admins can only remove standard users" });
-        }
         await deleteUser(input.userId);
+        return { success: true };
+      }),
+    toggleUserStatus: ownerProcedure
+      .input(z.object({ userId: z.number(), isActive: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        if (input.userId === ctx.user.id) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own status" });
+        }
+        await updateUserStatus(input.userId, input.isActive);
         return { success: true };
       }),
     getUserStats: ownerProcedure

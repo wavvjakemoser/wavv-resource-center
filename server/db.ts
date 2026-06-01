@@ -96,6 +96,11 @@ export async function deleteUser(userId: number) {
   if (!db) return;
   await db.delete(users).where(eq(users.id, userId));
 }
+export async function updateUserStatus(userId: number, isActive: boolean) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ isActive }).where(eq(users.id, userId));
+}
 export async function getUserStats(userId: number) {
   const db = await getDb();
   if (!db) return null;
