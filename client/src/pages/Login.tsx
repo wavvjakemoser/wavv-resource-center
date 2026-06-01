@@ -1,20 +1,33 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [, navigate] = useLocation();
 
   const nextPath = new URLSearchParams(window.location.search).get("next") || "/wavvadmin";
 
-  const checkEmail = trpc.auth.checkEmail.useMutation({
-    onSuccess: () => {
-      navigate(nextPath);
+  const loginMutation = trpc.auth.login.useMutation({
+    onSuccess: (data) => {
+      const role = data?.user?.role;
+      if (role === "partner_admin" || role === "partner") {
+        navigate("/wavvpartner");
+      } else {
+        navigate(nextPath);
+      }
     },
     onError: (err) => {
-      setError(err.message || "No account found for this email. Contact your admin if you need access.");
+      // If user exists but has no password yet, guide them to set one
+      if (err.message?.toLowerCase().includes("no password") || err.message?.toLowerCase().includes("set a password")) {
+        setError("Your account doesn't have a password yet. Use your invite link to set one, or contact your admin to resend it.");
+      } else {
+        setError(err.message || "Invalid email or password.");
+      }
     },
   });
 
@@ -22,7 +35,15 @@ export default function Login() {
     e.preventDefault();
     setError("");
     if (!email.trim()) { setError("Please enter your email address."); return; }
-    checkEmail.mutate({ email: email.trim().toLowerCase() });
+    if (!password) { setError("Please enter your password."); return; }
+    loginMutation.mutate({ email: email.trim().toLowerCase(), password });
+  };
+
+  const inputBase = "w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all pl-10";
+  const inputStyle = {
+    background: "#0d1117",
+    border: `1px solid ${error ? "rgba(248,81,73,0.5)" : "rgba(255,255,255,0.12)"}`,
+    fontFamily: "inherit",
   };
 
   return (
@@ -48,31 +69,62 @@ export default function Login() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <p className="text-white font-semibold text-lg text-center mb-1">Team Login</p>
+            <p className="text-white font-semibold text-lg text-center mb-1">Sign In</p>
             <p className="text-sm text-center" style={{ color: "#8b949e" }}>
-              Enter your work email to sign in. Access requires an active account.
+              Enter your email and password to access the portal.
             </p>
           </div>
 
+          {/* Email */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium" style={{ color: "#8b949e" }}>
               Work Email
             </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => { setEmail(e.target.value); setError(""); }}
-              placeholder="you@wavv.com"
-              autoFocus
-              className="w-full rounded-lg px-4 py-3 text-sm text-white outline-none transition-all"
-              style={{
-                background: "#0d1117",
-                border: `1px solid ${error ? "rgba(248,81,73,0.5)" : "rgba(255,255,255,0.12)"}`,
-                fontFamily: "inherit",
-              }}
-              onFocus={(e) => { if (!error) e.target.style.borderColor = "#0074F4"; }}
-              onBlur={(e) => { if (!error) e.target.style.borderColor = "rgba(255,255,255,0.12)"; }}
-            />
+            <div className="relative">
+              <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#8b949e" }} />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                placeholder="you@wavv.com"
+                autoFocus
+                autoComplete="email"
+                className={inputBase}
+                style={inputStyle}
+                onFocus={(e) => { if (!error) e.target.style.borderColor = "#0074F4"; }}
+                onBlur={(e) => { if (!error) e.target.style.borderColor = "rgba(255,255,255,0.12)"; }}
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium" style={{ color: "#8b949e" }}>
+              Password
+            </label>
+            <div className="relative">
+              <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#8b949e" }} />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                placeholder="Your password"
+                autoComplete="current-password"
+                className={`${inputBase} pr-10`}
+                style={inputStyle}
+                onFocus={(e) => { if (!error) e.target.style.borderColor = "#0074F4"; }}
+                onBlur={(e) => { if (!error) e.target.style.borderColor = "rgba(255,255,255,0.12)"; }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                style={{ color: "#8b949e" }}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -86,18 +138,18 @@ export default function Login() {
 
           <button
             type="submit"
-            disabled={checkEmail.isPending}
+            disabled={loginMutation.isPending}
             className="w-full rounded-lg py-3 text-sm font-semibold text-white transition-opacity"
             style={{
               background: "linear-gradient(135deg, #0074F4, #0056b3)",
-              opacity: checkEmail.isPending ? 0.6 : 1,
+              opacity: loginMutation.isPending ? 0.6 : 1,
             }}
           >
-            {checkEmail.isPending ? "Verifying…" : "Sign In →"}
+            {loginMutation.isPending ? "Signing in…" : "Sign In →"}
           </button>
 
           <p className="text-xs text-center" style={{ color: "#8b949e" }}>
-            This page requires access. Contact your WAVV admin to request an invitation.
+            Access requires an active account. Contact your WAVV admin to request access.
           </p>
         </form>
       </div>

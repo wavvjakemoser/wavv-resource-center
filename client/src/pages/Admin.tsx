@@ -114,6 +114,7 @@ import {
   Wrench,
   Gauge,
   Info,
+  KeyRound,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -1192,6 +1193,14 @@ function UsersTab() {
     onError: (err) => { toast.error(err.message); },
   });
 
+  const [resetLinkModal, setResetLinkModal] = React.useState<{ open: boolean; url: string; name: string }>({ open: false, url: "", name: "" });
+  const sendPasswordReset = trpc.admin.sendPasswordReset.useMutation({
+    onSuccess: (data) => {
+      setResetLinkModal({ open: true, url: data.resetLink, name: "" });
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const isPendingPromotion = (email: string | null | undefined) => {
     if (!email) return false;
     return /^[a-z]+\.[a-z]+@wavv\.com$/.test(email.toLowerCase());
@@ -1512,6 +1521,20 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                             </button>
                           )}
+                          {/* Reset Password — owner only */}
+                          {isOwner && !isSelf && (
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
+                              onClick={() => {
+                                setResetLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
+                                sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin });
+                              }}
+                              disabled={sendPasswordReset.isPending}
+                            >
+                              <KeyRound className="h-3 w-3 flex-shrink-0" /> Reset Password
+                            </button>
+                          )}
                           {/* Remove — owner only, cannot remove self */}
                           {isOwner && !isSelf && (
                             <button
@@ -1707,7 +1730,46 @@ function UsersTab() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Invite Team Member Dialog (magic link) ── */}
+      {/* ── Reset Password Link Modal ── */}
+      <Dialog open={resetLinkModal.open} onOpenChange={(open) => { if (!open) setResetLinkModal({ open: false, url: "", name: "" }); }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <KeyRound size={18} style={{ color: "#fbbf24" }} />
+              Password Reset Link
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Send this link directly to <strong className="text-white">{resetLinkModal.name}</strong> via Slack or email. They'll use it to set a new password. It expires in 24 hours and can only be used once.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 space-y-3">
+            <div
+              className="flex flex-col gap-1 p-3 rounded-lg"
+              style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
+            >
+              <p className="text-[10px] text-gray-500 font-mono">{(() => { try { return new URL(resetLinkModal.url).origin; } catch { return ""; } })()}</p>
+              <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
+                /accept-invite?token=<span style={{ color: "#93c5fd" }}>{resetLinkModal.url.split("token=")[1]?.slice(0, 12)}…</span>
+              </p>
+            </div>
+            <Button
+              className="w-full font-semibold"
+              style={{ background: "#0074F4", color: "#fff" }}
+              onClick={() => {
+                navigator.clipboard.writeText(resetLinkModal.url);
+                toast.success("Reset link copied to clipboard!");
+              }}
+            >
+              Copy Reset Link
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setResetLinkModal({ open: false, url: "", name: "" })} className="text-gray-400">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Invite Team Member Dialog ── */}
       <Dialog open={inviteOpen} onOpenChange={(open) => { if (!open) { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "admin" }); } }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
@@ -1716,7 +1778,7 @@ function UsersTab() {
               Invite Team Member
             </DialogTitle>
             <DialogDescription className="text-gray-400">
-              Enter their name and email. They'll receive a one-click login link — no password needed.
+              Enter their name, email, and role. An invite link will be generated — they'll use it to set their password and activate their account.
             </DialogDescription>
           </DialogHeader>
 
@@ -1726,14 +1788,14 @@ function UsersTab() {
                 <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
                 <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "customer_admin" ? "Customer Admin" : inviteResult.role === "partner_admin" ? "Partner Admin" : "Admin"}.</p>
               </div>
-              <p className="text-xs text-gray-400">Copy this login link and send it to them via Slack or email. It expires in 24 hours and can only be used once.</p>
+              <p className="text-xs text-gray-400">Copy this invite link and send it directly to them via Slack or email. They'll use it to set their password and activate their account. It expires in 24 hours and can only be used once.</p>
               <div
                 className="flex flex-col gap-1 p-3 rounded-lg"
                 style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
               >
                 <p className="text-[10px] text-gray-500 font-mono">{new URL(inviteResult.link).origin}</p>
                 <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
-                  /auth/magic?token=<span style={{ color: "#93c5fd" }}>{inviteResult.link.split("token=")[1]?.slice(0, 12)}…</span>
+                  /accept-invite?token=<span style={{ color: "#93c5fd" }}>{inviteResult.link.split("token=")[1]?.slice(0, 12)}…</span>
                 </p>
               </div>
               <Button
@@ -1741,10 +1803,10 @@ function UsersTab() {
                 style={{ background: "#0074F4", color: "#fff" }}
                 onClick={() => {
                   navigator.clipboard.writeText(inviteResult!.link);
-                  toast.success("Login link copied to clipboard!");
+                  toast.success("Invite link copied to clipboard!");
                 }}
               >
-                Copy Login Link
+                Copy Invite Link
               </Button>
             </div>
           ) : (
@@ -1792,11 +1854,11 @@ function UsersTab() {
                 disabled={inviteTeamMember.isPending || !inviteForm.name.trim() || !inviteForm.email.trim()}
                 onClick={() => {
                   if (!inviteForm.name.trim() || !inviteForm.email.trim()) { toast.error("Name and email are required."); return; }
-                  inviteTeamMember.mutate({ name: inviteForm.name.trim(), email: inviteForm.email.trim().toLowerCase(), role: inviteForm.role });
+                  inviteTeamMember.mutate({ name: inviteForm.name.trim(), email: inviteForm.email.trim().toLowerCase(), role: inviteForm.role, origin: window.location.origin });
                 }}
                 style={{ background: "#0074F4", color: "#fff" }}
               >
-                {inviteTeamMember.isPending ? "Sending…" : "Send Login Link"}
+                {inviteTeamMember.isPending ? "Creating…" : "Create Invite Link"}
               </Button>
             )}
           </DialogFooter>

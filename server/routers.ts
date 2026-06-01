@@ -914,8 +914,12 @@ export const appRouter = router({
         }
         // ── END DEMO MODE ────────────────────────────────────────────────────
         const user = await getUserByEmail(input.email);
-        if (!user || !user.passwordHash || !user.isActive) {
+        if (!user || !user.isActive) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        }
+        // User exists but has never set a password — guide them to the invite/reset flow
+        if (!user.passwordHash) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "No password set for this account. Please use your invite link or ask your admin to resend it." });
         }
         const valid = await verifyPassword(input.password, user.passwordHash);
         if (!valid) {
@@ -1188,27 +1192,63 @@ export const appRouter = router({
         const inviteUrl = `${input.origin}/accept-invite?token=${token}`;
         return { success: true, inviteUrl };
       }),
-    // Magic link invite: create user + send them a login link
+    // Invite team member: create user stub + generate accept-invite link for password setup
     inviteTeamMember: ownerProcedure
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
         role: z.enum(["owner", "customer_admin", "partner_admin", "admin"]).default("admin"),
+        origin: z.string().url().optional(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const email = input.email.trim().toLowerCase();
+        // Create or update user stub (no password yet)
         let user = await getUserByEmail(email);
         if (!user) {
           user = await createNativeUser({ email, name: input.name.trim(), passwordHash: null, role: input.role });
+        } else {
+          // Update role if user already exists
+          await updateUserRole(user.id, input.role);
         }
-        const token = await createMagicToken(email, "invite", user.id);
-        const appUrl = process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
-        const link = `${appUrl}/auth/magic?token=${token}`;
-        await notifyOwner({
-          title: `Team invite sent to ${input.name} (${input.role})`,
-          content: `Invite link for ${email}:\n${link}\n\nRole: ${input.role}\nThis link expires in 24 hours.`,
+        // Generate accept-invite token so they set their own password
+        const { token } = await generateInvite({
+          email,
+          name: input.name.trim(),
+          role: input.role,
+          createdBy: ctx.user.id,
         });
-        return { success: true, inviteLink: link, role: input.role };
+        const appUrl = input.origin ?? process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
+        const inviteLink = `${appUrl}/accept-invite?token=${token}`;
+        await notifyOwner({
+          title: `Team invite created for ${input.name} (${input.role})`,
+          content: `Invite link for ${email}:\n${inviteLink}\n\nRole: ${input.role}\nThis link expires in 24 hours. Share it directly with the user.`,
+        });
+        return { success: true, inviteLink, role: input.role };
+      }),
+    // Owner-triggered password reset: generates a fresh accept-invite link for an existing user
+    sendPasswordReset: ownerProcedure
+      .input(z.object({
+        userId: z.number(),
+        origin: z.string().url().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const allUsers = await getAllUsers();
+        const target = allUsers.find(u => u.id === input.userId);
+        if (!target) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        if (!target.email) throw new TRPCError({ code: "BAD_REQUEST", message: "User has no email address" });
+        const { token } = await generateInvite({
+          email: target.email,
+          name: target.name ?? target.email,
+          role: target.role as "admin" | "customer_admin" | "partner_admin" | "partner" | "owner",
+          createdBy: ctx.user.id,
+        });
+        const appUrl = input.origin ?? process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
+        const resetLink = `${appUrl}/accept-invite?token=${token}`;
+        await notifyOwner({
+          title: `Password reset link generated for ${target.name ?? target.email}`,
+          content: `Reset link for ${target.email}:\n${resetLink}\n\nThis link expires in 24 hours. Share it directly with the user.`,
+        });
+        return { success: true, resetLink };
       }),
     // Notification management (admin only)
     listNotifications: superAdminProcedure.query(async () => {

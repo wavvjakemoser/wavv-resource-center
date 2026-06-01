@@ -1080,3 +1080,16 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## UX Improvements (Session 4)
 - [x] Team Access: add info (i) tooltip to each role stat card describing role permissions
 - [x] Team Access: make the user list tab visible to all 4 admin tiers (owner, customer_admin, partner_admin, admin) as read-only — no invite/promote/remove actions for non-owners
+
+## Password Authentication (Session 5)
+- [x] DB: add passwordHash (nullable text) column to users table
+- [x] Server: install bcryptjs, add hashPassword/verifyPassword helpers in db.ts
+- [x] Server: update login procedure to verify password (email+password → session); reject no-password accounts with helpful message
+- [x] Server: inviteTeamMember updated to use accept-invite flow (password setup on first login)
+- [x] Server: add sendPasswordReset procedure (owner-only, generates fresh accept-invite token for existing user)
+- [x] Server: accept-invite flow already handles token validation and password setting
+- [x] Frontend: Login.tsx updated to email + password fields, single submit, red error on failure
+- [x] Frontend: AcceptInvite.tsx already handles password setup on invite claim
+- [x] Frontend: AcceptInvite routes to /wavvadmin or /wavvpartner after password set
+- [x] Frontend: Reset Password button added in user row actions (owner-only), shows copyable reset link modal
+- [x] Frontend: users with no password see a clear error message directing them to use their invite link
