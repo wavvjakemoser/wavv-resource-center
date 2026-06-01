@@ -26,7 +26,7 @@ export default function AdminPanel() {
 
   // Redirect non-admins
   if (user && user.role !== "admin") {
-    navigate("/dashboard");
+    navigate("/home");
     return null;
   }
 

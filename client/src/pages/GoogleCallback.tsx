@@ -12,7 +12,7 @@ export default function GoogleCallback() {
     onSuccess: async () => {
       await utils.auth.me.invalidate();
       toast.success("Signed in with Google");
-      navigate("/dashboard");
+      navigate("/home");
     },
     onError: (err) => {
       toast.error(err.message || "Google sign-in failed");

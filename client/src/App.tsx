@@ -34,7 +34,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/auth/google/callback" component={GoogleCallback} />
-      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/home" component={Dashboard} />
       <Route path="/academy" component={Academy} />
       <Route path="/academy/category/:categoryKey" component={AcademyCategory} />
       <Route path="/academy/:courseId" component={CourseDetail} />

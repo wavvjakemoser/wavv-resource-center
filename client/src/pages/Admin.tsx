@@ -191,7 +191,7 @@ export default function Admin() {
   }
   // Logged in but not an admin → send back to dashboard
   if (!loading && user && user.role !== "admin" && user.role !== "customer_admin" && user.role !== "partner_admin" && user.role !== "owner") {
-    navigate("/dashboard");
+    navigate("/home");
     return null;
   }
 
@@ -6301,7 +6301,7 @@ function SettingsTab() {
 
   // Nav items that can be toggled
   const NAV_ITEMS = [
-    { href: "/dashboard",  label: "Home",             icon: Home },
+    { href: "/home",  label: "Home",             icon: Home },
     { href: "/academy",    label: "WAVV Academy",      icon: GraduationCapIcon },
     { href: "/webinars",   label: "WAVV Webinars",     icon: VideoIcon },
     { href: "/guides",     label: "WAVV Guides & Docs", icon: FileTextIcon },

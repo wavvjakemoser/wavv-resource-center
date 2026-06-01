@@ -1,0 +1,9 @@
+{
+  "query": "\nUPDATE courses SET thumbnailUrl = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-banner-7mWusNnJpQ8v4MnHHTPFEe.webp' WHERE category = 'Onboarding';\nUPDATE courses SET thumbnailUrl = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-banner-gZHJ5iXjoKiGR6pJSgmVME.webp' WHERE category = 'How-To';\nUPDATE courses SET thumbnailUrl = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-banner-6T5JhWMpj9iAyBfwVXFFkv.webp' WHERE category = 'Strategy and Best Practices';\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute \nUPDATE courses SET thumbnailUrl = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-banner-7mWusNnJpQ8v4MnHHTPFEe.webp' WHERE category = 'Onboarding';\nUPDATE courses SET thumbnailUrl = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-banner-gZHJ5iXjoKiGR6pJSgmVME.webp' WHERE category = 'How-To';\nUPDATE courses SET thumbnailUrl = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-banner-6T5JhWMpj9iAyBfwVXFFkv.webp' WHERE category = 'Strategy and Best Practices';\n",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1300
+}

@@ -17,14 +17,14 @@ export default function Register() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      navigate("/dashboard");
+      navigate("/home");
     }
   }, [authLoading, user, navigate]);
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: async () => {
       await utils.auth.me.invalidate();
-      navigate("/dashboard");
+      navigate("/home");
     },
     onError: (err) => {
       setRegisterError(err.message || "Registration failed. Please try again.");

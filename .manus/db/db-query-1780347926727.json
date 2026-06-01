@@ -1,0 +1,112 @@
+{
+  "query": "SELECT id, title, category, thumbnailUrl FROM courses ORDER BY sortOrder;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT id, title, category, thumbnailUrl FROM courses ORDER BY sortOrder;",
+  "rows": [
+    {
+      "id": "30015",
+      "title": "1. Welcome To The Strategy & Best Practices Section",
+      "category": "Strategy and Best Practices",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30001",
+      "title": "1. Welcome To The Onboarding Section",
+      "category": "Onboarding",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30007",
+      "title": "1. Welcome To The How-To Section",
+      "category": "How-To",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30002",
+      "title": "2. NEW: WAVV Wallet",
+      "category": "Onboarding",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30008",
+      "title": "2. Making Calls With WAVV",
+      "category": "How-To",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30016",
+      "title": "2. WAVV Phone Numbers Tab",
+      "category": "Strategy and Best Practices",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30003",
+      "title": "3. Individual Single Line Dialer Onboarding",
+      "category": "Onboarding",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30017",
+      "title": "3. Connection Rates",
+      "category": "Strategy and Best Practices",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30009",
+      "title": "3. Voicemails",
+      "category": "How-To",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30004",
+      "title": "4. Individual Multi Line Dialer Onboarding",
+      "category": "Onboarding",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30010",
+      "title": "4. WAVV Call Campaigns",
+      "category": "How-To",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30005",
+      "title": "5. Team Onboarding",
+      "category": "Onboarding",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30011",
+      "title": "5. Nuisance Protection",
+      "category": "How-To",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30012",
+      "title": "6. Call Transfers",
+      "category": "How-To",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30006",
+      "title": "6. Common Onboarding Questions",
+      "category": "Onboarding",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30013",
+      "title": "7. Audio Source",
+      "category": "How-To",
+      "thumbnailUrl": "NULL"
+    },
+    {
+      "id": "30014",
+      "title": "8. Spam Protection",
+      "category": "How-To",
+      "thumbnailUrl": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcategory\tthumbnailUrl\n30015\t1. Welcome To The Strategy & Best Practices Section\tStrategy and Best Practices\tNULL\n30001\t1. Welcome To The Onboarding Section\tOnboarding\tNULL\n30007\t1. Welcome To The How-To Section\tHow-To\tNULL\n30002\t2. NEW: WAVV Wallet\tOnboarding\tNULL\n30008\t2. Making Calls With WAVV\tHow-To\tNULL\n30016\t2. WAVV Phone Numbers Tab\tStrategy and Best Practices\tNULL\n30003\t3. Individual Single Line Dialer Onboarding\tOnboarding\tNULL\n30017\t3. Connection Rates\tStrategy and Best Practices\tNULL\n30009\t3. Voicemails\tHow-To\tNULL\n30004\t4. Individual Multi Line Dialer Onboarding\tOnboarding\tNULL\n30010\t4. WAVV Call Campaigns\tHow-To\tNULL\n30005\t5. Team Onboarding\tOnboarding\tNULL\n30011\t5. Nuisance Protection\tHow-To\tNULL\n30012\t6. Call Transfers\tHow-To\tNULL\n30006\t6. Common Onboarding Questions\tOnboarding\tNULL\n30013\t7. Audio Source\tHow-To\tNULL\n30014\t8. Spam Protection\tHow-To\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 568
+}

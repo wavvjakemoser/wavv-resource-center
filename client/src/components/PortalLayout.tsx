@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 const baseNavItems = [
-  { href: "/dashboard", label: "Home",              icon: Home,          color: "#6366f1" },
+  { href: "/home", label: "Home",              icon: Home,          color: "#6366f1" },
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
@@ -208,7 +208,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             {navItems.map((item) => {
               const isActive =
                 location === item.href ||
-                (item.href !== "/dashboard" && location.startsWith(item.href));
+                (item.href !== "/home" && location.startsWith(item.href));
               return (
                 <NavLink
                   key={item.href}

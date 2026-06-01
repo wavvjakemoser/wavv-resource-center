@@ -41,7 +41,7 @@ export default function AdminAnalytics() {
 
   // Redirect non-admin users
   if (!loading && user && user.role !== "admin") {
-    navigate("/dashboard");
+    navigate("/home");
     return null;
   }
 
@@ -62,7 +62,7 @@ export default function AdminAnalytics() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/home")}
               className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition"
             >
               <ArrowLeft size={18} />

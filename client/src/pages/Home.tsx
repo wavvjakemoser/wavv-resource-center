@@ -54,7 +54,7 @@ export default function Home() {
   const [regError, setRegError] = useState("");
 
   useEffect(() => {
-    if (!authLoading && user) navigate("/dashboard");
+    if (!authLoading && user) navigate("/home");
   }, [authLoading, user, navigate]);
 
   useEffect(() => {
@@ -64,12 +64,12 @@ export default function Home() {
   }, []);
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: async () => { await utils.auth.me.invalidate(); navigate("/dashboard"); },
+    onSuccess: async () => { await utils.auth.me.invalidate(); navigate("/home"); },
     onError: (err) => setLoginError(err.message || "Invalid email or password."),
   });
 
   const registerMutation = trpc.auth.register.useMutation({
-    onSuccess: async () => { await utils.auth.me.invalidate(); navigate("/dashboard"); },
+    onSuccess: async () => { await utils.auth.me.invalidate(); navigate("/home"); },
     onError: (err) => setRegError(err.message || "Registration failed."),
   });
 
