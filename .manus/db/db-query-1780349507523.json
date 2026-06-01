@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE guides MODIFY COLUMN fileType ENUM('pdf', 'checklist', 'playbook', 'other', 'help_article') DEFAULT 'pdf';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute ALTER TABLE guides MODIFY COLUMN fileType ENUM('pdf', 'checklist', 'playbook', 'other', 'help_article') DEFAULT 'pdf';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 736
+}

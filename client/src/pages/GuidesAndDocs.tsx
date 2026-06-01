@@ -1,26 +1,27 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
-import { FileText, Download, ExternalLink, Search, BookOpen, CheckSquare, Map } from "lucide-react";
+import { FileText, Download, ExternalLink, Search, BookOpen, CheckSquare, Map, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ContentRequestCTA } from "./Academy";
 
 // Category metadata — drives section headers, icons, and color coding
 const CATEGORY_META: Record<string, { label: string; color: string; icon: React.ElementType; description: string }> = {
+  help_article: { label: "Help Articles", color: "#8B5CF6", icon: HelpCircle, description: "Answers to common questions and troubleshooting guides" },
   pdf:       { label: "PDFs",       color: "#ef4444", icon: FileText,   description: "Downloadable reference documents" },
   checklist: { label: "Checklists", color: "#67C728", icon: CheckSquare, description: "Step-by-step checklists to follow along" },
   playbook:  { label: "Playbooks",  color: "#0074F4", icon: Map,         description: "Strategy and process playbooks" },
   other:     { label: "Resources",  color: "#FF9900", icon: BookOpen,    description: "Reference materials and templates" },
 };
 
-// Display order for sections
-const CATEGORY_ORDER = ["pdf", "checklist", "playbook", "other"] as const;
+// Display order for sections — help_article appears first
+const CATEGORY_ORDER = ["help_article", "pdf", "checklist", "playbook", "other"] as const;
 
 export default function GuidesAndDocs() {
   const [search, setSearch] = useState("");
   const { data: guides, isLoading } = trpc.guides.list.useQuery();
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
-  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { pdf: true, checklist: true, playbook: true, resource: true };
+  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true, checklist: true, playbook: true, resource: true };
   const downloadMutation = trpc.guides.download.useMutation();
 
   const handleDownload = async (guide: NonNullable<typeof guides>[0]) => {
@@ -47,7 +48,7 @@ export default function GuidesAndDocs() {
     return acc;
   }, {});
 
-  const hasAnyResults = CATEGORY_ORDER.some((k) => (grouped[k]?.length ?? 0) > 0);
+  const hasAnyResults = (CATEGORY_ORDER as readonly string[]).some((k) => (grouped[k]?.length ?? 0) > 0);
 
   return (
     <PortalLayout title="WAVV Guides & Docs">
@@ -70,7 +71,7 @@ export default function GuidesAndDocs() {
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#67C728" }}>WAVV Guides & Docs</h1>
               <p className="text-gray-400 text-sm">
-                Playbooks, checklists, and reference documents to accelerate your WAVV success.
+                Help articles, playbooks, checklists, and reference documents to accelerate your WAVV success.
                 Download and use these resources with your team.
               </p>
             </div>
@@ -112,7 +113,7 @@ export default function GuidesAndDocs() {
           <div className="space-y-10">
             {CATEGORY_ORDER.map((categoryKey) => {
               // Map "other" to "resource" for visibility key lookup
-              const visKey = categoryKey === "other" ? "resource" : categoryKey;
+              const visKey = categoryKey === "other" ? "resource" : (categoryKey as string);
               if (guideVisibility[visKey] === false) return null;
               const items = grouped[categoryKey] ?? [];
               const meta = CATEGORY_META[categoryKey];

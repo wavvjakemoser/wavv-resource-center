@@ -132,7 +132,7 @@ export const guides = mysqlTable("guides", {
   description: text("description"),
   category: varchar("category", { length: 100 }),
   fileUrl: text("fileUrl"),
-  fileType: mysqlEnum("fileType", ["pdf", "checklist", "playbook", "other"]).default("pdf"),
+  fileType: mysqlEnum("fileType", ["pdf", "checklist", "playbook", "other", "help_article"]).default("pdf"),
   downloadCount: int("downloadCount").default(0),
   sortOrder: int("sortOrder").default(0).notNull(),
   published: boolean("published").default(true).notNull(),

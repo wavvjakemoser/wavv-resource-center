@@ -4791,7 +4791,7 @@ function GuidesTab() {
     description: "",
     fileUrl: "",
     // fileType = the section/category this guide belongs to
-    fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other",
+    fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article",
   });
   const uploadFileMutation = trpc.guides.uploadFile.useMutation({
     onError: (e) => toast.error("Upload failed: " + e.message),
@@ -4808,10 +4808,10 @@ function GuidesTab() {
     onSuccess: () => { utils.guides.adminList.invalidate(); toast.success("Guide deleted"); },
     onError: (e) => toast.error(e.message),
   });
-  function resetForm() { setForm({ title: "", description: "", fileUrl: "", fileType: "pdf" }); }
+  function resetForm() { setForm({ title: "", description: "", fileUrl: "", fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article" }); }
   function startEdit(g: typeof guides[0]) {
     setEditId(g.id);
-    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other") ?? "pdf" });
+    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other" | "help_article") ?? "pdf" });
     setShowForm(true);
   }
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -4889,7 +4889,8 @@ function GuidesTab() {
               </div>
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Category (Section)</label>
-                <select style={{ ...inputStyle, appearance: "none" as const }} value={form.fileType} onChange={e => setForm(f => ({ ...f, fileType: e.target.value as "pdf" | "checklist" | "playbook" | "other" }))}>
+                <select style={{ ...inputStyle, appearance: "none" as const }} value={form.fileType} onChange={e => setForm(f => ({ ...f, fileType: e.target.value as "pdf" | "checklist" | "playbook" | "other" | "help_article" }))}>
+                  <option value="help_article">Help Article</option>
                   <option value="pdf">PDF</option>
                   <option value="checklist">Checklist</option>
                   <option value="playbook">Playbook</option>
@@ -4950,6 +4951,7 @@ function GuidesTab() {
           <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
         </div>
         {[
+          { key: "help_article", label: "Help Articles", color: "#8B5CF6" },
           { key: "pdf",       label: "PDFs",       color: "#ef4444" },
           { key: "checklist", label: "Checklists", color: "#67C728" },
           { key: "playbook",  label: "Playbooks",  color: "#0074F4" },
@@ -4988,6 +4990,7 @@ function GuidesTab() {
 }
 
 const GUIDE_GROUP_META: Record<string, { label: string; color: string; description: string }> = {
+  help_article: { label: "Help Article", color: "#8B5CF6", description: "Common questions and troubleshooting" },
   pdf:       { label: "PDF",       color: "#ef4444", description: "Downloadable PDF documents" },
   checklist: { label: "Checklist", color: "#67C728", description: "Step-by-step checklists" },
   playbook:  { label: "Playbook",  color: "#0074F4", description: "Strategy and process playbooks" },
@@ -5015,7 +5018,7 @@ function GuideGroups({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-  const groupOrder = ["pdf", "checklist", "playbook", "resource", "other"];
+  const groupOrder = ["help_article", "pdf", "checklist", "playbook", "resource", "other"];
   const grouped = groupOrder.reduce((acc, type) => {
     acc[type] = guides.filter(g => (g.fileType ?? "other") === type);
     return acc;

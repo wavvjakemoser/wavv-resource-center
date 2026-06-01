@@ -579,8 +579,8 @@ const guidesRouter = router({
         description: z.string().optional(),
         category: z.string().optional(),
         fileUrl: z.string().optional(),
-        // fileType maps to the category section: pdf | checklist | playbook | other(=Resource)
-        fileType: z.enum(["pdf", "checklist", "playbook", "other"]).optional(),
+        // fileType maps to the category section: pdf | checklist | playbook | other | help_article
+        fileType: z.enum(["pdf", "checklist", "playbook", "other", "help_article"]).optional(),
       })
     )
     .mutation(({ input }) => createGuide({ ...input, published: true })),
@@ -594,7 +594,7 @@ const guidesRouter = router({
           description: z.string().optional(),
           category: z.string().optional(),
           fileUrl: z.string().optional(),
-          fileType: z.enum(["pdf", "checklist", "playbook", "other"]).optional(),
+          fileType: z.enum(["pdf", "checklist", "playbook", "other", "help_article"]).optional(),
           published: z.boolean().optional(),
         }),
       })

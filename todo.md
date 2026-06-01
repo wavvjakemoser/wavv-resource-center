@@ -1109,3 +1109,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Webinars page: fix on-demand series wording — remove "every 30 minutes" language
 - [x] Guides & Docs: show all sections even when empty, with an empty state message
 - [x] Settings tab: add Navigation section with per-item show/hide toggles for sidebar nav items (owner-only)
+
+## Support Page & Guides Updates (Session 8)
+- [x] Support page: remove "Ask WAVV" tile
+- [x] Support page: rename "Help Center" tile to "Chat with Support", make it first, link to Intercom URL (placeholder)
+- [x] Support page: add "Submit a Ticket" tile to the right of Chat with Support
+- [x] Support page: update hero/description copy to reflect new support model
+- [x] Guides & Docs: update hero banner copy to mention help articles
+- [x] Guides & Docs: add "Help Articles" as a new category (DB enum + schema.ts + routers.ts + GuidesAndDocs.tsx + Admin.tsx)
+- [x] Guides & Docs admin: Help Articles section visible in Section Visibility toggles and Add Guide dropdown
+- [x] WAVV Knowledge disabled: blocks ALL users (including owners) from clicking the button

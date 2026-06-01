@@ -1,30 +1,22 @@
 import PortalLayout from "@/components/PortalLayout";
-import { Headphones, ExternalLink, Sparkles } from "lucide-react";
+import { Headphones, MessageCircle, TicketCheck } from "lucide-react";
 
 const ACTION_CARDS = [
   {
-    key: "ai",
-    title: "Ask WAVV",
-    description: "Get an instant answer from our AI assistant — available 24/7",
-    icon: Sparkles,
+    key: "chat",
+    title: "Chat with Support",
+    description: "Connect with a WAVV support rep in real time — available during business hours",
+    icon: MessageCircle,
     color: "#0074F4",
-    href: undefined as string | undefined,
-    onClick: () => {
-      // Find and click the Ask WAVV button (top bar or floating bubble)
-      const btns = Array.from(document.querySelectorAll("button"));
-      for (const btn of btns) {
-        if (btn.textContent?.includes("Ask WAVV")) { btn.click(); break; }
-      }
-    },
+    href: "https://help.wavv.com",
   },
   {
-    key: "helpcenter",
-    title: "Help Center",
-    description: "Browse articles, step-by-step guides, and product documentation",
-    icon: ExternalLink,
-    color: "#00A9E2",
-    href: "https://help.wavv.com",
-    onClick: undefined as (() => void) | undefined,
+    key: "ticket",
+    title: "Submit a Ticket",
+    description: "Send us a detailed request and we'll follow up as soon as possible",
+    icon: TicketCheck,
+    color: "#67C728",
+    href: "https://help.wavv.com/hc/en-us/requests/new",
   },
 ];
 
@@ -51,7 +43,12 @@ export default function Support() {
             <div>
               <h1 className="text-xl font-bold mb-1" style={{ color: "#FF9900" }}>WAVV Support</h1>
               <p className="text-gray-400 text-sm">
-                Get help fast — ask WAVV AI for an instant answer or browse the Help Center.
+                Need help? Our support team is here for you. Chat with us directly or submit a
+                ticket and we'll get back to you as quickly as possible.
+              </p>
+              <p className="text-gray-500 text-xs mt-2">
+                Looking for guides, playbooks, or how-to docs? Visit{" "}
+                <a href="/guides" className="text-blue-400 hover:underline">WAVV Guides & Docs</a>.
               </p>
             </div>
           </div>
@@ -61,41 +58,39 @@ export default function Support() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {ACTION_CARDS.map((card) => {
             const Icon = card.icon;
-            const inner = (
-              <div
-                className="flex items-start gap-4 p-6 rounded-xl transition-all cursor-pointer h-full"
-                style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = card.color;
-                  e.currentTarget.style.boxShadow = `0 4px 24px ${card.color}18`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#252d3d";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-                onClick={card.onClick}
+            return (
+              <a
+                key={card.key}
+                href={card.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: "none" }}
               >
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ background: `${card.color}20` }}
+                  className="flex items-start gap-4 p-6 rounded-xl transition-all cursor-pointer h-full"
+                  style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = card.color;
+                    e.currentTarget.style.boxShadow = `0 4px 24px ${card.color}18`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#252d3d";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
                 >
-                  <Icon size={22} style={{ color: card.color }} />
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{ background: `${card.color}20` }}
+                  >
+                    <Icon size={22} style={{ color: card.color }} />
+                  </div>
+                  <div>
+                    <p className="text-white text-base font-semibold mb-1">{card.title}</p>
+                    <p className="text-gray-500 text-sm leading-relaxed">{card.description}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-white text-base font-semibold mb-1">{card.title}</p>
-                  <p className="text-gray-500 text-sm leading-relaxed">{card.description}</p>
-                </div>
-              </div>
+              </a>
             );
-
-            if (card.href) {
-              return (
-                <a key={card.key} href={card.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
-                  {inner}
-                </a>
-              );
-            }
-            return <div key={card.key}>{inner}</div>;
           })}
         </div>
 
