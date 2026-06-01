@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM invite_tokens WHERE email = 'jake.moser@wavv.com' AND used = 0;\nINSERT INTO invite_tokens (email, name, token, role, used, expiresAt, createdBy)\nVALUES ('jake.moser@wavv.com', 'Jake Moser', 'd8e0a2d5575270dd176cc25ad299d22d7fbca8b172ce119134bfca5a0eac845a', 'owner', 0, DATE_ADD(NOW(), INTERVAL 24 HOUR), 1);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute DELETE FROM invite_tokens WHERE email = 'jake.moser@wavv.com' AND used = 0;\nINSERT INTO invite_tokens (email, name, token, role, used, expiresAt, createdBy)\nVALUES ('jake.moser@wavv.com', 'Jake Moser', 'd8e0a2d5575270dd176cc25ad299d22d7fbca8b172ce119134bfca5a0eac845a', 'owner', 0, DATE_ADD(NOW(), INTERVAL 24 HOUR), 1);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 634
+}

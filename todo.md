@@ -1093,3 +1093,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Frontend: AcceptInvite routes to /wavvadmin or /wavvpartner after password set
 - [x] Frontend: Reset Password button added in user row actions (owner-only), shows copyable reset link modal
 - [x] Frontend: users with no password see a clear error message directing them to use their invite link
+
+## Partner Invite Flow (Session 6)
+- [x] Schema: ensure `partner` role exists in role enum (separate from `partner_admin`)
+- [x] DB migration: apply if needed (already in schema)
+- [x] Admin Partners tab: "Invite WAVV Partner" assigns `partner` role (not `partner_admin`)
+- [x] AcceptInvite: `partner` role routes to `/wavvpartner` after password set
+- [x] WavvPartnerPortal: gate access to `partner` + `partner_admin` + `owner` roles only (no `admin` or `customer_admin`)
+- [x] Admin Partners tab: show approved partners list (users with `partner` role) with name, email, joined date
+- [x] Admin Partners tab: partner rows show Remove button (owner-only), no role-change actions
+- [x] PortalLayout: sidebar does NOT show WAVV Admin link for `partner` role users (partner not in isAdmin)

@@ -114,6 +114,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     if (title) document.title = `${title} — WAVV Success Center`;
   }, [title]);
 
+  // `partner` role has portal access but is NOT an internal admin — they must not see the Admin panel link
   const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
   const isOwner = user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");

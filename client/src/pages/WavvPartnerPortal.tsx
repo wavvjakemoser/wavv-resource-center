@@ -63,20 +63,23 @@ export default function WavvPartnerPortal() {
   const { data: user, isLoading } = trpc.auth.me.useQuery();
   const [, navigate] = useLocation();
 
+  // Roles allowed on the partner portal
+  const PARTNER_ROLES = ["partner", "partner_admin", "owner"];
+
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
-      navigate("/login");
+      navigate("/login?next=/wavvpartner");
       return;
     }
-    // admin and customer_admin don't belong here — redirect to main admin panel
-    if (user.role === "admin" || user.role === "customer_admin") {
+    // Internal admin roles (admin, customer_admin) belong in the admin panel, not here
+    if (!PARTNER_ROLES.includes(user.role)) {
       navigate("/wavvadmin");
     }
   }, [user, isLoading, navigate]);
 
   if (isLoading || !user) return null;
-  if (user.role === "admin" || user.role === "customer_admin") return null;
+  if (!PARTNER_ROLES.includes(user.role)) return null;
 
   return (
     <PortalLayout title="WAVV Partners">

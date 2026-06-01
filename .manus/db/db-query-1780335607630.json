@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, name, email, role FROM users WHERE role = 'owner' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT id, name, email, role FROM users WHERE role = 'owner' LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Jake Moser",
+      "email": "jake.moser@wavv.com",
+      "role": "owner"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\n1\tJake Moser\tjake.moser@wavv.com\towner\n",
+  "stderr": "",
+  "execution_time_ms": 603
+}

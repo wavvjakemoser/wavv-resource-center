@@ -1,0 +1,13 @@
+{
+  "query": "SHOW TABLES LIKE '%invite%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SHOW TABLES LIKE '%invite%';",
+  "rows": [
+    {
+      "Tables_in_gkLpfNMVYQYMxzYT6m74Yk (%invite%)": "invite_tokens"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_gkLpfNMVYQYMxzYT6m74Yk (%invite%)\ninvite_tokens\n",
+  "stderr": "",
+  "execution_time_ms": 569
+}
