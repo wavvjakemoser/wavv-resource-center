@@ -12,8 +12,13 @@ export default function Login() {
 
   const nextPath = new URLSearchParams(window.location.search).get("next") || "/wavvadmin";
 
+  const utils = trpc.useUtils();
+
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      // Invalidate auth.me cache BEFORE navigating so the destination page
+      // doesn't see a stale null user and immediately redirect back to /login
+      await utils.auth.me.invalidate();
       const role = data?.user?.role;
       if (role === "partner_admin" || role === "partner") {
         navigate("/wavvpartner");
