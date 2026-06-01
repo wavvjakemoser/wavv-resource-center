@@ -658,7 +658,7 @@ export async function createNativeUser(data: {
   email: string;
   name: string;
   passwordHash: string | null;
-  role?: "user" | "admin" | "customer_admin";
+  role?: "user" | "admin" | "customer_admin" | "partner_admin" | "partner" | "owner";
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

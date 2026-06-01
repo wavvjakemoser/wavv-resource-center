@@ -1068,3 +1068,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] PortalLayout: Ask WAVV bubble visibility controlled by siteSettings
 - [ ] PortalLayout: announcement banner shown when active
 - [ ] PortalLayout: maintenance mode redirects non-owner visitors to maintenance page
+
+## UX Improvements (Session 3)
+- [x] Invite dialog: add role dropdown (Owner, Customer Admin, Partner Admin, Admin) for Team Access invites — owner-only
+- [x] Token URL prettification: truncate magic link hash for display, keep full URL in clipboard copy
+- [x] Login gate messaging: replace "we'll send an email" with "contact your WAVV admin to request access"ess"
+- [x] Sign out button: add visible sign out button in sidebar for ALL logged-in users (admins and partners)
+- [x] AcceptInvite: route `partner` role to /wavvpartner after claiming invite
+- [x] inviteTeamMember server procedure: accept optional role param (default admin), update createNativeUser type

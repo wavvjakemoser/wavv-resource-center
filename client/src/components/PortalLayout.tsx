@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import WavvAIChat from "./WavvAIChat";
 import AISearchBar from "./AISearchBar";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import {
   GraduationCap,
   Video,
@@ -16,6 +17,7 @@ import {
   Shield,
   Users,
   ExternalLink,
+  LogOut,
 } from "lucide-react";
 
 const baseNavItems = [
@@ -83,9 +85,21 @@ function NavLink({
 
 export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const { data: user } = trpc.auth.me.useQuery();
+  const { logout } = useAuth();
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      await logout();
+    } finally {
+      setSigningOut(false);
+      window.location.href = "/";
+    }
+  }
 
   // Site settings — controls Ask WAVV, announcement banner, maintenance mode
   const { data: allSettings = {} } = trpc.siteSettings.getAll.useQuery();
@@ -192,6 +206,41 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               );
             })}
           </nav>
+
+          {/* Sign out — pinned to bottom for all logged-in users */}
+          {user && (
+            <div className="px-3 pb-2" style={{ borderTop: "1px solid #1e2030", paddingTop: "10px" }}>
+              <button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
+                style={{
+                  fontSize: "15px",
+                  background: "transparent",
+                  border: "1px solid transparent",
+                  color: "rgba(255,255,255,0.45)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(248,81,73,0.08)";
+                  e.currentTarget.style.borderColor = "rgba(248,81,73,0.2)";
+                  e.currentTarget.style.color = "#f85149";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.borderColor = "transparent";
+                  e.currentTarget.style.color = "rgba(255,255,255,0.45)";
+                }}
+              >
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(248,81,73,0.1)" }}
+                >
+                  <LogOut size={16} style={{ color: "#f85149" }} />
+                </div>
+                <span className="truncate">{signingOut ? "Signing out…" : "Sign Out"}</span>
+              </button>
+            </div>
+          )}
 
           {/* Admin — pinned to bottom, only for admins */}
           {isAdmin && (

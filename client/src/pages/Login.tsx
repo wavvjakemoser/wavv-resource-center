@@ -50,7 +50,7 @@ export default function Login() {
           <div>
             <p className="text-white font-semibold text-lg text-center mb-1">Team Login</p>
             <p className="text-sm text-center" style={{ color: "#8b949e" }}>
-              Enter your work email to access the WAVV Admin panel.
+              Enter your work email to sign in. Access requires an active account.
             </p>
           </div>
 
@@ -97,8 +97,7 @@ export default function Login() {
           </button>
 
           <p className="text-xs text-center" style={{ color: "#8b949e" }}>
-            Only WAVV team members with an active account can log in.
-            Contact your admin if you need access.
+            This page requires access. Contact your WAVV admin to request an invitation.
           </p>
         </form>
       </div>

@@ -34,7 +34,7 @@ export default function AcceptInvite() {
       // Route by role: partner_admin → /wavvpartner, other internal roles → /wavvadmin, else → /dashboard
       const role = data?.user?.role;
       const dest =
-        role === "partner_admin" ? "/wavvpartner" :
+        (role === "partner_admin" || role === "partner") ? "/wavvpartner" :
         (role === "admin" || role === "customer_admin" || role === "owner") ? "/wavvadmin" :
         "/dashboard";
       setTimeout(() => navigate(dest), 2000);

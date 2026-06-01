@@ -1148,12 +1148,12 @@ function UsersTab() {
 
   // Magic link invite
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ name: "", email: "" });
-  const [inviteResult, setInviteResult] = useState<{ link: string; name: string } | null>(null);
+  const [inviteForm, setInviteForm] = useState({ name: "", email: "", role: "admin" as "owner" | "customer_admin" | "partner_admin" | "admin" });
+  const [inviteResult, setInviteResult] = useState<{ link: string; name: string; role: string } | null>(null);
   const inviteTeamMember = trpc.admin.inviteTeamMember.useMutation({
     onSuccess: (data) => {
-      setInviteResult({ link: data.inviteLink, name: inviteForm.name });
-      setInviteForm({ name: "", email: "" });
+      setInviteResult({ link: data.inviteLink, name: inviteForm.name, role: data.role ?? inviteForm.role });
+      setInviteForm({ name: "", email: "", role: "admin" });
       refetch();
     },
     onError: (e) => toast.error(e.message),
@@ -1327,7 +1327,7 @@ function UsersTab() {
             <FileDown size={13} />
             Export{roleFilter !== "all" ? ` ${roleFilter === "customer_admin" ? "Customer Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
           </button>
-          {isSuperAdmin && (
+          {isOwner && (
             <button
               onClick={() => { setInviteOpen(true); setInviteResult(null); }}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
@@ -1635,10 +1635,13 @@ function UsersTab() {
           </DialogHeader>
           <div className="py-2 space-y-3">
             <div
-              className="flex items-center gap-2 p-3 rounded-lg text-xs font-mono break-all"
-              style={{ background: "#0a0a0a", border: "1px solid #2a2a2a", color: "#60a5fa" }}
+              className="flex flex-col gap-1 p-3 rounded-lg"
+              style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
             >
-              <span className="flex-1 select-all">{inviteLinkModal.url}</span>
+              <p className="text-[10px] text-gray-500 font-mono">{(() => { try { return new URL(inviteLinkModal.url).origin; } catch { return ""; } })()}</p>
+              <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
+                /accept-invite?token=<span style={{ color: "#93c5fd" }}>{inviteLinkModal.url.split("token=")[1]?.slice(0, 12)}…</span>
+              </p>
             </div>
             <Button
               className="w-full font-semibold"
@@ -1659,7 +1662,7 @@ function UsersTab() {
       </Dialog>
 
       {/* ── Invite Team Member Dialog (magic link) ── */}
-      <Dialog open={inviteOpen} onOpenChange={(open) => { if (!open) { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "" }); } }}>
+      <Dialog open={inviteOpen} onOpenChange={(open) => { if (!open) { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "admin" }); } }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
@@ -1675,14 +1678,17 @@ function UsersTab() {
             <div className="py-2 space-y-3">
               <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
                 <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
-                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as an admin.</p>
+                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "customer_admin" ? "Customer Admin" : inviteResult.role === "partner_admin" ? "Partner Admin" : "Admin"}.</p>
               </div>
               <p className="text-xs text-gray-400">Copy this login link and send it to them via Slack or email. It expires in 24 hours and can only be used once.</p>
               <div
-                className="flex items-center gap-2 p-3 rounded-lg text-xs font-mono break-all"
-                style={{ background: "#0a0a0a", border: "1px solid #2a2a2a", color: "#60a5fa" }}
+                className="flex flex-col gap-1 p-3 rounded-lg"
+                style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
               >
-                <span className="flex-1 select-all">{inviteResult.link}</span>
+                <p className="text-[10px] text-gray-500 font-mono">{new URL(inviteResult.link).origin}</p>
+                <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
+                  /auth/magic?token=<span style={{ color: "#93c5fd" }}>{inviteResult.link.split("token=")[1]?.slice(0, 12)}…</span>
+                </p>
               </div>
               <Button
                 className="w-full font-semibold"
@@ -1716,18 +1722,31 @@ function UsersTab() {
                   className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
                 />
               </div>
-              <p className="text-xs text-gray-500">They will be added as an <strong className="text-gray-300">Admin</strong> with full content management access.</p>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-400">Role</label>
+                <select
+                  value={inviteForm.role}
+                  onChange={(e) => setInviteForm(f => ({ ...f, role: e.target.value as "owner" | "customer_admin" | "partner_admin" | "admin" }))}
+                  className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
+                  style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)" }}
+                >
+                  <option value="owner">Owner</option>
+                  <option value="customer_admin">Customer Admin</option>
+                  <option value="partner_admin">Partner Admin</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
             </div>
           )}
 
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "" }); }} className="text-gray-400">Close</Button>
+            <Button variant="ghost" onClick={() => { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "admin" }); }} className="text-gray-400">Close</Button>
             {!inviteResult && (
               <Button
                 disabled={inviteTeamMember.isPending || !inviteForm.name.trim() || !inviteForm.email.trim()}
                 onClick={() => {
                   if (!inviteForm.name.trim() || !inviteForm.email.trim()) { toast.error("Name and email are required."); return; }
-                  inviteTeamMember.mutate({ name: inviteForm.name.trim(), email: inviteForm.email.trim().toLowerCase() });
+                  inviteTeamMember.mutate({ name: inviteForm.name.trim(), email: inviteForm.email.trim().toLowerCase(), role: inviteForm.role });
                 }}
                 style={{ background: "#0074F4", color: "#fff" }}
               >
@@ -5795,6 +5814,7 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
   const [inviteName, setInviteName] = useState("");
   const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [inviteError, setInviteError] = useState("");
+  const [inviteUrl, setInviteUrl] = useState("");
   const [partnerSearch, setPartnerSearch] = useState("");
   const addUserMutation = trpc.admin.addUser.useMutation();
   const toggleStatus = trpc.admin.toggleUserStatus.useMutation({
@@ -5895,7 +5915,28 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
             {inviteStatus === "error" && (
               <p className="text-xs text-red-400">{inviteError}</p>
             )}
-            {inviteStatus === "success" && (
+            {inviteStatus === "success" && inviteUrl && (
+              <div className="space-y-2">
+                <p className="text-xs text-green-400">Partner invited successfully. Share this link:</p>
+                <div
+                  className="flex flex-col gap-1 p-3 rounded-lg"
+                  style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
+                >
+                  <p className="text-[10px] text-gray-500 font-mono">{(() => { try { return new URL(inviteUrl).origin; } catch { return ""; } })()}</p>
+                  <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
+                    /accept-invite?token=<span style={{ color: "#93c5fd" }}>{inviteUrl.split("token=")[1]?.slice(0, 12)}…</span>
+                  </p>
+                </div>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(inviteUrl); toast.success("Invite link copied!"); }}
+                  className="w-full rounded-lg py-2 text-sm font-medium transition-all"
+                  style={{ background: "#0074F4", color: "#fff" }}
+                >
+                  Copy Invite Link
+                </button>
+              </div>
+            )}
+            {inviteStatus === "success" && !inviteUrl && (
               <p className="text-xs text-green-400">Partner invited successfully.</p>
             )}
             <div className="flex gap-2 pt-1">
@@ -5912,10 +5953,10 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
                   setInviteStatus("loading");
                   setInviteError("");
                   try {
-                    await addUserMutation.mutateAsync({ name: inviteName.trim(), email: inviteEmail.trim(), role: "partner", origin: window.location.origin });
+                    const result = await addUserMutation.mutateAsync({ name: inviteName.trim(), email: inviteEmail.trim(), role: "partner", origin: window.location.origin });
+                    setInviteUrl(result.inviteUrl ?? "");
                     setInviteStatus("success");
                     refetch();
-                    setTimeout(() => setShowInvite(false), 1500);
                   } catch (err: any) {
                     setInviteStatus("error");
                     setInviteError(err?.message ?? "Failed to invite partner. Please try again.");

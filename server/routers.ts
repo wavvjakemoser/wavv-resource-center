@@ -1189,25 +1189,26 @@ export const appRouter = router({
         return { success: true, inviteUrl };
       }),
     // Magic link invite: create user + send them a login link
-    inviteTeamMember: superAdminProcedure
+    inviteTeamMember: ownerProcedure
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
+        role: z.enum(["owner", "customer_admin", "partner_admin", "admin"]).default("admin"),
       }))
       .mutation(async ({ input }) => {
         const email = input.email.trim().toLowerCase();
         let user = await getUserByEmail(email);
         if (!user) {
-          user = await createNativeUser({ email, name: input.name.trim(), passwordHash: null, role: "admin" });
+          user = await createNativeUser({ email, name: input.name.trim(), passwordHash: null, role: input.role });
         }
         const token = await createMagicToken(email, "invite", user.id);
         const appUrl = process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
         const link = `${appUrl}/auth/magic?token=${token}`;
         await notifyOwner({
-          title: `Team invite sent to ${input.name}`,
-          content: `Invite link for ${email}:\n${link}\n\nThis link expires in 24 hours.`,
+          title: `Team invite sent to ${input.name} (${input.role})`,
+          content: `Invite link for ${email}:\n${link}\n\nRole: ${input.role}\nThis link expires in 24 hours.`,
         });
-        return { success: true, inviteLink: link };
+        return { success: true, inviteLink: link, role: input.role };
       }),
     // Notification management (admin only)
     listNotifications: superAdminProcedure.query(async () => {

@@ -27,7 +27,7 @@ export default function MagicAuth() {
     const token = params.get("token");
     if (!token) {
       setStatus("error");
-      setErrorMsg("No token found in the URL. Please request a new login link.");
+      setErrorMsg("No token found in the URL. Contact your WAVV admin to request a new invitation.");
       return;
     }
     verify.mutate({ token });
@@ -85,7 +85,7 @@ export default function MagicAuth() {
               className="mt-2 px-6 py-2.5 rounded-lg text-sm font-semibold text-white"
               style={{ background: "linear-gradient(135deg, #0074F4, #0056b3)" }}
             >
-              Request a new link
+              Back to Login
             </button>
           </>
         )}
