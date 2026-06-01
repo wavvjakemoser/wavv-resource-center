@@ -228,7 +228,7 @@ const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactN
     label: "WAVV On-Demand Series",
     icon: <RefreshCw size={14} />,
     accent: "#0074F4",
-    description: "Always-on sessions running every 30 minutes — join anytime",
+    description: "Available anytime — watch at your own pace",
   },
   exclusive: {
     label: "Upcoming WAVV Exclusive Live Webinars",

@@ -108,14 +108,13 @@ export default function GuidesAndDocs() {
         )}
 
         {/* Grouped sections */}
-        {!isLoading && hasAnyResults && (
+        {!isLoading && (
           <div className="space-y-10">
             {CATEGORY_ORDER.map((categoryKey) => {
               // Map "other" to "resource" for visibility key lookup
               const visKey = categoryKey === "other" ? "resource" : categoryKey;
               if (guideVisibility[visKey] === false) return null;
               const items = grouped[categoryKey] ?? [];
-              if (items.length === 0) return null;
               const meta = CATEGORY_META[categoryKey];
               const Icon = meta.icon;
               return (
@@ -141,7 +140,16 @@ export default function GuidesAndDocs() {
                   </div>
                   {/* Divider */}
                   <div className="mb-4 h-px" style={{ background: `${meta.color}30` }} />
-                  {/* Cards */}
+                  {/* Cards or empty state */}
+                  {items.length === 0 ? (
+                    <div
+                      className="flex items-center gap-3 px-5 py-4 rounded-xl"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px dashed rgba(255,255,255,0.1)" }}
+                    >
+                      <Icon size={16} style={{ color: meta.color, opacity: 0.5 }} />
+                      <p className="text-sm text-gray-500">No {meta.label.toLowerCase()} yet. Check back soon or contact your admin.</p>
+                    </div>
+                  ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {items.map((guide) => (
                       <div
@@ -215,6 +223,7 @@ export default function GuidesAndDocs() {
                       </div>
                     ))}
                   </div>
+                  )}
                 </section>
               );
             })}

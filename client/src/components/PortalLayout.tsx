@@ -109,6 +109,9 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const announcementText = typeof (allSettings as Record<string, unknown>)["announcement_text"] === "string"
     ? (allSettings as Record<string, unknown>)["announcement_text"] as string
     : "";
+  const wavvKnowledgeEnabled = (allSettings as Record<string, unknown>)["wavv_knowledge_enabled"] !== false; // default true
+  // Nav visibility: object of { [href]: boolean } — missing key = visible (default true)
+  const navVisibility = ((allSettings as Record<string, unknown>)["nav_visibility"] ?? {}) as Record<string, boolean>;
 
   useEffect(() => {
     if (title) document.title = `${title} — WAVV Success Center`;
@@ -118,7 +121,16 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
   const isOwner = user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");
-  const navItems = [...baseNavItems, publicPartnerItem];
+
+  // Filter nav items: hidden if owner toggled off in Settings, or WAVV Knowledge disabled
+  const allNavItems = [...baseNavItems, publicPartnerItem];
+  const navItems = allNavItems.filter((item) => {
+    // Check nav_visibility setting (missing key = visible)
+    if (navVisibility[item.href] === false) return false;
+    // WAVV Knowledge is the /hands-on route
+    if (item.href === "/hands-on" && !wavvKnowledgeEnabled) return false;
+    return true;
+  });
 
   // Maintenance mode — show a holding page for non-owners on non-admin pages
   if (maintenanceMode && !isOwner && !isAdminPage) {

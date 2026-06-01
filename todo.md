@@ -1103,3 +1103,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Partners tab: show approved partners list (users with `partner` role) with name, email, joined date
 - [x] Admin Partners tab: partner rows show Remove button (owner-only), no role-change actions
 - [x] PortalLayout: sidebar does NOT show WAVV Admin link for `partner` role users (partner not in isAdmin)
+
+## Settings & Content Fixes (Session 7)
+- [x] Settings tab: add WAVV Knowledge on/off toggle (owner-only)
+- [x] Webinars page: fix on-demand series wording — remove "every 30 minutes" language
+- [x] Guides & Docs: show all sections even when empty, with an empty state message
+- [x] Settings tab: add Navigation section with per-item show/hide toggles for sidebar nav items (owner-only)

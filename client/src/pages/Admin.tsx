@@ -115,6 +115,13 @@ import {
   Gauge,
   Info,
   KeyRound,
+  Navigation,
+  Home,
+  GraduationCap as GraduationCapIcon,
+  Video as VideoIcon,
+  FileText as FileTextIcon,
+  Headphones as HeadphonesIcon,
+  Users as UsersIcon,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -6263,6 +6270,25 @@ function SettingsTab() {
   const announcementText = typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "";
   const announcementEnabled = settings["announcement_enabled"] === true;
   const rateLimitPerHour = typeof settings["ask_wavv_rate_limit"] === "number" ? settings["ask_wavv_rate_limit"] : 10;
+  const wavvKnowledgeEnabled = settings["wavv_knowledge_enabled"] !== false; // default true
+  const navVisibility = (settings["nav_visibility"] ?? {}) as Record<string, boolean>;
+
+  // Nav items that can be toggled
+  const NAV_ITEMS = [
+    { href: "/dashboard",  label: "Home",             icon: Home },
+    { href: "/academy",    label: "WAVV Academy",      icon: GraduationCapIcon },
+    { href: "/webinars",   label: "WAVV Webinars",     icon: VideoIcon },
+    { href: "/guides",     label: "WAVV Guides & Docs", icon: FileTextIcon },
+    { href: "/hands-on",   label: "WAVV Playground",   icon: FlaskConical },
+    { href: "/support",    label: "WAVV Support",      icon: HeadphonesIcon },
+    { href: "/partners",   label: "WAVV Partners",     icon: UsersIcon },
+  ];
+
+  function toggleNavItem(href: string) {
+    const current = navVisibility[href] !== false; // default visible
+    const updated = { ...navVisibility, [href]: !current };
+    updateSetting.mutate({ key: "nav_visibility", value: updated });
+  }
 
   const [localAnnouncement, setLocalAnnouncement] = useState(announcementText);
   const [localRateLimit, setLocalRateLimit] = useState(String(rateLimitPerHour));
@@ -6394,6 +6420,67 @@ function SettingsTab() {
               >
                 Save
               </button>
+            </div>
+          </div>
+
+          {/* ── WAVV Knowledge ── */}
+          <div className={sectionClass} style={sectionStyle}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
+                  <Sparkles size={15} style={{ color: "#f59e0b" }} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">WAVV Knowledge</p>
+                  <p className="text-xs text-gray-500">Show or hide the WAVV Knowledge tab in the sidebar</p>
+                </div>
+              </div>
+              <button
+                onClick={() => toggle("wavv_knowledge_enabled", wavvKnowledgeEnabled)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={wavvKnowledgeEnabled
+                  ? { background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+              >
+                {wavvKnowledgeEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                {wavvKnowledgeEnabled ? "Enabled" : "Disabled"}
+              </button>
+            </div>
+          </div>
+
+          {/* ── Navigation Visibility ── */}
+          <div className={sectionClass} style={sectionStyle}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(99,102,241,0.12)" }}>
+                <Navigation size={15} style={{ color: "#818cf8" }} />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">Navigation Visibility</p>
+                <p className="text-xs text-gray-500">Show or hide individual sidebar items for all users</p>
+              </div>
+            </div>
+            <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              {NAV_ITEMS.map(({ href, label, icon: NavIcon }) => {
+                const isVisible = navVisibility[href] !== false; // default true
+                return (
+                  <div key={href} className="flex items-center justify-between py-1">
+                    <div className="flex items-center gap-2">
+                      <NavIcon size={14} style={{ color: isVisible ? "#9ca3af" : "#4b5563" }} />
+                      <span className="text-xs" style={{ color: isVisible ? "#d1d5db" : "#6b7280" }}>{label}</span>
+                    </div>
+                    <button
+                      onClick={() => toggleNavItem(href)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                      style={isVisible
+                        ? { background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.25)" }
+                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                    >
+                      {isVisible ? <Eye size={11} /> : <EyeOff size={11} />}
+                      {isVisible ? "Visible" : "Hidden"}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
