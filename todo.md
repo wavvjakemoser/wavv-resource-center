@@ -1076,3 +1076,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Sign out button: add visible sign out button in sidebar for ALL logged-in users (admins and partners)
 - [x] AcceptInvite: route `partner` role to /wavvpartner after claiming invite
 - [x] inviteTeamMember server procedure: accept optional role param (default admin), update createNativeUser type
+
+## UX Improvements (Session 4)
+- [x] Team Access: add info (i) tooltip to each role stat card describing role permissions
+- [x] Team Access: make the user list tab visible to all 4 admin tiers (owner, customer_admin, partner_admin, admin) as read-only — no invite/promote/remove actions for non-owners

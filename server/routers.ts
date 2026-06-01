@@ -1100,7 +1100,7 @@ export const appRouter = router({
   analytics: analyticsRouter,
   scheduled: scheduledRouter,
   admin: router({
-    listUsers: partnerAdminOrSuperProcedure
+    listUsers: adminProcedure
       .input(z.object({ search: z.string().optional() }).optional())
       .query(async ({ input, ctx }) => {
         const allUsersData = await getAllUsers();

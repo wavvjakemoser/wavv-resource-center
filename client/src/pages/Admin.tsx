@@ -113,7 +113,14 @@ import {
   Megaphone,
   Wrench,
   Gauge,
+  Info,
 } from "lucide-react";
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 type AdminTab = "knowledge" | "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings";
@@ -134,7 +141,7 @@ export default function Admin() {
     const t = params.get("tab");
     if (t === "knowledge") return "knowledge";
     if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) return "partner_analytics";
-    if (t === "users" && isSuperAdmin) return "users";
+    if (t === "users") return "users";
     if ((t === "academy" || t === "content") && isSuperAdmin) return "academy";
     if (t === "webinars" && isSuperAdmin) return "webinars";
     if (t === "guides" && isSuperAdmin) return "guides";
@@ -145,6 +152,8 @@ export default function Admin() {
     // owner/customer_admin → users (Team Access); partner_admin → partner_analytics; admin → knowledge
     if (isOwner || (isSuperAdmin && !isPartnerAdmin)) return "users";
     if (isPartnerAdmin && !isOwner) return "partner_analytics";
+    // plain admin → Team Access (read-only)
+    if (user?.role === "admin") return "users";
     return "knowledge";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
@@ -155,7 +164,7 @@ export default function Admin() {
     const t = params.get("tab");
     if (t === "knowledge") setActiveTab("knowledge");
     else if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("partner_analytics");
-    else if (t === "users" && isSuperAdmin) setActiveTab("users");
+    else if (t === "users") setActiveTab("users");
     else if ((t === "academy" || t === "content") && isSuperAdmin) setActiveTab("academy");
     else if (t === "webinars" && isSuperAdmin) setActiveTab("webinars");
     else if (t === "guides" && isSuperAdmin) setActiveTab("guides");
@@ -190,11 +199,11 @@ export default function Admin() {
 
   // Tab access per role:
   // owner: all tabs
-  // customer_admin: knowledge, analytics, users, academy, webinars, guides, playground, support, content_requests (NO partners)
-  // partner_admin: knowledge + partners only
-  // admin: knowledge only
+  // customer_admin: all except partner_analytics
+  // partner_admin: knowledge + partner_analytics + team access (read-only)
+  // admin: team access (read-only) + knowledge
   const tabs: { id: AdminTab; label: string; icon: React.ReactNode; requiresSuperAdmin?: boolean; requiresPartnerAdmin?: boolean; requiresOwner?: boolean }[] = [
-    { id: "users",             label: "Team Access",     icon: <Shield size={13} />,        requiresSuperAdmin: true },
+    { id: "users",             label: "Team Access",     icon: <Shield size={13} />,        requiresSuperAdmin: false },
     { id: "analytics",         label: "Analytics",       icon: <BarChart3 size={13} />,     requiresSuperAdmin: true },
     { id: "academy",           label: "Academy",         icon: <GraduationCap size={13} />, requiresSuperAdmin: true },
     { id: "webinars",          label: "Webinars",        icon: <Video size={13} />,         requiresSuperAdmin: true },
@@ -267,7 +276,7 @@ export default function Admin() {
         {/* ── Tab content ── */}
         {activeTab === "knowledge" && <WavvKnowledgeTab />}
         {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab />}
-        {activeTab === "users" && isSuperAdmin && <UsersTab />}
+        {activeTab === "users" && <UsersTab />}
         {activeTab === "academy" && isSuperAdmin && <ContentTab />}
         {activeTab === "webinars" && isSuperAdmin && <WebinarsTab />}
         {activeTab === "guides" && isSuperAdmin && <GuidesTab />}
@@ -1204,7 +1213,7 @@ function UsersTab() {
   const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "customer_admin").length, [users]);
   const partnerAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "partner_admin").length, [users]);
   const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "admin").length, [users]);
-  const statCards: { filter: RoleFilter; label: string; value: number; iconEl: React.ReactNode; color: string; bg: string; activeBorder: string }[] = [
+  const statCards: { filter: RoleFilter; label: string; value: number; iconEl: React.ReactNode; color: string; bg: string; activeBorder: string; description: string }[] = [
     {
       filter: "owner",
       label: "Owners",
@@ -1213,6 +1222,7 @@ function UsersTab() {
       color: "#fb923c",
       bg: "rgba(251,146,60,0.1)",
       activeBorder: "#fb923c",
+      description: "Full platform control. Can invite and remove all users, change any role, manage all content, and access every admin tab including Settings.",
     },
     {
       filter: "customer_admin",
@@ -1222,6 +1232,7 @@ function UsersTab() {
       color: "#e879f9",
       bg: "rgba(232,121,249,0.1)",
       activeBorder: "#e879f9",
+      description: "Can manage all content (Academy, Webinars, Guides, Support, Playground) and view analytics. Cannot access Partner Analytics or Site Settings.",
     },
     {
       filter: "partner_admin",
@@ -1231,6 +1242,7 @@ function UsersTab() {
       color: "#00A9E2",
       bg: "rgba(0,169,226,0.1)",
       activeBorder: "#00A9E2",
+      description: "Access to WAVV Knowledge and Partner Analytics. Can invite and manage WAVV Partner accounts. Read-only access to Team Access.",
     },
     {
       filter: "admin",
@@ -1240,6 +1252,7 @@ function UsersTab() {
       color: "#fbbf24",
       bg: "rgba(251,191,36,0.1)",
       activeBorder: "#fbbf24",
+      description: "Support-level access. Can view Team Access (read-only) to look up users and verify access. Cannot make any changes to users or content.",
     },
   ];
 
@@ -1339,34 +1352,67 @@ function UsersTab() {
         </div>
       </div>
 
+      {/* Read-only notice for non-owners */}
+      {!isOwner && (
+        <div
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs"
+          style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.15)", color: "#fbbf24" }}
+        >
+          <Info size={13} style={{ flexShrink: 0 }} />
+          <span>You have <strong>read-only</strong> access to Team Access. Use the search to look up users and verify their access. Contact an Owner to make changes.</span>
+        </div>
+      )}
+
       {/* Clickable stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {statCards.map((s) => {
-          const active = roleFilter === s.filter;
-          return (
-            <button
-              key={s.filter}
-              onClick={() => setRoleFilter(active ? "all" : s.filter)}
-              className="rounded-xl p-4 text-left transition-all"
-              style={{
-                background: "#1d2230",
-                border: active ? `1.5px solid ${s.activeBorder}` : "1px solid #2a2a2a",
-                boxShadow: active ? `0 0 12px ${s.activeBorder}33` : "none",
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg flex items-center justify-center" style={{ background: s.bg }}>
-                  {s.iconEl}
+      <TooltipProvider delayDuration={200}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {statCards.map((s) => {
+            const active = roleFilter === s.filter;
+            return (
+              <button
+                key={s.filter}
+                onClick={() => setRoleFilter(active ? "all" : s.filter)}
+                className="rounded-xl p-4 text-left transition-all relative"
+                style={{
+                  background: "#1d2230",
+                  border: active ? `1.5px solid ${s.activeBorder}` : "1px solid #2a2a2a",
+                  boxShadow: active ? `0 0 12px ${s.activeBorder}33` : "none",
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg flex items-center justify-center" style={{ background: s.bg }}>
+                    {s.iconEl}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-500">{s.label}</p>
+                    <p className="text-2xl font-bold" style={{ color: active ? s.color : "#fff" }}>{s.value}</p>
+                  </div>
+                  {/* Info tooltip — stop propagation so clicking it doesn't toggle the filter */}
+                  <UITooltip>
+                    <TooltipTrigger asChild>
+                      <span
+                        className="absolute top-2 right-2 flex items-center justify-center rounded-full cursor-default"
+                        style={{ width: 18, height: 18 }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Info size={13} style={{ color: "rgba(255,255,255,0.25)" }} />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="bottom"
+                      className="max-w-[220px] text-xs leading-relaxed"
+                      style={{ background: "#1d2230", border: "1px solid #3a3a4a", color: "#d1d5db" }}
+                    >
+                      <p className="font-semibold mb-1" style={{ color: s.color }}>{s.label}</p>
+                      {s.description}
+                    </TooltipContent>
+                  </UITooltip>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500">{s.label}</p>
-                  <p className="text-2xl font-bold" style={{ color: active ? s.color : "#fff" }}>{s.value}</p>
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+              </button>
+            );
+          })}
+        </div>
+      </TooltipProvider>
 
       {/* Search */}
       <div className="relative max-w-md">
@@ -1389,17 +1435,17 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Role</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Registered</TableHead>
-              <TableHead className="text-gray-400 text-right">Actions</TableHead>
+              {isOwner && <TableHead className="text-gray-400 text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-12 text-gray-500">Loading users...</TableCell>
+                <TableCell colSpan={isOwner ? 5 : 4} className="text-center py-12 text-gray-500">Loading users...</TableCell>
               </TableRow>
             ) : filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-12 text-gray-500">
+                <TableCell colSpan={isOwner ? 5 : 4} className="text-center py-12 text-gray-500">
                   {search || roleFilter !== "all" ? "No users match your filter." : "No users found."}
                 </TableCell>
               </TableRow>
@@ -1451,7 +1497,7 @@ function UsersTab() {
                     <TableCell className="text-gray-500 text-sm">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                     </TableCell>
-                    <TableCell>
+                    {isOwner && <TableCell>
                       {isSelf ? (
                         <span className="text-xs text-gray-600">—</span>
                       ) : (
@@ -1477,7 +1523,7 @@ function UsersTab() {
                           )}
                         </div>
                       )}
-                    </TableCell>
+                    </TableCell>}
                   </TableRow>
                 );
               })
