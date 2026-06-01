@@ -205,6 +205,11 @@ export default function Admin() {
     );
   }
 
+  // Fetch site settings to check if WAVV Knowledge is enabled
+  const { data: adminSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const wavvKnowledgeEnabled = (adminSettings as Record<string, unknown>)["wavv_knowledge_enabled"] !== false;
+  const knowledgeDisabledForUser = !wavvKnowledgeEnabled; // disabled = no one can access it
+
   // Tab access per role:
   // owner: all tabs
   // customer_admin: all except partner_analytics
@@ -229,18 +234,31 @@ export default function Admin() {
 
         {/* ── WAVV Knowledge standalone button ── */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setActiveTab("knowledge")}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-            style={
-              activeTab === "knowledge"
-                ? { background: "#0074F4", color: "#fff", border: "1px solid #0074F4" }
-                : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
-            }
-          >
-            <Sparkles size={14} />
-            WAVV Knowledge
-          </button>
+          <UITooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => { if (!knowledgeDisabledForUser) setActiveTab("knowledge"); }}
+                disabled={knowledgeDisabledForUser}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                style={
+                  knowledgeDisabledForUser
+                    ? { background: "#1a1f2e", color: "rgba(255,255,255,0.2)", border: "1px solid #222", cursor: "not-allowed", opacity: 0.5 }
+                    : activeTab === "knowledge"
+                    ? { background: "#0074F4", color: "#fff", border: "1px solid #0074F4" }
+                    : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
+                }
+              >
+                <Sparkles size={14} />
+                WAVV Knowledge
+                {knowledgeDisabledForUser && <Lock size={11} style={{ marginLeft: 2, opacity: 0.6 }} />}
+              </button>
+            </TooltipTrigger>
+            {knowledgeDisabledForUser && (
+              <TooltipContent side="bottom">
+                <p>WAVV Knowledge has been disabled by your admin.</p>
+              </TooltipContent>
+            )}
+          </UITooltip>
         </div>
 
         {/* ── Tab bar ── */}
@@ -280,9 +298,17 @@ export default function Admin() {
             );
           })}
         </div>
-
         {/* ── Tab content ── */}
-        {activeTab === "knowledge" && <WavvKnowledgeTab />}
+        {activeTab === "knowledge" && !knowledgeDisabledForUser && <WavvKnowledgeTab />}
+        {activeTab === "knowledge" && knowledgeDisabledForUser && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
+              <Lock size={24} style={{ color: "rgba(255,255,255,0.2)" }} />
+            </div>
+            <p className="text-white font-semibold mb-1">WAVV Knowledge is currently disabled</p>
+            <p className="text-sm text-gray-500">This feature has been turned off. Enable it in Settings to restore access.</p>
+          </div>
+        )}
         {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "academy" && isSuperAdmin && <ContentTab />}
