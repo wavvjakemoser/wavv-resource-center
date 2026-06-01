@@ -107,10 +107,16 @@ import {
   Send,
   BookOpen,
   Crown,
+  Settings,
+  ToggleLeft,
+  ToggleRight,
+  Megaphone,
+  Wrench,
+  Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
 
-type AdminTab = "knowledge" | "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests";
+type AdminTab = "knowledge" | "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -197,6 +203,7 @@ export default function Admin() {
     { id: "support",           label: "Support",         icon: <Headphones size={13} />,    requiresSuperAdmin: true },
     { id: "content_requests",  label: "Requests",        icon: <MessageSquare size={13} />, requiresSuperAdmin: true },
     { id: "partner_analytics", label: "Partners",        icon: <Users size={13} />,         requiresPartnerAdmin: true },
+    { id: "settings",          label: "Settings",        icon: <Settings size={13} />,      requiresOwner: true },
   ];
 
   return (
@@ -268,6 +275,7 @@ export default function Admin() {
         {activeTab === "support" && isSuperAdmin && <SupportTab />}
         {activeTab === "content_requests" && isSuperAdmin && <ContentRequestsTab />}
         {activeTab === "partner_analytics" && (isSuperAdmin || isPartnerAdmin) && <PartnerAnalyticsTab isPartnerAdmin={isPartnerAdmin && !isOwner} />}
+        {activeTab === "settings" && isOwner && <SettingsTab />}
       </div>
     </PortalLayout>
   );
@@ -5798,8 +5806,8 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
     onError: (e) => toast.error(e.message),
   });
 
-  // Approved partners = users with partner_admin role
-  const approvedPartners = allUsers.filter((u: any) => u.role === "partner_admin");
+  // Approved partners = users with partner role (external WAVV Partners)
+  const approvedPartners = allUsers.filter((u: any) => u.role === "partner");
   const totalPartnerAccounts = approvedPartners.length;
   const activePartnerCount = approvedPartners.filter((u: any) => u.isActive).length;
 
@@ -5904,7 +5912,7 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
                   setInviteStatus("loading");
                   setInviteError("");
                   try {
-                    await addUserMutation.mutateAsync({ name: inviteName.trim(), email: inviteEmail.trim(), role: "partner_admin", origin: window.location.origin });
+                    await addUserMutation.mutateAsync({ name: inviteName.trim(), email: inviteEmail.trim(), role: "partner", origin: window.location.origin });
                     setInviteStatus("success");
                     refetch();
                     setTimeout(() => setShowInvite(false), 1500);
@@ -6081,6 +6089,194 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
           Referral link click tracking, course completion rates, and time-to-activation will be available once the partner onboarding course is published.
         </p>
       </div>
+    </div>
+  );
+}
+
+// ─── Settings Tab (Owner Only) ────────────────────────────────────────────────
+function SettingsTab() {
+  const utils = trpc.useUtils();
+
+  // Load all site settings
+  const { data: settings = {}, isLoading } = trpc.siteSettings.getAll.useQuery();
+
+  const updateSetting = trpc.siteSettings.update.useMutation({
+    onSuccess: () => {
+      utils.siteSettings.getAll.invalidate();
+      utils.siteSettings.get.invalidate();
+      toast.success("Setting updated");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const askWavvEnabled = settings["ask_wavv_enabled"] !== false; // default true
+  const maintenanceMode = settings["maintenance_mode"] === true;
+  const announcementText = typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "";
+  const announcementEnabled = settings["announcement_enabled"] === true;
+  const rateLimitPerHour = typeof settings["ask_wavv_rate_limit"] === "number" ? settings["ask_wavv_rate_limit"] : 10;
+
+  const [localAnnouncement, setLocalAnnouncement] = useState(announcementText);
+  const [localRateLimit, setLocalRateLimit] = useState(String(rateLimitPerHour));
+
+  // Sync local state when settings load
+  useEffect(() => {
+    setLocalAnnouncement(typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "");
+    setLocalRateLimit(String(typeof settings["ask_wavv_rate_limit"] === "number" ? settings["ask_wavv_rate_limit"] : 10));
+  }, [settings]);
+
+  function toggle(key: string, current: boolean) {
+    updateSetting.mutate({ key, value: !current });
+  }
+
+  function saveAnnouncement() {
+    updateSetting.mutate({ key: "announcement_text", value: localAnnouncement });
+  }
+
+  function saveRateLimit() {
+    const n = parseInt(localRateLimit, 10);
+    if (isNaN(n) || n < 1) { toast.error("Rate limit must be a positive number"); return; }
+    updateSetting.mutate({ key: "ask_wavv_rate_limit", value: n });
+  }
+
+  const sectionClass = "rounded-xl p-5 space-y-4";
+  const sectionStyle = { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" };
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <div>
+        <h2 className="text-base font-semibold text-white flex items-center gap-2">
+          <Settings size={16} style={{ color: "#0074F4" }} />
+          Site Settings
+        </h2>
+        <p className="text-xs text-gray-500 mt-0.5">Owner-only controls for site-wide features and configuration</p>
+      </div>
+
+      {isLoading ? (
+        <div className="text-sm text-gray-500">Loading settings…</div>
+      ) : (
+        <>
+          {/* ── Ask WAVV ── */}
+          <div className={sectionClass} style={sectionStyle}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)" }}>
+                  <Bot size={15} style={{ color: "#0074F4" }} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Ask WAVV Chat</p>
+                  <p className="text-xs text-gray-500">Show or hide the AI chat bubble site-wide</p>
+                </div>
+              </div>
+              <button
+                onClick={() => toggle("ask_wavv_enabled", askWavvEnabled)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={askWavvEnabled
+                  ? { background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+              >
+                {askWavvEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                {askWavvEnabled ? "Enabled" : "Disabled"}
+              </button>
+            </div>
+
+            {/* Rate limit */}
+            <div className="flex items-center gap-3 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="flex items-center gap-2 flex-1">
+                <Gauge size={13} style={{ color: "#9ca3af" }} />
+                <span className="text-xs text-gray-400">Rate limit (messages / hour / visitor)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={localRateLimit}
+                  onChange={(e) => setLocalRateLimit(e.target.value)}
+                  className="w-16 rounded-lg px-2 py-1 text-xs text-white text-center outline-none"
+                  style={{ background: "#0d0d0d", border: "1px solid #333" }}
+                />
+                <button
+                  onClick={saveRateLimit}
+                  className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                  style={{ background: "#0074F4", color: "#fff" }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Announcement Banner ── */}
+          <div className={sectionClass} style={sectionStyle}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(251,191,36,0.12)" }}>
+                  <Megaphone size={15} style={{ color: "#fbbf24" }} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Announcement Banner</p>
+                  <p className="text-xs text-gray-500">Show a banner at the top of every page</p>
+                </div>
+              </div>
+              <button
+                onClick={() => toggle("announcement_enabled", announcementEnabled)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={announcementEnabled
+                  ? { background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+              >
+                {announcementEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                {announcementEnabled ? "Enabled" : "Disabled"}
+              </button>
+            </div>
+            <div className="flex gap-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <input
+                type="text"
+                placeholder="e.g. New webinar this Friday — register now!"
+                value={localAnnouncement}
+                onChange={(e) => setLocalAnnouncement(e.target.value)}
+                className="flex-1 rounded-lg px-3 py-2 text-xs text-white outline-none"
+                style={{ background: "#0d0d0d", border: "1px solid #333" }}
+              />
+              <button
+                onClick={saveAnnouncement}
+                className="px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                style={{ background: "#0074F4", color: "#fff" }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+
+          {/* ── Maintenance Mode ── */}
+          <div className={sectionClass} style={sectionStyle}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(239,68,68,0.12)" }}>
+                  <Wrench size={15} style={{ color: "#ef4444" }} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Maintenance Mode</p>
+                  <p className="text-xs text-gray-500">Replace the public site with a "Coming soon" message. Owners can still access /wavvadmin.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (!maintenanceMode && !window.confirm("Enable maintenance mode? Public visitors will see a Coming Soon page.")) return;
+                  toggle("maintenance_mode", maintenanceMode);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={maintenanceMode
+                  ? { background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+              >
+                {maintenanceMode ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                {maintenanceMode ? "Active" : "Off"}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

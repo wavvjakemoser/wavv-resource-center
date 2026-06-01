@@ -1115,7 +1115,7 @@ export const appRouter = router({
         );
       }),
     updateRole: ownerProcedure
-      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "customer_admin", "partner_admin", "owner"]) }))
+      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "customer_admin", "partner_admin", "partner", "owner"]) }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own role" });
@@ -1155,7 +1155,7 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
-        role: z.enum(["admin", "customer_admin", "partner_admin", "owner"]).default("admin"),
+        role: z.enum(["admin", "customer_admin", "partner_admin", "partner", "owner"]).default("admin"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1176,7 +1176,7 @@ export const appRouter = router({
     resendInvite: superAdminProcedure
       .input(z.object({
         email: z.string().email(),
-        role: z.enum(["admin", "customer_admin", "partner_admin", "owner"]).default("admin"),
+        role: z.enum(["admin", "customer_admin", "partner_admin", "partner", "owner"]).default("admin"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1479,6 +1479,10 @@ export const appRouter = router({
   }),
 
   siteSettings: router({
+    getAll: publicProcedure.query(async () => {
+      const { getSiteSettings } = await import("./db");
+      return getSiteSettings();
+    }),
     get: publicProcedure
       .input(z.object({ key: z.string() }))
       .query(async ({ input }) => {
@@ -1486,14 +1490,14 @@ export const appRouter = router({
         return getSiteSetting(input.key);
       }),
     update: protectedProcedure
-      .input(z.object({ key: z.string(), value: z.record(z.string(), z.boolean()) }))
+      .input(z.object({ key: z.string(), value: z.union([z.boolean(), z.string(), z.number(), z.record(z.string(), z.boolean())]) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "customer_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN", message: "Owner access required" });
         return next({ ctx });
       })
       .mutation(async ({ input }) => {
         const { upsertSiteSetting } = await import("./db");
-        await upsertSiteSetting(input.key, input.value as Record<string, boolean>);
+        await upsertSiteSetting(input.key, input.value);
         return { success: true };
       }),
   }),

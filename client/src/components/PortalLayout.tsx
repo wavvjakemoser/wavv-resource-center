@@ -87,16 +87,47 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
 
+  // Site settings — controls Ask WAVV, announcement banner, maintenance mode
+  const { data: allSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const askWavvEnabled = (allSettings as Record<string, unknown>)["ask_wavv_enabled"] !== false; // default true
+  const maintenanceMode = (allSettings as Record<string, unknown>)["maintenance_mode"] === true;
+  const announcementEnabled = (allSettings as Record<string, unknown>)["announcement_enabled"] === true;
+  const announcementText = typeof (allSettings as Record<string, unknown>)["announcement_text"] === "string"
+    ? (allSettings as Record<string, unknown>)["announcement_text"] as string
+    : "";
+
   useEffect(() => {
     if (title) document.title = `${title} — WAVV Success Center`;
   }, [title]);
 
   const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const isOwner = user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");
   const navItems = [...baseNavItems, publicPartnerItem];
 
+  // Maintenance mode — show a holding page for non-owners on non-admin pages
+  if (maintenanceMode && !isOwner && !isAdminPage) {
+    return (
+      <div className="h-screen flex items-center justify-center flex-col gap-4" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
+        <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" style={{ height: "28px", marginBottom: "8px" }} />
+        <h1 className="text-2xl font-bold text-white">We'll be right back</h1>
+        <p className="text-sm text-gray-400 max-w-sm text-center">The WAVV Success Center is undergoing scheduled maintenance. Check back shortly.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
+
+      {/* ── Announcement Banner ── */}
+      {announcementEnabled && announcementText && (
+        <div
+          className="w-full text-center text-xs font-medium py-2 px-4"
+          style={{ background: "rgba(251,191,36,0.12)", borderBottom: "1px solid rgba(251,191,36,0.25)", color: "#fbbf24" }}
+        >
+          {announcementText}
+        </div>
+      )}
 
       {/* ── Body row: sidebar + main ── */}
       <div className="flex flex-1 min-h-0">
@@ -267,8 +298,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
         </div>
       </div>
 
-      {/* Ask WAVV floating bubble — customer pages only, bottom-right */}
-      {!isAdminPage && !aiOpen && (
+      {/* Ask WAVV floating bubble — customer pages only, controlled by siteSettings */}
+      {!isAdminPage && askWavvEnabled && !aiOpen && (
         <button
           onClick={() => setAiOpen(true)}
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-2.5 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
@@ -288,7 +319,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
       )}
 
       {/* Ask WAVV Chat Panel — customer pages only */}
-      {!isAdminPage && <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />}
+      {!isAdminPage && askWavvEnabled && <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />}
 
     </div>
   );

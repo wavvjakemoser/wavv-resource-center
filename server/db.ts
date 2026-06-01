@@ -86,7 +86,7 @@ export async function getAllUsers() {
   return db.select().from(users).orderBy(desc(users.createdAt));
 }
 
-export async function updateUserRole(userId: number, role: "user" | "admin" | "customer_admin" | "partner_admin" | "owner") {
+export async function updateUserRole(userId: number, role: "user" | "admin" | "customer_admin" | "partner_admin" | "partner" | "owner") {
   const db = await getDb();
   if (!db) return;
   await db.update(users).set({ role }).where(eq(users.id, userId));
@@ -1386,7 +1386,7 @@ export async function getSiteSetting(key: string): Promise<Record<string, boolea
   try { return JSON.parse(rows[0].value) as Record<string, boolean>; } catch { return null; }
 }
 
-export async function upsertSiteSetting(key: string, value: Record<string, boolean>): Promise<void> {
+export async function upsertSiteSetting(key: string, value: boolean | string | number | Record<string, boolean>): Promise<void> {
   const db = await getDb();
   if (!db) return;
   const json = JSON.stringify(value);
@@ -1422,7 +1422,7 @@ export async function removeStrikeFromUser(userId: number) {
 export async function createManualUser(data: {
   name: string;
   email: string;
-  role: "user" | "admin" | "customer_admin" | "partner_admin" | "owner";
+  role: "user" | "admin" | "customer_admin" | "partner_admin" | "partner" | "owner";
 }) {
   const db = await getDb();
   if (!db) return null;
@@ -1446,7 +1446,7 @@ export async function createManualUser(data: {
 export async function generateInvite(data: {
   email: string;
   name?: string;
-  role: "user" | "admin" | "customer_admin" | "partner_admin" | "owner";
+  role: "user" | "admin" | "customer_admin" | "partner_admin" | "partner" | "owner";
   createdBy: number;
 }) {
   const db = await getDb();
@@ -1698,4 +1698,27 @@ export async function validateMagicToken(token: string): Promise<{
     .set({ usedAt: new Date() })
     .where(eq(magicLinkTokens.id, row.id));
   return { email: row.email, type: row.type, userId: row.userId ?? null };
+}
+
+// ─── Site Settings ────────────────────────────────────────────────────────────
+
+export async function getSiteSettings(): Promise<Record<string, unknown>> {
+  const db = await getDb();
+  if (!db) return {};
+  const rows = await db.select().from(siteSettings);
+  const result: Record<string, unknown> = {};
+  for (const row of rows) {
+    try { result[row.key] = JSON.parse(row.value); } catch { result[row.key] = row.value; }
+  }
+  return result;
+}
+
+export async function updateSiteSetting(key: string, value: unknown): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const serialized = JSON.stringify(value);
+  await db
+    .insert(siteSettings)
+    .values({ key, value: serialized })
+    .onDuplicateKeyUpdate({ set: { value: serialized } });
 }

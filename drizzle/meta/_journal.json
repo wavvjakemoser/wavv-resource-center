@@ -197,6 +197,13 @@
       "when": 1780096996672,
       "tag": "0026_third_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1780329440051,
+      "tag": "0027_deep_carlie_cooper",
+      "breakpoints": true
     }
   ]
 }

@@ -1048,3 +1048,23 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Login.tsx: update default nextPath from /admin → /wavvadmin
 - [x] MagicAuth.tsx: update default nextPath from /admin → /wavvadmin
 - [x] PortalLayout.tsx: update adminItem href /admin → /wavvadmin, isAdminPage check, isAdmin to include owner/partner_admin
+
+## Settings Tab + Partner Role Fix
+
+- [ ] Schema: add partner role back to role enum
+- [ ] Schema: add site_settings table (key/value store)
+- [ ] DB migration: apply schema changes
+- [ ] Server: siteSettings.get and siteSettings.update procedures (owner-only)
+- [ ] Server: add partner role to all type guards and listUsers filter
+- [ ] Admin UI: Settings tab (owner-only, after Partners in tab bar)
+- [ ] Settings tab: Ask WAVV toggle (on/off)
+- [ ] Settings tab: Site announcement banner (text + active toggle)
+- [ ] Settings tab: Maintenance mode toggle
+- [ ] Settings tab: Ask WAVV rate limit (messages per hour input)
+- [ ] Partner Analytics: filter to show only partner role users (not partner_admin)
+- [ ] Partner Analytics: search bar for approved partners
+- [ ] Invite flow: "Invite WAVV Partner" assigns partner role (not partner_admin)
+- [ ] /wavvpartner gate: partner role + partner_admin + owner can access
+- [ ] PortalLayout: Ask WAVV bubble visibility controlled by siteSettings
+- [ ] PortalLayout: announcement banner shown when active
+- [ ] PortalLayout: maintenance mode redirects non-owner visitors to maintenance page

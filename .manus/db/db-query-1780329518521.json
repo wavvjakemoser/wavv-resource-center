@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `site_settings` (\n  `key` varchar(100) NOT NULL,\n  `value` text NOT NULL,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`key`)\n);\n\nINSERT IGNORE INTO `site_settings` (`key`, `value`) VALUES\n  ('askWavvEnabled', 'false'),\n  ('announcementActive', 'false'),\n  ('announcementText', '\"\"'),\n  ('maintenanceMode', 'false'),\n  ('askWavvRateLimit', '10');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute CREATE TABLE IF NOT EXISTS `site_settings` (\n  `key` varchar(100) NOT NULL,\n  `value` text NOT NULL,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  PRIMARY KEY (`key`)\n);\n\nINSERT IGNORE INTO `site_settings` (`key`, `value`) VALUES\n  ('askWavvEnabled', 'false'),\n  ('announcementActive', 'false'),\n  ('announcementText', '\"\"'),\n  ('maintenanceMode', 'false'),\n  ('askWavvRateLimit', '10');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 765
+}
