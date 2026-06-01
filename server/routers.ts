@@ -1279,11 +1279,14 @@ export const appRouter = router({
     }),
   }),
   search: router({
-    query: protectedProcedure
+    query: publicProcedure
       .input(z.object({ q: z.string().min(1).max(200) }))
       .query(async ({ ctx, input }) => {
         if (input.q.trim().length < 2) return { courses: [], lessons: [], webinars: [], guides: [] };
-        await trackEvent({ userId: ctx.user.id, eventType: "search", metadata: JSON.stringify({ query: input.q.trim() }) });
+        // Only track search events for logged-in users
+        if (ctx.user) {
+          await trackEvent({ userId: ctx.user.id, eventType: "search", metadata: JSON.stringify({ query: input.q.trim() }) });
+        }
         return searchContent(input.q.trim());
       }),
   }),
