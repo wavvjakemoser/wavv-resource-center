@@ -167,6 +167,9 @@ export default function Admin() {
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
+  // Must be called unconditionally before any early returns (Rules of Hooks)
+  const { data: adminSettings = {} } = trpc.siteSettings.getAll.useQuery();
+
   // Sync tab when the URL changes (e.g., sidebar link clicked while already on /admin)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -208,8 +211,6 @@ export default function Admin() {
     );
   }
 
-  // Fetch site settings to check if WAVV Knowledge is enabled
-  const { data: adminSettings = {} } = trpc.siteSettings.getAll.useQuery();
   const wavvKnowledgeEnabled = (adminSettings as Record<string, unknown>)["wavv_knowledge_enabled"] !== false;
   // WAVV Knowledge is only shown when enabled — hidden entirely when disabled
   const showKnowledge = wavvKnowledgeEnabled;
