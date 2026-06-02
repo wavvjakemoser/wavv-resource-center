@@ -494,49 +494,69 @@ function WavvKnowledgeTab() {
 }
 
 // ─── Analytics Tab ────────────────────────────────────────────────────────────
+type AnonTimeRange = 7 | 30 | 90 | 0; // 0 = All Time
+
 function AnalyticsTab() {
-  const [days, setDays] = useState<TimeRange>(30);
+  const [days, setDays] = useState<AnonTimeRange>(30);
   const [resetOpen, setResetOpen] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState("");
   const utils = trpc.useUtils();
   const { user: analyticsUser } = useAuth();
   const isSuperAdmin = analyticsUser?.role === "customer_admin" || analyticsUser?.role === "owner";
+  const { data: tabSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const askWavvEnabled = (tabSettings as Record<string, unknown>)["ask_wavv_enabled"] !== false;
 
   const resetAnalytics = trpc.analytics.resetAnalytics.useMutation({
     onSuccess: () => {
-      toast.success("Analytics data has been cleared.");
+      toast.success("All analytics data has been cleared.");
       setResetOpen(false);
-      utils.analytics.getSummary.invalidate();
-      utils.analytics.getEventCounts.invalidate();
-      utils.analytics.getDailyEvents.invalidate();
-      utils.analytics.getActiveUsers.invalidate();
-      utils.analytics.getTopContent.invalidate();
-      utils.analytics.getRecentEvents.invalidate();
+      setResetConfirmText("");
+      utils.analytics.getAnonOverview.invalidate();
+      utils.analytics.getAnonTrend.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });
 
+  const TIME_OPTIONS: { value: AnonTimeRange; label: string }[] = [
+    { value: 7,  label: "7D" },
+    { value: 30, label: "30D" },
+    { value: 90, label: "90D" },
+    { value: 0,  label: "All Time" },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Reset confirmation dialog — single confirmation */}
-      <Dialog open={resetOpen} onOpenChange={setResetOpen}>
+      {/* Two-step reset confirmation dialog */}
+      <Dialog open={resetOpen} onOpenChange={(o) => { setResetOpen(o); if (!o) setResetConfirmText(""); }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle size={18} style={{ color: "#ef4444" }} />
-              Reset All Analytics
+              Reset All Analytics Data
             </DialogTitle>
             <DialogDescription className="text-gray-400">
-              This will permanently erase all analytics event data. This action cannot be undone.
+              This will permanently erase <strong className="text-white">all</strong> anonymous analytics event data. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
+          <div className="px-1 py-2">
+            <p className="text-xs text-gray-500 mb-2">Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm:</p>
+            <input
+              type="text"
+              value={resetConfirmText}
+              onChange={(e) => setResetConfirmText(e.target.value)}
+              placeholder="Type DELETE"
+              className="w-full px-3 py-2 rounded-lg text-sm text-white bg-transparent border outline-none"
+              style={{ borderColor: resetConfirmText === "DELETE" ? "#ef4444" : "rgba(255,255,255,0.15)" }}
+            />
+          </div>
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setResetOpen(false)} className="text-gray-400">Cancel</Button>
+            <Button variant="ghost" onClick={() => { setResetOpen(false); setResetConfirmText(""); }} className="text-gray-400">Cancel</Button>
             <Button
               variant="destructive"
-              disabled={resetAnalytics.isPending}
+              disabled={resetAnalytics.isPending || resetConfirmText !== "DELETE"}
               onClick={() => resetAnalytics.mutate()}
             >
-              {resetAnalytics.isPending ? "Resetting..." : "Reset Analytics"}
+              {resetAnalytics.isPending ? "Resetting..." : "Confirm Reset"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -544,59 +564,37 @@ function AnalyticsTab() {
 
       {/* Controls */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-base font-semibold text-white">Analytics Dashboard</h2>
+        <div>
+          <h2 className="text-base font-semibold text-white">Analytics Dashboard</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Anonymous visitors only — authenticated users are excluded</p>
+        </div>
         <div className="flex items-center gap-3">
           {isSuperAdmin && (
             <button
               onClick={() => setResetOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-              style={{
-                background: "rgba(239,68,68,0.08)",
-                color: "#f87171",
-                border: "1px solid rgba(239,68,68,0.2)",
-              }}
+              style={{ background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
             >
               <Trash2 size={13} />
               Reset Data
             </button>
           )}
-          {isSuperAdmin && (
-            <button
-              onClick={() => exportCSV(days)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-              style={{
-                background: "rgba(6,182,212,0.1)",
-                color: "#22d3ee",
-                border: "1px solid rgba(6,182,212,0.2)",
-              }}
-            >
-              <FileDown size={14} />
-              Export CSV
-            </button>
-          )}
-          <div
-            className="flex items-center gap-1 p-1 rounded-lg"
-            style={{ background: "rgba(255,255,255,0.05)" }}
-          >
-            {([7, 30, 90, 365] as TimeRange[]).map((d) => (
+          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
+            {TIME_OPTIONS.map(({ value, label }) => (
               <button
-                key={d}
-                onClick={() => setDays(d)}
+                key={value}
+                onClick={() => setDays(value)}
                 className="px-3 py-1.5 text-xs font-medium rounded-md transition"
-                style={
-                  days === d
-                    ? { background: "rgba(6,182,212,0.2)", color: "#22d3ee" }
-                    : { color: "#9ca3af" }
-                }
+                style={days === value ? { background: "rgba(6,182,212,0.2)", color: "#22d3ee" } : { color: "#9ca3af" }}
               >
-                {d === 365 ? "1Y" : `${d}D`}
+                {label}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <AnalyticsContent days={days} />
+      <AnonAnalyticsContent days={days} askWavvEnabled={askWavvEnabled} />
     </div>
   );
 }
@@ -976,6 +974,282 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
           onClose={() => setDrawerMeta(null)}
         />
       )}
+    </div>
+  );
+}
+
+// ─── Anonymous Analytics Dashboard ──────────────────────────────────────────
+function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; askWavvEnabled: boolean }) {
+  const { data: overview, isLoading } = trpc.analytics.getAnonOverview.useQuery({ days });
+  const { data: pageTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "page_view", days });
+  const { data: academyTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "academy_video_play", days });
+  const { data: webinarTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "webinar_video_play", days });
+  const { data: guideTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "guide_download", days });
+
+  const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides">("overview");
+
+  const GUIDE_TYPE_LABELS: Record<string, string> = {
+    help_article: "Help Articles", pdf: "PDFs", checklist: "Checklists",
+    playbook: "Playbooks", other: "Resources",
+  };
+  const GUIDE_TYPE_COLORS: Record<string, string> = {
+    help_article: "#8B5CF6", pdf: "#ef4444", checklist: "#67C728",
+    playbook: "#0074F4", other: "#FF9900",
+  };
+  const WEBINAR_TYPE_COLORS: Record<string, string> = {
+    exclusive: "#a78bfa", evergreen: "#22d3ee", recording: "#f59e0b",
+  };
+
+  const totalAcademyPlays = (overview?.academyByCategory ?? []).reduce((s, r) => s + (r.count ?? 0), 0);
+  const totalWebinarPlays = (overview?.webinarByType ?? []).reduce((s, r) => s + (r.count ?? 0), 0);
+  const totalGuideDownloads = (overview?.guidesByType ?? []).reduce((s, r) => s + (r.count ?? 0), 0);
+
+  const PANEL_TABS = [
+    { key: "overview" as const, label: "Overview", color: "#22d3ee", icon: <Activity size={13} /> },
+    { key: "academy" as const, label: "WAVV Academy", color: "#22d3ee", icon: <GraduationCap size={13} /> },
+    { key: "webinars" as const, label: "Webinars", color: "#f59e0b", icon: <Video size={13} /> },
+    { key: "guides" as const, label: "Guides & Docs", color: "#4ade80", icon: <FileText size={13} /> },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="rounded-xl p-5 animate-pulse h-24"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary stat tiles */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={<Eye size={18} />}           label="Page Views"         value={overview?.totalPageViews ?? 0}  color="blue"   />
+        <StatCard icon={<GraduationCap size={18} />} label="Academy Plays"      value={totalAcademyPlays}              color="cyan"   />
+        <StatCard icon={<Video size={18} />}         label="Webinar Plays"      value={totalWebinarPlays}              color="amber"  />
+        <StatCard icon={<Download size={18} />}      label="Guide Downloads"    value={totalGuideDownloads}            color="green"  />
+        {askWavvEnabled && (
+          <StatCard icon={<MessageSquare size={18} />} label="AskWAVV Conversations" value={overview?.askWavvCount ?? 0} color="purple" />
+        )}
+      </div>
+
+      {/* Panel tabs */}
+      <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        {PANEL_TABS.map((t) => (
+          <button key={t.key} onClick={() => setActivePanel(t.key)}
+            className="flex items-center gap-1.5 flex-1 justify-center py-2 text-xs font-medium rounded-lg transition"
+            style={activePanel === t.key
+              ? { background: "rgba(255,255,255,0.1)", color: t.color }
+              : { color: "#6b7280" }}>
+            {t.icon} {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Overview panel */}
+      {activePanel === "overview" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Page views trend */}
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Eye size={13} style={{ color: "#60a5fa" }} /> Page Views Trend</p>
+            <AnonTrendChart data={pageTrend ?? []} color="#60a5fa" />
+          </div>
+          {/* Top pages */}
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Navigation size={13} style={{ color: "#22d3ee" }} /> Top Pages (excl. home)</p>
+            <AnonRankedList
+              items={(overview?.topPages ?? []).map((p) => ({ label: p.path ?? "unknown", count: p.count ?? 0 }))}
+              color="#22d3ee"
+              emptyText="No page views recorded yet"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Academy panel */}
+      {activePanel === "academy" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><GraduationCap size={13} style={{ color: "#22d3ee" }} /> Plays by Category</p>
+            <AnonBarChart
+              data={(overview?.academyByCategory ?? []).map((r) => ({ name: r.category ?? "Unknown", count: r.count ?? 0 }))}
+              color="#22d3ee"
+            />
+          </div>
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Activity size={13} style={{ color: "#22d3ee" }} /> Academy Plays Trend</p>
+            <AnonTrendChart data={academyTrend ?? []} color="#22d3ee" />
+          </div>
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Layers size={13} style={{ color: "#22d3ee" }} /> Top Sections</p>
+            <AnonRankedList
+              items={(overview?.academyBySection ?? []).map((r) => ({ label: r.section ?? "Unknown", sublabel: r.category ?? undefined, count: r.count ?? 0 }))}
+              color="#22d3ee"
+              emptyText="No academy plays yet"
+            />
+          </div>
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Star size={13} style={{ color: "#fbbf24" }} /> Top Individual Lessons</p>
+            <AnonRankedList
+              items={(overview?.topLessons ?? []).map((r) => ({ label: r.title ?? "Unknown", sublabel: r.section ?? undefined, count: r.count ?? 0 }))}
+              color="#fbbf24"
+              emptyText="No lesson plays yet"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Webinars panel */}
+      {activePanel === "webinars" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Video size={13} style={{ color: "#f59e0b" }} /> Plays by Type</p>
+            <div className="space-y-2">
+              {(overview?.webinarByType ?? []).length === 0
+                ? <p className="text-gray-500 text-sm text-center py-6">No webinar plays yet</p>
+                : (overview?.webinarByType ?? []).map((r, i) => {
+                    const color = WEBINAR_TYPE_COLORS[r.type ?? ""] ?? "#9ca3af";
+                    const total = totalWebinarPlays || 1;
+                    const pct = Math.round(((r.count ?? 0) / total) * 100);
+                    return (
+                      <div key={i} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-300 capitalize">{r.type ?? "unknown"}</span>
+                          <span className="font-semibold text-white">{r.count ?? 0} <span className="text-gray-500 font-normal">({pct}%)</span></span>
+                        </div>
+                        <div className="h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                        </div>
+                      </div>
+                    );
+                  })
+              }
+            </div>
+          </div>
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Activity size={13} style={{ color: "#f59e0b" }} /> Webinar Plays Trend</p>
+            <AnonTrendChart data={webinarTrend ?? []} color="#f59e0b" />
+          </div>
+          <div className="rounded-xl p-5 space-y-3 lg:col-span-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Star size={13} style={{ color: "#fbbf24" }} /> Top Individual Webinars</p>
+            <AnonRankedList
+              items={(overview?.topWebinars ?? []).map((r) => ({ label: r.title ?? "Unknown", sublabel: r.type ?? undefined, count: r.count ?? 0 }))}
+              color="#f59e0b"
+              emptyText="No webinar plays yet"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Guides & Docs panel */}
+      {activePanel === "guides" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Download size={13} style={{ color: "#4ade80" }} /> Downloads by Category</p>
+            <div className="space-y-2">
+              {(overview?.guidesByType ?? []).length === 0
+                ? <p className="text-gray-500 text-sm text-center py-6">No guide downloads yet</p>
+                : (overview?.guidesByType ?? []).map((r, i) => {
+                    const color = GUIDE_TYPE_COLORS[r.fileType ?? ""] ?? "#9ca3af";
+                    const label = GUIDE_TYPE_LABELS[r.fileType ?? ""] ?? (r.fileType ?? "Other");
+                    const total = totalGuideDownloads || 1;
+                    const pct = Math.round(((r.count ?? 0) / total) * 100);
+                    return (
+                      <div key={i} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-300">{label}</span>
+                          <span className="font-semibold text-white">{r.count ?? 0} <span className="text-gray-500 font-normal">({pct}%)</span></span>
+                        </div>
+                        <div className="h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                        </div>
+                      </div>
+                    );
+                  })
+              }
+            </div>
+          </div>
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Activity size={13} style={{ color: "#4ade80" }} /> Downloads Trend</p>
+            <AnonTrendChart data={guideTrend ?? []} color="#4ade80" />
+          </div>
+          <div className="rounded-xl p-5 space-y-3 lg:col-span-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Star size={13} style={{ color: "#fbbf24" }} /> Top Individual Guides</p>
+            <AnonRankedList
+              items={(overview?.topGuides ?? []).map((r) => ({ label: r.title ?? "Unknown", sublabel: GUIDE_TYPE_LABELS[r.fileType ?? ""] ?? r.fileType ?? undefined, count: r.count ?? 0 }))}
+              color="#4ade80"
+              emptyText="No guide downloads yet"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Shared mini chart components ────────────────────────────────────────────
+function AnonTrendChart({ data, color }: { data: { date: string; count: number }[]; color: string }) {
+  if (!data || data.length === 0)
+    return <div className="flex items-center justify-center h-32 text-gray-500 text-xs">No data for this period</div>;
+  return (
+    <div style={{ height: 128 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+          <XAxis dataKey="date" tick={{ fill: "#9ca3af", fontSize: 10 }}
+            tickFormatter={(v) => { const d = new Date(v); return `${d.getMonth()+1}/${d.getDate()}`; }} />
+          <YAxis tick={{ fill: "#9ca3af", fontSize: 10 }} />
+          <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff", fontSize: 12 }} />
+          <Line type="monotone" dataKey="count" stroke={color} strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function AnonBarChart({ data, color }: { data: { name: string; count: number }[]; color: string }) {
+  if (!data || data.length === 0)
+    return <div className="flex items-center justify-center h-32 text-gray-500 text-xs">No data for this period</div>;
+  return (
+    <div style={{ height: 128 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ left: 8, right: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+          <XAxis type="number" tick={{ fill: "#9ca3af", fontSize: 10 }} />
+          <YAxis type="category" dataKey="name" tick={{ fill: "#d1d5db", fontSize: 10 }} width={100} />
+          <Tooltip contentStyle={{ background: "#1f2937", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", color: "#fff", fontSize: 12 }} />
+          <Bar dataKey="count" fill={color} radius={[0, 3, 3, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function AnonRankedList({ items, color, emptyText }: {
+  items: { label: string; sublabel?: string; count: number }[];
+  color: string;
+  emptyText: string;
+}) {
+  if (items.length === 0)
+    return <p className="text-gray-500 text-sm text-center py-6">{emptyText}</p>;
+  const max = items[0]?.count || 1;
+  return (
+    <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+      {items.map((item, idx) => (
+        <div key={idx} className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-white/[0.03] transition">
+          <span className="text-gray-500 text-xs w-5 shrink-0 text-right">{idx + 1}.</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-200 truncate leading-tight">{item.label}</p>
+            {item.sublabel && <p className="text-[10px] text-gray-500 truncate">{item.sublabel}</p>}
+            <div className="h-1 rounded-full mt-1" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div className="h-1 rounded-full" style={{ width: `${Math.round((item.count / max) * 100)}%`, background: color }} />
+            </div>
+          </div>
+          <span className="text-sm font-semibold text-white shrink-0">{item.count.toLocaleString()}</span>
+        </div>
+      ))}
     </div>
   );
 }

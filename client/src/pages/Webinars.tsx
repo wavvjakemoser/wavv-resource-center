@@ -205,6 +205,7 @@ function WebinarCard({
 }) {
   const registerClickMutation = trpc.webinars.trackRegistrationClick.useMutation();
   const watchMutation = trpc.webinars.watch.useMutation();
+  const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
 
   // countdown kept for future use if needed
   const _countdown = useCountdown(nextSession ?? nextHalfHour());
@@ -231,6 +232,13 @@ function WebinarCard({
 
   function handleWatchClick() {
     watchMutation.mutate({ webinarId: webinar.id });
+    // Track anonymous play event (server drops authenticated users)
+    trackAnon.mutate({
+      eventType: "webinar_video_play",
+      resourceType: "webinar",
+      resourceId: webinar.id,
+      metadata: JSON.stringify({ title: webinar.title, type: variant }),
+    });
     if (embedUrl && onPlay) {
       onPlay(embedUrl, webinar.title, variant);
     }

@@ -1783,3 +1783,276 @@ export async function getPartnerUsers() {
   if (!db) return [];
   return db.select().from(users).where(eq(users.role, "partner")).orderBy(desc(users.createdAt));
 }
+
+// ─── Anonymous-Only Analytics Helpers ────────────────────────────────────────
+// These helpers are used by the revamped analytics dashboard.
+// All queries filter to events where userId IS NULL (anonymous visitors only).
+
+const ANON_ROLES = ["owner", "admin", "customer_admin", "partner_admin", "partner"] as const;
+
+/** Track an anonymous event. If userId is provided, the event is silently dropped. */
+export async function trackAnonEvent(data: {
+  eventType: string;
+  resourceType?: string;
+  resourceId?: number;
+  metadata?: string;
+  userId?: number | null;
+}) {
+  // Drop events from any authenticated user
+  if (data.userId != null) return;
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(analyticsEvents).values({
+    userId: null,
+    eventType: data.eventType,
+    resourceType: data.resourceType,
+    resourceId: data.resourceId,
+    metadata: data.metadata,
+  });
+}
+
+/** Total anonymous page views (all paths, or filtered by path prefix) */
+export async function getAnonPageViews(sinceDate: Date, pathPrefix?: string) {
+  const db = await getDb();
+  if (!db) return 0;
+  const conditions = [
+    gte(analyticsEvents.createdAt, sinceDate),
+    eq(analyticsEvents.eventType, "page_view"),
+    sql`${analyticsEvents.userId} IS NULL`,
+  ];
+  if (pathPrefix) {
+    conditions.push(like(analyticsEvents.metadata, `%"path":"${pathPrefix}%`));
+  }
+  const [row] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(analyticsEvents)
+    .where(and(...conditions));
+  return row?.count ?? 0;
+}
+
+/** Top pages by anonymous view count, excluding home ("/") */
+export async function getTopAnonPages(sinceDate: Date, limit = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      path: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "page_view"),
+        sql`${analyticsEvents.userId} IS NULL`,
+        sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path')) NOT IN ('/', '/home', '')`,
+        sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path')) IS NOT NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path'))`)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows;
+}
+
+/** Academy video plays by category (anonymous only) */
+export async function getAcademyPlaysByCategory(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      category: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.category'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "academy_video_play"),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.category'))`)
+    .orderBy(sql`COUNT(*) DESC`);
+  return rows;
+}
+
+/** Academy video plays by section (anonymous only) */
+export async function getAcademyPlaysBySection(sinceDate: Date, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      section: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.section'))`,
+      category: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.category'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "academy_video_play"),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.section')), JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.category'))`)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows;
+}
+
+/** Top individual Academy lessons by play count (anonymous only) */
+export async function getTopAcademyLessons(sinceDate: Date, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      title: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.title'))`,
+      section: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.section'))`,
+      category: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.category'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "academy_video_play"),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.title')), JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.section')), JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.category'))`)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows;
+}
+
+/** Webinar plays by type (anonymous only) */
+export async function getWebinarPlaysByType(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      type: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.type'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "webinar_video_play"),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.type'))`)
+    .orderBy(sql`COUNT(*) DESC`);
+  return rows;
+}
+
+/** Top individual webinars by play count (anonymous only) */
+export async function getTopWebinars(sinceDate: Date, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      title: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.title'))`,
+      type: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.type'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "webinar_video_play"),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.title')), JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.type'))`)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows;
+}
+
+/** Guide downloads by file type/category (anonymous only) */
+export async function getGuideDownloadsByType(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      fileType: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.fileType'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "guide_download"),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.fileType'))`)
+    .orderBy(sql`COUNT(*) DESC`);
+  return rows;
+}
+
+/** Top individual guides by download count (anonymous only) */
+export async function getTopGuides(sinceDate: Date, limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      title: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.title'))`,
+      fileType: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.fileType'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "guide_download"),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.title')), JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.fileType'))`)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows;
+}
+
+/** AskWAVV conversation count (anonymous only) */
+export async function getAskWavvConversations(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return 0;
+  const [row] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "askwavv_conversation"),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    );
+  return row?.count ?? 0;
+}
+
+/** Daily trend for a given event type (anonymous only) */
+export async function getAnonDailyTrend(eventType: string, sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      date: sql<string>`DATE(createdAt)`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, eventType),
+        sql`${analyticsEvents.userId} IS NULL`
+      )
+    )
+    .groupBy(sql`DATE(createdAt)`)
+    .orderBy(sql`DATE(createdAt)`);
+  return rows;
+}

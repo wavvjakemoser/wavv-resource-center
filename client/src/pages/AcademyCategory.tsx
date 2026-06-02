@@ -319,7 +319,7 @@ function SectionRow({
   defaultOpen?: boolean;
   dbLessonMap?: Record<string, DbLessonMeta>;
   courseTags?: string[];
-  onPlay?: (embedUrl: string, title: string) => void;
+  onPlay?: (embedUrl: string, title: string, sectionTitle: string) => void;
   sectionPdfs?: SectionPdf[];
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -466,8 +466,8 @@ function SectionRow({
                 key={video.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => onPlay?.(embedUrl, video.title)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPlay?.(embedUrl, video.title); } }}
+                onClick={() => onPlay?.(embedUrl, video.title, section.title)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPlay?.(embedUrl, video.title, section.title); } }}
                 className={rowClass + " cursor-pointer"}
                 style={effectiveDownloadFile ? { ...rowStyle, borderBottom: "none" } : rowStyle}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = `${accentColor}0a`; }}
@@ -594,8 +594,14 @@ export default function AcademyCategory() {
       toast.error("Picture-in-Picture is not available in this browser.");
     }
   }
-  const handlePlay = (embedUrl: string, title: string) => {
+  const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
+  const handlePlay = (embedUrl: string, title: string, sectionTitle: string) => {
     setPlayingVideo({ embedUrl, title });
+    trackAnon.mutate({
+      eventType: "academy_video_play",
+      resourceType: "lesson",
+      metadata: JSON.stringify({ title, section: sectionTitle, category: cat?.key ?? "" }),
+    });
   };
   const handleClosePlayer = () => { setPlayingVideo(null); };
 

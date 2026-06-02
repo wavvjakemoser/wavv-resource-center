@@ -176,9 +176,17 @@ export default function GuidesAndDocs() {
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
   const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true, checklist: true, playbook: true, resource: true };
   const downloadMutation = trpc.guides.download.useMutation();
+  const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
 
   const handleDownload = async (guide: GuideItem) => {
     await downloadMutation.mutateAsync({ guideId: guide.id });
+    // Track anonymous download (server drops authenticated users)
+    trackAnon.mutate({
+      eventType: "guide_download",
+      resourceType: "guide",
+      resourceId: guide.id,
+      metadata: JSON.stringify({ title: guide.title, fileType: guide.fileType ?? "other" }),
+    });
     if (guide.fileUrl) {
       window.open(guide.fileUrl, "_blank");
     } else {

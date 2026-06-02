@@ -108,6 +108,18 @@ import {
   updatePartnerContent,
   deletePartnerContent,
   getPartnerUsers,
+  trackAnonEvent,
+  getAnonPageViews,
+  getTopAnonPages,
+  getAcademyPlaysByCategory,
+  getAcademyPlaysBySection,
+  getTopAcademyLessons,
+  getWebinarPlaysByType,
+  getTopWebinars,
+  getGuideDownloadsByType,
+  getTopGuides,
+  getAskWavvConversations,
+  getAnonDailyTrend,
 } from "./db";
 
 // // ─── Role guards ─────────────────────────────────────────────────────
@@ -881,6 +893,57 @@ const analyticsRouter = router({
       await clearAllAnalytics();
       return { success: true };
     }),
+
+  // ── Anonymous-only analytics (revamped dashboard) ──
+  /** Track an anonymous event — authenticated users are silently dropped server-side */
+  trackAnon: publicProcedure
+    .input(z.object({
+      eventType: z.string().max(100),
+      resourceType: z.string().max(50).optional(),
+      resourceId: z.number().int().optional(),
+      metadata: z.string().max(2000).optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      // Drop if any authenticated user
+      if (ctx.user) return { ok: false };
+      await trackAnonEvent({
+        eventType: input.eventType,
+        resourceType: input.resourceType,
+        resourceId: input.resourceId,
+        metadata: input.metadata,
+        userId: null,
+      });
+      return { ok: true };
+    }),
+
+  getAnonOverview: adminProcedure
+    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(0)]).default(30) }))
+    .query(async ({ input }) => {
+      const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      const [totalPageViews, topPages, academyByCategory, academyBySection, topLessons, webinarByType, topWebinars, guidesByType, topGuides, askWavvCount] = await Promise.all([
+        getAnonPageViews(since),
+        getTopAnonPages(since, 10),
+        getAcademyPlaysByCategory(since),
+        getAcademyPlaysBySection(since, 20),
+        getTopAcademyLessons(since, 20),
+        getWebinarPlaysByType(since),
+        getTopWebinars(since, 20),
+        getGuideDownloadsByType(since),
+        getTopGuides(since, 20),
+        getAskWavvConversations(since),
+      ]);
+      return { totalPageViews, topPages, academyByCategory, academyBySection, topLessons, webinarByType, topWebinars, guidesByType, topGuides, askWavvCount };
+    }),
+
+  getAnonTrend: adminProcedure
+    .input(z.object({
+      eventType: z.string(),
+      days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(0)]).default(30),
+    }))
+    .query(async ({ input }) => {
+      const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getAnonDailyTrend(input.eventType, since);
+    }),
 });
 
 // ─── Scheduled Task endpoint ──────────────────────────────────────────────────
@@ -1305,13 +1368,15 @@ export const appRouter = router({
     }),
   }),
   tracking: router({
-    pageView: protectedProcedure
+    pageView: publicProcedure
       .input(z.object({ path: z.string().max(500) }))
       .mutation(async ({ ctx, input }) => {
-        await trackEvent({
-          userId: ctx.user.id,
+        // Only track anonymous visitors — drop any authenticated user
+        if (ctx.user) return { ok: false };
+        await trackAnonEvent({
           eventType: "page_view",
           metadata: JSON.stringify({ path: input.path }),
+          userId: null,
         });
         return { ok: true };
       }),
