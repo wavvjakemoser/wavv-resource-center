@@ -1,0 +1,192 @@
+{
+  "query": "\nSELECT l.id, l.title, l.videoUrl, l.published, c.title AS course_title\nFROM lessons l\nLEFT JOIN courses c ON l.courseId = c.id\nORDER BY c.title, l.sortOrder;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute \nSELECT l.id, l.title, l.videoUrl, l.published, c.title AS course_title\nFROM lessons l\nLEFT JOIN courses c ON l.courseId = c.id\nORDER BY c.title, l.sortOrder;\n",
+  "rows": [
+    {
+      "id": "11",
+      "title": "Welcome to How-To",
+      "videoUrl": "https://www.loom.com/embed/31c2aacc6f9c4a0593bb4d173e8142c0",
+      "published": "1",
+      "course_title": "1. Welcome To The How-To Section"
+    },
+    {
+      "id": "1",
+      "title": "Welcome to WAVV Onboarding",
+      "videoUrl": "https://www.loom.com/embed/120f6c99ba1245e288ec5c486c146524",
+      "published": "1",
+      "course_title": "1. Welcome To The Onboarding Section"
+    },
+    {
+      "id": "20",
+      "title": "Welcome to Strategy & Best Practices",
+      "videoUrl": "https://www.loom.com/embed/dfe22925928c4e3585739d0c4cde3607",
+      "published": "1",
+      "course_title": "1. Welcome To The Strategy & Best Practices Section"
+    },
+    {
+      "id": "12",
+      "title": "Different Ways to Make Calls With WAVV",
+      "videoUrl": "https://www.loom.com/embed/f4bbb4ff9b0743f1a8e41e613b26adb3",
+      "published": "1",
+      "course_title": "2. Making Calls With WAVV"
+    },
+    {
+      "id": "2",
+      "title": "Introducing WAVV Wallet",
+      "videoUrl": "https://www.loom.com/embed/f8163ba9c8ae4bc2a90d789a77523248",
+      "published": "1",
+      "course_title": "2. NEW: WAVV Wallet"
+    },
+    {
+      "id": "21",
+      "title": "Understanding the WAVV Phone Numbers Tab",
+      "videoUrl": "https://www.loom.com/embed/405084a41eef425c9ec1d827b476d3e6",
+      "published": "1",
+      "course_title": "2. WAVV Phone Numbers Tab"
+    },
+    {
+      "id": "22",
+      "title": "Overview of Connection Rates",
+      "videoUrl": "https://www.loom.com/embed/fb5a30d1e0aa4a18b9f6524d55d76d7c",
+      "published": "1",
+      "course_title": "3. Connection Rates"
+    },
+    {
+      "id": "23",
+      "title": "Connection Rates vs Conversion Rates",
+      "videoUrl": "https://www.loom.com/embed/8273b292095c473db9b7a2da03bcb832",
+      "published": "1",
+      "course_title": "3. Connection Rates"
+    },
+    {
+      "id": "24",
+      "title": "Using the Reports Tab to Track Connection Rates",
+      "videoUrl": "https://www.loom.com/embed/a975028bb8944a07b008ee8d325c46df",
+      "published": "1",
+      "course_title": "3. Connection Rates"
+    },
+    {
+      "id": "25",
+      "title": "Beginner Foundational Setup",
+      "videoUrl": "https://www.loom.com/embed/ff828e167c8544dfab40511485f5e562",
+      "published": "1",
+      "course_title": "3. Connection Rates"
+    },
+    {
+      "id": "26",
+      "title": "Intermediate Foundational Setup",
+      "videoUrl": "https://www.loom.com/embed/144e92518ee242469a3fa9d4e0510aae",
+      "published": "1",
+      "course_title": "3. Connection Rates"
+    },
+    {
+      "id": "27",
+      "title": "Advanced Foundational Setup",
+      "videoUrl": "https://www.loom.com/embed/e6d749ab3fa9496a99092ee5c754166a",
+      "published": "1",
+      "course_title": "3. Connection Rates"
+    },
+    {
+      "id": "3",
+      "title": "Getting Started With Your Single Line Dialer",
+      "videoUrl": "https://www.loom.com/embed/5ff763a76caa4ec68d764d06cfe798f1",
+      "published": "1",
+      "course_title": "3. Individual Single Line Dialer Onboarding"
+    },
+    {
+      "id": "13",
+      "title": "How to Use Outbound Voicemails Within Your WAVV Dialer",
+      "videoUrl": "https://www.loom.com/embed/74809218f7514cfda22a8136dc0c8aeb",
+      "published": "1",
+      "course_title": "3. Voicemails"
+    },
+    {
+      "id": "30001",
+      "title": "Understanding the Voicemail Tab and Incoming Voicemails",
+      "videoUrl": "https://www.loom.com/embed/519433f254b4412b99185010c3f8639b",
+      "published": "1",
+      "course_title": "3. Voicemails"
+    },
+    {
+      "id": "4",
+      "title": "Getting Started With Your Multi Line Dialer",
+      "videoUrl": "https://www.loom.com/embed/bb53e452362346e48510619256bfda1b",
+      "published": "1",
+      "course_title": "4. Individual Multi Line Dialer Onboarding"
+    },
+    {
+      "id": "15",
+      "title": "Resuming a WAVV Call Campaign",
+      "videoUrl": "https://www.loom.com/embed/386827621d2045a098a3b5958694a437",
+      "published": "1",
+      "course_title": "4. WAVV Call Campaigns"
+    },
+    {
+      "id": "16",
+      "title": "Understanding the Nuisance Protection Feature",
+      "videoUrl": "https://www.loom.com/embed/3138552497fc4b8fb73b0b0618ac58e0",
+      "published": "1",
+      "course_title": "5. Nuisance Protection"
+    },
+    {
+      "id": "5",
+      "title": "Team Onboarding - Intro",
+      "videoUrl": "https://www.loom.com/embed/306c20a4bd97470aaa2911eb18e5a2ea",
+      "published": "1",
+      "course_title": "5. Team Onboarding"
+    },
+    {
+      "id": "6",
+      "title": "Manager/Billing Owner Onboarding",
+      "videoUrl": "https://www.loom.com/embed/54c64029a8504929abceac46acee752c",
+      "published": "1",
+      "course_title": "5. Team Onboarding"
+    },
+    {
+      "id": "7",
+      "title": "Settings Lock",
+      "videoUrl": "https://www.loom.com/embed/ec6a9741c531470aa8835347c9e1fc58",
+      "published": "1",
+      "course_title": "5. Team Onboarding"
+    },
+    {
+      "id": "8",
+      "title": "Understanding User Roles",
+      "videoUrl": "https://www.loom.com/embed/4482c88a456c457c8e98ff73171dd873",
+      "published": "1",
+      "course_title": "5. Team Onboarding"
+    },
+    {
+      "id": "9",
+      "title": "Agent Onboarding",
+      "videoUrl": "https://www.loom.com/embed/c22c59b083fb408b9cc8bef1ecab4250",
+      "published": "1",
+      "course_title": "5. Team Onboarding"
+    },
+    {
+      "id": "17",
+      "title": "How to Transfer Calls Within WAVV",
+      "videoUrl": "https://www.loom.com/embed/1fb002c3ce8646cfb5227c0ba911fbdf",
+      "published": "1",
+      "course_title": "6. Call Transfers"
+    },
+    {
+      "id": "18",
+      "title": "Understanding Your Audio Source",
+      "videoUrl": "https://www.loom.com/embed/40096adc8e19414383bd8be6e27c2028",
+      "published": "1",
+      "course_title": "7. Audio Source"
+    },
+    {
+      "id": "19",
+      "title": "How to Add Spam Protection",
+      "videoUrl": "https://www.loom.com/embed/34bc6fb91674441897d7e4e1af3ddac0",
+      "published": "1",
+      "course_title": "8. Spam Protection"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tvideoUrl\tpublished\tcourse_title\n11\tWelcome to How-To\thttps://www.loom.com/embed/31c2aacc6f9c4a0593bb4d173e8142c0\t1\t1. Welcome To The How-To Section\n1\tWelcome to WAVV Onboarding\thttps://www.loom.com/embed/120f6c99ba1245e288ec5c486c146524\t1\t1. Welcome To The Onboarding Section\n20\tWelcome to Strategy & Best Practices\thttps://www.loom.com/embed/dfe22925928c4e3585739d0c4cde3607\t1\t1. Welcome To The Strategy & Best Practices Section\n12\tDifferent Ways to Make Calls With WAVV\thttps://www.loom.com/embed/f4bbb4ff9b0743f1a8e41e613b26adb3\t1\t2. Making Calls With WAVV\n2\tIntroducing WAVV Wallet\thttps://www.loom.com/embed/f8163ba9c8ae4bc2a90d789a77523248\t1\t2. NEW: WAVV Wallet\n21\tUnderstanding the WAVV Phone Numbers Tab\thttps://www.loom.com/embed/405084a41eef425c9ec1d827b476d3e6\t1\t2. WAVV Phone Numbers Tab\n22\tOverview of Connection Rates\thttps://www.loom.com/embed/fb5a30d1e0aa4a18b9f6524d55d76d7c\t1\t3. Connection Rates\n23\tConnection Rates vs Conversion Rates\thttps://www.loom.com/embed/8273b292095c473db9b7a2da03bcb832\t1\t3. Connection Rates\n24\tUsing the Reports Tab to Track Connection Rates\thttps://www.loom.com/embed/a975028bb8944a07b008ee8d325c46df\t1\t3. Connection Rates\n25\tBeginner Foundational Setup\thttps://www.loom.com/embed/ff828e167c8544dfab40511485f5e562\t1\t3. Connection Rates\n26\tIntermediate Foundational Setup\thttps://www.loom.com/embed/144e92518ee242469a3fa9d4e0510aae\t1\t3. Connection Rates\n27\tAdvanced Foundational Setup\thttps://www.loom.com/embed/e6d749ab3fa9496a99092ee5c754166a\t1\t3. Connection Rates\n3\tGetting Started With Your Single Line Dialer\thttps://www.loom.com/embed/5ff763a76caa4ec68d764d06cfe798f1\t1\t3. Individual Single Line Dialer Onboarding\n13\tHow to Use Outbound Voicemails Within Your WAVV Dialer\thttps://www.loom.com/embed/74809218f7514cfda22a8136dc0c8aeb\t1\t3. Voicemails\n30001\tUnderstanding the Voicemail Tab and Incoming Voicemails\thttps://www.loom.com/embed/519433f254b4412b99185010c3f8639b\t1\t3. Voicemails\n4\tGetting Started With Your Multi Line Dialer\thttps://www.loom.com/embed/bb53e452362346e48510619256bfda1b\t1\t4. Individual Multi Line Dialer Onboarding\n15\tResuming a WAVV Call Campaign\thttps://www.loom.com/embed/386827621d2045a098a3b5958694a437\t1\t4. WAVV Call Campaigns\n16\tUnderstanding the Nuisance Protection Feature\thttps://www.loom.com/embed/3138552497fc4b8fb73b0b0618ac58e0\t1\t5. Nuisance Protection\n5\tTeam Onboarding - Intro\thttps://www.loom.com/embed/306c20a4bd97470aaa2911eb18e5a2ea\t1\t5. Team Onboarding\n6\tManager/Billing Owner Onboarding\thttps://www.loom.com/embed/54c64029a8504929abceac46acee752c\t1\t5. Team Onboarding\n7\tSettings Lock\thttps://www.loom.com/embed/ec6a9741c531470aa8835347c9e1fc58\t1\t5. Team Onboarding\n8\tUnderstanding User Roles\thttps://www.loom.com/embed/4482c88a456c457c8e98ff73171dd873\t1\t5. Team Onboarding\n9\tAgent Onboarding\thttps://www.loom.com/embed/c22c59b083fb408b9cc8bef1ecab4250\t1\t5. Team Onboarding\n17\tHow to Transfer Calls Within WAVV\thttps://www.loom.com/embed/1fb002c3ce8646cfb5227c0ba911fbdf\t1\t6. Call Transfers\n18\tUnderstanding Your Audio Source\thttps://www.loom.com/embed/40096adc8e19414383bd8be6e27c2028\t1\t7. Audio Source\n19\tHow to Add Spam Protection\thttps://www.loom.com/embed/34bc6fb91674441897d7e4e1af3ddac0\t1\t8. Spam Protection\n",
+  "stderr": "",
+  "execution_time_ms": 577
+}

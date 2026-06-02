@@ -1,0 +1,52 @@
+{
+  "query": "\nSELECT l.id, l.title, l.videoUrl, l.published, c.title AS course_title\nFROM lessons l\nLEFT JOIN courses c ON l.courseId = c.id\nORDER BY c.title, l.sortOrder\nLIMIT 26 OFFSET 20;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute \nSELECT l.id, l.title, l.videoUrl, l.published, c.title AS course_title\nFROM lessons l\nLEFT JOIN courses c ON l.courseId = c.id\nORDER BY c.title, l.sortOrder\nLIMIT 26 OFFSET 20;\n",
+  "rows": [
+    {
+      "id": "7",
+      "title": "Settings Lock",
+      "videoUrl": "https://www.loom.com/embed/ec6a9741c531470aa8835347c9e1fc58",
+      "published": "1",
+      "course_title": "5. Team Onboarding"
+    },
+    {
+      "id": "8",
+      "title": "Understanding User Roles",
+      "videoUrl": "https://www.loom.com/embed/4482c88a456c457c8e98ff73171dd873",
+      "published": "1",
+      "course_title": "5. Team Onboarding"
+    },
+    {
+      "id": "9",
+      "title": "Agent Onboarding",
+      "videoUrl": "https://www.loom.com/embed/c22c59b083fb408b9cc8bef1ecab4250",
+      "published": "1",
+      "course_title": "5. Team Onboarding"
+    },
+    {
+      "id": "17",
+      "title": "How to Transfer Calls Within WAVV",
+      "videoUrl": "https://www.loom.com/embed/1fb002c3ce8646cfb5227c0ba911fbdf",
+      "published": "1",
+      "course_title": "6. Call Transfers"
+    },
+    {
+      "id": "18",
+      "title": "Understanding Your Audio Source",
+      "videoUrl": "https://www.loom.com/embed/40096adc8e19414383bd8be6e27c2028",
+      "published": "1",
+      "course_title": "7. Audio Source"
+    },
+    {
+      "id": "19",
+      "title": "How to Add Spam Protection",
+      "videoUrl": "https://www.loom.com/embed/34bc6fb91674441897d7e4e1af3ddac0",
+      "published": "1",
+      "course_title": "8. Spam Protection"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tvideoUrl\tpublished\tcourse_title\n7\tSettings Lock\thttps://www.loom.com/embed/ec6a9741c531470aa8835347c9e1fc58\t1\t5. Team Onboarding\n8\tUnderstanding User Roles\thttps://www.loom.com/embed/4482c88a456c457c8e98ff73171dd873\t1\t5. Team Onboarding\n9\tAgent Onboarding\thttps://www.loom.com/embed/c22c59b083fb408b9cc8bef1ecab4250\t1\t5. Team Onboarding\n17\tHow to Transfer Calls Within WAVV\thttps://www.loom.com/embed/1fb002c3ce8646cfb5227c0ba911fbdf\t1\t6. Call Transfers\n18\tUnderstanding Your Audio Source\thttps://www.loom.com/embed/40096adc8e19414383bd8be6e27c2028\t1\t7. Audio Source\n19\tHow to Add Spam Protection\thttps://www.loom.com/embed/34bc6fb91674441897d7e4e1af3ddac0\t1\t8. Spam Protection\n",
+  "stderr": "",
+  "execution_time_ms": 571
+}

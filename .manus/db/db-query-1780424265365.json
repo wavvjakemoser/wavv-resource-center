@@ -1,0 +1,34 @@
+{
+  "query": "\nSELECT id, name, email, role, isActive, createdAt\nFROM users\nORDER BY createdAt ASC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute \nSELECT id, name, email, role, isActive, createdAt\nFROM users\nORDER BY createdAt ASC;\n",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Jake Moser",
+      "email": "jake.moser@wavv.com",
+      "role": "owner",
+      "isActive": "1",
+      "createdAt": "2026-05-01 22:15:45"
+    },
+    {
+      "id": "300001",
+      "name": "Katie Furstenau",
+      "email": "katie.furstenau@wavv.com",
+      "role": "partner_admin",
+      "isActive": "1",
+      "createdAt": "2026-06-01 17:42:41"
+    },
+    {
+      "id": "360001",
+      "name": "Kam Abilla",
+      "email": "kameron.abilla@wavv.com",
+      "role": "customer_admin",
+      "isActive": "1",
+      "createdAt": "2026-06-02 16:39:53"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tisActive\tcreatedAt\n1\tJake Moser\tjake.moser@wavv.com\towner\t1\t2026-05-01 22:15:45\n300001\tKatie Furstenau\tkatie.furstenau@wavv.com\tpartner_admin\t1\t2026-06-01 17:42:41\n360001\tKam Abilla\tkameron.abilla@wavv.com\tcustomer_admin\t1\t2026-06-02 16:39:53\n",
+  "stderr": "",
+  "execution_time_ms": 685
+}
