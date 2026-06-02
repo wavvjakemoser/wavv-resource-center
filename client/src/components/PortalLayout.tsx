@@ -263,8 +263,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 isActive={location.startsWith(adminItem.href)}
                 onClick={() => setSidebarOpen(false)}
               />
-              {/* Partner portal preview link — only visible on /wavvadmin, opens in new tab */}
-              {isAdminPage && (user?.role === "owner" || user?.role === "partner_admin") && (
+              {/* Partner portal preview link — always visible for owner/partner_admin */}
+              {(user?.role === "owner" || user?.role === "partner_admin") && (
                 <a
                   href="/wavvpartner"
                   target="_blank"

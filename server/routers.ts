@@ -254,6 +254,7 @@ const academyRouter = router({
         videoUrl: z.string().optional(),
         durationMinutes: z.number().optional(),
         sortOrder: z.number().optional(),
+        pipEnabled: z.boolean().optional(),
       })
     )
     .mutation(({ input }) => createLesson(input)),
@@ -274,6 +275,7 @@ const academyRouter = router({
           fileUrl: z.string().nullable().optional(),
           starred: z.boolean().optional(),
           hidden: z.boolean().optional(),
+          pipEnabled: z.boolean().optional(),
         }),
       })
     )
@@ -477,6 +479,7 @@ const webinarsRouter = router({
         videoUrl: z.string().optional(),
         thumbnailUrl: z.string().optional(),
         accentColor: z.string().optional(),
+        pipEnabled: z.boolean().optional(),
       })
     )
     .mutation(({ input }) => createWebinar({ ...input, published: true })),
@@ -496,6 +499,7 @@ const webinarsRouter = router({
           thumbnailUrl: z.string().optional(),
           accentColor: z.string().optional(),
           published: z.boolean().optional(),
+          pipEnabled: z.boolean().optional(),
         }),
       })
     )

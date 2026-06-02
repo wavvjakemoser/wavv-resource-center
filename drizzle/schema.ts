@@ -77,6 +77,8 @@ export const lessons = mysqlTable("lessons", {
   hidden: boolean("hidden").default(false).notNull(),
   // Admin-set file URL for downloadable resources (PDF, etc.)
   fileUrl: text("fileUrl"),
+  // Pop-out (Picture-in-Picture) enabled for this lesson
+  pipEnabled: boolean("pipEnabled").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -112,6 +114,8 @@ export const webinars = mysqlTable("webinars", {
   viewCount: int("viewCount").default(0),
   sortOrder: int("sortOrder").default(0).notNull(),
   published: boolean("published").default(true).notNull(),
+  // Pop-out (Picture-in-Picture) enabled for this webinar
+  pipEnabled: boolean("pipEnabled").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

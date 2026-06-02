@@ -3664,6 +3664,7 @@ function LessonRow({
     tags?: string | null;
     starred?: boolean | null;
     hidden?: boolean | null;
+    pipEnabled?: boolean | null;
   };
   isActive: boolean;
   onDeactivate?: () => void;
@@ -3698,6 +3699,7 @@ function LessonRow({
   const [activeTags, setActiveTags] = React.useState<string[]>(() => parseTagList(lesson.tags));
   const [customTagInput, setCustomTagInput] = React.useState("");
   const [isHidden, setIsHidden] = React.useState(!!lesson.hidden);
+  const [editPipEnabled, setEditPipEnabled] = React.useState(lesson.pipEnabled !== false);
   const utils = trpc.useUtils();
 
   const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
@@ -3724,6 +3726,7 @@ function LessonRow({
         videoUrl: editVideoUrl.trim() || undefined,
         fileUrl: editFileUrl.trim() || null,
         tags: activeTags.join(",") || null,
+        pipEnabled: editPipEnabled,
       },
     });
   };
@@ -3736,6 +3739,7 @@ function LessonRow({
     setEditFileName(null);
     setActiveTags(parseTagList(lesson.tags));
     setCustomTagInput("");
+    setEditPipEnabled(lesson.pipEnabled !== false);
     setEditing(false);
   };
 
@@ -3801,6 +3805,16 @@ function LessonRow({
               <input type="file" accept=".pdf,.docx,.xlsx" className="hidden" onChange={handleLessonFileUpload} disabled={uploadingFile} />
             </label>
           </div>
+          {/* PiP toggle */}
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={editPipEnabled}
+              onChange={(e) => setEditPipEnabled(e.target.checked)}
+              className="w-3.5 h-3.5 rounded accent-blue-500"
+            />
+            <span className="text-xs text-gray-400">Enable Pop-out (Picture-in-Picture) for this video</span>
+          </label>
           {/* Tag editor */}
           <div>
             <p className="text-[11px] text-gray-500 mb-1.5">Tags — click to toggle presets, or type a custom tag</p>
@@ -4253,6 +4267,7 @@ function WebinarsTab() {
     scheduledAt: "",
     accentColor: "#0074F4",
     thumbnailUrl: "",
+    pipEnabled: true,
   });
 
   const createMutation = trpc.webinars.adminCreate.useMutation({
@@ -4296,7 +4311,7 @@ function WebinarsTab() {
     } catch { /* handled by onError */ } finally { setUploadingVideo(false); }
   }
 
-  function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", thumbnailUrl: "" }); }
+  function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", thumbnailUrl: "", pipEnabled: true }); }
 
   function startEdit(w: typeof webinars[0]) {
     setEditId(w.id);
@@ -4310,6 +4325,7 @@ function WebinarsTab() {
       scheduledAt: w.scheduledAt ? new Date(w.scheduledAt).toISOString().slice(0, 16) : "",
       accentColor: (w as { accentColor?: string | null }).accentColor ?? "#0074F4",
       thumbnailUrl: w.thumbnailUrl ?? "",
+      pipEnabled: (w as { pipEnabled?: boolean | null }).pipEnabled !== false,
     });
     setShowForm(true);
   }
@@ -4329,6 +4345,7 @@ function WebinarsTab() {
         thumbnailUrl: form.thumbnailUrl || undefined,
         accentColor: form.accentColor || undefined,
         scheduledAt: scheduledAtDate,
+        pipEnabled: form.pipEnabled,
       }});
     } else {
       createMutation.mutate({
@@ -4341,6 +4358,7 @@ function WebinarsTab() {
         thumbnailUrl: form.thumbnailUrl || undefined,
         accentColor: form.accentColor || undefined,
         scheduledAt: scheduledAtDate,
+        pipEnabled: form.pipEnabled,
       });
     }
   }
@@ -4473,6 +4491,16 @@ function WebinarsTab() {
                 <input style={inputStyle} value={form.thumbnailUrl} onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))} placeholder="https://..." />
               </div>
             </div>
+            {/* PiP toggle */}
+            <label className="flex items-center gap-2 cursor-pointer select-none mt-1">
+              <input
+                type="checkbox"
+                checked={form.pipEnabled}
+                onChange={(e) => setForm(f => ({ ...f, pipEnabled: e.target.checked }))}
+                className="w-3.5 h-3.5 rounded accent-blue-500"
+              />
+              <span className="text-xs text-gray-400">Enable Pop-out (Picture-in-Picture) for this webinar</span>
+            </label>
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
               <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>

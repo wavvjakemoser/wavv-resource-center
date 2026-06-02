@@ -63,8 +63,8 @@ function VideoModal({ title, embedUrl, accentColor, showPip = false, onClose }: 
 
   // Detect Document PiP API support (Chrome 116+)
   useEffect(() => {
-    setPipSupported(showPip && "documentPictureInPicture" in window);
-  }, [showPip]);
+    setPipSupported("documentPictureInPicture" in window);
+  }, []);  // always enabled when browser supports it
 
   async function handlePip() {
     if (!("documentPictureInPicture" in window)) return;
@@ -72,8 +72,8 @@ function VideoModal({ title, embedUrl, accentColor, showPip = false, onClose }: 
       // Open a small always-on-top PiP window
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pipWindow = await (window as any).documentPictureInPicture.requestWindow({
-        width: 480,
-        height: 270,
+        width: 854,
+        height: 480,
       });
 
       // Copy base styles so the iframe renders correctly
@@ -557,7 +557,7 @@ export default function Webinars() {
             playingVideo.variant === "exclusive" ? "#D4AF37" :
             playingVideo.variant === "evergreen" ? "#0074F4" : "#00A9E2"
           }
-          showPip={playingVideo.variant === "exclusive" || playingVideo.variant === "recording"}
+          showPip={true}
           onClose={handleCloseModal}
         />
       )}
