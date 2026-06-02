@@ -9,8 +9,8 @@ import { CheckCircle2, Eye, EyeOff, Lock, User, AlertCircle } from "lucide-react
 export default function AcceptInvite() {
   const [, navigate] = useLocation();
 
-  // Extract token from URL query string
-  const token = new URLSearchParams(window.location.search).get("token") ?? "";
+  // Extract token once on mount — stabilize reference to prevent React hook order issues
+  const [token] = useState(() => new URLSearchParams(window.location.search).get("token") ?? "");
 
   const [form, setForm] = useState({ name: "", password: "", confirm: "" });
   const [showPassword, setShowPassword] = useState(false);
