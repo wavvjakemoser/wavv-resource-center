@@ -576,30 +576,11 @@ export default function AcademyCategory() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   // Video player modal state
-  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; lessonId?: number; courseId?: number; completed?: boolean } | null>(null);
-  const trackOpen = trpc.academy.trackOpen.useMutation();
-  const markCompleteMut = trpc.academy.markComplete.useMutation({
-    onSuccess: () => {
-      setPlayingVideo(prev => prev ? { ...prev, completed: true } : null);
-    },
-  });
+  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
   const handlePlay = (embedUrl: string, title: string) => {
-    // Look up DB meta immediately if dbLessonMap is already populated
-    const meta = dbLessonMap[title.toLowerCase().trim()];
-    setPlayingVideo({ embedUrl, title, lessonId: meta?.id, courseId: meta?.courseId, completed: false });
-    setPlayingTitle(title);
+    setPlayingVideo({ embedUrl, title });
   };
-  const [playingTitle, setPlayingTitle] = useState<string | null>(null);
-  const [showPulse, setShowPulse] = useState(false);
-  const handleClosePlayer = () => { setPlayingVideo(null); setPlayingTitle(null); setShowPulse(false); };
-
-  // After 30s of watching, pulse the Mark Complete button to draw attention
-  useEffect(() => {
-    if (!playingVideo || playingVideo.completed) { setShowPulse(false); return; }
-    setShowPulse(false);
-    const t = setTimeout(() => setShowPulse(true), 30_000);
-    return () => clearTimeout(t);
-  }, [playingVideo?.embedUrl, playingVideo?.completed]);
+  const handleClosePlayer = () => { setPlayingVideo(null); };
 
   // Fetch DB lessons for this category to get tags + createdAt
   const { data: dbLessons = [] } = trpc.academy.getLessonsByCategory.useQuery(
@@ -691,15 +672,7 @@ export default function AcademyCategory() {
     return map;
   }, [dbLessons]);
 
-  // When a video is opened, fire trackOpen to create an in-progress row for Continue Learning
-  useEffect(() => {
-    if (!playingTitle) return;
-    const meta = dbLessonMap[playingTitle.toLowerCase().trim()];
-    if (meta?.id && meta?.courseId) {
-      trackOpen.mutate({ lessonId: meta.id, courseId: meta.courseId });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playingTitle]);
+
 
   // Collect all tags present in this category for the filter bar
   const availableTags = useMemo(() => {
@@ -920,38 +893,12 @@ export default function AcademyCategory() {
                 style={{ border: "none" }}
               />
             </div>
-            {/* Modal footer — Mark Complete */}
+            {/* Modal footer */}
             <div
-              className="flex items-center justify-between px-5 py-3"
+              className="flex items-center justify-center px-5 py-3"
               style={{ borderTop: "1px solid #2a2a2a", background: "#0d0f14" }}
             >
-              <p className="text-xs text-gray-500">
-                {playingVideo.completed ? "Lesson marked as complete" : "Finished watching? Mark it complete to track your progress."}
-              </p>
-              {playingVideo.completed ? (
-                <span
-                  className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg"
-                  style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 6.5L5.5 10L11 3" stroke="#4ade80" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  Completed
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (playingVideo.lessonId && playingVideo.courseId) {
-                      markCompleteMut.mutate({ lessonId: playingVideo.lessonId, courseId: playingVideo.courseId });
-                    }
-                  }}
-                  disabled={markCompleteMut.isPending || !playingVideo.lessonId}
-                  className={`text-sm font-semibold px-5 py-2.5 rounded-lg transition-all disabled:opacity-50 flex items-center gap-2 ${showPulse ? "animate-pulse" : ""}`}
-                  style={{ background: showPulse ? "#22c55e" : "#0074F4", color: "#fff", boxShadow: showPulse ? "0 0 16px rgba(34,197,94,0.5)" : "none" }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L6 11L12 3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  {markCompleteMut.isPending ? "Saving..." : "Mark Complete"}
-                </button>
-              )}
+              <p className="text-xs text-gray-500">Click outside or press Esc to close</p>
             </div>
           </div>
         </div>

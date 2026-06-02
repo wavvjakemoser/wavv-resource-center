@@ -1127,3 +1127,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Webinars: Exclusive webinar modal includes PiP button (Chrome/Edge only, hidden on unsupported browsers)
 - [x] Webinars: PiP uses Document Picture-in-Picture API to float the iframe in an always-on-top window
 - [x] Webinars: view count tracking fires on modal open (same as current watchMutation)
+
+## Academy Bug Fix (Session 10)
+- [x] BUG: Academy play button closes window and redirects to home page instead of opening video modal
+- [x] Remove Mark Complete button from Academy video modal (not tracking user progress)
