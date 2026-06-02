@@ -1,3 +1,4 @@
+// AcceptInvite v2 — token stabilized with useState to prevent React error #310
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
