@@ -131,7 +131,7 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
-type AdminTab = "knowledge" | "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings";
+type AdminTab = "knowledge" | "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -148,21 +148,22 @@ export default function Admin() {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
     if (t === "knowledge") return "knowledge";
-    if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) return "partner_analytics";
     if (t === "users") return "users";
+    if (t === "analytics" && isSuperAdmin) return "analytics";
+    if (t === "approved_partners" && (isSuperAdmin || isPartnerAdmin)) return "approved_partners";
     if ((t === "academy" || t === "content") && isSuperAdmin) return "academy";
     if (t === "webinars" && isSuperAdmin) return "webinars";
     if (t === "guides" && isSuperAdmin) return "guides";
     if (t === "playground" && isSuperAdmin) return "playground";
     if (t === "support" && isSuperAdmin) return "support";
     if (t === "content_requests" && isSuperAdmin) return "content_requests";
-    if (t === "analytics" && isSuperAdmin) return "analytics";
-    // owner/customer_admin → users (Team Access); partner_admin → partner_analytics; admin → knowledge
+    if (t === "partners_content" && (isSuperAdmin || isPartnerAdmin)) return "partners_content";
+    if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) return "partner_analytics";
+    // defaults by role
     if (isOwner || (isSuperAdmin && !isPartnerAdmin)) return "users";
-    if (isPartnerAdmin && !isOwner) return "partner_analytics";
-    // plain admin → Team Access (read-only)
+    if (isPartnerAdmin && !isOwner) return "approved_partners";
     if (user?.role === "admin") return "users";
-    return "knowledge";
+    return "users";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
@@ -171,18 +172,20 @@ export default function Admin() {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
     if (t === "knowledge") setActiveTab("knowledge");
-    else if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("partner_analytics");
     else if (t === "users") setActiveTab("users");
+    else if (t === "analytics" && isSuperAdmin) setActiveTab("analytics");
+    else if (t === "approved_partners" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("approved_partners");
     else if ((t === "academy" || t === "content") && isSuperAdmin) setActiveTab("academy");
     else if (t === "webinars" && isSuperAdmin) setActiveTab("webinars");
     else if (t === "guides" && isSuperAdmin) setActiveTab("guides");
     else if (t === "playground" && isSuperAdmin) setActiveTab("playground");
     else if (t === "support" && isSuperAdmin) setActiveTab("support");
     else if (t === "content_requests" && isSuperAdmin) setActiveTab("content_requests");
-    else if (t === "analytics" && isSuperAdmin) setActiveTab("analytics");
+    else if (t === "partners_content" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("partners_content");
+    else if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("partner_analytics");
     else if (isOwner || (isSuperAdmin && !isPartnerAdmin)) setActiveTab("users");
-    else if (isPartnerAdmin && !isOwner) setActiveTab("partner_analytics");
-    else setActiveTab("knowledge");
+    else if (isPartnerAdmin && !isOwner) setActiveTab("approved_partners");
+    else setActiveTab("users");
   }, [location]);
   // Not logged in at all → send to /login with ?next=/admin
   if (!loading && !user) {
@@ -208,118 +211,108 @@ export default function Admin() {
   // Fetch site settings to check if WAVV Knowledge is enabled
   const { data: adminSettings = {} } = trpc.siteSettings.getAll.useQuery();
   const wavvKnowledgeEnabled = (adminSettings as Record<string, unknown>)["wavv_knowledge_enabled"] !== false;
-  // All admin roles can always access WAVV Knowledge for QA/preview even when disabled for regular users
-  const knowledgeDisabledForUser = !wavvKnowledgeEnabled && !isOwner && !isSuperAdmin;
+  // WAVV Knowledge is only shown when enabled — hidden entirely when disabled
+  const showKnowledge = wavvKnowledgeEnabled;
 
-  // Tab access per role:
-  // owner: all tabs
-  // customer_admin: all except partner_analytics
-  // partner_admin: knowledge + partner_analytics + team access (read-only)
-  // admin: team access (read-only) + knowledge
-  const tabs: { id: AdminTab; label: string; icon: React.ReactNode; requiresSuperAdmin?: boolean; requiresPartnerAdmin?: boolean; requiresOwner?: boolean }[] = [
-    { id: "users",             label: "Team Access",     icon: <Shield size={13} />,        requiresSuperAdmin: false },
-    { id: "analytics",         label: "Analytics",       icon: <BarChart3 size={13} />,     requiresSuperAdmin: true },
-    { id: "academy",           label: "Academy",         icon: <GraduationCap size={13} />, requiresSuperAdmin: true },
-    { id: "webinars",          label: "Webinars",        icon: <Video size={13} />,         requiresSuperAdmin: true },
-    { id: "guides",            label: "Guides",          icon: <FileText size={13} />,      requiresSuperAdmin: true },
-    { id: "playground",        label: "Playground",      icon: <FlaskConical size={13} />,  requiresSuperAdmin: true },
-    { id: "support",           label: "Support",         icon: <Headphones size={13} />,    requiresSuperAdmin: true },
-    { id: "content_requests",  label: "Requests",        icon: <MessageSquare size={13} />, requiresSuperAdmin: true },
-    { id: "partner_analytics", label: "Partners",        icon: <Users size={13} />,         requiresPartnerAdmin: true },
-    { id: "settings",          label: "Settings",        icon: <Settings size={13} />,      requiresOwner: true },
+  // ── Tab row definitions ──
+  type TabDef = { id: AdminTab; label: string; icon: React.ReactNode; show: boolean };
+
+  const operationsRow: TabDef[] = [
+    { id: "users",            label: "Team Access",       icon: <Shield size={13} />,    show: true },
+    { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} />, show: isSuperAdmin },
+    { id: "settings",         label: "Settings",          icon: <Settings size={13} />,  show: isOwner },
+    { id: "approved_partners",label: "Approved Partners", icon: <UserPlus size={13} />,  show: isSuperAdmin || isPartnerAdmin },
   ];
+
+  const contentRow: TabDef[] = [
+    { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />, show: isSuperAdmin },
+    { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,         show: isSuperAdmin },
+    { id: "guides",           label: "Guides & Docs",     icon: <FileText size={13} />,      show: isSuperAdmin },
+    { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,  show: isSuperAdmin },
+    { id: "support",          label: "Support",           icon: <Headphones size={13} />,    show: isSuperAdmin },
+    { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isSuperAdmin || isPartnerAdmin },
+    { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />, show: isSuperAdmin },
+  ];
+
+  function TabButton({ tab }: { tab: TabDef }) {
+    const active = activeTab === tab.id;
+    return (
+      <button
+        key={tab.id}
+        onClick={() => setActiveTab(tab.id)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
+        style={
+          active
+            ? { background: "#0074F4", color: "#fff" }
+            : { color: "#9ca3af" }
+        }
+      >
+        <span className="flex-shrink-0" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {tab.icon}
+        </span>
+        {tab.label}
+      </button>
+    );
+  }
 
   return (
     <PortalLayout title="Admin">
-      <div className="px-4 lg:px-6 py-6 max-w-7xl mx-auto space-y-6">
+      <div className="px-4 lg:px-6 py-6 max-w-7xl mx-auto space-y-4">
 
-        {/* ── WAVV Knowledge standalone button ── */}
-        <div className="flex items-center gap-3">
-          <UITooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => { if (!knowledgeDisabledForUser) setActiveTab("knowledge"); }}
-                disabled={knowledgeDisabledForUser}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-                style={
-                  knowledgeDisabledForUser
-                    ? { background: "#1a1f2e", color: "rgba(255,255,255,0.2)", border: "1px solid #222", cursor: "not-allowed", opacity: 0.5 }
-                    : activeTab === "knowledge"
-                    ? { background: "#0074F4", color: "#fff", border: "1px solid #0074F4" }
-                    : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
-                }
-              >
-                <Sparkles size={14} />
-                WAVV Knowledge
-                {knowledgeDisabledForUser && <Lock size={11} style={{ marginLeft: 2, opacity: 0.6 }} />}
-              </button>
-            </TooltipTrigger>
-            {knowledgeDisabledForUser && (
-              <TooltipContent side="bottom">
-                <p>WAVV Knowledge has been disabled by your admin.</p>
-              </TooltipContent>
-            )}
-          </UITooltip>
-        </div>
-
-        {/* ── Tab bar ── */}
-        <div
-          className="flex items-center gap-0.5 p-1 rounded-xl"
-          style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
-        >
-          {tabs.map((tab) => {
-            // 4-tier access model:
-            // owner: all tabs
-            // customer_admin: all except partner_analytics
-            // partner_admin: knowledge + partner_analytics
-            // admin: knowledge only
-            let locked = false;
-            if (tab.requiresSuperAdmin) locked = !isSuperAdmin;
-            if (tab.requiresPartnerAdmin) locked = !isPartnerAdmin;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => { if (!locked) setActiveTab(tab.id); }}
-                title={locked ? "Access restricted" : undefined}
-                className="flex flex-1 items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-0"
-                style={
-                  locked
-                    ? { color: "rgba(255,255,255,0.2)", cursor: "not-allowed" }
-                    : activeTab === tab.id
-                    ? { background: "#0074F4", color: "#fff" }
-                    : { color: "#9ca3af" }
-                }
-              >
-                <span className="flex-shrink-0" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {tab.icon}
-                </span>
-                {tab.label}
-                {locked && <Lock size={10} style={{ marginLeft: 2, opacity: 0.5 }} />}
-              </button>
-            );
-          })}
-        </div>
-        {/* ── Tab content ── */}
-        {activeTab === "knowledge" && !knowledgeDisabledForUser && <WavvKnowledgeTab />}
-        {activeTab === "knowledge" && knowledgeDisabledForUser && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ background: "rgba(255,255,255,0.05)" }}>
-              <Lock size={24} style={{ color: "rgba(255,255,255,0.2)" }} />
-            </div>
-            <p className="text-white font-semibold mb-1">WAVV Knowledge is currently disabled</p>
-            <p className="text-sm text-gray-500">This feature has been turned off. Enable it in Settings to restore access.</p>
+        {/* ── Row 1: WAVV Knowledge (hidden when disabled) ── */}
+        {showKnowledge && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setActiveTab("knowledge")}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+              style={
+                activeTab === "knowledge"
+                  ? { background: "#0074F4", color: "#fff", border: "1px solid #0074F4" }
+                  : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
+              }
+            >
+              <Sparkles size={14} />
+              WAVV Knowledge
+            </button>
           </div>
         )}
+
+        {/* ── Row 2: Operations ── */}
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#4b5563" }}>Operations</p>
+          <div
+            className="flex items-center gap-0.5 p-1 rounded-xl"
+            style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+          >
+            {operationsRow.filter(t => t.show).map(tab => <TabButton key={tab.id} tab={tab} />)}
+          </div>
+        </div>
+
+        {/* ── Row 3: Content Management ── */}
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#4b5563" }}>Content Management</p>
+          <div
+            className="flex items-center gap-0.5 p-1 rounded-xl"
+            style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+          >
+            {contentRow.filter(t => t.show).map(tab => <TabButton key={tab.id} tab={tab} />)}
+          </div>
+        </div>
+
+        {/* ── Tab content ── */}
+        {activeTab === "knowledge" && showKnowledge && <WavvKnowledgeTab />}
         {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab />}
         {activeTab === "users" && <UsersTab />}
+        {activeTab === "settings" && isOwner && <SettingsTab />}
+        {activeTab === "approved_partners" && (isSuperAdmin || isPartnerAdmin) && <ApprovedPartnersTab />}
         {activeTab === "academy" && isSuperAdmin && <ContentTab />}
         {activeTab === "webinars" && isSuperAdmin && <WebinarsTab />}
         {activeTab === "guides" && isSuperAdmin && <GuidesTab />}
         {activeTab === "playground" && isSuperAdmin && <PlaygroundTab />}
         {activeTab === "support" && isSuperAdmin && <SupportTab />}
+        {activeTab === "partners_content" && (isSuperAdmin || isPartnerAdmin) && <PartnersContentTab />}
         {activeTab === "content_requests" && isSuperAdmin && <ContentRequestsTab />}
         {activeTab === "partner_analytics" && (isSuperAdmin || isPartnerAdmin) && <PartnerAnalyticsTab isPartnerAdmin={isPartnerAdmin && !isOwner} />}
-        {activeTab === "settings" && isOwner && <SettingsTab />}
       </div>
     </PortalLayout>
   );
@@ -6542,6 +6535,354 @@ function SettingsTab() {
             </div>
           </div>
         </>
+      )}
+    </div>
+  );
+}
+
+// ─── Approved Partners Tab ────────────────────────────────────────────────────
+function ApprovedPartnersTab() {
+  const { data: partners = [], refetch } = trpc.approvedPartners.list.useQuery();
+  const [search, setSearch] = useState("");
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteName, setInviteName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState("");
+  const inviteMutation = trpc.approvedPartners.invite.useMutation({
+    onSuccess: (data) => { setInviteLink(data.inviteLink); refetch(); },
+    onError: (e) => setInviteError(e.message),
+  });
+  const deactivateMutation = trpc.approvedPartners.deactivate.useMutation({ onSuccess: () => refetch() });
+  const removeMutation = trpc.approvedPartners.remove.useMutation({ onSuccess: () => refetch() });
+  const resendMutation = trpc.approvedPartners.resendInvite.useMutation({
+    onSuccess: (data) => { setInviteLink(data.inviteLink); setInviteOpen(true); },
+  });
+  const filtered = partners.filter(p =>
+    (p.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
+    (p.email ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+  function exportCSV() {
+    const header = "Name,Email,Status,Joined";
+    const rows = filtered.map(p =>
+      `"${p.name ?? ""}","${p.email ?? ""}","${p.isActive ? "Active" : "Inactive"}","${new Date(p.createdAt).toLocaleDateString()}"`
+    );
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "wavv-partners.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-white">Approved Partners</h2>
+          <p className="text-sm text-gray-400 mt-0.5">Invite and manage WAVV Partners who can access the Partner Portal.</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={exportCSV} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300 border border-gray-700 hover:bg-white/5 transition-all flex items-center gap-1.5">
+            <Download size={13} /> Export CSV
+          </button>
+          <button onClick={() => { setInviteOpen(true); setInviteLink(null); setInviteError(""); setInviteName(""); setInviteEmail(""); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium text-white flex items-center gap-1.5"
+            style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
+            <UserPlus size={13} /> Invite Partner
+          </button>
+        </div>
+      </div>
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or email..."
+          className="w-full pl-9 pr-4 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" />
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Total Partners", value: partners.length, color: "#3b82f6" },
+          { label: "Active", value: partners.filter(p => p.isActive).length, color: "#22c55e" },
+          { label: "Inactive", value: partners.filter(p => !p.isActive).length, color: "#ef4444" },
+        ].map(s => (
+          <div key={s.label} className="rounded-xl p-4 border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="rounded-xl border border-white/10 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-400">Name</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-400">Email</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-400">Status</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-400">Joined</th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-gray-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr><td colSpan={5} className="text-center py-10 text-gray-500 text-sm">No partners found.</td></tr>
+            ) : filtered.map(p => (
+              <tr key={p.id} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
+                <td className="px-4 py-3 text-white font-medium">{p.name ?? "—"}</td>
+                <td className="px-4 py-3 text-gray-400">{p.email ?? "—"}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${p.isActive ? "bg-green-500/15 text-green-400" : "bg-red-500/15 text-red-400"}`}>
+                    {p.isActive ? "Active" : "Inactive"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-gray-400 text-xs">{new Date(p.createdAt).toLocaleDateString()}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-2">
+                    <button onClick={() => resendMutation.mutate({ userId: p.id, origin: window.location.origin })}
+                      className="px-2 py-1 rounded text-xs text-blue-400 hover:bg-blue-500/10 transition-colors">Resend Invite</button>
+                    <button onClick={() => deactivateMutation.mutate({ userId: p.id })}
+                      className="px-2 py-1 rounded text-xs text-yellow-400 hover:bg-yellow-500/10 transition-colors">
+                      {p.isActive ? "Deactivate" : "Reactivate"}
+                    </button>
+                    <button onClick={() => { if (window.confirm(`Remove ${p.name ?? p.email} as a WAVV Partner?`)) removeMutation.mutate({ userId: p.id }); }}
+                      className="px-2 py-1 rounded text-xs text-red-400 hover:bg-red-500/10 transition-colors">Remove</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {inviteOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setInviteOpen(false)}>
+          <div className="rounded-2xl p-6 w-full max-w-md space-y-4" style={{ background: "#1a1f2e", border: "1px solid #2a2a3a" }} onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-white">Invite WAVV Partner</h3>
+            {inviteLink ? (
+              <div className="space-y-3">
+                <p className="text-sm text-green-400">Invite created! Share this link with the partner:</p>
+                <div className="p-3 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300 break-all">{inviteLink}</div>
+                <button onClick={() => navigator.clipboard.writeText(inviteLink ?? "")}
+                  className="w-full py-2 rounded-lg text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>Copy Link</button>
+                <button onClick={() => setInviteOpen(false)} className="w-full py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors">Close</button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Full Name</label>
+                  <input value={inviteName} onChange={e => setInviteName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" placeholder="Jane Smith" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">Email Address</label>
+                  <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} type="email"
+                    className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" placeholder="jane@company.com" />
+                </div>
+                {inviteError && <p className="text-xs text-red-400">{inviteError}</p>}
+                <button onClick={() => inviteMutation.mutate({ name: inviteName, email: inviteEmail, origin: window.location.origin })}
+                  disabled={!inviteName || !inviteEmail || inviteMutation.isPending}
+                  className="w-full py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
+                  {inviteMutation.isPending ? "Sending..." : "Send Invite"}
+                </button>
+                <button onClick={() => setInviteOpen(false)} className="w-full py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Partners Content Tab ─────────────────────────────────────────────────────
+function PartnersContentTab() {
+  const utils = trpc.useUtils();
+  const [pageTarget, setPageTarget] = useState<"public" | "portal">("public");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [addingBlock, setAddingBlock] = useState<string | null>(null);
+  const [form, setForm] = useState({ title: "", description: "", linkUrl: "", status: "coming_soon" as "coming_soon" | "live", isLocked: false, isVisible: true, sortOrder: 0 });
+  const { data: allContent = [], isLoading } = trpc.partnerContent.list.useQuery({ pageTarget });
+  const createMutation = trpc.partnerContent.create.useMutation({ onSuccess: () => { utils.partnerContent.list.invalidate(); setAddingBlock(null); resetForm(); } });
+  const updateMutation = trpc.partnerContent.update.useMutation({ onSuccess: () => { utils.partnerContent.list.invalidate(); setEditingId(null); } });
+  const deleteMutation = trpc.partnerContent.delete.useMutation({ onSuccess: () => utils.partnerContent.list.invalidate() });
+  function resetForm() { setForm({ title: "", description: "", linkUrl: "", status: "coming_soon", isLocked: false, isVisible: true, sortOrder: 0 }); }
+  const blockTypes = [
+    { type: "hero" as const, label: "Hero / Welcome", icon: "Home" },
+    { type: "module" as const, label: "Course Module", icon: "Book" },
+    { type: "resource_card" as const, label: "Resource Card", icon: "Card" },
+    { type: "quick_link" as const, label: "Quick Link", icon: "Link" },
+  ];
+  const grouped = blockTypes.map(bt => ({ ...bt, items: allContent.filter(c => c.blockType === bt.type) }));
+  function startEdit(item: typeof allContent[0]) {
+    setEditingId(item.id);
+    setForm({ title: item.title, description: item.description ?? "", linkUrl: item.linkUrl ?? "", status: item.status ?? "coming_soon", isLocked: item.isLocked, isVisible: item.isVisible, sortOrder: item.sortOrder });
+  }
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-white">Partners Content</h2>
+          <p className="text-sm text-gray-400 mt-0.5">Manage content for the public Partners page and the approved Partner Portal.</p>
+        </div>
+        <div className="flex rounded-lg overflow-hidden border border-white/10">
+          {(["public", "portal"] as const).map(t => (
+            <button key={t} onClick={() => setPageTarget(t)}
+              className="px-4 py-1.5 text-xs font-medium transition-all"
+              style={pageTarget === t ? { background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", color: "#fff" } : { background: "transparent", color: "#9ca3af" }}>
+              {t === "public" ? "Public /partners" : "Partner Portal"}
+            </button>
+          ))}
+        </div>
+      </div>
+      {isLoading ? (
+        <div className="text-center py-12 text-gray-500">Loading content...</div>
+      ) : (
+        <div className="space-y-8">
+          {grouped.map(group => (
+            <div key={group.type} className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
+                  {group.label} <span className="text-xs text-gray-600">({group.items.length})</span>
+                </h3>
+                <button onClick={() => { setAddingBlock(group.type); resetForm(); }}
+                  className="px-2.5 py-1 rounded-lg text-xs text-blue-400 border border-blue-500/30 hover:bg-blue-500/10 transition-all flex items-center gap-1">
+                  <Plus size={11} /> Add
+                </button>
+              </div>
+              {addingBlock === group.type && (
+                <div className="rounded-xl p-4 border border-blue-500/30 space-y-3" style={{ background: "rgba(59,130,246,0.05)" }}>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2">
+                      <label className="block text-xs text-gray-400 mb-1">Title *</label>
+                      <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" placeholder="Content title" />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-xs text-gray-400 mb-1">Description</label>
+                      <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2}
+                        className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50 resize-none" placeholder="Optional description" />
+                    </div>
+                    {(group.type === "resource_card" || group.type === "quick_link") && (
+                      <div className="col-span-2">
+                        <label className="block text-xs text-gray-400 mb-1">Link URL</label>
+                        <input value={form.linkUrl} onChange={e => setForm(f => ({ ...f, linkUrl: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" placeholder="https://..." />
+                      </div>
+                    )}
+                    {group.type === "module" && (
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Status</label>
+                        <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as "coming_soon" | "live" }))}
+                          className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none">
+                          <option value="coming_soon">Coming Soon</option>
+                          <option value="live">Live</option>
+                        </select>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-4">
+                      {group.type === "resource_card" && (
+                        <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                          <input type="checkbox" checked={form.isLocked} onChange={e => setForm(f => ({ ...f, isLocked: e.target.checked }))} className="rounded" /> Locked
+                        </label>
+                      )}
+                      <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                        <input type="checkbox" checked={form.isVisible} onChange={e => setForm(f => ({ ...f, isVisible: e.target.checked }))} className="rounded" /> Visible
+                      </label>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => createMutation.mutate({ pageTarget, blockType: group.type, ...form })}
+                      disabled={!form.title || createMutation.isPending}
+                      className="px-4 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
+                      style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
+                      {createMutation.isPending ? "Saving..." : "Save"}
+                    </button>
+                    <button onClick={() => setAddingBlock(null)} className="px-4 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white border border-white/10 transition-colors">Cancel</button>
+                  </div>
+                </div>
+              )}
+              {group.items.length === 0 && addingBlock !== group.type ? (
+                <p className="text-xs text-gray-600 italic pl-1">No {group.label.toLowerCase()} items yet.</p>
+              ) : group.items.map(item => (
+                <div key={item.id} className="rounded-xl border border-white/10 overflow-hidden" style={{ background: "rgba(255,255,255,0.02)" }}>
+                  {editingId === item.id ? (
+                    <div className="p-4 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2">
+                          <label className="block text-xs text-gray-400 mb-1">Title *</label>
+                          <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-xs text-gray-400 mb-1">Description</label>
+                          <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2}
+                            className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50 resize-none" />
+                        </div>
+                        {(item.blockType === "resource_card" || item.blockType === "quick_link") && (
+                          <div className="col-span-2">
+                            <label className="block text-xs text-gray-400 mb-1">Link URL</label>
+                            <input value={form.linkUrl} onChange={e => setForm(f => ({ ...f, linkUrl: e.target.value }))}
+                              className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" placeholder="https://..." />
+                          </div>
+                        )}
+                        {item.blockType === "module" && (
+                          <div>
+                            <label className="block text-xs text-gray-400 mb-1">Status</label>
+                            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as "coming_soon" | "live" }))}
+                              className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none">
+                              <option value="coming_soon">Coming Soon</option>
+                              <option value="live">Live</option>
+                            </select>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-4">
+                          {item.blockType === "resource_card" && (
+                            <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                              <input type="checkbox" checked={form.isLocked} onChange={e => setForm(f => ({ ...f, isLocked: e.target.checked }))} className="rounded" /> Locked
+                            </label>
+                          )}
+                          <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                            <input type="checkbox" checked={form.isVisible} onChange={e => setForm(f => ({ ...f, isVisible: e.target.checked }))} className="rounded" /> Visible
+                          </label>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => updateMutation.mutate({ id: item.id, ...form })}
+                          disabled={!form.title || updateMutation.isPending}
+                          className="px-4 py-1.5 rounded-lg text-xs font-medium text-white disabled:opacity-50"
+                          style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
+                          {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                        </button>
+                        <button onClick={() => setEditingId(null)} className="px-4 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white border border-white/10 transition-colors">Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-white truncate">{item.title}</p>
+                          {!item.isVisible && <span className="text-xs px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">Hidden</span>}
+                          {item.blockType === "module" && (
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${item.status === "live" ? "bg-green-500/15 text-green-400" : "bg-yellow-500/15 text-yellow-400"}`}>
+                              {item.status === "live" ? "Live" : "Coming Soon"}
+                            </span>
+                          )}
+                          {item.blockType === "resource_card" && item.isLocked && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-gray-700 text-gray-400">Locked</span>
+                          )}
+                        </div>
+                        {item.description && <p className="text-xs text-gray-500 mt-0.5 truncate">{item.description}</p>}
+                        {item.linkUrl && <p className="text-xs text-blue-400/70 mt-0.5 truncate">{item.linkUrl}</p>}
+                      </div>
+                      <div className="flex items-center gap-2 ml-4 shrink-0">
+                        <button onClick={() => startEdit(item)} className="px-2 py-1 rounded text-xs text-blue-400 hover:bg-blue-500/10 transition-colors">Edit</button>
+                        <button onClick={() => { if (window.confirm("Delete this content block?")) deleteMutation.mutate({ id: item.id }); }}
+                          className="px-2 py-1 rounded text-xs text-red-400 hover:bg-red-500/10 transition-colors">Delete</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

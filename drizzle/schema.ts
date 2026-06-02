@@ -322,3 +322,28 @@ export const magicLinkTokens = mysqlTable("magic_link_tokens", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type MagicLinkToken = typeof magicLinkTokens.$inferSelect;
+
+// ─── Partner Content ──────────────────────────────────────────────────────────
+// Stores editable content blocks for /partners (public) and /wavvpartner (portal)
+export const partnerContent = mysqlTable("partner_content", {
+  id: int("id").autoincrement().primaryKey(),
+  // 'public' = /partners page, 'portal' = /wavvpartner page
+  pageTarget: mysqlEnum("pageTarget", ["public", "portal"]).notNull(),
+  // Content block type
+  blockType: mysqlEnum("blockType", ["hero", "module", "resource_card", "quick_link"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  // URL for resource cards and quick links
+  linkUrl: varchar("linkUrl", { length: 500 }),
+  // For modules: 'coming_soon' | 'live'
+  status: mysqlEnum("status", ["coming_soon", "live"]).default("coming_soon"),
+  // For resource cards: whether the card is locked/unlocked
+  isLocked: boolean("isLocked").default(true).notNull(),
+  // Display order within its block type + page
+  sortOrder: int("sortOrder").default(0).notNull(),
+  // Whether this block is visible
+  isVisible: boolean("isVisible").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PartnerContent = typeof partnerContent.$inferSelect;

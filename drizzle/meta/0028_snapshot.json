@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "f2b57236-d6cb-4879-8b04-d12c8f19c13c",
-  "prevId": "5f4b5c3b-c917-42e4-88b6-cde2e134fab8",
+  "id": "c562e580-084d-4d5c-ac1a-b928cc3af810",
+  "prevId": "f2b57236-d6cb-4879-8b04-d12c8f19c13c",
   "tables": {
     "analytics_events": {
       "name": "analytics_events",
@@ -353,7 +353,7 @@
         },
         "fileType": {
           "name": "fileType",
-          "type": "enum('pdf','checklist','playbook','other')",
+          "type": "enum('pdf','checklist','playbook','other','help_article')",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
@@ -901,6 +901,114 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
+    "partner_content": {
+      "name": "partner_content",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "pageTarget": {
+          "name": "pageTarget",
+          "type": "enum('public','portal')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "blockType": {
+          "name": "blockType",
+          "type": "enum('hero','module','resource_card','quick_link')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "linkUrl": {
+          "name": "linkUrl",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('coming_soon','live')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'coming_soon'"
+        },
+        "isLocked": {
+          "name": "isLocked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "sortOrder": {
+          "name": "sortOrder",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "isVisible": {
+          "name": "isVisible",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "partner_content_id": {
+          "name": "partner_content_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "playground_requests": {
       "name": "playground_requests",
       "columns": {
@@ -1309,6 +1417,20 @@
         "password_hash": {
           "name": "password_hash",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password_reset_token": {
+          "name": "password_reset_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password_reset_expires": {
+          "name": "password_reset_expires",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

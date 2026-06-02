@@ -1722,3 +1722,64 @@ export async function updateSiteSetting(key: string, value: unknown): Promise<vo
     .values({ key, value: serialized })
     .onDuplicateKeyUpdate({ set: { value: serialized } });
 }
+
+// ─── Partner Content Helpers ──────────────────────────────────────────────────
+import { partnerContent } from "../drizzle/schema";
+
+export async function getPartnerContent(pageTarget?: "public" | "portal") {
+  const db = await getDb();
+  if (!db) return [];
+  const query = db.select().from(partnerContent);
+  if (pageTarget) {
+    return query.where(eq(partnerContent.pageTarget, pageTarget)).orderBy(asc(partnerContent.sortOrder));
+  }
+  return query.orderBy(asc(partnerContent.pageTarget), asc(partnerContent.sortOrder));
+}
+
+export async function createPartnerContent(data: {
+  pageTarget: "public" | "portal";
+  blockType: "hero" | "module" | "resource_card" | "quick_link";
+  title: string;
+  description?: string;
+  linkUrl?: string;
+  status?: "coming_soon" | "live";
+  isLocked?: boolean;
+  sortOrder?: number;
+  isVisible?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [result] = await db.insert(partnerContent).values({
+    ...data,
+    isLocked: data.isLocked ?? true,
+    sortOrder: data.sortOrder ?? 0,
+    isVisible: data.isVisible ?? true,
+  });
+  return result;
+}
+
+export async function updatePartnerContent(id: number, data: Partial<{
+  title: string;
+  description: string;
+  linkUrl: string;
+  status: "coming_soon" | "live";
+  isLocked: boolean;
+  sortOrder: number;
+  isVisible: boolean;
+}>) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(partnerContent).set(data).where(eq(partnerContent.id, id));
+}
+
+export async function deletePartnerContent(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.delete(partnerContent).where(eq(partnerContent.id, id));
+}
+
+export async function getPartnerUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(users).where(eq(users.role, "partner")).orderBy(desc(users.createdAt));
+}

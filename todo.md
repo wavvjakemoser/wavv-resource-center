@@ -1136,3 +1136,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Disabling WAVV Knowledge should NOT hide WAVV Playground from the sidebar
 - [x] All 4 admin roles always see all nav items (bypass nav_visibility toggles) for QA purposes
 - [x] WAVV Knowledge toggle only disables the AI chat for regular users; admins always see it
+
+## Admin Panel Rebuild (Session 12)
+- [ ] Admin: 3-row layout — Row 1: WAVV Knowledge (hidden when disabled), Row 2: Operations (Team Access, Analytics, Settings, Approved Partners), Row 3: Content (Academy, Webinars, Guides & Docs, Playground, Support, Partners, Requests)
+- [ ] Admin: WAVV Knowledge hidden entirely when wavv_knowledge_enabled=false (not greyed out)
+- [ ] Admin: Approved Partners tab — invite by email (assigns partner role), list all WAVV Partners, search, export CSV, deactivate/remove
+- [ ] Admin: Partners content tab — edit /partners public page content and /wavvpartner portal content (modules, resource cards, quick links)
+- [ ] Admin: partner_admin role stays in Team Access (internal); WAVV Partner (partner role) managed in Approved Partners tab

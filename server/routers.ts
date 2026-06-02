@@ -103,6 +103,11 @@ import {
   addStrikeToUser,
   removeStrikeFromUser,
   createManualUser,
+  getPartnerContent,
+  createPartnerContent,
+  updatePartnerContent,
+  deletePartnerContent,
+  getPartnerUsers,
 } from "./db";
 
 // // ─── Role guards ─────────────────────────────────────────────────────
@@ -1526,6 +1531,146 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+  // ─── Partner Content ─────────────────────────────────────────────────────────
+  partnerContent: router({
+    list: publicProcedure
+      .input(z.object({ pageTarget: z.enum(["public", "portal"]).optional() }))
+      .query(({ input }) => getPartnerContent(input.pageTarget)),
+
+    create: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({
+        pageTarget: z.enum(["public", "portal"]),
+        blockType: z.enum(["hero", "module", "resource_card", "quick_link"]),
+        title: z.string().min(1).max(255),
+        description: z.string().optional(),
+        linkUrl: z.string().optional(),
+        status: z.enum(["coming_soon", "live"]).optional(),
+        isLocked: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+        isVisible: z.boolean().optional(),
+      }))
+      .mutation(({ input }) => createPartnerContent(input)),
+
+    update: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).max(255).optional(),
+        description: z.string().optional(),
+        linkUrl: z.string().optional(),
+        status: z.enum(["coming_soon", "live"]).optional(),
+        isLocked: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+        isVisible: z.boolean().optional(),
+      }))
+      .mutation(({ input }) => {
+        const { id, ...data } = input;
+        return updatePartnerContent(id, data);
+      }),
+
+    delete: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input }) => deletePartnerContent(input.id)),
+  }),
+
+  // ─── Approved Partners ────────────────────────────────────────────────────────
+  approvedPartners: router({
+    list: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .query(() => getPartnerUsers()),
+
+    invite: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({
+        name: z.string().min(1).max(255),
+        email: z.string().email(),
+        origin: z.string().url().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const email = input.email.trim().toLowerCase();
+        let user = await getUserByEmail(email);
+        if (!user) {
+          user = await createNativeUser({ email, name: input.name.trim(), passwordHash: null, role: "partner" });
+        } else {
+          await updateUserRole(user.id, "partner");
+        }
+        const { token } = await generateInvite({
+          email,
+          name: input.name.trim(),
+          role: "partner",
+          createdBy: ctx.user.id,
+        });
+        const appUrl = input.origin ?? process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
+        const inviteLink = `${appUrl}/accept-invite?token=${token}`;
+        await notifyOwner({
+          title: `WAVV Partner invite created for ${input.name}`,
+          content: `Invite link for ${email}:\n${inviteLink}\n\nThis link expires in 24 hours.`,
+        });
+        return { success: true, inviteLink };
+      }),
+
+    deactivate: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ input }) => {
+        const { updateUserStatus } = await import("./db");
+        await updateUserStatus(input.userId, false);
+        return { success: true };
+      }),
+
+    remove: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteUser(input.userId);
+        return { success: true };
+      }),
+
+    resendInvite: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .input(z.object({ userId: z.number(), origin: z.string().url().optional() }))
+      .mutation(async ({ input, ctx }) => {
+        const allUsers = await getAllUsers();
+        const target = allUsers.find(u => u.id === input.userId);
+        if (!target || !target.email) throw new TRPCError({ code: "NOT_FOUND" });
+        const { token } = await generateInvite({
+          email: target.email,
+          name: target.name ?? target.email,
+          role: "partner",
+          createdBy: ctx.user.id,
+        });
+        const appUrl = input.origin ?? process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
+        const inviteLink = `${appUrl}/accept-invite?token=${token}`;
+        return { success: true, inviteLink };
+      }),
+  }),
+
   readiness: router({
     getItems: protectedProcedure
       .input(z.object({ page: z.enum(["academy", "webinars", "guides", "playground", "support"]) }))
