@@ -6298,13 +6298,14 @@ function SettingsTab() {
 
   // Nav items that can be toggled
   const NAV_ITEMS = [
-    { href: "/home",  label: "Home",             icon: Home },
-    { href: "/academy",    label: "WAVV Academy",      icon: GraduationCapIcon },
-    { href: "/webinars",   label: "WAVV Webinars",     icon: VideoIcon },
-    { href: "/guides",     label: "WAVV Guides & Docs", icon: FileTextIcon },
-    { href: "/hands-on",   label: "WAVV Playground",   icon: FlaskConical },
-    { href: "/support",    label: "WAVV Support",      icon: HeadphonesIcon },
-    { href: "/partners",   label: "WAVV Partners",     icon: UsersIcon },
+    { href: "/home",        label: "Home",                   icon: Home },
+    { href: "/academy",    label: "WAVV Academy",            icon: GraduationCapIcon },
+    { href: "/webinars",   label: "WAVV Webinars",           icon: VideoIcon },
+    { href: "/guides",     label: "WAVV Guides & Docs",      icon: FileTextIcon },
+    { href: "/hands-on",   label: "WAVV Playground",         icon: FlaskConical },
+    { href: "/support",    label: "WAVV Support",            icon: HeadphonesIcon },
+    { href: "/partners",   label: "WAVV Partners (public)",  icon: UsersIcon },
+    { href: "/wavvpartner",label: "WAVV Partner Portal",     icon: UsersIcon },
   ];
 
   function toggleNavItem(href: string) {

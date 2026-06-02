@@ -58,8 +58,8 @@ function Router() {
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
-      <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
-      <Route path="/wavvpartner" component={WavvPartnerPortal} />
+      <Route path="/partners" component={Partners} />
+      <Route path="/wavvpartner">{() => <NavGuard href="/wavvpartner"><WavvPartnerPortal /></NavGuard>}</Route>
       <Route path="/wavvadmin" component={Admin} />
       <Route path="/wavvadmin/legacy" component={AdminPanel} />
       <Route path="/hands-on" component={HandsOn} />
