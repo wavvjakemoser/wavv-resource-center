@@ -1415,7 +1415,7 @@ function UsersTab() {
 
       {/* Clickable stat cards */}
       <TooltipProvider delayDuration={200}>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
           {statCards.map((s) => {
             const active = roleFilter === s.filter;
             return (
@@ -6741,14 +6741,24 @@ function PartnersContentTab() {
             <button key={t} onClick={() => setPageTarget(t)}
               className="px-4 py-1.5 text-xs font-medium transition-all"
               style={pageTarget === t ? { background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", color: "#fff" } : { background: "transparent", color: "#9ca3af" }}>
-              {t === "public" ? "Public /partners" : "Partner Portal"}
+              {t === "public" ? "WAVV Partners" : "WAVV Partners Portal"}
             </button>
           ))}
         </div>
       </div>
-      {isLoading ? (
+      {/* Under Construction placeholder — both tabs */}
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.2)" }}>
+          <Wrench size={28} style={{ color: "#fbbf24" }} />
+        </div>
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-white mb-1">Under Construction</h3>
+          <p className="text-sm text-gray-500 max-w-sm">Content for the <span className="text-gray-300">{pageTarget === "public" ? "WAVV Partners" : "WAVV Partners Portal"}</span> page is being finalized. Check back soon.</p>
+        </div>
+      </div>
+      {false && isLoading ? (
         <div className="text-center py-12 text-gray-500">Loading content...</div>
-      ) : (
+      ) : false && (
         <div className="space-y-8">
           {grouped.map(group => (
             <div key={group.type} className="space-y-3">
