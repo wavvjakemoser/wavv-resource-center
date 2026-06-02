@@ -292,7 +292,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     <Users size={17} style={{ color: "#00A9E2" }} />
                   </div>
                   <span className="flex-1 whitespace-nowrap">WAVV Partners Portal</span>
-                  <ExternalLink size={13} style={{ color: "rgba(0,169,226,0.6)", flexShrink: 0 }} />
                 </a>
               )}
             </div>
