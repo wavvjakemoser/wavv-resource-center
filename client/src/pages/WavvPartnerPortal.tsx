@@ -12,6 +12,7 @@ import {
   Lock,
   CheckCircle2,
   PlayCircle,
+  FlaskConical,
 } from "lucide-react";
 
 // ─── Static content ───────────────────────────────────────────────────────────
@@ -83,6 +84,21 @@ export default function WavvPartnerPortal() {
 
   return (
     <PortalLayout title="WAVV Partners">
+      {/* ── Prototype Banner ── */}
+      <div
+        className="w-full flex items-center justify-center gap-3 px-6 py-3 text-sm font-semibold"
+        style={{
+          background: "linear-gradient(90deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.10) 100%)",
+          borderBottom: "1px solid rgba(245,158,11,0.35)",
+          color: "#fbbf24",
+        }}
+      >
+        <FlaskConical size={15} className="flex-shrink-0" />
+        <span>
+          <strong>Internal Preview Only</strong> — This portal is currently disabled for customers. Content is a prototype and not yet live. Visible to owners and partner admins only.
+        </span>
+      </div>
+
       <div className="px-6 py-8 max-w-5xl mx-auto w-full space-y-8">
 
         {/* ── Hero ── */}
