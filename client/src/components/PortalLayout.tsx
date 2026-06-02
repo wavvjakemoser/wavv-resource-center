@@ -25,11 +25,8 @@ const baseNavItems = [
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
+  { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
   { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
-];
-// Admin-only nav items — visible to all 4 admin roles, never shown to regular/partner users
-const adminOnlyNavItems = [
-  { href: "/hands-on", label: "WAVV Playground", icon: FlaskConical, color: "#a855f7" },
 ];
 const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
 
@@ -124,11 +121,9 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const isOwner = user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");
 
-  // Build nav items: admins see base + admin-only items; regular users see base + partner item
-  // Admin roles bypass nav_visibility toggles for QA purposes
-  const allNavItems = isAdmin
-    ? [...baseNavItems, ...adminOnlyNavItems, publicPartnerItem]
-    : [...baseNavItems, publicPartnerItem];
+  // All users see all base nav items + partner item
+  // Admins bypass nav_visibility toggles for QA purposes
+  const allNavItems = [...baseNavItems, publicPartnerItem];
   const navItems = allNavItems.filter((item) => {
     // All admin roles bypass visibility toggles
     if (isAdmin) return true;
