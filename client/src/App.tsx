@@ -17,7 +17,6 @@ import AdminPanel from "./pages/AdminPanel";
 import Admin from "./pages/Admin";
 import HandsOn from "./pages/HandsOn";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import GoogleCallback from "./pages/GoogleCallback";
 import AcceptInvite from "./pages/AcceptInvite";
@@ -48,7 +47,6 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
       <Route path="/auth/google/callback" component={GoogleCallback} />
       <Route path="/home" component={Dashboard} />
       <Route path="/academy" component={Academy} />

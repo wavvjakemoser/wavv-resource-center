@@ -39,19 +39,10 @@ export default function Home() {
   const { data: user, isLoading: authLoading } = trpc.auth.me.useQuery();
   const utils = trpc.useUtils();
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState<"signin" | "register">("signin");
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
-
-  const [regName, setRegName] = useState("");
-  const [regEmail, setRegEmail] = useState("");
-  const [regPassword, setRegPassword] = useState("");
-  const [regConfirm, setRegConfirm] = useState("");
-  const [showRegPassword, setShowRegPassword] = useState(false);
-  const [regError, setRegError] = useState("");
 
   useEffect(() => {
     if (!authLoading && user) navigate("/home");
@@ -68,30 +59,11 @@ export default function Home() {
     onError: (err) => setLoginError(err.message || "Invalid email or password."),
   });
 
-  const registerMutation = trpc.auth.register.useMutation({
-    onSuccess: async () => { await utils.auth.me.invalidate(); navigate("/home"); },
-    onError: (err) => setRegError(err.message || "Registration failed."),
-  });
-
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
     if (!email || !password) { setLoginError("Please enter your email and password."); return; }
     loginMutation.mutate({ email: email.trim().toLowerCase(), password });
-  };
-
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    setRegError("");
-    if (!regName.trim()) { setRegError("Please enter your full name."); return; }
-    if (!regEmail.trim()) { setRegError("Please enter your email."); return; }
-    if (regPassword.length < 8) { setRegError("Password must be at least 8 characters."); return; }
-    if (regPassword !== regConfirm) { setRegError("Passwords do not match."); return; }
-    registerMutation.mutate({ name: regName.trim(), email: regEmail.trim().toLowerCase(), password: regPassword });
-  };
-
-  const switchMode = (mode: "signin" | "register") => {
-    setModalMode(mode); setLoginError(""); setRegError("");
   };
 
   if (authLoading) {
@@ -115,7 +87,7 @@ export default function Home() {
       <nav className="flex items-center justify-between px-8 py-5">
         <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-7 w-auto" />
         <button
-          onClick={() => { setModalMode("signin"); setShowModal(true); }}
+          onClick={() => setShowModal(true)}
           className="text-sm font-semibold transition-all hover:text-white"
           style={{ color: "rgba(255,255,255,0.55)" }}
         >
@@ -175,7 +147,7 @@ export default function Home() {
 
         {/* CTA */}
         <button
-          onClick={() => { setModalMode("signin"); setShowModal(true); }}
+          onClick={() => setShowModal(true)}
           className="flex items-center gap-2.5 px-8 py-4 rounded-xl text-sm font-bold text-white transition-all hover:scale-[1.03] active:scale-[0.98] mb-16"
           style={{
             background: "linear-gradient(135deg, #0074F4 0%, #00A9E2 100%)",
@@ -244,31 +216,10 @@ export default function Home() {
             {/* Logo */}
             <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-7 w-auto mb-7" />
 
-            {/* Mode tabs */}
-            <div
-              className="flex w-full mb-6 rounded-xl p-1"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
-            >
-              {(["signin", "register"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => switchMode(mode)}
-                  className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                  style={{
-                    background: modalMode === mode ? "linear-gradient(135deg, #0074F4, #00A9E2)" : "transparent",
-                    color: modalMode === mode ? "#fff" : "#6b7280",
-                    boxShadow: modalMode === mode ? "0 2px 8px rgba(0,116,244,0.3)" : "none",
-                  }}
-                >
-                  {mode === "signin" ? "Sign In" : "Create Account"}
-                </button>
-              ))}
-            </div>
+
 
             {/* ── SIGN IN ── */}
-            {modalMode === "signin" && (
-              <>
+            <>
                 <h2 className="text-white text-xl font-bold mb-1 text-center">Welcome back</h2>
                 <p className="mb-6 text-center text-sm" style={{ color: "#6b7280" }}>Sign in to your WAVV account</p>
                 <form onSubmit={handleSignIn} className="w-full flex flex-col gap-3">
@@ -298,52 +249,10 @@ export default function Home() {
                     {loginMutation.isPending ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Signing in...</> : "Sign In"}
                   </button>
                   <p className="text-center text-xs mt-1" style={{ color: "#6b7280" }}>
-                    Don't have an account?{" "}
-                    <button type="button" onClick={() => switchMode("register")} className="hover:underline font-medium" style={{ color: "#0074F4" }}>Create one</button>
+                    Access is by invitation only. Contact your WAVV admin.
                   </p>
                 </form>
-              </>
-            )}
-
-            {/* ── CREATE ACCOUNT ── */}
-            {modalMode === "register" && (
-              <>
-                <h2 className="text-white text-xl font-bold mb-1 text-center">Create your account</h2>
-                <p className="mb-6 text-center text-sm" style={{ color: "#6b7280" }}>Get access to the WAVV Success Center</p>
-                <form onSubmit={handleRegister} className="w-full flex flex-col gap-3">
-                  <input type="text" placeholder="Full name" value={regName} onChange={(e) => setRegName(e.target.value)}
-                    autoComplete="name" required style={inputBase} onFocus={inputFocus} onBlur={inputBlur} />
-                  <input type="email" placeholder="Work email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)}
-                    autoComplete="email" required style={inputBase} onFocus={inputFocus} onBlur={inputBlur} />
-                  <div className="relative">
-                    <input type={showRegPassword ? "text" : "password"} placeholder="Password (min. 8 characters)"
-                      value={regPassword} onChange={(e) => setRegPassword(e.target.value)} autoComplete="new-password" required
-                      style={{ ...inputBase, paddingRight: "44px" }} onFocus={inputFocus} onBlur={inputBlur} />
-                    <button type="button" onClick={() => setShowRegPassword(!showRegPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors" style={{ color: "#6b7280" }}>
-                      {showRegPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                    </button>
-                  </div>
-                  <input type="password" placeholder="Confirm password" value={regConfirm} onChange={(e) => setRegConfirm(e.target.value)}
-                    autoComplete="new-password" required style={inputBase} onFocus={inputFocus} onBlur={inputBlur} />
-                  {regError && (
-                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs"
-                      style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171" }}>
-                      <AlertCircle size={13} className="flex-shrink-0" />{regError}
-                    </div>
-                  )}
-                  <button type="submit" disabled={registerMutation.isPending}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed mt-1"
-                    style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", boxShadow: "0 4px 20px rgba(0,116,244,0.3)" }}>
-                    {registerMutation.isPending ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Creating account...</> : "Create Account"}
-                  </button>
-                  <p className="text-center text-xs mt-1" style={{ color: "#6b7280" }}>
-                    Already have an account?{" "}
-                    <button type="button" onClick={() => switchMode("signin")} className="hover:underline font-medium" style={{ color: "#0074F4" }}>Sign in</button>
-                  </p>
-                </form>
-              </>
-            )}
+            </>
           </div>
         </div>
       )}
