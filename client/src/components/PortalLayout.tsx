@@ -122,13 +122,14 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const isOwner = user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");
 
-  // Filter nav items: hidden if owner toggled off in Settings, or WAVV Knowledge disabled
+  // Filter nav items: admins (all 4 roles) always see every page for QA purposes
+  // nav_visibility toggles only affect regular/partner users
   const allNavItems = [...baseNavItems, publicPartnerItem];
   const navItems = allNavItems.filter((item) => {
+    // All admin roles bypass visibility toggles
+    if (isAdmin) return true;
     // Check nav_visibility setting (missing key = visible)
     if (navVisibility[item.href] === false) return false;
-    // WAVV Knowledge is the /hands-on route
-    if (item.href === "/hands-on" && !wavvKnowledgeEnabled) return false;
     return true;
   });
 

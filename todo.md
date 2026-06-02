@@ -1131,3 +1131,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Academy Bug Fix (Session 10)
 - [x] BUG: Academy play button closes window and redirects to home page instead of opening video modal
 - [x] Remove Mark Complete button from Academy video modal (not tracking user progress)
+
+## WAVV Knowledge / Playground Visibility Fix (Session 11)
+- [x] Disabling WAVV Knowledge should NOT hide WAVV Playground from the sidebar
+- [x] All 4 admin roles always see all nav items (bypass nav_visibility toggles) for QA purposes
+- [x] WAVV Knowledge toggle only disables the AI chat for regular users; admins always see it

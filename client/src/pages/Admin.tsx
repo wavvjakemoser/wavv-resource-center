@@ -208,7 +208,8 @@ export default function Admin() {
   // Fetch site settings to check if WAVV Knowledge is enabled
   const { data: adminSettings = {} } = trpc.siteSettings.getAll.useQuery();
   const wavvKnowledgeEnabled = (adminSettings as Record<string, unknown>)["wavv_knowledge_enabled"] !== false;
-  const knowledgeDisabledForUser = !wavvKnowledgeEnabled; // disabled = no one can access it
+  // All admin roles can always access WAVV Knowledge for QA/preview even when disabled for regular users
+  const knowledgeDisabledForUser = !wavvKnowledgeEnabled && !isOwner && !isSuperAdmin;
 
   // Tab access per role:
   // owner: all tabs
