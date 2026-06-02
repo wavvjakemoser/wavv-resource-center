@@ -25,6 +25,22 @@ import Partners from "./pages/Partners";
 import WavvPartnerPortal from "./pages/WavvPartnerPortal";
 import MagicAuth from "./pages/MagicAuth";
 import { usePageTracking } from "./hooks/usePageTracking";
+import { trpc } from "./lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Redirect } from "wouter";
+
+// Guard for pages that can be disabled via nav_visibility in site settings.
+// Admins always bypass. Non-admins are redirected to /404 when the page is hidden.
+function NavGuard({ href, children }: { href: string; children: React.ReactNode }) {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const { data: allSettings, isLoading } = trpc.siteSettings.getAll.useQuery();
+  if (isAdmin) return <>{children}</>;
+  if (isLoading) return null; // brief flash prevention
+  const navVisibility = ((allSettings ?? {}) as Record<string, unknown>)["nav_visibility"] as Record<string, boolean> | undefined;
+  if (navVisibility && navVisibility[href] === false) return <Redirect to="/404" />;
+  return <>{children}</>;
+}
 
 function Router() {
   usePageTracking();
@@ -42,7 +58,7 @@ function Router() {
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
-      <Route path="/partners" component={Partners} />
+      <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
       <Route path="/wavvpartner" component={WavvPartnerPortal} />
       <Route path="/wavvadmin" component={Admin} />
       <Route path="/wavvadmin/legacy" component={AdminPanel} />

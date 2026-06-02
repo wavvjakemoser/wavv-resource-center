@@ -1143,3 +1143,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Admin: Approved Partners tab — invite by email (assigns partner role), list all WAVV Partners, search, export CSV, deactivate/remove
 - [ ] Admin: Partners content tab — edit /partners public page content and /wavvpartner portal content (modules, resource cards, quick links)
 - [ ] Admin: partner_admin role stays in Team Access (internal); WAVV Partner (partner role) managed in Approved Partners tab
+
+## Partner Portal Disable (Session 12)
+- [x] Nav Visibility toggle for WAVV Partners enforces full URL block — non-admins redirected to /404 when disabled
+- [x] Admins always bypass the guard and can access /partners regardless of toggle state
+- [x] Default state: Partners page visible (no change to existing behavior unless toggled off)
