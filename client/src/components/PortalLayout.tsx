@@ -25,7 +25,6 @@ const baseNavItems = [
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
-  { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
   { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
 ];
 const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
@@ -109,7 +108,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const announcementText = typeof (allSettings as Record<string, unknown>)["announcement_text"] === "string"
     ? (allSettings as Record<string, unknown>)["announcement_text"] as string
     : "";
-  const wavvKnowledgeEnabled = (allSettings as Record<string, unknown>)["wavv_knowledge_enabled"] !== false; // default true
   // Nav visibility: object of { [href]: boolean } — missing key = visible (default true)
   const navVisibility = ((allSettings as Record<string, unknown>)["nav_visibility"] ?? {}) as Record<string, boolean>;
 
