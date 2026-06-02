@@ -310,8 +310,6 @@ function SectionRow({
   defaultOpen = false,
   dbLessonMap = {},
   courseTags = [] as string[],
-  bookmarkedIds = new Set<number>(),
-  onToggleBookmark,
   onPlay,
   sectionPdfs = [],
 }: {
@@ -321,8 +319,6 @@ function SectionRow({
   defaultOpen?: boolean;
   dbLessonMap?: Record<string, DbLessonMeta>;
   courseTags?: string[];
-  bookmarkedIds?: Set<number>;
-  onToggleBookmark?: (contentId: number, title: string, isBookmarked: boolean) => void;
   onPlay?: (embedUrl: string, title: string) => void;
   sectionPdfs?: SectionPdf[];
 }) {
@@ -460,22 +456,7 @@ function SectionRow({
                       Watch
                     </span>
                   )}
-                  {onToggleBookmark && video.status === "available" && (() => {
-                    const cid = hashTitle(video.title);
-                    const isBm = bookmarkedIds.has(cid);
-                    return (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleBookmark(cid, video.title, isBm); }}
-                        className="p-1 rounded transition-colors hover:bg-white/10"
-                        title={isBm ? "Remove bookmark" : "Bookmark this video"}
-                      >
-                        {isBm
-                          ? <BookmarkCheck size={14} style={{ color: "#fbbf24" }} />
-                          : <Bookmark size={14} className="text-gray-600 hover:text-gray-400" />}
-                      </button>
-                    );
-                  })()}
+                  {/* bookmark removed — not tied to users */}
                 </div>
               </>
             );
@@ -829,44 +810,8 @@ export default function AcademyCategory() {
           </div>
         </div>
 
-        {/* ── Filter bar ── */}
-        <div className="flex items-center gap-2 flex-wrap">
-            <Filter size={13} className="text-gray-500 flex-shrink-0" />
-            {["All", "New", "Bookmarked"].map((f) => {
-              const isActive = (f === "All" && !activeFilter) || activeFilter === f;
-              return (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => setActiveFilter(f === "All" ? null : f)}
-                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-full transition-all"
-                  style={isActive
-                    ? { background: cat.color, color: "#fff", border: `1px solid ${cat.color}` }
-                    : { background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #2a2a2a" }
-                  }
-                >
-                  {f === "Bookmarked" ? (
-                    <><Bookmark size={11} /> Bookmarked</>
-                  ) : f}
-                </button>
-              );
-            })}
-        </div>
-
         {/* ── Section list ── */}
         <div className="space-y-3">
-          {filteredSections.length === 0 && activeFilter && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-sm">No videos match the "{activeFilter}" filter.</p>
-              <button
-                type="button"
-                onClick={() => setActiveFilter(null)}
-                className="mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                Clear filter
-              </button>
-            </div>
-          )}
           {filteredSections.map((section, idx) => (
             <SectionRow
               key={section.id}
@@ -881,8 +826,6 @@ export default function AcademyCategory() {
                   .map((t) => t.trim())
                   .filter(Boolean) ?? []
               }
-              bookmarkedIds={bookmarkedIds}
-              onToggleBookmark={handleToggleBookmark}
               onPlay={handlePlay}
               sectionPdfs={pdfsByCourseId[courseTitleToId[section.title.toLowerCase().trim()] ?? -1] ?? []}
             />

@@ -1,11 +1,11 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
-import { FileText, Download, ExternalLink, Search, BookOpen, CheckSquare, Map, HelpCircle } from "lucide-react";
+import { FileText, Download, ExternalLink, Search, BookOpen, CheckSquare, Map, HelpCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { ContentRequestCTA } from "./Academy";
 
-// Category metadata — drives section headers, icons, and color coding
+// Category metadata
 const CATEGORY_META: Record<string, { label: string; color: string; icon: React.ElementType; description: string }> = {
   help_article: { label: "Help Articles", color: "#8B5CF6", icon: HelpCircle, description: "Answers to common questions and troubleshooting guides" },
   pdf:       { label: "PDFs",       color: "#ef4444", icon: FileText,   description: "Downloadable reference documents" },
@@ -14,8 +14,161 @@ const CATEGORY_META: Record<string, { label: string; color: string; icon: React.
   other:     { label: "Resources",  color: "#FF9900", icon: BookOpen,    description: "Reference materials and templates" },
 };
 
-// Display order for sections — help_article appears first
 const CATEGORY_ORDER = ["help_article", "pdf", "checklist", "playbook", "other"] as const;
+
+type GuideItem = {
+  id: number;
+  title: string;
+  description?: string | null;
+  fileUrl?: string | null;
+  downloadCount?: number | null;
+  fileType?: string | null;
+};
+
+function GuideRow({
+  guide,
+  meta,
+  onDownload,
+  isPending,
+}: {
+  guide: GuideItem;
+  meta: typeof CATEGORY_META[string];
+  onDownload: (guide: GuideItem) => void;
+  isPending: boolean;
+}) {
+  const Icon = meta.icon;
+  return (
+    <div
+      className="flex items-center gap-4 px-4 py-3 rounded-lg transition-all group"
+      style={{ background: "#1d2230", border: "1px solid #252d3d" }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${meta.color}50`; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; }}
+    >
+      {/* Type icon */}
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{ background: `${meta.color}18` }}
+      >
+        <Icon size={15} style={{ color: meta.color }} />
+      </div>
+
+      {/* Title + description */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-white leading-snug truncate">{guide.title}</p>
+        {guide.description && (
+          <p className="text-xs text-gray-500 truncate mt-0.5">{guide.description}</p>
+        )}
+      </div>
+
+      {/* Download count */}
+      {guide.downloadCount ? (
+        <span className="text-xs text-gray-600 flex-shrink-0 hidden sm:block">
+          {guide.downloadCount} dl
+        </span>
+      ) : null}
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <button
+          onClick={() => onDownload(guide)}
+          disabled={isPending}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+          style={{ background: `${meta.color}18`, color: meta.color, border: `1px solid ${meta.color}35` }}
+        >
+          <Download size={11} />
+          <span className="hidden sm:inline">Download</span>
+        </button>
+        {guide.fileUrl && (
+          <a
+            href={guide.fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={{ background: "#252d3d", color: "#9ca3af" }}
+          >
+            <ExternalLink size={11} />
+            <span className="hidden sm:inline">View</span>
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CategorySection({
+  categoryKey,
+  items,
+  onDownload,
+  isPending,
+}: {
+  categoryKey: string;
+  items: GuideItem[];
+  onDownload: (guide: GuideItem) => void;
+  isPending: boolean;
+}) {
+  const [open, setOpen] = useState(true);
+  const meta = CATEGORY_META[categoryKey];
+  const Icon = meta.icon;
+
+  return (
+    <section>
+      {/* Section header — collapsible */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-3 mb-3 group"
+      >
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: `${meta.color}18` }}
+        >
+          <Icon size={14} style={{ color: meta.color }} />
+        </div>
+        <div className="flex-1 text-left">
+          <span className="text-sm font-bold text-white">{meta.label}</span>
+          <span className="ml-2 text-xs text-gray-500">{meta.description}</span>
+        </div>
+        <span
+          className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+          style={{ background: `${meta.color}15`, color: meta.color }}
+        >
+          {items.length}
+        </span>
+        {open
+          ? <ChevronDown size={14} className="text-gray-500 flex-shrink-0" />
+          : <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />}
+      </button>
+
+      {/* Divider */}
+      <div className="mb-3 h-px" style={{ background: `${meta.color}25` }} />
+
+      {/* Rows or empty state */}
+      {open && (
+        items.length === 0 ? (
+          <div
+            className="flex items-center gap-3 px-4 py-3 rounded-lg"
+            style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
+          >
+            <Icon size={14} style={{ color: meta.color, opacity: 0.4 }} />
+            <p className="text-xs text-gray-500">No {meta.label.toLowerCase()} yet. Check back soon or contact your admin.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {items.map((guide) => (
+              <GuideRow
+                key={guide.id}
+                guide={guide}
+                meta={meta}
+                onDownload={onDownload}
+                isPending={isPending}
+              />
+            ))}
+          </div>
+        )
+      )}
+    </section>
+  );
+}
 
 export default function GuidesAndDocs() {
   const [search, setSearch] = useState("");
@@ -24,7 +177,7 @@ export default function GuidesAndDocs() {
   const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true, checklist: true, playbook: true, resource: true };
   const downloadMutation = trpc.guides.download.useMutation();
 
-  const handleDownload = async (guide: NonNullable<typeof guides>[0]) => {
+  const handleDownload = async (guide: GuideItem) => {
     await downloadMutation.mutateAsync({ guideId: guide.id });
     if (guide.fileUrl) {
       window.open(guide.fileUrl, "_blank");
@@ -33,11 +186,10 @@ export default function GuidesAndDocs() {
     }
   };
 
-  // Group guides by fileType (= category)
-  const grouped = (guides ?? []).reduce<Record<string, NonNullable<typeof guides>>>((acc, g) => {
+  // Group + filter
+  const grouped = (guides ?? []).reduce<Record<string, GuideItem[]>>((acc, g) => {
     const key = g.fileType ?? "other";
     if (!acc[key]) acc[key] = [];
-    // Apply search filter
     if (
       !search ||
       g.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -52,7 +204,7 @@ export default function GuidesAndDocs() {
 
   return (
     <PortalLayout title="WAVV Guides & Docs">
-      <div className="px-4 lg:px-6 py-6 max-w-5xl mx-auto space-y-8">
+      <div className="px-4 lg:px-6 py-6 max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div
           className="relative overflow-hidden rounded-2xl p-6"
@@ -94,15 +246,14 @@ export default function GuidesAndDocs() {
 
         {/* Loading skeleton */}
         {isLoading && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="space-y-3">
-                <div className="h-6 w-32 rounded animate-pulse" style={{ background: "#1d2230" }} />
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {[...Array(3)].map((_, j) => (
-                    <div key={j} className="h-40 rounded-xl animate-pulse" style={{ background: "#1d2230" }} />
-                  ))}
-                </div>
+              <div key={i} className="space-y-2">
+                <div className="h-5 w-28 rounded animate-pulse" style={{ background: "#1d2230" }} />
+                <div className="h-px" style={{ background: "#2a2a2a" }} />
+                {[...Array(3)].map((_, j) => (
+                  <div key={j} className="h-12 rounded-lg animate-pulse" style={{ background: "#1d2230" }} />
+                ))}
               </div>
             ))}
           </div>
@@ -110,122 +261,19 @@ export default function GuidesAndDocs() {
 
         {/* Grouped sections */}
         {!isLoading && (
-          <div className="space-y-10">
+          <div className="space-y-8">
             {CATEGORY_ORDER.map((categoryKey) => {
-              // Map "other" to "resource" for visibility key lookup
               const visKey = categoryKey === "other" ? "resource" : (categoryKey as string);
               if (guideVisibility[visKey] === false) return null;
               const items = grouped[categoryKey] ?? [];
-              const meta = CATEGORY_META[categoryKey];
-              const Icon = meta.icon;
               return (
-                <section key={categoryKey}>
-                  {/* Section header */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: `${meta.color}20` }}
-                    >
-                      <Icon size={16} style={{ color: meta.color }} />
-                    </div>
-                    <div>
-                      <h2 className="text-base font-bold text-white">{meta.label}</h2>
-                      <p className="text-xs text-gray-500">{meta.description}</p>
-                    </div>
-                    <div
-                      className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full"
-                      style={{ background: `${meta.color}15`, color: meta.color }}
-                    >
-                      {items.length}
-                    </div>
-                  </div>
-                  {/* Divider */}
-                  <div className="mb-4 h-px" style={{ background: `${meta.color}30` }} />
-                  {/* Cards or empty state */}
-                  {items.length === 0 ? (
-                    <div
-                      className="flex items-center gap-3 px-5 py-4 rounded-xl"
-                      style={{ background: "rgba(255,255,255,0.03)", border: "1px dashed rgba(255,255,255,0.1)" }}
-                    >
-                      <Icon size={16} style={{ color: meta.color, opacity: 0.5 }} />
-                      <p className="text-sm text-gray-500">No {meta.label.toLowerCase()} yet. Check back soon or contact your admin.</p>
-                    </div>
-                  ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {items.map((guide) => (
-                      <div
-                        key={guide.id}
-                        className="relative flex flex-col p-5 rounded-xl transition-all"
-                        style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = meta.color;
-                          e.currentTarget.style.boxShadow = `0 4px 20px ${meta.color}15`;
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = "#252d3d";
-                          e.currentTarget.style.boxShadow = "none";
-                        }}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div
-                            className="w-10 h-10 rounded-lg flex items-center justify-center"
-                            style={{ background: `${meta.color}20` }}
-                          >
-                            <Icon size={20} style={{ color: meta.color }} />
-                          </div>
-                          <span
-                            className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                            style={{ background: `${meta.color}20`, color: meta.color }}
-                          >
-                            {meta.label.replace(/s$/, "")}
-                          </span>
-                        </div>
-
-                        <h3 className="text-white font-semibold text-sm mb-1 leading-snug">{guide.title}</h3>
-                        {guide.description && (
-                          <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-3">
-                            {guide.description}
-                          </p>
-                        )}
-
-                        <div className="mt-auto flex items-center gap-2">
-                          <button
-                            onClick={() => handleDownload(guide)}
-                            disabled={downloadMutation.isPending}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex-1 justify-center"
-                            style={{
-                              background: `${meta.color}20`,
-                              color: meta.color,
-                              border: `1px solid ${meta.color}40`,
-                            }}
-                          >
-                            <Download size={12} />
-                            Download
-                          </button>
-                          {guide.fileUrl && (
-                            <a
-                              href={guide.fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                              style={{ background: "#252d3d", color: "#9ca3af" }}
-                            >
-                              <ExternalLink size={11} />
-                              View
-                            </a>
-                          )}
-                        </div>
-
-                        {guide.downloadCount ? (
-                          <p className="text-xs text-gray-600 text-center mt-2">
-                            {guide.downloadCount} download{guide.downloadCount !== 1 ? "s" : ""}
-                          </p>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                  )}
-                </section>
+                <CategorySection
+                  key={categoryKey}
+                  categoryKey={categoryKey}
+                  items={items}
+                  onDownload={handleDownload}
+                  isPending={downloadMutation.isPending}
+                />
               );
             })}
           </div>
@@ -253,7 +301,7 @@ export default function GuidesAndDocs() {
       </div>
 
       {/* Request a Written Guide */}
-      <div className="px-4 lg:px-6 pb-10 max-w-5xl mx-auto">
+      <div className="px-4 lg:px-6 pb-10 max-w-4xl mx-auto">
         <ContentRequestCTA requestType="guide" accentColor="#67C728" />
       </div>
     </PortalLayout>
