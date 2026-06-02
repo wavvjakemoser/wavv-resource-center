@@ -1148,3 +1148,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Nav Visibility toggle for WAVV Partners enforces full URL block — non-admins redirected to /404 when disabled
 - [x] Admins always bypass the guard and can access /partners regardless of toggle state
 - [x] Default state: Partners page visible (no change to existing behavior unless toggled off)
+
+## Role Badge & Access Control (Session 13)
+- [ ] Role badge: all purple (single color) instead of multi-color
+- [ ] Customer Admin: remove Approved Partners tab from Operations row
+- [ ] Customer Admin: remove Partners content tab from Content row
+- [ ] Customer Admin: remove Partner Portal sidebar button (bottom-left)
+- [ ] Partner Portal sidebar button: only visible to owner and partner_admin
+- [ ] Team Access: add "All Users" stat tile
+- [ ] Team Access: organize users by role in this order: Owner, Customer, Admin, Partner Admin
+- [ ] Team Access: clean visual separation between role groups

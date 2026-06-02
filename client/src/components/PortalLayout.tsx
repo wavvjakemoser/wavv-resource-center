@@ -264,7 +264,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 onClick={() => setSidebarOpen(false)}
               />
               {/* Partner portal preview link — only visible on /wavvadmin, opens in new tab */}
-              {isAdminPage && (user?.role === "owner" || user?.role === "partner_admin" || user?.role === "customer_admin") && (
+              {isAdminPage && (user?.role === "owner" || user?.role === "partner_admin") && (
                 <a
                   href="/wavvpartner"
                   target="_blank"
@@ -291,7 +291,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                   >
                     <Users size={17} style={{ color: "#00A9E2" }} />
                   </div>
-                  <span className="truncate flex-1">Partner Portal</span>
+                  <span className="truncate flex-1">WAVV Partners Portal</span>
                   <ExternalLink size={13} style={{ color: "rgba(0,169,226,0.6)", flexShrink: 0 }} />
                 </a>
               )}

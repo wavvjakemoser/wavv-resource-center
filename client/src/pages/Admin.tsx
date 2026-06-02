@@ -221,7 +221,7 @@ export default function Admin() {
     { id: "users",            label: "Team Access",       icon: <Shield size={13} />,    show: true },
     { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} />, show: isSuperAdmin },
     { id: "settings",         label: "Settings",          icon: <Settings size={13} />,  show: isOwner },
-    { id: "approved_partners",label: "Approved Partners", icon: <UserPlus size={13} />,  show: isSuperAdmin || isPartnerAdmin },
+    { id: "approved_partners",label: "Approved Partners", icon: <UserPlus size={13} />,  show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
   ];
 
   const contentRow: TabDef[] = [
@@ -230,7 +230,7 @@ export default function Admin() {
     { id: "guides",           label: "Guides & Docs",     icon: <FileText size={13} />,      show: isSuperAdmin },
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,  show: isSuperAdmin },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,    show: isSuperAdmin },
-    { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isSuperAdmin || isPartnerAdmin },
+    { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />, show: isSuperAdmin },
   ];
 
@@ -304,13 +304,13 @@ export default function Admin() {
         {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "settings" && isOwner && <SettingsTab />}
-        {activeTab === "approved_partners" && (isSuperAdmin || isPartnerAdmin) && <ApprovedPartnersTab />}
+        {activeTab === "approved_partners" && (isOwner || isPartnerAdmin) && <ApprovedPartnersTab />}
         {activeTab === "academy" && isSuperAdmin && <ContentTab />}
         {activeTab === "webinars" && isSuperAdmin && <WebinarsTab />}
         {activeTab === "guides" && isSuperAdmin && <GuidesTab />}
         {activeTab === "playground" && isSuperAdmin && <PlaygroundTab />}
         {activeTab === "support" && isSuperAdmin && <SupportTab />}
-        {activeTab === "partners_content" && (isSuperAdmin || isPartnerAdmin) && <PartnersContentTab />}
+        {activeTab === "partners_content" && (isOwner || isPartnerAdmin) && <PartnersContentTab />}
         {activeTab === "content_requests" && isSuperAdmin && <ContentRequestsTab />}
         {activeTab === "partner_analytics" && (isSuperAdmin || isPartnerAdmin) && <PartnerAnalyticsTab isPartnerAdmin={isPartnerAdmin && !isOwner} />}
       </div>
@@ -1233,23 +1233,37 @@ function UsersTab() {
     return /^[a-z]+\.[a-z]+@wavv\.com$/.test(email.toLowerCase());
   };
 
+  const ROLE_ORDER: Record<string, number> = { owner: 0, customer_admin: 1, partner_admin: 2, admin: 3 };
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     // Only show internal team members — no public users or partners in this panel
     let list = (users ?? []).filter((u) => u.role === "admin" || u.role === "customer_admin" || u.role === "partner_admin" || u.role === "owner");
     if (roleFilter !== "all") list = list.filter((u) => u.role === roleFilter);
-    if (!search.trim()) return list;
-    const q = search.trim().toLowerCase();
-    return list.filter(
-      (u) => (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q)
-    );
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((u) => (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q));
+    }
+    // Sort by role order: Owner → Customer Admin → Partner Admin → Admin
+    list = [...list].sort((a, b) => (ROLE_ORDER[a.role ?? ""] ?? 99) - (ROLE_ORDER[b.role ?? ""] ?? 99));
+    return list;
   }, [users, search, roleFilter]);
 
   const ownerCount = useMemo(() => (users ?? []).filter((u) => u.role === "owner").length, [users]);
   const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "customer_admin").length, [users]);
   const partnerAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "partner_admin").length, [users]);
   const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "admin").length, [users]);
+  const totalCount = ownerCount + superAdminCount + partnerAdminCount + adminCount;
   const statCards: { filter: RoleFilter; label: string; value: number; iconEl: React.ReactNode; color: string; bg: string; activeBorder: string; description: string }[] = [
+    {
+      filter: "all",
+      label: "All Users",
+      value: totalCount,
+      iconEl: <Users className="h-5 w-5" style={{ color: "#60a5fa" }} />,
+      color: "#60a5fa",
+      bg: "rgba(96,165,250,0.1)",
+      activeBorder: "#60a5fa",
+      description: "All internal team members across every role.",
+    },
     {
       filter: "owner",
       label: "Owners",
@@ -1265,9 +1279,9 @@ function UsersTab() {
       label: "Customer Admins",
       value: superAdminCount,
       iconEl: <SuperAdminIcon size={20} />,
-      color: "#e879f9",
-      bg: "rgba(232,121,249,0.1)",
-      activeBorder: "#e879f9",
+      color: "#a78bfa",
+      bg: "rgba(139,92,246,0.1)",
+      activeBorder: "#a78bfa",
       description: "Can manage all content (Academy, Webinars, Guides, Support, Playground) and view analytics. Cannot access Partner Analytics or Site Settings.",
     },
     {
@@ -1512,7 +1526,7 @@ function UsersTab() {
                             <Crown className="h-3 w-3" /> Owner
                           </Badge>
                         ) : u.role === "customer_admin" ? (
-                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(56,189,248,0.15)", color: "#38bdf8", border: "1px solid rgba(56,189,248,0.4)" }}>
+                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.4)" }}>
                             <SuperAdminIcon size={12} />
                             Customer Admin
                           </Badge>
@@ -6304,7 +6318,7 @@ function SettingsTab() {
     { href: "/guides",     label: "WAVV Guides & Docs",      icon: FileTextIcon },
     { href: "/hands-on",   label: "WAVV Playground",         icon: FlaskConical },
     { href: "/support",    label: "WAVV Support",            icon: HeadphonesIcon },
-    { href: "/partners",   label: "WAVV Partners (public)",  icon: UsersIcon },
+    { href: "/partners",   label: "WAVV Partners",          icon: UsersIcon },
     { href: "/wavvpartner",label: "WAVV Partner Portal",     icon: UsersIcon },
   ];
 
