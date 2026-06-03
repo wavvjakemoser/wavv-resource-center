@@ -376,13 +376,13 @@ export default function Academy() {
                 <Link
                   href={`/academy/category/${encodeURIComponent(cat.key)}`}
                   className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
-                  style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "160px" }}
+                  style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "200px" }}
                 >
                   {/* Background thumbnail — object-contain keeps full image visible at consistent zoom */}
                   <img
                     src={cat.thumbnail}
                     alt={cat.label}
-                    className="absolute inset-0 w-full h-full object-cover object-center"
+                    className="absolute inset-0 w-full h-full object-cover object-top"
                     aria-hidden="true"
                   />
                   {/* Dark overlay — fades image into card background on both sides */}
