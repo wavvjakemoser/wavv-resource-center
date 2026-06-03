@@ -376,7 +376,7 @@ export default function Academy() {
                 <Link
                   href={`/academy/category/${encodeURIComponent(cat.key)}`}
                   className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
-                  style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "200px" }}
+                  style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "160px" }}
                 >
                   {/* Background thumbnail — object-contain keeps full image visible at consistent zoom */}
                   <img

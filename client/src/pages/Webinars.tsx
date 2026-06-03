@@ -277,8 +277,8 @@ function WebinarCard({
     >
       {/* Thumbnail */}
       <div
-        className="relative w-full overflow-hidden"
-        style={{ aspectRatio: "16/9", borderBottom: `1px solid ${accentColor}30` }}
+        className="relative w-full overflow-hidden flex-shrink-0"
+        style={{ height: "140px", borderBottom: `1px solid ${accentColor}30` }}
       >
         <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
         {/* Play overlay for cards with video */}
