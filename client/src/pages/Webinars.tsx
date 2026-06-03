@@ -302,7 +302,7 @@ function WebinarCard({
       {webinar.comingSoon && (
         <div
           className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
-          style={{ background: `${accentColor}22`, color: accentColor, borderBottom: `1px solid ${accentColor}40` }}
+          style={{ background: "#FF990022", color: "#FF9900", borderBottom: "1px solid #FF990040" }}
         >
           <Timer size={11} />
           Coming Soon

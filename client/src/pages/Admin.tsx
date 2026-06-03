@@ -4835,6 +4835,19 @@ function WebinarsTab() {
             <div className="grid grid-cols-1 gap-3">
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Accent Color</label>
+                {/* Preset palette */}
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {["#0074F4","#67C728","#FF9900","#FF3B3B","#A855F7","#EC4899","#14B8A6","#F59E0B","#06B6D4","#8B5CF6","#10B981","#EF4444"].map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      title={c}
+                      onClick={() => setForm(f => ({ ...f, accentColor: c }))}
+                      className="w-6 h-6 rounded-full border-2 transition-all"
+                      style={{ background: c, borderColor: form.accentColor === c ? "#fff" : "transparent", transform: form.accentColor === c ? "scale(1.2)" : "scale(1)" }}
+                    />
+                  ))}
+                </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
@@ -4849,6 +4862,18 @@ function WebinarsTab() {
                     onChange={e => setForm(f => ({ ...f, accentColor: e.target.value }))}
                     placeholder="#0074F4"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const palette = ["#0074F4","#67C728","#FF9900","#FF3B3B","#A855F7","#EC4899","#14B8A6","#F59E0B","#06B6D4","#8B5CF6","#10B981","#EF4444"];
+                      const pick = palette[Math.floor(Math.random() * palette.length)];
+                      setForm(f => ({ ...f, accentColor: pick }));
+                    }}
+                    className="px-3 py-1.5 rounded text-xs font-semibold whitespace-nowrap"
+                    style={{ background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+                  >
+                    ✦ Auto-Pick
+                  </button>
                 </div>
               </div>
             </div>
