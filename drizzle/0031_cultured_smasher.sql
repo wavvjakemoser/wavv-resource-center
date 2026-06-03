@@ -1,0 +1,1 @@
+ALTER TABLE `content_requests` MODIFY COLUMN `requestType` enum('video','guide','webinar','search_query') NOT NULL;

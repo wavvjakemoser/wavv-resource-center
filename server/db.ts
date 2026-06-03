@@ -1067,7 +1067,7 @@ export async function getSupportSubmittersExport() {
 // ─── Content Requests ─────────────────────────────────────────────────────────
 export async function createContentRequest(data: {
   userId: number;
-  requestType: "video" | "guide" | "webinar";
+  requestType: "video" | "guide" | "webinar" | "search_query";
   topic: string;
   description?: string;
   category?: string;
@@ -1080,7 +1080,7 @@ export async function createContentRequest(data: {
   return result;
 }
 
-export async function getContentRequests(requestType?: "video" | "guide" | "webinar") {
+export async function getContentRequests(requestType?: "video" | "guide" | "webinar" | "search_query") {
   const db = await getDb();
   if (!db) return [];
   const query = db

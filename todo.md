@@ -1158,3 +1158,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Team Access: add "All Users" stat tile
 - [ ] Team Access: organize users by role in this order: Owner, Customer, Admin, Partner Admin
 - [ ] Team Access: clean visual separation between role groups
+
+## QA Fixes (Session — Jun 3 2026)
+
+- [x] Fix Academy videos auto-closing and redirecting to home (bookmarks.getAll was protected, fired for unauthenticated users → global redirect hook triggered)
+- [x] Fix WAVV Playground auto-redirect after 5-10s (playground.hasRequested and getStats were protected, now guarded behind enabled:!!user)
+- [x] Fix Playground "Apply to Get Notified" form — name/email inputs not typeable (were read-only divs; now editable inputs when user is not logged in)
+- [x] Fix PiP (pop-out) video fill — iframe was skinny/stretched; fixed html/body/iframe to 100% absolute fill
+- [x] Add Partners portal login link below Apply Now button (links to https://wavv.firstpromoter.com/login)
+- [x] Fix double-login on /wavvadmin — loading spinner check now runs before redirect guards to prevent race condition
+- [x] Add empty search state with "We can't find what you're looking for" message and "Request this content" CTA
+- [x] Auto-log search queries with no results to content_requests table as search_query type
+- [x] Add "Query Search Requests" group to admin Requests tab (purple, shows auto-logged search queries)

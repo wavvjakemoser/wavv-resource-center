@@ -1559,8 +1559,26 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    // Public endpoint — logs a search query that returned no results
+    submitSearchQuery: publicProcedure
+      .input(z.object({
+        query: z.string().min(1).max(255),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Use userId if logged in, otherwise use a sentinel value (0 = anonymous)
+        const userId = ctx.user?.id ?? 0;
+        await createContentRequest({
+          userId,
+          requestType: "search_query",
+          topic: input.query,
+          description: "Auto-generated from search bar: no results found",
+          priority: "low",
+        });
+        return { success: true };
+      }),
+
     adminList: superAdminProcedure
-      .input(z.object({ requestType: z.enum(["video", "guide", "webinar"]).optional() }))
+      .input(z.object({ requestType: z.enum(["video", "guide", "webinar", "search_query"]).optional() }))
       .query(async ({ input }) => {
         return getContentRequests(input.requestType);
       }),

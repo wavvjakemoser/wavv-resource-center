@@ -55,6 +55,8 @@ function RequestModal({
 }) {
   const [submitted, setSubmitted] = useState(false);
   const [optIn, setOptIn] = useState(false);
+  const [localName, setLocalName] = useState("");
+  const [localEmail, setLocalEmail] = useState("");
 
   const submitMutation = trpc.playground.submitRequest.useMutation({
     onSuccess: () => {
@@ -135,15 +137,35 @@ function RequestModal({
               </p>
             </div>
 
-            {/* Read-only user info */}
+            {/* User info — read-only if logged in, editable if not */}
             <div className="space-y-2 mb-4">
               <div>
                 <p className="text-xs text-gray-500 mb-1">Name</p>
-                <div style={readonlyStyle}>{userName ?? "—"}</div>
+                {userName ? (
+                  <div style={readonlyStyle}>{userName}</div>
+                ) : (
+                  <input
+                    type="text"
+                    value={localName}
+                    onChange={(e) => setLocalName(e.target.value)}
+                    placeholder="Your name"
+                    style={{ ...readonlyStyle, color: "#e5e7eb", border: "1px solid rgba(168,85,247,0.3)" }}
+                  />
+                )}
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">Email</p>
-                <div style={readonlyStyle}>{userEmail ?? "—"}</div>
+                {userEmail ? (
+                  <div style={readonlyStyle}>{userEmail}</div>
+                ) : (
+                  <input
+                    type="email"
+                    value={localEmail}
+                    onChange={(e) => setLocalEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    style={{ ...readonlyStyle, color: "#e5e7eb", border: "1px solid rgba(168,85,247,0.3)" }}
+                  />
+                )}
               </div>
             </div>
 
@@ -179,9 +201,15 @@ function RequestModal({
 }
 
 export default function HandsOn() {
-  const { data: user } = trpc.auth.me.useQuery();
-  const { data: playgroundStats } = trpc.playground.getStats.useQuery();
-  const { data: requestStatus } = trpc.playground.hasRequested.useQuery();
+  const { data: user } = trpc.auth.me.useQuery(undefined, { retry: false });
+  const { data: playgroundStats } = trpc.playground.getStats.useQuery(
+    undefined,
+    { enabled: !!user && (user.role === 'owner' || user.role === 'customer_admin' || user.role === 'admin'), retry: false }
+  );
+  const { data: requestStatus } = trpc.playground.hasRequested.useQuery(
+    undefined,
+    { enabled: !!user, retry: false }
+  );
   const [modalOpen, setModalOpen] = useState(false);
   const alreadyRequested = requestStatus?.hasRequested ?? false;
 

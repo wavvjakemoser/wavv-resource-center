@@ -326,6 +326,20 @@ export default function Partners() {
             Apply Now
             <ArrowRight size={15} />
           </a>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+            Already an approved WAVV Partner?{" "}
+            <a
+              href="https://wavv.firstpromoter.com/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 transition-colors"
+              style={{ color: "rgba(0,169,226,0.85)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#00A9E2"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(0,169,226,0.85)"; }}
+            >
+              Log in to your portal here
+            </a>
+          </p>
         </div>
 
       </div>

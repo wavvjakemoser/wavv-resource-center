@@ -217,7 +217,7 @@ export const contentRequests = mysqlTable("content_requests", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   // Type of content being requested
-  requestType: mysqlEnum("requestType", ["video", "guide", "webinar"]).notNull(),
+  requestType: mysqlEnum("requestType", ["video", "guide", "webinar", "search_query"]).notNull(),
   // Topic / title of the requested content
   topic: varchar("topic", { length: 255 }).notNull(),
   // Detailed description of what they want to learn / cover

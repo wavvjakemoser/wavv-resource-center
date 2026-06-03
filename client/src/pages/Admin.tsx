@@ -212,17 +212,8 @@ export default function Admin() {
     else if (isPartnerAdmin && !isOwner) setActiveTab("approved_partners");
     else setActiveTab("users");
   }, [location]);
-  // Not logged in at all → send to /login with ?next=/admin
-  if (!loading && !user) {
-    navigate("/login?next=/wavvadmin");
-    return null;
-  }
-  // Logged in but not an admin → send back to dashboard
-  if (!loading && user && user.role !== "admin" && user.role !== "customer_admin" && user.role !== "partner_admin" && user.role !== "owner") {
-    navigate("/home");
-    return null;
-  }
-
+  // Show spinner while auth is resolving — MUST come before any redirect checks
+  // to prevent the race condition where loading=true + user=null triggers a login redirect
   if (loading) {
     return (
       <PortalLayout title="Admin">
@@ -231,6 +222,17 @@ export default function Admin() {
         </div>
       </PortalLayout>
     );
+  }
+
+  // Not logged in at all → send to /login with ?next=/wavvadmin
+  if (!user) {
+    navigate("/login?next=/wavvadmin");
+    return null;
+  }
+  // Logged in but not an admin → send back to dashboard
+  if (user.role !== "admin" && user.role !== "customer_admin" && user.role !== "partner_admin" && user.role !== "owner") {
+    navigate("/home");
+    return null;
   }
 
   const wavvKnowledgeEnabled = (adminSettings as Record<string, unknown>)["wavv_knowledge_enabled"] !== false;
@@ -5865,6 +5867,7 @@ function ContentRequestsTab() {
     video: "#0074F4",
     guide: "#00A9E2",
     webinar: "#67C728",
+    search_query: "#a855f7",
   };
 
   function exportCSV() {
@@ -5984,9 +5987,10 @@ function ContentRequestsTab() {
 }
 
 const CONTENT_REQUEST_GROUPS: Array<{ key: string; label: string; description: string }> = [
-  { key: "video",   label: "Video Requests",   description: "Academy lesson and tutorial requests" },
-  { key: "webinar", label: "Webinar Requests",  description: "Live and on-demand webinar requests" },
-  { key: "guide",   label: "Guide Requests",    description: "Playbook, checklist, and doc requests" },
+  { key: "video",        label: "Video Requests",          description: "Academy lesson and tutorial requests" },
+  { key: "webinar",     label: "Webinar Requests",         description: "Live and on-demand webinar requests" },
+  { key: "guide",       label: "Guide Requests",           description: "Playbook, checklist, and doc requests" },
+  { key: "search_query", label: "Query Search Requests",  description: "Auto-logged from search bar — no results found" },
 ];
 
 function exportGroupCSV(groupKey: string, groupLabel: string, group: Array<{

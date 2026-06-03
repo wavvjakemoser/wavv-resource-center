@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Search, BookOpen, Video, FileText, GraduationCap, X } from "lucide-react";
+import { Sparkles, Search, BookOpen, Video, FileText, GraduationCap, X, Send, CheckCircle2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
+import { toast } from "sonner";
 
 export default function AISearchBar() {
   const [query, setQuery] = useState("");
@@ -25,6 +26,15 @@ export default function AISearchBar() {
   const hasResults =
     data &&
     (data.courses.length + data.lessons.length + data.webinars.length + data.guides.length) > 0;
+
+  const [requestedQueries, setRequestedQueries] = useState<Set<string>>(new Set());
+  const submitSearchQuery = trpc.contentRequests.submitSearchQuery.useMutation({
+    onSuccess: (_, vars) => {
+      setRequestedQueries((prev) => new Set(Array.from(prev).concat(vars.query)));
+      toast.success("Request submitted! We'll work on adding this content.");
+    },
+    onError: () => {},
+  });
 
   // Close on outside click
   useEffect(() => {
@@ -85,8 +95,30 @@ export default function AISearchBar() {
             </div>
           )}
           {!isError && !hasResults && !isFetching && (
-            <div className="px-4 py-6 text-center text-sm text-gray-500">
-              No results found for <span className="text-white">"{query}"</span>
+            <div className="px-4 py-5 text-center">
+              <p className="text-sm text-gray-400 mb-1">
+                We can't find what you're looking for.
+              </p>
+              <p className="text-xs text-gray-600 mb-3">
+                Submit a request for content related to{" "}
+                <span className="text-white font-medium">"{debouncedQ}"</span>
+              </p>
+              {requestedQueries.has(debouncedQ) ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "rgba(103,199,40,0.12)", color: "#67C728" }}>
+                  <CheckCircle2 size={12} />
+                  Request submitted
+                </div>
+              ) : (
+                <button
+                  onClick={() => submitSearchQuery.mutate({ query: debouncedQ })}
+                  disabled={submitSearchQuery.isPending}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                  style={{ background: "linear-gradient(135deg, #0074F4, #0056b3)" }}
+                >
+                  <Send size={11} />
+                  {submitSearchQuery.isPending ? "Submitting…" : "Request this content"}
+                </button>
+              )}
             </div>
           )}
 

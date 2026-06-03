@@ -553,6 +553,9 @@ export default function AcademyCategory() {
   const params = useParams<{ categoryKey: string }>();
   const categoryKey = decodeURIComponent(params.categoryKey ?? "");
 
+  // Get current user — bookmarks are only fetched when authenticated
+  const { data: currentUser } = trpc.auth.me.useQuery(undefined, { retry: false });
+
   const cat = CATEGORY_DATA.find((c) => c.key === categoryKey);
 
   // Active filter pill (null = All)
@@ -584,8 +587,9 @@ export default function AcademyCategory() {
       iframe.src = playingVideo.embedUrl;
       iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
       iframe.allowFullscreen = true;
-      iframe.style.cssText = "width:100%;height:100%;border:none;display:block;";
-      pipWindow.document.body.style.cssText = "margin:0;padding:0;background:#000;overflow:hidden;";
+      iframe.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:block;";
+      pipWindow.document.documentElement.style.cssText = "margin:0;padding:0;width:100%;height:100%;";
+      pipWindow.document.body.style.cssText = "margin:0;padding:0;background:#000;overflow:hidden;width:100%;height:100%;position:relative;";
       pipWindow.document.body.appendChild(iframe);
       setPipActive(true);
       pipWindow.addEventListener("pagehide", () => setPipActive(false));
@@ -643,9 +647,12 @@ export default function AcademyCategory() {
     return map;
   }, [sectionResources]);
 
-  // Fetch user bookmarks
+  // Fetch user bookmarks — only when logged in to avoid unauthorized redirect
   const utils = trpc.useUtils();
-  const { data: userBookmarks = [] } = trpc.bookmarks.getAll.useQuery();
+  const { data: userBookmarks = [] } = trpc.bookmarks.getAll.useQuery(
+    undefined,
+    { enabled: !!currentUser, retry: false }
+  );
   const addBookmarkMut = trpc.bookmarks.add.useMutation({
     onSuccess: () => utils.bookmarks.getAll.invalidate(),
   });
