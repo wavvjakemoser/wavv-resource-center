@@ -8,14 +8,14 @@ const VALUE_PILLARS = [
   {
     icon: Megaphone,
     color: "#0074F4",
-    title: "Co-Marketing & Visibility",
-    body: "Get listed in the WAVV Partner Directory, featured in partner spotlights, and co-branded in joint campaigns. We invest in making our partners visible to the right audiences.",
+    title: "Marketing Support & Visibility",
+    body: "Get listed in the WAVV Partner Directory and featured in partner spotlights. Need a video, co-branded content, or a collab? We'll build it with you. If it helps you sell, we're in.",
   },
   {
     icon: LifeBuoy,
     color: "#a855f7",
     title: "Dedicated Partner Support",
-    body: "Access a dedicated partner success contact, onboarding resources, and a private partner portal with everything you need to pitch, close, and support WAVV customers.",
+    body: "You'll have a dedicated partner success contact, onboarding resources to get you up and running fast, and priority support from our technical team when you need help.",
   },
 ];
 
@@ -24,19 +24,19 @@ const HOW_IT_WORKS = [
     step: "01",
     color: "#0074F4",
     title: "Apply",
-    body: "Submit your application at wavv.com/partner-program. Tell us about your audience, your network, and how you plan to refer customers to WAVV.",
+    body: "Answer a few quick questions at wavv.com/partner-program so we can learn a little about you before we get you set up.",
   },
   {
     step: "02",
     color: "#10b981",
     title: "Complete a Course",
-    body: "Once approved, you'll get access to the WAVV Partners portal. Complete the required onboarding course to unlock your partner resources, tracking link, and co-marketing materials.",
+    body: "Once approved, you'll get access to the onboarding course. Complete the required onboarding course to unlock your unique promo code and partner portal.",
   },
   {
     step: "03",
     color: "#67C728",
     title: "Start Earning",
-    body: "Share your unique referral link with your network. Every qualified customer you refer earns you a recurring commission — tracked in real time inside your partner dashboard.",
+    body: "Share your promo code with your network. Every qualified customer you refer earns you a recurring commission — tracked in real time inside your partner dashboard.",
   },
 ];
 
@@ -162,7 +162,7 @@ export default function Partners() {
               className="mx-auto mb-8 leading-relaxed"
               style={{ color: "rgba(255,255,255,0.45)", fontSize: "clamp(0.82rem, 1.4vw, 0.95rem)", maxWidth: "540px" }}
             >
-              Built for consultants, coaches, and CRM professionals who want to turn their network into a revenue stream — with real support behind them.
+              Built for sales leaders and agency owners who are ready to turn their network into a revenue stream.
             </p>
 
             {/* CTA */}
