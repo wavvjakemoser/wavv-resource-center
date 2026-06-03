@@ -378,24 +378,22 @@ export default function Academy() {
                   className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
                   style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "160px" }}
                 >
-                  {/* Background thumbnail — object-contain keeps full image visible at consistent zoom */}
-                  <img
-                    src={cat.thumbnail}
-                    alt={cat.label}
-                    className="absolute inset-0 w-full h-full object-contain object-right"
-                    aria-hidden="true"
-                  />
-                  {/* Dark overlay — fades image into card background on both sides */}
+                  {/* Background gradient — no image, clean dark card with color accent */}
                   <div
                     className="absolute inset-0"
-                    style={{
-                      background: `linear-gradient(90deg, rgba(8,10,16,0.97) 0%, rgba(8,10,16,0.88) 50%, rgba(8,10,16,0.60) 100%)`,
-                    }}
+                    style={{ background: `linear-gradient(135deg, rgba(8,10,16,1) 0%, rgba(8,10,16,0.95) 60%, ${cat.color}18 100%)` }}
                   />
+                  {/* Large icon watermark — right side */}
+                  <div
+                    className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ opacity: 0.12, color: cat.color }}
+                  >
+                    <cat.icon size={100} strokeWidth={1.2} />
+                  </div>
                   {/* Colour accent glow — subtle, centre-right */}
                   <div
                     className="absolute inset-0 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse at 70% 50%, ${cat.color}18 0%, transparent 55%)` }}
+                    style={{ background: `radial-gradient(ellipse at 80% 50%, ${cat.color}14 0%, transparent 55%)` }}
                   />
                   {/* Content overlay — category label, subtitle, and count badges */}
                   <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
