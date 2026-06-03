@@ -229,7 +229,7 @@ export default function GuidesAndDocs() {
             <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
               style={{ background: "rgba(103,199,40,0.12)", border: "1px solid rgba(103,199,40,0.25)" }}>
               <FileText size={12} style={{ color: "#67C728" }} />
-              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#67C728" }}>Guides &amp; Docs</span>
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#67C728" }}>WAVV Guides &amp; Docs</span>
             </div>
 
             {/* Headline */}
