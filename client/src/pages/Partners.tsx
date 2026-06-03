@@ -6,12 +6,6 @@ import PortalLayout from "@/components/PortalLayout";
 
 const VALUE_PILLARS = [
   {
-    icon: DollarSign,
-    color: "#10b981",
-    title: "Competitive Revenue Share",
-    body: "Earn a recurring commission on every customer you refer — for as long as they stay active. Our rev-share model is built to reward partners who drive real, lasting value.",
-  },
-  {
     icon: Megaphone,
     color: "#0074F4",
     title: "Co-Marketing & Visibility",
