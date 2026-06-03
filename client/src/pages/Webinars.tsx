@@ -278,7 +278,7 @@ function WebinarCard({
       {/* Thumbnail */}
       <div
         className="relative w-full overflow-hidden flex-shrink-0"
-        style={{ height: "140px", borderBottom: `1px solid ${accentColor}30` }}
+        style={{ height: "100px", borderBottom: `1px solid ${accentColor}30` }}
       >
         <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
         {/* Play overlay for cards with video */}
@@ -313,7 +313,7 @@ function WebinarCard({
       <div className="p-4 flex flex-col flex-1">
         <h3 className="text-white font-bold text-sm leading-snug mb-2">{webinar.title}</h3>
         {webinar.description && (
-          <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-2">{webinar.description}</p>
+          <p className="text-gray-500 text-xs leading-relaxed mb-2">{webinar.description}</p>
         )}
         {webinar.host && (
           <p className="text-gray-500 text-xs mb-2">

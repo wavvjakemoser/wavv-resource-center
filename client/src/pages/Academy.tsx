@@ -382,14 +382,14 @@ export default function Academy() {
                   <img
                     src={cat.thumbnail}
                     alt={cat.label}
-                    className="absolute inset-0 w-full h-full object-cover object-top"
+                    className="absolute inset-0 w-full h-full object-cover object-center"
                     aria-hidden="true"
                   />
                   {/* Dark overlay — fades image into card background on both sides */}
                   <div
                     className="absolute inset-0"
                     style={{
-                      background: `linear-gradient(90deg, rgba(10,12,18,0.88) 0%, rgba(10,12,18,0.55) 50%, rgba(10,12,18,0.88) 100%)`,
+                      background: `linear-gradient(90deg, rgba(8,10,16,0.92) 0%, rgba(8,10,16,0.72) 40%, rgba(8,10,16,0.82) 100%)`,
                     }}
                   />
                   {/* Colour accent glow — subtle, centre-right */}
