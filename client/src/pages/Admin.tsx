@@ -4558,7 +4558,7 @@ function WebinarsTab() {
     title: "",
     description: "",
     host: "",
-    type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen",
+    type: "evergreen" as "upcoming" | "recording" | "exclusive" | "evergreen",
     registrationUrl: "",
     videoUrl: "",
     scheduledAt: "",
@@ -4610,7 +4610,7 @@ function WebinarsTab() {
     } catch { /* handled by onError */ } finally { setUploadingVideo(false); }
   }
 
-  function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", iconName: "Video", thumbnailUrl: "", pipEnabled: true, comingSoon: false }); }
+  function resetForm() { setForm({ title: "", description: "", host: "", type: "evergreen" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", iconName: "Video", thumbnailUrl: "", pipEnabled: true, comingSoon: false }); }
 
   function startEdit(w: typeof webinars[0]) {
     setEditId(w.id);
