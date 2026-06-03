@@ -298,8 +298,8 @@ function WebinarCard({
         )}
       </div>
 
-      {/* Coming Soon bar — shown when comingSoon flag is set OR evergreen without video */}
-      {(webinar.comingSoon || (variant === "evergreen" && !embedUrl && !isHostedVideo)) && (
+      {/* Coming Soon bar — shown only when comingSoon flag is explicitly set */}
+      {webinar.comingSoon && (
         <div
           className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
           style={{ background: `${accentColor}22`, color: accentColor, borderBottom: `1px solid ${accentColor}40` }}
