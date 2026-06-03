@@ -574,7 +574,7 @@ export default function AcademyCategory() {
     if (!playingVideo || !("documentPictureInPicture" in window)) return;
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pipWindow = await (window as any).documentPictureInPicture.requestWindow({ width: 854, height: 480 });
+      const pipWindow = await (window as any).documentPictureInPicture.requestWindow({ width: 640, height: 390 });
       Array.from(document.styleSheets).forEach((sheet) => {
         try {
           const cssRules = Array.from(sheet.cssRules).map((r) => r.cssText).join("");
