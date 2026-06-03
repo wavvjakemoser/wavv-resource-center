@@ -4834,8 +4834,56 @@ function WebinarsTab() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Thumbnail URL <span className="text-gray-600">(optional)</span></label>
-                <input style={inputStyle} value={form.thumbnailUrl} onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))} placeholder="https://..." />
+                <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(choose a preset or paste a custom URL)</span></label>
+                {/* Preset neon thumbnail gallery */}
+                <div className="grid grid-cols-5 gap-1.5 mb-2">
+                  {([
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp", label: "Dialer" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp", label: "Call Boards" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-connection-rates-87rQWg6ZByH7ZA6HiRu9Mi.webp", label: "Connection" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-security-compliance-j5H6G2LXYyyt53RBZUZhG2.webp", label: "Security" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-onboarding-CCFD8DchGw2sHc6DwsnvXB.webp", label: "Onboarding" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-prospecting-nNAxw7CBSmXxaxY4E9Vohm.webp", label: "Prospecting" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-pipeline-cY6bCUMvdMuinagDB7sucT.webp", label: "Pipeline" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-outbound-Njwyty7V65Y3h3UQ2GCtJH.webp", label: "Outbound" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-analytics-42bSMiVFenHV6Htqdsrwdq.webp", label: "Analytics" },
+                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-team-training-fLhfdJ3XrFeaMD6TS9DV9X.webp", label: "Team" },
+                  ] as { url: string; label: string }[]).map(({ url, label }) => {
+                    const isSelected = form.thumbnailUrl === url;
+                    return (
+                      <button
+                        key={url}
+                        type="button"
+                        title={label}
+                        onClick={() => setForm(f => ({ ...f, thumbnailUrl: isSelected ? "" : url }))}
+                        className="relative rounded-lg overflow-hidden transition-all"
+                        style={{
+                          aspectRatio: "16/9",
+                          border: isSelected ? "2px solid #0074F4" : "2px solid #2a2a2a",
+                          boxShadow: isSelected ? "0 0 8px #0074F466" : "none",
+                          background: "#111",
+                        }}
+                      >
+                        <img src={url} alt={label} className="w-full h-full object-cover" />
+                        {isSelected && (
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,116,244,0.25)" }}>
+                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                              <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </div>
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 text-center" style={{ background: "rgba(0,0,0,0.6)", fontSize: 8, color: "#ccc", padding: "1px 0" }}>{label}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Custom URL fallback */}
+                <input
+                  style={inputStyle}
+                  value={form.thumbnailUrl}
+                  onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
+                  placeholder="Or paste a custom thumbnail URL..."
+                />
               </div>
             </div>
             {/* PiP toggle */}

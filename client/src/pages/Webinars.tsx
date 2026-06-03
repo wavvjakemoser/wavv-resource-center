@@ -280,15 +280,31 @@ function WebinarCard({
         className="relative flex-shrink-0 overflow-hidden"
         style={{ height: "120px", borderBottom: `1px solid ${accentColor}30` }}
       >
-        <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        {/* Icon badge — shown when an icon is selected for this webinar */}
-        {CardIcon && (
+        {CardIcon ? (
+          /* Icon-driven thumbnail — replaces static image when an icon is selected */
           <div
-            className="absolute top-2.5 left-2.5 w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: `${accentColor}dd`, boxShadow: `0 2px 8px ${accentColor}55` }}
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              background: `radial-gradient(ellipse at center, ${accentColor}18 0%, #0d1117 70%)`,
+              backgroundColor: "#0d1117",
+            }}
           >
-            <CardIcon size={15} color="#fff" />
+            {/* Outer glow ring */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: 80, height: 80,
+                background: `radial-gradient(circle, ${accentColor}22 0%, transparent 70%)`,
+                filter: `blur(8px)`,
+              }}
+            />
+            {/* Icon with neon glow */}
+            <div style={{ filter: `drop-shadow(0 0 12px ${accentColor}cc) drop-shadow(0 0 4px ${accentColor})` }}>
+              <CardIcon size={48} color={accentColor} strokeWidth={1.25} />
+            </div>
           </div>
+        ) : (
+          <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
         )}
         {/* Play overlay for cards with video */}
         {(embedUrl || isHostedVideo) && (
