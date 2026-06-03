@@ -302,7 +302,7 @@ export default function Academy() {
 
   return (
     <PortalLayout title="WAVV Academy">
-      <div className="px-4 lg:px-6 py-6 max-w-6xl mx-auto space-y-10">
+      <div className="px-4 lg:px-8 py-6 space-y-10">
 
         {/* ── Hero header ── */}
         <div
@@ -435,7 +435,7 @@ export default function Academy() {
       </div>
 
       {/* ── Request a Video CTA ── */}
-      <div className="px-4 lg:px-6 pb-10 max-w-6xl mx-auto">
+      <div className="px-4 lg:px-8 pb-10">
         <ContentRequestCTA requestType="video" />
       </div>
     </PortalLayout>

@@ -465,7 +465,7 @@ export default function Webinars() {
 
   return (
     <PortalLayout title="Webinars">
-      <div className="px-4 lg:px-6 py-6 max-w-5xl mx-auto space-y-6">
+      <div className="px-4 lg:px-8 py-6 space-y-6">
 
         {/* ── Header ── */}
         <div
@@ -595,7 +595,7 @@ export default function Webinars() {
       </div>
 
       {/* ── Request a Webinar ── */}
-      <div className="px-4 lg:px-6 pb-10 max-w-5xl mx-auto">
+      <div className="px-4 lg:px-8 pb-10">
         <ContentRequestCTA requestType="webinar" accentColor="#00A9E2" />
       </div>
 

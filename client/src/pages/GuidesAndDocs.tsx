@@ -205,7 +205,7 @@ export default function GuidesAndDocs() {
 
   return (
     <PortalLayout title="WAVV Guides & Docs">
-      <div className="px-4 lg:px-6 py-6 max-w-4xl mx-auto space-y-6">
+      <div className="px-4 lg:px-8 py-6 space-y-6">
         {/* Header */}
         <div
           className="relative overflow-hidden rounded-2xl"
@@ -322,7 +322,7 @@ export default function GuidesAndDocs() {
       </div>
 
       {/* Request a Written Guide */}
-      <div className="px-4 lg:px-6 pb-10 max-w-4xl mx-auto">
+      <div className="px-4 lg:px-8 pb-10">
         <ContentRequestCTA requestType="guide" accentColor="#67C728" />
       </div>
     </PortalLayout>

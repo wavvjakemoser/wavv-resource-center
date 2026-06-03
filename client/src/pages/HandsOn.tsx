@@ -240,7 +240,7 @@ export default function HandsOn() {
 
   return (
     <PortalLayout title="WAVV Playground">
-      <div className="px-4 lg:px-6 py-6 max-w-5xl mx-auto space-y-8">
+      <div className="px-4 lg:px-8 py-6 space-y-8">
 
         {/* ── Header ── */}
         <div
