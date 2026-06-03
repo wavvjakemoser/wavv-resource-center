@@ -111,6 +111,7 @@ export const webinars = mysqlTable("webinars", {
   videoUrl: text("videoUrl"),
   thumbnailUrl: varchar('thumbnail_url', { length: 500 }),
   accentColor: varchar('accent_color', { length: 20 }),
+  iconName: varchar('icon_name', { length: 50 }),
   viewCount: int("viewCount").default(0),
   sortOrder: int("sortOrder").default(0).notNull(),
   published: boolean("published").default(true).notNull(),

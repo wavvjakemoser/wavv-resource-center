@@ -397,6 +397,12 @@ export async function incrementWebinarView(webinarId: number) {
     .where(eq(webinars.id, webinarId));
 }
 
+export async function resetWebinarViews(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(webinars).set({ viewCount: 0 }).where(eq(webinars.id, id));
+}
+
 // ─── Guides ───────────────────────────────────────────────────────────────────
 export async function getGuides(publishedOnly = true) {
   const db = await getDb();
@@ -438,6 +444,12 @@ export async function incrementGuideDownload(guideId: number) {
     .update(guides)
     .set({ downloadCount: sql`${guides.downloadCount} + 1` })
     .where(eq(guides.id, guideId));
+}
+
+export async function resetGuideDownloads(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(guides).set({ downloadCount: 0 }).where(eq(guides.id, id));
 }
 
 // ─── Support Tickets ──────────────────────────────────────────────────────────

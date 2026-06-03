@@ -122,6 +122,19 @@ import {
   FileText as FileTextIcon,
   Headphones as HeadphonesIcon,
   Users as UsersIcon,
+  Play,
+  Mic,
+  Radio,
+  UserCheck,
+  Target,
+  Zap,
+  Phone,
+  PhoneCall,
+  Mail,
+  Lightbulb,
+  Award,
+  Trophy,
+  Rocket,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -4541,6 +4554,7 @@ function WebinarsTab() {
     videoUrl: "",
     scheduledAt: "",
     accentColor: "#0074F4",
+    iconName: "Video",
     thumbnailUrl: "",
     pipEnabled: true,
   });
@@ -4586,7 +4600,7 @@ function WebinarsTab() {
     } catch { /* handled by onError */ } finally { setUploadingVideo(false); }
   }
 
-  function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", thumbnailUrl: "", pipEnabled: true }); }
+  function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", iconName: "Video", thumbnailUrl: "", pipEnabled: true }); }
 
   function startEdit(w: typeof webinars[0]) {
     setEditId(w.id);
@@ -4599,6 +4613,7 @@ function WebinarsTab() {
       videoUrl: w.videoUrl ?? "",
       scheduledAt: w.scheduledAt ? new Date(w.scheduledAt).toISOString().slice(0, 16) : "",
       accentColor: (w as { accentColor?: string | null }).accentColor ?? "#0074F4",
+      iconName: (w as { iconName?: string | null }).iconName ?? "Video",
       thumbnailUrl: w.thumbnailUrl ?? "",
       pipEnabled: (w as { pipEnabled?: boolean | null }).pipEnabled !== false,
     });
@@ -4619,6 +4634,7 @@ function WebinarsTab() {
         videoUrl: form.videoUrl || undefined,
         thumbnailUrl: form.thumbnailUrl || undefined,
         accentColor: form.accentColor || undefined,
+        iconName: form.iconName || undefined,
         scheduledAt: scheduledAtDate,
         pipEnabled: form.pipEnabled,
       }});
@@ -4632,6 +4648,7 @@ function WebinarsTab() {
         videoUrl: form.videoUrl || undefined,
         thumbnailUrl: form.thumbnailUrl || undefined,
         accentColor: form.accentColor || undefined,
+        iconName: form.iconName || undefined,
         scheduledAt: scheduledAtDate,
         pipEnabled: form.pipEnabled,
       });
@@ -4742,6 +4759,42 @@ function WebinarsTab() {
                 />
               </div>
             )}
+            {/* Icon Picker */}
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Icon <span className="text-gray-600">(choose one, color set by Accent Color)</span></label>
+              <div className="flex flex-wrap gap-1.5 p-3 rounded-xl" style={{ background: "#111", border: "1px solid #2a2a2a" }}>
+                {([
+                  "Video", "Play", "Mic", "Radio", "Users", "UserCheck", "GraduationCap",
+                  "BarChart3", "TrendingUp", "Activity", "Target", "Zap",
+                  "Phone", "PhoneCall", "Headphones", "MessageSquare", "Mail",
+                  "BookOpen", "FileText", "Lightbulb", "Star", "Award", "Trophy", "Rocket",
+                ] as const).map((iconKey) => {
+                  const IconComp = {
+                    Video, Play: Play, Mic, Radio, Users, UserCheck, GraduationCap,
+                    BarChart3, TrendingUp, Activity, Target: Target, Zap: Zap,
+                    Phone, PhoneCall, Headphones, MessageSquare, Mail,
+                    BookOpen, FileText, Lightbulb, Star, Award, Trophy, Rocket,
+                  }[iconKey as string] as React.FC<{ size?: number; color?: string }> | undefined;
+                  if (!IconComp) return null;
+                  const isSelected = form.iconName === iconKey;
+                  return (
+                    <button
+                      key={iconKey}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, iconName: iconKey }))}
+                      title={iconKey}
+                      className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
+                      style={isSelected
+                        ? { background: form.accentColor + "33", border: `2px solid ${form.accentColor}` }
+                        : { background: "#1d2230", border: "1px solid #2a2a2a" }
+                      }
+                    >
+                      <IconComp size={16} color={isSelected ? form.accentColor : "#6b7280"} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Accent Color</label>
@@ -4871,6 +4924,10 @@ function WebinarGroups({
   onDelete: (id: number) => void;
 }) {
   const utils = trpc.useUtils();
+  const resetViewsMutation = trpc.webinars.adminResetViews.useMutation({
+    onSuccess: () => { utils.webinars.adminList.invalidate(); toast.success("Views reset to 0"); },
+    onError: (e) => toast.error(e.message),
+  });
   const reorderMutation = trpc.webinars.adminReorder.useMutation({
     onSuccess: () => utils.webinars.adminList.invalidate(),
     onError: (e) => toast.error("Reorder failed: " + e.message),
@@ -4962,6 +5019,11 @@ function WebinarGroups({
                                 {(w.registrationUrl || w.videoUrl) && (
                                   <a href={(w.registrationUrl || w.videoUrl)!} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
                                 )}
+                                <button
+                                  onClick={() => { if (confirm(`Reset views for "${w.title}" to 0?`)) resetViewsMutation.mutate({ id: w.id }); }}
+                                  title="Reset view count"
+                                  className="text-gray-500 hover:text-amber-400 transition"
+                                ><ArrowDown size={13} /></button>
                                 <button onClick={() => onEdit(w as Parameters<typeof onEdit>[0])} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
                                 <button onClick={() => onDelete(w.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
                               </div>
@@ -5319,6 +5381,10 @@ function GuideGroups({
   onDelete: (id: number) => void;
 }) {
   const utils = trpc.useUtils();
+  const resetDownloadsMutation = trpc.guides.adminResetDownloads.useMutation({
+    onSuccess: () => { utils.guides.adminList.invalidate(); toast.success("Downloads reset to 0"); },
+    onError: (e) => toast.error(e.message),
+  });
   const reorderMutation = trpc.guides.adminReorder.useMutation({
     onSuccess: () => utils.guides.adminList.invalidate(),
     onError: (e) => toast.error("Reorder failed: " + e.message),
@@ -5413,6 +5479,11 @@ function GuideGroups({
                                 {g.fileUrl && (
                                   <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
                                 )}
+                                <button
+                                  onClick={() => { if (confirm(`Reset downloads for "${g.title}" to 0?`)) resetDownloadsMutation.mutate({ id: g.id }); }}
+                                  title="Reset download count"
+                                  className="text-gray-500 hover:text-amber-400 transition"
+                                ><ArrowDown size={13} /></button>
                                 <button onClick={() => onEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
                                 <button onClick={() => onDelete(g.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
                               </div>

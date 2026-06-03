@@ -120,6 +120,8 @@ import {
   getTopGuides,
   getAskWavvConversations,
   getAnonDailyTrend,
+  resetWebinarViews,
+  resetGuideDownloads,
 } from "./db";
 
 // // ─── Role guards ─────────────────────────────────────────────────────
@@ -491,6 +493,7 @@ const webinarsRouter = router({
         videoUrl: z.string().optional(),
         thumbnailUrl: z.string().optional(),
         accentColor: z.string().optional(),
+        iconName: z.string().optional(),
         pipEnabled: z.boolean().optional(),
       })
     )
@@ -510,12 +513,18 @@ const webinarsRouter = router({
           videoUrl: z.string().optional(),
           thumbnailUrl: z.string().optional(),
           accentColor: z.string().optional(),
+          iconName: z.string().optional(),
           published: z.boolean().optional(),
           pipEnabled: z.boolean().optional(),
         }),
       })
     )
     .mutation(({ input }) => updateWebinar(input.id, input.data)),
+
+  // Reset view count to 0 for a specific webinar
+  adminResetViews: superAdminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => resetWebinarViews(input.id)),
 
   adminDelete: superAdminProcedure
     .input(z.object({ id: z.number() }))
@@ -633,6 +642,11 @@ const guidesRouter = router({
   adminReorder: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderGuides(input.id1, input.id2)),
+
+  // Reset download count to 0 for a specific guide
+  adminResetDownloads: superAdminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => resetGuideDownloads(input.id)),
 });
 
 // ─── Support Router ───────────────────────────────────────────────────────────
