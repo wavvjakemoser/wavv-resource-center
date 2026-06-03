@@ -6,6 +6,12 @@ import PortalLayout from "@/components/PortalLayout";
 
 const VALUE_PILLARS = [
   {
+    icon: DollarSign,
+    color: "#10b981",
+    title: "Competitive Revenue Share",
+    body: "Earn recurring commissions on every active customer you refer. There is no cap on earnings — the more you grow, the more you earn.",
+  },
+  {
     icon: Megaphone,
     color: "#0074F4",
     title: "Marketing Support & Visibility",
@@ -43,23 +49,19 @@ const HOW_IT_WORKS = [
 const FAQS = [
   {
     q: "Who is the WAVV Partner Program for?",
-    a: "The program is designed for consultants, coaches, CRM specialists, RevOps professionals, sales trainers, and anyone with an audience of sales or customer success teams who could benefit from WAVV. If you regularly advise people on outbound strategy or CRM tooling, you're a strong fit.",
+    a: "The program is designed for sales leaders and agency owners who are ready to turn their network into a revenue stream. If you regularly advise people on outbound strategy, CRM tooling, or working in a sales environment, you're a strong fit.",
   },
   {
     q: "How does the commission structure work?",
-    a: "WAVV partners earn a recurring revenue share on every active customer they refer. Exact commission rates are shared during the approval process and depend on the volume and type of referrals. There is no cap on earnings.",
-  },
-  {
-    q: "Do I need to be a WAVV customer to become a partner?",
-    a: "No — but we strongly recommend experiencing the product firsthand. We offer demo access to approved partners so you can speak to WAVV's value with confidence.",
+    a: "WAVV partners earn a recurring revenue share on every active customer they refer. Exact commission rates are shared during the approval process. There is no cap on earnings.",
   },
   {
     q: "How are referrals tracked?",
-    a: "Each approved partner receives a unique tracking link. All referrals made through that link are attributed to your account and visible in your partner dashboard in real time.",
+    a: "Each approved partner receives a unique promo code. All referrals that apply the code at checkout are attributed to your account and visible in your partner dashboard in real time.",
   },
   {
     q: "What support do partners receive?",
-    a: "Approved partners get access to a dedicated partner success contact, a private resource library (pitch decks, one-pagers, demo scripts), co-marketing opportunities, and priority support for any customer questions that come through your referrals.",
+    a: "Approved Partners get access to a dedicated partner success contact, co-marketing opportunities, and priority technical support.",
   },
 ];
 
@@ -265,13 +267,12 @@ export default function Partners() {
           >
             {[
               "Recurring commission on every active referral",
+              "Yearly revenue incentives",
               "Real-time referral tracking dashboard",
               "Dedicated partner success contact",
-              "Co-branded marketing materials",
+              "Personalized marketing support",
               "Listing in the WAVV Partner Directory",
-              "Partner-only resource library (pitch decks, one-pagers)",
-              "Demo access to WAVV for hands-on experience",
-              "Priority support for your referred customers",
+              "Priority technical support",
             ].map((item) => (
               <div key={item} className="flex items-start gap-2.5">
                 <CheckCircle2 size={15} className="mt-0.5 flex-shrink-0" style={{ color: "#67C728" }} />
@@ -310,8 +311,7 @@ export default function Partners() {
           <div className="space-y-2">
             <p className="text-xl font-bold text-white">Ready to become a WAVV Partner?</p>
             <p className="text-sm max-w-md" style={{ color: "rgba(255,255,255,0.55)" }}>
-              Applications are reviewed within 3–5 business days. Join a growing network of partners
-              earning recurring revenue by connecting their clients with WAVV.
+              Applications are reviewed and approved within minutes. After you apply, watch your email for the next steps. Join a growing network of partners earning recurring revenue by connecting their clients with WAVV.
             </p>
           </div>
           <a
