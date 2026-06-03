@@ -25,7 +25,7 @@ const baseNavItems = [
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
-  { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
+  { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7", comingSoon: true },
   { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
 ];
 const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
@@ -38,8 +38,8 @@ interface PortalLayoutProps {
 }
 
 function NavLink({
-  href, label, icon: Icon, color, isActive, onClick,
-}: { href: string; label: string; icon: React.ElementType; color: string; isActive: boolean; onClick: () => void }) {
+  href, label, icon: Icon, color, isActive, onClick, comingSoon,
+}: { href: string; label: string; icon: React.ElementType; color: string; isActive: boolean; onClick: () => void; comingSoon?: boolean }) {
   return (
     <Link
       href={href}
@@ -78,7 +78,15 @@ function NavLink({
       >
         <Icon size={17} style={{ color }} />
       </div>
-      <span className="truncate">{label}</span>
+      <span className="truncate flex-1">{label}</span>
+      {comingSoon && (
+        <span
+          className="flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+          style={{ background: "rgba(168,85,247,0.18)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }}
+        >
+          Soon
+        </span>
+      )}
     </Link>
   );
 }
