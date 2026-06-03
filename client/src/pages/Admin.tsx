@@ -4932,9 +4932,9 @@ function WebinarsTab() {
 }
 
 const WEBINAR_GROUP_META: Record<string, { label: string; color: string; description: string }> = {
-  evergreen:  { label: "Evergreen",           color: "#67C728", description: "Always-available training content" },
-  exclusive:  { label: "Exclusive / Upcoming", color: "#0074F4", description: "Live or invite-only sessions" },
-  recording:  { label: "On Demand",            color: "#FF9900", description: "Recorded sessions available anytime" },
+  evergreen:  { label: "WAVV On-Demand Series",                color: "#67C728", description: "Always-available training content" },
+  exclusive:  { label: "Upcoming WAVV Exclusive Live Webinars", color: "#0074F4", description: "Live or invite-only sessions" },
+  recording:  { label: "WAVV Exclusive On-Demand Webinars",    color: "#FF9900", description: "Recorded sessions available anytime" },
   upcoming:   { label: "Upcoming (Legacy)",    color: "#6b7280", description: "Legacy upcoming entries" },
 };
 
