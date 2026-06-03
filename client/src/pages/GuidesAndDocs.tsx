@@ -60,13 +60,6 @@ function GuideRow({
         )}
       </div>
 
-      {/* Download count */}
-      {guide.downloadCount ? (
-        <span className="text-xs text-gray-600 flex-shrink-0 hidden sm:block">
-          {guide.downloadCount} dl
-        </span>
-      ) : null}
-
       {/* Actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <button
