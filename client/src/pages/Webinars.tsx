@@ -229,7 +229,7 @@ function WebinarCard({
     exclusive: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp",
     recording: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-recording-v2-3C9ghU23nQyUUDrjZs5iVM.webp",
   };
-  const thumbBg = variant === 'evergreen' && webinar.thumbnailUrl
+  const thumbBg = webinar.thumbnailUrl
     ? webinar.thumbnailUrl
     : SECTION_BG[variant];
 
