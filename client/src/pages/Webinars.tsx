@@ -465,7 +465,7 @@ export default function Webinars() {
 
   return (
     <PortalLayout title="Webinars">
-      <div className="px-4 lg:px-8 py-6 space-y-6" style={{ maxWidth: "1280px", margin: "0 auto" }}>
+      <div className="px-4 lg:px-8 py-6 space-y-6">
 
         {/* ── Header ── */}
         <div

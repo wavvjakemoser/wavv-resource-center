@@ -302,7 +302,7 @@ export default function Academy() {
 
   return (
     <PortalLayout title="WAVV Academy">
-      <div className="px-4 lg:px-8 py-6 space-y-10" style={{ maxWidth: "1280px", margin: "0 auto" }}>
+      <div className="px-4 lg:px-8 py-6 space-y-10">
 
         {/* ── Hero header ── */}
         <div
