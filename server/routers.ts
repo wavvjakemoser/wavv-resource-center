@@ -495,6 +495,7 @@ const webinarsRouter = router({
         accentColor: z.string().optional(),
         iconName: z.string().optional(),
         pipEnabled: z.boolean().optional(),
+        comingSoon: z.boolean().optional(),
       })
     )
     .mutation(({ input }) => createWebinar({ ...input, published: true })),
@@ -516,6 +517,7 @@ const webinarsRouter = router({
           iconName: z.string().optional(),
           published: z.boolean().optional(),
           pipEnabled: z.boolean().optional(),
+          comingSoon: z.boolean().optional(),
         }),
       })
     )

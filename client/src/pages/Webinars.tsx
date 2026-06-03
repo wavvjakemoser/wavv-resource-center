@@ -205,7 +205,7 @@ function WebinarCard({
   nextSession,
   onPlay,
 }: {
-  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null; iconName?: string | null };
+  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null; iconName?: string | null; comingSoon?: boolean | null };
   variant: WebinarType;
   nextSession?: Date;
   onPlay?: (embedUrl: string, title: string, variant: WebinarType) => void;
@@ -323,8 +323,8 @@ function WebinarCard({
         )}
       </div>
 
-      {/* Coming Soon bar for evergreen without video */}
-      {variant === "evergreen" && !embedUrl && !isHostedVideo && (
+      {/* Coming Soon bar — shown when comingSoon flag is set OR evergreen without video */}
+      {(webinar.comingSoon || (variant === "evergreen" && !embedUrl && !isHostedVideo)) && (
         <div
           className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
           style={{ background: `${accentColor}22`, color: accentColor, borderBottom: `1px solid ${accentColor}40` }}

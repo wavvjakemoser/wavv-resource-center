@@ -218,6 +218,13 @@
       "when": 1780501089758,
       "tag": "0029_left_the_fallen",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1780503805195,
+      "tag": "0030_panoramic_praxagora",
+      "breakpoints": true
     }
   ]
 }

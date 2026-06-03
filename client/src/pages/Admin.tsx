@@ -4566,6 +4566,7 @@ function WebinarsTab() {
     iconName: "Video",
     thumbnailUrl: "",
     pipEnabled: true,
+    comingSoon: false,
   });
 
   const createMutation = trpc.webinars.adminCreate.useMutation({
@@ -4609,7 +4610,7 @@ function WebinarsTab() {
     } catch { /* handled by onError */ } finally { setUploadingVideo(false); }
   }
 
-  function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", iconName: "Video", thumbnailUrl: "", pipEnabled: true }); }
+  function resetForm() { setForm({ title: "", description: "", host: "", type: "exclusive" as "upcoming" | "recording" | "exclusive" | "evergreen", registrationUrl: "", videoUrl: "", scheduledAt: "", accentColor: "#0074F4", iconName: "Video", thumbnailUrl: "", pipEnabled: true, comingSoon: false }); }
 
   function startEdit(w: typeof webinars[0]) {
     setEditId(w.id);
@@ -4625,6 +4626,7 @@ function WebinarsTab() {
       iconName: (w as { iconName?: string | null }).iconName ?? "Video",
       thumbnailUrl: w.thumbnailUrl ?? "",
       pipEnabled: (w as { pipEnabled?: boolean | null }).pipEnabled !== false,
+      comingSoon: !!(w as { comingSoon?: boolean | null }).comingSoon,
     });
     setShowForm(true);
   }
@@ -4646,6 +4648,7 @@ function WebinarsTab() {
         iconName: form.iconName || undefined,
         scheduledAt: scheduledAtDate,
         pipEnabled: form.pipEnabled,
+        comingSoon: form.comingSoon,
       }});
     } else {
       createMutation.mutate({
@@ -4660,6 +4663,7 @@ function WebinarsTab() {
         iconName: form.iconName || undefined,
         scheduledAt: scheduledAtDate,
         pipEnabled: form.pipEnabled,
+        comingSoon: form.comingSoon,
       });
     }
   }
@@ -4849,15 +4853,28 @@ function WebinarsTab() {
               </div>
             </div>
             {/* PiP toggle */}
-            <label className="flex items-center gap-2 cursor-pointer select-none mt-1">
-              <input
-                type="checkbox"
-                checked={form.pipEnabled}
-                onChange={(e) => setForm(f => ({ ...f, pipEnabled: e.target.checked }))}
-                className="w-3.5 h-3.5 rounded accent-blue-500"
-              />
-              <span className="text-xs text-gray-400">Enable Pop-out (Picture-in-Picture) for this webinar</span>
-            </label>
+            <div className="flex flex-col gap-2 mt-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={form.pipEnabled}
+                  onChange={(e) => setForm(f => ({ ...f, pipEnabled: e.target.checked }))}
+                  className="w-3.5 h-3.5 rounded accent-blue-500"
+                />
+                <span className="text-xs text-gray-400">Enable Pop-out (Picture-in-Picture) for this webinar</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={form.comingSoon}
+                  onChange={(e) => setForm(f => ({ ...f, comingSoon: e.target.checked }))}
+                  className="w-3.5 h-3.5 rounded accent-yellow-400"
+                />
+                <span className="text-xs" style={{ color: form.comingSoon ? '#F59E0B' : '#6b7280' }}>
+                  Mark as Coming Soon (hides video/register button, shows Coming Soon banner)
+                </span>
+              </label>
+            </div>
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
               <button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>

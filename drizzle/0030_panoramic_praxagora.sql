@@ -1,0 +1,1 @@
+ALTER TABLE `webinars` ADD `comingSoon` boolean DEFAULT false NOT NULL;

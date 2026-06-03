@@ -1,0 +1,59 @@
+{
+  "query": "SELECT id, title, type, thumbnail_url, accent_color FROM webinars ORDER BY id LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT id, title, type, thumbnail_url, accent_color FROM webinars ORDER BY id LIMIT 20;",
+  "rows": [
+    {
+      "id": "30006",
+      "title": "Dialer Deep Dive: Get More Out of Every Session",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp",
+      "accent_color": "#0074F4"
+    },
+    {
+      "id": "30007",
+      "title": "Call Boards: Build the System That Decides Who You Call Next",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-callboards-QjnAKfzoizdeemFXgQFrwF.webp",
+      "accent_color": "#67C728"
+    },
+    {
+      "id": "30008",
+      "title": "Connection Rates & Number Health: Answer the Phone Problem",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-settings-bdXM6kQqytMu6UH3iS5hY9.webp",
+      "accent_color": "#8B5CF6"
+    },
+    {
+      "id": "30009",
+      "title": "Spam Protection: What It Is, How It Works, and Why It Matters",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-spam-6ujGHpZpRXLVsQMzzD3juJ.webp",
+      "accent_color": "#F59E0B"
+    },
+    {
+      "id": "30010",
+      "title": "Call Strategy: The System Behind the Sprint",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-crm-6CXPSF3DpxoQ7tCXSUMnBi.webp",
+      "accent_color": "#00A9E2"
+    },
+    {
+      "id": "30011",
+      "title": "Managing Your Team in WAVV: Visibility Without Micromanaging",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-3dialers-7G79vRaWgqiuwgx2edwDa4.webp",
+      "accent_color": "#6366F1"
+    },
+    {
+      "id": "90001",
+      "title": "Always Know Who To Call Next With WAVV Call Boards",
+      "type": "recording",
+      "thumbnail_url": "NULL",
+      "accent_color": "#0074F4"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\ttype\tthumbnail_url\taccent_color\n30006\tDialer Deep Dive: Get More Out of Every Session\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp\t#0074F4\n30007\tCall Boards: Build the System That Decides Who You Call Next\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-callboards-QjnAKfzoizdeemFXgQFrwF.webp\t#67C728\n30008\tConnection Rates & Number Health: Answer the Phone Problem\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-settings-bdXM6kQqytMu6UH3iS5hY9.webp\t#8B5CF6\n30009\tSpam Protection: What It Is, How It Works, and Why It Matters\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-spam-6ujGHpZpRXLVsQMzzD3juJ.webp\t#F59E0B\n30010\tCall Strategy: The System Behind the Sprint\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-crm-6CXPSF3DpxoQ7tCXSUMnBi.webp\t#00A9E2\n30011\tManaging Your Team in WAVV: Visibility Without Micromanaging\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-3dialers-7G79vRaWgqiuwgx2edwDa4.webp\t#6366F1\n90001\tAlways Know Who To Call Next With WAVV Call Boards\trecording\tNULL\t#0074F4\n",
+  "stderr": "",
+  "execution_time_ms": 1454
+}

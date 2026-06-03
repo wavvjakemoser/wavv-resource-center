@@ -117,6 +117,8 @@ export const webinars = mysqlTable("webinars", {
   published: boolean("published").default(true).notNull(),
   // Pop-out (Picture-in-Picture) enabled for this webinar
   pipEnabled: boolean("pipEnabled").default(true).notNull(),
+  // Coming Soon flag — hides video/register and shows Coming Soon banner
+  comingSoon: boolean("comingSoon").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
