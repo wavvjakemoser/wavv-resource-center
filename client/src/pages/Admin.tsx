@@ -4768,53 +4768,67 @@ function WebinarsTab() {
                 />
               </div>
             )}
-            {/* Icon Picker */}
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Icon <span className="text-gray-600">(choose one, color set by Accent Color)</span></label>
-              <div className="flex flex-wrap gap-1.5 p-3 rounded-xl" style={{ background: "#111", border: "1px solid #2a2a2a" }}>
+              <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(choose a preset or paste a custom URL)</span></label>
+              {/* Preset neon thumbnail gallery — 20 images, no labels */}
+              <div className="grid grid-cols-5 gap-1.5 mb-2">
                 {([
-                  // Content & learning
-                  "Video", "Play", "BookOpen", "GraduationCap", "FileText", "Lightbulb",
-                  // Outbound calling & prospecting
-                  "Phone", "PhoneCall", "PhoneOutgoing", "PhoneMissed", "PhoneOff", "Headphones",
-                  // Pipeline & prospecting
-                  "Target", "Crosshair", "TrendingUp", "BarChart3", "Activity", "Shuffle",
-                  // Process & workflow
-                  "ListChecks", "ClipboardList", "Repeat", "RotateCcw", "Zap", "Megaphone",
-                  // People & teams
-                  "Users", "UserCheck", "MessageSquare", "Mail", "Mic", "Radio",
-                  // Recognition
-                  "Star", "Award", "Trophy", "Rocket",
-                ] as const).map((iconKey) => {
-                  const IconComp = {
-                    Video, Play, BookOpen, GraduationCap, FileText, Lightbulb,
-                    Phone, PhoneCall, PhoneOutgoing, PhoneMissed, PhoneOff, Headphones,
-                    Target, Crosshair, TrendingUp, BarChart3, Activity, Shuffle,
-                    ListChecks, ClipboardList, Repeat, RotateCcw, Zap, Megaphone,
-                    Users, UserCheck, MessageSquare, Mail, Mic, Radio,
-                    Star, Award, Trophy, Rocket,
-                  }[iconKey as string] as React.FC<{ size?: number; color?: string }> | undefined;
-                  if (!IconComp) return null;
-                  const isSelected = form.iconName === iconKey;
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-connection-rates-87rQWg6ZByH7ZA6HiRu9Mi.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-security-compliance-j5H6G2LXYyyt53RBZUZhG2.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-onboarding-CCFD8DchGw2sHc6DwsnvXB.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-prospecting-nNAxw7CBSmXxaxY4E9Vohm.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-pipeline-cY6bCUMvdMuinagDB7sucT.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-outbound-Njwyty7V65Y3h3UQ2GCtJH.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-analytics-42bSMiVFenHV6Htqdsrwdq.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-team-training-fLhfdJ3XrFeaMD6TS9DV9X.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-settings-4sPnpfDQ49akV24fbo9rQv.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-integration-jji77pKwzaxU6XVawSD6b8.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-number-rotation-JDBNu9jHh5tz2gYP3BBX2k.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-automation-6n6ymqXKucpZbuQbTjSWty.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-reporting-QdHJaFWvAw8a9x3d9dwQK4.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-crm-6CXPSF3DpxoQ7tCXSUMnBi.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-headset-bWd3oQpTpvkYFkCXnRmb3L.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-calendar-7sqeNkVGfErrwaq7J5Sikb.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-trophy-6gRPqVzcCn9kRkgBTsHPZs.webp",
+                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-chat-JywJ7xdLZZ3TjLeR7SqyK4.webp",
+                ] as string[]).map((url) => {
+                  const isSelected = form.thumbnailUrl === url;
                   return (
                     <button
-                      key={iconKey}
+                      key={url}
                       type="button"
-                      onClick={() => setForm(f => ({ ...f, iconName: iconKey }))}
-                      title={iconKey}
-                      className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
-                      style={isSelected
-                        ? { background: form.accentColor + "33", border: `2px solid ${form.accentColor}` }
-                        : { background: "#1d2230", border: "1px solid #2a2a2a" }
-                      }
+                      onClick={() => setForm(f => ({ ...f, thumbnailUrl: isSelected ? "" : url }))}
+                      className="relative rounded-lg overflow-hidden transition-all"
+                      style={{
+                        aspectRatio: "16/9",
+                        border: isSelected ? "2px solid #0074F4" : "2px solid #1a1a1a",
+                        boxShadow: isSelected ? "0 0 8px #0074F466" : "none",
+                        background: "#111",
+                      }}
                     >
-                      <IconComp size={16} color={isSelected ? form.accentColor : "#6b7280"} />
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      {isSelected && (
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,116,244,0.2)" }}>
+                          <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </div>
+                        </div>
+                      )}
                     </button>
                   );
                 })}
               </div>
+              {/* Custom URL fallback */}
+              <input
+                style={inputStyle}
+                value={form.thumbnailUrl}
+                onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
+                placeholder="Or paste a custom thumbnail URL..."
+              />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Accent Color</label>
                 <div className="flex items-center gap-2">
@@ -4832,58 +4846,6 @@ function WebinarsTab() {
                     placeholder="#0074F4"
                   />
                 </div>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(choose a preset or paste a custom URL)</span></label>
-                {/* Preset neon thumbnail gallery */}
-                <div className="grid grid-cols-5 gap-1.5 mb-2">
-                  {([
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp", label: "Dialer" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp", label: "Call Boards" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-connection-rates-87rQWg6ZByH7ZA6HiRu9Mi.webp", label: "Connection" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-security-compliance-j5H6G2LXYyyt53RBZUZhG2.webp", label: "Security" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-onboarding-CCFD8DchGw2sHc6DwsnvXB.webp", label: "Onboarding" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-prospecting-nNAxw7CBSmXxaxY4E9Vohm.webp", label: "Prospecting" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-pipeline-cY6bCUMvdMuinagDB7sucT.webp", label: "Pipeline" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-outbound-Njwyty7V65Y3h3UQ2GCtJH.webp", label: "Outbound" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-analytics-42bSMiVFenHV6Htqdsrwdq.webp", label: "Analytics" },
-                    { url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-team-training-fLhfdJ3XrFeaMD6TS9DV9X.webp", label: "Team" },
-                  ] as { url: string; label: string }[]).map(({ url, label }) => {
-                    const isSelected = form.thumbnailUrl === url;
-                    return (
-                      <button
-                        key={url}
-                        type="button"
-                        title={label}
-                        onClick={() => setForm(f => ({ ...f, thumbnailUrl: isSelected ? "" : url }))}
-                        className="relative rounded-lg overflow-hidden transition-all"
-                        style={{
-                          aspectRatio: "16/9",
-                          border: isSelected ? "2px solid #0074F4" : "2px solid #2a2a2a",
-                          boxShadow: isSelected ? "0 0 8px #0074F466" : "none",
-                          background: "#111",
-                        }}
-                      >
-                        <img src={url} alt={label} className="w-full h-full object-cover" />
-                        {isSelected && (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,116,244,0.25)" }}>
-                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                              <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </div>
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 text-center" style={{ background: "rgba(0,0,0,0.6)", fontSize: 8, color: "#ccc", padding: "1px 0" }}>{label}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-                {/* Custom URL fallback */}
-                <input
-                  style={inputStyle}
-                  value={form.thumbnailUrl}
-                  onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
-                  placeholder="Or paste a custom thumbnail URL..."
-                />
               </div>
             </div>
             {/* PiP toggle */}
