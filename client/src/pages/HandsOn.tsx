@@ -68,10 +68,32 @@ function RequestModal({
     },
   });
 
+  const submitPublicMutation = trpc.playground.submitPublicInterest.useMutation({
+    onSuccess: () => {
+      setSubmitted(true);
+      toast.success("You're on the list! We'll notify you when it's ready.");
+    },
+    onError: (err) => {
+      toast.error(err.message ?? "Submission failed. Please try again.");
+    },
+  });
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    submitMutation.mutate({ optIn });
+    if (userName && userEmail) {
+      // Logged-in user — use protected procedure
+      submitMutation.mutate({ optIn });
+    } else {
+      // Anonymous user — use public procedure with manually entered name/email
+      if (!localName.trim() || !localEmail.trim()) {
+        toast.error("Please enter your name and email.");
+        return;
+      }
+      submitPublicMutation.mutate({ name: localName.trim(), email: localEmail.trim() });
+    }
   }
+
+  const isPending = submitMutation.isPending || submitPublicMutation.isPending;
 
   function handleClose() {
     onClose();
@@ -185,12 +207,12 @@ function RequestModal({
 
               <button
                 type="submit"
-                disabled={submitMutation.isPending || !optIn}
+                disabled={isPending || !optIn}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
               >
                 <Bell size={13} />
-                {submitMutation.isPending ? "Submitting…" : "Notify Me"}
+                {isPending ? "Submitting…" : "Notify Me"}
               </button>
             </form>
           </>
