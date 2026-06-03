@@ -244,39 +244,55 @@ export default function HandsOn() {
 
         {/* ── Header ── */}
         <div
-          className="relative overflow-hidden rounded-2xl p-6 lg:p-8"
+          className="relative overflow-hidden rounded-2xl"
           style={{
-            background: "linear-gradient(135deg, #1a0a2e 0%, #0d1f35 60%, #0a1a10 100%)",
+            background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(168,85,247,0.28) 0%, rgba(124,58,237,0.14) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
             border: "1px solid rgba(168,85,247,0.25)",
+            minHeight: "280px",
           }}
         >
-          <div className="relative z-10 flex items-start gap-5">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
-            >
-              <FlaskConical size={28} className="text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-3 flex-wrap mb-2">
-                <h1 className="text-2xl lg:text-3xl font-bold" style={{ background: "linear-gradient(90deg, #0074F4, #67C728)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>WAVV Playground</h1>
-                <span
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold uppercase tracking-widest"
-                  style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.25), rgba(124,58,237,0.25))", color: "#c084fc", border: "1.5px solid rgba(168,85,247,0.5)", letterSpacing: "0.12em" }}
-                >
-                  Coming Soon
-                </span>
+          {/* Subtle grid */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
+            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+          {/* Glow orbs */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(168,85,247,0.16), transparent 65%)", transform: "translate(25%, -30%)" }} />
+          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
+
+          <div className="relative z-10 px-6 lg:px-16 py-12 text-center">
+            {/* Eyebrow + Coming Soon */}
+            <div className="flex items-center justify-center gap-3 mb-5 flex-wrap">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full"
+                style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.25)" }}>
+                <FlaskConical size={12} style={{ color: "#a855f7" }} />
+                <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#a855f7" }}>WAVV Playground</span>
               </div>
-              <p className="text-gray-400 text-sm max-w-2xl leading-relaxed">
-                A safe, isolated environment to explore WAVV features without affecting your live account.
-                Practice the dialer, explore call boards, and get comfortable with the platform before going live.
-              </p>
+              <span
+                className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest"
+                style={{ background: "rgba(168,85,247,0.18)", color: "#c084fc", border: "1.5px solid rgba(168,85,247,0.45)", letterSpacing: "0.12em" }}
+              >
+                Coming Soon
+              </span>
             </div>
+
+            {/* Headline */}
+            <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
+              <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #e9d5ff 30%, #c084fc 60%, #a855f7 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                Your WAVV Sandbox
+              </span>
+            </h1>
+
+            {/* Accent line */}
+            <div className="flex justify-center mb-5">
+              <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
+            </div>
+
+            {/* Subline */}
+            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+              A safe, isolated environment to explore WAVV features without affecting your live account. Practice the dialer, explore call boards, and get comfortable with the platform before going live.
+            </p>
           </div>
-          <div
-            className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10 pointer-events-none"
-            style={{ background: "radial-gradient(circle, #a855f7, transparent)", transform: "translate(30%, -30%)" }}
-          />
         </div>
 
         {/* ── Coming soon notice ── */}

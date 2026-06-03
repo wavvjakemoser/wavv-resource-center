@@ -469,22 +469,46 @@ export default function Webinars() {
 
         {/* ── Header ── */}
         <div
-          className="relative overflow-hidden rounded-2xl p-6"
+          className="relative overflow-hidden rounded-2xl"
           style={{
-            background: "linear-gradient(135deg, #001B28 0%, #0d1f35 100%)",
+            background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,169,226,0.28) 0%, rgba(0,116,244,0.14) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
             border: "1px solid rgba(0,169,226,0.2)",
+            minHeight: "280px",
           }}
         >
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,169,226,0.2)" }}>
-              <Video size={24} style={{ color: "#00A9E2" }} />
+          {/* Subtle grid */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
+            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
+          {/* Glow orbs */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(0,169,226,0.16), transparent 65%)", transform: "translate(25%, -30%)" }} />
+          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
+
+          <div className="relative z-10 px-6 lg:px-16 py-12 text-center">
+            {/* Eyebrow */}
+            <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
+              style={{ background: "rgba(0,169,226,0.12)", border: "1px solid rgba(0,169,226,0.25)" }}>
+              <Video size={12} style={{ color: "#00A9E2" }} />
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#00A9E2" }}>WAVV Webinars</span>
             </div>
-            <div>
-              <h1 className="text-xl font-bold mb-1" style={{ color: "#00A9E2" }}>WAVV Webinars</h1>
-              <p className="text-gray-400 text-sm">
-                Join exclusive live sessions and on-demand content from the WAVV team.
-              </p>
+
+            {/* Headline */}
+            <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
+              <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                Live Sessions &amp; On-Demand Content
+              </span>
+            </h1>
+
+            {/* Accent line */}
+            <div className="flex justify-center mb-5">
+              <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
+
+            {/* Subline */}
+            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+              Join exclusive live sessions and on-demand content from the WAVV team. Learn best practices, see new features in action, and sharpen your outbound strategy.
+            </p>
           </div>
         </div>
 
