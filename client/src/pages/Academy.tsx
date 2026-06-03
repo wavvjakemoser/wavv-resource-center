@@ -386,7 +386,7 @@ export default function Academy() {
                   {/* Large icon watermark — right side */}
                   <div
                     className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none"
-                    style={{ opacity: 0.12, color: cat.color }}
+                    style={{ opacity: 0.35, color: cat.color }}
                   >
                     <cat.icon size={100} strokeWidth={1.2} />
                   </div>

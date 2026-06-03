@@ -2671,7 +2671,7 @@ function SectionRow2({
 function CategoryBlock({
   categoryKey,
   categoryLabel,
-  categoryBanner,
+  categoryIcon,
   categorySubtitle,
   videoCount,
   courses,
@@ -2686,7 +2686,7 @@ function CategoryBlock({
 }: {
   categoryKey: string;
   categoryLabel?: string;
-  categoryBanner?: string;
+  categoryIcon?: React.ElementType;
   categorySubtitle?: string;
   videoCount?: number;
   courses: Array<{ id: number; title: string; category: string; published: boolean; tags?: string | null }>;
@@ -2711,14 +2711,16 @@ function CategoryBlock({
         className="w-full relative overflow-hidden rounded-xl mb-3 group"
         style={{ border: `1px solid ${accentColor}55`, minHeight: "140px" }}
       >
-        {/* Banner image */}
-        {categoryBanner && (
-          <img src={categoryBanner} alt={displayLabel} className="absolute inset-0 w-full h-full object-cover" aria-hidden />
-        )}
-        {/* Dark overlay */}
-        <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.50) 100%)` }} />
+        {/* Dark gradient background */}
+        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${accentColor}18 100%)` }} />
+        {/* Large icon watermark — right side */}
+        {categoryIcon && React.createElement(categoryIcon, {
+          size: 100, strokeWidth: 1.2,
+          className: "absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none",
+          style: { opacity: 0.35, color: accentColor }
+        })}
         {/* Colour glow */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 85% 50%, ${accentColor}22 0%, transparent 60%)` }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 85% 50%, ${accentColor}30 0%, transparent 60%)` }} />
         {/* Content — mirrors Academy landing page: WAVV ACADEMY label, title, subtitle, section+video badges */}
         <div className="relative flex flex-col justify-center h-full px-8 py-5 gap-1 text-left">
           <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: accentColor }}>WAVV Academy</p>
@@ -2797,11 +2799,11 @@ function CategoryBlock({
 // ─── InactiveCategoryBlock ────────────────────────────────────────────────
 // Extracted so useState can be called at top level (Rules of Hooks)
 function InactiveCategoryBlock({
-  categoryKey, label, subtitle, color, banner,
+  categoryKey, label, subtitle, color, icon,
   inactiveCourses, inactiveLessons, allLessons,
   onDeactivateLesson, onActivateLesson, onDeleteCourse, onDeleteLesson,
 }: {
-  categoryKey: string; label: string; subtitle?: string; color: string; banner?: string;
+  categoryKey: string; label: string; subtitle?: string; color: string; icon?: React.ElementType;
   inactiveCourses: Array<{ id: number; title: string; category: string; published: boolean; sortOrder: number | null }>;
   inactiveLessons: Array<{ id: number; title: string; courseId: number; published: boolean; courseTitle?: string | null; [key: string]: unknown }>;
   allLessons: Array<{
@@ -2824,8 +2826,9 @@ function InactiveCategoryBlock({
         className="w-full relative overflow-hidden rounded-xl mb-3 group"
         style={{ border: `1px solid ${color}30`, minHeight: "110px", opacity: 0.80 }}
       >
-        {banner && <img src={banner} alt={label} className="absolute inset-0 w-full h-full object-cover" aria-hidden />}
-        <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.80) 60%, rgba(0,0,0,0.60) 100%)` }} />
+        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${color}18 100%)` }} />
+        {icon && React.createElement(icon, { size: 100, strokeWidth: 1.2, className: "absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none", style: { opacity: 0.35, color } })}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 85% 50%, ${color}30 0%, transparent 60%)` }} />
         <div className="relative flex flex-col justify-center h-full px-8 py-5 gap-1 text-left">
           <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color }}>WAVV Academy</p>
           <div className="flex items-center gap-2">
@@ -3055,14 +3058,14 @@ function ContentTab() {
     return map;
   }, [courses]);
 
-  // Mirror the exact Academy category order, display names, colors, banners, subtitles, and video counts
+  // Mirror the exact Academy category order, display names, colors, icons, subtitles, and video counts
   const ACADEMY_CATEGORIES = [
     {
       key: "Onboarding",
       label: "Onboarding",
       subtitle: "Get your team up and running with WAVV",
       color: "#0074F4",
-      banner: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663417013740/JHIRajYPPlnohilQ.png",
+      icon: Rocket,
       videoCount: 12,
     },
     {
@@ -3070,7 +3073,7 @@ function ContentTab() {
       label: "How-To",
       subtitle: "Step-by-step guides for core WAVV features",
       color: "#00A9E2",
-      banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v6-K3TYV9Xeg5ZaWLpmZiJwHh.webp",
+      icon: Wrench,
       videoCount: 9,
     },
     {
@@ -3078,7 +3081,7 @@ function ContentTab() {
       label: "Strategy & Best Practices",
       subtitle: "Maximize connection rates, conversions, and team performance",
       color: "#67C728",
-      banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v7-h4rfU3p4xkyGFotsGxeuPW.webp",
+      icon: Lightbulb,
       videoCount: 8,
     },
   ];
@@ -3127,7 +3130,7 @@ function ContentTab() {
           <span className="text-xs text-gray-500 font-medium">Everything currently visible on WAVV Academy</span>
         </div>
         <div className="space-y-6">
-          {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner, videoCount }) => {
+          {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, videoCount }) => {
             // All published courses for this category = the live sections
             const categoryCourses = (byCategory[key] ?? []).filter((c) => c.published);
             return (
@@ -3135,7 +3138,7 @@ function ContentTab() {
                 key={key}
                 categoryKey={key}
                 categoryLabel={label}
-                categoryBanner={banner}
+                categoryIcon={CatIcon}
                 categorySubtitle={subtitle}
                 videoCount={videoCount}
                 courses={categoryCourses}
@@ -3189,7 +3192,7 @@ function ContentTab() {
               </div>
             ) : (
               <div className="space-y-6">
-                {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, banner }) => {
+                {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon }) => {
                   const catInactiveCourses = inactiveCourses.filter((c) => c.category === key);
                   const catCourseIds = new Set([...(byCategory[key] ?? []).map((c) => c.id), ...catInactiveCourses.map((c) => c.id)]);
                   const catInactiveLessons = inactiveLessons.filter((l) => catCourseIds.has(l.courseId));
@@ -3200,7 +3203,7 @@ function ContentTab() {
                       label={label}
                       subtitle={subtitle}
                       color={color}
-                      banner={banner}
+                      icon={CatIcon}
                       inactiveCourses={catInactiveCourses}
                       inactiveLessons={catInactiveLessons}
                       allLessons={lessons}
