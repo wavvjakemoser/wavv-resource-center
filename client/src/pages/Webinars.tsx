@@ -278,9 +278,9 @@ function WebinarCard({
       {/* Thumbnail */}
       <div
         className="relative w-full overflow-hidden flex-shrink-0"
-        style={{ height: "100px", borderBottom: `1px solid ${accentColor}30` }}
+        style={{ height: "80px", borderBottom: `1px solid ${accentColor}30` }}
       >
-        <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+        <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-contain object-center" style={{ background: "#0a0c12" }} />
         {/* Play overlay for cards with video */}
         {(embedUrl || isHostedVideo) && (
           <div
@@ -465,7 +465,7 @@ export default function Webinars() {
 
   return (
     <PortalLayout title="Webinars">
-      <div className="px-4 lg:px-8 py-6 space-y-6">
+      <div className="px-4 lg:px-8 py-6 space-y-6" style={{ maxWidth: "1280px", margin: "0 auto" }}>
 
         {/* ── Header ── */}
         <div

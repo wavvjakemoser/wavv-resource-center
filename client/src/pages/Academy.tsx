@@ -302,7 +302,7 @@ export default function Academy() {
 
   return (
     <PortalLayout title="WAVV Academy">
-      <div className="px-4 lg:px-8 py-6 space-y-10">
+      <div className="px-4 lg:px-8 py-6 space-y-10" style={{ maxWidth: "1280px", margin: "0 auto" }}>
 
         {/* ── Hero header ── */}
         <div
@@ -382,14 +382,14 @@ export default function Academy() {
                   <img
                     src={cat.thumbnail}
                     alt={cat.label}
-                    className="absolute inset-0 w-full h-full object-cover object-center"
+                    className="absolute inset-0 w-full h-full object-contain object-right"
                     aria-hidden="true"
                   />
                   {/* Dark overlay — fades image into card background on both sides */}
                   <div
                     className="absolute inset-0"
                     style={{
-                      background: `linear-gradient(90deg, rgba(8,10,16,0.92) 0%, rgba(8,10,16,0.72) 40%, rgba(8,10,16,0.82) 100%)`,
+                      background: `linear-gradient(90deg, rgba(8,10,16,0.97) 0%, rgba(8,10,16,0.88) 50%, rgba(8,10,16,0.60) 100%)`,
                     }}
                   />
                   {/* Colour accent glow — subtle, centre-right */}
