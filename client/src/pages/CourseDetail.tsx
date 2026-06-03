@@ -122,7 +122,7 @@ export default function CourseDetail() {
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Lessons</h2>
           {data.lessons.length === 0 && (
             <div className="text-center py-10">
-              <p className="text-gray-500 text-sm">No lessons available yet.</p>
+              <p className="text-gray-500 text-sm">No Lessons yet. Please check back soon!</p>
             </div>
           )}
           {data.lessons.map((lesson, index) => {

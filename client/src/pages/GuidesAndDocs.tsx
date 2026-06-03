@@ -143,7 +143,7 @@ function CategorySection({
             style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
           >
             <Icon size={14} style={{ color: meta.color, opacity: 0.4 }} />
-            <p className="text-xs text-gray-500">No {meta.label.toLowerCase()} yet. Check back soon or contact your admin.</p>
+            <p className="text-xs text-gray-500">No {meta.label} yet. Please check back soon!</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -304,9 +304,9 @@ export default function GuidesAndDocs() {
         {!isLoading && !hasAnyResults && !search && (
           <div className="text-center py-20">
             <FileText size={48} className="text-gray-700 mx-auto mb-4" />
-            <h3 className="text-white font-semibold mb-2">No guides yet</h3>
+            <h3 className="text-white font-semibold mb-2">No Guides yet</h3>
             <p className="text-gray-500 text-sm">
-              Guides, playbooks, and checklists will appear here once added by your admin.
+              Please check back soon!
             </p>
           </div>
         )}

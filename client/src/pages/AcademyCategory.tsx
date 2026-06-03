@@ -825,6 +825,15 @@ export default function AcademyCategory() {
 
         {/* ── Section list ── */}
         <div className="space-y-3">
+          {filteredSections.length === 0 && !dbCoursesLoading && (
+            <div
+              className="flex items-center gap-3 px-4 py-4 rounded-xl text-center justify-center"
+              style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
+            >
+              <GraduationCap size={16} className="text-gray-600 flex-shrink-0" />
+              <p className="text-sm text-gray-500">No Videos yet. Please check back soon!</p>
+            </div>
+          )}
           {filteredSections.map((section, idx) => (
             <SectionRow
               key={section.id}

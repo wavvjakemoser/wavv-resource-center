@@ -552,8 +552,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <Star size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-400 text-sm font-medium">No exclusive webinars scheduled right now.</p>
-              <p className="text-gray-600 text-xs mt-1">New sessions are added regularly — check back soon.</p>
+              <p className="text-gray-400 text-sm font-medium">No Exclusive Webinars yet.</p>
+              <p className="text-gray-600 text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}
@@ -569,7 +569,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <RefreshCw size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-400 text-sm font-medium">No on-demand videos available yet.</p>
+              <p className="text-gray-400 text-sm font-medium">No On-Demand Videos yet.</p>
+              <p className="text-gray-600 text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}
@@ -585,8 +586,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <PlayCircle size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-400 text-sm font-medium">No recordings available yet.</p>
-              <p className="text-gray-600 text-xs mt-1">Completed exclusive webinars will be added here.</p>
+              <p className="text-gray-400 text-sm font-medium">No Recordings yet.</p>
+              <p className="text-gray-600 text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}
