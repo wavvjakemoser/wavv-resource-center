@@ -3,7 +3,14 @@ import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import {
   Video, Calendar, Clock, ExternalLink, PlayCircle,
-  Users, Star, RefreshCw, Timer, X, PictureInPicture2, Maximize2
+  Users, Star, RefreshCw, Timer, X, PictureInPicture2, Maximize2,
+  Play, Mic, Radio, UserCheck, GraduationCap,
+  BarChart3, TrendingUp, Activity, Target, Zap,
+  Phone, PhoneCall, Headphones, MessageSquare, Mail,
+  BookOpen, FileText, Lightbulb, Award, Trophy, Rocket,
+  PhoneOutgoing, PhoneMissed, PhoneOff, ListChecks, ClipboardList,
+  Crosshair, Megaphone, Repeat, RotateCcw, Shuffle,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ContentRequestCTA } from "./Academy";
@@ -198,7 +205,7 @@ function WebinarCard({
   nextSession,
   onPlay,
 }: {
-  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null };
+  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null; iconName?: string | null };
   variant: WebinarType;
   nextSession?: Date;
   onPlay?: (embedUrl: string, title: string, variant: WebinarType) => void;
@@ -225,6 +232,17 @@ function WebinarCard({
   const thumbBg = variant === 'evergreen' && webinar.thumbnailUrl
     ? webinar.thumbnailUrl
     : SECTION_BG[variant];
+
+  // Resolve the selected icon component from the stored name
+  const ICON_MAP: Record<string, LucideIcon> = {
+    Video, Play, Mic, Radio, Users, UserCheck, GraduationCap,
+    BarChart3, TrendingUp, Activity, Target, Zap,
+    Phone, PhoneCall, Headphones, MessageSquare, Mail,
+    BookOpen, FileText, Lightbulb, Star, Award, Trophy, Rocket,
+    PhoneOutgoing, PhoneMissed, PhoneOff, ListChecks, ClipboardList,
+    Crosshair, Megaphone, Repeat, RotateCcw, Shuffle,
+  };
+  const CardIcon: LucideIcon | undefined = webinar.iconName ? ICON_MAP[webinar.iconName] : undefined;
 
   // Determine if this card has an embeddable video
   const embedUrl = webinar.videoUrl ? getEmbedUrl(webinar.videoUrl) : null;
@@ -263,6 +281,15 @@ function WebinarCard({
         style={{ height: "120px", borderBottom: `1px solid ${accentColor}30` }}
       >
         <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        {/* Icon badge — shown when an icon is selected for this webinar */}
+        {CardIcon && (
+          <div
+            className="absolute top-2.5 left-2.5 w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: `${accentColor}dd`, boxShadow: `0 2px 8px ${accentColor}55` }}
+          >
+            <CardIcon size={15} color="#fff" />
+          </div>
+        )}
         {/* Play overlay for cards with video */}
         {(embedUrl || isHostedVideo) && (
           <div

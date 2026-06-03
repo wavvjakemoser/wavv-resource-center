@@ -135,6 +135,15 @@ import {
   Award,
   Trophy,
   Rocket,
+  PhoneOutgoing,
+  PhoneMissed,
+  PhoneOff,
+  ListChecks,
+  ClipboardList,
+  Crosshair,
+  Repeat,
+  RotateCcw,
+  Shuffle,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -4764,16 +4773,26 @@ function WebinarsTab() {
               <label className="block text-xs text-gray-400 mb-1">Icon <span className="text-gray-600">(choose one, color set by Accent Color)</span></label>
               <div className="flex flex-wrap gap-1.5 p-3 rounded-xl" style={{ background: "#111", border: "1px solid #2a2a2a" }}>
                 {([
-                  "Video", "Play", "Mic", "Radio", "Users", "UserCheck", "GraduationCap",
-                  "BarChart3", "TrendingUp", "Activity", "Target", "Zap",
-                  "Phone", "PhoneCall", "Headphones", "MessageSquare", "Mail",
-                  "BookOpen", "FileText", "Lightbulb", "Star", "Award", "Trophy", "Rocket",
+                  // Content & learning
+                  "Video", "Play", "BookOpen", "GraduationCap", "FileText", "Lightbulb",
+                  // Outbound calling & prospecting
+                  "Phone", "PhoneCall", "PhoneOutgoing", "PhoneMissed", "PhoneOff", "Headphones",
+                  // Pipeline & prospecting
+                  "Target", "Crosshair", "TrendingUp", "BarChart3", "Activity", "Shuffle",
+                  // Process & workflow
+                  "ListChecks", "ClipboardList", "Repeat", "RotateCcw", "Zap", "Megaphone",
+                  // People & teams
+                  "Users", "UserCheck", "MessageSquare", "Mail", "Mic", "Radio",
+                  // Recognition
+                  "Star", "Award", "Trophy", "Rocket",
                 ] as const).map((iconKey) => {
                   const IconComp = {
-                    Video, Play: Play, Mic, Radio, Users, UserCheck, GraduationCap,
-                    BarChart3, TrendingUp, Activity, Target: Target, Zap: Zap,
-                    Phone, PhoneCall, Headphones, MessageSquare, Mail,
-                    BookOpen, FileText, Lightbulb, Star, Award, Trophy, Rocket,
+                    Video, Play, BookOpen, GraduationCap, FileText, Lightbulb,
+                    Phone, PhoneCall, PhoneOutgoing, PhoneMissed, PhoneOff, Headphones,
+                    Target, Crosshair, TrendingUp, BarChart3, Activity, Shuffle,
+                    ListChecks, ClipboardList, Repeat, RotateCcw, Zap, Megaphone,
+                    Users, UserCheck, MessageSquare, Mail, Mic, Radio,
+                    Star, Award, Trophy, Rocket,
                   }[iconKey as string] as React.FC<{ size?: number; color?: string }> | undefined;
                   if (!IconComp) return null;
                   const isSelected = form.iconName === iconKey;
