@@ -74,14 +74,6 @@ export default function LessonViewer() {
                 allowFullScreen
                 title={lesson?.title}
               />
-              {/* WAVV watermark overlay — bottom-right, 15% opacity */}
-              <img
-                src="/manus-storage/wavv_watermark_836a886a.png"
-                alt=""
-                aria-hidden="true"
-                draggable={false}
-                style={{ position: "absolute", bottom: "14px", right: "16px", width: "112px", opacity: 0.15, pointerEvents: "none", userSelect: "none", zIndex: 10 }}
-              />
             </div>
           ) : lesson?.videoUrl ? (
             <div className="relative" style={{ paddingBottom: "56.25%" }}>
@@ -90,14 +82,6 @@ export default function LessonViewer() {
                 controls
                 className="absolute inset-0 w-full h-full"
                 style={{ background: "#000" }}
-              />
-              {/* WAVV watermark overlay — bottom-right, 15% opacity */}
-              <img
-                src="/manus-storage/wavv_watermark_836a886a.png"
-                alt=""
-                aria-hidden="true"
-                draggable={false}
-                style={{ position: "absolute", bottom: "14px", right: "16px", width: "112px", opacity: 0.15, pointerEvents: "none", userSelect: "none", zIndex: 10 }}
               />
             </div>
           ) : (

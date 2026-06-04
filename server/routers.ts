@@ -124,10 +124,6 @@ import {
   resetGuideDownloads,
 } from "./db";
 
-// ─── Watermark helper ───────────────────────────────────────────────────────
-import { applyPdfWatermark } from "./watermark";
-import type { DocumentType } from "./watermark";
-
 // // ─── Role guards ─────────────────────────────────────────────────────
 // Owner only — full access, promote/demote, remove users
 const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -303,20 +299,10 @@ const academyRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => deleteLesson(input.id)),
   adminUploadLessonFile: superAdminProcedure
-    .input(z.object({
-      base64: z.string(),
-      mimeType: z.string(),
-      fileName: z.string(),
-      documentType: z.string().optional(),
-      skipWatermark: z.boolean().optional(),
-    }))
+    .input(z.object({ base64: z.string(), mimeType: z.string(), fileName: z.string() }))
     .mutation(async ({ input }) => {
       const { storagePut } = await import("./storage");
-      let buffer = Buffer.from(input.base64, "base64");
-      // Apply WAVV watermark to PDFs unless explicitly skipped
-      if (!input.skipWatermark && input.mimeType === "application/pdf") {
-        buffer = await applyPdfWatermark(buffer, (input.documentType as DocumentType) ?? "");
-      }
+      const buffer = Buffer.from(input.base64, "base64");
       const ext = input.fileName.split(".").pop() ?? "pdf";
       const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").substring(0, 80);
       const key = `lesson-files/${Date.now()}-${safeName}`;
@@ -391,16 +377,10 @@ const academyRouter = router({
       base64: z.string(),
       mimeType: z.string(),
       fileName: z.string(),
-      documentType: z.string().optional(),
-      skipWatermark: z.boolean().optional(),
     }))
     .mutation(async ({ input }) => {
       const { storagePut } = await import("./storage");
-      let buffer = Buffer.from(input.base64, "base64");
-      // Apply WAVV watermark to PDFs unless explicitly skipped
-      if (!input.skipWatermark && input.mimeType === "application/pdf") {
-        buffer = await applyPdfWatermark(buffer, (input.documentType as DocumentType) ?? "");
-      }
+      const buffer = Buffer.from(input.base64, "base64");
       const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").substring(0, 80);
       const key = `section-resources/${Date.now()}-${safeName}`;
       const { url } = await storagePut(key, buffer, input.mimeType);
@@ -615,16 +595,10 @@ const guidesRouter = router({
       base64: z.string(),
       mimeType: z.enum(["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]),
       fileName: z.string(),
-      documentType: z.string().optional(),
-      skipWatermark: z.boolean().optional(),
     }))
     .mutation(async ({ input }) => {
       const { storagePut } = await import("./storage");
-      let buffer = Buffer.from(input.base64, "base64");
-      // Apply WAVV watermark to PDFs unless explicitly skipped
-      if (!input.skipWatermark && input.mimeType === "application/pdf") {
-        buffer = await applyPdfWatermark(buffer, (input.documentType as DocumentType) ?? "");
-      }
+      const buffer = Buffer.from(input.base64, "base64");
       const ext = input.fileName.split(".").pop() ?? "pdf";
       const key = `guides/${Date.now()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const { url } = await storagePut(key, buffer, input.mimeType);

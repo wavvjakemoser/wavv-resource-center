@@ -3448,7 +3448,7 @@ function SectionResourcesPanel({
 
   // Upload dialog state
   const [uploadDialog, setUploadDialog] = React.useState(false);
-  const [uploadForm, setUploadForm] = React.useState({ courseId: "", label: "", fileName: "", base64: "", mimeType: "", documentType: "Resource", skipWatermark: false });
+  const [uploadForm, setUploadForm] = React.useState({ courseId: "", label: "", fileName: "", base64: "", mimeType: "" });
   const [uploading, setUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -3462,7 +3462,7 @@ function SectionResourcesPanel({
       utils.academy.adminGetSectionResources.invalidate();
       toast.success("PDF resource uploaded");
       setUploadDialog(false);
-      setUploadForm({ courseId: "", label: "", fileName: "", base64: "", mimeType: "", documentType: "Resource", skipWatermark: false });
+      setUploadForm({ courseId: "", label: "", fileName: "", base64: "", mimeType: "" });
     },
     onError: (e) => toast.error("Upload failed: " + e.message),
   });
@@ -3517,8 +3517,6 @@ function SectionResourcesPanel({
         base64: uploadForm.base64,
         mimeType: uploadForm.mimeType,
         fileName: uploadForm.fileName,
-        documentType: uploadForm.documentType || undefined,
-        skipWatermark: uploadForm.skipWatermark,
       });
     } catch { /* handled by onError */ } finally { setUploading(false); }
   }
@@ -3569,7 +3567,7 @@ function SectionResourcesPanel({
         {isSuperAdmin && (
           <button
             type="button"
-            onClick={() => { setUploadForm({ courseId: "", label: "", fileName: "", base64: "", mimeType: "", documentType: "Resource", skipWatermark: false }); setUploadDialog(true); }}
+            onClick={() => { setUploadForm({ courseId: "", label: "", fileName: "", base64: "", mimeType: "" }); setUploadDialog(true); }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition hover:opacity-90"
             style={{ background: "rgba(96,165,250,0.12)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.3)" }}
           >
@@ -3749,23 +3747,6 @@ function SectionResourcesPanel({
               />
             </div>
 
-            {/* Document Type */}
-            {uploadForm.mimeType === "application/pdf" && !uploadForm.skipWatermark && (
-              <div>
-                <label className="text-xs text-gray-400 mb-1.5 block">Document Type</label>
-                <Select value={uploadForm.documentType} onValueChange={(v) => setUploadForm((f) => ({ ...f, documentType: v }))}>
-                  <SelectTrigger className="bg-black/30 border-white/10 text-white">
-                    <SelectValue placeholder="Select type..." />
-                  </SelectTrigger>
-                  <SelectContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-                    {["Help Article", "Playbook", "Quick Reference", "Release Notes", "Guide", "Resource"].map((t) => (
-                      <SelectItem key={t} value={t} className="text-white">{t}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
             {/* File picker */}
             <div>
               <label className="text-xs text-gray-400 mb-1.5 block">File <span className="text-red-400">*</span></label>
@@ -3796,20 +3777,6 @@ function SectionResourcesPanel({
                   <Upload size={15} /> Choose PDF / DOCX / XLSX (max 16 MB)
                 </button>
               )}
-            </div>
-
-            {/* Skip watermark override */}
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
-                id="skip-wm-section"
-                checked={uploadForm.skipWatermark}
-                onChange={(e) => setUploadForm((f) => ({ ...f, skipWatermark: e.target.checked }))}
-                className="w-3.5 h-3.5 rounded accent-blue-500"
-              />
-              <label htmlFor="skip-wm-section" className="text-xs text-gray-400 cursor-pointer">
-                Skip watermark <span className="text-gray-600">(third-party content)</span>
-              </label>
             </div>
           </div>
           <DialogFooter>
@@ -4027,7 +3994,7 @@ function LessonRow({
     try {
       const buf = await file.arrayBuffer();
       const base64 = btoa(String.fromCharCode(...Array.from(new Uint8Array(buf))));
-      await uploadLessonFileMut.mutateAsync({ base64, mimeType: file.type, fileName: file.name, documentType: lessonDocType || undefined, skipWatermark: lessonSkipWm });
+      await uploadLessonFileMut.mutateAsync({ base64, mimeType: file.type, fileName: file.name });
     } catch { /* handled by onError */ } finally { setUploadingFile(false); }
     e.target.value = "";
   }
@@ -4035,8 +4002,6 @@ function LessonRow({
   const [customTagInput, setCustomTagInput] = React.useState("");
   const [isHidden, setIsHidden] = React.useState(!!lesson.hidden);
   const [editPipEnabled, setEditPipEnabled] = React.useState(lesson.pipEnabled !== false);
-  const [lessonDocType, setLessonDocType] = React.useState("Resource");
-  const [lessonSkipWm, setLessonSkipWm] = React.useState(false);
   const utils = trpc.useUtils();
 
   const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
@@ -4124,28 +4089,6 @@ function LessonRow({
           {/* Downloadable file attachment */}
           <div className="rounded-lg p-2.5 space-y-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid #2a2a2a" }}>
             <p className="text-[11px] text-gray-500 font-medium">Downloadable Attachment (PDF, DOCX, XLSX)</p>
-            {/* Watermark controls */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <select
-                value={lessonDocType}
-                onChange={(e) => setLessonDocType(e.target.value)}
-                disabled={lessonSkipWm}
-                className="text-[11px] bg-[#111] border border-[#2a2a2a] rounded px-2 py-1 text-gray-300 outline-none"
-              >
-                {["Help Article", "Playbook", "Quick Reference", "Release Notes", "Guide", "Resource"].map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={lessonSkipWm}
-                  onChange={(e) => setLessonSkipWm(e.target.checked)}
-                  className="w-3 h-3 rounded accent-blue-500"
-                />
-                <span className="text-[11px] text-gray-500">Skip watermark</span>
-              </label>
-            </div>
             {editFileUrl ? (
               <div className="flex items-center gap-2">
                 <Paperclip size={12} className="text-blue-400 flex-shrink-0" />
@@ -5298,8 +5241,6 @@ function GuidesTab() {
     fileUrl: "",
     // fileType = the section/category this guide belongs to
     fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article",
-    documentType: "Guide",
-    skipWatermark: false,
   });
   const uploadFileMutation = trpc.guides.uploadFile.useMutation({
     onError: (e) => toast.error("Upload failed: " + e.message),
@@ -5316,10 +5257,10 @@ function GuidesTab() {
     onSuccess: () => { utils.guides.adminList.invalidate(); toast.success("Guide deleted"); },
     onError: (e) => toast.error(e.message),
   });
-  function resetForm() { setForm({ title: "", description: "", fileUrl: "", fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article", documentType: "Guide", skipWatermark: false }); }
+  function resetForm() { setForm({ title: "", description: "", fileUrl: "", fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article" }); }
   function startEdit(g: typeof guides[0]) {
     setEditId(g.id);
-    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other" | "help_article") ?? "pdf", documentType: "Guide", skipWatermark: false });
+    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other" | "help_article") ?? "pdf" });
     setShowForm(true);
   }
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -5343,7 +5284,7 @@ function GuidesTab() {
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      const result = await uploadFileMutation.mutateAsync({ base64, mimeType, fileName: file.name, documentType: form.documentType || undefined, skipWatermark: form.skipWatermark });
+      const result = await uploadFileMutation.mutateAsync({ base64, mimeType, fileName: file.name });
       setForm(f => ({ ...f, fileUrl: result.url }));
       toast.success("File uploaded — URL masked by portal storage");
     } catch { /* handled by onError */ } finally { setUploadingFile(false); }
@@ -5411,35 +5352,6 @@ function GuidesTab() {
               <label className="block text-xs text-gray-400 mb-1">Description</label>
               <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description" />
             </div>
-            {/* Row 2.5: Document Type + Skip Watermark */}
-            <div className="grid grid-cols-2 gap-3 items-end">
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">Document Type <span className="text-gray-600">(for watermark)</span></label>
-                <select
-                  style={{ ...inputStyle, appearance: "none" as const }}
-                  value={form.documentType}
-                  onChange={e => setForm(f => ({ ...f, documentType: e.target.value }))}
-                  disabled={form.skipWatermark}
-                >
-                  {["Help Article", "Playbook", "Quick Reference", "Release Notes", "Guide", "Resource"].map(t => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center gap-2 pb-1">
-                <input
-                  type="checkbox"
-                  id="skip-wm-guide"
-                  checked={form.skipWatermark}
-                  onChange={(e) => setForm(f => ({ ...f, skipWatermark: e.target.checked }))}
-                  className="w-3.5 h-3.5 rounded accent-blue-500"
-                />
-                <label htmlFor="skip-wm-guide" className="text-xs text-gray-400 cursor-pointer">
-                  Skip watermark <span className="text-gray-600">(3rd-party)</span>
-                </label>
-              </div>
-            </div>
-
             {/* Row 3: File upload + URL preview */}
             <div className="space-y-2">
               <label className="block text-xs text-gray-400 mb-1">File Attachment <span className="text-gray-600">(PDF, DOCX, or XLSX — max 16 MB)</span></label>
