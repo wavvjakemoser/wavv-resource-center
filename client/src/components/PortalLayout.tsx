@@ -329,7 +329,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                         Hidden
                       </span>
                     )}
-                    <ExternalLink size={13} style={{ color: "rgba(0,169,226,0.6)", flexShrink: 0 }} />
                   </a>
                 );
               })()}
