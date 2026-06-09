@@ -5821,15 +5821,15 @@ function SupportTab() {
       {/* Under-construction banner */}
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: "rgba(245,158,11,0.07)", border: "2px dashed rgba(245,158,11,0.35)" }}
+        style={{ background: "rgba(255,153,0,0.07)", border: "2px dashed rgba(255,153,0,0.35)" }}
       >
         <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
           {/* Icon */}
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ background: "rgba(245,158,11,0.15)" }}
+            style={{ background: "rgba(255,153,0,0.15)" }}
           >
-            <AlertTriangle size={40} style={{ color: "#f59e0b" }} />
+            <AlertTriangle size={40} style={{ color: "#FF9900" }} />
           </div>
 
           {/* Heading */}
@@ -5839,7 +5839,7 @@ function SupportTab() {
             </h3>
             <div
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-              style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
+              style={{ background: "rgba(255,153,0,0.2)", color: "#FF9900" }}
             >
               <AlertTriangle size={11} />
               Under Construction
@@ -5868,7 +5868,7 @@ function SupportTab() {
                 className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
               >
-                <span style={{ color: "#f59e0b" }}>{icon}</span>
+                <span style={{ color: "#FF9900" }}>{icon}</span>
                 {label}
               </div>
             ))}
@@ -7320,8 +7320,8 @@ function PartnersContentTab() {
             <Users size={18} style={{ color: "#00A9E2" }} />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white">Partners Content</h2>
-            <p className="text-xs text-gray-500">Manage content for the public Partners page and the approved Partner Portal</p>
+            <h2 className="text-base font-bold text-white">WAVV Partners Content</h2>
+            <p className="text-xs text-gray-500">Manage content for the public Partners page and the WAVV Partners Portal</p>
           </div>
         </div>
         <div className="flex rounded-lg overflow-hidden border border-white/10">
@@ -7334,18 +7334,18 @@ function PartnersContentTab() {
           ))}
         </div>
       </div>
-      {/* Under Construction placeholder — matches Support Analytics card style exactly */}
+      {/* Under Construction placeholder */}
       <div
         className="rounded-2xl overflow-hidden"
-        style={{ background: "rgba(245,158,11,0.07)", border: "2px dashed rgba(245,158,11,0.35)" }}
+        style={{ background: "rgba(0,169,226,0.07)", border: "2px dashed rgba(0,169,226,0.35)" }}
       >
         <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
           {/* Icon */}
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ background: "rgba(245,158,11,0.15)" }}
+            style={{ background: "rgba(0,169,226,0.15)" }}
           >
-            <AlertTriangle size={40} style={{ color: "#f59e0b" }} />
+            <AlertTriangle size={40} style={{ color: "#00A9E2" }} />
           </div>
 
           {/* Heading */}
@@ -7355,7 +7355,7 @@ function PartnersContentTab() {
             </h3>
             <div
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-              style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
+              style={{ background: "rgba(0,169,226,0.2)", color: "#00A9E2" }}
             >
               <AlertTriangle size={11} />
               Under Construction
@@ -7383,7 +7383,7 @@ function PartnersContentTab() {
                 className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
               >
-                <span style={{ color: "#f59e0b" }}>{icon}</span>
+                <span style={{ color: "#00A9E2" }}>{icon}</span>
                 {label}
               </div>
             ))}
