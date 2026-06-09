@@ -18,6 +18,7 @@ import {
   Users,
   ExternalLink,
   LogOut,
+  EyeOff,
 } from "lucide-react";
 
 const baseNavItems = [
@@ -38,8 +39,8 @@ interface PortalLayoutProps {
 }
 
 function NavLink({
-  href, label, icon: Icon, color, isActive, onClick, comingSoon,
-}: { href: string; label: string; icon: React.ElementType; color: string; isActive: boolean; onClick: () => void; comingSoon?: boolean }) {
+  href, label, icon: Icon, color, isActive, onClick, comingSoon, isHidden,
+}: { href: string; label: string; icon: React.ElementType; color: string; isActive: boolean; onClick: () => void; comingSoon?: boolean; isHidden?: boolean }) {
   return (
     <Link
       href={href}
@@ -78,8 +79,18 @@ function NavLink({
       >
         <Icon size={17} style={{ color }} />
       </div>
-      <span className="truncate flex-1">{label}</span>
-      {comingSoon && (
+      <span className="truncate flex-1" style={isHidden ? { opacity: 0.55 } : {}}>{label}</span>
+      {isHidden && (
+        <span
+          className="flex-shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+          style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
+          title="Hidden from customers"
+        >
+          <EyeOff size={8} />
+          Hidden
+        </span>
+      )}
+      {comingSoon && !isHidden && (
         <span
           className="flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
           style={{ background: "rgba(168,85,247,0.18)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }}
@@ -220,11 +231,14 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               const isActive =
                 location === item.href ||
                 (item.href !== "/home" && location.startsWith(item.href));
+              // Show hidden badge to admins for items toggled off in nav_visibility
+              const isHiddenFromCustomers = isAdmin && !settingsLoading && navVisibility[item.href] === false;
               return (
                 <NavLink
                   key={item.href}
                   {...item}
                   isActive={isActive}
+                  isHidden={isHiddenFromCustomers}
                   onClick={() => setSidebarOpen(false)}
                 />
               );
