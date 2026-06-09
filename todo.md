@@ -1198,3 +1198,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] Add guide_viewed event tracking when user opens a guide card
 - [ ] Rename "Role" column/label to "Access Level" in analytics UI
 - [ ] Build Content Leaderboard view in AdminAnalytics (top content across all types by engagement)
+
+## Route Rename + Route Guard (Session — Jun 9 2026 cont.)
+- [x] Rename /hands-on → /playground: App.tsx route updated, /hands-on redirects to /playground
+- [x] PortalLayout nav href updated to /playground
+- [x] Admin.tsx NAV_ITEMS updated to /playground (nav_visibility key)
+- [x] Dashboard.tsx Playground card navHref updated to /playground
+- [x] /wavvpartner NavGuard verified: non-admins redirected to /404 when hidden in nav_visibility

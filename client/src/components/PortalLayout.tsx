@@ -25,7 +25,7 @@ const baseNavItems = [
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
-  { href: "/hands-on",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
+  { href: "/playground",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
   { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
 ];
 const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
@@ -46,15 +46,17 @@ function NavLink({
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
       style={{
         fontSize: "15px",
-        opacity: isHidden ? 0.45 : 1,
-        borderLeft: isHidden ? "3px solid #fbbf24" : undefined,
-        paddingLeft: isHidden ? "9px" : undefined,
+        opacity: isHidden ? 0.55 : 1,
         ...(isActive ? {
           background: `${color}18`,
           border: `1px solid ${color}35`,
           color: "#ffffff",
+        } : isHidden ? {
+          background: "rgba(251,191,36,0.06)",
+          border: "1px solid #fbbf24",
+          color: "#ffffff",
         } : {
-          background: isHidden ? "rgba(251,191,36,0.04)" : "transparent",
+          background: "transparent",
           border: "1px solid transparent",
           color: "#ffffff",
         }),
@@ -292,11 +294,9 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
                     style={{
                       fontSize: "14px",
-                      opacity: isPartnerPortalHidden ? 0.45 : 1,
-                      background: isPartnerPortalHidden ? "rgba(251,191,36,0.04)" : "rgba(0,169,226,0.08)",
-                      border: "1px solid transparent",
-                      borderLeft: isPartnerPortalHidden ? "3px solid #fbbf24" : "1px solid rgba(0,169,226,0.18)",
-                      paddingLeft: isPartnerPortalHidden ? "9px" : undefined,
+                      opacity: isPartnerPortalHidden ? 0.55 : 1,
+                      background: isPartnerPortalHidden ? "rgba(251,191,36,0.06)" : "rgba(0,169,226,0.08)",
+                      border: isPartnerPortalHidden ? "1px solid #fbbf24" : "1px solid rgba(0,169,226,0.18)",
                       color: "#00A9E2",
                     }}
                     onMouseEnter={(e) => {

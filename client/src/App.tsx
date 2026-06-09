@@ -60,7 +60,8 @@ function Router() {
       <Route path="/wavvpartner">{() => <NavGuard href="/wavvpartner"><WavvPartnerPortal /></NavGuard>}</Route>
       <Route path="/wavvadmin" component={Admin} />
       <Route path="/wavvadmin/legacy" component={AdminPanel} />
-      <Route path="/hands-on" component={HandsOn} />
+      <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>
+      <Route path="/hands-on">{() => <Redirect to="/playground" />}</Route>
       <Route path="/accept-invite" component={AcceptInvite} />
       <Route path="/auth/magic" component={MagicAuth} />
       <Route path="/profile" component={Profile} />

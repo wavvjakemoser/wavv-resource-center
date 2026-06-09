@@ -69,7 +69,7 @@ const START_HERE_CARDS = [
   {
     id: "playground",
     href: null,
-    navHref: "/hands-on",
+    navHref: "/playground",
     label: "WAVV Playground",
     icon: FlaskConical,
     color: "#a855f7",
