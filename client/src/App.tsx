@@ -41,6 +41,20 @@ function NavGuard({ href, children }: { href: string; children: React.ReactNode 
   return <>{children}</>;
 }
 
+// Strict guard for /wavvpartner — only owner and partner_admin can access, regardless of visibility.
+// Everyone else (including other admins, content_admin, regular users) gets /404.
+// When hidden in nav_visibility, even owner/partner_admin see it but others always get /404.
+function PartnerPortalGuard({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const { data: allSettings, isLoading } = trpc.siteSettings.getAll.useQuery();
+  // Wait for auth to resolve before making a decision
+  if (isLoading || user === undefined) return null;
+  const isAllowed = user?.role === "owner" || user?.role === "partner_admin";
+  if (!isAllowed) return <Redirect to="/404" />;
+  // If allowed role but page is hidden, still let them through (they can see it in admin sidebar)
+  return <>{children}</>;
+}
+
 function Router() {
   usePageTracking();
   return (
@@ -57,7 +71,7 @@ function Router() {
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
       <Route path="/partners" component={Partners} />
-      <Route path="/wavvpartner">{() => <NavGuard href="/wavvpartner"><WavvPartnerPortal /></NavGuard>}</Route>
+      <Route path="/wavvpartner">{() => <PartnerPortalGuard><WavvPartnerPortal /></PartnerPortalGuard>}</Route>
       <Route path="/wavvadmin" component={Admin} />
       <Route path="/wavvadmin/legacy" component={AdminPanel} />
       <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>
