@@ -1170,3 +1170,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add empty search state with "We can't find what you're looking for" message and "Request this content" CTA
 - [x] Auto-log search queries with no results to content_requests table as search_query type
 - [x] Add "Query Search Requests" group to admin Requests tab (purple, shows auto-logged search queries)
+
+## Admin UX Polish (Session — Jun 9 2026)
+
+- [x] Settings tab: add Approved Partners on/off toggle (owner-only, amber style); confirm dialog on disable
+- [x] ApprovedPartnersTab: when disabled, show locked overlay card (amber warning, Lock icon, explains how to re-enable) instead of partner management UI; when enabled, show consistent hero header
+- [x] PortalLayout: WAVV Partners Portal sidebar link now shows amber "Hidden" badge + dimmed label when /wavvpartner is toggled off in nav_visibility (matches NavLink hidden badge behavior)
+- [x] ContentTab (Academy): add icon+title+subtitle hero header (GraduationCap, blue)
+- [x] WebinarsTab: add icon+title+subtitle hero header (Video, blue)
+- [x] GuidesTab: add icon+title+subtitle hero header (FileText, green)
+- [x] PlaygroundTab: add icon+title+subtitle hero header (FlaskConical, purple)
+- [x] ContentRequestsTab: already had hero header — confirmed consistent, no change needed
+- [x] SupportTab: already had hero header — confirmed consistent, no change needed

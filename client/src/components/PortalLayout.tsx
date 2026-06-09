@@ -289,36 +289,51 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 onClick={() => setSidebarOpen(false)}
               />
               {/* Partner portal preview link — always visible for owner/partner_admin */}
-              {(user?.role === "owner" || user?.role === "partner_admin") && (
-                <a
-                  href="/wavvpartner"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
-                  style={{
-                    fontSize: "15px",
-                    background: "rgba(0,169,226,0.08)",
-                    border: "1px solid rgba(0,169,226,0.18)",
-                    color: "#00A9E2",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(0,169,226,0.14)";
-                    e.currentTarget.style.borderColor = "rgba(0,169,226,0.3)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(0,169,226,0.08)";
-                    e.currentTarget.style.borderColor = "rgba(0,169,226,0.18)";
-                  }}
-                >
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: "rgba(0,169,226,0.15)" }}
+              {(user?.role === "owner" || user?.role === "partner_admin") && (() => {
+                const isPartnerPortalHidden = !settingsLoading && navVisibility["/wavvpartner"] === false;
+                return (
+                  <a
+                    href="/wavvpartner"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
+                    style={{
+                      fontSize: "15px",
+                      background: "rgba(0,169,226,0.08)",
+                      border: "1px solid rgba(0,169,226,0.18)",
+                      color: "#00A9E2",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(0,169,226,0.14)";
+                      e.currentTarget.style.borderColor = "rgba(0,169,226,0.3)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(0,169,226,0.08)";
+                      e.currentTarget.style.borderColor = "rgba(0,169,226,0.18)";
+                    }}
                   >
-                    <Users size={17} style={{ color: "#00A9E2" }} />
-                  </div>
-                  <span className="flex-1 whitespace-nowrap">WAVV Partners Portal</span>
-                </a>
-              )}
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(0,169,226,0.15)" }}
+                    >
+                      <Users size={17} style={{ color: "#00A9E2" }} />
+                    </div>
+                    <span className="flex-1 whitespace-nowrap" style={isPartnerPortalHidden ? { opacity: 0.55 } : {}}>WAVV Partners Portal</span>
+                    {isPartnerPortalHidden && (
+                      <span
+                        className="flex-shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                        style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
+                        title="Hidden from customers"
+                      >
+                        <EyeOff size={8} />
+                        Hidden
+                      </span>
+                    )}
+                    <ExternalLink size={13} style={{ color: "rgba(0,169,226,0.6)", flexShrink: 0 }} />
+                  </a>
+                );
+              })()}
+
             </div>
           )}
         </aside>

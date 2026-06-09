@@ -3102,6 +3102,17 @@ function ContentTab() {
 
   return (
     <div className="space-y-0">
+      {/* Hero header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+          <GraduationCap size={18} style={{ color: "#0074F4" }} />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-white">WAVV Academy</h2>
+          <p className="text-xs text-gray-500">Manage courses, lessons, and learning content for all Academy categories</p>
+        </div>
+      </div>
+
       {/* ── Top-level Add Section bar ── */}
       <div className="flex items-center gap-3 mb-6 p-3 rounded-xl" style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.18)" }}>
         <span className="text-xs font-semibold text-gray-400 whitespace-nowrap">Add Section to:</span>
@@ -4366,7 +4377,15 @@ function PlaygroundTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white">Playground & Support</h2>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(168,85,247,0.15)" }}>
+            <FlaskConical size={18} style={{ color: "#a855f7" }} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white">WAVV Playground</h2>
+            <p className="text-xs text-gray-500">Playground session requests and hands-on demo management</p>
+          </div>
+        </div>
         <button
           onClick={exportCSVRequests}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
@@ -4678,7 +4697,15 @@ function WebinarsTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white">WAVV Webinars</h2>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+            <VideoIcon size={18} style={{ color: "#0074F4" }} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white">WAVV Webinars</h2>
+            <p className="text-xs text-gray-500">Manage on-demand series, exclusive live webinars, and recordings</p>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={async () => {
@@ -5302,7 +5329,15 @@ function GuidesTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white">WAVV Guides & Docs</h2>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(103,199,40,0.15)" }}>
+            <FileTextIcon size={18} style={{ color: "#67C728" }} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white">WAVV Guides & Docs</h2>
+            <p className="text-xs text-gray-500">Manage PDFs, checklists, playbooks, and help articles</p>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={async () => {
@@ -6756,6 +6791,7 @@ function SettingsTab() {
 
   const askWavvEnabled = settings["ask_wavv_enabled"] !== false; // default true
   const maintenanceMode = settings["maintenance_mode"] === true;
+  const approvedPartnersEnabled = settings["approved_partners_enabled"] !== false; // default true
   const announcementText = typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "";
   const announcementEnabled = settings["announcement_enabled"] === true;
   const rateLimitPerHour = typeof settings["ask_wavv_rate_limit"] === "number" ? settings["ask_wavv_rate_limit"] : 10;
@@ -6974,6 +7010,34 @@ function SettingsTab() {
             </div>
           </div>
 
+          {/* ── Approved Partners ── */}
+          <div className={sectionClass} style={sectionStyle}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
+                  <UserPlus size={15} style={{ color: "#f59e0b" }} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Approved Partners</p>
+                  <p className="text-xs text-gray-500">Controls whether the Approved Partners tab is active. Disable to prevent accidental partner invitations while the Partner Portal is under construction.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (approvedPartnersEnabled && !window.confirm("Disable Approved Partners? The tab will remain visible but locked to prevent accidental invitations.")) return;
+                  toggle("approved_partners_enabled", approvedPartnersEnabled);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                style={approvedPartnersEnabled
+                  ? { background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+              >
+                {approvedPartnersEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                {approvedPartnersEnabled ? "Enabled" : "Disabled"}
+              </button>
+            </div>
+          </div>
+
           {/* ── Maintenance Mode ── */}
           <div className={sectionClass} style={sectionStyle}>
             <div className="flex items-center justify-between">
@@ -7009,6 +7073,8 @@ function SettingsTab() {
 
 // ─── Approved Partners Tab ────────────────────────────────────────────────────
 function ApprovedPartnersTab() {
+  const { data: settings = {} } = trpc.siteSettings.getAll.useQuery();
+  const approvedPartnersEnabled = (settings as Record<string, unknown>)["approved_partners_enabled"] !== false;
   const { data: partners = [], refetch } = trpc.approvedPartners.list.useQuery();
   const [search, setSearch] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -7041,12 +7107,77 @@ function ApprovedPartnersTab() {
     a.href = url; a.download = "wavv-partners.csv"; a.click();
     URL.revokeObjectURL(url);
   }
+  if (!approvedPartnersEnabled) {
+    return (
+      <div className="p-6">
+        {/* Hero header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(245,158,11,0.15)" }}>
+            <UserPlus size={18} style={{ color: "#f59e0b" }} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white">Approved Partners</h2>
+            <p className="text-xs text-gray-500">Invite and manage WAVV Partners who can access the Partner Portal</p>
+          </div>
+        </div>
+        {/* Locked overlay card */}
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{ background: "rgba(245,158,11,0.07)", border: "2px dashed rgba(245,158,11,0.35)" }}
+        >
+          <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(245,158,11,0.15)" }}>
+              <Lock size={40} style={{ color: "#f59e0b" }} />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-white tracking-tight">Partner Invitations Disabled</h3>
+              <div
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+                style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
+              >
+                <AlertTriangle size={11} />
+                Access Locked
+              </div>
+            </div>
+            <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+              The Approved Partners feature has been <span className="text-white font-medium">disabled by an owner</span>. This prevents accidental partner invitations while the{" "}
+              <span className="text-white font-medium">WAVV Partner Portal</span> is under construction. Re-enable it in{" "}
+              <span className="text-white font-medium">Settings → Approved Partners</span>.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
+              {[
+                { icon: <UserPlus size={14} />, label: "Partner Invitations" },
+                { icon: <Users size={14} />, label: "Partner Management" },
+                { icon: <Shield size={14} />, label: "Access Control" },
+              ].map(({ icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium"
+                  style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.18)", color: "#fbbf24" }}
+                >
+                  <span style={{ color: "#f59e0b" }}>{icon}</span>
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
+      {/* Hero header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-white">Approved Partners</h2>
-          <p className="text-sm text-gray-400 mt-0.5">Invite and manage WAVV Partners who can access the Partner Portal.</p>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(245,158,11,0.15)" }}>
+            <UserPlus size={18} style={{ color: "#f59e0b" }} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white">Approved Partners</h2>
+            <p className="text-xs text-gray-500">Invite and manage WAVV Partners who can access the Partner Portal</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <button onClick={exportCSV} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300 border border-gray-700 hover:bg-white/5 transition-all flex items-center gap-1.5">
