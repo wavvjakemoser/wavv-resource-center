@@ -33,6 +33,7 @@ const START_HERE_CARDS = [
   {
     id: "academy",
     href: "/academy",
+    navHref: "/academy",
     label: "WAVV Academy",
     icon: GraduationCap,
     color: "#0074F4",
@@ -47,6 +48,7 @@ const START_HERE_CARDS = [
     label: "WAVV Webinars",
     icon: Video,
     color: "#10b981",
+    navHref: "/webinars",
     description: "Live and on-demand sessions hosted by the WAVV team. Watch replays, register for upcoming events, and sharpen your skills.",
     cta: "Browse Webinars",
     ctaIcon: Video,
@@ -55,6 +57,7 @@ const START_HERE_CARDS = [
   {
     id: "guides",
     href: "/guides",
+    navHref: "/guides",
     label: "Guides & Docs",
     icon: FileText,
     color: "#67C728",
@@ -66,6 +69,7 @@ const START_HERE_CARDS = [
   {
     id: "playground",
     href: null,
+    navHref: "/hands-on",
     label: "WAVV Playground",
     icon: FlaskConical,
     color: "#a855f7",
@@ -77,6 +81,7 @@ const START_HERE_CARDS = [
   {
     id: "support",
     href: "/support",
+    navHref: "/support",
     label: "WAVV Support",
     icon: Headphones,
     color: "#FF9900",
@@ -88,6 +93,7 @@ const START_HERE_CARDS = [
   {
     id: "partners",
     href: "/partners",
+    navHref: "/partners",
     label: "WAVV Partners",
     icon: Users,
     color: "#00A9E2",
@@ -234,6 +240,10 @@ export default function Dashboard() {
   const { data: exclusiveWebinars } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const trackRegClick = trpc.webinars.trackRegistrationClick.useMutation();
   const [showPlaygroundModal, setShowPlaygroundModal] = useState(false);
+  const { data: allSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const navVisibility = ((allSettings as Record<string, unknown>)["nav_visibility"] ?? {}) as Record<string, boolean>;
+  // Filter out cards whose nav item has been explicitly hidden (false). Default (undefined) = visible.
+  const visibleCards = START_HERE_CARDS.filter((c) => navVisibility[c.navHref] !== false);
 
   const exclusive = (exclusiveWebinars ?? [])
     .filter((w) => !w.scheduledAt || new Date(w.scheduledAt) >= new Date())
@@ -471,7 +481,7 @@ export default function Dashboard() {
 
           {/* Full-width single-column stack */}
           <div className="flex flex-col gap-3">
-            {START_HERE_CARDS.map((card) => {
+            {visibleCards.map((card) => {
               const Icon = card.icon;
               const CtaIcon = card.ctaIcon;
               const isPlayground = card.id === "playground";

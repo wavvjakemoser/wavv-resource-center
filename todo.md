@@ -1182,3 +1182,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] PlaygroundTab: add icon+title+subtitle hero header (FlaskConical, purple)
 - [x] ContentRequestsTab: already had hero header — confirmed consistent, no change needed
 - [x] SupportTab: already had hero header — confirmed consistent, no change needed
+
+## Nav Visibility Consistency (Session — Jun 9 2026 cont.)
+
+- [x] Dashboard "Explore the Center": fetch siteSettings and filter cards by navVisibility — hidden sections no longer appear
+- [x] PortalLayout: WAVV Partners Portal sidebar link — fix truncation (overflow-hidden + truncate span); reduce font to 14px to match NavLink
+- [x] Admin PartnersContentTab: replace plain h2 header with icon+title+desc hero header (Users icon, #00A9E2, matching other tabs)
+- [x] Admin content tab icons: fix Webinars (#10b981 green) and Support (#FF9900 orange) to match sidebar color scheme exactly

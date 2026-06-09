@@ -4698,8 +4698,8 @@ function WebinarsTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
-            <VideoIcon size={18} style={{ color: "#0074F4" }} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(16,185,129,0.15)" }}>
+            <VideoIcon size={18} style={{ color: "#10b981" }} />
           </div>
           <div>
             <h2 className="text-base font-bold text-white">WAVV Webinars</h2>
@@ -5808,9 +5808,9 @@ function SupportTab() {
       <div className="flex items-center gap-3">
         <div
           className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(0,116,244,0.15)" }}
+          style={{ background: "rgba(255,153,0,0.15)" }}
         >
-          <Headphones size={18} style={{ color: "#0074F4" }} />
+          <Headphones size={18} style={{ color: "#FF9900" }} />
         </div>
         <div>
           <h2 className="text-base font-bold text-white">WAVV Support</h2>
@@ -7315,9 +7315,14 @@ function PartnersContentTab() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-white">Partners Content</h2>
-          <p className="text-sm text-gray-400 mt-0.5">Manage content for the public Partners page and the approved Partner Portal.</p>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,169,226,0.15)" }}>
+            <Users size={18} style={{ color: "#00A9E2" }} />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-white">Partners Content</h2>
+            <p className="text-xs text-gray-500">Manage content for the public Partners page and the approved Partner Portal</p>
+          </div>
         </div>
         <div className="flex rounded-lg overflow-hidden border border-white/10">
           {(["public", "portal"] as const).map(t => (

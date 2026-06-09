@@ -296,9 +296,9 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     href="/wavvpartner"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
                     style={{
-                      fontSize: "15px",
+                      fontSize: "14px",
                       background: "rgba(0,169,226,0.08)",
                       border: "1px solid rgba(0,169,226,0.18)",
                       color: "#00A9E2",
@@ -318,7 +318,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     >
                       <Users size={17} style={{ color: "#00A9E2" }} />
                     </div>
-                    <span className="flex-1 whitespace-nowrap" style={isPartnerPortalHidden ? { opacity: 0.55 } : {}}>WAVV Partners Portal</span>
+                    <span className="flex-1 min-w-0 truncate" style={isPartnerPortalHidden ? { opacity: 0.55 } : {}}>WAVV Partners Portal</span>
                     {isPartnerPortalHidden && (
                       <span
                         className="flex-shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
