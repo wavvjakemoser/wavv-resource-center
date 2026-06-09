@@ -110,7 +110,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   }
 
   // Site settings — controls Ask WAVV, announcement banner, maintenance mode
-  const { data: allSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const { data: allSettings = {}, isLoading: settingsLoading } = trpc.siteSettings.getAll.useQuery();
   const askWavvEnabled = (allSettings as Record<string, unknown>)["ask_wavv_enabled"] !== false; // default true
   const maintenanceMode = (allSettings as Record<string, unknown>)["maintenance_mode"] === true;
   const announcementEnabled = (allSettings as Record<string, unknown>)["announcement_enabled"] === true;
@@ -131,10 +131,13 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
 
   // All users see all base nav items + partner item
   // Admins bypass nav_visibility toggles for QA purposes
+  // While settings are loading, non-admins see no nav items to prevent flash of hidden content
   const allNavItems = [...baseNavItems, publicPartnerItem];
   const navItems = allNavItems.filter((item) => {
-    // All admin roles bypass visibility toggles
+    // All admin roles bypass visibility toggles (and don't need to wait for settings)
     if (isAdmin) return true;
+    // Suppress all items until settings have loaded to prevent flash of hidden content
+    if (settingsLoading) return false;
     // Check nav_visibility setting (missing key = visible)
     if (navVisibility[item.href] === false) return false;
     return true;
@@ -368,7 +371,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
       </div>
 
       {/* Ask WAVV floating bubble — customer pages only, controlled by siteSettings */}
-      {!isAdminPage && askWavvEnabled && !aiOpen && (
+      {!isAdminPage && !settingsLoading && askWavvEnabled && !aiOpen && (
         <button
           onClick={() => setAiOpen(true)}
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-2.5 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
@@ -388,7 +391,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
       )}
 
       {/* Ask WAVV Chat Panel — customer pages only */}
-      {!isAdminPage && askWavvEnabled && <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />}
+      {!isAdminPage && !settingsLoading && askWavvEnabled && <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />}
 
     </div>
   );
