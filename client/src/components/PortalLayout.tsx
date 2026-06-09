@@ -63,15 +63,15 @@ function NavLink({
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = `${color}12`;
-          e.currentTarget.style.borderColor = `${color}25`;
+          e.currentTarget.style.background = isHidden ? "rgba(251,191,36,0.12)" : `${color}12`;
+          e.currentTarget.style.borderColor = isHidden ? "#fbbf24" : `${color}25`;
           e.currentTarget.style.color = "#ffffff";
         }
       }}
       onMouseLeave={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = "transparent";
-          e.currentTarget.style.borderColor = "transparent";
+          e.currentTarget.style.background = isHidden ? "rgba(251,191,36,0.06)" : "transparent";
+          e.currentTarget.style.borderColor = isHidden ? "#fbbf24" : "transparent";
           e.currentTarget.style.color = "#ffffff";
         }
       }}
@@ -300,16 +300,12 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                       color: "#00A9E2",
                     }}
                     onMouseEnter={(e) => {
-                      if (!isPartnerPortalHidden) {
-                        e.currentTarget.style.background = "rgba(0,169,226,0.14)";
-                        e.currentTarget.style.borderColor = "rgba(0,169,226,0.3)";
-                      }
+                      e.currentTarget.style.background = isPartnerPortalHidden ? "rgba(251,191,36,0.12)" : "rgba(0,169,226,0.14)";
+                      e.currentTarget.style.borderColor = isPartnerPortalHidden ? "#fbbf24" : "rgba(0,169,226,0.3)";
                     }}
                     onMouseLeave={(e) => {
-                      if (!isPartnerPortalHidden) {
-                        e.currentTarget.style.background = "rgba(0,169,226,0.08)";
-                        e.currentTarget.style.borderColor = "rgba(0,169,226,0.18)";
-                      }
+                      e.currentTarget.style.background = isPartnerPortalHidden ? "rgba(251,191,36,0.06)" : "rgba(0,169,226,0.08)";
+                      e.currentTarget.style.borderColor = isPartnerPortalHidden ? "#fbbf24" : "rgba(0,169,226,0.18)";
                     }}
                   >
                     <div
