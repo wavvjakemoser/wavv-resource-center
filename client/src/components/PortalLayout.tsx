@@ -18,7 +18,6 @@ import {
   Users,
   ExternalLink,
   LogOut,
-  EyeOff,
 } from "lucide-react";
 
 const baseNavItems = [
@@ -83,11 +82,7 @@ function NavLink({
         <Icon size={17} style={{ color }} />
       </div>
       <span className="truncate flex-1">{label}</span>
-      {isHidden && (
-        <span aria-label="Hidden from customers" style={{ flexShrink: 0, display: "flex" }}>
-          <EyeOff size={12} style={{ color: "#fbbf24" }} />
-        </span>
-      )}
+
       {comingSoon && !isHidden && (
         <span
           className="flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
@@ -324,11 +319,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                       <Users size={17} style={{ color: "#00A9E2" }} />
                     </div>
                     <span className="flex-1 min-w-0 truncate">WAVV Partners Portal</span>
-                    {isPartnerPortalHidden && (
-                      <span aria-label="Hidden from customers" style={{ flexShrink: 0, display: "flex" }}>
-                        <EyeOff size={12} style={{ color: "#fbbf24" }} />
-                      </span>
-                    )}
+
                   </a>
                 );
               })()}
