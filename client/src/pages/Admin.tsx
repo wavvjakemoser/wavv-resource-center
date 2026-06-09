@@ -7112,8 +7112,8 @@ function ApprovedPartnersTab() {
       <div className="p-6">
         {/* Hero header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(245,158,11,0.15)" }}>
-            <UserPlus size={18} style={{ color: "#f59e0b" }} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,169,226,0.15)" }}>
+            <UserPlus size={18} style={{ color: "#00A9E2" }} />
           </div>
           <div>
             <h2 className="text-base font-bold text-white">Approved Partners</h2>
@@ -7123,17 +7123,17 @@ function ApprovedPartnersTab() {
         {/* Locked overlay card */}
         <div
           className="rounded-2xl overflow-hidden"
-          style={{ background: "rgba(245,158,11,0.07)", border: "2px dashed rgba(245,158,11,0.35)" }}
+          style={{ background: "rgba(0,169,226,0.07)", border: "2px dashed rgba(0,169,226,0.35)" }}
         >
           <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(245,158,11,0.15)" }}>
-              <Lock size={40} style={{ color: "#f59e0b" }} />
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(0,169,226,0.15)" }}>
+              <Lock size={40} style={{ color: "#00A9E2" }} />
             </div>
             <div className="space-y-2">
               <h3 className="text-2xl font-bold text-white tracking-tight">Partner Invitations Disabled</h3>
               <div
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-                style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
+                style={{ background: "rgba(0,169,226,0.2)", color: "#00A9E2" }}
               >
                 <AlertTriangle size={11} />
                 Access Locked
@@ -7153,9 +7153,9 @@ function ApprovedPartnersTab() {
                 <div
                   key={label}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium"
-                  style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.18)", color: "#fbbf24" }}
+                  style={{ background: "rgba(0,169,226,0.08)", border: "1px solid rgba(0,169,226,0.18)", color: "#00A9E2" }}
                 >
-                  <span style={{ color: "#f59e0b" }}>{icon}</span>
+                  <span style={{ color: "#00A9E2" }}>{icon}</span>
                   {label}
                 </div>
               ))}
@@ -7171,8 +7171,8 @@ function ApprovedPartnersTab() {
       {/* Hero header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(245,158,11,0.15)" }}>
-            <UserPlus size={18} style={{ color: "#f59e0b" }} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,169,226,0.15)" }}>
+            <UserPlus size={18} style={{ color: "#00A9E2" }} />
           </div>
           <div>
             <h2 className="text-base font-bold text-white">Approved Partners</h2>
@@ -7313,10 +7313,14 @@ function PartnersContentTab() {
     setForm({ title: item.title, description: item.description ?? "", linkUrl: item.linkUrl ?? "", status: item.status ?? "coming_soon", isLocked: item.isLocked, isVisible: item.isVisible, sortOrder: item.sortOrder });
   }
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,169,226,0.15)" }}>
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(0,169,226,0.15)" }}
+          >
             <Users size={18} style={{ color: "#00A9E2" }} />
           </div>
           <div>
