@@ -16,9 +16,12 @@ export default function Login() {
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: async (data) => {
-      // Invalidate auth.me cache BEFORE navigating so the destination page
-      // doesn't see a stale null user and immediately redirect back to /login
-      await utils.auth.me.invalidate();
+      // Pre-populate auth.me cache with the user returned from login so the
+      // destination page sees an authenticated user immediately on mount —
+      // no second network request, no second loading flash.
+      if (data?.user) {
+        utils.auth.me.setData(undefined, data.user as Parameters<typeof utils.auth.me.setData>[1]);
+      }
       const role = data?.user?.role;
       if (role === "partner_admin" || role === "partner") {
         navigate("/wavvpartner");
