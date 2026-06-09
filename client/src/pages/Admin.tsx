@@ -1127,9 +1127,7 @@ function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; a
                   <thead>
                     <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                       <th className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Page</th>
-                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Total</th>
-                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Anon</th>
-                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Logged In</th>
+                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Views</th>
                       <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Share</th>
                     </tr>
                   </thead>
@@ -1144,8 +1142,6 @@ function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; a
                             <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{p.path}</div>
                           </td>
                           <td className="px-6 py-3 text-right font-semibold text-white">{p.total.toLocaleString()}</td>
-                          <td className="px-6 py-3 text-right" style={{ color: "rgba(255,255,255,0.5)" }}>{p.anon.toLocaleString()}</td>
-                          <td className="px-6 py-3 text-right" style={{ color: "rgba(255,255,255,0.5)" }}>{p.auth.toLocaleString()}</td>
                           <td className="px-6 py-3 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
