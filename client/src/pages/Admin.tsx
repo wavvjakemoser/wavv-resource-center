@@ -188,6 +188,8 @@ export default function Admin() {
     return "users";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
+  // Persist analytics time-range across tab switches
+  const [analyticsDays, setAnalyticsDays] = useState<AnonTimeRange>(30);
 
   // Must be called unconditionally before any early returns (Rules of Hooks)
   const { data: adminSettings = {} } = trpc.siteSettings.getAll.useQuery();
@@ -326,7 +328,7 @@ export default function Admin() {
 
         {/* ── Tab content ── */}
         {activeTab === "knowledge" && showKnowledge && <WavvKnowledgeTab />}
-        {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab />}
+        {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab days={analyticsDays} onDaysChange={setAnalyticsDays} />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "settings" && isOwner && <SettingsTab />}
         {activeTab === "approved_partners" && (isOwner || isPartnerAdmin) && <ApprovedPartnersTab />}
@@ -521,8 +523,10 @@ function WavvKnowledgeTab() {
 // ─── Analytics Tab ────────────────────────────────────────────────────────────
 type AnonTimeRange = 7 | 30 | 90 | 0; // 0 = All Time
 
-function AnalyticsTab() {
-  const [days, setDays] = useState<AnonTimeRange>(30);
+function AnalyticsTab({ days: daysProp, onDaysChange }: { days?: AnonTimeRange; onDaysChange?: (d: AnonTimeRange) => void } = {}) {
+  const [localDays, setLocalDays] = useState<AnonTimeRange>(daysProp ?? 30);
+  const days = daysProp ?? localDays;
+  const setDays = (d: AnonTimeRange) => { setLocalDays(d); onDaysChange?.(d); };
   const [resetOpen, setResetOpen] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState("");
   const utils = trpc.useUtils();
@@ -1004,6 +1008,25 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
 }
 
 // ─── Anonymous Analytics Dashboard ──────────────────────────────────────────
+// ─── Page name labels for drilldown ────────────────────────────────────────
+const PAGE_LABELS: Record<string, string> = {
+  "/academy": "WAVV Academy",
+  "/webinars": "WAVV Webinars",
+  "/guides": "Guides & Docs",
+  "/playground": "WAVV Playground",
+  "/support": "WAVV Support",
+  "/wavvpartner": "Partners Portal",
+  "/wavvadmin": "Admin Panel",
+  "/profile": "My Profile",
+  "/search": "Search",
+};
+function friendlyPage(path: string) {
+  if (PAGE_LABELS[path]) return PAGE_LABELS[path];
+  // /academy/course/123 → "Academy · Course 123"
+  const parts = path.replace(/^\//, "").split("/");
+  return parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" › ");
+}
+
 function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; askWavvEnabled: boolean }) {
   const { data: overview, isLoading } = trpc.analytics.getAnonOverview.useQuery({ days });
   const { data: pageTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "page_view", days });
@@ -1012,6 +1035,8 @@ function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; a
   const { data: guideTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "guide_download", days });
 
   const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides">("overview");
+  const [showPageDrilldown, setShowPageDrilldown] = useState(false);
+  const { data: drilldown } = trpc.analytics.getPageViewDrilldown.useQuery({ days }, { enabled: showPageDrilldown });
 
   const GUIDE_TYPE_LABELS: Record<string, string> = {
     help_article: "Help Articles", pdf: "PDFs", checklist: "Checklists",
@@ -1051,7 +1076,15 @@ function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; a
     <div className="space-y-6">
       {/* Summary stat tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Eye size={18} />}           label="Page Views"         value={overview?.totalPageViews ?? 0}  color="blue"   />
+        {/* Page Views tile — clickable for drilldown */}
+        <div
+          className="relative cursor-pointer group"
+          onClick={() => setShowPageDrilldown(true)}
+          title="Click to see per-page breakdown"
+        >
+          <StatCard icon={<Eye size={18} />} label="Page Views" value={overview?.totalPageViews ?? 0} color="blue" />
+          <span className="absolute bottom-2 right-3 text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#60a5fa" }}>View breakdown →</span>
+        </div>
         <StatCard icon={<GraduationCap size={18} />} label="Academy Plays"      value={totalAcademyPlays}              color="cyan"   />
         <StatCard icon={<Video size={18} />}         label="Webinar Plays"      value={totalWebinarPlays}              color="amber"  />
         <StatCard icon={<Download size={18} />}      label="Guide Downloads"    value={totalGuideDownloads}            color="green"  />
@@ -1059,6 +1092,78 @@ function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; a
           <StatCard icon={<MessageSquare size={18} />} label="AskWAVV Conversations" value={overview?.askWavvCount ?? 0} color="purple" />
         )}
       </div>
+
+      {/* Page View Drilldown Modal */}
+      {showPageDrilldown && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowPageDrilldown(false); }}
+        >
+          <div className="w-full max-w-2xl rounded-2xl overflow-hidden" style={{ background: "#161b22", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "80vh" }}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="flex items-center gap-2">
+                <Eye size={16} style={{ color: "#60a5fa" }} />
+                <span className="font-semibold text-white text-sm">Page View Breakdown</span>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(96,165,250,0.12)", color: "#60a5fa" }}>
+                  {drilldown?.total ?? overview?.totalPageViews ?? 0} total
+                </span>
+              </div>
+              <button onClick={() => setShowPageDrilldown(false)} className="text-gray-400 hover:text-white transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            {/* Table */}
+            <div className="overflow-y-auto" style={{ maxHeight: "calc(80vh - 72px)" }}>
+              {!drilldown ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-6 h-6 rounded-full border-2 border-blue-400 border-t-transparent animate-spin" />
+                </div>
+              ) : drilldown.pages.length === 0 ? (
+                <p className="text-center text-gray-500 py-12 text-sm">No page views recorded yet.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      <th className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Page</th>
+                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Total</th>
+                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Anon</th>
+                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Logged In</th>
+                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Share</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {drilldown.pages.map((p, i) => {
+                      const pct = drilldown.total > 0 ? Math.round((p.total / drilldown.total) * 100) : 0;
+                      return (
+                        <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                          className="hover:bg-white/[0.02] transition-colors">
+                          <td className="px-6 py-3">
+                            <div className="font-medium text-white">{friendlyPage(p.path ?? "")}</div>
+                            <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{p.path}</div>
+                          </td>
+                          <td className="px-6 py-3 text-right font-semibold text-white">{p.total.toLocaleString()}</td>
+                          <td className="px-6 py-3 text-right" style={{ color: "rgba(255,255,255,0.5)" }}>{p.anon.toLocaleString()}</td>
+                          <td className="px-6 py-3 text-right" style={{ color: "rgba(255,255,255,0.5)" }}>{p.auth.toLocaleString()}</td>
+                          <td className="px-6 py-3 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#60a5fa" }} />
+                              </div>
+                              <span className="text-xs w-8 text-right" style={{ color: "#60a5fa" }}>{pct}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Panel tabs */}
       <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -1085,7 +1190,7 @@ function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; a
           <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Navigation size={13} style={{ color: "#22d3ee" }} /> Top Pages (excl. home)</p>
             <AnonRankedList
-              items={(overview?.topPages ?? []).map((p) => ({ label: p.path ?? "unknown", count: p.count ?? 0 }))}
+              items={(overview?.topPages ?? []).map((p) => ({ label: friendlyPage(p.path ?? "unknown"), count: p.total ?? 0 }))}
               color="#22d3ee"
               emptyText="No page views recorded yet"
             />
@@ -4601,6 +4706,7 @@ function WebinarsTab() {
     onSuccess: () => { utils.webinars.adminList.invalidate(); setShowForm(false); setEditId(null); resetForm(); toast.success("Webinar updated"); },
     onError: (e) => toast.error(e.message),
   });
+  const uploadWebinarThumbnail = trpc.webinars.uploadThumbnail.useMutation();
   const deleteMutation = trpc.webinars.adminDelete.useMutation({
     onSuccess: () => { utils.webinars.adminList.invalidate(); toast.success("Webinar deleted"); },
     onError: (e) => toast.error(e.message),
@@ -4855,6 +4961,41 @@ function WebinarsTab() {
                     </button>
                   );
                 })}
+              </div>
+              {/* Upload branded thumbnail */}
+              <div className="flex items-center gap-2 mb-2">
+                <label
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors"
+                  style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.3)", color: "#60a5fa" }}
+                >
+                  <Upload size={12} />
+                  Upload Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
+                      const reader = new FileReader();
+                      reader.onload = async () => {
+                        const base64 = (reader.result as string).split(",")[1];
+                        try {
+                          const result = await uploadWebinarThumbnail.mutateAsync({ base64, mimeType: file.type });
+                          setForm(f => ({ ...f, thumbnailUrl: result.url }));
+                          toast.success("Thumbnail uploaded");
+                        } catch {
+                          toast.error("Upload failed — try pasting a URL instead");
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+                {form.thumbnailUrl && (
+                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Custom thumbnail selected</span>
+                )}
               </div>
               {/* Custom URL fallback */}
               <input

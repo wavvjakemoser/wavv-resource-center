@@ -105,6 +105,11 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [aiOpen, setAiOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
+  // Auto-close mobile sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location]);
+
   async function handleSignOut() {
     setSigningOut(true);
     try {

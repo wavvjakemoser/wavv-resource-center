@@ -1205,3 +1205,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin.tsx NAV_ITEMS updated to /playground (nav_visibility key)
 - [x] Dashboard.tsx Playground card navHref updated to /playground
 - [x] /wavvpartner NavGuard verified: non-admins redirected to /404 when hidden in nav_visibility
+
+## Analytics, UX, and Webinar Polish (Session — Jun 9 2026)
+- [x] Fix page_view tracking: deduplicate so only one event fires per route change (not per re-render)
+- [x] Track all portal pages in page_view events (include path in metadata)
+- [x] Admin analytics: add Page Views stat tile showing total page views
+- [x] Admin analytics: Page Views tile is clickable/hoverable to show per-page breakdown table
+- [x] Remove "Continue Where You Left Off" section from Dashboard (anonymous users only, no real data)
+- [x] Mobile sidebar: auto-close when a nav item is clicked
+- [x] Admin analytics: persist time-range filter selection across tab switches
+- [x] Webinar cards: add fallback placeholder thumbnail when no image is uploaded
+- [x] Webinar admin: add thumbnail upload field to Add/Edit webinar form
+- [x] Webinar admin: store thumbnail URL in DB and display on webinar cards

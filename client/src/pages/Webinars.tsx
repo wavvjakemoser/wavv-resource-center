@@ -280,7 +280,34 @@ function WebinarCard({
         className="relative w-full overflow-hidden flex-shrink-0"
         style={{ height: "80px", borderBottom: `1px solid ${accentColor}30` }}
       >
-        <img src={thumbBg} alt="" className="absolute inset-0 w-full h-full object-contain object-center" style={{ background: "#0a0c12" }} />
+        {thumbBg ? (
+          <img
+            src={thumbBg}
+            alt=""
+            className="absolute inset-0 w-full h-full object-contain object-center"
+            style={{ background: "#0a0c12" }}
+            onError={(e) => {
+              // Fallback to gradient placeholder on broken image
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                parent.style.background = `linear-gradient(135deg, ${accentColor}18 0%, #0a0c12 100%)`;
+              }
+            }}
+          />
+        ) : (
+          // Fallback placeholder when no thumbnail is set
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ background: `linear-gradient(135deg, ${accentColor}18 0%, #0a0c12 100%)` }}
+          >
+            {CardIcon ? (
+              <CardIcon size={28} style={{ color: `${accentColor}80` }} />
+            ) : (
+              <Video size={28} style={{ color: `${accentColor}80` }} />
+            )}
+          </div>
+        )}
         {/* Play overlay for cards with video */}
         {(embedUrl || isHostedVideo) && (
           <div

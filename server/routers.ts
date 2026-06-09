@@ -111,6 +111,8 @@ import {
   trackAnonEvent,
   getAnonPageViews,
   getTopAnonPages,
+  getAllPageViews,
+  getTopAllPages,
   getAcademyPlaysByCategory,
   getAcademyPlaysBySection,
   getTopAcademyLessons,
@@ -559,6 +561,20 @@ const webinarsRouter = router({
   adminReorder: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderWebinars(input.id1, input.id2)),
+  // Upload a branded thumbnail image to S3
+  uploadThumbnail: superAdminProcedure
+    .input(z.object({
+      base64: z.string(),
+      mimeType: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      const { storagePut } = await import("./storage");
+      const buffer = Buffer.from(input.base64, "base64");
+      const ext = input.mimeType.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
+      const key = `webinars/thumbnails/${Date.now()}.${ext}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+      return { url };
+    }),
   // Upload a video file to S3 for on-demand/evergreen webinars
   uploadVideo: superAdminProcedure
     .input(z.object({
@@ -955,8 +971,8 @@ const analyticsRouter = router({
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       const [totalPageViews, topPages, academyByCategory, academyBySection, topLessons, webinarByType, topWebinars, guidesByType, topGuides, askWavvCount] = await Promise.all([
-        getAnonPageViews(since),
-        getTopAnonPages(since, 10),
+        getAllPageViews(since),           // all users (anon + auth)
+        getTopAllPages(since, 10),        // per-page breakdown, all users
         getAcademyPlaysByCategory(since),
         getAcademyPlaysBySection(since, 20),
         getTopAcademyLessons(since, 20),
@@ -967,6 +983,17 @@ const analyticsRouter = router({
         getAskWavvConversations(since),
       ]);
       return { totalPageViews, topPages, academyByCategory, academyBySection, topLessons, webinarByType, topWebinars, guidesByType, topGuides, askWavvCount };
+    }),
+
+  getPageViewDrilldown: adminProcedure
+    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(0)]).default(30) }))
+    .query(async ({ input }) => {
+      const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      const [total, pages] = await Promise.all([
+        getAllPageViews(since),
+        getTopAllPages(since, 50),
+      ]);
+      return { total, pages };
     }),
 
   getAnonTrend: adminProcedure
@@ -1438,12 +1465,11 @@ export const appRouter = router({
     pageView: publicProcedure
       .input(z.object({ path: z.string().max(500) }))
       .mutation(async ({ ctx, input }) => {
-        // Only track anonymous visitors — drop any authenticated user
-        if (ctx.user) return { ok: false };
-        await trackAnonEvent({
+        // Track page views for ALL users (anonymous + authenticated)
+        await trackEvent({
+          userId: ctx.user?.id,
           eventType: "page_view",
           metadata: JSON.stringify({ path: input.path }),
-          userId: null,
         });
         return { ok: true };
       }),

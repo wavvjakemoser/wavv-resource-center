@@ -1913,6 +1913,48 @@ export async function getTopAnonPages(sinceDate: Date, limit = 10) {
   return rows;
 }
 
+/** Total page views across ALL users (anonymous + authenticated) */
+export async function getAllPageViews(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return 0;
+  const [row] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "page_view")
+      )
+    );
+  return row?.count ?? 0;
+}
+
+/** Top pages by total view count (anon + auth), with per-page breakdown, excluding home */
+export async function getTopAllPages(sinceDate: Date, limit = 25) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      path: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path'))`,
+      total: sql<number>`COUNT(*)`,
+      anon: sql<number>`SUM(CASE WHEN ${analyticsEvents.userId} IS NULL THEN 1 ELSE 0 END)`,
+      auth: sql<number>`SUM(CASE WHEN ${analyticsEvents.userId} IS NOT NULL THEN 1 ELSE 0 END)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        eq(analyticsEvents.eventType, "page_view"),
+        sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path')) NOT IN ('/', '/home', '')`,
+        sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path')) IS NOT NULL`
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path'))`)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows;
+}
+
 /** Academy video plays by category (anonymous only) */
 export async function getAcademyPlaysByCategory(sinceDate: Date) {
   const db = await getDb();
