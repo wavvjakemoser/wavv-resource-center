@@ -7198,61 +7198,60 @@ function PartnersContentTab() {
           ))}
         </div>
       </div>
-      {/* Under Construction placeholder — matches Support Analytics card style */}
+      {/* Under Construction placeholder — matches Support Analytics card style exactly */}
       <div
-        className="rounded-2xl p-10 flex flex-col items-center justify-center gap-6 text-center"
-        style={{
-          border: "2px dashed rgba(251,191,36,0.45)",
-          background: "rgba(251,191,36,0.03)",
-        }}
+        className="rounded-2xl overflow-hidden"
+        style={{ background: "rgba(245,158,11,0.07)", border: "2px dashed rgba(245,158,11,0.35)" }}
       >
-        {/* Warning icon */}
-        <div
-          className="w-20 h-20 rounded-2xl flex items-center justify-center"
-          style={{ background: "rgba(251,191,36,0.15)" }}
-        >
-          <AlertTriangle size={36} style={{ color: "#fbbf24" }} />
-        </div>
-
-        {/* Title + badge */}
-        <div className="flex flex-col items-center gap-2">
-          <h3 className="text-2xl font-bold text-white">
-            {pageTarget === "public" ? "WAVV Partners" : "WAVV Partners Portal"}
-          </h3>
-          <span
-            className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
-            style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
+        <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
+          {/* Icon */}
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center"
+            style={{ background: "rgba(245,158,11,0.15)" }}
           >
-            <AlertTriangle size={11} />
-            Under Construction
-          </span>
-        </div>
+            <AlertTriangle size={40} style={{ color: "#f59e0b" }} />
+          </div>
 
-        {/* Description */}
-        <p className="text-sm max-w-lg leading-relaxed" style={{ color: "#9ca3af" }}>
-          This section will surface{" "}
-          <strong className="text-white">partner onboarding resources</strong>,{" "}
-          <strong className="text-white">co-sell enablement content</strong>, and{" "}
-          <strong className="text-white">portal access management</strong>{" "}
-          once the partner program is ready to launch.
-        </p>
-
-        {/* Feature pills */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          {[
-            { icon: <Users size={14} />, label: "Partner Onboarding" },
-            { icon: <FileText size={14} />, label: "Co-Sell Resources" },
-            { icon: <BarChart3 size={14} />, label: "Partner Analytics" },
-          ].map(({ icon, label }) => (
+          {/* Heading */}
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold text-white tracking-tight">
+              {pageTarget === "public" ? "WAVV Partners" : "WAVV Partners Portal"}
+            </h3>
             <div
-              key={label}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "#9ca3af" }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+              style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
             >
-              {icon}
-              {label}
+              <AlertTriangle size={11} />
+              Under Construction
             </div>
-          ))}
+          </div>
+
+          {/* Description */}
+          <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+            This section will surface{" "}
+            <span className="text-white font-medium">partner onboarding resources</span>,{" "}
+            <span className="text-white font-medium">co-sell enablement content</span>, and{" "}
+            <span className="text-white font-medium">portal access management</span>{" "}
+            once the partner program is ready to launch.
+          </p>
+
+          {/* Upcoming features list */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
+            {[
+              { icon: <Users size={14} />, label: "Partner Onboarding" },
+              { icon: <FileText size={14} />, label: "Co-Sell Resources" },
+              { icon: <BarChart3 size={14} />, label: "Partner Analytics" },
+            ].map(({ icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
+              >
+                <span style={{ color: "#f59e0b" }}>{icon}</span>
+                {label}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       {false && isLoading ? (
