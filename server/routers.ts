@@ -1465,7 +1465,16 @@ export const appRouter = router({
     pageView: publicProcedure
       .input(z.object({ path: z.string().max(500) }))
       .mutation(async ({ ctx, input }) => {
-        // Track page views for ALL users (anonymous + authenticated)
+        // Skip internal team members entirely — they should never appear in analytics
+        const INTERNAL_ROLES = ['owner', 'admin', 'content_admin', 'partner_admin'];
+        if (ctx.user && INTERNAL_ROLES.includes(ctx.user.role)) {
+          return { ok: true };
+        }
+        // Only track the 7 customer-facing pages
+        const TRACKED_PAGES = ['/', '/academy', '/webinars', '/guides', '/playground', '/support', '/wavvpartner'];
+        if (!TRACKED_PAGES.includes(input.path)) {
+          return { ok: true };
+        }
         await trackEvent({
           userId: ctx.user?.id,
           eventType: "page_view",

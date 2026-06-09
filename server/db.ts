@@ -1913,43 +1913,57 @@ export async function getTopAnonPages(sinceDate: Date, limit = 10) {
   return rows;
 }
 
-/** Total page views across ALL users (anonymous + authenticated) */
+// Pages we want to track — only these 7 customer-facing routes count
+const TRACKED_PAGES = ['/', '/academy', '/webinars', '/guides', '/playground', '/support', '/wavvpartner'];
+// Internal roles that should never be counted in analytics
+const INTERNAL_ROLES = ['owner', 'admin', 'content_admin', 'partner_admin'];
+
+/** Total page views across the 7 tracked pages, excluding internal team members */
 export async function getAllPageViews(sinceDate: Date) {
   const db = await getDb();
   if (!db) return 0;
+  const internalRoleList = INTERNAL_ROLES.map(r => `'${r}'`).join(',');
+  const trackedPathList = TRACKED_PAGES.map(p => `'${p}'`).join(',');
   const [row] = await db
     .select({ count: sql<number>`COUNT(*)` })
     .from(analyticsEvents)
+    .leftJoin(users, eq(analyticsEvents.userId, users.id))
     .where(
       and(
         gte(analyticsEvents.createdAt, sinceDate),
-        eq(analyticsEvents.eventType, "page_view")
+        eq(analyticsEvents.eventType, "page_view"),
+        sql`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.path')) IN (${sql.raw(trackedPathList)})`,
+        // Exclude internal team members (users with admin/owner roles)
+        sql`(${analyticsEvents.userId} IS NULL OR ${users.role} NOT IN (${sql.raw(internalRoleList)}))`
       )
     );
   return row?.count ?? 0;
 }
 
-/** Top pages by total view count (anon + auth), with per-page breakdown, excluding home */
+/** Top pages by total view count — only 7 tracked pages, no internal team members */
 export async function getTopAllPages(sinceDate: Date, limit = 25) {
   const db = await getDb();
   if (!db) return [];
+  const internalRoleList = INTERNAL_ROLES.map(r => `'${r}'`).join(',');
+  const trackedPathList = TRACKED_PAGES.map(p => `'${p}'`).join(',');
   const rows = await db
     .select({
-      path: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path'))`,
+      path: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.path'))`,
       total: sql<number>`COUNT(*)`,
       anon: sql<number>`SUM(CASE WHEN ${analyticsEvents.userId} IS NULL THEN 1 ELSE 0 END)`,
       auth: sql<number>`SUM(CASE WHEN ${analyticsEvents.userId} IS NOT NULL THEN 1 ELSE 0 END)`,
     })
     .from(analyticsEvents)
+    .leftJoin(users, eq(analyticsEvents.userId, users.id))
     .where(
       and(
         gte(analyticsEvents.createdAt, sinceDate),
         eq(analyticsEvents.eventType, "page_view"),
-        sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path')) NOT IN ('/', '/home', '')`,
-        sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path')) IS NOT NULL`
+        sql`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.path')) IN (${sql.raw(trackedPathList)})`,
+        sql`(${analyticsEvents.userId} IS NULL OR ${users.role} NOT IN (${sql.raw(internalRoleList)}))`
       )
     )
-    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.path'))`)
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.path'))`)
     .orderBy(sql`COUNT(*) DESC`)
     .limit(limit);
   return rows;
