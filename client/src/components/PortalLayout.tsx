@@ -240,50 +240,17 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             })}
           </nav>
 
-          {/* Sign out — pinned to bottom for all logged-in users */}
-          {user && (
-            <div className="px-3 pb-2" style={{ borderTop: "1px solid #1e2030", paddingTop: "10px" }}>
-              <button
-                onClick={handleSignOut}
-                disabled={signingOut}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
-                style={{
-                  fontSize: "15px",
-                  background: "transparent",
-                  border: "1px solid transparent",
-                  color: "rgba(255,255,255,0.45)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(248,81,73,0.08)";
-                  e.currentTarget.style.borderColor = "rgba(248,81,73,0.2)";
-                  e.currentTarget.style.color = "#f85149";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.borderColor = "transparent";
-                  e.currentTarget.style.color = "rgba(255,255,255,0.45)";
-                }}
-              >
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(248,81,73,0.1)" }}
-                >
-                  <LogOut size={16} style={{ color: "#f85149" }} />
-                </div>
-                <span className="truncate">{signingOut ? "Signing out…" : "Sign Out"}</span>
-              </button>
-            </div>
-          )}
-
-          {/* Admin — pinned to bottom, only for admins */}
+          {/* ── Admin Tools section — only for admins ── */}
           {isAdmin && (
-            <div className="px-3 pb-4 space-y-1" style={{ borderTop: "1px solid #1e2030", paddingTop: "12px" }}>
+            <div className="px-3 pt-3 pb-1" style={{ borderTop: "1px solid #1e2030" }}>
+              {/* Section label */}
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Admin Tools</p>
               <NavLink
                 {...adminItem}
                 isActive={location.startsWith(adminItem.href)}
                 onClick={() => setSidebarOpen(false)}
               />
-              {/* Partner portal preview link — always visible for owner/partner_admin */}
+              {/* Partner portal — owner/partner_admin only */}
               {(user?.role === "owner" || user?.role === "partner_admin") && (() => {
                 const isPartnerPortalHidden = !settingsLoading && navVisibility["/wavvpartner"] === false;
                 return (
@@ -315,11 +282,39 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                       <Users size={17} style={{ color: "#00A9E2" }} />
                     </div>
                     <span className="flex-1 min-w-0 truncate">WAVV Partners Portal</span>
-
                   </a>
                 );
               })()}
+            </div>
+          )}
 
+          {/* ── Sign Out — slim text row pinned to very bottom ── */}
+          {user && (
+            <div className="px-4 pb-4 pt-2" style={{ borderTop: "1px solid #1e2030" }}>
+              <button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-150 cursor-pointer"
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  background: "transparent",
+                  border: "none",
+                  color: "rgba(255,255,255,0.35)",
+                  letterSpacing: "0.01em",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#f85149";
+                  e.currentTarget.style.background = "rgba(248,81,73,0.06)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "rgba(255,255,255,0.35)";
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <LogOut size={13} />
+                <span>{signingOut ? "Signing out…" : "Sign out"}</span>
+              </button>
             </div>
           )}
         </aside>
