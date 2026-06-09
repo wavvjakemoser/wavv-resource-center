@@ -120,6 +120,8 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
     trpc.analytics.getTopContent.useQuery({ days, limit: 10 });
   const { data: recentEvents } =
     trpc.analytics.getRecentEvents.useQuery({ days: Math.min(days, 7), limit: 30 });
+  const { data: contentLeaderboard } =
+    trpc.analytics.getContentLeaderboard.useQuery({ days, limit: 25 });
 
   // Derive stat counts from eventCounts
   const stats = useMemo(() => {
@@ -419,6 +421,74 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Content Leaderboard */}
+      <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+          <TrendingUp size={15} className="text-cyan-400" />
+          Content Leaderboard
+        </h3>
+        <p className="text-xs text-gray-500 mb-4">Top content by engagement (lesson starts, guide views, downloads, webinar watches) — last {days} days</p>
+        {contentLeaderboard && contentLeaderboard.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left text-xs text-gray-500 font-medium pb-2 pr-4 w-6">#</th>
+                  <th className="text-left text-xs text-gray-500 font-medium pb-2 pr-4">Title</th>
+                  <th className="text-left text-xs text-gray-500 font-medium pb-2 pr-4">Type</th>
+                  <th className="text-right text-xs text-gray-500 font-medium pb-2 pr-4">Starts / Views</th>
+                  <th className="text-right text-xs text-gray-500 font-medium pb-2 pr-4">Downloads</th>
+                  <th className="text-right text-xs text-gray-500 font-medium pb-2">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contentLeaderboard.map((item, idx) => {
+                  const maxTotal = contentLeaderboard[0]?.total ?? 1;
+                  const barPct = Math.round((item.total / maxTotal) * 100);
+                  const typeColor: Record<string, string> = {
+                    lesson: "#0074F4",
+                    guide: "#67C728",
+                    webinar: "#10b981",
+                  };
+                  const color = typeColor[item.resourceType] ?? "#9ca3af";
+                  return (
+                    <tr key={idx} className="border-b border-white/5 hover:bg-white/3 transition">
+                      <td className="py-2.5 pr-4 text-gray-500 text-xs">{idx + 1}</td>
+                      <td className="py-2.5 pr-4">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-gray-200 font-medium truncate max-w-xs" title={item.title}>{item.title}</span>
+                          <div className="w-full bg-white/5 rounded-full h-1">
+                            <div className="h-1 rounded-full transition-all" style={{ width: `${barPct}%`, background: color }} />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-2.5 pr-4">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium capitalize" style={{ background: `${color}18`, color }}>
+                          {item.resourceType}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4 text-right">
+                        <span className="text-white font-medium">{item.starts > 0 ? item.starts : item.views}</span>
+                      </td>
+                      <td className="py-2.5 pr-4 text-right">
+                        <span className="text-gray-400">{item.downloads > 0 ? item.downloads : "—"}</span>
+                      </td>
+                      <td className="py-2.5 text-right">
+                        <span className="text-white font-semibold">{item.total}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-gray-500 text-sm text-center py-10">
+            No content engagement data yet for this period
+          </div>
+        )}
       </div>
 
       {/* Search Activity Chart */}

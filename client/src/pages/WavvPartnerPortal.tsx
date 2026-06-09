@@ -73,7 +73,7 @@ export default function WavvPartnerPortal() {
       navigate("/login?next=/wavvpartner");
       return;
     }
-    // Internal admin roles (admin, customer_admin) belong in the admin panel, not here
+    // Internal admin roles (admin, content_admin) belong in the admin panel, not here
     if (!PARTNER_ROLES.includes(user.role)) {
       navigate("/wavvadmin");
     }

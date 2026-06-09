@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE `invite_tokens` MODIFY COLUMN `role` enum('user','admin','content_admin','partner_admin','partner','owner') NOT NULL DEFAULT 'user';\nALTER TABLE `users` MODIFY COLUMN `role` enum('user','admin','content_admin','partner_admin','partner','owner') NOT NULL DEFAULT 'user';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute ALTER TABLE `invite_tokens` MODIFY COLUMN `role` enum('user','admin','content_admin','partner_admin','partner','owner') NOT NULL DEFAULT 'user';\nALTER TABLE `users` MODIFY COLUMN `role` enum('user','admin','content_admin','partner_admin','partner','owner') NOT NULL DEFAULT 'user';",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1265 (01000) at line 1: Data truncated for column 'role', value is 'customer_admin'"
+  ]
+}

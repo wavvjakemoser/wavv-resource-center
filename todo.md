@@ -1189,3 +1189,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] PortalLayout: WAVV Partners Portal sidebar link — fix truncation (overflow-hidden + truncate span); reduce font to 14px to match NavLink
 - [x] Admin PartnersContentTab: replace plain h2 header with icon+title+desc hero header (Users icon, #00A9E2, matching other tabs)
 - [x] Admin content tab icons: fix Webinars (#10b981 green) and Support (#FF9900 orange) to match sidebar color scheme exactly
+
+## Role Rename + Analytics + Nav Styling (Session — Jun 9)
+- [ ] Rename customer_admin → content_admin in schema enum, DB migration, server role guards, UI labels, invite flow
+- [ ] Hidden nav items: remove HIDDEN badge, grey out entire row (icon + label to 40% opacity), add amber left border indicator
+- [ ] Hidden Partners Portal sidebar link: same treatment (grey out + amber left border, no badge)
+- [ ] Add lesson_started event tracking when user clicks into a lesson video
+- [ ] Add guide_viewed event tracking when user opens a guide card
+- [ ] Rename "Role" column/label to "Access Level" in analytics UI
+- [ ] Build Content Leaderboard view in AdminAnalytics (top content across all types by engagement)

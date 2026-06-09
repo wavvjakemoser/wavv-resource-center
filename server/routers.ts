@@ -122,6 +122,7 @@ import {
   getAnonDailyTrend,
   resetWebinarViews,
   resetGuideDownloads,
+  getContentLeaderboard,
 } from "./db";
 
 // // ─── Role guards ─────────────────────────────────────────────────────
@@ -132,22 +133,22 @@ const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
   }
   return next({ ctx });
 });
-// Customer Admin or Owner — edit all content except Partners
+// Content Admin or Owner — edit all content except Partners
 const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "customer_admin" && ctx.user.role !== "owner") {
+  if (ctx.user.role !== "content_admin" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Customer admin access required" });
   }
   return next({ ctx });
 });
-// Any internal role (admin, customer_admin, partner_admin, owner) — read-only admin panel access
+// Any internal role (admin, content_admin, partner_admin, owner) — read-only admin panel access
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin" && ctx.user.role !== "customer_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
+  if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
   }  return next({ ctx });
 });
-// Partner Admin, Customer Admin, or Owner — can manage team invites
+// Partner Admin, Content Admin, or Owner — can manage team invites
 const partnerAdminOrSuperProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "customer_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
+  if (ctx.user.role !== "content_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Partner admin or customer admin access required" });
   }
   return next({ ctx });
@@ -349,12 +350,12 @@ const academyRouter = router({
   // DB-driven Academy page: courses grouped by category with their published lessons
   getCategories: publicProcedure.query(() => getCategories()),
 
-  // Reorder: swap sortOrder between two courses (customer_admin only)
+  // Reorder: swap sortOrder between two courses (content_admin only)
   reorderCourses: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderCourses(input.id1, input.id2)),
 
-  // Reorder: swap sortOrder between two lessons (customer_admin only)
+  // Reorder: swap sortOrder between two lessons (content_admin only)
   reorderLessons: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderLessons(input.id1, input.id2)),
@@ -544,7 +545,7 @@ const webinarsRouter = router({
   keepArchived: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => updateWebinar(input.id, { published: false })),
-  // Reorder: swap sortOrder between two webinars (customer_admin only)
+  // Reorder: swap sortOrder between two webinars (content_admin only)
   adminReorder: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderWebinars(input.id1, input.id2)),
@@ -640,7 +641,7 @@ const guidesRouter = router({
   adminList: superAdminProcedure.query(() => getGuides(false)),
   adminExportDownloaders: superAdminProcedure.query(() => getGuideDownloadersExport()),
 
-  // Reorder: swap sortOrder between two guides (customer_admin only)
+  // Reorder: swap sortOrder between two guides (content_admin only)
   adminReorder: superAdminProcedure
     .input(z.object({ id1: z.number(), id2: z.number() }))
     .mutation(({ input }) => reorderGuides(input.id1, input.id2)),
@@ -839,6 +840,13 @@ const analyticsRouter = router({
     .query(({ input }) => {
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getRecentEvents(since, input.limit);
+    }),
+
+  getContentLeaderboard: adminProcedure
+    .input(z.object({ days: z.number().min(1).max(365).default(30), limit: z.number().min(1).max(50).default(25) }))
+    .query(({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      return getContentLeaderboard(since, input.limit);
     }),
 
   exportCSV: superAdminProcedure
@@ -1188,7 +1196,7 @@ export const appRouter = router({
         );
       }),
     updateRole: ownerProcedure
-      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "customer_admin", "partner_admin", "partner", "owner"]) }))
+      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "content_admin", "partner_admin", "partner", "owner"]) }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own role" });
@@ -1228,7 +1236,7 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
-        role: z.enum(["admin", "customer_admin", "partner_admin", "partner", "owner"]).default("admin"),
+        role: z.enum(["admin", "content_admin", "partner_admin", "partner", "owner"]).default("admin"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1249,7 +1257,7 @@ export const appRouter = router({
     resendInvite: superAdminProcedure
       .input(z.object({
         email: z.string().email(),
-        role: z.enum(["admin", "customer_admin", "partner_admin", "partner", "owner"]).default("admin"),
+        role: z.enum(["admin", "content_admin", "partner_admin", "partner", "owner"]).default("admin"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1266,7 +1274,7 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
-        role: z.enum(["owner", "customer_admin", "partner_admin", "admin"]).default("admin"),
+        role: z.enum(["owner", "content_admin", "partner_admin", "admin"]).default("admin"),
         origin: z.string().url().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1308,7 +1316,7 @@ export const appRouter = router({
         const { token } = await generateInvite({
           email: target.email,
           name: target.name ?? target.email,
-          role: target.role as "admin" | "customer_admin" | "partner_admin" | "partner" | "owner",
+          role: target.role as "admin" | "content_admin" | "partner_admin" | "partner" | "owner",
           createdBy: ctx.user.id,
         });
         const appUrl = input.origin ?? process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
@@ -1778,7 +1786,7 @@ export const appRouter = router({
     getItems: protectedProcedure
       .input(z.object({ page: z.enum(["academy", "webinars", "guides", "playground", "support"]) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "customer_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(({ input }) => getReadinessItems(input.page)),
@@ -1786,7 +1794,7 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "customer_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => toggleReadinessItem(input.id, input.checked)),

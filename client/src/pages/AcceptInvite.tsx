@@ -36,7 +36,7 @@ export default function AcceptInvite() {
       const role = data?.user?.role;
       const dest =
         (role === "partner_admin" || role === "partner") ? "/wavvpartner" :
-        (role === "admin" || role === "customer_admin" || role === "owner") ? "/wavvadmin" :
+        (role === "admin" || role === "content_admin" || role === "owner") ? "/wavvadmin" :
         "/home";
       setTimeout(() => navigate(dest), 2000);
     },

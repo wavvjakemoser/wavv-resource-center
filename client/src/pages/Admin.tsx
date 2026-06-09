@@ -162,7 +162,7 @@ export default function Admin() {
   const [location, navigate] = useLocation();
 
   const isOwner = user?.role === "owner";
-  const isSuperAdmin = user?.role === "customer_admin" || isOwner;
+  const isSuperAdmin = user?.role === "content_admin" || isOwner;
   const isPartnerAdmin = user?.role === "partner_admin" || isOwner;
 
   // Read ?tab= from the URL to set the initial active tab
@@ -230,7 +230,7 @@ export default function Admin() {
     return null;
   }
   // Logged in but not an admin → send back to dashboard
-  if (user.role !== "admin" && user.role !== "customer_admin" && user.role !== "partner_admin" && user.role !== "owner") {
+  if (user.role !== "admin" && user.role !== "content_admin" && user.role !== "partner_admin" && user.role !== "owner") {
     navigate("/home");
     return null;
   }
@@ -527,7 +527,7 @@ function AnalyticsTab() {
   const [resetConfirmText, setResetConfirmText] = useState("");
   const utils = trpc.useUtils();
   const { user: analyticsUser } = useAuth();
-  const isSuperAdmin = analyticsUser?.role === "customer_admin" || analyticsUser?.role === "owner";
+  const isSuperAdmin = analyticsUser?.role === "content_admin" || analyticsUser?.role === "owner";
   const { data: tabSettings = {} } = trpc.siteSettings.getAll.useQuery();
   const askWavvEnabled = (tabSettings as Record<string, unknown>)["ask_wavv_enabled"] !== false;
 
@@ -1426,8 +1426,8 @@ function SearchAIChart({ days, height = 192 }: { days: number; height?: number }
 }
 
 // ─── Users Tab ────────────────────────────────────────────────────────────────
-type RoleFilter = "all" | "customer_admin" | "admin" | "user" | "owner" | "partner_admin";
-type UserRole = "owner" | "customer_admin" | "partner_admin" | "admin";
+type RoleFilter = "all" | "content_admin" | "admin" | "user" | "owner" | "partner_admin";
+type UserRole = "owner" | "content_admin" | "partner_admin" | "admin";
 
 // Super Admin icon: plain Shield in fuchsia, matching Admin amber shield style
 function SuperAdminIcon({ size = 14 }: { size?: number }) {
@@ -1437,7 +1437,7 @@ function SuperAdminIcon({ size = 14 }: { size?: number }) {
 
 function UsersTab() {
   const { user: currentUser } = useAuth();
-  const isSuperAdmin = currentUser?.role === "customer_admin" || currentUser?.role === "owner";
+  const isSuperAdmin = currentUser?.role === "content_admin" || currentUser?.role === "owner";
   const isOwner = currentUser?.role === "owner";
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
@@ -1459,11 +1459,11 @@ function UsersTab() {
   } | null>(null);
 
   const { data: users, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined, {
-    enabled: currentUser?.role === "admin" || currentUser?.role === "customer_admin" || currentUser?.role === "partner_admin" || currentUser?.role === "owner",
+    enabled: currentUser?.role === "admin" || currentUser?.role === "content_admin" || currentUser?.role === "partner_admin" || currentUser?.role === "owner",
   });
 
   const [addUserOpen, setAddUserOpen] = useState(false);
-  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "admin" as "admin" | "customer_admin" | "partner_admin" | "owner" });
+  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "admin" as "admin" | "content_admin" | "partner_admin" | "owner" });
   const [inviteLinkModal, setInviteLinkModal] = useState<{ open: boolean; url: string; name: string }>({
     open: false, url: "", name: "",
   });
@@ -1484,7 +1484,7 @@ function UsersTab() {
 
   // Magic link invite
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ name: "", email: "", role: "admin" as "owner" | "customer_admin" | "partner_admin" | "admin" });
+  const [inviteForm, setInviteForm] = useState({ name: "", email: "", role: "admin" as "owner" | "content_admin" | "partner_admin" | "admin" });
   const [inviteResult, setInviteResult] = useState<{ link: string; name: string; role: string } | null>(null);
   const inviteTeamMember = trpc.admin.inviteTeamMember.useMutation({
     onSuccess: (data) => {
@@ -1498,7 +1498,7 @@ function UsersTab() {
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
       if (promoteDialog) {
-        const roleLabels: Record<UserRole, string> = { owner: "an Owner", customer_admin: "a Customer Admin", partner_admin: "a Partner Admin", admin: "an Admin" };
+        const roleLabels: Record<UserRole, string> = { owner: "an Owner", content_admin: "a Content Admin", partner_admin: "a Partner Admin", admin: "an Admin" };
         toast.success(`${promoteDialog.userName} is now ${roleLabels[promoteDialog.selectedRole]}.`);
         setPromoteDialog(null);
       } else {
@@ -1532,23 +1532,23 @@ function UsersTab() {
     return /^[a-z]+\.[a-z]+@wavv\.com$/.test(email.toLowerCase());
   };
 
-  const ROLE_ORDER: Record<string, number> = { owner: 0, customer_admin: 1, partner_admin: 2, admin: 3 };
+  const ROLE_ORDER: Record<string, number> = { owner: 0, content_admin: 1, partner_admin: 2, admin: 3 };
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     // Only show internal team members — no public users or partners in this panel
-    let list = (users ?? []).filter((u) => u.role === "admin" || u.role === "customer_admin" || u.role === "partner_admin" || u.role === "owner");
+    let list = (users ?? []).filter((u) => u.role === "admin" || u.role === "content_admin" || u.role === "partner_admin" || u.role === "owner");
     if (roleFilter !== "all") list = list.filter((u) => u.role === roleFilter);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter((u) => (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q));
     }
-    // Sort by role order: Owner → Customer Admin → Partner Admin → Admin
+    // Sort by role order: Owner → Content Admin → Partner Admin → Admin
     list = [...list].sort((a, b) => (ROLE_ORDER[a.role ?? ""] ?? 99) - (ROLE_ORDER[b.role ?? ""] ?? 99));
     return list;
   }, [users, search, roleFilter]);
 
   const ownerCount = useMemo(() => (users ?? []).filter((u) => u.role === "owner").length, [users]);
-  const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "customer_admin").length, [users]);
+  const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "content_admin").length, [users]);
   const partnerAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "partner_admin").length, [users]);
   const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "admin").length, [users]);
   const totalCount = ownerCount + superAdminCount + partnerAdminCount + adminCount;
@@ -1574,8 +1574,8 @@ function UsersTab() {
       description: "Full platform control. Can invite and remove all users, change any role, manage all content, and access every admin tab including Settings.",
     },
     {
-      filter: "customer_admin",
-      label: "Customer Admins",
+      filter: "content_admin",
+      label: "Content Admins",
       value: superAdminCount,
       iconEl: <SuperAdminIcon size={20} />,
       color: "#a78bfa",
@@ -1616,34 +1616,34 @@ function UsersTab() {
       removeUser.mutate({ userId: confirmDialog.userId });
     } else {
       // demote → drop one level
-      const demotedRole: Record<string, string> = { owner: "customer_admin", customer_admin: "admin", partner_admin: "admin", admin: "admin" };
+      const demotedRole: Record<string, string> = { owner: "content_admin", content_admin: "admin", partner_admin: "admin", admin: "admin" };
       updateRole.mutate({ userId: confirmDialog.userId, role: (demotedRole[confirmDialog.currentRole] ?? "admin") as any });
     }
   }
 
   // Roles the current user can promote someone TO — per defined hierarchy rules:
-  // Owner: can promote anyone to owner, customer_admin, or partner_admin
-  // Super Admin: can promote admin → customer_admin only
-  // Partner Admin: can promote admin → customer_admin or partner_admin; customer_admin → partner_admin
+  // Owner: can promote anyone to owner, content_admin, or partner_admin
+  // Super Admin: can promote admin → content_admin only
+  // Partner Admin: can promote admin → content_admin or partner_admin; content_admin → partner_admin
   function getPromotableRoles(targetCurrentRole: string): UserRole[] {
     const myRole = currentUser?.role;
     if (myRole === "owner") {
-      // Owner can promote to owner, customer_admin, or partner_admin (anything above admin, up to owner)
-      const all: UserRole[] = ["partner_admin", "customer_admin", "owner"];
+      // Owner can promote to owner, content_admin, or partner_admin (anything above admin, up to owner)
+      const all: UserRole[] = ["partner_admin", "content_admin", "owner"];
       // Only show roles strictly above the target's current role
-      const hierarchy: UserRole[] = ["admin", "partner_admin", "customer_admin", "owner"];
+      const hierarchy: UserRole[] = ["admin", "partner_admin", "content_admin", "owner"];
       const targetIdx = hierarchy.indexOf(targetCurrentRole as UserRole);
       return all.filter(r => hierarchy.indexOf(r) > targetIdx);
     }
-    if (myRole === "customer_admin") {
-      // Super Admin can only promote admin → customer_admin
-      if (targetCurrentRole === "admin") return ["customer_admin"];
+    if (myRole === "content_admin") {
+      // Super Admin can only promote admin → content_admin
+      if (targetCurrentRole === "admin") return ["content_admin"];
       return [];
     }
     if (myRole === "partner_admin") {
-      // Partner Admin can promote admin → customer_admin or partner_admin; customer_admin → partner_admin
-      if (targetCurrentRole === "admin") return ["customer_admin", "partner_admin"];
-      if (targetCurrentRole === "customer_admin") return ["partner_admin"];
+      // Partner Admin can promote admin → content_admin or partner_admin; content_admin → partner_admin
+      if (targetCurrentRole === "admin") return ["content_admin", "partner_admin"];
+      if (targetCurrentRole === "content_admin") return ["partner_admin"];
       return [];
     }
     return [];
@@ -1654,7 +1654,7 @@ function UsersTab() {
   // Export users filtered by current roleFilter
   function exportUsersCSV() {
     const list = roleFilter === "all" ? (users ?? []) : (users ?? []).filter((u) => u.role === roleFilter);
-    const header = ["Name", "Email", "Role", "Registered"].join(",");
+    const header = ["Name", "Email", "Access Level", "Registered"].join(",");
     const rows = list.map((u) =>
       [
         `"${(u.name ?? "").replace(/"/g, '""')}"`,
@@ -1687,7 +1687,7 @@ function UsersTab() {
             style={{ background: "rgba(6,182,212,0.1)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.2)" }}
           >
             <FileDown size={13} />
-            Export{roleFilter !== "all" ? ` ${roleFilter === "customer_admin" ? "Customer Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
+            Export{roleFilter !== "all" ? ` ${roleFilter === "content_admin" ? "Content Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
           </button>
           {isOwner && (
             <button
@@ -1782,7 +1782,7 @@ function UsersTab() {
             <TableRow style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
               <TableHead className="text-gray-400 w-[240px]">Name</TableHead>
               <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
-              <TableHead className="text-gray-400 w-[160px]">Role</TableHead>
+              <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Registered</TableHead>
               {isOwner && <TableHead className="text-gray-400 text-right">Actions</TableHead>}
             </TableRow>
@@ -1824,10 +1824,10 @@ function UsersTab() {
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.4)" }}>
                             <Crown className="h-3 w-3" /> Owner
                           </Badge>
-                        ) : u.role === "customer_admin" ? (
+                        ) : u.role === "content_admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.4)" }}>
                             <SuperAdminIcon size={12} />
-                            Customer Admin
+                            Content Admin
                           </Badge>
                         ) : u.role === "partner_admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
@@ -1907,10 +1907,10 @@ function UsersTab() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            {promoteDialog && (["owner", "customer_admin", "partner_admin", "admin"] as UserRole[]).map((role) => {
+            {promoteDialog && (["owner", "content_admin", "partner_admin", "admin"] as UserRole[]).map((role) => {
               const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
                 owner:        { label: "Owner",        color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
-                customer_admin:  { label: "Customer Admin",  color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
+                content_admin:  { label: "Content Admin",  color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
                 partner_admin:{ label: "Partner Admin",color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
                 admin:        { label: "Admin",        color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
               };
@@ -1999,15 +1999,15 @@ function UsersTab() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Role</label>
+              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Access Level</label>
               <select
                 value={addUserForm.role}
-                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "admin" | "customer_admin" | "partner_admin" | "owner" }))}
+                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "admin" | "content_admin" | "partner_admin" | "owner" }))}
                 className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                 style={{ background: "#111", border: "1px solid #2a2a2a" }}
               >
                 <option value="owner">Owner</option>
-                <option value="customer_admin">Customer Admin</option>
+                <option value="content_admin">Content Admin</option>
                 <option value="partner_admin">Partner Admin</option>
                 <option value="admin">Admin</option>
               </select>
@@ -2126,7 +2126,7 @@ function UsersTab() {
             <div className="py-2 space-y-3">
               <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
                 <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
-                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "customer_admin" ? "Customer Admin" : inviteResult.role === "partner_admin" ? "Partner Admin" : "Admin"}.</p>
+                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "content_admin" ? "Content Admin" : inviteResult.role === "partner_admin" ? "Partner Admin" : "Admin"}.</p>
               </div>
               <p className="text-xs text-gray-400">Copy this invite link and send it directly to them via Slack or email. They'll use it to set their password and activate their account. It expires in 24 hours and can only be used once.</p>
               <div
@@ -2171,15 +2171,15 @@ function UsersTab() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-400">Role</label>
+                <label className="text-xs text-gray-400">Access Level</label>
                 <select
                   value={inviteForm.role}
-                  onChange={(e) => setInviteForm(f => ({ ...f, role: e.target.value as "owner" | "customer_admin" | "partner_admin" | "admin" }))}
+                  onChange={(e) => setInviteForm(f => ({ ...f, role: e.target.value as "owner" | "content_admin" | "partner_admin" | "admin" }))}
                   className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                   style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
                   <option value="owner">Owner</option>
-                  <option value="customer_admin">Customer Admin</option>
+                  <option value="content_admin">Content Admin</option>
                   <option value="partner_admin">Partner Admin</option>
                   <option value="admin">Admin</option>
                 </select>
@@ -2749,7 +2749,7 @@ function CategoryBlock({
             const nextCourse = courses[idx + 1];
             return (
               <div key={course.id} className="relative group/section">
-                {/* Reorder arrows — customer_admin only, shown on hover */}
+                {/* Reorder arrows — content_admin only, shown on hover */}
                 {onReorderCourse && (
                   <div className="absolute -left-7 top-2 flex flex-col gap-0.5 opacity-0 group-hover/section:opacity-100 transition-opacity">
                     <button
@@ -3453,7 +3453,7 @@ function SectionResourcesPanel({
 }) {
   const utils = trpc.useUtils();
   const { user } = useAuth();
-  const isSuperAdmin = user?.role === "customer_admin";
+  const isSuperAdmin = user?.role === "content_admin";
 
   const { data: resources = [], isLoading } = trpc.academy.adminGetSectionResources.useQuery();
 
@@ -6540,7 +6540,7 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 mb-1 block">Role</label>
+                <label className="text-xs text-gray-400 mb-1 block">Access Level</label>
                 <div
                   className="w-full rounded-lg px-3 py-2 text-sm flex items-center gap-2"
                   style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.2)", color: "#60a5fa" }}

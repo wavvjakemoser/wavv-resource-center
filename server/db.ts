@@ -86,7 +86,7 @@ export async function getAllUsers() {
   return db.select().from(users).orderBy(desc(users.createdAt));
 }
 
-export async function updateUserRole(userId: number, role: "user" | "admin" | "customer_admin" | "partner_admin" | "partner" | "owner") {
+export async function updateUserRole(userId: number, role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner") {
   const db = await getDb();
   if (!db) return;
   await db.update(users).set({ role }).where(eq(users.id, userId));
@@ -658,6 +658,52 @@ export async function getRecentEvents(sinceDate: Date, limit = 50) {
   return rows;
 }
 
+/** Content Leaderboard — aggregate clicks/views/downloads by title across all content types */
+export async function getContentLeaderboard(sinceDate: Date, limit = 25) {
+  const db = await getDb();
+  if (!db) return [];
+  // Pull all relevant engagement events with their metadata
+  const rows = await db
+    .select({
+      eventType: analyticsEvents.eventType,
+      resourceType: analyticsEvents.resourceType,
+      metadata: analyticsEvents.metadata,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        gte(analyticsEvents.createdAt, sinceDate),
+        sql`${analyticsEvents.eventType} IN ('lesson_started','academy_video_play','guide_viewed','guide_download','webinar_ondemand_watched','webinar_registered')`
+      )
+    )
+    .groupBy(analyticsEvents.eventType, analyticsEvents.resourceType, analyticsEvents.metadata)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(500); // fetch more than needed, aggregate in JS by title
+
+  // Aggregate by extracted title from metadata JSON
+  const titleMap = new Map<string, { title: string; resourceType: string; starts: number; views: number; downloads: number; total: number }>();
+  for (const row of rows) {
+    let title = "(unknown)";
+    try {
+      const meta = JSON.parse(row.metadata ?? "{}");
+      title = meta.title ?? meta.name ?? "(unknown)";
+    } catch { /* ignore */ }
+    const key = `${row.resourceType}::${title}`;
+    const existing = titleMap.get(key) ?? { title, resourceType: row.resourceType ?? "unknown", starts: 0, views: 0, downloads: 0, total: 0 };
+    const n = Number(row.count);
+    if (row.eventType === "lesson_started" || row.eventType === "academy_video_play") existing.starts += n;
+    else if (row.eventType === "guide_viewed" || row.eventType === "webinar_ondemand_watched") existing.views += n;
+    else if (row.eventType === "guide_download") existing.downloads += n;
+    existing.total = existing.starts + existing.views + existing.downloads;
+    titleMap.set(key, existing);
+  }
+
+  return Array.from(titleMap.values())
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limit);
+}
+
 // ─── Native Auth Helpers ──────────────────────────────────────────────────────
 export async function getUserByEmail(email: string) {
   const db = await getDb();
@@ -670,7 +716,7 @@ export async function createNativeUser(data: {
   email: string;
   name: string;
   passwordHash: string | null;
-  role?: "user" | "admin" | "customer_admin" | "partner_admin" | "partner" | "owner";
+  role?: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner";
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -1434,7 +1480,7 @@ export async function removeStrikeFromUser(userId: number) {
 export async function createManualUser(data: {
   name: string;
   email: string;
-  role: "user" | "admin" | "customer_admin" | "partner_admin" | "partner" | "owner";
+  role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner";
 }) {
   const db = await getDb();
   if (!db) return null;
@@ -1458,7 +1504,7 @@ export async function createManualUser(data: {
 export async function generateInvite(data: {
   email: string;
   name?: string;
-  role: "user" | "admin" | "customer_admin" | "partner_admin" | "partner" | "owner";
+  role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner";
   createdBy: number;
 }) {
   const db = await getDb();
@@ -1800,7 +1846,7 @@ export async function getPartnerUsers() {
 // These helpers are used by the revamped analytics dashboard.
 // All queries filter to events where userId IS NULL (anonymous visitors only).
 
-const ANON_ROLES = ["owner", "admin", "customer_admin", "partner_admin", "partner"] as const;
+const ANON_ROLES = ["owner", "admin", "content_admin", "partner_admin", "partner"] as const;
 
 /** Track an anonymous event. If userId is provided, the event is silently dropped. */
 export async function trackAnonEvent(data: {

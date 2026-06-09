@@ -29,11 +29,13 @@ function GuideRow({
   guide,
   meta,
   onDownload,
+  onView,
   isPending,
 }: {
   guide: GuideItem;
   meta: typeof CATEGORY_META[string];
   onDownload: (guide: GuideItem) => void;
+  onView?: (guide: GuideItem) => void;
   isPending: boolean;
 }) {
   const Icon = meta.icon;
@@ -78,6 +80,7 @@ function GuideRow({
             rel="noopener noreferrer"
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
             style={{ background: "#252d3d", color: "#9ca3af" }}
+            onClick={() => onView?.(guide)}
           >
             <ExternalLink size={11} />
             <span className="hidden sm:inline">View</span>
@@ -92,11 +95,13 @@ function CategorySection({
   categoryKey,
   items,
   onDownload,
+  onView,
   isPending,
 }: {
   categoryKey: string;
   items: GuideItem[];
   onDownload: (guide: GuideItem) => void;
+  onView?: (guide: GuideItem) => void;
   isPending: boolean;
 }) {
   const [open, setOpen] = useState(true);
@@ -153,6 +158,7 @@ function CategorySection({
                 guide={guide}
                 meta={meta}
                 onDownload={onDownload}
+                onView={onView}
                 isPending={isPending}
               />
             ))}
@@ -170,6 +176,15 @@ export default function GuidesAndDocs() {
   const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true, checklist: true, playbook: true, resource: true };
   const downloadMutation = trpc.guides.download.useMutation();
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
+
+  const handleView = (guide: GuideItem) => {
+    trackAnon.mutate({
+      eventType: "guide_viewed",
+      resourceType: "guide",
+      resourceId: guide.id,
+      metadata: JSON.stringify({ title: guide.title, fileType: guide.fileType ?? "other" }),
+    });
+  };
 
   const handleDownload = async (guide: GuideItem) => {
     await downloadMutation.mutateAsync({ guideId: guide.id });
@@ -293,6 +308,7 @@ export default function GuidesAndDocs() {
                   categoryKey={categoryKey}
                   items={items}
                   onDownload={handleDownload}
+                  onView={handleView}
                   isPending={downloadMutation.isPending}
                 />
               );

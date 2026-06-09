@@ -47,12 +47,15 @@ function NavLink({
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
       style={{
         fontSize: "15px",
+        opacity: isHidden ? 0.45 : 1,
+        borderLeft: isHidden ? "3px solid #fbbf24" : undefined,
+        paddingLeft: isHidden ? "9px" : undefined,
         ...(isActive ? {
           background: `${color}18`,
           border: `1px solid ${color}35`,
           color: "#ffffff",
         } : {
-          background: "transparent",
+          background: isHidden ? "rgba(251,191,36,0.04)" : "transparent",
           border: "1px solid transparent",
           color: "#ffffff",
         }),
@@ -79,15 +82,10 @@ function NavLink({
       >
         <Icon size={17} style={{ color }} />
       </div>
-      <span className="truncate flex-1" style={isHidden ? { opacity: 0.55 } : {}}>{label}</span>
+      <span className="truncate flex-1">{label}</span>
       {isHidden && (
-        <span
-          className="flex-shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-          style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
-          title="Hidden from customers"
-        >
-          <EyeOff size={8} />
-          Hidden
+        <span aria-label="Hidden from customers" style={{ flexShrink: 0, display: "flex" }}>
+          <EyeOff size={12} style={{ color: "#fbbf24" }} />
         </span>
       )}
       {comingSoon && !isHidden && (
@@ -136,7 +134,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   }, [title]);
 
   // `partner` role has portal access but is NOT an internal admin — they must not see the Admin panel link
-  const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const isAdmin = user?.role === "admin" || user?.role === "content_admin" || user?.role === "partner_admin" || user?.role === "owner";
   const isOwner = user?.role === "owner";
   const isAdminPage = location.startsWith("/wavvadmin");
 
@@ -299,17 +297,24 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
                     style={{
                       fontSize: "14px",
-                      background: "rgba(0,169,226,0.08)",
-                      border: "1px solid rgba(0,169,226,0.18)",
+                      opacity: isPartnerPortalHidden ? 0.45 : 1,
+                      background: isPartnerPortalHidden ? "rgba(251,191,36,0.04)" : "rgba(0,169,226,0.08)",
+                      border: "1px solid transparent",
+                      borderLeft: isPartnerPortalHidden ? "3px solid #fbbf24" : "1px solid rgba(0,169,226,0.18)",
+                      paddingLeft: isPartnerPortalHidden ? "9px" : undefined,
                       color: "#00A9E2",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "rgba(0,169,226,0.14)";
-                      e.currentTarget.style.borderColor = "rgba(0,169,226,0.3)";
+                      if (!isPartnerPortalHidden) {
+                        e.currentTarget.style.background = "rgba(0,169,226,0.14)";
+                        e.currentTarget.style.borderColor = "rgba(0,169,226,0.3)";
+                      }
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(0,169,226,0.08)";
-                      e.currentTarget.style.borderColor = "rgba(0,169,226,0.18)";
+                      if (!isPartnerPortalHidden) {
+                        e.currentTarget.style.background = "rgba(0,169,226,0.08)";
+                        e.currentTarget.style.borderColor = "rgba(0,169,226,0.18)";
+                      }
                     }}
                   >
                     <div
@@ -318,15 +323,10 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     >
                       <Users size={17} style={{ color: "#00A9E2" }} />
                     </div>
-                    <span className="flex-1 min-w-0 truncate" style={isPartnerPortalHidden ? { opacity: 0.55 } : {}}>WAVV Partners Portal</span>
+                    <span className="flex-1 min-w-0 truncate">WAVV Partners Portal</span>
                     {isPartnerPortalHidden && (
-                      <span
-                        className="flex-shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                        style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}
-                        title="Hidden from customers"
-                      >
-                        <EyeOff size={8} />
-                        Hidden
+                      <span aria-label="Hidden from customers" style={{ flexShrink: 0, display: "flex" }}>
+                        <EyeOff size={12} style={{ color: "#fbbf24" }} />
                       </span>
                     )}
                   </a>

@@ -32,7 +32,7 @@ import { Redirect } from "wouter";
 // Admins always bypass. Non-admins are redirected to /404 when the page is hidden.
 function NavGuard({ href, children }: { href: string; children: React.ReactNode }) {
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || user?.role === "customer_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const isAdmin = user?.role === "admin" || user?.role === "content_admin" || user?.role === "partner_admin" || user?.role === "owner";
   const { data: allSettings, isLoading } = trpc.siteSettings.getAll.useQuery();
   if (isAdmin) return <>{children}</>;
   if (isLoading) return null; // brief flash prevention
