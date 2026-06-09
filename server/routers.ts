@@ -125,6 +125,16 @@ import {
   getContentLeaderboard,
 } from "./db";
 
+// ─── Login rate-limit store (in-memory, per email+IP, 5 attempts / 15 min) ────
+const loginAttemptStore = new Map<string, { count: number; windowStart: number }>();
+// Prune expired entries every 30 minutes to prevent unbounded memory growth
+setInterval(() => {
+  const cutoff = Date.now() - 15 * 60 * 1000;
+  Array.from(loginAttemptStore.entries()).forEach(([key, entry]) => {
+    if (entry.windowStart < cutoff) loginAttemptStore.delete(key);
+  });
+}, 30 * 60 * 1000);
+
 // // ─── Role guards ─────────────────────────────────────────────────────
 // Owner only — full access, promote/demote, remove users
 const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -990,8 +1000,34 @@ export const appRouter = router({
     login: publicProcedure
       .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
       .mutation(async ({ ctx, input }) => {
+        // ── Rate limiting: 5 failed attempts per email per 15 minutes ──────────
+        const emailKey = input.email.trim().toLowerCase();
+        const ipKey = (ctx.req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || ctx.req.socket.remoteAddress || "unknown";
+        const rateLimitKey = `${emailKey}::${ipKey}`;
+        const now = Date.now();
+        const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+        const MAX_ATTEMPTS = 5;
+        const entry = loginAttemptStore.get(rateLimitKey);
+        if (entry) {
+          // Clear window if it has expired
+          if (now - entry.windowStart > WINDOW_MS) {
+            loginAttemptStore.delete(rateLimitKey);
+          } else if (entry.count >= MAX_ATTEMPTS) {
+            const retryAfterSec = Math.ceil((entry.windowStart + WINDOW_MS - now) / 1000);
+            throw new TRPCError({
+              code: "TOO_MANY_REQUESTS",
+              message: `TOO_MANY_ATTEMPTS::${retryAfterSec}`,
+            });
+          }
+        }
+        // ── Authenticate ────────────────────────────────────────────────────────
         const user = await getUserByEmail(input.email);
         if (!user || !user.isActive) {
+          // Record failed attempt
+          const cur = loginAttemptStore.get(rateLimitKey);
+          loginAttemptStore.set(rateLimitKey, cur && now - cur.windowStart <= WINDOW_MS
+            ? { count: cur.count + 1, windowStart: cur.windowStart }
+            : { count: 1, windowStart: now });
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
         }
         // User exists but has never set a password — guide them to the invite/reset flow
@@ -1000,8 +1036,15 @@ export const appRouter = router({
         }
         const valid = await verifyPassword(input.password, user.passwordHash);
         if (!valid) {
+          // Record failed attempt
+          const cur = loginAttemptStore.get(rateLimitKey);
+          loginAttemptStore.set(rateLimitKey, cur && now - cur.windowStart <= WINDOW_MS
+            ? { count: cur.count + 1, windowStart: cur.windowStart }
+            : { count: 1, windowStart: now });
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
         }
+        // Successful login — clear the attempt counter
+        loginAttemptStore.delete(rateLimitKey);
         const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });

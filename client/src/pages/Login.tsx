@@ -30,6 +30,11 @@ export default function Login() {
       }
     },
     onError: (err) => {
+      // Locked out after too many failed attempts — redirect to homepage
+      if (err.message?.startsWith("TOO_MANY_ATTEMPTS::")) {
+        window.location.href = "https://wavvsuccesscenter.manus.space/";
+        return;
+      }
       // If user exists but has no password yet, guide them to set one
       if (err.message?.toLowerCase().includes("no password") || err.message?.toLowerCase().includes("set a password")) {
         setError("Your account doesn't have a password yet. Use your invite link to set one, or contact your admin to resend it.");
