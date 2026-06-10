@@ -1998,7 +1998,8 @@ function UsersTab() {
 
                       </div>
                     </TableCell>
-                    <TableCell className="text-gray-500 text-sm">
+                    {/* Invite Sent — date only, with Resend button if expired */}
+                    <TableCell className="text-gray-400 text-sm">
                       {(u as any).inviteSentAt ? (() => {
                         const sentDate = new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
                         const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
@@ -2007,39 +2008,47 @@ function UsersTab() {
                         return (
                           <div className="flex flex-col gap-1">
                             <span>{sentDate}</span>
-                            {isUsed ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>Claimed</span>
-                            ) : isExpired ? (
-                              <div className="flex items-center gap-1.5">
-                                <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>Expired</span>
-                                <button
-                                  onClick={() => sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin })}
-                                  disabled={sendPasswordReset.isPending}
-                                  className="text-[10px] text-blue-400 hover:text-blue-300 underline transition-colors"
-                                >Resend</button>
-                              </div>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>Pending</span>
+                            {isExpired && (
+                              <button
+                                onClick={() => sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin })}
+                                disabled={sendPasswordReset.isPending}
+                                className="text-[10px] text-blue-400 hover:text-blue-300 underline transition-colors w-fit"
+                              >Resend</button>
                             )}
                           </div>
                         );
                       })() : <span className="text-gray-600 italic">—</span>}
                     </TableCell>
+                    {/* Status — reflects whether the user account is active */}
                     <TableCell>
                       {(() => {
                         const hasPassword = !!(u as any).hasPassword;
                         const lastSignedIn = (u as any).lastSignedIn;
                         const hasLoggedIn = !!lastSignedIn && new Date(lastSignedIn).getFullYear() > 2020;
                         const isActive = hasLoggedIn || hasPassword;
-                        return isActive ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" /> Pending
-                          </span>
-                        );
+                        // Expired: invite was sent but token expired and never used
+                        const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
+                        const inviteUsed = !!(u as any).inviteUsed;
+                        const inviteExpired = !inviteUsed && expiresAt && expiresAt < new Date();
+                        if (isActive) {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
+                            </span>
+                          );
+                        } else if (inviteExpired) {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" /> Expired
+                            </span>
+                          );
+                        } else {
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" /> Pending
+                            </span>
+                          );
+                        }
                       })()}
                     </TableCell>
                     {isOwner && (
@@ -2049,8 +2058,8 @@ function UsersTab() {
                             <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" /> Not set
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" /> Pending
                           </span>
                         )}
                       </TableCell>
