@@ -1997,16 +1997,34 @@ function UsersTab() {
                     </TableCell>
                     {/* Invite Sent — date only, with Resend button if expired */}
                     <TableCell className="text-gray-400 text-sm">
-                      {(u as any).inviteSentAt
-                        ? new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                        : <span className="text-gray-600 italic">—</span>}
+                      {(u as any).inviteSentAt ? (() => {
+                        const sentDate = new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                        const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
+                        const expiresDate = expiresAt ? expiresAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
+                        const isExpired = expiresAt && expiresAt < new Date();
+                        return (
+                          <div className="flex flex-col gap-0.5">
+                            <span>{sentDate}</span>
+                            {expiresDate && (
+                              <span className="text-[10px]" style={{ color: isExpired ? "#ef4444" : "#6b7280" }}>
+                                Exp: {expiresDate}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })() : <span className="text-gray-600 italic">—</span>}
                     </TableCell>
-                    {/* Status — reflects whether the user account is active */}
+                    {/* Status — Active = logged in or has password; Pending = invite live; Expired = invite lapsed unclaimed */}
                     <TableCell>
                       {(() => {
                         const hasPassword = !!(u as any).hasPassword;
                         const lastSignedIn = (u as any).lastSignedIn;
-                        const hasLoggedIn = !!lastSignedIn && new Date(lastSignedIn).getFullYear() > 2020;
+                        const createdAt = (u as any).createdAt;
+                        // lastSignedIn defaults to createdAt on account creation, so only count it as
+                        // a real login if it's meaningfully later than createdAt (>60s)
+                        const lastMs = lastSignedIn ? new Date(lastSignedIn).getTime() : 0;
+                        const createdMs = createdAt ? new Date(createdAt).getTime() : 0;
+                        const hasLoggedIn = lastMs > createdMs + 60_000;
                         const isActive = hasLoggedIn || hasPassword;
                         // Expired: invite was sent but token expired and never used
                         const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
