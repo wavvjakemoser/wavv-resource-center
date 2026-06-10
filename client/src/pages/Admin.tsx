@@ -70,6 +70,7 @@ import {
   FileDown,
   Shield,
   ShieldOff,
+  ShieldCheck,
   UserPlus,
   Pencil,
   Check,
@@ -1628,6 +1629,20 @@ function UsersTab() {
     onError: (e) => toast.error(e.message),
   });
 
+  // MFA setup link modal
+  const [mfaLinkModal, setMfaLinkModal] = React.useState<{ open: boolean; url: string; name: string }>({ open: false, url: "", name: "" });
+  const generateMfaSetup = trpc.auth.generateMfaSetup.useMutation({
+    onSuccess: (data) => {
+      const setupUrl = `${window.location.origin}/mfa-setup?token=${data.setupToken}`;
+      setMfaLinkModal({ open: true, url: setupUrl, name: "" });
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const resetMfaMutation = trpc.auth.resetMfa.useMutation({
+    onSuccess: () => { toast.success("MFA has been reset. Send the user a new setup link."); refetch(); },
+    onError: (e) => toast.error(e.message),
+  });
+
   const isPendingPromotion = (email: string | null | undefined) => {
     if (!email) return false;
     return /^[a-z]+\.[a-z]+@wavv\.com$/.test(email.toLowerCase());
@@ -1885,6 +1900,7 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Registered</TableHead>
+              {isOwner && <TableHead className="text-gray-400 w-[100px]">MFA</TableHead>}
               {isOwner && <TableHead className="text-gray-400 text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
@@ -1947,6 +1963,19 @@ function UsersTab() {
                     <TableCell className="text-gray-500 text-sm">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                     </TableCell>
+                    {isOwner && (
+                      <TableCell>
+                        {(u as any).mfaEnabled ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" /> Not set
+                          </span>
+                        )}
+                      </TableCell>
+                    )}
                     {isOwner && <TableCell>
                       {isSelf ? (
                         <span className="text-xs text-gray-600">—</span>
@@ -1974,6 +2003,30 @@ function UsersTab() {
                               disabled={sendPasswordReset.isPending}
                             >
                               <KeyRound className="h-3 w-3 flex-shrink-0" /> Reset Password
+                            </button>
+                          )}
+                          {/* MFA Setup / Reset — owner only */}
+                          {isOwner && !isSelf && !(u as any).mfaEnabled && (
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(34,197,94,0.1)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.25)" }}
+                              onClick={() => {
+                                setMfaLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
+                                generateMfaSetup.mutate({ userId: u.id });
+                              }}
+                              disabled={generateMfaSetup.isPending}
+                            >
+                              <ShieldCheck className="h-3 w-3 flex-shrink-0" /> MFA Setup Link
+                            </button>
+                          )}
+                          {isOwner && !isSelf && (u as any).mfaEnabled && (
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
+                              onClick={() => resetMfaMutation.mutate({ userId: u.id })}
+                              disabled={resetMfaMutation.isPending}
+                            >
+                              <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
                             </button>
                           )}
                           {/* Remove — owner only, cannot remove self */}
@@ -2206,6 +2259,46 @@ function UsersTab() {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setResetLinkModal({ open: false, url: "", name: "" })} className="text-gray-400">Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── MFA Setup Link Modal ── */}
+      <Dialog open={mfaLinkModal.open} onOpenChange={(open) => { if (!open) setMfaLinkModal({ open: false, url: "", name: "" }); }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <ShieldCheck size={18} style={{ color: "#22c55e" }} />
+              MFA Setup Link
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Send this link to <strong className="text-white">{mfaLinkModal.name}</strong> via Slack or email. They'll open it, scan the QR code with Google Authenticator, and enter their first 6-digit code to activate MFA. The link expires in 24 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 space-y-3">
+            <div
+              className="flex flex-col gap-1 p-3 rounded-lg"
+              style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
+            >
+              <p className="text-[10px] text-gray-500 font-mono">{(() => { try { return new URL(mfaLinkModal.url).origin; } catch { return ""; } })()}</p>
+              <p className="text-xs font-mono" style={{ color: "#22c55e" }}>
+                /mfa-setup?token=<span style={{ color: "#86efac" }}>{mfaLinkModal.url.split("token=")[1]?.slice(0, 12)}…</span>
+              </p>
+            </div>
+            <Button
+              className="w-full font-semibold"
+              style={{ background: "#22c55e", color: "#000" }}
+              onClick={() => {
+                navigator.clipboard.writeText(mfaLinkModal.url);
+                toast.success("MFA setup link copied to clipboard!");
+              }}
+            >
+              Copy MFA Setup Link
+            </Button>
+            <p className="text-xs text-gray-500 text-center">Paste this link in Slack or email. The user scans the QR code with Google Authenticator and enters their first code to activate.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setMfaLinkModal({ open: false, url: "", name: "" })} className="text-gray-400">Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -2170,3 +2170,48 @@ export async function getAnonDailyTrend(eventType: string, sinceDate: Date) {
     .orderBy(sql`DATE(createdAt)`);
   return rows;
 }
+
+// ─── MFA (TOTP) Helpers ──────────────────────────────────────────────────────
+
+/** Store a TOTP secret and a one-time setup token for a user */
+export async function setMfaSetupToken(userId: number, secret: string, setupToken: string, expiresAt: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({
+    mfaSecret: secret,
+    mfaEnabled: false,
+    mfaSetupToken: setupToken,
+    mfaSetupTokenExpiresAt: expiresAt,
+  }).where(eq(users.id, userId));
+}
+
+/** Activate MFA for a user after they confirm their first code */
+export async function activateMfa(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({
+    mfaEnabled: true,
+    mfaSetupToken: null,
+    mfaSetupTokenExpiresAt: null,
+  }).where(eq(users.id, userId));
+}
+
+/** Reset MFA for a user (admin action) */
+export async function resetMfa(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({
+    mfaSecret: null,
+    mfaEnabled: false,
+    mfaSetupToken: null,
+    mfaSetupTokenExpiresAt: null,
+  }).where(eq(users.id, userId));
+}
+
+/** Get a user by their MFA setup token */
+export async function getUserByMfaSetupToken(token: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(users).where(eq(users.mfaSetupToken, token)).limit(1);
+  return result[0] ?? null;
+}

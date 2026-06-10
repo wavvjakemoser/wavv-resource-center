@@ -16,6 +16,11 @@ export default function Login() {
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: async (data) => {
+      // MFA required — redirect to step-2 verification page
+      if (data?.mfaRequired && data?.challengeToken) {
+        navigate(`/mfa-verify?challenge=${data.challengeToken}&next=${encodeURIComponent(nextPath)}`);
+        return;
+      }
       // Pre-populate auth.me cache with the user returned from login so the
       // destination page sees an authenticated user immediately on mount —
       // no second network request, no second loading flash.

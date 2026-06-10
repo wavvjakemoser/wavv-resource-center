@@ -27,6 +27,11 @@ export const users = mysqlTable("users", {
   avatarUrl: text("avatarUrl"),
   googleId: varchar("googleId", { length: 255 }),
   strikes: int("strikes").default(0).notNull(),
+  // MFA (TOTP / Google Authenticator)
+  mfaSecret: text("mfa_secret"),
+  mfaEnabled: boolean("mfa_enabled").default(false).notNull(),
+  mfaSetupToken: text("mfa_setup_token"),
+  mfaSetupTokenExpiresAt: bigint("mfa_setup_token_expires_at", { mode: "number" }),
 });
 
 export type User = typeof users.$inferSelect;

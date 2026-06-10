@@ -23,6 +23,8 @@ import AcceptInvite from "./pages/AcceptInvite";
 import Partners from "./pages/Partners";
 import WavvPartnerPortal from "./pages/WavvPartnerPortal";
 import MagicAuth from "./pages/MagicAuth";
+import MfaSetup from "./pages/MfaSetup";
+import MfaVerify from "./pages/MfaVerify";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { trpc } from "./lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -78,6 +80,8 @@ function Router() {
       <Route path="/hands-on">{() => <Redirect to="/playground" />}</Route>
       <Route path="/accept-invite" component={AcceptInvite} />
       <Route path="/auth/magic" component={MagicAuth} />
+      <Route path="/mfa-setup" component={MfaSetup} />
+      <Route path="/mfa-verify" component={MfaVerify} />
       <Route path="/profile" component={Profile} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

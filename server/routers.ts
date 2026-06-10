@@ -9,7 +9,7 @@ import { notifyOwner } from "./_core/notification";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { hashPassword, verifyPassword, createSessionToken } from "./nativeAuth";
-import { getUserByEmail, createNativeUser, upsertGoogleUser, generateInvite, getInviteByToken, claimInvite, createMagicToken, validateMagicToken } from "./db";
+import { getUserByEmail, createNativeUser, upsertGoogleUser, generateInvite, getInviteByToken, claimInvite, createMagicToken, validateMagicToken, setMfaSetupToken, activateMfa, resetMfa, getUserByMfaSetupToken } from "./db";
 import {
   createCourse,
   createGuide,
@@ -1070,13 +1070,22 @@ export const appRouter = router({
             : { count: 1, windowStart: now });
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
         }
-        // Successful login — clear the attempt counter
+        // Successful password check — clear the attempt counter
         loginAttemptStore.delete(rateLimitKey);
+        // If MFA is enabled, return a challenge instead of issuing a session
+        if (user.mfaEnabled && user.mfaSecret) {
+          // Issue a short-lived MFA challenge token (10 min) so the client can complete step 2
+          const cryptoMod = await import("crypto");
+          const challengeToken = cryptoMod.randomBytes(32).toString("hex");
+          // Reuse mfa_setup_token field as a challenge token (expires in 10 min)
+          await setMfaSetupToken(user.id, user.mfaSecret, challengeToken, Date.now() + 10 * 60 * 1000);
+          return { success: true, mfaRequired: true, challengeToken, user: null };
+        }
         const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
         await trackEvent({ userId: user.id, eventType: "login" });
-        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+        return { success: true, mfaRequired: false, challengeToken: null, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
       }),
 
     register: publicProcedure
@@ -1242,6 +1251,113 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+
+    // ── MFA: Get setup data by token (public — used by the setup page to fetch QR code) ──
+    getMfaSetupData: publicProcedure
+      .input(z.object({ setupToken: z.string() }))
+      .query(async ({ input }) => {
+        const user = await getUserByMfaSetupToken(input.setupToken);
+        if (!user) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired setup link." });
+        if (!user.mfaSetupTokenExpiresAt || Date.now() > user.mfaSetupTokenExpiresAt) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "This setup link has expired. Ask your admin to generate a new one." });
+        }
+        // Regenerate QR from the stored secret (secret was already saved when admin generated the link)
+        const otplib = await import("otplib");
+        const QRCode = await import("qrcode");
+        const otpAuthUrl = otplib.generateURI({ label: user.email ?? user.name ?? "user", issuer: "WAVV Success Center", secret: user.mfaSecret! });
+        const qrDataUrl = await QRCode.default.toDataURL(otpAuthUrl);
+        return { qrDataUrl, secret: user.mfaSecret! };
+      }),
+
+    // ── MFA: Generate setup (called by admin when creating/resetting MFA for a user) ──
+    generateMfaSetup: protectedProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        // Only owner or partner_admin can generate setup links for others; users can generate their own
+        const isAdmin = ctx.user.role === "owner" || ctx.user.role === "admin" || ctx.user.role === "content_admin" || ctx.user.role === "partner_admin";
+        if (!isAdmin && ctx.user.id !== input.userId) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+        }
+        const otplib = await import("otplib");
+        const cryptoMod = await import("crypto");
+        const targetUser = await getUserById(input.userId);
+        if (!targetUser) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        const secret = otplib.generateSecret();
+        const setupToken = cryptoMod.randomBytes(32).toString("hex");
+        const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+        await setMfaSetupToken(input.userId, secret, setupToken, expiresAt);
+        const otpAuthUrl = otplib.generateURI({ label: targetUser.email ?? targetUser.name ?? "user", issuer: "WAVV Success Center", secret });
+        const QRCode = await import("qrcode");
+        const qrDataUrl = await QRCode.default.toDataURL(otpAuthUrl);
+        return { setupToken, qrDataUrl, secret, otpAuthUrl };
+      }),
+
+    // ── MFA: Verify setup (user scans QR, enters first code to confirm) ──
+    verifyMfaSetup: publicProcedure
+      .input(z.object({ setupToken: z.string(), code: z.string().length(6) }))
+      .mutation(async ({ ctx }) => {
+        // Intentionally public — user is not yet authenticated
+        const input = ctx.req.body as { setupToken: string; code: string };
+        void input;
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Use verifyMfaSetupByToken" });
+      }),
+
+    // ── MFA: Verify setup token + code, activate MFA ──
+    verifyMfaSetupByToken: publicProcedure
+      .input(z.object({ setupToken: z.string(), code: z.string().min(6).max(6) }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await getUserByMfaSetupToken(input.setupToken);
+        if (!user) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired setup link." });
+        if (!user.mfaSetupTokenExpiresAt || Date.now() > user.mfaSetupTokenExpiresAt) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "This setup link has expired. Ask your admin to generate a new one." });
+        }
+        const otplibSetup = await import("otplib");
+        const verifyResultSetup = await otplibSetup.verify({ token: input.code, secret: user.mfaSecret! });
+        if (!verifyResultSetup || (typeof verifyResultSetup === 'object' && !verifyResultSetup.valid)) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect code. Please try again." });
+        }
+        await activateMfa(user.id);
+        // Issue a full session after successful MFA setup
+        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        await trackEvent({ userId: user.id, eventType: "login" });
+        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+      }),
+
+    // ── MFA: Verify login code (step 2 of login when MFA is enabled) ──
+    verifyMfaLogin: publicProcedure
+      .input(z.object({ challengeToken: z.string(), code: z.string().min(6).max(6) }))
+      .mutation(async ({ ctx, input }) => {
+        // The challenge token was stored in mfa_setup_token field with a 10-min expiry
+        const user = await getUserByMfaSetupToken(input.challengeToken);
+        if (!user) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid or expired challenge. Please sign in again." });
+        if (!user.mfaSetupTokenExpiresAt || Date.now() > user.mfaSetupTokenExpiresAt) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Challenge expired. Please sign in again." });
+        }
+        const otplibLogin = await import("otplib");
+        const verifyResultLogin = await otplibLogin.verify({ token: input.code, secret: user.mfaSecret! });
+        if (!verifyResultLogin || (typeof verifyResultLogin === 'object' && !verifyResultLogin.valid)) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect code. Please try again." });
+        }
+        // Clear the challenge token
+        await setMfaSetupToken(user.id, user.mfaSecret!, "", 0);
+        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
+        await trackEvent({ userId: user.id, eventType: "login" });
+        return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+      }),
+
+    // ── MFA: Reset (admin clears MFA for a user) ──
+    resetMfa: protectedProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const isAdmin = ctx.user.role === "owner" || ctx.user.role === "admin" || ctx.user.role === "content_admin" || ctx.user.role === "partner_admin";
+        if (!isAdmin) throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+        await resetMfa(input.userId);
+        return { success: true };
+      }),
   }),
   academy: academyRouter,
   webinars: webinarsRouter,

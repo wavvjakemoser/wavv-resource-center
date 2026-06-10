@@ -1217,3 +1217,20 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Webinar cards: add fallback placeholder thumbnail when no image is uploaded
 - [x] Webinar admin: add thumbnail upload field to Add/Edit webinar form
 - [x] Webinar admin: store thumbnail URL in DB and display on webinar cards
+
+## MFA (Google Authenticator / TOTP) — Mandatory for all /wavvadmin users
+
+- [x] Install otplib and qrcode npm packages
+- [x] Extend users table: mfa_secret, mfa_enabled, mfa_setup_token, mfa_setup_token_expires_at
+- [x] Run DB migration for MFA fields
+- [x] Server: generateMfaSetup procedure (creates secret + QR code data URL + setup token)
+- [x] Server: verifyMfaSetup procedure (validates first code, marks mfa_enabled=true, invalidates setup token)
+- [x] Server: login procedure updated to return mfa_required flag when MFA is enabled (no session yet)
+- [x] Server: verifyMfaLogin procedure (validates TOTP code, issues session)
+- [x] Server: resetMfa procedure (admin-only, clears mfa_secret and mfa_enabled for a user)
+- [x] Client: /mfa-setup page — shows QR code, manual entry code, confirm input field
+- [x] Client: Login flow — after password success, if mfa_required redirect to /mfa-verify
+- [x] Client: /mfa-verify page — 6-digit code input, submit, error handling
+- [x] Admin User Management: show MFA status badge per user (Enabled / Not Set Up)
+- [x] Admin User Management: "Generate Setup Link" button — copies link to clipboard
+- [x] Admin User Management: "Reset MFA" button — clears MFA for a user (with confirm dialog)
