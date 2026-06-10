@@ -18,7 +18,7 @@ import {
   LogOut,
 } from "lucide-react";
 
-// ─── Intercom types ───────────────────────────────────────────────────────────
+// ─── Intercom integration ─────────────────────────────────────────────────────
 declare global {
   interface Window {
     Intercom?: (...args: unknown[]) => void;
@@ -28,42 +28,36 @@ declare global {
 
 const INTERCOM_APP_ID = import.meta.env.VITE_INTERCOM_APP_ID as string | undefined;
 
-function bootIntercom(user: { name?: string | null; email?: string | null } | null | undefined) {
-  if (!INTERCOM_APP_ID || !window.Intercom) return;
-  if (user?.email) {
-    window.Intercom("boot", {
-      app_id: INTERCOM_APP_ID,
-      name: user.name ?? undefined,
-      email: user.email,
-    });
-  } else {
-    window.Intercom("boot", { app_id: INTERCOM_APP_ID });
-  }
+// Official Intercom snippet — installs the stub queue so calls before script load are buffered
+function installIntercomStub() {
+  if (typeof window.Intercom === "function") return; // already installed
+  const i = function (...args: unknown[]) {
+    (i as unknown as { q: unknown[] }).q.push(args);
+  } as unknown as ((...args: unknown[]) => void) & { q: unknown[] };
+  i.q = [];
+  window.Intercom = i;
 }
 
 function loadIntercomScript(appId: string) {
   if (document.getElementById("intercom-script")) return;
-  const w = window as Window & { attachEvent?: (event: string, fn: () => void) => void };
-  const ic = w.Intercom;
-  if (typeof ic === "function") {
-    ic("reattach_activator");
-    ic("update", w.intercomSettings ?? {});
-  } else {
-    const d = document;
-    const i = function (...args: unknown[]) {
-      (i as unknown as { q: unknown[] }).q.push(args);
-    } as unknown as ((...args: unknown[]) => void) & { q: unknown[]; c: (...args: unknown[]) => void };
-    i.q = [];
-    i.c = function (...args: unknown[]) { i(...args); };
-    w.Intercom = i;
-    const s = d.createElement("script");
-    s.id = "intercom-script";
-    s.type = "text/javascript";
-    s.async = true;
-    s.src = `https://widget.intercom.io/widget/${appId}`;
-    const x = d.getElementsByTagName("script")[0];
-    x?.parentNode?.insertBefore(s, x);
+  installIntercomStub();
+  const s = document.createElement("script");
+  s.id = "intercom-script";
+  s.type = "text/javascript";
+  s.async = true;
+  s.src = `https://widget.intercom.io/widget/${appId}`;
+  document.head.appendChild(s);
+}
+
+function bootIntercom(user: { name?: string | null; email?: string | null } | null | undefined) {
+  if (!INTERCOM_APP_ID) return;
+  installIntercomStub(); // ensure stub exists even if script hasn't loaded yet
+  const settings: Record<string, unknown> = { app_id: INTERCOM_APP_ID };
+  if (user?.email) {
+    settings.name = user.name ?? undefined;
+    settings.email = user.email;
   }
+  window.Intercom!("boot", settings);
 }
 
 const baseNavItems = [
@@ -167,38 +161,25 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     setSidebarOpen(false);
   }, [location]);
 
-  // ── Intercom: load script once, boot with identity when user resolves ────────
+  // ── Intercom: load script once on mount ─────────────────────────────────────
   useEffect(() => {
     if (INTERCOM_APP_ID) loadIntercomScript(INTERCOM_APP_ID);
   }, []);
 
+  // Boot once user auth and settings have resolved
   useEffect(() => {
-    // user may be null (anonymous visitor) or a logged-in user object
-    // Wait until the auth query has settled (user !== undefined means query ran)
-    if (user !== undefined) {
-      if (intercomEnabled) {
-        bootIntercom(user);
-      } else if (window.Intercom) {
-        window.Intercom("shutdown");
-      }
+    if (user === undefined) return; // still loading
+    if (!intercomEnabled) {
+      window.Intercom?.("shutdown");
+      return;
     }
+    bootIntercom(user);
   }, [user, intercomEnabled]);
 
-  // Update Intercom on route change so it tracks page views
+  // Notify Intercom of page changes (keeps conversation context accurate)
   useEffect(() => {
-    if (intercomEnabled && window.Intercom) window.Intercom("update");
-  }, [location, intercomEnabled]);
-
-  // Shut down Intercom when disabled via settings toggle
-  useEffect(() => {
-    if (!window.Intercom) return;
-    if (!intercomEnabled) {
-      window.Intercom("shutdown");
-    } else if (INTERCOM_APP_ID) {
-      bootIntercom(user);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [intercomEnabled]);
+    if (intercomEnabled) window.Intercom?.("update");
+  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSignOut() {
     setSigningOut(true);
