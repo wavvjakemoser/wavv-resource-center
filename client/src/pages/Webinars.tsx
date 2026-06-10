@@ -278,38 +278,43 @@ function WebinarCard({
     >
       {/* Thumbnail */}
       <div
-        className="relative w-full overflow-hidden flex-shrink-0 flex items-center justify-center"
-        style={{ height: "120px", background: "#0a0c12" }}
+        className="relative w-full overflow-hidden flex-shrink-0"
+        style={{ height: "140px" }}
       >
-        {/* Background image — contained, not cropped */}
-        {thumbBg ? (
+        {/* Full-bleed section background image */}
+        <img
+          src={SECTION_BG[variant]}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.9 }}
+        />
+        {/* Custom thumbnail overlaid at contained size when set */}
+        {webinar.thumbnailUrl && (
           <img
-            src={thumbBg}
+            src={webinar.thumbnailUrl}
             alt=""
-            className="w-full h-full object-contain"
-            style={{ padding: "8px", opacity: 0.95 }}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = "none";
-              const parent = e.currentTarget.parentElement;
-              if (parent) {
-                parent.style.background = `linear-gradient(135deg, ${accentColor}22 0%, #0a0c12 100%)`;
-              }
-            }}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ opacity: 0.92 }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
-        ) : (
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, ${accentColor}22 0%, #0a0c12 100%)` }}
-          >
-            {CardIcon ? (
-              <CardIcon size={36} style={{ color: accentColor, filter: `drop-shadow(0 0 10px ${accentColor}88)` }} />
-            ) : (
-              <Video size={36} style={{ color: accentColor, filter: `drop-shadow(0 0 10px ${accentColor}88)` }} />
-            )}
+        )}
+        {/* Icon overlay — centered, small, on top of background */}
+        {!webinar.thumbnailUrl && variant !== "exclusive" && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="flex items-center justify-center rounded-full"
+              style={{ width: 44, height: 44, background: `rgba(0,0,0,0.55)`, backdropFilter: "blur(2px)", border: `1px solid ${accentColor}55` }}
+            >
+              {CardIcon ? (
+                <CardIcon size={20} style={{ color: accentColor, filter: `drop-shadow(0 0 6px ${accentColor}99)` }} />
+              ) : (
+                <Video size={20} style={{ color: accentColor, filter: `drop-shadow(0 0 6px ${accentColor}99)` }} />
+              )}
+            </div>
           </div>
         )}
-        {/* Subtle vignette overlay */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(10,12,18,0.6))" }} />
+        {/* Bottom gradient overlay */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
         {/* Type badge top-right */}
         <div className="absolute top-3 right-3">
           <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
