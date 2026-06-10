@@ -462,6 +462,11 @@ export function ContentRequestCTA({
   accentColor?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const { data: allSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const settingsMap = allSettings as Record<string, unknown>;
+  // Check the toggle for this request type — default true (visible)
+  const settingKey = requestType === "video" ? "video_requests_enabled" : requestType === "guide" ? "guide_requests_enabled" : "webinar_requests_enabled";
+  const isEnabled = settingsMap[settingKey] !== false;
   const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#67C728");
   const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
   // Match the sidebar emblem for each section
@@ -471,6 +476,9 @@ export function ContentRequestCTA({
     : requestType === "guide"
     ? "Missing a playbook or reference doc? Tell us what would help your team."
     : "Want a session on a specific topic? Let us know what to cover next.";
+
+  // If the owner has disabled this request type, render nothing
+  if (!isEnabled) return null;
 
   return (
     <>

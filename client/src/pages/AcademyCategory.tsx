@@ -19,6 +19,7 @@ import {
   X,
   PictureInPicture2,
 } from "lucide-react";
+import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
 
@@ -563,40 +564,12 @@ export default function AcademyCategory() {
 
   // Video player modal state
   const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
-  const [pipSupported, setPipSupported] = useState(false);
-  const [pipActive, setPipActive] = useState(false);
+  const [floatingVideo, setFloatingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
 
-  useEffect(() => {
-    setPipSupported("documentPictureInPicture" in window);
-  }, []);
-
-  async function handleAcademyPip() {
-    if (!playingVideo || !("documentPictureInPicture" in window)) return;
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pipWindow = await (window as any).documentPictureInPicture.requestWindow({ width: 640, height: 390 });
-      Array.from(document.styleSheets).forEach((sheet) => {
-        try {
-          const cssRules = Array.from(sheet.cssRules).map((r) => r.cssText).join("");
-          const style = pipWindow.document.createElement("style");
-          style.textContent = cssRules;
-          pipWindow.document.head.appendChild(style);
-        } catch { /* cross-origin */ }
-      });
-      const iframe = pipWindow.document.createElement("iframe");
-      iframe.src = playingVideo.embedUrl;
-      iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
-      iframe.allowFullscreen = true;
-      iframe.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:block;";
-      pipWindow.document.documentElement.style.cssText = "margin:0;padding:0;width:100%;height:100%;";
-      pipWindow.document.body.style.cssText = "margin:0;padding:0;background:#000;overflow:hidden;width:100%;height:100%;position:relative;";
-      pipWindow.document.body.appendChild(iframe);
-      setPipActive(true);
-      pipWindow.addEventListener("pagehide", () => setPipActive(false));
-      handleClosePlayer();
-    } catch {
-      toast.error("Picture-in-Picture is not available in this browser.");
-    }
+  function handlePopOut() {
+    if (!playingVideo) return;
+    setFloatingVideo({ embedUrl: playingVideo.embedUrl, title: playingVideo.title });
+    handleClosePlayer();
   }
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
   const handlePlay = (embedUrl: string, title: string, sectionTitle: string, lessonId?: string) => {
@@ -766,6 +739,7 @@ export default function AcademyCategory() {
   const totalVideos = cat.sections.reduce((sum, s) => sum + s.videos.length, 0);
 
   return (
+    <>
     <PortalLayout title={`WAVV Academy — ${cat.label}`}>
       <div className="px-4 lg:px-6 py-6 max-w-3xl mx-auto space-y-6">
 
@@ -880,18 +854,16 @@ export default function AcademyCategory() {
             >
               <p className="text-sm font-semibold text-white truncate flex-1">{playingVideo.title}</p>
               <div className="flex items-center gap-2 flex-shrink-0">
-                {pipSupported && !pipActive && (
-                  <button
-                    type="button"
-                    onClick={handleAcademyPip}
-                    title="Pop out to floating window (Picture-in-Picture)"
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
-                    style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
-                  >
-                    <PictureInPicture2 size={13} />
-                    <span className="hidden sm:inline">Pop out</span>
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={handlePopOut}
+                  title="Pop out to floating window"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+                  style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
+                >
+                  <PictureInPicture2 size={13} />
+                  <span className="hidden sm:inline">Pop out</span>
+                </button>
                 <button
                   type="button"
                   onClick={handleClosePlayer}
@@ -919,17 +891,26 @@ export default function AcademyCategory() {
               style={{ borderTop: "1px solid #2a2a2a", background: "#0d0f14" }}
             >
               <p className="text-xs text-gray-500">Click outside or press Esc to close</p>
-              {pipSupported && (
-                <p className="text-xs text-gray-600 flex items-center gap-1">
-                  <PictureInPicture2 size={11} />
-                  Pop out to keep watching while you browse
-                </p>
-              )}
+              <p className="text-xs text-gray-600 flex items-center gap-1">
+                <PictureInPicture2 size={11} />
+                Pop out to keep watching while you browse
+              </p>
             </div>
           </div>
         </div>
       )}
 
     </PortalLayout>
+
+      {/* ── Floating video player (persists while browsing within the page) ── */}
+      {floatingVideo && (
+        <FloatingVideoPlayer
+          title={floatingVideo.title}
+          embedUrl={floatingVideo.embedUrl}
+          onClose={() => setFloatingVideo(null)}
+        />
+      )}
+    </>
   );
 }
+

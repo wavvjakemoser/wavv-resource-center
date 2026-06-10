@@ -141,12 +141,13 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const isAdminPage = location.startsWith("/wavvadmin");
 
   // All users see all base nav items + partner item
-  // Admins bypass nav_visibility toggles for QA purposes
-  // While settings are loading, non-admins see no nav items to prevent flash of hidden content
+  // Only the owner bypasses nav_visibility toggles (for QA/admin purposes)
+  // admin/content_admin/partner_admin roles respect visibility toggles like regular users
+  // While settings are loading, non-owners see no nav items to prevent flash of hidden content
   const allNavItems = [...baseNavItems, publicPartnerItem];
   const navItems = allNavItems.filter((item) => {
-    // All admin roles bypass visibility toggles (and don't need to wait for settings)
-    if (isAdmin) return true;
+    // Only the owner bypasses visibility toggles (and doesn't need to wait for settings)
+    if (isOwner) return true;
     // Suppress all items until settings have loaded to prevent flash of hidden content
     if (settingsLoading) return false;
     // Check nav_visibility setting (missing key = visible)
@@ -231,8 +232,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               const isActive =
                 location === item.href ||
                 (item.href !== "/home" && location.startsWith(item.href));
-              // Show hidden badge to admins for items toggled off in nav_visibility
-              const isHiddenFromCustomers = isAdmin && !settingsLoading && navVisibility[item.href] === false;
+              // Show hidden badge only to the owner for items toggled off in nav_visibility
+              const isHiddenFromCustomers = isOwner && !settingsLoading && navVisibility[item.href] === false;
               return (
                 <NavLink
                   key={item.href}

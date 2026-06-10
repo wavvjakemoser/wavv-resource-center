@@ -32,12 +32,12 @@ import { useAuth } from "@/_core/hooks/useAuth";
 
 
 // Guard for pages that can be disabled via nav_visibility in site settings.
-// Admins always bypass. Non-admins are redirected to /404 when the page is hidden.
+// Only the owner bypasses visibility checks. All other roles (including admin) are redirected to /404 when the page is hidden.
 function NavGuard({ href, children }: { href: string; children: React.ReactNode }) {
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || user?.role === "content_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const isOwner = user?.role === "owner";
   const { data: allSettings, isLoading } = trpc.siteSettings.getAll.useQuery();
-  if (isAdmin) return <>{children}</>;
+  if (isOwner) return <>{children}</>;
   if (isLoading) return null; // brief flash prevention
   const navVisibility = ((allSettings ?? {}) as Record<string, unknown>)["nav_visibility"] as Record<string, boolean> | undefined;
   if (navVisibility && navVisibility[href] === false) return <Redirect to="/404" />;

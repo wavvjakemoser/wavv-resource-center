@@ -1300,3 +1300,19 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Invite token expiry — Invite Sent column shows Claimed/Pending/Expired badge; Expired rows show Resend button
 - [x] Slack-ready setup instructions modal — after Create Invite Link, shows copyable Slack message with 4-step walkthrough and "WAVV Success Center Admin Token" branded link
 - [x] Bulk CSV user import — Bulk Import button opens dialog; paste Name, Email, Role CSV; generates up to 50 invite tokens; shows per-row OK/Error results; Copy All Invite Links button
+
+## Role Access + Request Toggles + Video Pop-out — Jun 10 2026 (Session 5)
+- [ ] Hidden page visibility: restrict hidden content to Owner role only — Admins see only active/visible pages and content
+- [ ] Request button toggles: Owner can enable/disable Video Requests, Webinar Requests, Guide Requests, Search Requests in admin settings; hidden from UI when off
+- [ ] Standardize video pop-out modal: all Academy and Webinar pop-outs use same large format (title, view count, full-size iframe) as Academy pop-out; fix Webinar on-demand pop-out which is currently small/broken
+- [ ] Pop-out is a custom in-page floating modal (not browser PiP) — closes when user navigates away from the site or closes the tab; does not persist outside the portal
+
+## Pop-out Player + Request Toggles + Access Control (Current Session)
+
+- [x] NavGuard: restrict hidden-page bypass to Owner role only (admin/content_admin/partner_admin no longer bypass nav_visibility)
+- [x] Admin Settings: add "Request Buttons" card with 4 toggles (Video, Webinar, Guide, Search)
+- [x] ContentRequestCTA: reads video_requests_enabled / guide_requests_enabled / webinar_requests_enabled from siteSettings; renders null when disabled
+- [x] AISearchBar: reads search_requests_enabled from siteSettings; hides request CTA when disabled
+- [x] FloatingVideoPlayer: new custom in-page draggable overlay component (closes on navigation, Escape key, and X button; expand/compact toggle)
+- [x] AcademyCategory: replace native Document PiP with FloatingVideoPlayer; "Pop out" button launches floating player
+- [x] Webinars: replace VideoModal component with inline modal + FloatingVideoPlayer; "Pop out" button launches floating player

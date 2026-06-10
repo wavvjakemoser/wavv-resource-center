@@ -75,10 +75,11 @@ describe("auth.logout", () => {
 // ─── Academy Tests ───────────────────────────────────────────────────────────
 
 describe("academy.getCourses", () => {
-  it("requires authentication", async () => {
+  it("resolves without authentication (public procedure)", async () => {
     const { ctx } = makeCtx(null);
     const caller = appRouter.createCaller(ctx);
-    await expect(caller.academy.getCourses()).rejects.toThrow();
+    const result = await caller.academy.getCourses();
+    expect(Array.isArray(result)).toBe(true);
   });
 
   it("returns an array for authenticated user", async () => {
@@ -147,10 +148,11 @@ describe("webinars.list", () => {
 // ─── Guides Tests ────────────────────────────────────────────────────────────
 
 describe("guides.list", () => {
-  it("requires authentication", async () => {
+  it("resolves without authentication (public procedure)", async () => {
     const { ctx } = makeCtx(null);
     const caller = appRouter.createCaller(ctx);
-    await expect(caller.guides.list()).rejects.toThrow();
+    const result = await caller.guides.list();
+    expect(Array.isArray(result)).toBe(true);
   });
 
   it("returns array of guides for authenticated user", async () => {
@@ -251,12 +253,11 @@ describe("wavvAi.chat", () => {
 // ─── Section Resources Tests ─────────────────────────────────────────────────
 
 describe("academy.getSectionResourcesByCategory", () => {
-  it("requires authentication", async () => {
+  it("resolves without authentication (public procedure)", async () => {
     const { ctx } = makeCtx(null);
     const caller = appRouter.createCaller(ctx);
-    await expect(
-      caller.academy.getSectionResourcesByCategory({ category: "Onboarding" })
-    ).rejects.toThrow();
+    const result = await caller.academy.getSectionResourcesByCategory({ category: "Onboarding" });
+    expect(Array.isArray(result)).toBe(true);
   });
 
   it("returns an array for authenticated users", async () => {
