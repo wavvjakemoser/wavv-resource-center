@@ -2000,7 +2000,8 @@ function UsersTab() {
                     {isOwner && <TableCell>
                       {isSelf ? (
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          {/* Self row: show Reset Password + MFA Setup only */}
+                          {/* Self row: dash, Reset Password, MFA Setup Link, dash */}
+                          <span className="text-gray-600 text-sm select-none">—</span>
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                             style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
@@ -2035,7 +2036,7 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
                             </button>
                           )}
-
+                          <span className="text-gray-600 text-sm select-none">—</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -7213,126 +7214,187 @@ function SettingsTab() {
       {isLoading ? (
         <div className="text-sm text-gray-500">Loading settings…</div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* ── Ask WAVV ── */}
-          <div className={sectionClass} style={sectionStyle}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)" }}>
-                  <Bot size={15} style={{ color: "#0074F4" }} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Ask WAVV Chat</p>
-                  <p className="text-xs text-gray-500">Show or hide the AI chat bubble site-wide</p>
-                </div>
-              </div>
-              <button
-                onClick={() => toggle("ask_wavv_enabled", askWavvEnabled)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                style={askWavvEnabled
-                  ? { background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }
-                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
-              >
-                {askWavvEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                {askWavvEnabled ? "Enabled" : "Disabled"}
-              </button>
-            </div>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
 
-            {/* Rate limit */}
-            <div className="flex items-center gap-3 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-              <div className="flex items-center gap-2 flex-1">
-                <Gauge size={13} style={{ color: "#9ca3af" }} />
-                <span className="text-xs text-gray-400">Rate limit (messages / hour / visitor)</span>
+          {/* ── LEFT COLUMN: 5 stacked cards ── */}
+          <div className="space-y-4">
+
+            {/* ── Announcement Banner ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(251,191,36,0.12)" }}>
+                    <Megaphone size={15} style={{ color: "#fbbf24" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Announcement Banner</p>
+                    <p className="text-xs text-gray-500">Show a banner at the top of every page</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toggle("announcement_enabled", announcementEnabled)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={announcementEnabled
+                    ? { background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                >
+                  {announcementEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  {announcementEnabled ? "Enabled" : "Disabled"}
+                </button>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex gap-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 <input
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={localRateLimit}
-                  onChange={(e) => setLocalRateLimit(e.target.value)}
-                  className="w-16 rounded-lg px-2 py-1 text-xs text-white text-center outline-none"
+                  type="text"
+                  placeholder="e.g. New webinar this Friday — register now!"
+                  value={localAnnouncement}
+                  onChange={(e) => setLocalAnnouncement(e.target.value)}
+                  className="flex-1 rounded-lg px-3 py-2 text-xs text-white outline-none"
                   style={{ background: "#0d0d0d", border: "1px solid #333" }}
                 />
                 <button
-                  onClick={saveRateLimit}
-                  className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                  onClick={saveAnnouncement}
+                  className="px-3 py-2 rounded-lg text-xs font-medium transition-all"
                   style={{ background: "#0074F4", color: "#fff" }}
                 >
                   Save
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* ── Announcement Banner ── */}
-          <div className={sectionClass} style={sectionStyle}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(251,191,36,0.12)" }}>
-                  <Megaphone size={15} style={{ color: "#fbbf24" }} />
+            {/* ── Maintenance Mode ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(239,68,68,0.12)" }}>
+                    <Wrench size={15} style={{ color: "#ef4444" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Maintenance Mode</p>
+                    <p className="text-xs text-gray-500">Replace the public site with a "Coming soon" message. Owners can still access /wavvadmin.</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Announcement Banner</p>
-                  <p className="text-xs text-gray-500">Show a banner at the top of every page</p>
+                <button
+                  onClick={() => {
+                    if (!maintenanceMode && !window.confirm("Enable maintenance mode? Public visitors will see a Coming Soon page.")) return;
+                    toggle("maintenance_mode", maintenanceMode);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={maintenanceMode
+                    ? { background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                >
+                  {maintenanceMode ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  {maintenanceMode ? "Active" : "Off"}
+                </button>
+              </div>
+            </div>
+
+            {/* ── WAVV Knowledge ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
+                    <Sparkles size={15} style={{ color: "#f59e0b" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">WAVV Knowledge</p>
+                    <p className="text-xs text-gray-500">Show or hide the WAVV Knowledge tab in the sidebar</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toggle("wavv_knowledge_enabled", wavvKnowledgeEnabled)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={wavvKnowledgeEnabled
+                    ? { background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                >
+                  {wavvKnowledgeEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  {wavvKnowledgeEnabled ? "Enabled" : "Disabled"}
+                </button>
+              </div>
+            </div>
+
+            {/* ── Ask WAVV ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)" }}>
+                    <Bot size={15} style={{ color: "#0074F4" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Ask WAVV (Chat Bubble)</p>
+                    <p className="text-xs text-gray-500">Show or hide the AI chat bubble site-wide</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toggle("ask_wavv_enabled", askWavvEnabled)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={askWavvEnabled
+                    ? { background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                >
+                  {askWavvEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  {askWavvEnabled ? "Enabled" : "Disabled"}
+                </button>
+              </div>
+              {/* Rate limit */}
+              <div className="flex items-center gap-3 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                <div className="flex items-center gap-2 flex-1">
+                  <Gauge size={13} style={{ color: "#9ca3af" }} />
+                  <span className="text-xs text-gray-400">Rate limit (messages / hour / visitor)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={localRateLimit}
+                    onChange={(e) => setLocalRateLimit(e.target.value)}
+                    className="w-16 rounded-lg px-2 py-1 text-xs text-white text-center outline-none"
+                    style={{ background: "#0d0d0d", border: "1px solid #333" }}
+                  />
+                  <button
+                    onClick={saveRateLimit}
+                    className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                    style={{ background: "#0074F4", color: "#fff" }}
+                  >
+                    Save
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={() => toggle("announcement_enabled", announcementEnabled)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                style={announcementEnabled
-                  ? { background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }
-                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
-              >
-                {announcementEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                {announcementEnabled ? "Enabled" : "Disabled"}
-              </button>
             </div>
-            <div className="flex gap-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-              <input
-                type="text"
-                placeholder="e.g. New webinar this Friday — register now!"
-                value={localAnnouncement}
-                onChange={(e) => setLocalAnnouncement(e.target.value)}
-                className="flex-1 rounded-lg px-3 py-2 text-xs text-white outline-none"
-                style={{ background: "#0d0d0d", border: "1px solid #333" }}
-              />
-              <button
-                onClick={saveAnnouncement}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition-all"
-                style={{ background: "#0074F4", color: "#fff" }}
-              >
-                Save
-              </button>
-            </div>
-          </div>
 
-          {/* ── WAVV Knowledge ── */}
-          <div className={sectionClass} style={sectionStyle}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
-                  <Sparkles size={15} style={{ color: "#f59e0b" }} />
+            {/* ── Approved Partners ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
+                    <UserPlus size={15} style={{ color: "#f59e0b" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Approved Partners</p>
+                    <p className="text-xs text-gray-500">Controls whether the Approved Partners tab is active. Disable to prevent accidental partner invitations while the Partner Portal is under construction.</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white">WAVV Knowledge</p>
-                  <p className="text-xs text-gray-500">Show or hide the WAVV Knowledge tab in the sidebar</p>
-                </div>
+                <button
+                  onClick={() => {
+                    if (approvedPartnersEnabled && !window.confirm("Disable Approved Partners? The tab will remain visible but locked to prevent accidental invitations.")) return;
+                    toggle("approved_partners_enabled", approvedPartnersEnabled);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                  style={approvedPartnersEnabled
+                    ? { background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                >
+                  {approvedPartnersEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  {approvedPartnersEnabled ? "Enabled" : "Disabled"}
+                </button>
               </div>
-              <button
-                onClick={() => toggle("wavv_knowledge_enabled", wavvKnowledgeEnabled)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                style={wavvKnowledgeEnabled
-                  ? { background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
-                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
-              >
-                {wavvKnowledgeEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                {wavvKnowledgeEnabled ? "Enabled" : "Disabled"}
-              </button>
             </div>
-          </div>
 
-          {/* ── Navigation Visibility ── */}
+          </div>{/* end left column */}
+
+          {/* ── RIGHT COLUMN: Navigation Visibility (spans full height) ── */}
           <div className={sectionClass} style={sectionStyle}>
             <div className="flex items-center gap-3 mb-3">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(99,102,241,0.12)" }}>
@@ -7366,63 +7428,8 @@ function SettingsTab() {
                 );
               })}
             </div>
-          </div>
+          </div>{/* end right column */}
 
-          {/* ── Approved Partners ── */}
-          <div className={sectionClass} style={sectionStyle}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
-                  <UserPlus size={15} style={{ color: "#f59e0b" }} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Approved Partners</p>
-                  <p className="text-xs text-gray-500">Controls whether the Approved Partners tab is active. Disable to prevent accidental partner invitations while the Partner Portal is under construction.</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (approvedPartnersEnabled && !window.confirm("Disable Approved Partners? The tab will remain visible but locked to prevent accidental invitations.")) return;
-                  toggle("approved_partners_enabled", approvedPartnersEnabled);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0"
-                style={approvedPartnersEnabled
-                  ? { background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
-                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
-              >
-                {approvedPartnersEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                {approvedPartnersEnabled ? "Enabled" : "Disabled"}
-              </button>
-            </div>
-          </div>
-
-          {/* ── Maintenance Mode ── */}
-          <div className={sectionClass} style={sectionStyle}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(239,68,68,0.12)" }}>
-                  <Wrench size={15} style={{ color: "#ef4444" }} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Maintenance Mode</p>
-                  <p className="text-xs text-gray-500">Replace the public site with a "Coming soon" message. Owners can still access /wavvadmin.</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (!maintenanceMode && !window.confirm("Enable maintenance mode? Public visitors will see a Coming Soon page.")) return;
-                  toggle("maintenance_mode", maintenanceMode);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                style={maintenanceMode
-                  ? { background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
-                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
-              >
-                {maintenanceMode ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                {maintenanceMode ? "Active" : "Off"}
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
