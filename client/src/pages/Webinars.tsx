@@ -225,14 +225,8 @@ function WebinarCard({
   // Colors are hardcoded per section type — accentColor from DB is ignored
   const accentColor = SECTION_ACCENT[variant];
 
-  const SECTION_BG: Record<WebinarType, string> = {
-    evergreen: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-evergreen-v2-GrKL79AD2FdyCtLXnUSv4C.webp",
-    exclusive: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp",
-    recording: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-recording-v2-3C9ghU23nQyUUDrjZs5iVM.webp",
-  };
-  const thumbBg = webinar.thumbnailUrl
-    ? webinar.thumbnailUrl
-    : SECTION_BG[variant];
+  // Universal dark circuit-board background — same for all section types for visual consistency
+  const UNIVERSAL_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp";
 
   // Resolve the selected icon component from the stored name
   const ICON_MAP: Record<string, LucideIcon> = {
@@ -281,14 +275,14 @@ function WebinarCard({
         className="relative w-full overflow-hidden flex-shrink-0"
         style={{ height: "140px" }}
       >
-        {/* Full-bleed section background image */}
+        {/* Universal dark circuit-board background — consistent across all section types */}
         <img
-          src={SECTION_BG[variant]}
+          src={UNIVERSAL_BG}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.9 }}
         />
-        {/* Custom thumbnail overlaid at contained size when set */}
+        {/* Custom thumbnail replaces background when set by admin */}
         {webinar.thumbnailUrl && (
           <img
             src={webinar.thumbnailUrl}
@@ -298,17 +292,28 @@ function WebinarCard({
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
         )}
-        {/* Icon overlay — centered, small, on top of background */}
-        {!webinar.thumbnailUrl && variant !== "exclusive" && (
+        {/* Icon overlay — small, centered, accent-colored — shown on all types when no custom thumbnail */}
+        {!webinar.thumbnailUrl && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div
               className="flex items-center justify-center rounded-full"
-              style={{ width: 44, height: 44, background: `rgba(0,0,0,0.55)`, backdropFilter: "blur(2px)", border: `1px solid ${accentColor}55` }}
+              style={{
+                width: 52,
+                height: 52,
+                background: `rgba(0,0,0,0.6)`,
+                backdropFilter: "blur(3px)",
+                border: `1.5px solid ${accentColor}66`,
+                boxShadow: `0 0 16px ${accentColor}44`,
+              }}
             >
               {CardIcon ? (
-                <CardIcon size={20} style={{ color: accentColor, filter: `drop-shadow(0 0 6px ${accentColor}99)` }} />
+                <CardIcon size={22} style={{ color: accentColor, filter: `drop-shadow(0 0 8px ${accentColor}bb)` }} />
+              ) : variant === "exclusive" ? (
+                <Star size={22} style={{ color: accentColor, filter: `drop-shadow(0 0 8px ${accentColor}bb)` }} />
+              ) : variant === "recording" ? (
+                <PlayCircle size={22} style={{ color: accentColor, filter: `drop-shadow(0 0 8px ${accentColor}bb)` }} />
               ) : (
-                <Video size={20} style={{ color: accentColor, filter: `drop-shadow(0 0 6px ${accentColor}99)` }} />
+                <Video size={22} style={{ color: accentColor, filter: `drop-shadow(0 0 8px ${accentColor}bb)` }} />
               )}
             </div>
           </div>
