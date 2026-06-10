@@ -1282,3 +1282,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] "New" badge on content added in last 14 days (webinars + guides) — added to WebinarCard and GuideRow
 - [x] Webinar auto-promotion — already implemented via getArchivedExclusiveWebinars() and CompletedExclusiveWebinars admin component
 - [x] Remove /wavvadmin/legacy route and AdminPanel import from App.tsx
+
+## Team Access + Analytics Fixes — Jun 10 2026 (Session 2)
+- [x] Fix column order: Status before Last Login in Team Access table
+- [x] Fix Invite Sent column — now shows inviteSentAt from invite_tokens (not user createdAt)
+- [x] Fix lastSignedIn display — Last Login column now shows actual lastSignedIn date
+- [x] Merge Reset Password + MFA Setup Link into single "Send Setup Link" button (both self-row and non-self-row)
+- [x] Remove userId from analytics event tracking — all events stored anonymously (userId stripped in trackEvent before DB insert)

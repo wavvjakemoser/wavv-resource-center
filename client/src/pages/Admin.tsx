@@ -1979,12 +1979,7 @@ function UsersTab() {
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-500 text-sm">
-                      {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
-                    </TableCell>
-                    <TableCell className="text-gray-500 text-sm">
-                      {(u as any).lastSignedIn && new Date((u as any).lastSignedIn).getFullYear() > 2020
-                        ? new Date((u as any).lastSignedIn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                        : <span className="text-gray-600 italic">Never</span>}
+                      {(u as any).inviteSentAt ? new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : <span className="text-gray-600 italic">—</span>}
                     </TableCell>
                     <TableCell>
                       {(() => {
@@ -2002,6 +1997,11 @@ function UsersTab() {
                           </span>
                         );
                       })()}
+                    </TableCell>
+                    <TableCell className="text-gray-500 text-sm">
+                      {(u as any).lastSignedIn && new Date((u as any).lastSignedIn).getFullYear() > 2020
+                        ? new Date((u as any).lastSignedIn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                        : <span className="text-gray-600 italic">Never</span>}
                     </TableCell>
                     {isOwner && (
                       <TableCell>
@@ -2026,7 +2026,7 @@ function UsersTab() {
                             onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole, step: 1 })}>
                             <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                           </button>
-                          {/* Col 2: Reset Password */}
+                          {/* Col 2: Send Setup Link — combined password reset + MFA setup */}
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                             style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
@@ -2036,22 +2036,10 @@ function UsersTab() {
                             }}
                             disabled={sendPasswordReset.isPending}
                           >
-                            <KeyRound className="h-3 w-3 flex-shrink-0" /> Reset Password
+                            <KeyRound className="h-3 w-3 flex-shrink-0" /> Send Setup Link
                           </button>
-                          {/* Col 3: MFA Setup Link or Reset MFA */}
-                          {!(u as any).mfaEnabled ? (
-                            <button
-                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(34,197,94,0.1)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.25)" }}
-                              onClick={() => {
-                                setMfaLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
-                                generateMfaSetup.mutate({ userId: u.id });
-                              }}
-                              disabled={generateMfaSetup.isPending}
-                            >
-                              <ShieldCheck className="h-3 w-3 flex-shrink-0" /> MFA Setup Link
-                            </button>
-                          ) : (
+                          {/* Col 3: Reset MFA — only shown if MFA is active */}
+                          {(u as any).mfaEnabled && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
@@ -2071,7 +2059,6 @@ function UsersTab() {
                         </div>
                       ) : (
                         <div className="flex flex-wrap gap-1.5 items-center">
-
                           {/* Change Role — owner only, full dropdown for any role */}
                           {isOwner && (
                             <button
@@ -2081,7 +2068,7 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                             </button>
                           )}
-                          {/* Reset Password — owner only */}
+                          {/* Send Setup Link — combined password reset + MFA (owner only, not self) */}
                           {isOwner && !isSelf && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
@@ -2092,23 +2079,10 @@ function UsersTab() {
                               }}
                               disabled={sendPasswordReset.isPending}
                             >
-                              <KeyRound className="h-3 w-3 flex-shrink-0" /> Reset Password
+                              <KeyRound className="h-3 w-3 flex-shrink-0" /> Send Setup Link
                             </button>
                           )}
-                          {/* MFA Setup / Reset — owner only */}
-                          {isOwner && !isSelf && !(u as any).mfaEnabled && (
-                            <button
-                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(34,197,94,0.1)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.25)" }}
-                              onClick={() => {
-                                setMfaLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
-                                generateMfaSetup.mutate({ userId: u.id });
-                              }}
-                              disabled={generateMfaSetup.isPending}
-                            >
-                              <ShieldCheck className="h-3 w-3 flex-shrink-0" /> MFA Setup Link
-                            </button>
-                          )}
+                          {/* Reset MFA — only shown if MFA is active */}
                           {isOwner && !isSelf && (u as any).mfaEnabled && (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"

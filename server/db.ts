@@ -84,10 +84,17 @@ export async function getAllUsers() {
   const db = await getDb();
   if (!db) return [];
   const rows = await db.select().from(users).orderBy(desc(users.createdAt));
+  // Get the most recent invite sent date per email
+  const invites = await db
+    .select({ email: inviteTokens.email, inviteSentAt: sql<Date>`MAX(${inviteTokens.createdAt})` })
+    .from(inviteTokens)
+    .groupBy(inviteTokens.email);
+  const inviteMap = new Map(invites.map(i => [i.email, i.inviteSentAt]));
   // Strip passwordHash before returning — replace with hasPassword boolean
   return rows.map(({ passwordHash, mfaSecret, ...safe }) => ({
     ...safe,
     hasPassword: !!passwordHash,
+    inviteSentAt: inviteMap.get(safe.email ?? "") ?? null,
   }));
 }
 export async function updateLastSignedIn(userId: number) {
@@ -505,7 +512,9 @@ export async function trackEvent(data: {
 }) {
   const db = await getDb();
   if (!db) return;
-  await db.insert(analyticsEvents).values(data);
+  // Strip userId before insert — all analytics events are stored anonymously
+  const { userId: _userId, ...anonymousData } = data;
+  await db.insert(analyticsEvents).values(anonymousData);
 }
 export async function clearAllAnalytics() {
   const db = await getDb();
