@@ -1,0 +1,91 @@
+{
+  "query": "SELECT id, name, email, role, createdAt, lastSignedIn, password_hash FROM users ORDER BY createdAt;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT id, name, email, role, createdAt, lastSignedIn, password_hash FROM users ORDER BY createdAt;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Jake Moser",
+      "email": "jake.moser@wavv.com",
+      "role": "owner",
+      "createdAt": "2026-05-01 22:15:45",
+      "lastSignedIn": "2026-05-01 22:41:54",
+      "password_hash": "$2b$12$F9buP/zuZ1fuARGKfasUcuSYI2w1vHukaHvoV1YsQQRFcn1LkbjRy"
+    },
+    {
+      "id": "300001",
+      "name": "Katie Furstenau",
+      "email": "katie.furstenau@wavv.com",
+      "role": "partner_admin",
+      "createdAt": "2026-06-01 17:42:41",
+      "lastSignedIn": "2026-06-01 17:42:42",
+      "password_hash": "$2b$12$d314Qoyz5780/oWIEbnty.50cViWoh5hCPPr2cv5xqlnNZRjn32NK"
+    },
+    {
+      "id": "360001",
+      "name": "Kam Abilla",
+      "email": "kameron.abilla@wavv.com",
+      "role": "content_admin",
+      "createdAt": "2026-06-02 16:39:53",
+      "lastSignedIn": "2026-06-02 16:39:53",
+      "password_hash": "$2b$12$UMKDJS1b5in37ff2tzwjYeFnbyxf569HKrC199sgkAYhnnHiTBdI."
+    },
+    {
+      "id": "390001",
+      "name": "Malia Robinson",
+      "email": "malia.robinson@wavv.com",
+      "role": "owner",
+      "createdAt": "2026-06-02 19:15:32",
+      "lastSignedIn": "2026-06-02 19:15:33",
+      "password_hash": "$2b$12$27snnY67otbD15H2tKTwvu3iVa1tQgbFBFdPAMnnomP36y..eWckK"
+    },
+    {
+      "id": "510001",
+      "name": "Cassie Bogart",
+      "email": "cassie.bogart@wavv.com",
+      "role": "content_admin",
+      "createdAt": "2026-06-02 20:24:59",
+      "lastSignedIn": "2026-06-02 20:25:00",
+      "password_hash": "$2b$12$.0/BBrXKOmVzlQTU94KFwuBmkSS5kQsuDJ2pGgfwcD8gLffiGQ39a"
+    },
+    {
+      "id": "540001",
+      "name": "Bailey McCann",
+      "email": "bailey.mccann@wavv.com",
+      "role": "content_admin",
+      "createdAt": "2026-06-02 21:12:45",
+      "lastSignedIn": "2026-06-02 21:12:46",
+      "password_hash": "$2b$12$VmxnARoAFSjDZFPc6.MuOuyr0EJcB4/Wb9VaSatqD5xCz8pclSPdK"
+    },
+    {
+      "id": "570001",
+      "name": "Ryan Bean",
+      "email": "ryan.bean@wavv.com",
+      "role": "admin",
+      "createdAt": "2026-06-05 20:52:08",
+      "lastSignedIn": "2026-06-05 20:52:08",
+      "password_hash": "$2b$12$qDbWSiqsFHGrsi.oYvwhl.6Uc.v9wZxKiDI2aCg8FTQV6RVnvtf6i"
+    },
+    {
+      "id": "600001",
+      "name": "CJ Lewis",
+      "email": "cj.lewis@wavv.com",
+      "role": "owner",
+      "createdAt": "2026-06-08 19:26:42",
+      "lastSignedIn": "2026-06-08 19:26:43",
+      "password_hash": "$2b$12$u1wmh6KP9p2kFtCC9DaqjuZVbLiBulu6ujUyAjY7Z1.AhJ7WosM8K"
+    },
+    {
+      "id": "630001",
+      "name": "Spencer Harman",
+      "email": "spencer.harman@wavv.com",
+      "role": "owner",
+      "createdAt": "2026-06-09 19:01:24",
+      "lastSignedIn": "2026-06-09 19:01:25",
+      "password_hash": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tcreatedAt\tlastSignedIn\tpassword_hash\n1\tJake Moser\tjake.moser@wavv.com\towner\t2026-05-01 22:15:45\t2026-05-01 22:41:54\t$2b$12$F9buP/zuZ1fuARGKfasUcuSYI2w1vHukaHvoV1YsQQRFcn1LkbjRy\n300001\tKatie Furstenau\tkatie.furstenau@wavv.com\tpartner_admin\t2026-06-01 17:42:41\t2026-06-01 17:42:42\t$2b$12$d314Qoyz5780/oWIEbnty.50cViWoh5hCPPr2cv5xqlnNZRjn32NK\n360001\tKam Abilla\tkameron.abilla@wavv.com\tcontent_admin\t2026-06-02 16:39:53\t2026-06-02 16:39:53\t$2b$12$UMKDJS1b5in37ff2tzwjYeFnbyxf569HKrC199sgkAYhnnHiTBdI.\n390001\tMalia Robinson\tmalia.robinson@wavv.com\towner\t2026-06-02 19:15:32\t2026-06-02 19:15:33\t$2b$12$27snnY67otbD15H2tKTwvu3iVa1tQgbFBFdPAMnnomP36y..eWckK\n510001\tCassie Bogart\tcassie.bogart@wavv.com\tcontent_admin\t2026-06-02 20:24:59\t2026-06-02 20:25:00\t$2b$12$.0/BBrXKOmVzlQTU94KFwuBmkSS5kQsuDJ2pGgfwcD8gLffiGQ39a\n540001\tBailey McCann\tbailey.mccann@wavv.com\tcontent_admin\t2026-06-02 21:12:45\t2026-06-02 21:12:46\t$2b$12$VmxnARoAFSjDZFPc6.MuOuyr0EJcB4/Wb9VaSatqD5xCz8pclSPdK\n570001\tRyan Bean\tryan.bean@wavv.com\tadmin\t2026-06-05 20:52:08\t2026-06-05 20:52:08\t$2b$12$qDbWSiqsFHGrsi.oYvwhl.6Uc.v9wZxKiDI2aCg8FTQV6RVnvtf6i\n600001\tCJ Lewis\tcj.lewis@wavv.com\towner\t2026-06-08 19:26:42\t2026-06-08 19:26:43\t$2b$12$u1wmh6KP9p2kFtCC9DaqjuZVbLiBulu6ujUyAjY7Z1.AhJ7WosM8K\n630001\tSpencer Harman\tspencer.harman@wavv.com\towner\t2026-06-09 19:01:24\t2026-06-09 19:01:25\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 603
+}

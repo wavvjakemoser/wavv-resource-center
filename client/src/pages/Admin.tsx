@@ -1774,13 +1774,14 @@ function UsersTab() {
   // Export users filtered by current roleFilter
   function exportUsersCSV() {
     const list = roleFilter === "all" ? (users ?? []) : (users ?? []).filter((u) => u.role === roleFilter);
-    const header = ["Name", "Email", "Access Level", "Registered"].join(",");
+      const header = ["Name", "Email", "Access Level", "Invite Sent", "Status"].join(",");
     const rows = list.map((u) =>
       [
         `"${(u.name ?? "").replace(/"/g, '""')}"`,
         `"${(u.email ?? "").replace(/"/g, '""')}"`,
         u.role,
         u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
+        (u as any).password_hash ? "Active" : "Pending",
       ].join(",")
     );
     const csv = [header, ...rows].join("\n");
@@ -1903,7 +1904,8 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[240px]">Name</TableHead>
               <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
-              <TableHead className="text-gray-400 w-[160px]">Registered</TableHead>
+              <TableHead className="text-gray-400 w-[160px]">Invite Sent</TableHead>
+              <TableHead className="text-gray-400 w-[110px]">Status</TableHead>
               {isOwner && <TableHead className="text-gray-400 w-[100px]">MFA</TableHead>}
               {isOwner && <TableHead className="text-gray-400 text-right">Actions</TableHead>}
             </TableRow>
@@ -1911,7 +1913,7 @@ function UsersTab() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={isOwner ? 5 : 4} className="text-center py-12 text-gray-500">Loading users...</TableCell>
+                <TableCell colSpan={isOwner ? 6 : 5} className="text-center py-12 text-gray-500">Loading users...</TableCell>
               </TableRow>
             ) : filteredUsers.length === 0 ? (
               <TableRow>
@@ -1967,6 +1969,21 @@ function UsersTab() {
                     <TableCell className="text-gray-500 text-sm">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                     </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const hasPassword = !!(u as any).password_hash;
+                        const isActive = hasPassword;
+                        return isActive ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" /> Pending
+                          </span>
+                        );
+                      })()}
+                    </TableCell>
                     {isOwner && (
                       <TableCell>
                         {(u as any).mfaEnabled ? (
@@ -1982,7 +1999,46 @@ function UsersTab() {
                     )}
                     {isOwner && <TableCell>
                       {isSelf ? (
-                        <span className="text-xs text-gray-600">—</span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {/* Self row: show Reset Password + MFA Setup only */}
+                          <button
+                            className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                            style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
+                            onClick={() => {
+                              setResetLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
+                              sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin });
+                            }}
+                            disabled={sendPasswordReset.isPending}
+                          >
+                            <KeyRound className="h-3 w-3 flex-shrink-0" /> Reset Password
+                          </button>
+                          {!(u as any).mfaEnabled && (
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(34,197,94,0.1)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.25)" }}
+                              onClick={() => {
+                                setMfaLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
+                                generateMfaSetup.mutate({ userId: u.id });
+                              }}
+                              disabled={generateMfaSetup.isPending}
+                            >
+                              <ShieldCheck className="h-3 w-3 flex-shrink-0" /> MFA Setup Link
+                            </button>
+                          )}
+                          {(u as any).mfaEnabled && (
+                            <button
+                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                              style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
+                              onClick={() => resetMfaMutation.mutate({ userId: u.id })}
+                              disabled={resetMfaMutation.isPending}
+                            >
+                              <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
+                            </button>
+                          )}
+                          {/* Change Role and Remove: dash for self */}
+                          <span className="text-xs text-gray-600 px-1">—</span>
+                          <span className="text-xs text-gray-600 px-1">—</span>
+                        </div>
                       ) : (
                         <div className="flex items-center gap-1.5 flex-wrap">
 

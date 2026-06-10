@@ -1,0 +1,8 @@
+{
+  "query": "DESCRIBE invitations; SELECT id, name, email, role, createdAt, lastSignedIn, password_hash FROM users ORDER BY createdAt;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute DESCRIBE invitations; SELECT id, name, email, role, createdAt, lastSignedIn, password_hash FROM users ORDER BY createdAt;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'gklpfnmvyqymxzyt6m74yk.invitations' doesn't exist"
+  ]
+}
