@@ -1656,10 +1656,7 @@ function UsersTab() {
     },
     onError: (e) => toast.error(e.message),
   });
-  const resetMfaMutation = trpc.auth.resetMfa.useMutation({
-    onSuccess: () => { toast.success("MFA has been reset. Send the user a new setup link."); refetch(); },
-    onError: (e) => toast.error(e.message),
-  });
+  // resetMfaMutation removed — full reset handled by Send Setup Link
 
   const isPendingPromotion = (email: string | null | undefined) => {
     if (!email) return false;
@@ -1938,7 +1935,7 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Invite Sent</TableHead>
               <TableHead className="text-gray-400 w-[110px]">Status</TableHead>
-              {isOwner && <TableHead className="text-gray-400 w-[100px]">MFA</TableHead>}
+
               {isOwner && <TableHead className="text-gray-400">Actions</TableHead>}
             </TableRow>
           </TableHeader>
@@ -2051,19 +2048,7 @@ function UsersTab() {
                         }
                       })()}
                     </TableCell>
-                    {isOwner && (
-                      <TableCell>
-                        {(u as any).mfaEnabled ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" /> Pending
-                          </span>
-                        )}
-                      </TableCell>
-                    )}
+
                     {isOwner && <TableCell>
                       {isSelf ? (
                         <div className="flex flex-wrap gap-1.5 items-center">
@@ -2086,17 +2071,6 @@ function UsersTab() {
                           >
                             <KeyRound className="h-3 w-3 flex-shrink-0" /> Send Setup Link
                           </button>
-                          {/* Col 3: Reset MFA — only shown if MFA is active */}
-                          {(u as any).mfaEnabled && (
-                            <button
-                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
-                              onClick={() => resetMfaMutation.mutate({ userId: u.id })}
-                              disabled={resetMfaMutation.isPending}
-                            >
-                              <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
-                            </button>
-                          )}
                           {/* Col 4: Remove — triggers confirmation dialog */}
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
@@ -2128,17 +2102,6 @@ function UsersTab() {
                               disabled={sendPasswordReset.isPending}
                             >
                               <KeyRound className="h-3 w-3 flex-shrink-0" /> Send Setup Link
-                            </button>
-                          )}
-                          {/* Reset MFA — only shown if MFA is active */}
-                          {isOwner && !isSelf && (u as any).mfaEnabled && (
-                            <button
-                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
-                              onClick={() => resetMfaMutation.mutate({ userId: u.id })}
-                              disabled={resetMfaMutation.isPending}
-                            >
-                              <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
                             </button>
                           )}
                           {/* Remove — owner only, cannot remove self */}

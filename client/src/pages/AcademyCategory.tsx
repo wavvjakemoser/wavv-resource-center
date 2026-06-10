@@ -752,31 +752,29 @@ export default function AcademyCategory() {
           WAVV Academy
         </Link>
 
-        {/* ── Category hero banner ── */}
+        {/* ── Category hero banner — simple gradient + icon (matches Academy.tsx cards) ── */}
         <div
           className="relative overflow-hidden rounded-2xl"
           style={{ height: "160px", border: `1px solid ${cat.color}40` }}
         >
-          {/* Background thumbnail image */}
-          {cat.thumbnail && (
-            <img
-              src={cat.thumbnail}
-              alt={cat.label}
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              aria-hidden="true"
-            />
-          )}
-          {/* Dark overlay — fades image into card background on both sides */}
+          {/* Background gradient — no image, clean dark card with colour accent */}
           <div
             className="absolute inset-0"
-            style={{
-              background: `linear-gradient(90deg, rgba(10,12,18,0.88) 0%, rgba(10,12,18,0.55) 50%, rgba(10,12,18,0.88) 100%)`,
-            }}
+            style={{ background: `linear-gradient(135deg, rgba(8,10,16,1) 0%, rgba(8,10,16,0.95) 60%, ${cat.color}18 100%)` }}
           />
-          {/* Colour accent glow */}
+          {/* Large icon watermark — right side */}
+          {(() => { const HeroIcon = CATEGORY_ICONS[cat.key] ?? Rocket; return (
+            <div
+              className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ opacity: 0.35, color: cat.color }}
+            >
+              <HeroIcon size={100} strokeWidth={1.2} />
+            </div>
+          ); })()}
+          {/* Colour accent glow — subtle, centre-right */}
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse at 70% 50%, ${cat.color}18 0%, transparent 55%)` }}
+            style={{ background: `radial-gradient(ellipse at 80% 50%, ${cat.color}14 0%, transparent 55%)` }}
           />
           {/* Content overlay */}
           <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
@@ -787,14 +785,14 @@ export default function AcademyCategory() {
             <p className="text-sm text-gray-300 mb-2">{cat.subtitle}</p>
             <div className="flex items-center gap-2">
               <span
-                className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
-                style={{ background: `${cat.color}25`, color: cat.color, border: `1px solid ${cat.color}50` }}
+                className="text-[11px] font-bold px-3 py-1 rounded-full"
+                style={{ background: `${cat.color}35`, color: cat.color, border: `1px solid ${cat.color}` }}
               >
                 {cat.sections.length} {cat.sections.length === 1 ? "section" : "sections"}
               </span>
               <span
-                className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
-                style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}
+                className="text-[11px] font-bold px-3 py-1 rounded-full"
+                style={{ background: "rgba(255,255,255,0.15)", color: "#f3f4f6", border: "1px solid rgba(255,255,255,0.35)" }}
               >
                 {totalVideos} {totalVideos === 1 ? "video" : "videos"}
               </span>
