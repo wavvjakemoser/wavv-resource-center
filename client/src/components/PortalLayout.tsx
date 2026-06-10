@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import WavvAIChat from "./WavvAIChat";
 import AISearchBar from "./AISearchBar";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -12,13 +11,60 @@ import {
   Home,
   Menu,
   X,
-  Sparkles,
   FlaskConical,
   Shield,
   Users,
   ExternalLink,
   LogOut,
 } from "lucide-react";
+
+// ─── Intercom types ───────────────────────────────────────────────────────────
+declare global {
+  interface Window {
+    Intercom?: (...args: unknown[]) => void;
+    intercomSettings?: Record<string, unknown>;
+  }
+}
+
+const INTERCOM_APP_ID = import.meta.env.VITE_INTERCOM_APP_ID as string | undefined;
+
+function bootIntercom(user: { name?: string | null; email?: string | null } | null | undefined) {
+  if (!INTERCOM_APP_ID || !window.Intercom) return;
+  if (user?.email) {
+    window.Intercom("boot", {
+      app_id: INTERCOM_APP_ID,
+      name: user.name ?? undefined,
+      email: user.email,
+    });
+  } else {
+    window.Intercom("boot", { app_id: INTERCOM_APP_ID });
+  }
+}
+
+function loadIntercomScript(appId: string) {
+  if (document.getElementById("intercom-script")) return;
+  const w = window as Window & { attachEvent?: (event: string, fn: () => void) => void };
+  const ic = w.Intercom;
+  if (typeof ic === "function") {
+    ic("reattach_activator");
+    ic("update", w.intercomSettings ?? {});
+  } else {
+    const d = document;
+    const i = function (...args: unknown[]) {
+      (i as unknown as { q: unknown[] }).q.push(args);
+    } as unknown as ((...args: unknown[]) => void) & { q: unknown[]; c: (...args: unknown[]) => void };
+    i.q = [];
+    i.c = function (...args: unknown[]) { i(...args); };
+    w.Intercom = i;
+    const s = d.createElement("script");
+    s.id = "intercom-script";
+    s.type = "text/javascript";
+    s.async = true;
+    s.src = `https://widget.intercom.io/widget/${appId}`;
+    const x = d.getElementsByTagName("script")[0];
+    x?.parentNode?.insertBefore(s, x);
+  }
+}
 
 const baseNavItems = [
   { href: "/home", label: "Home",              icon: Home,          color: "#6366f1" },
@@ -102,13 +148,42 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const { logout } = useAuth();
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [aiOpen, setAiOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const isAdminPage = location.startsWith("/wavvadmin");
 
   // Auto-close mobile sidebar on route change
   useEffect(() => {
     setSidebarOpen(false);
   }, [location]);
+
+  // ── Intercom: load script once, boot with identity when user resolves ────────
+  useEffect(() => {
+    if (INTERCOM_APP_ID) loadIntercomScript(INTERCOM_APP_ID);
+  }, []);
+
+  useEffect(() => {
+    // user may be null (anonymous visitor) or a logged-in user object
+    // Wait until the auth query has settled (user !== undefined means query ran)
+    if (user !== undefined) {
+      bootIntercom(user);
+    }
+  }, [user]);
+
+  // Update Intercom on route change so it tracks page views
+  useEffect(() => {
+    if (window.Intercom) window.Intercom("update");
+  }, [location]);
+
+  // Shut down Intercom on admin pages to keep it out of internal tooling
+  useEffect(() => {
+    if (!window.Intercom) return;
+    if (isAdminPage) {
+      window.Intercom("shutdown");
+    } else if (INTERCOM_APP_ID) {
+      bootIntercom(user);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdminPage]);
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -120,9 +195,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     }
   }
 
-  // Site settings — controls Ask WAVV, announcement banner, maintenance mode
+  // Site settings — controls announcement banner, maintenance mode
   const { data: allSettings = {}, isLoading: settingsLoading } = trpc.siteSettings.getAll.useQuery();
-  const askWavvEnabled = (allSettings as Record<string, unknown>)["ask_wavv_enabled"] !== false; // default true
   const maintenanceMode = (allSettings as Record<string, unknown>)["maintenance_mode"] === true;
   const announcementEnabled = (allSettings as Record<string, unknown>)["announcement_enabled"] === true;
   const announcementText = typeof (allSettings as Record<string, unknown>)["announcement_text"] === "string"
@@ -138,7 +212,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   // `partner` role has portal access but is NOT an internal admin — they must not see the Admin panel link
   const isAdmin = user?.role === "admin" || user?.role === "content_admin" || user?.role === "partner_admin" || user?.role === "owner";
   const isOwner = user?.role === "owner";
-  const isAdminPage = location.startsWith("/wavvadmin");
 
   // All users see all base nav items + partner item
   // Only the owner bypasses nav_visibility toggles (for QA/admin purposes)
@@ -386,28 +459,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
         </div>
       </div>
 
-      {/* Ask WAVV floating bubble — customer pages only, controlled by siteSettings */}
-      {!isAdminPage && !settingsLoading && askWavvEnabled && !aiOpen && (
-        <button
-          onClick={() => setAiOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-2.5 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95"
-          style={{
-            background: "linear-gradient(135deg, #0074F4, #00A9E2)",
-            color: "white",
-            boxShadow: "0 4px 28px rgba(0, 116, 244, 0.4)",
-            fontWeight: 600,
-            fontSize: "14px",
-            whiteSpace: "nowrap",
-          }}
-          title="Ask WAVV"
-        >
-          <Sparkles size={15} />
-          <span>Ask WAVV</span>
-        </button>
-      )}
-
-      {/* Ask WAVV Chat Panel — customer pages only */}
-      {!isAdminPage && !settingsLoading && askWavvEnabled && <WavvAIChat isOpen={aiOpen} onClose={() => setAiOpen(false)} />}
+      {/* Intercom messenger is loaded via script tag — no JSX needed */}
 
     </div>
   );

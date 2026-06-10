@@ -158,7 +158,7 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
-type AdminTab = "knowledge" | "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
+type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -174,7 +174,6 @@ export default function Admin() {
   const initialTab = (): AdminTab => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
-    if (t === "knowledge") return "knowledge";
     if (t === "users") return "users";
     if (t === "analytics" && isSuperAdmin) return "analytics";
     if (t === "approved_partners" && (isSuperAdmin || isPartnerAdmin)) return "approved_partners";
@@ -203,8 +202,7 @@ export default function Admin() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get("tab");
-    if (t === "knowledge") setActiveTab("knowledge");
-    else if (t === "users") setActiveTab("users");
+    if (t === "users") setActiveTab("users");
     else if (t === "analytics" && isSuperAdmin) setActiveTab("analytics");
     else if (t === "approved_partners" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("approved_partners");
     else if ((t === "academy" || t === "content") && isSuperAdmin) setActiveTab("academy");
@@ -241,10 +239,6 @@ export default function Admin() {
     navigate("/home");
     return null;
   }
-
-  const wavvKnowledgeEnabled = (adminSettings as Record<string, unknown>)["wavv_knowledge_enabled"] !== false;
-  // WAVV Knowledge is only shown when enabled — hidden entirely when disabled
-  const showKnowledge = wavvKnowledgeEnabled;
 
   // ── Tab row definitions ──
   type TabDef = { id: AdminTab; label: string; icon: React.ReactNode; show: boolean };
@@ -291,25 +285,7 @@ export default function Admin() {
     <PortalLayout title="Admin">
       <div className="px-4 lg:px-6 py-6 space-y-4">
 
-        {/* ── Row 1: WAVV Knowledge (hidden when disabled) ── */}
-        {showKnowledge && (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setActiveTab("knowledge")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-              style={
-                activeTab === "knowledge"
-                  ? { background: "#0074F4", color: "#fff", border: "1px solid #0074F4" }
-                  : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
-              }
-            >
-              <Sparkles size={14} />
-              WAVV Knowledge
-            </button>
-          </div>
-        )}
-
-        {/* ── Row 2: Operations ── */}
+        {/* ── Row 1: Operations ── */}
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#4b5563" }}>Operations</p>
           <div
@@ -332,7 +308,6 @@ export default function Admin() {
         </div>
 
         {/* ── Tab content ── */}
-        {activeTab === "knowledge" && showKnowledge && <WavvKnowledgeTab />}
         {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab days={analyticsDays} onDaysChange={setAnalyticsDays} />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "settings" && isOwner && <SettingsTab />}
@@ -350,180 +325,6 @@ export default function Admin() {
   );
 }
 
-// ─── WAVV Knowledge Tab ──────────────────────────────────────────────────────
-function WavvKnowledgeTab() {
-  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const chatMutation = trpc.wavvAi.chat.useMutation();
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const sendMessage = async (content: string) => {
-    if (!content.trim() || isLoading) return;
-    const userMsg = { role: "user" as const, content: content.trim() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setInput("");
-    setIsLoading(true);
-    try {
-      const response = await chatMutation.mutateAsync({ messages: newMessages });
-      const aiContent = typeof response.content === "string" ? response.content : String(response.content);
-      setMessages([...newMessages, { role: "assistant", content: aiContent }]);
-    } catch {
-      setMessages([...newMessages, { role: "assistant", content: "Unable to connect. Please try again." }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: "#141414", border: "1px solid #2a2a2a", minHeight: "600px", display: "flex", flexDirection: "column" }}>
-      {/* Header */}
-      <div className="flex items-center gap-3 px-5 py-4 flex-shrink-0" style={{ background: "linear-gradient(135deg, #1a1f2e, #1d2230)", borderBottom: "1px solid #2a2a2a" }}>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}>
-          <Sparkles size={15} className="text-white" />
-        </div>
-        <div>
-          <p className="text-white font-semibold text-sm">WAVV Knowledge</p>
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Internal knowledge base — admin access only</p>
-        </div>
-      </div>
-
-      {/* Search bar — always visible at top */}
-      <div className="px-5 pt-5 pb-3 flex-shrink-0">
-        <div className="flex items-center gap-2 rounded-xl px-4 py-3" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
-          <Search size={16} style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }} />
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-            placeholder="Search the WAVV knowledge base..."
-            className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
-            disabled={isLoading}
-          />
-          {input.trim() && (
-            <button onClick={() => sendMessage(input)} disabled={isLoading}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all disabled:opacity-40"
-              style={{ background: "#0074F4", color: "white" }}>
-              <Send size={11} />
-              Ask
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-4">
-        {messages.length === 0 && (
-          <div
-            className="rounded-2xl overflow-hidden mt-2"
-            style={{ background: "rgba(245,158,11,0.07)", border: "2px dashed rgba(245,158,11,0.35)" }}
-          >
-            <div className="flex flex-col items-center justify-center text-center py-14 px-8 gap-5">
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                style={{ background: "rgba(245,158,11,0.15)" }}
-              >
-                <AlertTriangle size={32} style={{ color: "#f59e0b" }} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-white tracking-tight">WAVV Knowledge</h3>
-                <div
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-                  style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b" }}
-                >
-                  <AlertTriangle size={11} />
-                  Under Construction
-                </div>
-              </div>
-              <p className="text-sm text-gray-400 leading-relaxed max-w-md">
-                The internal knowledge base is being curated. Once content is added, this will be your
-                go-to for finding answers without digging through{" "}
-                <span className="text-white font-medium">Slack</span> or{" "}
-                <span className="text-white font-medium">Google Drive</span>.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg mt-1">
-                {[
-                  { icon: <BookOpen size={14} />, label: "Onboarding Guides" },
-                  { icon: <MessageSquare size={14} />, label: "Product FAQs" },
-                  { icon: <TrendingUp size={14} />, label: "Best Practices" },
-                ].map(({ icon, label }) => (
-                  <div
-                    key={label}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
-                  >
-                    <span style={{ color: "#f59e0b" }}>{icon}</span>
-                    {label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex items-start gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-            <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-              style={{ background: msg.role === "user" ? "linear-gradient(135deg, #67C728, #00A9E2)" : "linear-gradient(135deg, #0074F4, #00A9E2)" }}>
-              {msg.role === "user" ? <Users size={13} className="text-white" /> : <Bot size={13} className="text-white" />}
-            </div>
-            <div className="rounded-2xl px-4 py-3 text-sm" style={{
-              background: msg.role === "user" ? "rgba(0,116,244,0.12)" : "#1e1e1e",
-              border: msg.role === "user" ? "1px solid rgba(0,116,244,0.25)" : "1px solid #2a2a2a",
-              color: "#e5e7eb", maxWidth: "80%",
-              borderRadius: msg.role === "user" ? "1rem 1rem 0.25rem 1rem" : "1rem 1rem 1rem 0.25rem",
-            }}>{msg.content}</div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex items-start gap-3">
-            <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}>
-              <Bot size={13} className="text-white" />
-            </div>
-            <div className="rounded-2xl rounded-tl-sm px-4 py-3" style={{ background: "#1e1e1e", border: "1px solid #2a2a2a" }}>
-              <div className="flex gap-1">
-                {[0,1,2].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />)}
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Follow-up input — shown after conversation starts */}
-      {messages.length > 0 && (
-        <div className="px-5 py-3 flex-shrink-0" style={{ borderTop: "1px solid #2a2a2a" }}>
-          <div className="flex items-center gap-2 rounded-xl px-4 py-2.5" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
-            <Search size={14} style={{ color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-              placeholder="Ask a follow-up..."
-              className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
-              disabled={isLoading}
-              autoFocus
-            />
-            {input.trim() && (
-              <button onClick={() => sendMessage(input)} disabled={isLoading}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all disabled:opacity-40"
-                style={{ background: "#0074F4", color: "white" }}>
-                <Send size={11} />
-                Ask
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ─── Analytics Tab ────────────────────────────────────────────────────────────
 type AnonTimeRange = 7 | 30 | 90 | 0; // 0 = All Time
@@ -538,8 +339,6 @@ function AnalyticsTab({ days: daysProp, onDaysChange }: { days?: AnonTimeRange; 
   const { user: analyticsUser } = useAuth();
   const isSuperAdmin = analyticsUser?.role === "content_admin" || analyticsUser?.role === "owner";
   const { data: tabSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const askWavvEnabled = (tabSettings as Record<string, unknown>)["ask_wavv_enabled"] !== false;
-
   const resetAnalytics = trpc.analytics.resetAnalytics.useMutation({
     onSuccess: () => {
       toast.success("All analytics data has been cleared.");
@@ -628,7 +427,7 @@ function AnalyticsTab({ days: daysProp, onDaysChange }: { days?: AnonTimeRange; 
         </div>
       </div>
 
-      <AnonAnalyticsContent days={days} askWavvEnabled={askWavvEnabled} />
+      <AnonAnalyticsContent days={days} />
     </div>
   );
 }
@@ -1032,7 +831,7 @@ function friendlyPage(path: string) {
   return parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" › ");
 }
 
-function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; askWavvEnabled: boolean }) {
+function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
   const { data: overview, isLoading } = trpc.analytics.getAnonOverview.useQuery({ days });
   const { data: pageTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "page_view", days });
   const { data: academyTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "academy_video_play", days });
@@ -1093,9 +892,6 @@ function AnonAnalyticsContent({ days, askWavvEnabled }: { days: AnonTimeRange; a
         <StatCard icon={<GraduationCap size={18} />} label="Academy Plays"      value={totalAcademyPlays}              color="cyan"   />
         <StatCard icon={<Video size={18} />}         label="Webinar Plays"      value={totalWebinarPlays}              color="amber"  />
         <StatCard icon={<Download size={18} />}      label="Guide Downloads"    value={totalGuideDownloads}            color="green"  />
-        {askWavvEnabled && (
-          <StatCard icon={<MessageSquare size={18} />} label="AskWAVV Conversations" value={overview?.askWavvCount ?? 0} color="purple" />
-        )}
       </div>
 
       {/* Page View Drilldown Modal */}
@@ -7382,13 +7178,10 @@ function SettingsTab() {
     onError: (e) => toast.error(e.message),
   });
 
-  const askWavvEnabled = settings["ask_wavv_enabled"] !== false; // default true
   const maintenanceMode = settings["maintenance_mode"] === true;
   const approvedPartnersEnabled = settings["approved_partners_enabled"] !== false; // default true
   const announcementText = typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "";
   const announcementEnabled = settings["announcement_enabled"] === true;
-  const rateLimitPerHour = typeof settings["ask_wavv_rate_limit"] === "number" ? settings["ask_wavv_rate_limit"] : 10;
-  const wavvKnowledgeEnabled = settings["wavv_knowledge_enabled"] !== false; // default true
   const navVisibility = (settings["nav_visibility"] ?? {}) as Record<string, boolean>;
   // Request button toggles (default true = enabled)
   const videoRequestsEnabled = settings["video_requests_enabled"] !== false;
@@ -7415,12 +7208,9 @@ function SettingsTab() {
   }
 
   const [localAnnouncement, setLocalAnnouncement] = useState(announcementText);
-  const [localRateLimit, setLocalRateLimit] = useState(String(rateLimitPerHour));
-
   // Sync local state when settings load
   useEffect(() => {
     setLocalAnnouncement(typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "");
-    setLocalRateLimit(String(typeof settings["ask_wavv_rate_limit"] === "number" ? settings["ask_wavv_rate_limit"] : 10));
   }, [settings]);
 
   function toggle(key: string, current: boolean) {
@@ -7429,12 +7219,6 @@ function SettingsTab() {
 
   function saveAnnouncement() {
     updateSetting.mutate({ key: "announcement_text", value: localAnnouncement });
-  }
-
-  function saveRateLimit() {
-    const n = parseInt(localRateLimit, 10);
-    if (isNaN(n) || n < 1) { toast.error("Rate limit must be a positive number"); return; }
-    updateSetting.mutate({ key: "ask_wavv_rate_limit", value: n });
   }
 
   const sectionClass = "rounded-xl p-5 space-y-4";
@@ -7525,81 +7309,6 @@ function SettingsTab() {
                   {maintenanceMode ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                   {maintenanceMode ? "Active" : "Off"}
                 </button>
-              </div>
-            </div>
-
-            {/* ── WAVV Knowledge ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
-                    <Sparkles size={15} style={{ color: "#f59e0b" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">WAVV Knowledge</p>
-                    <p className="text-xs text-gray-500">Show or hide the WAVV Knowledge tab in the sidebar</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => toggle("wavv_knowledge_enabled", wavvKnowledgeEnabled)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={wavvKnowledgeEnabled
-                    ? { background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
-                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
-                >
-                  {wavvKnowledgeEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                  {wavvKnowledgeEnabled ? "Enabled" : "Disabled"}
-                </button>
-              </div>
-            </div>
-
-            {/* ── Ask WAVV ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)" }}>
-                    <Bot size={15} style={{ color: "#0074F4" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Ask WAVV (Chat Bubble)</p>
-                    <p className="text-xs text-gray-500">Show or hide the AI chat bubble site-wide</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => toggle("ask_wavv_enabled", askWavvEnabled)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={askWavvEnabled
-                    ? { background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }
-                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
-                >
-                  {askWavvEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                  {askWavvEnabled ? "Enabled" : "Disabled"}
-                </button>
-              </div>
-              {/* Rate limit */}
-              <div className="flex items-center gap-3 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                <div className="flex items-center gap-2 flex-1">
-                  <Gauge size={13} style={{ color: "#9ca3af" }} />
-                  <span className="text-xs text-gray-400">Rate limit (messages / hour / visitor)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={localRateLimit}
-                    onChange={(e) => setLocalRateLimit(e.target.value)}
-                    className="w-16 rounded-lg px-2 py-1 text-xs text-white text-center outline-none"
-                    style={{ background: "#0d0d0d", border: "1px solid #333" }}
-                  />
-                  <button
-                    onClick={saveRateLimit}
-                    className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
-                    style={{ background: "#0074F4", color: "#fff" }}
-                  >
-                    Save
-                  </button>
-                </div>
               </div>
             </div>
 

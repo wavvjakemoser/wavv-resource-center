@@ -316,3 +316,13 @@ describe("academy.adminReorderSectionResources", () => {
     ).rejects.toThrow();
   });
 });
+
+// ─── Intercom Integration ─────────────────────────────────────────────────────
+describe("intercom", () => {
+  it("VITE_INTERCOM_APP_ID is set and non-empty", () => {
+    const appId = process.env.VITE_INTERCOM_APP_ID;
+    expect(appId).toBeDefined();
+    expect(typeof appId).toBe("string");
+    expect((appId as string).length).toBeGreaterThan(0);
+  });
+});
