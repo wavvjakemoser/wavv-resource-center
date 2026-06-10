@@ -5077,7 +5077,7 @@ function WebinarsTab() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
             style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
           >
-            <FileDown size={13} /> Export Registrants
+            <FileDown size={13} /> Export
           </button>
 
           <button
@@ -5786,7 +5786,7 @@ function GuidesTab() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
             style={{ background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
           >
-            <FileDown size={13} /> Export Downloaders
+            <FileDown size={13} /> Export
           </button>
 
           <button
