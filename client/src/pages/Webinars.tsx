@@ -240,10 +240,11 @@ function WebinarCard({
     Clapperboard, MonitorPlay, PlayCircle,
   };
   // Section default icons — used when no iconName is set on the webinar
+  // DB types: evergreen = On-Demand Series, recording = Exclusive On-Demand, exclusive = Exclusive Live
   const SECTION_DEFAULT_ICON: Record<string, LucideIcon> = {
-    ondemand: PlayCircle,      // WAVV On-Demand Series
-    recording: Clapperboard,  // WAVV Exclusive On-Demand
-    exclusive: Star,           // Exclusive Live — star only (no overlay shown)
+    evergreen: PlayCircle,    // WAVV On-Demand Series
+    recording: Clapperboard, // WAVV Exclusive On-Demand
+    exclusive: Star,          // Exclusive Live — star only (no overlay shown)
   };
   const CardIcon: LucideIcon | undefined = webinar.iconName
     ? ICON_MAP[webinar.iconName]
@@ -303,7 +304,7 @@ function WebinarCard({
           />
         )}
         {/* Small icon overlay for On-Demand sections — Exclusive Live shows the star image only */}
-        {variant !== "exclusive" && CardIcon && !webinar.thumbnailUrl && (
+        {(variant === "evergreen" || variant === "recording") && CardIcon && !webinar.thumbnailUrl && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div
               className="flex items-center justify-center rounded-full"

@@ -1,0 +1,58 @@
+{
+  "query": "SELECT id, title, type, icon_name FROM webinars ORDER BY type, id LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT id, title, type, icon_name FROM webinars ORDER BY type, id LIMIT 20;",
+  "rows": [
+    {
+      "id": "90001",
+      "title": "Always Know Who To Call Next With WAVV Call Boards",
+      "type": "recording",
+      "icon_name": "NULL"
+    },
+    {
+      "id": "210001",
+      "title": "Test",
+      "type": "exclusive",
+      "icon_name": "NULL"
+    },
+    {
+      "id": "120001",
+      "title": "Call Boards: Build the System That Decides Who You Call Next",
+      "type": "evergreen",
+      "icon_name": "NULL"
+    },
+    {
+      "id": "120002",
+      "title": "Dialer Deep Dive: Get More Out of Every Session",
+      "type": "evergreen",
+      "icon_name": "NULL"
+    },
+    {
+      "id": "120003",
+      "title": "Connection Rates & Number Health: Answer the Phone Problem",
+      "type": "evergreen",
+      "icon_name": "NULL"
+    },
+    {
+      "id": "120004",
+      "title": "Spam Protection: What It Is, How It Works, and Why It Matters",
+      "type": "evergreen",
+      "icon_name": "NULL"
+    },
+    {
+      "id": "120005",
+      "title": "Call Strategy: The System Behind the Sprint",
+      "type": "evergreen",
+      "icon_name": "NULL"
+    },
+    {
+      "id": "120006",
+      "title": "Managing Your Team in WAVV: Visibility Without Micromanaging",
+      "type": "evergreen",
+      "icon_name": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\ttype\ticon_name\n90001\tAlways Know Who To Call Next With WAVV Call Boards\trecording\tNULL\n210001\tTest\texclusive\tNULL\n120001\tCall Boards: Build the System That Decides Who You Call Next\tevergreen\tNULL\n120002\tDialer Deep Dive: Get More Out of Every Session\tevergreen\tNULL\n120003\tConnection Rates & Number Health: Answer the Phone Problem\tevergreen\tNULL\n120004\tSpam Protection: What It Is, How It Works, and Why It Matters\tevergreen\tNULL\n120005\tCall Strategy: The System Behind the Sprint\tevergreen\tNULL\n120006\tManaging Your Team in WAVV: Visibility Without Micromanaging\tevergreen\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 601
+}
