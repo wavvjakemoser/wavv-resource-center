@@ -1781,7 +1781,7 @@ function UsersTab() {
         `"${(u.email ?? "").replace(/"/g, '""')}"`,
         u.role,
         u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
-        (u as any).password_hash ? "Active" : "Pending",
+        (u as any).passwordHash ? "Active" : "Pending",
       ].join(",")
     );
     const csv = [header, ...rows].join("\n");
@@ -1907,7 +1907,7 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[160px]">Invite Sent</TableHead>
               <TableHead className="text-gray-400 w-[110px]">Status</TableHead>
               {isOwner && <TableHead className="text-gray-400 w-[100px]">MFA</TableHead>}
-              {isOwner && <TableHead className="text-gray-400 text-right">Actions</TableHead>}
+              {isOwner && <TableHead className="text-gray-400">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -1971,7 +1971,7 @@ function UsersTab() {
                     </TableCell>
                     <TableCell>
                       {(() => {
-                        const hasPassword = !!(u as any).password_hash;
+                        const hasPassword = !!(u as any).passwordHash;
                         const isActive = hasPassword;
                         return isActive ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
@@ -2035,9 +2035,7 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
                             </button>
                           )}
-                          {/* Change Role and Remove: dash for self */}
-                          <span className="text-xs text-gray-600 px-1">—</span>
-                          <span className="text-xs text-gray-600 px-1">—</span>
+
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -4643,9 +4641,9 @@ function PlaygroundTab() {
         <button
           onClick={exportCSVRequests}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-          style={{ background: "rgba(168,85,247,0.1)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.2)" }}
+          style={{ background: "rgba(168,85,247,0.15)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.3)" }}
         >
-          <FileDown size={13} /> Export Requests CSV
+          <FileDown size={13} /> Export Notify Requests
         </button>
       </div>
 
@@ -4997,11 +4995,12 @@ function WebinarsTab() {
               const csv = [headers.join(","), ...rows.map(r => [r.userName ?? "", r.userEmail ?? "", r.webinarTitle ?? "", r.registeredAt ? new Date(r.registeredAt).toLocaleString() : ""].map(v => `"${v}"`).join(","))].join("\n");
               const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "webinar-registrants.csv"; a.click();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#67C728" }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+            style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
           >
             <FileDown size={13} /> Export Registrants
           </button>
+
           <button
             onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
@@ -5705,11 +5704,12 @@ function GuidesTab() {
               const csv = [headers.join(","), ...rows.map(r => [r.userName ?? "", r.userEmail ?? "", r.guideTitle ?? "", r.guideCategory ?? "", r.createdAt ? new Date(r.createdAt).toLocaleString() : ""].map(v => `"${v}"`).join(","))].join("\n");
               const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "guide-downloaders.csv"; a.click();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#67C728" }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+            style={{ background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
           >
             <FileDown size={13} /> Export Downloaders
           </button>
+
           <button
             onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
@@ -6304,9 +6304,9 @@ function ContentRequestsTab() {
         <button
           onClick={exportCSV}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-          style={{ background: "rgba(0,116,244,0.1)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.2)" }}
+          style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
         >
-          <FileDown size={13} /> Export CSV
+          <FileDown size={13} /> Export All Requests
         </button>
       </div>
 
@@ -7201,7 +7201,7 @@ function SettingsTab() {
   const sectionStyle = { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" };
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6">
       <div>
         <h2 className="text-base font-semibold text-white flex items-center gap-2">
           <Settings size={16} style={{ color: "#0074F4" }} />
@@ -7213,7 +7213,7 @@ function SettingsTab() {
       {isLoading ? (
         <div className="text-sm text-gray-500">Loading settings…</div>
       ) : (
-        <>
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {/* ── Ask WAVV ── */}
           <div className={sectionClass} style={sectionStyle}>
             <div className="flex items-center justify-between">
@@ -7423,7 +7423,7 @@ function SettingsTab() {
               </button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -7538,8 +7538,9 @@ function ApprovedPartnersTab() {
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={exportCSV} className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300 border border-gray-700 hover:bg-white/5 transition-all flex items-center gap-1.5">
-            <Download size={13} /> Export CSV
+          <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
+            style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
+            <FileDown size={13} /> Export Partners
           </button>
           <button onClick={() => { setInviteOpen(true); setInviteLink(null); setInviteError(""); setInviteName(""); setInviteEmail(""); }}
             className="px-3 py-1.5 rounded-lg text-xs font-medium text-white flex items-center gap-1.5"

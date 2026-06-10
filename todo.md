@@ -1247,3 +1247,17 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Hide Pop-out (PiP) checkbox in Admin form when type = exclusive (live webinars don't have video)
 - [x] Add handleThumbUpload function + uploadingThumb state to Admin.tsx webinar form
 - [x] Add ImageIcon import to Admin.tsx lucide-react imports
+
+## Admin UI Polish — Export Buttons, Layout, Team Access (Session — Jun 10 2026)
+
+- [x] Admin layout: Remove max-w-7xl mx-auto constraint so content stretches full width
+- [x] Team Access table: Rename "Registered" → "Invite Sent"
+- [x] Team Access table: Add Status column (Active=has passwordHash, Pending=no passwordHash)
+- [x] Team Access table: Self-row (Jake Moser/owner) shows Reset Password + MFA Setup Link buttons, centered dashes for Change Role and Remove
+- [x] Settings tab: Remove max-w-2xl constraint, wrap cards in grid grid-cols-1 xl:grid-cols-2 gap-6 for 2-column layout
+- [x] Export buttons: Fix incomplete Webinars tab export button (was missing closing tag + label) — now shows "Export Registrants" in amber (#f59e0b)
+- [x] Export buttons: Fix incomplete Guides tab export button (was missing closing tag + label) — now shows "Export Downloaders" in green (#4ade80)
+- [x] Export buttons: Playground tab "Export Notify Requests" — already purple (#a855f7), confirmed correct
+- [x] Export buttons: Requests tab "Export All Requests" — already blue (#0074F4), confirmed correct
+- [x] Export buttons: Approved Partners tab "Export CSV" → "Export Partners" — updated from grey to light blue (#00A9E2)
+- [x] TypeScript: 0 errors confirmed
