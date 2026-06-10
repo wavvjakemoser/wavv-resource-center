@@ -146,6 +146,7 @@ import {
   RotateCcw,
   Shuffle,
   Image as ImageIcon,
+  PlayCircle,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -5075,89 +5076,103 @@ function WebinarsTab() {
                 </div>
               </div>
             ) : (
-              /* Non-exclusive: full preset gallery + upload */
-              <div>
-                <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(choose a preset or upload a custom image)</span></label>
-                {/* Preset neon thumbnail gallery */}
-                <div className="grid grid-cols-5 gap-1.5 mb-2">
-                  {([
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-connection-rates-87rQWg6ZByH7ZA6HiRu9Mi.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-security-compliance-j5H6G2LXYyyt53RBZUZhG2.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-onboarding-CCFD8DchGw2sHc6DwsnvXB.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-prospecting-nNAxw7CBSmXxaxY4E9Vohm.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-pipeline-cY6bCUMvdMuinagDB7sucT.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-outbound-Njwyty7V65Y3h3UQ2GCtJH.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-analytics-42bSMiVFenHV6Htqdsrwdq.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-team-training-fLhfdJ3XrFeaMD6TS9DV9X.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-settings-4sPnpfDQ49akV24fbo9rQv.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-integration-jji77pKwzaxU6XVawSD6b8.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-number-rotation-JDBNu9jHh5tz2gYP3BBX2k.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-automation-6n6ymqXKucpZbuQbTjSWty.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-reporting-QdHJaFWvAw8a9x3d9dwQK4.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-crm-6CXPSF3DpxoQ7tCXSUMnBi.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-headset-bWd3oQpTpvkYFkCXnRmb3L.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-calendar-7sqeNkVGfErrwaq7J5Sikb.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-trophy-6gRPqVzcCn9kRkgBTsHPZs.webp",
-                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-chat-JywJ7xdLZZ3TjLeR7SqyK4.webp",
-                  ] as string[]).map((url) => {
-                    const isSelected = form.thumbnailUrl === url;
-                    return (
-                      <button
-                        key={url}
-                        type="button"
-                        onClick={() => setForm(f => ({ ...f, thumbnailUrl: isSelected ? "" : url }))}
-                        className="relative rounded-lg overflow-hidden transition-all"
-                        style={{
-                          aspectRatio: "16/9",
-                          border: isSelected ? "2px solid #0074F4" : "2px solid #1a1a1a",
-                          boxShadow: isSelected ? "0 0 8px #0074F466" : "none",
-                          background: "#111",
-                        }}
-                      >
-                        <img src={url} alt="" className="w-full h-full object-contain" style={{ padding: "4px", background: "#0a0c12" }} />
-                        {isSelected && (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,116,244,0.2)" }}>
-                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                              <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            </div>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+              /* Non-exclusive: icon picker + optional custom thumbnail upload */
+              <div className="space-y-3">
+                {/* Icon picker — selects the overlay icon shown on the circuit-board background */}
+                <div>
+                  <label className="block text-xs text-gray-400 mb-2">Card Icon <span className="text-gray-600">(shown centered on the card background)</span></label>
+                  <div className="grid grid-cols-8 gap-1.5">
+                    {([
+                      { name: "Video",         Icon: Video },
+                      { name: "Play",          Icon: Play },
+                      { name: "PlayCircle",    Icon: PlayCircle },
+                      { name: "Mic",           Icon: Mic },
+                      { name: "Radio",         Icon: Radio },
+                      { name: "Phone",         Icon: Phone },
+                      { name: "PhoneCall",     Icon: PhoneCall },
+                      { name: "PhoneOutgoing", Icon: PhoneOutgoing },
+                      { name: "PhoneMissed",   Icon: PhoneMissed },
+                      { name: "PhoneOff",      Icon: PhoneOff },
+                      { name: "Headphones",    Icon: Headphones },
+                      { name: "MessageSquare", Icon: MessageSquare },
+                      { name: "Mail",          Icon: Mail },
+                      { name: "Users",         Icon: Users },
+                      { name: "UserCheck",     Icon: UserCheck },
+                      { name: "GraduationCap", Icon: GraduationCap },
+                      { name: "BookOpen",      Icon: BookOpen },
+                      { name: "FileText",      Icon: FileText },
+                      { name: "Lightbulb",     Icon: Lightbulb },
+                      { name: "Star",          Icon: Star },
+                      { name: "Award",         Icon: Award },
+                      { name: "Trophy",        Icon: Trophy },
+                      { name: "Rocket",        Icon: Rocket },
+                      { name: "Target",        Icon: Target },
+                      { name: "Zap",           Icon: Zap },
+                      { name: "BarChart3",     Icon: BarChart3 },
+                      { name: "TrendingUp",    Icon: TrendingUp },
+                      { name: "Activity",      Icon: Activity },
+                      { name: "ListChecks",    Icon: ListChecks },
+                      { name: "ClipboardList", Icon: ClipboardList },
+                      { name: "Crosshair",     Icon: Crosshair },
+                      { name: "Megaphone",     Icon: Megaphone },
+                      { name: "Repeat",        Icon: Repeat },
+                      { name: "Shuffle",       Icon: Shuffle },
+                    ] as { name: string; Icon: React.ElementType }[]).map(({ name, Icon }) => {
+                      const isSelected = form.iconName === name;
+                      const sectionAccent = form.type === "recording" ? "#00A9E2" : "#7C3AED";
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          title={name}
+                          onClick={() => setForm(f => ({ ...f, iconName: name }))}
+                          className="flex items-center justify-center rounded-lg transition-all"
+                          style={{
+                            aspectRatio: "1",
+                            background: isSelected ? `${sectionAccent}22` : "#111",
+                            border: isSelected ? `1.5px solid ${sectionAccent}` : "1.5px solid #2a2a2a",
+                            boxShadow: isSelected ? `0 0 8px ${sectionAccent}44` : "none",
+                            padding: "8px",
+                          }}
+                        >
+                          <Icon size={16} style={{ color: isSelected ? sectionAccent : "#6b7280" }} />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                {/* Upload custom image */}
-                <div className="flex items-center gap-2 mb-2">
-                  <label
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
-                    style={{ background: uploadingThumb ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingThumb ? "#9ca3af" : "#fff" }}
-                  >
-                    {uploadingThumb ? (
-                      <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
-                    ) : (
-                      <><ImageIcon size={13} /> Upload Custom Image</>
-                    )}
-                    <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleThumbUpload} disabled={uploadingThumb} />
-                  </label>
-                  {form.thumbnailUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setForm(f => ({ ...f, thumbnailUrl: "" }))}
-                      className="text-xs text-gray-500 hover:text-red-400 transition"
+                {/* Optional custom thumbnail — replaces the background entirely when set */}
+                <div>
+                  <label className="block text-xs text-gray-400 mb-2">Custom Thumbnail <span className="text-gray-600">(optional — replaces the default background)</span></label>
+                  <div className="flex items-center gap-2">
+                    <label
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                      style={{ background: uploadingThumb ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingThumb ? "#9ca3af" : "#fff" }}
                     >
-                      Clear
-                    </button>
-                  )}
+                      {uploadingThumb ? (
+                        <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                      ) : (
+                        <><ImageIcon size={13} /> Upload Image</>
+                      )}
+                      <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleThumbUpload} disabled={uploadingThumb} />
+                    </label>
+                    {form.thumbnailUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, thumbnailUrl: "" }))}
+                        className="text-xs text-gray-500 hover:text-red-400 transition"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    style={{ ...inputStyle, marginTop: "8px" }}
+                    value={form.thumbnailUrl}
+                    onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
+                    placeholder="Or paste a custom thumbnail URL..."
+                  />
                 </div>
-                {/* Custom URL fallback */}
-                <input
-                  style={inputStyle}
-                  value={form.thumbnailUrl}
-                  onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
-                  placeholder="Or paste a custom thumbnail URL..."
-                />
               </div>
             )}
             {/* Accent color is now hardcoded per section type — no picker needed */}

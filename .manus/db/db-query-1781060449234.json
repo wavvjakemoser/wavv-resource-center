@@ -1,0 +1,66 @@
+{
+  "query": "SELECT id, title, type, thumbnail_url, icon_name FROM webinars LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2BUx4aB33MgfJQi.28261bf45373 --database gkLpfNMVYQYMxzYT6m74Yk --execute SELECT id, title, type, thumbnail_url, icon_name FROM webinars LIMIT 20;",
+  "rows": [
+    {
+      "id": "90001",
+      "title": "Always Know Who To Call Next With WAVV Call Boards",
+      "type": "recording",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp",
+      "icon_name": "Video"
+    },
+    {
+      "id": "120001",
+      "title": "Call Boards: Build the System That Decides Who You Call Next",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp",
+      "icon_name": "Video"
+    },
+    {
+      "id": "120002",
+      "title": "Dialer Deep Dive: Get More Out of Every Session",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp",
+      "icon_name": "Video"
+    },
+    {
+      "id": "120003",
+      "title": "Connection Rates & Number Health: Answer the Phone Problem",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-connection-rates-87rQWg6ZByH7ZA6HiRu9Mi.webp",
+      "icon_name": "Video"
+    },
+    {
+      "id": "120004",
+      "title": "Spam Protection: What It Is, How It Works, and Why It Matters",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-security-compliance-j5H6G2LXYyyt53RBZUZhG2.webp",
+      "icon_name": "Video"
+    },
+    {
+      "id": "120005",
+      "title": "Call Strategy: The System Behind the Sprint",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-integration-jji77pKwzaxU6XVawSD6b8.webp",
+      "icon_name": "Video"
+    },
+    {
+      "id": "120006",
+      "title": "Managing Your Team in WAVV: Visibility Without Micromanaging",
+      "type": "evergreen",
+      "thumbnail_url": "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-team-training-fLhfdJ3XrFeaMD6TS9DV9X.webp",
+      "icon_name": "Video"
+    },
+    {
+      "id": "210001",
+      "title": "Test",
+      "type": "exclusive",
+      "thumbnail_url": "NULL",
+      "icon_name": "Video"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\ttype\tthumbnail_url\ticon_name\n90001\tAlways Know Who To Call Next With WAVV Call Boards\trecording\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp\tVideo\n120001\tCall Boards: Build the System That Decides Who You Call Next\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp\tVideo\n120002\tDialer Deep Dive: Get More Out of Every Session\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp\tVideo\n120003\tConnection Rates & Number Health: Answer the Phone Problem\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-connection-rates-87rQWg6ZByH7ZA6HiRu9Mi.webp\tVideo\n120004\tSpam Protection: What It Is, How It Works, and Why It Matters\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-security-compliance-j5H6G2LXYyyt53RBZUZhG2.webp\tVideo\n120005\tCall Strategy: The System Behind the Sprint\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-integration-jji77pKwzaxU6XVawSD6b8.webp\tVideo\n120006\tManaging Your Team in WAVV: Visibility Without Micromanaging\tevergreen\thttps://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-team-training-fLhfdJ3XrFeaMD6TS9DV9X.webp\tVideo\n210001\tTest\texclusive\tNULL\tVideo\n",
+  "stderr": "",
+  "execution_time_ms": 669
+}
