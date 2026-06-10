@@ -5078,8 +5078,37 @@ function WebinarsTab() {
                 </div>
               </div>
             ) : (
-              /* Non-exclusive: icon picker + optional custom thumbnail upload */
+              /* Non-exclusive: default bg preview + optional custom thumbnail upload */
               <div className="space-y-3">
+                {/* Default background preview */}
+                <div>
+                  <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(section default shown — upload a custom image to override)</span></label>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: form.thumbnailUrl ? "2px solid #1a1a1a" : `2px solid ${form.type === "recording" ? "#00A9E2" : "#7C3AED"}`, boxShadow: form.thumbnailUrl ? "none" : `0 0 8px ${form.type === "recording" ? "#00A9E244" : "#7C3AED44"}` }}>
+                      <img
+                        src={form.type === "recording"
+                          ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-ondemand-clapperboard-XGLnb93SFV6vDUAxePhB3u.webp"
+                          : "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp"}
+                        alt="Default"
+                        className="w-full h-full object-cover"
+                      />
+                      {!form.thumbnailUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: `rgba(${form.type === "recording" ? "0,169,226" : "124,58,237"},0.2)` }}>
+                          <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: form.type === "recording" ? "#00A9E2" : "#7C3AED" }}>
+                            <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {form.thumbnailUrl ? (
+                        <span style={{ color: form.type === "recording" ? "#00A9E2" : "#7C3AED" }}>Custom image set</span>
+                      ) : (
+                        <span>Default {form.type === "recording" ? "clapperboard" : "play circle"} thumbnail (active)</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 {/* Icon picker — selects the overlay icon shown on the circuit-board background */}
                 <div>
                   <label className="block text-xs text-gray-400 mb-2">Card Icon <span className="text-gray-600">(shown centered on the card background)</span></label>
