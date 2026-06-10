@@ -5034,7 +5034,7 @@ function WebinarsTab() {
                 <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(star circuit board is the default — upload a custom image to override)</span></label>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: form.thumbnailUrl ? "2px solid #1a1a1a" : "2px solid #D4AF37", boxShadow: form.thumbnailUrl ? "none" : "0 0 8px #D4AF3766" }}>
-                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp" alt="Default" className="w-full h-full object-cover" />
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp" alt="Default" className="w-full h-full object-contain" style={{ padding: "4px", background: "#0a0c12" }} />
                     {!form.thumbnailUrl && (
                       <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(212,175,55,0.2)" }}>
                         <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#D4AF37" }}>
@@ -5116,7 +5116,7 @@ function WebinarsTab() {
                           background: "#111",
                         }}
                       >
-                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <img src={url} alt="" className="w-full h-full object-contain" style={{ padding: "4px", background: "#0a0c12" }} />
                         {isSelected && (
                           <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,116,244,0.2)" }}>
                             <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">

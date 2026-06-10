@@ -278,16 +278,16 @@ function WebinarCard({
     >
       {/* Thumbnail */}
       <div
-        className="relative w-full overflow-hidden flex-shrink-0"
-        style={{ height: "140px" }}
+        className="relative w-full overflow-hidden flex-shrink-0 flex items-center justify-center"
+        style={{ height: "120px", background: "#0a0c12" }}
       >
-        {/* Background image or gradient fallback */}
+        {/* Background image — contained, not cropped */}
         {thumbBg ? (
           <img
             src={thumbBg}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ opacity: 0.92 }}
+            className="w-full h-full object-contain"
+            style={{ padding: "8px", opacity: 0.95 }}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = "none";
               const parent = e.currentTarget.parentElement;
@@ -308,8 +308,8 @@ function WebinarCard({
             )}
           </div>
         )}
-        {/* Bottom gradient overlay */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
+        {/* Subtle vignette overlay */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(10,12,18,0.6))" }} />
         {/* Type badge top-right */}
         <div className="absolute top-3 right-3">
           <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
