@@ -2503,18 +2503,15 @@ function UsersTab() {
                       const slackMsg = [
                         `Hey ${inviteResult!.name}!`,
                         "",
-                        "You’ve been invited to the WAVV Success Center admin portal.",
+                        "You've been invited to the WAVV Success Center admin portal.",
                         "",
-                        "Here’s how to get set up:",
-                        "1. Click the link below to set your password",
-                        `2. Log in at ${origin}/login`,
-                        "3. You’ll be prompted to set up Google Authenticator (required for all admins)",
-                        "4. Once MFA is active, you’ll have full access",
+                        "Here's how to get set up:",
+                        `1. Click the link below (WAVV Success Center Admin Token) to accept your invite and create your password: ${inviteResult!.link}`,
+                        "2. Sign in using your newly created password",
+                        "3. You'll be prompted to set up Google Authenticator (required for all admins)",
+                        "4. Once MFA is active, you'll have full access",
                         "",
-                        "WAVV Success Center Admin Token:",
-                        inviteResult!.link,
-                        "",
-                        "This link expires in 24 hours and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.",
+                        "This link expires in 72 hours and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.",
                       ].join("\n");
                       navigator.clipboard.writeText(slackMsg);
                       toast.success("Slack message copied to clipboard!");
@@ -2525,19 +2522,18 @@ function UsersTab() {
                 </div>
                 <div className="p-3 text-xs leading-relaxed space-y-2" style={{ background: "#0a0a0a", color: "#c9d1d9", fontFamily: "monospace" }}>
                   <p>Hey <strong style={{ color: "#fff" }}>{inviteResult.name}</strong>!</p>
-                  <p>You’ve been invited to the <strong style={{ color: "#fff" }}>WAVV Success Center</strong> admin portal.</p>
-                  <p className="text-gray-400">Here’s how to get set up:</p>
+                  <p>You've been invited to the <strong style={{ color: "#fff" }}>WAVV Success Center</strong> admin portal.</p>
+                  <p className="text-gray-400">Here's how to get set up:</p>
                   <ol className="list-none space-y-1 pl-1">
-                    <li>1. Click the link below to set your password</li>
-                    <li>2. Log in at <span style={{ color: "#60a5fa" }}>{(() => { try { return new URL(inviteResult.link).origin; } catch { return "the portal"; } })()}/login</span></li>
-                    <li>3. You’ll be prompted to set up <strong style={{ color: "#fff" }}>Google Authenticator</strong> (required for all admins)</li>
-                    <li>4. Once MFA is active, you’ll have full access</li>
+                    <li>1. Click the link below (<strong style={{ color: "#fff" }}>WAVV Success Center Admin Token</strong>) to accept your invite and create your password:</li>
+                    <li className="pl-3">
+                      <a href={inviteResult.link} target="_blank" rel="noopener noreferrer" style={{ color: "#93c5fd" }} className="break-all underline">WAVV Success Center Admin Token</a>
+                    </li>
+                    <li>2. Sign in using your newly created password</li>
+                    <li>3. You'll be prompted to set up <strong style={{ color: "#fff" }}>Google Authenticator</strong> (required for all admins)</li>
+                    <li>4. Once MFA is active, you'll have full access</li>
                   </ol>
-                  <div className="rounded-lg px-3 py-2 mt-2" style={{ background: "rgba(0,116,244,0.1)", border: "1px solid rgba(0,116,244,0.2)" }}>
-                    <p className="text-[10px] text-gray-500 mb-0.5">WAVV Success Center Admin Token</p>
-                    <p className="text-xs break-all" style={{ color: "#93c5fd" }}>{inviteResult.link}</p>
-                  </div>
-                  <p className="text-gray-500 text-[10px]">This link expires in 24 hours and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.</p>
+                  <p className="text-gray-500 text-[10px] mt-2">This link expires in <strong style={{ color: "#fbbf24" }}>72 hours</strong> and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.</p>
                 </div>
               </div>
             </div>
