@@ -1554,6 +1554,7 @@ function UsersTab() {
     userName: string;
     currentRole: string;
     selectedRole: UserRole;
+    step: 1 | 2;
   } | null>(null);
   // Demote/Remove confirm dialog
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -1562,6 +1563,7 @@ function UsersTab() {
     userName: string;
     currentRole: string;
     action: "demote" | "remove";
+    step: 1 | 2;
   } | null>(null);
 
   const { data: users, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined, {
@@ -1727,11 +1729,20 @@ function UsersTab() {
 
   function handlePromoteConfirm() {
     if (!promoteDialog) return;
+    if (promoteDialog.step === 1) {
+      // Move to confirmation step
+      setPromoteDialog(d => d ? { ...d, step: 2 } : d);
+      return;
+    }
     updateRole.mutate({ userId: promoteDialog.userId, role: promoteDialog.selectedRole });
   }
 
   function handleConfirm() {
     if (!confirmDialog) return;
+    if (confirmDialog.step === 1) {
+      setConfirmDialog(d => d ? { ...d, step: 2 } : d);
+      return;
+    }
     if (confirmDialog.action === "remove") {
       removeUser.mutate({ userId: confirmDialog.userId });
     } else {
@@ -2004,7 +2015,7 @@ function UsersTab() {
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                             style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
-                            onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole })}>
+                            onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole, step: 1 })}>
                             <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                           </button>
                           {/* Col 2: Reset Password */}
@@ -2046,7 +2057,7 @@ function UsersTab() {
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                             style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
-                            onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "remove" })}>
+                            onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "remove", step: 1 })}>
                             <Trash2 className="h-3 w-3 flex-shrink-0" /> Remove
                           </button>
                         </div>
@@ -2058,7 +2069,7 @@ function UsersTab() {
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
-                              onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole })}>
+                              onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole, step: 1 })}>
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                             </button>
                           )}
@@ -2105,7 +2116,7 @@ function UsersTab() {
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
-                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "remove" })}>
+                              onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "remove", step: 1 })}>
                               <Trash2 className="h-3 w-3 flex-shrink-0" /> Remove
                             </button>
                           )}
@@ -2121,78 +2132,133 @@ function UsersTab() {
       </div>
 
 
-      {/* Promote dialog — role picker */}
+      {/* Promote dialog — role picker (step 1) + final confirm (step 2) */}
       <Dialog open={!!promoteDialog?.open} onOpenChange={(open) => { if (!open) setPromoteDialog(null); }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <DialogHeader>
-            <DialogTitle className="text-white">Change Role — {promoteDialog?.userName}</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Select a new role for <strong className="text-white">{promoteDialog?.userName}</strong>.
-              Current role: <span className="text-gray-300 capitalize">{promoteDialog?.currentRole?.replace(/_/g, " ")}</span>
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2 py-2">
-            {promoteDialog && (["owner", "content_admin", "partner_admin", "admin"] as UserRole[]).map((role) => {
-              const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
-                owner:        { label: "Owner",        color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
-                content_admin:  { label: "Content Admin",  color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
-                partner_admin:{ label: "Partner Admin",color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
-                admin:        { label: "Admin",        color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
-              };
-              const cfg = roleConfig[role];
-              const isSelected = promoteDialog.selectedRole === role;
-              return (
-                <button
-                  key={role}
-                  onClick={() => setPromoteDialog(d => d ? { ...d, selectedRole: role } : d)}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left"
-                  style={{
-                    background: isSelected ? cfg.bg : "rgba(255,255,255,0.03)",
-                    border: `1px solid ${isSelected ? cfg.color : "#2a2a2a"}`,
-                    color: isSelected ? cfg.color : "#9ca3af",
-                  }}
+          {promoteDialog?.step === 1 ? (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-white">Change Role — {promoteDialog?.userName}</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Select the new role for <strong className="text-white">{promoteDialog?.userName}</strong>.
+                  Current role: <span className="text-gray-300 capitalize">{promoteDialog?.currentRole?.replace(/_/g, " ")}</span>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2 py-2">
+                {promoteDialog && (["owner", "content_admin", "partner_admin", "admin"] as UserRole[]).map((role) => {
+                  const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
+                    owner:        { label: "Owner",        color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
+                    content_admin:  { label: "Content Admin",  color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
+                    partner_admin:{ label: "Partner Admin",color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
+                    admin:        { label: "Admin",        color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
+                  };
+                  const cfg = roleConfig[role];
+                  const isSelected = promoteDialog.selectedRole === role;
+                  return (
+                    <button
+                      key={role}
+                      onClick={() => setPromoteDialog(d => d ? { ...d, selectedRole: role } : d)}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left"
+                      style={{
+                        background: isSelected ? cfg.bg : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${isSelected ? cfg.color : "#2a2a2a"}`,
+                        color: isSelected ? cfg.color : "#9ca3af",
+                      }}
+                    >
+                      <span className="flex-1">{cfg.label}</span>
+                      {isSelected && <CheckCircle2 className="h-4 w-4" style={{ color: cfg.color }} />}
+                    </button>
+                  );
+                })}
+              </div>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setPromoteDialog(null)} disabled={isPending}>Cancel</Button>
+                <Button
+                  onClick={handlePromoteConfirm}
+                  disabled={isPending || promoteDialog?.selectedRole === promoteDialog?.currentRole}
+                  style={{ background: "#0074F4", color: "#fff" }}
                 >
-                  <span className="flex-1">{cfg.label}</span>
-                  {isSelected && <CheckCircle2 className="h-4 w-4" style={{ color: cfg.color }} />}
-                </button>
-              );
-            })}
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setPromoteDialog(null)} disabled={isPending}>Cancel</Button>
-            <Button
-              onClick={handlePromoteConfirm}
-              disabled={isPending || promoteDialog?.selectedRole === promoteDialog?.currentRole}
-              style={{ background: "#0074F4", color: "#fff" }}
-            >
-              {isPending ? "Saving..." : `Set Role: ${promoteDialog?.selectedRole?.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}`}
-            </Button>
-          </DialogFooter>
+                  {isPending ? "Saving..." : "Continue"}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-white">Confirm Role Change</DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  You're about to change <strong className="text-white">{promoteDialog?.userName}</strong>'s role from{" "}
+                  <span className="text-gray-300 capitalize">{promoteDialog?.currentRole?.replace(/_/g, " ")}</span> to{" "}
+                  <span className="text-white font-semibold capitalize">{promoteDialog?.selectedRole?.replace(/_/g, " ")}</span>.
+                  This will immediately update their permissions across the platform. Are you sure you want to proceed?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setPromoteDialog(d => d ? { ...d, step: 1 } : d)} disabled={isPending}>Back</Button>
+                <Button
+                  onClick={handlePromoteConfirm}
+                  disabled={isPending}
+                  style={{ background: "#0074F4", color: "#fff" }}
+                >
+                  {isPending ? "Saving..." : `Yes, Change to ${promoteDialog?.selectedRole?.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}`}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
-      {/* Demote / Remove confirm dialog */}
+      {/* Demote / Remove confirm dialog — two-step */}
       <Dialog open={!!confirmDialog?.open} onOpenChange={(open) => { if (!open) setConfirmDialog(null); }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              {confirmDialog?.action === "demote" ? "Change Role Confirmation" : "Remove User Confirmation"}
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              {confirmDialog?.action === "demote" && (
-                <>You\'re about to change the role for <strong className="text-white">{confirmDialog.userName}</strong>. They will be moved down one permission level from <span className="text-gray-300 capitalize">{confirmDialog.currentRole.replace(/_/g, " ")}</span>. Are you sure you want to proceed?</>
-              )}
-              {confirmDialog?.action === "remove" && (
-                <>You\'re about to permanently remove <strong className="text-white">{confirmDialog?.userName}</strong> from the platform. They will lose all access immediately and this action cannot be undone. Are you sure?</>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setConfirmDialog(null)} disabled={isPending}>No, Keep Them</Button>
-            <Button variant="destructive" onClick={handleConfirm} disabled={isPending}>
-              {isPending ? "Processing..." : confirmDialog?.action === "demote" ? "Yes, Change Role" : "Yes, Remove User"}
-            </Button>
-          </DialogFooter>
+          {confirmDialog?.step === 1 ? (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-white">
+                  {confirmDialog?.action === "demote" ? "Change Role" : "Remove User"}
+                </DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  {confirmDialog?.action === "demote" && (
+                    <>You're about to change the role for <strong className="text-white">{confirmDialog.userName}</strong>. They will be moved down one permission level from <span className="text-gray-300 capitalize">{confirmDialog.currentRole.replace(/_/g, " ")}</span>. Do you want to continue?</>
+                  )}
+                  {confirmDialog?.action === "remove" && (
+                    <>You're about to remove <strong className="text-white">{confirmDialog?.userName}</strong> from the platform. They will immediately lose all access. This action cannot be undone. Do you want to continue?</>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setConfirmDialog(null)} disabled={isPending}>Cancel</Button>
+                <Button
+                  onClick={handleConfirm}
+                  disabled={isPending}
+                  style={confirmDialog?.action === "remove" ? { background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" } : { background: "#0074F4", color: "#fff" }}
+                >
+                  {isPending ? "Processing..." : "Yes, Continue"}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-white" style={{ color: confirmDialog?.action === "remove" ? "#ef4444" : undefined }}>
+                  {confirmDialog?.action === "remove" ? "Are you absolutely sure?" : "Confirm Role Change"}
+                </DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  {confirmDialog?.action === "remove" ? (
+                    <>This is your final confirmation. <strong className="text-white">{confirmDialog?.userName}</strong> will be permanently removed and will lose all access immediately. There is no undo.</>
+                  ) : (
+                    <>This is your final confirmation. <strong className="text-white">{confirmDialog?.userName}</strong>'s role will be changed and their permissions will update immediately.</>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setConfirmDialog(d => d ? { ...d, step: 1 } : d)} disabled={isPending}>Back</Button>
+                <Button variant="destructive" onClick={handleConfirm} disabled={isPending}>
+                  {isPending ? "Processing..." : confirmDialog?.action === "demote" ? "Yes, Change Role" : "Yes, Remove User"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
