@@ -1289,3 +1289,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix lastSignedIn display — Last Login column now shows actual lastSignedIn date
 - [x] Merge Reset Password + MFA Setup Link into single "Send Setup Link" button (both self-row and non-self-row)
 - [x] Remove userId from analytics event tracking — all events stored anonymously (userId stripped in trackEvent before DB insert)
+
+## Team Access + Guide URL Display Name — Jun 10 2026 (Session 3)
+- [x] Remove Last Login column from Team Access table (header + data cell)
+- [x] Add display name field to guides/docs — admin can set a friendly name shown to users instead of raw storage URL

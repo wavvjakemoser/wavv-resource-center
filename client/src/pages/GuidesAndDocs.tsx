@@ -21,6 +21,7 @@ type GuideItem = {
   title: string;
   description?: string | null;
   fileUrl?: string | null;
+  linkLabel?: string | null;
   downloadCount?: number | null;
   fileType?: string | null;
   createdAt?: Date | null;
@@ -87,12 +88,13 @@ function GuideRow({
             href={guide.fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all max-w-[180px] truncate"
             style={{ background: "#252d3d", color: "#9ca3af" }}
             onClick={() => onView?.(guide)}
+            title={guide.linkLabel ?? guide.fileUrl}
           >
-            <ExternalLink size={11} />
-            <span className="hidden sm:inline">View</span>
+            <ExternalLink size={11} className="flex-shrink-0" />
+            <span className="hidden sm:inline truncate">{guide.linkLabel ?? "View"}</span>
           </a>
         )}
       </div>

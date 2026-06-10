@@ -1917,7 +1917,6 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Invite Sent</TableHead>
               <TableHead className="text-gray-400 w-[110px]">Status</TableHead>
-              <TableHead className="text-gray-400 w-[150px]">Last Login</TableHead>
               {isOwner && <TableHead className="text-gray-400 w-[100px]">MFA</TableHead>}
               {isOwner && <TableHead className="text-gray-400">Actions</TableHead>}
             </TableRow>
@@ -1997,11 +1996,6 @@ function UsersTab() {
                           </span>
                         );
                       })()}
-                    </TableCell>
-                    <TableCell className="text-gray-500 text-sm">
-                      {(u as any).lastSignedIn && new Date((u as any).lastSignedIn).getFullYear() > 2020
-                        ? new Date((u as any).lastSignedIn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                        : <span className="text-gray-600 italic">Never</span>}
                     </TableCell>
                     {isOwner && (
                       <TableCell>
@@ -5684,6 +5678,7 @@ function GuidesTab() {
     title: "",
     description: "",
     fileUrl: "",
+    linkLabel: "",
     // fileType = the section/category this guide belongs to
     fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article",
   });
@@ -5702,10 +5697,10 @@ function GuidesTab() {
     onSuccess: () => { utils.guides.adminList.invalidate(); toast.success("Guide deleted"); },
     onError: (e) => toast.error(e.message),
   });
-  function resetForm() { setForm({ title: "", description: "", fileUrl: "", fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article" }); }
+  function resetForm() { setForm({ title: "", description: "", fileUrl: "", linkLabel: "", fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article" }); }
   function startEdit(g: typeof guides[0]) {
     setEditId(g.id);
-    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other" | "help_article") ?? "pdf" });
+    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", linkLabel: (g as any).linkLabel ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other" | "help_article") ?? "pdf" });
     setShowForm(true);
   }
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -5738,9 +5733,9 @@ function GuidesTab() {
     e.preventDefault();
     if (!form.title.trim()) { toast.error("Title is required"); return; }
     if (editId !== null) {
-      updateMutation.mutate({ id: editId, data: { title: form.title, description: form.description || undefined, fileType: form.fileType, fileUrl: form.fileUrl || undefined } });
+      updateMutation.mutate({ id: editId, data: { title: form.title, description: form.description || undefined, fileType: form.fileType, fileUrl: form.fileUrl || undefined, linkLabel: form.linkLabel.trim() || null } });
     } else {
-      createMutation.mutate({ title: form.title, description: form.description || undefined, fileType: form.fileType, fileUrl: form.fileUrl || undefined });
+      createMutation.mutate({ title: form.title, description: form.description || undefined, fileType: form.fileType, fileUrl: form.fileUrl || undefined, linkLabel: form.linkLabel.trim() || undefined });
     }
   }
   const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
@@ -5806,7 +5801,25 @@ function GuidesTab() {
               <label className="block text-xs text-gray-400 mb-1">Description</label>
               <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description" />
             </div>
-            {/* Row 3: File upload + URL preview */}
+            {/* Row 3: Link Display Name */}
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">
+                Link Display Name
+                <span className="text-gray-600 ml-1">(optional — shown to users instead of the raw URL)</span>
+              </label>
+              <input
+                style={inputStyle}
+                value={form.linkLabel}
+                onChange={e => setForm(f => ({ ...f, linkLabel: e.target.value }))}
+                placeholder="e.g. WAVV Onboarding Checklist.pdf"
+              />
+              {form.fileUrl && !form.linkLabel && (
+                <p className="text-xs text-yellow-500 mt-1 flex items-center gap-1">
+                  <span>⚠</span> No display name set — users will see the raw storage URL. Add a friendly name above.
+                </p>
+              )}
+            </div>
+            {/* Row 4: File upload + URL preview */}
             <div className="space-y-2">
               <label className="block text-xs text-gray-400 mb-1">File Attachment <span className="text-gray-600">(PDF, DOCX, or XLSX — max 16 MB)</span></label>
               <div className="flex items-center gap-3">
@@ -5986,6 +5999,7 @@ function GuideGroups({
                         <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
                           <TableHead className="text-gray-400 text-xs w-6"></TableHead>
                           <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Link Display Name</TableHead>
                           <TableHead className="text-gray-400 text-xs">Category</TableHead>
                           <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
                           <TableHead className="text-gray-400 text-xs">Status</TableHead>
@@ -5997,6 +6011,11 @@ function GuideGroups({
                           <SortableTableRow key={g.id} id={g.id}>
                             <TableCell className="text-gray-600 text-xs w-6" style={{ cursor: "grab" }}>⠿</TableCell>
                             <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
+                            <TableCell className="text-xs max-w-[160px] truncate">
+                              {(g as any).linkLabel
+                                ? <span className="text-green-400">{(g as any).linkLabel}</span>
+                                : <span className="text-gray-600 italic">Not set</span>}
+                            </TableCell>
                             <TableCell className="text-gray-400 text-xs">{g.category ?? "—"}</TableCell>
                             <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
                             <TableCell>

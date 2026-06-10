@@ -1,0 +1,1 @@
+ALTER TABLE `guides` ADD `linkLabel` varchar(255);

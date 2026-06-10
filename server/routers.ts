@@ -639,6 +639,7 @@ const guidesRouter = router({
         description: z.string().optional(),
         category: z.string().optional(),
         fileUrl: z.string().optional(),
+        linkLabel: z.string().max(255).optional(),
         // fileType maps to the category section: pdf | checklist | playbook | other | help_article
         fileType: z.enum(["pdf", "checklist", "playbook", "other", "help_article"]).optional(),
       })
@@ -654,6 +655,7 @@ const guidesRouter = router({
           description: z.string().optional(),
           category: z.string().optional(),
           fileUrl: z.string().optional(),
+          linkLabel: z.string().max(255).optional().nullable(),
           fileType: z.enum(["pdf", "checklist", "playbook", "other", "help_article"]).optional(),
           published: z.boolean().optional(),
         }),
