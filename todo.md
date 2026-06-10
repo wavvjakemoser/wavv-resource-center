@@ -1234,3 +1234,16 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin User Management: show MFA status badge per user (Enabled / Not Set Up)
 - [x] Admin User Management: "Generate Setup Link" button — copies link to clipboard
 - [x] Admin User Management: "Reset MFA" button — clears MFA for a user (with confirm dialog)
+
+## Webinar Color & Badge Redesign (Session N)
+
+- [x] Fix 6 TypeScript errors (install @types/qrcode for otplib/qrcode MFA imports)
+- [x] Hardcode section colors: Exclusive = #D4AF37, On-Demand Series = #7C3AED (vibrant purple), Exclusive On-Demand = #00A9E2
+- [x] Remove per-webinar accent color picker from Admin webinar form
+- [x] Update badge style: solid fill background (accentColor) with white text — no more transparent border style
+- [x] Rename "Recording" badge to "Exclusive On-Demand" on webinar cards
+- [x] Lock Exclusive Live Webinar thumbnail to star circuit board default + custom upload only (no preset gallery)
+- [x] Non-exclusive types retain full preset gallery + upload + custom URL
+- [x] Hide Pop-out (PiP) checkbox in Admin form when type = exclusive (live webinars don't have video)
+- [x] Add handleThumbUpload function + uploadingThumb state to Admin.tsx webinar form
+- [x] Add ImageIcon import to Admin.tsx lucide-react imports

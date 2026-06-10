@@ -219,10 +219,11 @@ function WebinarCard({
 
   const SECTION_ACCENT: Record<WebinarType, string> = {
     exclusive: "#D4AF37",
-    evergreen: "#0074F4",
+    evergreen: "#7C3AED",
     recording: "#00A9E2",
   };
-  const accentColor = (variant === "evergreen" && webinar.accentColor) ? webinar.accentColor : SECTION_ACCENT[variant];
+  // Colors are hardcoded per section type — accentColor from DB is ignored
+  const accentColor = SECTION_ACCENT[variant];
 
   const SECTION_BG: Record<WebinarType, string> = {
     evergreen: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-evergreen-v2-GrKL79AD2FdyCtLXnUSv4C.webp",
@@ -312,8 +313,8 @@ function WebinarCard({
         {/* Type badge top-right */}
         <div className="absolute top-3 right-3">
           <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
-            style={{ background: `${accentColor}25`, color: accentColor, border: `1px solid ${accentColor}55` }}>
-            {variant === "exclusive" ? "Exclusive" : variant === "recording" ? "Recording" : "On-Demand"}
+            style={{ background: accentColor, color: "#fff" }}>
+            {variant === "exclusive" ? "Exclusive" : variant === "recording" ? "Exclusive On-Demand" : "On-Demand"}
           </span>
         </div>
         {/* Play overlay for cards with video */}
@@ -436,7 +437,7 @@ const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactN
   evergreen: {
     label: "WAVV On-Demand Series",
     icon: <RefreshCw size={14} />,
-    accent: "#0074F4",
+    accent: "#7C3AED",
     description: "Available anytime — watch at your own pace",
   },
   exclusive: {
@@ -641,7 +642,7 @@ export default function Webinars() {
           embedUrl={playingVideo.embedUrl}
           accentColor={
             playingVideo.variant === "exclusive" ? "#D4AF37" :
-            playingVideo.variant === "evergreen" ? "#0074F4" : "#00A9E2"
+            playingVideo.variant === "evergreen" ? "#7C3AED" : "#00A9E2"
           }
           showPip={true}
           onClose={handleCloseModal}

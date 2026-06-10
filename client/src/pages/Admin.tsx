@@ -145,6 +145,7 @@ import {
   Repeat,
   RotateCcw,
   Shuffle,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -4804,6 +4805,27 @@ function WebinarsTab() {
     onError: (e) => toast.error("Video upload failed: " + e.message),
   });
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingThumb, setUploadingThumb] = useState(false);
+
+  async function handleThumbUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const maxMb = 10;
+    if (file.size > maxMb * 1024 * 1024) { toast.error(`Image too large — max ${maxMb} MB`); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    setUploadingThumb(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const result = await uploadWebinarThumbnail.mutateAsync({ base64, mimeType: file.type });
+      setForm(f => ({ ...f, thumbnailUrl: result.url }));
+      toast.success("Thumbnail uploaded");
+    } catch { toast.error("Thumbnail upload failed"); } finally { setUploadingThumb(false); }
+  }
 
   async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -5006,157 +5028,152 @@ function WebinarsTab() {
                 />
               </div>
             )}
-            <div>
-              <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(choose a preset or paste a custom URL)</span></label>
-              {/* Preset neon thumbnail gallery — 20 images, no labels */}
-              <div className="grid grid-cols-5 gap-1.5 mb-2">
-                {([
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-connection-rates-87rQWg6ZByH7ZA6HiRu9Mi.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-security-compliance-j5H6G2LXYyyt53RBZUZhG2.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-onboarding-CCFD8DchGw2sHc6DwsnvXB.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-prospecting-nNAxw7CBSmXxaxY4E9Vohm.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-pipeline-cY6bCUMvdMuinagDB7sucT.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-outbound-Njwyty7V65Y3h3UQ2GCtJH.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-analytics-42bSMiVFenHV6Htqdsrwdq.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-team-training-fLhfdJ3XrFeaMD6TS9DV9X.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-settings-4sPnpfDQ49akV24fbo9rQv.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-integration-jji77pKwzaxU6XVawSD6b8.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-number-rotation-JDBNu9jHh5tz2gYP3BBX2k.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-automation-6n6ymqXKucpZbuQbTjSWty.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-reporting-QdHJaFWvAw8a9x3d9dwQK4.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-crm-6CXPSF3DpxoQ7tCXSUMnBi.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-headset-bWd3oQpTpvkYFkCXnRmb3L.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-calendar-7sqeNkVGfErrwaq7J5Sikb.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-trophy-6gRPqVzcCn9kRkgBTsHPZs.webp",
-                  "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-chat-JywJ7xdLZZ3TjLeR7SqyK4.webp",
-                ] as string[]).map((url) => {
-                  const isSelected = form.thumbnailUrl === url;
-                  return (
-                    <button
-                      key={url}
-                      type="button"
-                      onClick={() => setForm(f => ({ ...f, thumbnailUrl: isSelected ? "" : url }))}
-                      className="relative rounded-lg overflow-hidden transition-all"
-                      style={{
-                        aspectRatio: "16/9",
-                        border: isSelected ? "2px solid #0074F4" : "2px solid #1a1a1a",
-                        boxShadow: isSelected ? "0 0 8px #0074F466" : "none",
-                        background: "#111",
-                      }}
-                    >
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                      {isSelected && (
-                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,116,244,0.2)" }}>
-                          <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          </div>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {/* Upload branded thumbnail */}
-              <div className="flex items-center gap-2 mb-2">
-                <label
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors"
-                  style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.3)", color: "#60a5fa" }}
-                >
-                  <Upload size={12} />
-                  Upload Image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
-                      const reader = new FileReader();
-                      reader.onload = async () => {
-                        const base64 = (reader.result as string).split(",")[1];
-                        try {
-                          const result = await uploadWebinarThumbnail.mutateAsync({ base64, mimeType: file.type });
-                          setForm(f => ({ ...f, thumbnailUrl: result.url }));
-                          toast.success("Thumbnail uploaded");
-                        } catch {
-                          toast.error("Upload failed — try pasting a URL instead");
-                        }
-                      };
-                      reader.readAsDataURL(file);
-                    }}
-                  />
-                </label>
-                {form.thumbnailUrl && (
-                  <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>Custom thumbnail selected</span>
-                )}
-              </div>
-              {/* Custom URL fallback */}
-              <input
-                style={inputStyle}
-                value={form.thumbnailUrl}
-                onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
-                placeholder="Or paste a custom thumbnail URL..."
-              />
-            </div>
-            <div className="grid grid-cols-1 gap-3">
+            {form.type === "exclusive" ? (
+              /* Exclusive Live Webinar: star circuit board is the locked default */
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Accent Color</label>
-                {/* Preset palette */}
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {["#0074F4","#67C728","#FF9900","#FF3B3B","#A855F7","#EC4899","#14B8A6","#F59E0B","#06B6D4","#8B5CF6","#10B981","#EF4444"].map(c => (
-                    <button
-                      key={c}
-                      type="button"
-                      title={c}
-                      onClick={() => setForm(f => ({ ...f, accentColor: c }))}
-                      className="w-6 h-6 rounded-full border-2 transition-all"
-                      style={{ background: c, borderColor: form.accentColor === c ? "#fff" : "transparent", transform: form.accentColor === c ? "scale(1.2)" : "scale(1)" }}
-                    />
-                  ))}
+                <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(star circuit board is the default — upload a custom image to override)</span></label>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: form.thumbnailUrl ? "2px solid #1a1a1a" : "2px solid #D4AF37", boxShadow: form.thumbnailUrl ? "none" : "0 0 8px #D4AF3766" }}>
+                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp" alt="Default" className="w-full h-full object-cover" />
+                    {!form.thumbnailUrl && (
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(212,175,55,0.2)" }}>
+                        <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#D4AF37" }}>
+                          <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {form.thumbnailUrl ? (
+                      <span className="text-amber-400">Custom image set</span>
+                    ) : (
+                      <span>Default star thumbnail (active)</span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={form.accentColor}
-                    onChange={e => setForm(f => ({ ...f, accentColor: e.target.value }))}
-                    className="w-10 h-9 rounded cursor-pointer border-0 p-0.5"
-                    style={{ background: "#111", border: "1px solid #2a2a2a" }}
-                  />
-                  <input
-                    style={{ ...inputStyle, flex: 1 }}
-                    value={form.accentColor}
-                    onChange={e => setForm(f => ({ ...f, accentColor: e.target.value }))}
-                    placeholder="#0074F4"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const palette = ["#0074F4","#67C728","#FF9900","#FF3B3B","#A855F7","#EC4899","#14B8A6","#F59E0B","#06B6D4","#8B5CF6","#10B981","#EF4444"];
-                      const pick = palette[Math.floor(Math.random() * palette.length)];
-                      setForm(f => ({ ...f, accentColor: pick }));
-                    }}
-                    className="px-3 py-1.5 rounded text-xs font-semibold whitespace-nowrap"
-                    style={{ background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+                  <label
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                    style={{ background: uploadingThumb ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingThumb ? "#9ca3af" : "#fff" }}
                   >
-                    ✦ Auto-Pick
-                  </button>
+                    {uploadingThumb ? (
+                      <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                    ) : (
+                      <><ImageIcon size={13} /> Upload Custom Image</>
+                    )}
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleThumbUpload} disabled={uploadingThumb} />
+                  </label>
+                  {form.thumbnailUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, thumbnailUrl: "" }))}
+                      className="text-xs text-gray-500 hover:text-red-400 transition"
+                    >
+                      Reset to default
+                    </button>
+                  )}
                 </div>
               </div>
-            </div>
-            {/* PiP toggle */}
-            <div className="flex flex-col gap-2 mt-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
+            ) : (
+              /* Non-exclusive: full preset gallery + upload */
+              <div>
+                <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(choose a preset or upload a custom image)</span></label>
+                {/* Preset neon thumbnail gallery */}
+                <div className="grid grid-cols-5 gap-1.5 mb-2">
+                  {([
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-phone-dialer-FtuDjhQFD8QgEY8Tydk94p.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-call-boards-HfkAhZAcmsg2rpcG7XmMJS.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-connection-rates-87rQWg6ZByH7ZA6HiRu9Mi.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-security-compliance-j5H6G2LXYyyt53RBZUZhG2.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-onboarding-CCFD8DchGw2sHc6DwsnvXB.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-prospecting-nNAxw7CBSmXxaxY4E9Vohm.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-pipeline-cY6bCUMvdMuinagDB7sucT.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-outbound-Njwyty7V65Y3h3UQ2GCtJH.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-analytics-42bSMiVFenHV6Htqdsrwdq.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-team-training-fLhfdJ3XrFeaMD6TS9DV9X.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-settings-4sPnpfDQ49akV24fbo9rQv.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-integration-jji77pKwzaxU6XVawSD6b8.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-number-rotation-JDBNu9jHh5tz2gYP3BBX2k.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-automation-6n6ymqXKucpZbuQbTjSWty.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-reporting-QdHJaFWvAw8a9x3d9dwQK4.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-crm-6CXPSF3DpxoQ7tCXSUMnBi.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-headset-bWd3oQpTpvkYFkCXnRmb3L.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-calendar-7sqeNkVGfErrwaq7J5Sikb.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-trophy-6gRPqVzcCn9kRkgBTsHPZs.webp",
+                    "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/neon-thumb-chat-JywJ7xdLZZ3TjLeR7SqyK4.webp",
+                  ] as string[]).map((url) => {
+                    const isSelected = form.thumbnailUrl === url;
+                    return (
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, thumbnailUrl: isSelected ? "" : url }))}
+                        className="relative rounded-lg overflow-hidden transition-all"
+                        style={{
+                          aspectRatio: "16/9",
+                          border: isSelected ? "2px solid #0074F4" : "2px solid #1a1a1a",
+                          boxShadow: isSelected ? "0 0 8px #0074F466" : "none",
+                          background: "#111",
+                        }}
+                      >
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        {isSelected && (
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,116,244,0.2)" }}>
+                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                              <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Upload custom image */}
+                <div className="flex items-center gap-2 mb-2">
+                  <label
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                    style={{ background: uploadingThumb ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingThumb ? "#9ca3af" : "#fff" }}
+                  >
+                    {uploadingThumb ? (
+                      <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                    ) : (
+                      <><ImageIcon size={13} /> Upload Custom Image</>
+                    )}
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleThumbUpload} disabled={uploadingThumb} />
+                  </label>
+                  {form.thumbnailUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, thumbnailUrl: "" }))}
+                      className="text-xs text-gray-500 hover:text-red-400 transition"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                {/* Custom URL fallback */}
                 <input
-                  type="checkbox"
-                  checked={form.pipEnabled}
-                  onChange={(e) => setForm(f => ({ ...f, pipEnabled: e.target.checked }))}
-                  className="w-3.5 h-3.5 rounded accent-blue-500"
+                  style={inputStyle}
+                  value={form.thumbnailUrl}
+                  onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
+                  placeholder="Or paste a custom thumbnail URL..."
                 />
-                <span className="text-xs text-gray-400">Enable Pop-out (Picture-in-Picture) for this webinar</span>
-              </label>
+              </div>
+            )}
+            {/* Accent color is now hardcoded per section type — no picker needed */}
+            {/* PiP toggle — hidden for exclusive live webinars (they link to registration, not video) */}
+            <div className="flex flex-col gap-2 mt-1">
+              {form.type !== "exclusive" && (
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={form.pipEnabled}
+                    onChange={(e) => setForm(f => ({ ...f, pipEnabled: e.target.checked }))}
+                    className="w-3.5 h-3.5 rounded accent-blue-500"
+                  />
+                  <span className="text-xs text-gray-400">Enable Pop-out (Picture-in-Picture) for this webinar</span>
+                </label>
+              )}
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
