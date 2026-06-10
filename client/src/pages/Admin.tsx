@@ -4850,6 +4850,12 @@ function WebinarsTab() {
     setShowForm(true);
   }
 
+  function normalizeUrl(url: string): string | undefined {
+    if (!url.trim()) return undefined;
+    if (/^https?:\/\//i.test(url.trim())) return url.trim();
+    return `https://${url.trim()}`;
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title.trim()) { toast.error("Title is required"); return; }
@@ -4860,8 +4866,8 @@ function WebinarsTab() {
         description: form.description || undefined,
         host: form.host || undefined,
         type: form.type,
-        registrationUrl: form.registrationUrl || undefined,
-        videoUrl: form.videoUrl || undefined,
+        registrationUrl: normalizeUrl(form.registrationUrl),
+        videoUrl: normalizeUrl(form.videoUrl),
         thumbnailUrl: form.thumbnailUrl || undefined,
         accentColor: form.accentColor || undefined,
         iconName: form.iconName || undefined,
@@ -4875,8 +4881,8 @@ function WebinarsTab() {
         description: form.description || undefined,
         host: form.host || undefined,
         type: form.type,
-        registrationUrl: form.registrationUrl || undefined,
-        videoUrl: form.videoUrl || undefined,
+        registrationUrl: normalizeUrl(form.registrationUrl),
+        videoUrl: normalizeUrl(form.videoUrl),
         thumbnailUrl: form.thumbnailUrl || undefined,
         accentColor: form.accentColor || undefined,
         iconName: form.iconName || undefined,
@@ -4982,7 +4988,8 @@ function WebinarsTab() {
                 ) : (
                   <>
                     <label className="block text-xs text-gray-400 mb-1">Registration URL</label>
-                    <input style={inputStyle} value={form.registrationUrl} onChange={e => setForm(f => ({ ...f, registrationUrl: e.target.value }))} placeholder="https://..." />
+                    <input style={inputStyle} value={form.registrationUrl} onChange={e => setForm(f => ({ ...f, registrationUrl: e.target.value }))} placeholder="https://zoom.us/webinar/register/..." />
+                    <p className="text-[11px] text-gray-600 mt-1">Full URL required. If you omit https://, it will be added automatically.</p>
                   </>
                 )}
               </div>
