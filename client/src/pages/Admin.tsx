@@ -2000,11 +2000,13 @@ function UsersTab() {
                     {isOwner && <TableCell>
                       {isSelf ? (
                         <div style={{ display: "grid", gridTemplateColumns: "auto auto auto auto", gap: "6px", alignItems: "center" }}>
-                          {/* Col 1: dash placeholder for Change Role */}
-                          <div className="flex items-center justify-center text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap"
-                            style={{ color: "#4b5563" }}>
-                            —
-                          </div>
+                          {/* Col 1: Change Role — triggers confirmation dialog */}
+                          <button
+                            className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                            style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
+                            onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole })}>
+                            <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
+                          </button>
                           {/* Col 2: Reset Password */}
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
@@ -2040,11 +2042,13 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
                             </button>
                           )}
-                          {/* Col 4: dash placeholder for Remove */}
-                          <div className="flex items-center justify-center text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap"
-                            style={{ color: "#4b5563" }}>
-                            —
-                          </div>
+                          {/* Col 4: Remove — triggers confirmation dialog */}
+                          <button
+                            className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                            style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
+                            onClick={() => setConfirmDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, action: "remove" })}>
+                            <Trash2 className="h-3 w-3 flex-shrink-0" /> Remove
+                          </button>
                         </div>
                       ) : (
                         <div style={{ display: "grid", gridTemplateColumns: "auto auto auto auto", gap: "6px", alignItems: "center" }}>
@@ -2172,21 +2176,21 @@ function UsersTab() {
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">
-              {confirmDialog?.action === "demote" ? "Demote User" : "Remove User"}
+              {confirmDialog?.action === "demote" ? "Change Role Confirmation" : "Remove User Confirmation"}
             </DialogTitle>
             <DialogDescription className="text-gray-400">
               {confirmDialog?.action === "demote" && (
-                <><strong className="text-white">{confirmDialog.userName}</strong> will be demoted one level (from {confirmDialog.currentRole.replace("_", " ")}).</>
+                <>You\'re about to change the role for <strong className="text-white">{confirmDialog.userName}</strong>. They will be moved down one permission level from <span className="text-gray-300 capitalize">{confirmDialog.currentRole.replace(/_/g, " ")}</span>. Are you sure you want to proceed?</>
               )}
               {confirmDialog?.action === "remove" && (
-                <><strong className="text-white">{confirmDialog?.userName}</strong> will be permanently removed from the platform. This cannot be undone.</>
+                <>You\'re about to permanently remove <strong className="text-white">{confirmDialog?.userName}</strong> from the platform. They will lose all access immediately and this action cannot be undone. Are you sure?</>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setConfirmDialog(null)} disabled={isPending}>Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmDialog(null)} disabled={isPending}>No, Keep Them</Button>
             <Button variant="destructive" onClick={handleConfirm} disabled={isPending}>
-              {isPending ? "Processing..." : confirmDialog?.action === "demote" ? "Demote" : "Remove User"}
+              {isPending ? "Processing..." : confirmDialog?.action === "demote" ? "Yes, Change Role" : "Yes, Remove User"}
             </Button>
           </DialogFooter>
         </DialogContent>
