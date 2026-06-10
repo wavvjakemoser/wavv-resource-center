@@ -22,6 +22,7 @@ export interface SessionPayload {
   userId: number;
   email: string;
   role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner";
+  mfaPending?: boolean; // true when session issued but MFA not yet configured
 }
 
 export async function createSessionToken(payload: SessionPayload): Promise<string> {
@@ -39,6 +40,7 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
       userId: payload.userId as number,
       email: payload.email as string,
       role: payload.role as "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner",
+      mfaPending: payload.mfaPending as boolean | undefined,
     };
   } catch {
     return null;

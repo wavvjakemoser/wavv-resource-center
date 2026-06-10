@@ -86,15 +86,22 @@ export async function getAllUsers() {
   const rows = await db.select().from(users).orderBy(desc(users.createdAt));
   // Get the most recent invite sent date per email
   const invites = await db
-    .select({ email: inviteTokens.email, inviteSentAt: sql<Date>`MAX(${inviteTokens.createdAt})` })
+    .select({
+      email: inviteTokens.email,
+      inviteSentAt: sql<Date>`MAX(${inviteTokens.createdAt})`,
+      inviteExpiresAt: sql<Date>`MAX(${inviteTokens.expiresAt})`,
+      inviteUsed: sql<number>`MAX(CASE WHEN ${inviteTokens.expiresAt} = (SELECT MAX(it2.expiresAt) FROM invite_tokens it2 WHERE it2.email = ${inviteTokens.email}) THEN ${inviteTokens.used} ELSE 0 END)`,
+    })
     .from(inviteTokens)
     .groupBy(inviteTokens.email);
-  const inviteMap = new Map(invites.map(i => [i.email, i.inviteSentAt]));
+  const inviteMap = new Map(invites.map(i => [i.email, { inviteSentAt: i.inviteSentAt, inviteExpiresAt: i.inviteExpiresAt, inviteUsed: !!i.inviteUsed }]));
   // Strip passwordHash before returning — replace with hasPassword boolean
   return rows.map(({ passwordHash, mfaSecret, ...safe }) => ({
     ...safe,
     hasPassword: !!passwordHash,
-    inviteSentAt: inviteMap.get(safe.email ?? "") ?? null,
+    inviteSentAt: inviteMap.get(safe.email ?? "")?.inviteSentAt ?? null,
+    inviteExpiresAt: inviteMap.get(safe.email ?? "")?.inviteExpiresAt ?? null,
+    inviteUsed: inviteMap.get(safe.email ?? "")?.inviteUsed ?? null,
   }));
 }
 export async function updateLastSignedIn(userId: number) {

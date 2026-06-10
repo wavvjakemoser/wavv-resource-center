@@ -25,7 +25,12 @@ export default function Login() {
       // destination page sees an authenticated user immediately on mount —
       // no second network request, no second loading flash.
       if (data?.user) {
-        utils.auth.me.setData(undefined, data.user as Parameters<typeof utils.auth.me.setData>[1]);
+        utils.auth.me.setData(undefined, { ...data.user, mfaPending: data.mfaPending ?? false } as Parameters<typeof utils.auth.me.setData>[1]);
+      }
+      // If MFA is not yet configured, MfaGate will intercept and redirect to /mfa-required
+      if (data?.mfaPending) {
+        navigate("/mfa-required");
+        return;
       }
       const role = data?.user?.role;
       if (role === "partner_admin" || role === "partner") {

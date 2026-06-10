@@ -1293,3 +1293,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Team Access + Guide URL Display Name — Jun 10 2026 (Session 3)
 - [x] Remove Last Login column from Team Access table (header + data cell)
 - [x] Add display name field to guides/docs — admin can set a friendly name shown to users instead of raw storage URL
+
+## Admin Onboarding Hardening — Jun 10 2026 (Session 4)
+- [x] MFA enforcement gate — after login, if mfaPending=true, redirect to /mfa-required; MfaGate component wraps all routes
+- [x] /mfa-required page — explains requirement, auto-generates setup token, links to /mfa-setup
+- [x] Invite token expiry — Invite Sent column shows Claimed/Pending/Expired badge; Expired rows show Resend button
+- [x] Slack-ready setup instructions modal — after Create Invite Link, shows copyable Slack message with 4-step walkthrough and "WAVV Success Center Admin Token" branded link
+- [x] Bulk CSV user import — Bulk Import button opens dialog; paste Name, Email, Role CSV; generates up to 50 invite tokens; shows per-row OK/Error results; Copy All Invite Links button

@@ -1024,7 +1024,7 @@ export const appRouter = router({
       if (!u) return null;
       // Never expose passwordHash or other sensitive fields to the client
       const { passwordHash: _ph, openId: _oid, ...safeUser } = u;
-      return safeUser;
+      return { ...safeUser, mfaPending: opts.ctx.mfaPending };
     }),
 
     login: publicProcedure
@@ -1084,12 +1084,14 @@ export const appRouter = router({
           await setMfaSetupToken(user.id, user.mfaSecret, challengeToken, Date.now() + 10 * 60 * 1000);
           return { success: true, mfaRequired: true, challengeToken, user: null };
         }
-        const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        // Issue session — mark mfaPending if MFA is not yet configured
+        const mfaPending = !user.mfaEnabled;
+        const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role, mfaPending });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
         await trackEvent({ userId: user.id, eventType: "login" });
         await updateLastSignedIn(user.id);
-        return { success: true, mfaRequired: false, challengeToken: null, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+        return { success: true, mfaRequired: false, mfaPending, challengeToken: null, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
       }),
 
     register: publicProcedure
@@ -1132,7 +1134,8 @@ export const appRouter = router({
         const passwordHash = await hashPassword(input.password);
         const user = await claimInvite({ token: input.token, name: input.name, passwordHash });
         if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to claim invite." });
-        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        // After accepting invite, user has no MFA yet — mark pending
+        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role, mfaPending: true });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
         await trackEvent({ userId: user.id, eventType: "login" });
@@ -1273,6 +1276,18 @@ export const appRouter = router({
         return { qrDataUrl, secret: user.mfaSecret! };
       }),
 
+    // ── MFA: Initiate setup for self (called by a logged-in user who has mfaPending) ──
+    initiateMfaSetupForSelf: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        const otplib = await import("otplib");
+        const cryptoMod = await import("crypto");
+        const secret = otplib.generateSecret();
+        const setupToken = cryptoMod.randomBytes(32).toString("hex");
+        const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+        await setMfaSetupToken(ctx.user.id, secret, setupToken, expiresAt);
+        return { setupToken };
+      }),
+
     // ── MFA: Generate setup (called by admin when creating/resetting MFA for a user) ──
     generateMfaSetup: protectedProcedure
       .input(z.object({ userId: z.number() }))
@@ -1321,8 +1336,8 @@ export const appRouter = router({
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect code. Please try again." });
         }
         await activateMfa(user.id);
-        // Issue a full session after successful MFA setup
-        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
+        // Issue a full session after successful MFA setup — mfaPending cleared
+        const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role, mfaPending: false });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
         await trackEvent({ userId: user.id, eventType: "login" });
@@ -1493,6 +1508,48 @@ export const appRouter = router({
         });
         return { success: true, inviteLink, role: input.role };
       }),
+    // Bulk invite: create multiple users at once from a list of {name, email, role} entries
+    bulkInviteTeamMembers: ownerProcedure
+      .input(z.object({
+        entries: z.array(z.object({
+          name: z.string().min(1).max(255),
+          email: z.string().email(),
+          role: z.enum(["owner", "content_admin", "partner_admin", "admin"]).default("admin"),
+        })).min(1).max(50),
+        origin: z.string().url().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const appUrl = input.origin ?? process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
+        const results: { email: string; name: string; inviteLink: string; status: "created" | "updated" | "error"; error?: string }[] = [];
+        for (const entry of input.entries) {
+          try {
+            const email = entry.email.trim().toLowerCase();
+            let user = await getUserByEmail(email);
+            if (!user) {
+              user = await createNativeUser({ email, name: entry.name.trim(), passwordHash: null, role: entry.role });
+            } else {
+              await updateUserRole(user.id, entry.role);
+            }
+            const { token } = await generateInvite({
+              email,
+              name: entry.name.trim(),
+              role: entry.role,
+              createdBy: ctx.user.id,
+            });
+            const inviteLink = `${appUrl}/accept-invite?token=${token}`;
+            results.push({ email, name: entry.name.trim(), inviteLink, status: user ? "updated" : "created" });
+          } catch (err) {
+            results.push({ email: entry.email, name: entry.name, inviteLink: "", status: "error", error: err instanceof Error ? err.message : "Unknown error" });
+          }
+        }
+        const successCount = results.filter(r => r.status !== "error").length;
+        await notifyOwner({
+          title: `Bulk invite: ${successCount}/${input.entries.length} users invited`,
+          content: results.map(r => `${r.email}: ${r.status}${r.error ? ` (${r.error})` : ""}`).join("\n"),
+        });
+        return { results };
+      }),
+
     // Owner-triggered password reset: generates a fresh accept-invite link for an existing user
     sendPasswordReset: ownerProcedure
       .input(z.object({

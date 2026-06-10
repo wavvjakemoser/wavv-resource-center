@@ -11,41 +11,43 @@ export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
   user: User | null;
+  mfaPending: boolean;
 };
 
-async function getUserFromRequest(req: CreateExpressContextOptions["req"]): Promise<User | null> {
+async function getSessionFromRequest(req: CreateExpressContextOptions["req"]): Promise<{ user: User | null; mfaPending: boolean }> {
   try {
     const cookieHeader = req.headers.cookie;
-    if (!cookieHeader) return null;
+    if (!cookieHeader) return { user: null, mfaPending: false };
 
     const cookies = parseCookieHeader(cookieHeader);
     const sessionCookie = cookies[COOKIE_NAME];
-    if (!sessionCookie) return null;
+    if (!sessionCookie) return { user: null, mfaPending: false };
 
     const session = await verifySessionToken(sessionCookie);
-    if (!session) return null;
+    if (!session) return { user: null, mfaPending: false };
 
     const db = await getDb();
-    if (!db) return null;
+    if (!db) return { user: null, mfaPending: false };
 
     const result = await db.select().from(users).where(eq(users.id, session.userId)).limit(1);
     const user = result[0];
-    if (!user || !user.isActive) return null;
+    if (!user || !user.isActive) return { user: null, mfaPending: false };
 
-    return user;
+    return { user, mfaPending: session.mfaPending === true };
   } catch {
-    return null;
+    return { user: null, mfaPending: false };
   }
 }
 
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
-  const user = await getUserFromRequest(opts.req);
+  const { user, mfaPending } = await getSessionFromRequest(opts.req);
 
   return {
     req: opts.req,
     res: opts.res,
     user,
+    mfaPending,
   };
 }

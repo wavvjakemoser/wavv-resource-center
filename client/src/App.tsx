@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { useEffect } from "react";
+import { Route, Switch, useLocation, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -24,10 +25,11 @@ import WavvPartnerPortal from "./pages/WavvPartnerPortal";
 import MagicAuth from "./pages/MagicAuth";
 import MfaSetup from "./pages/MfaSetup";
 import MfaVerify from "./pages/MfaVerify";
+import MfaRequired from "./pages/MfaRequired";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { trpc } from "./lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Redirect } from "wouter";
+
 
 // Guard for pages that can be disabled via nav_visibility in site settings.
 // Admins always bypass. Non-admins are redirected to /404 when the page is hidden.
@@ -56,6 +58,27 @@ function PartnerPortalGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Intercepts any portal route when user is logged in but MFA is not yet configured.
+function MfaGate({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const [, navigate] = useLocation();
+  const path = window.location.pathname;
+  const MFA_EXEMPT = ["/login", "/mfa-setup", "/mfa-verify", "/mfa-required", "/accept-invite", "/auth/google/callback", "/auth/magic"];
+  const isExempt = MFA_EXEMPT.some(p => path.startsWith(p));
+
+  useEffect(() => {
+    if (loading || isExempt) return;
+    if (user && (user as { mfaPending?: boolean }).mfaPending) {
+      navigate("/mfa-required");
+    }
+  }, [user, loading, isExempt, navigate]);
+
+  if (!loading && !isExempt && user && (user as { mfaPending?: boolean }).mfaPending) {
+    return null; // suppress flash while redirect fires
+  }
+  return <>{children}</>;
+}
+
 function Router() {
   usePageTracking();
   return (
@@ -80,6 +103,7 @@ function Router() {
       <Route path="/auth/magic" component={MagicAuth} />
       <Route path="/mfa-setup" component={MfaSetup} />
       <Route path="/mfa-verify" component={MfaVerify} />
+      <Route path="/mfa-required" component={MfaRequired} />
       <Route path="/profile" component={Profile} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
@@ -102,7 +126,9 @@ function App() {
               },
             }}
           />
-          <Router />
+          <MfaGate>
+            <Router />
+          </MfaGate>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -1594,6 +1594,18 @@ function UsersTab() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ name: "", email: "", role: "admin" as "owner" | "content_admin" | "partner_admin" | "admin" });
   const [inviteResult, setInviteResult] = useState<{ link: string; name: string; role: string } | null>(null);
+
+  // Bulk import state
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [bulkCsvText, setBulkCsvText] = useState("");
+  const [bulkResults, setBulkResults] = useState<{ email: string; name: string; inviteLink: string; status: string; error?: string }[] | null>(null);
+  const bulkInviteMutation = trpc.admin.bulkInviteTeamMembers.useMutation({
+    onSuccess: (data) => {
+      setBulkResults(data.results);
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const inviteTeamMember = trpc.admin.inviteTeamMember.useMutation({
     onSuccess: (data) => {
       setInviteResult({ link: data.inviteLink, name: inviteForm.name, role: data.role ?? inviteForm.role });
@@ -1822,13 +1834,22 @@ function UsersTab() {
             Export{roleFilter !== "all" ? ` ${roleFilter === "content_admin" ? "Content Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
           </button>
           {isOwner && (
-            <button
-              onClick={() => { setInviteOpen(true); setInviteResult(null); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
-              style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.25)" }}
-            >
-              <UserPlus size={13} /> Invite Team Member
-            </button>
+            <>
+              <button
+                onClick={() => { setInviteOpen(true); setInviteResult(null); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
+                style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.25)" }}
+              >
+                <UserPlus size={13} /> Invite Team Member
+              </button>
+              <button
+                onClick={() => setBulkImportOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
+                style={{ background: "rgba(103,199,40,0.1)", color: "#86efac", border: "1px solid rgba(103,199,40,0.25)" }}
+              >
+                <Users size={13} /> Bulk Import
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -1978,7 +1999,31 @@ function UsersTab() {
                       </div>
                     </TableCell>
                     <TableCell className="text-gray-500 text-sm">
-                      {(u as any).inviteSentAt ? new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : <span className="text-gray-600 italic">—</span>}
+                      {(u as any).inviteSentAt ? (() => {
+                        const sentDate = new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                        const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
+                        const isExpired = expiresAt && expiresAt < new Date();
+                        const isUsed = (u as any).inviteUsed;
+                        return (
+                          <div className="flex flex-col gap-1">
+                            <span>{sentDate}</span>
+                            {isUsed ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>Claimed</span>
+                            ) : isExpired ? (
+                              <div className="flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>Expired</span>
+                                <button
+                                  onClick={() => sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin })}
+                                  disabled={sendPasswordReset.isPending}
+                                  className="text-[10px] text-blue-400 hover:text-blue-300 underline transition-colors"
+                                >Resend</button>
+                              </div>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>Pending</span>
+                            )}
+                          </div>
+                        );
+                      })() : <span className="text-gray-600 italic">—</span>}
                     </TableCell>
                     <TableCell>
                       {(() => {
@@ -2430,31 +2475,62 @@ function UsersTab() {
           </DialogHeader>
 
           {inviteResult ? (
-            <div className="py-2 space-y-3">
+            <div className="py-2 space-y-4">
+              {/* Success banner */}
               <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
                 <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
                 <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "content_admin" ? "Content Admin" : inviteResult.role === "partner_admin" ? "Partner Admin" : "Admin"}.</p>
               </div>
-              <p className="text-xs text-gray-400">Copy this invite link and send it directly to them via Slack or email. They'll use it to set their password and activate their account. It expires in 24 hours and can only be used once.</p>
-              <div
-                className="flex flex-col gap-1 p-3 rounded-lg"
-                style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
-              >
-                <p className="text-[10px] text-gray-500 font-mono">{new URL(inviteResult.link).origin}</p>
-                <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
-                  /accept-invite?token=<span style={{ color: "#93c5fd" }}>{inviteResult.link.split("token=")[1]?.slice(0, 12)}…</span>
-                </p>
+
+              {/* Slack instructions block */}
+              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
+                <div className="px-3 py-2 flex items-center justify-between" style={{ background: "rgba(0,116,244,0.12)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                  <p className="text-xs font-semibold" style={{ color: "#60a5fa" }}>Slack Message — Copy &amp; Send</p>
+                  <button
+                    className="text-[10px] px-2 py-0.5 rounded font-medium transition-colors"
+                    style={{ background: "rgba(0,116,244,0.2)", color: "#93c5fd", border: "1px solid rgba(0,116,244,0.3)" }}
+                    onClick={() => {
+                      const origin = (() => { try { return new URL(inviteResult!.link).origin; } catch { return "the portal"; } })();
+                      const slackMsg = [
+                        `Hey ${inviteResult!.name}!`,
+                        "",
+                        "You’ve been invited to the WAVV Success Center admin portal.",
+                        "",
+                        "Here’s how to get set up:",
+                        "1. Click the link below to set your password",
+                        `2. Log in at ${origin}/login`,
+                        "3. You’ll be prompted to set up Google Authenticator (required for all admins)",
+                        "4. Once MFA is active, you’ll have full access",
+                        "",
+                        "WAVV Success Center Admin Token:",
+                        inviteResult!.link,
+                        "",
+                        "This link expires in 24 hours and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.",
+                      ].join("\n");
+                      navigator.clipboard.writeText(slackMsg);
+                      toast.success("Slack message copied to clipboard!");
+                    }}
+                  >
+                    Copy
+                  </button>
+                </div>
+                <div className="p-3 text-xs leading-relaxed space-y-2" style={{ background: "#0a0a0a", color: "#c9d1d9", fontFamily: "monospace" }}>
+                  <p>Hey <strong style={{ color: "#fff" }}>{inviteResult.name}</strong>!</p>
+                  <p>You’ve been invited to the <strong style={{ color: "#fff" }}>WAVV Success Center</strong> admin portal.</p>
+                  <p className="text-gray-400">Here’s how to get set up:</p>
+                  <ol className="list-none space-y-1 pl-1">
+                    <li>1. Click the link below to set your password</li>
+                    <li>2. Log in at <span style={{ color: "#60a5fa" }}>{(() => { try { return new URL(inviteResult.link).origin; } catch { return "the portal"; } })()}/login</span></li>
+                    <li>3. You’ll be prompted to set up <strong style={{ color: "#fff" }}>Google Authenticator</strong> (required for all admins)</li>
+                    <li>4. Once MFA is active, you’ll have full access</li>
+                  </ol>
+                  <div className="rounded-lg px-3 py-2 mt-2" style={{ background: "rgba(0,116,244,0.1)", border: "1px solid rgba(0,116,244,0.2)" }}>
+                    <p className="text-[10px] text-gray-500 mb-0.5">WAVV Success Center Admin Token</p>
+                    <p className="text-xs break-all" style={{ color: "#93c5fd" }}>{inviteResult.link}</p>
+                  </div>
+                  <p className="text-gray-500 text-[10px]">This link expires in 24 hours and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.</p>
+                </div>
               </div>
-              <Button
-                className="w-full font-semibold"
-                style={{ background: "#0074F4", color: "#fff" }}
-                onClick={() => {
-                  navigator.clipboard.writeText(inviteResult!.link);
-                  toast.success("Invite link copied to clipboard!");
-                }}
-              >
-                Copy Invite Link
-              </Button>
             </div>
           ) : (
             <div className="py-2 space-y-3">
@@ -2506,6 +2582,105 @@ function UsersTab() {
                 style={{ background: "#0074F4", color: "#fff" }}
               >
                 {inviteTeamMember.isPending ? "Creating…" : "Create Invite Link"}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Bulk Import Dialog ── */}
+      <Dialog open={bulkImportOpen} onOpenChange={(open) => { if (!open) { setBulkImportOpen(false); setBulkCsvText(""); setBulkResults(null); } }}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a", maxWidth: 560 }}>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Users size={18} style={{ color: "#86efac" }} />
+              Bulk Import Team Members
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Paste a CSV or list of users below. Each line: <code className="text-green-400 bg-black/30 px-1 rounded">Name, Email, Role</code>. Role is optional (defaults to admin).
+            </DialogDescription>
+          </DialogHeader>
+
+          {bulkResults ? (
+            <div className="py-2 space-y-3">
+              <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
+                <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
+                <p className="text-sm text-white">{bulkResults.filter(r => r.status !== "error").length} of {bulkResults.length} users invited successfully.</p>
+              </div>
+              <div className="max-h-60 overflow-y-auto rounded-lg" style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}>
+                {bulkResults.map((r, i) => (
+                  <div key={i} className="flex items-start gap-2 px-3 py-2 border-b last:border-b-0" style={{ borderColor: "#1a1a1a" }}>
+                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full mt-0.5 ${r.status === "error" ? "text-red-400" : "text-green-400"}`}
+                      style={{ background: r.status === "error" ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)", border: `1px solid ${r.status === "error" ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)"}` }}>
+                      {r.status === "error" ? "Error" : "OK"}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-white truncate">{r.name} — {r.email}</p>
+                      {r.status === "error" ? (
+                        <p className="text-[10px] text-red-400">{r.error}</p>
+                      ) : (
+                        <p className="text-[10px] text-gray-500 truncate">{r.inviteLink}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button
+                className="w-full font-semibold"
+                style={{ background: "rgba(103,199,40,0.15)", color: "#86efac", border: "1px solid rgba(103,199,40,0.3)" }}
+                onClick={() => {
+                  const lines = bulkResults.filter(r => r.status !== "error").map(r =>
+                    `${r.name} (${r.email}):\n${r.inviteLink}`
+                  ).join("\n\n");
+                  navigator.clipboard.writeText(lines);
+                  toast.success("All invite links copied!");
+                }}
+              >
+                Copy All Invite Links
+              </Button>
+            </div>
+          ) : (
+            <div className="py-2 space-y-3">
+              <div className="text-xs text-gray-500 rounded-lg p-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="font-medium text-gray-400 mb-1">Format (one per line):</p>
+                <p className="font-mono">John Smith, john@wavv.com, admin</p>
+                <p className="font-mono">Jane Doe, jane@wavv.com, content_admin</p>
+                <p className="font-mono text-gray-600">Alex Lee, alex@wavv.com  ← role defaults to admin</p>
+              </div>
+              <textarea
+                value={bulkCsvText}
+                onChange={(e) => setBulkCsvText(e.target.value)}
+                placeholder={"John Smith, john@wavv.com, admin\nJane Doe, jane@wavv.com"}
+                rows={8}
+                className="w-full rounded-lg px-3 py-2 text-sm text-white font-mono outline-none resize-none"
+                style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)" }}
+              />
+              <p className="text-[10px] text-gray-600">Max 50 users per import. Existing users will have their role updated and a new invite link generated.</p>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => { setBulkImportOpen(false); setBulkCsvText(""); setBulkResults(null); }} className="text-gray-400">Close</Button>
+            {!bulkResults && (
+              <Button
+                disabled={bulkInviteMutation.isPending || !bulkCsvText.trim()}
+                onClick={() => {
+                  const csvLines = bulkCsvText.split("\n").map((l: string) => l.trim()).filter(Boolean);
+                  const entries: { name: string; email: string; role: "owner" | "content_admin" | "partner_admin" | "admin" }[] = [];
+                  const validRoles = ["owner", "content_admin", "partner_admin", "admin"];
+                  for (const line of csvLines) {
+                    const parts = line.split(",").map((p: string) => p.trim());
+                    if (parts.length < 2) { toast.error(`Invalid line: "${line}" — expected Name, Email[, Role]`); return; }
+                    const [name, email, roleRaw] = parts;
+                    const role = (validRoles.includes(roleRaw ?? "") ? roleRaw : "admin") as "owner" | "content_admin" | "partner_admin" | "admin";
+                    entries.push({ name, email, role });
+                  }
+                  if (entries.length === 0) { toast.error("No valid entries found."); return; }
+                  bulkInviteMutation.mutate({ entries, origin: window.location.origin });
+                }}
+                style={{ background: "rgba(103,199,40,0.15)", color: "#86efac", border: "1px solid rgba(103,199,40,0.3)" }}
+              >
+                {bulkInviteMutation.isPending ? "Importing…" : "Generate Invite Links"}
               </Button>
             )}
           </DialogFooter>
