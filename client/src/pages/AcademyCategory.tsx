@@ -741,7 +741,7 @@ export default function AcademyCategory() {
   return (
     <>
     <PortalLayout title={`WAVV Academy — ${cat.label}`}>
-      <div className="px-4 lg:px-6 py-6 max-w-3xl mx-auto space-y-6">
+      <div className="px-4 lg:px-8 py-6 space-y-6">
 
         {/* ── Back breadcrumb ── */}
         <Link
