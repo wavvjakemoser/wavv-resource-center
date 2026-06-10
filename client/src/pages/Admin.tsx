@@ -7179,6 +7179,7 @@ function SettingsTab() {
   });
 
   const maintenanceMode = settings["maintenance_mode"] === true;
+  const intercomEnabled = settings["intercom_enabled"] !== false; // default true
   const approvedPartnersEnabled = settings["approved_partners_enabled"] !== false; // default true
   const announcementText = typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "";
   const announcementEnabled = settings["announcement_enabled"] === true;
@@ -7308,6 +7309,31 @@ function SettingsTab() {
                 >
                   {maintenanceMode ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                   {maintenanceMode ? "Active" : "Off"}
+                </button>
+              </div>
+            </div>
+
+            {/* ── Intercom / Fin ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)" }}>
+                    <Bot size={15} style={{ color: "#0074F4" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Intercom / Fin</p>
+                    <p className="text-xs text-gray-500">Show or hide the Intercom chat bubble and AI Fin assistant site-wide</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toggle("intercom_enabled", intercomEnabled)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={intercomEnabled
+                    ? { background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                >
+                  {intercomEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  {intercomEnabled ? "Enabled" : "Disabled"}
                 </button>
               </div>
             </div>

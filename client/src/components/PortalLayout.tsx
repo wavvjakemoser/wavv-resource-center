@@ -151,6 +151,17 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [signingOut, setSigningOut] = useState(false);
   const isAdminPage = location.startsWith("/wavvadmin");
 
+  // Site settings — fetched early so Intercom effects can read intercomEnabled
+  const { data: allSettings = {}, isLoading: settingsLoading } = trpc.siteSettings.getAll.useQuery();
+  const intercomEnabled = (allSettings as Record<string, unknown>)["intercom_enabled"] !== false; // default true
+  const maintenanceMode = (allSettings as Record<string, unknown>)["maintenance_mode"] === true;
+  const announcementEnabled = (allSettings as Record<string, unknown>)["announcement_enabled"] === true;
+  const announcementText = typeof (allSettings as Record<string, unknown>)["announcement_text"] === "string"
+    ? (allSettings as Record<string, unknown>)["announcement_text"] as string
+    : "";
+  // Nav visibility: object of { [href]: boolean } — missing key = visible (default true)
+  const navVisibility = ((allSettings as Record<string, unknown>)["nav_visibility"] ?? {}) as Record<string, boolean>;
+
   // Auto-close mobile sidebar on route change
   useEffect(() => {
     setSidebarOpen(false);
@@ -165,25 +176,29 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     // user may be null (anonymous visitor) or a logged-in user object
     // Wait until the auth query has settled (user !== undefined means query ran)
     if (user !== undefined) {
-      bootIntercom(user);
+      if (intercomEnabled) {
+        bootIntercom(user);
+      } else if (window.Intercom) {
+        window.Intercom("shutdown");
+      }
     }
-  }, [user]);
+  }, [user, intercomEnabled]);
 
   // Update Intercom on route change so it tracks page views
   useEffect(() => {
-    if (window.Intercom) window.Intercom("update");
-  }, [location]);
+    if (intercomEnabled && window.Intercom) window.Intercom("update");
+  }, [location, intercomEnabled]);
 
-  // Shut down Intercom on admin pages to keep it out of internal tooling
+  // Shut down Intercom when disabled via settings toggle
   useEffect(() => {
     if (!window.Intercom) return;
-    if (isAdminPage) {
+    if (!intercomEnabled) {
       window.Intercom("shutdown");
     } else if (INTERCOM_APP_ID) {
       bootIntercom(user);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdminPage]);
+  }, [intercomEnabled]);
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -195,15 +210,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     }
   }
 
-  // Site settings — controls announcement banner, maintenance mode
-  const { data: allSettings = {}, isLoading: settingsLoading } = trpc.siteSettings.getAll.useQuery();
-  const maintenanceMode = (allSettings as Record<string, unknown>)["maintenance_mode"] === true;
-  const announcementEnabled = (allSettings as Record<string, unknown>)["announcement_enabled"] === true;
-  const announcementText = typeof (allSettings as Record<string, unknown>)["announcement_text"] === "string"
-    ? (allSettings as Record<string, unknown>)["announcement_text"] as string
-    : "";
-  // Nav visibility: object of { [href]: boolean } — missing key = visible (default true)
-  const navVisibility = ((allSettings as Record<string, unknown>)["nav_visibility"] ?? {}) as Record<string, boolean>;
+  // (settings declared above, before Intercom effects)
 
   useEffect(() => {
     if (title) document.title = `${title} — WAVV Success Center`;
