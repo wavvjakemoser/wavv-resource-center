@@ -289,7 +289,7 @@ export default function Admin() {
 
   return (
     <PortalLayout title="Admin">
-      <div className="px-4 lg:px-6 py-6 max-w-7xl mx-auto space-y-4">
+      <div className="px-4 lg:px-6 py-6 space-y-4">
 
         {/* ── Row 1: WAVV Knowledge (hidden when disabled) ── */}
         {showKnowledge && (
