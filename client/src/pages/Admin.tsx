@@ -147,6 +147,8 @@ import {
   Shuffle,
   Image as ImageIcon,
   PlayCircle,
+  Clapperboard,
+  MonitorPlay,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -5117,6 +5119,8 @@ function WebinarsTab() {
                       { name: "Megaphone",     Icon: Megaphone },
                       { name: "Repeat",        Icon: Repeat },
                       { name: "Shuffle",       Icon: Shuffle },
+                      { name: "Clapperboard",  Icon: Clapperboard },
+                      { name: "MonitorPlay",   Icon: MonitorPlay },
                     ] as { name: string; Icon: React.ElementType }[]).map(({ name, Icon }) => {
                       const isSelected = form.iconName === name;
                       const sectionAccent = form.type === "recording" ? "#00A9E2" : "#7C3AED";

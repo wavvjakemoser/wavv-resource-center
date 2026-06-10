@@ -10,6 +10,7 @@ import {
   BookOpen, FileText, Lightbulb, Award, Trophy, Rocket,
   PhoneOutgoing, PhoneMissed, PhoneOff, ListChecks, ClipboardList,
   Crosshair, Megaphone, Repeat, RotateCcw, Shuffle,
+  Clapperboard, MonitorPlay,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -236,8 +237,17 @@ function WebinarCard({
     BookOpen, FileText, Lightbulb, Star, Award, Trophy, Rocket,
     PhoneOutgoing, PhoneMissed, PhoneOff, ListChecks, ClipboardList,
     Crosshair, Megaphone, Repeat, RotateCcw, Shuffle,
+    Clapperboard, MonitorPlay, PlayCircle,
   };
-  const CardIcon: LucideIcon | undefined = webinar.iconName ? ICON_MAP[webinar.iconName] : undefined;
+  // Section default icons — used when no iconName is set on the webinar
+  const SECTION_DEFAULT_ICON: Record<string, LucideIcon> = {
+    ondemand: PlayCircle,      // WAVV On-Demand Series
+    recording: Clapperboard,  // WAVV Exclusive On-Demand
+    exclusive: Star,           // Exclusive Live — star only (no overlay shown)
+  };
+  const CardIcon: LucideIcon | undefined = webinar.iconName
+    ? ICON_MAP[webinar.iconName]
+    : SECTION_DEFAULT_ICON[variant];
 
   // Determine if this card has an embeddable video
   const embedUrl = webinar.videoUrl ? getEmbedUrl(webinar.videoUrl) : null;
@@ -292,7 +302,24 @@ function WebinarCard({
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
         )}
-        {/* No icon overlay — background image stands clean on its own */}
+        {/* Small icon overlay for On-Demand sections — Exclusive Live shows the star image only */}
+        {variant !== "exclusive" && CardIcon && !webinar.thumbnailUrl && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="flex items-center justify-center rounded-full"
+              style={{
+                width: 48,
+                height: 48,
+                background: "rgba(0,0,0,0.55)",
+                backdropFilter: "blur(4px)",
+                border: `1.5px solid ${accentColor}55`,
+                boxShadow: `0 0 18px ${accentColor}33`,
+              }}
+            >
+              <CardIcon size={20} style={{ color: accentColor, filter: `drop-shadow(0 0 6px ${accentColor}99)` }} />
+            </div>
+          </div>
+        )}
         {/* Bottom gradient overlay */}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
         {/* Type badge top-right */}
