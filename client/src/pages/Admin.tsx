@@ -1997,24 +1997,9 @@ function UsersTab() {
                     </TableCell>
                     {/* Invite Sent — date only, with Resend button if expired */}
                     <TableCell className="text-gray-400 text-sm">
-                      {(u as any).inviteSentAt ? (() => {
-                        const sentDate = new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-                        const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
-                        const isUsed = !!(u as any).inviteUsed;
-                        const isExpired = !isUsed && expiresAt && expiresAt < new Date();
-                        return (
-                          <div className="flex flex-col gap-1">
-                            <span>{sentDate}</span>
-                            {isExpired && (
-                              <button
-                                onClick={() => sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin })}
-                                disabled={sendPasswordReset.isPending}
-                                className="text-[10px] text-blue-400 hover:text-blue-300 underline transition-colors w-fit"
-                              >Resend</button>
-                            )}
-                          </div>
-                        );
-                      })() : <span className="text-gray-600 italic">—</span>}
+                      {(u as any).inviteSentAt
+                        ? new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                        : <span className="text-gray-600 italic">—</span>}
                     </TableCell>
                     {/* Status — reflects whether the user account is active */}
                     <TableCell>
@@ -2059,18 +2044,24 @@ function UsersTab() {
                             onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole, step: 1 })}>
                             <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                           </button>
-                          {/* Col 2: Send Setup Link — combined password reset + MFA setup */}
-                          <button
-                            className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                            style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
-                            onClick={() => {
-                              setResetLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
-                              sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin });
-                            }}
-                            disabled={sendPasswordReset.isPending}
-                          >
-                            <KeyRound className="h-3 w-3 flex-shrink-0" /> Send Setup Link
-                          </button>
+                          {/* Col 2: Send / Resend Setup Link — combined password reset + MFA setup */}
+                          {(() => {
+                            const hadInvite = !!(u as any).inviteSentAt;
+                            const label = hadInvite ? "Resend Setup Link" : "Send Setup Link";
+                            return (
+                              <button
+                                className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                                style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
+                                onClick={() => {
+                                  setResetLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
+                                  sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin });
+                                }}
+                                disabled={sendPasswordReset.isPending}
+                              >
+                                <KeyRound className="h-3 w-3 flex-shrink-0" /> {label}
+                              </button>
+                            );
+                          })()}
                           {/* Col 4: Remove — triggers confirmation dialog */}
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
@@ -2090,20 +2081,24 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                             </button>
                           )}
-                          {/* Send Setup Link — combined password reset + MFA (owner only, not self) */}
-                          {isOwner && !isSelf && (
-                            <button
-                              className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                              style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
-                              onClick={() => {
-                                setResetLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
-                                sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin });
-                              }}
-                              disabled={sendPasswordReset.isPending}
-                            >
-                              <KeyRound className="h-3 w-3 flex-shrink-0" /> Send Setup Link
-                            </button>
-                          )}
+                          {/* Send / Resend Setup Link — combined password reset + MFA (owner only, not self) */}
+                          {isOwner && !isSelf && (() => {
+                            const hadInvite = !!(u as any).inviteSentAt;
+                            const label = hadInvite ? "Resend Setup Link" : "Send Setup Link";
+                            return (
+                              <button
+                                className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
+                                style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
+                                onClick={() => {
+                                  setResetLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
+                                  sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin });
+                                }}
+                                disabled={sendPasswordReset.isPending}
+                              >
+                                <KeyRound className="h-3 w-3 flex-shrink-0" /> {label}
+                              </button>
+                            );
+                          })()}
                           {/* Remove — owner only, cannot remove self */}
                           {isOwner && !isSelf && (
                             <button
