@@ -2002,8 +2002,8 @@ function UsersTab() {
                       {(u as any).inviteSentAt ? (() => {
                         const sentDate = new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
                         const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
-                        const isExpired = expiresAt && expiresAt < new Date();
-                        const isUsed = (u as any).inviteUsed;
+                        const isUsed = !!(u as any).inviteUsed;
+                        const isExpired = !isUsed && expiresAt && expiresAt < new Date();
                         return (
                           <div className="flex flex-col gap-1">
                             <span>{sentDate}</span>
