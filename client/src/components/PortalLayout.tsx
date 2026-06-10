@@ -166,15 +166,25 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     if (INTERCOM_APP_ID) loadIntercomScript(INTERCOM_APP_ID);
   }, []);
 
-  // Boot once user auth and settings have resolved
+  // Boot as soon as settings are ready — don't wait for user auth (anonymous visitors are valid)
   useEffect(() => {
-    if (user === undefined) return; // still loading
     if (!intercomEnabled) {
       window.Intercom?.("shutdown");
       return;
     }
-    bootIntercom(user);
-  }, [user, intercomEnabled]);
+    // Boot with whatever identity we have right now (may be null/anonymous)
+    bootIntercom(user ?? null);
+  }, [intercomEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Once user identity resolves, update Intercom with their details
+  useEffect(() => {
+    if (!intercomEnabled || user === undefined) return;
+    // user is now known — update identity (null = anonymous, object = logged-in)
+    if (user) {
+      bootIntercom(user);
+    }
+    // If user is null (not logged in), the initial anonymous boot is sufficient
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Notify Intercom of page changes (keeps conversation context accurate)
   useEffect(() => {
