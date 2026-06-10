@@ -23,6 +23,7 @@ type GuideItem = {
   fileUrl?: string | null;
   downloadCount?: number | null;
   fileType?: string | null;
+  createdAt?: Date | null;
 };
 
 function GuideRow({
@@ -56,7 +57,15 @@ function GuideRow({
 
       {/* Title + description */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white leading-snug truncate">{guide.title}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-white leading-snug truncate">{guide.title}</p>
+          {guide.createdAt && (Date.now() - new Date(guide.createdAt).getTime()) < 14 * 24 * 60 * 60 * 1000 && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wide uppercase flex-shrink-0"
+              style={{ background: "rgba(74,222,128,0.2)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.4)" }}>
+              New
+            </span>
+          )}
+        </div>
         {guide.description && (
           <p className="text-xs text-gray-500 truncate mt-0.5">{guide.description}</p>
         )}

@@ -125,6 +125,7 @@ import {
   resetWebinarViews,
   resetGuideDownloads,
   getContentLeaderboard,
+  updateLastSignedIn,
 } from "./db";
 
 // ─── Login rate-limit store (in-memory, per email+IP, 5 attempts / 15 min) ────
@@ -1085,6 +1086,7 @@ export const appRouter = router({
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
         await trackEvent({ userId: user.id, eventType: "login" });
+        await updateLastSignedIn(user.id);
         return { success: true, mfaRequired: false, challengeToken: null, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
       }),
 
@@ -1346,6 +1348,7 @@ export const appRouter = router({
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
         await trackEvent({ userId: user.id, eventType: "login" });
+        await updateLastSignedIn(user.id);
         return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
       }),
 

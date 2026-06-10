@@ -1261,3 +1261,24 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Export buttons: Requests tab "Export All Requests" — already blue (#0074F4), confirmed correct
 - [x] Export buttons: Approved Partners tab "Export CSV" → "Export Partners" — updated from grey to light blue (#00A9E2)
 - [x] TypeScript: 0 errors confirmed
+
+## Audit Cleanup — Jun 10 2026
+
+### Fix Now (Security / Functional)
+- [x] Strip passwordHash from listUsers response — replace with hasPassword: boolean server-side
+- [x] Add lastSignedIn update on every successful login (column already existed)
+- [x] Fix Active/Pending status logic — Active if lastSignedIn is set, Pending if never logged in
+
+### UX Improvements
+- [x] Full-text search on Guides & Docs page (title + description) — already implemented
+- [x] Empty state on Academy home when no courses exist
+- [x] Last login column in Admin Team Access table
+- [x] Admin analytics per-user drill-down on stat card events — already implemented (name, email, event, resource, timestamp)
+- [x] Webinar admin form — icon/thumbnail picker already well-placed with preview, no change needed
+- [x] Mobile responsiveness audit — existing Tailwind responsive classes in place; no critical breakages found
+
+### Strategic Features
+- [x] Search analytics — zero-result searches already tracked via contentRequests.submitSearchQuery and surfaced in Admin Requests tab
+- [x] "New" badge on content added in last 14 days (webinars + guides) — added to WebinarCard and GuideRow
+- [x] Webinar auto-promotion — already implemented via getArchivedExclusiveWebinars() and CompletedExclusiveWebinars admin component
+- [x] Remove /wavvadmin/legacy route and AdminPanel import from App.tsx

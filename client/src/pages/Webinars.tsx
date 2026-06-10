@@ -206,7 +206,7 @@ function WebinarCard({
   nextSession,
   onPlay,
 }: {
-  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null; iconName?: string | null; comingSoon?: boolean | null };
+  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null; iconName?: string | null; comingSoon?: boolean | null; createdAt?: Date | null };
   variant: WebinarType;
   nextSession?: Date;
   onPlay?: (embedUrl: string, title: string, variant: WebinarType) => void;
@@ -310,6 +310,15 @@ function WebinarCard({
         {/* No icon overlay — icon is baked into the section background image */}
         {/* Bottom gradient overlay */}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
+        {/* New badge top-left — shown for content added in the last 14 days */}
+        {webinar.createdAt && (Date.now() - new Date(webinar.createdAt).getTime()) < 14 * 24 * 60 * 60 * 1000 && (
+          <div className="absolute top-3 left-3">
+            <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
+              style={{ background: "rgba(74,222,128,0.2)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.4)" }}>
+              New
+            </span>
+          </div>
+        )}
         {/* Type badge top-right */}
         <div className="absolute top-3 right-3">
           <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"

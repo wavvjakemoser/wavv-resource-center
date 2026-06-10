@@ -13,7 +13,6 @@ import LessonViewer from "./pages/LessonViewer";
 import Webinars from "./pages/Webinars";
 import GuidesAndDocs from "./pages/GuidesAndDocs";
 import Support from "./pages/Support";
-import AdminPanel from "./pages/AdminPanel";
 import Admin from "./pages/Admin";
 import HandsOn from "./pages/HandsOn";
 import Login from "./pages/Login";
@@ -75,7 +74,6 @@ function Router() {
       <Route path="/partners" component={Partners} />
       <Route path="/wavvpartner">{() => <PartnerPortalGuard><WavvPartnerPortal /></PartnerPortalGuard>}</Route>
       <Route path="/wavvadmin" component={Admin} />
-      <Route path="/wavvadmin/legacy" component={AdminPanel} />
       <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>
       <Route path="/hands-on">{() => <Redirect to="/playground" />}</Route>
       <Route path="/accept-invite" component={AcceptInvite} />

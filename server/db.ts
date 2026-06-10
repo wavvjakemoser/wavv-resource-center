@@ -83,7 +83,17 @@ export async function getUserByOpenId(openId: string) {
 export async function getAllUsers() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(users).orderBy(desc(users.createdAt));
+  const rows = await db.select().from(users).orderBy(desc(users.createdAt));
+  // Strip passwordHash before returning — replace with hasPassword boolean
+  return rows.map(({ passwordHash, mfaSecret, ...safe }) => ({
+    ...safe,
+    hasPassword: !!passwordHash,
+  }));
+}
+export async function updateLastSignedIn(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, userId));
 }
 
 export async function updateUserRole(userId: number, role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner") {

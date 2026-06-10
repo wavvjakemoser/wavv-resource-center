@@ -1792,7 +1792,7 @@ function UsersTab() {
         `"${(u.email ?? "").replace(/"/g, '""')}"`,
         u.role,
         u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
-        (u as any).passwordHash ? "Active" : "Pending",
+        ((u as any).hasPassword || !!(u as any).lastSignedIn) ? "Active" : "Pending",
       ].join(",")
     );
     const csv = [header, ...rows].join("\n");
@@ -1917,6 +1917,7 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Invite Sent</TableHead>
               <TableHead className="text-gray-400 w-[110px]">Status</TableHead>
+              <TableHead className="text-gray-400 w-[150px]">Last Login</TableHead>
               {isOwner && <TableHead className="text-gray-400 w-[100px]">MFA</TableHead>}
               {isOwner && <TableHead className="text-gray-400">Actions</TableHead>}
             </TableRow>
@@ -1924,11 +1925,11 @@ function UsersTab() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={isOwner ? 6 : 5} className="text-center py-12 text-gray-500">Loading users...</TableCell>
+                <TableCell colSpan={isOwner ? 7 : 6} className="text-center py-12 text-gray-500">Loading users...</TableCell>
               </TableRow>
             ) : filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isOwner ? 5 : 4} className="text-center py-12 text-gray-500">
+                <TableCell colSpan={isOwner ? 6 : 5} className="text-center py-12 text-gray-500">
                   {search || roleFilter !== "all" ? "No users match your filter." : "No users found."}
                 </TableCell>
               </TableRow>
@@ -1980,10 +1981,17 @@ function UsersTab() {
                     <TableCell className="text-gray-500 text-sm">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
                     </TableCell>
+                    <TableCell className="text-gray-500 text-sm">
+                      {(u as any).lastSignedIn && new Date((u as any).lastSignedIn).getFullYear() > 2020
+                        ? new Date((u as any).lastSignedIn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                        : <span className="text-gray-600 italic">Never</span>}
+                    </TableCell>
                     <TableCell>
                       {(() => {
-                        const hasPassword = !!(u as any).passwordHash;
-                        const isActive = hasPassword;
+                        const hasPassword = !!(u as any).hasPassword;
+                        const lastSignedIn = (u as any).lastSignedIn;
+                        const hasLoggedIn = !!lastSignedIn && new Date(lastSignedIn).getFullYear() > 2020;
+                        const isActive = hasLoggedIn || hasPassword;
                         return isActive ? (
                           <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
                             <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active

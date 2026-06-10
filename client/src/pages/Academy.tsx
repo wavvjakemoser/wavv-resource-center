@@ -365,6 +365,19 @@ export default function Academy() {
           </div>
         )}
 
+        {/* ── Empty state when no courses are published ── */}
+        {!isLoading && (courses ?? []).length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5" style={{ background: "rgba(0,116,244,0.1)", border: "1px solid rgba(0,116,244,0.2)" }}>
+              <GraduationCap size={32} style={{ color: "#0074F4" }} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Content Coming Soon</h3>
+            <p className="text-gray-500 text-sm max-w-sm">
+              The WAVV Academy is being set up. Check back soon — structured learning paths and video lessons will be available here.
+            </p>
+          </div>
+        )}
+
         {/* ── 3 Category sections ── */}
         {!isLoading &&
           CATEGORIES.map((cat) => {
