@@ -2025,11 +2025,13 @@ function UsersTab() {
                         const lastMs = lastSignedIn ? new Date(lastSignedIn).getTime() : 0;
                         const createdMs = createdAt ? new Date(createdAt).getTime() : 0;
                         const hasLoggedIn = lastMs > createdMs + 60_000;
-                        const isActive = hasLoggedIn || hasPassword;
-                        // Expired: invite was sent but token expired and never used
+                        // Expired: invite was sent, token lapsed, and never claimed
                         const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
                         const inviteUsed = !!(u as any).inviteUsed;
                         const inviteExpired = !inviteUsed && expiresAt && expiresAt < new Date();
+                        // Active only if the user actually logged in or set a password AND their invite
+                        // was either claimed or they have no invite (direct Manus OAuth user)
+                        const isActive = (hasLoggedIn || hasPassword) && !inviteExpired;
                         if (isActive) {
                           return (
                             <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
