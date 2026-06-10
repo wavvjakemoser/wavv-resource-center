@@ -394,52 +394,52 @@ export default function Dashboard() {
               {exclusive.map((w) => (
                 <div
                   key={w.id}
-                  className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer"
-                  style={{
-                    background: "linear-gradient(160deg, #141824 0%, #0f1318 100%)",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                  }}
+                  className="flex flex-col rounded-xl overflow-hidden transition-all duration-200"
+                  style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = `${ACCENT}60`;
-                    e.currentTarget.style.boxShadow = `0 8px 32px ${ACCENT}18`;
-                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.borderColor = ACCENT;
+                    e.currentTarget.style.boxShadow = `0 4px 20px ${ACCENT}22`;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
+                    e.currentTarget.style.borderColor = "#252d3d";
                     e.currentTarget.style.boxShadow = "none";
-                    e.currentTarget.style.transform = "translateY(0)";
                   }}
-                  onClick={() => { window.location.href = "/webinars"; }}
                 >
-                  <div className="relative flex-shrink-0 overflow-hidden" style={{ height: "140px" }}>
-                    <img src={THUMB} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" />
-                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.8))" }} />
+                  {/* Thumbnail — same as Webinars page */}
+                  <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "140px" }}>
+                    <img
+                      src={w.thumbnailUrl || THUMB}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ opacity: 0.9 }}
+                    />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
                     <div className="absolute top-3 right-3">
-                      <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide"
-                        style={{ background: `${ACCENT}25`, color: ACCENT, border: `1px solid ${ACCENT}55` }}>
-                        EXCLUSIVE
+                      <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
+                        style={{ background: ACCENT, color: "#fff" }}>
+                        Exclusive
                       </span>
                     </div>
                   </div>
-                  <div className="p-5 flex flex-col flex-1">
+
+                  {/* Body */}
+                  <div className="p-4 flex flex-col flex-1">
                     <h3 className="text-white font-bold text-sm leading-snug mb-2">{w.title}</h3>
                     {w.description && (
-                      <p className="text-xs leading-relaxed line-clamp-2 mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>
-                        {w.description}
-                      </p>
+                      <p className="text-gray-500 text-xs leading-relaxed mb-2">{w.description}</p>
                     )}
                     {w.host && (
-                      <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.35)" }}>
-                        Host: <span style={{ color: "rgba(255,255,255,0.65)" }}>{w.host}</span>
+                      <p className="text-gray-500 text-xs mb-2">
+                        Host: <span className="text-gray-300">{w.host}</span>
                       </p>
                     )}
                     {w.scheduledAt && (
-                      <div className="space-y-1 mb-4">
-                        <p className="text-xs flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>
+                      <div className="space-y-0.5 mb-3">
+                        <p className="text-xs text-gray-400 flex items-center gap-1.5">
                           <Calendar size={11} style={{ color: ACCENT }} />
                           {new Date(w.scheduledAt).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "America/Denver" })}
                         </p>
-                        <p className="text-xs flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>
+                        <p className="text-xs text-gray-400 flex items-center gap-1.5">
                           <Clock size={11} style={{ color: ACCENT }} />
                           {new Date(w.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Denver", timeZoneName: "short" })}
                         </p>
@@ -451,17 +451,20 @@ export default function Dashboard() {
                           href={w.registrationUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={(e) => { e.stopPropagation(); trackRegClick.mutate({ webinarId: w.id }); }}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-                          style={{ background: `${ACCENT}20`, color: ACCENT, border: `1px solid ${ACCENT}45` }}
+                          onClick={() => trackRegClick.mutate({ webinarId: w.id })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                          style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
                         >
-                          <ExternalLink size={11} /> Register Now
+                          <ExternalLink size={12} /> Register Now →
                         </a>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold"
-                          style={{ background: `${ACCENT}20`, color: ACCENT, border: `1px solid ${ACCENT}45` }}>
-                          <Star size={11} /> View Details
-                        </span>
+                        <a
+                          href="/webinars"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                          style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40`, textDecoration: "none" }}
+                        >
+                          <Star size={12} /> View Details →
+                        </a>
                       )}
                     </div>
                   </div>

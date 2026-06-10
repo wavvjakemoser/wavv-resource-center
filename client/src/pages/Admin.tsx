@@ -1999,12 +1999,13 @@ function UsersTab() {
                     )}
                     {isOwner && <TableCell>
                       {isSelf ? (
-                        <div className="flex items-center gap-1.5">
-                          {/* Placeholder matching Change Role width */}
+                        <div style={{ display: "grid", gridTemplateColumns: "auto auto auto auto", gap: "6px", alignItems: "center" }}>
+                          {/* Col 1: dash placeholder for Change Role */}
                           <div className="flex items-center justify-center text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap"
-                            style={{ minWidth: "95px", color: "#4b5563", border: "1px solid transparent" }}>
+                            style={{ color: "#4b5563" }}>
                             —
                           </div>
+                          {/* Col 2: Reset Password */}
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                             style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
@@ -2016,7 +2017,8 @@ function UsersTab() {
                           >
                             <KeyRound className="h-3 w-3 flex-shrink-0" /> Reset Password
                           </button>
-                          {!(u as any).mfaEnabled && (
+                          {/* Col 3: MFA Setup Link or Reset MFA */}
+                          {!(u as any).mfaEnabled ? (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(34,197,94,0.1)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.25)" }}
@@ -2028,8 +2030,7 @@ function UsersTab() {
                             >
                               <ShieldCheck className="h-3 w-3 flex-shrink-0" /> MFA Setup Link
                             </button>
-                          )}
-                          {(u as any).mfaEnabled && (
+                          ) : (
                             <button
                               className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                               style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
@@ -2039,14 +2040,14 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
                             </button>
                           )}
-                          {/* Placeholder matching Remove width */}
+                          {/* Col 4: dash placeholder for Remove */}
                           <div className="flex items-center justify-center text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap"
-                            style={{ minWidth: "72px", color: "#4b5563", border: "1px solid transparent" }}>
+                            style={{ color: "#4b5563" }}>
                             —
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1.5 flex-wrap">
+                        <div style={{ display: "grid", gridTemplateColumns: "auto auto auto auto", gap: "6px", alignItems: "center" }}>
 
                           {/* Change Role — owner only, full dropdown for any role */}
                           {isOwner && (
