@@ -292,32 +292,7 @@ function WebinarCard({
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
         )}
-        {/* Icon overlay — small, centered, accent-colored — shown on all types when no custom thumbnail */}
-        {!webinar.thumbnailUrl && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className="flex items-center justify-center rounded-full"
-              style={{
-                width: 52,
-                height: 52,
-                background: `rgba(0,0,0,0.6)`,
-                backdropFilter: "blur(3px)",
-                border: `1.5px solid ${accentColor}66`,
-                boxShadow: `0 0 16px ${accentColor}44`,
-              }}
-            >
-              {CardIcon ? (
-                <CardIcon size={22} style={{ color: accentColor, filter: `drop-shadow(0 0 8px ${accentColor}bb)` }} />
-              ) : variant === "exclusive" ? (
-                <Star size={22} style={{ color: accentColor, filter: `drop-shadow(0 0 8px ${accentColor}bb)` }} />
-              ) : variant === "recording" ? (
-                <PlayCircle size={22} style={{ color: accentColor, filter: `drop-shadow(0 0 8px ${accentColor}bb)` }} />
-              ) : (
-                <Video size={22} style={{ color: accentColor, filter: `drop-shadow(0 0 8px ${accentColor}bb)` }} />
-              )}
-            </div>
-          </div>
-        )}
+        {/* No icon overlay — background image stands clean on its own */}
         {/* Bottom gradient overlay */}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
         {/* Type badge top-right */}
