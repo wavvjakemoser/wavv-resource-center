@@ -1999,7 +1999,7 @@ function UsersTab() {
                     )}
                     {isOwner && <TableCell>
                       {isSelf ? (
-                        <div style={{ display: "grid", gridTemplateColumns: "auto auto auto auto", gap: "6px", alignItems: "center" }}>
+                        <div className="flex flex-wrap gap-1.5 items-center">
                           {/* Col 1: Change Role — triggers confirmation dialog */}
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
@@ -2051,7 +2051,7 @@ function UsersTab() {
                           </button>
                         </div>
                       ) : (
-                        <div style={{ display: "grid", gridTemplateColumns: "auto auto auto auto", gap: "6px", alignItems: "center" }}>
+                        <div className="flex flex-wrap gap-1.5 items-center">
 
                           {/* Change Role — owner only, full dropdown for any role */}
                           {isOwner && (

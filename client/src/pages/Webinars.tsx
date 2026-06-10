@@ -409,18 +409,22 @@ function WebinarCard({
           )}
 
           {/* Registration link (exclusive live, no video yet) */}
-          {!isHostedVideo && !embedUrl && variant !== "recording" && webinar.registrationUrl && (
-            <a
-              href={webinar.registrationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => registerClickMutation.mutate({ webinarId: webinar.id })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-              style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
-            >
-              <ExternalLink size={12} />
-              {variant === "evergreen" ? "Join Next Session →" : "Register Now →"}
-            </a>
+          {!isHostedVideo && !embedUrl && variant !== "recording" && (
+            webinar.registrationUrl ? (
+              <a
+                href={webinar.registrationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => registerClickMutation.mutate({ webinarId: webinar.id })}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
+              >
+                <ExternalLink size={12} />
+                {variant === "evergreen" ? "Join Next Session →" : "Register →"}
+              </a>
+            ) : variant === "exclusive" ? (
+              <span className="text-xs text-gray-600">Registration link coming soon</span>
+            ) : null
           )}
         </div>
       </div>
