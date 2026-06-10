@@ -278,41 +278,49 @@ function WebinarCard({
       {/* Thumbnail */}
       <div
         className="relative w-full overflow-hidden flex-shrink-0"
-        style={{ height: "80px", borderBottom: `1px solid ${accentColor}30` }}
+        style={{ height: "140px" }}
       >
+        {/* Background image or gradient fallback */}
         {thumbBg ? (
           <img
             src={thumbBg}
             alt=""
-            className="absolute inset-0 w-full h-full object-contain object-center"
-            style={{ background: "#0a0c12" }}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ opacity: 0.92 }}
             onError={(e) => {
-              // Fallback to gradient placeholder on broken image
               (e.currentTarget as HTMLImageElement).style.display = "none";
               const parent = e.currentTarget.parentElement;
               if (parent) {
-                parent.style.background = `linear-gradient(135deg, ${accentColor}18 0%, #0a0c12 100%)`;
+                parent.style.background = `linear-gradient(135deg, ${accentColor}22 0%, #0a0c12 100%)`;
               }
             }}
           />
         ) : (
-          // Fallback placeholder when no thumbnail is set
           <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, ${accentColor}18 0%, #0a0c12 100%)` }}
+            style={{ background: `linear-gradient(135deg, ${accentColor}22 0%, #0a0c12 100%)` }}
           >
             {CardIcon ? (
-              <CardIcon size={28} style={{ color: `${accentColor}80` }} />
+              <CardIcon size={36} style={{ color: accentColor, filter: `drop-shadow(0 0 10px ${accentColor}88)` }} />
             ) : (
-              <Video size={28} style={{ color: `${accentColor}80` }} />
+              <Video size={36} style={{ color: accentColor, filter: `drop-shadow(0 0 10px ${accentColor}88)` }} />
             )}
           </div>
         )}
+        {/* Bottom gradient overlay */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
+        {/* Type badge top-right */}
+        <div className="absolute top-3 right-3">
+          <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
+            style={{ background: `${accentColor}25`, color: accentColor, border: `1px solid ${accentColor}55` }}>
+            {variant === "exclusive" ? "Exclusive" : variant === "recording" ? "Recording" : "On-Demand"}
+          </span>
+        </div>
         {/* Play overlay for cards with video */}
         {(embedUrl || isHostedVideo) && (
           <div
             className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-            style={{ background: "rgba(0,0,0,0.55)" }}
+            style={{ background: "rgba(0,0,0,0.45)" }}
             onClick={handleWatchClick}
           >
             <div
@@ -435,7 +443,7 @@ const SECTION_CONFIG: Record<WebinarSection, { label: string; icon: React.ReactN
     label: "Upcoming WAVV Exclusive Live Webinars",
     icon: <Star size={14} />,
     accent: "#D4AF37",
-    description: "Single-topic, focused live sessions — limited availability",
+    description: "Single-topic, focused live sessions with the WAVV team",
   },
   recording: {
     label: "WAVV Exclusive On-Demand Webinars",

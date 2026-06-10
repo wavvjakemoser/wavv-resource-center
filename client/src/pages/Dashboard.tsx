@@ -382,7 +382,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-2.5">
                 <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${ACCENT}, ${ACCENT}80)` }} />
                 <Star size={14} style={{ color: ACCENT }} />
-                <h2 className="text-sm font-bold text-white tracking-wide">Exclusive Live Webinars</h2>
+                <h2 className="text-sm font-bold text-white tracking-wide">Upcoming Exclusive Live Webinars</h2>
               </div>
               <Link href="/webinars" className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-white"
                 style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
