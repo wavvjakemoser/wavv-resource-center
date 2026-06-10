@@ -1999,9 +1999,12 @@ function UsersTab() {
                     )}
                     {isOwner && <TableCell>
                       {isSelf ? (
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {/* Self row: dash, Reset Password, MFA Setup Link, dash */}
-                          <span className="text-gray-600 text-sm select-none">—</span>
+                        <div className="flex items-center gap-1.5">
+                          {/* Placeholder matching Change Role width */}
+                          <div className="flex items-center justify-center text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap"
+                            style={{ minWidth: "95px", color: "#4b5563", border: "1px solid transparent" }}>
+                            —
+                          </div>
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
                             style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
@@ -2036,7 +2039,11 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Reset MFA
                             </button>
                           )}
-                          <span className="text-gray-600 text-sm select-none">—</span>
+                          {/* Placeholder matching Remove width */}
+                          <div className="flex items-center justify-center text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap"
+                            style={{ minWidth: "72px", color: "#4b5563", border: "1px solid transparent" }}>
+                            —
+                          </div>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -6479,10 +6486,10 @@ function ContentRequestGroups({
                 <button
                   onClick={(e) => { e.stopPropagation(); exportGroupCSV(key, label, group); }}
                   className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition hover:opacity-80"
-                  style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af", border: "1px solid rgba(255,255,255,0.08)" }}
+                  style={{ background: `${color}18`, color, border: `1px solid ${color}40` }}
                   title={`Export ${label} as CSV`}
                 >
-                  <FileDown size={10} /> CSV
+                  <FileDown size={10} /> Export
                 </button>
                 <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
               </div>
