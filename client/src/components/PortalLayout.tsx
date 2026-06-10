@@ -18,48 +18,6 @@ import {
   LogOut,
 } from "lucide-react";
 
-// ─── Intercom integration ─────────────────────────────────────────────────────
-declare global {
-  interface Window {
-    Intercom?: (...args: unknown[]) => void;
-    intercomSettings?: Record<string, unknown>;
-  }
-}
-
-const INTERCOM_APP_ID = import.meta.env.VITE_INTERCOM_APP_ID as string | undefined;
-
-// Official Intercom snippet — installs the stub queue so calls before script load are buffered
-function installIntercomStub() {
-  if (typeof window.Intercom === "function") return; // already installed
-  const i = function (...args: unknown[]) {
-    (i as unknown as { q: unknown[] }).q.push(args);
-  } as unknown as ((...args: unknown[]) => void) & { q: unknown[] };
-  i.q = [];
-  window.Intercom = i;
-}
-
-function loadIntercomScript(appId: string) {
-  if (document.getElementById("intercom-script")) return;
-  installIntercomStub();
-  const s = document.createElement("script");
-  s.id = "intercom-script";
-  s.type = "text/javascript";
-  s.async = true;
-  s.src = `https://widget.intercom.io/widget/${appId}`;
-  document.head.appendChild(s);
-}
-
-function bootIntercom(user: { name?: string | null; email?: string | null } | null | undefined) {
-  if (!INTERCOM_APP_ID) return;
-  installIntercomStub(); // ensure stub exists even if script hasn't loaded yet
-  const settings: Record<string, unknown> = { app_id: INTERCOM_APP_ID };
-  if (user?.email) {
-    settings.name = user.name ?? undefined;
-    settings.email = user.email;
-  }
-  window.Intercom!("boot", settings);
-}
-
 const baseNavItems = [
   { href: "/home", label: "Home",              icon: Home,          color: "#6366f1" },
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
@@ -145,9 +103,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [signingOut, setSigningOut] = useState(false);
   const isAdminPage = location.startsWith("/wavvadmin");
 
-  // Site settings — fetched early so Intercom effects can read intercomEnabled
+  // Site settings
   const { data: allSettings = {}, isLoading: settingsLoading } = trpc.siteSettings.getAll.useQuery();
-  const intercomEnabled = (allSettings as Record<string, unknown>)["intercom_enabled"] !== false; // default true
   const maintenanceMode = (allSettings as Record<string, unknown>)["maintenance_mode"] === true;
   const announcementEnabled = (allSettings as Record<string, unknown>)["announcement_enabled"] === true;
   const announcementText = typeof (allSettings as Record<string, unknown>)["announcement_text"] === "string"
@@ -160,36 +117,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   useEffect(() => {
     setSidebarOpen(false);
   }, [location]);
-
-  // ── Intercom: load script once on mount ─────────────────────────────────────
-  useEffect(() => {
-    if (INTERCOM_APP_ID) loadIntercomScript(INTERCOM_APP_ID);
-  }, []);
-
-  // Boot as soon as settings are ready — don't wait for user auth (anonymous visitors are valid)
-  useEffect(() => {
-    if (!intercomEnabled) {
-      window.Intercom?.("shutdown");
-      return;
-    }
-    // Boot with whatever identity we have right now (may be null/anonymous)
-    bootIntercom(user ?? null);
-  }, [intercomEnabled]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Once user identity resolves, update Intercom with their details
-  useEffect(() => {
-    if (!intercomEnabled || user === undefined) return;
-    // user is now known — update identity (null = anonymous, object = logged-in)
-    if (user) {
-      bootIntercom(user);
-    }
-    // If user is null (not logged in), the initial anonymous boot is sufficient
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Notify Intercom of page changes (keeps conversation context accurate)
-  useEffect(() => {
-    if (intercomEnabled) window.Intercom?.("update");
-  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSignOut() {
     setSigningOut(true);

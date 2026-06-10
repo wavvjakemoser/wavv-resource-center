@@ -27,6 +27,7 @@ import MfaSetup from "./pages/MfaSetup";
 import MfaVerify from "./pages/MfaVerify";
 import MfaRequired from "./pages/MfaRequired";
 import { usePageTracking } from "./hooks/usePageTracking";
+import { useIntercom } from "./hooks/useIntercom";
 import { trpc } from "./lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -81,6 +82,7 @@ function MfaGate({ children }: { children: React.ReactNode }) {
 
 function Router() {
   usePageTracking();
+  useIntercom();
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
