@@ -226,8 +226,12 @@ function WebinarCard({
   // Colors are hardcoded per section type — accentColor from DB is ignored
   const accentColor = SECTION_ACCENT[variant];
 
-  // Universal dark circuit-board background — same for all section types for visual consistency
-  const UNIVERSAL_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp";
+  // Per-section background images — each section has its own neon icon baked in
+  const SECTION_BG: Record<string, string> = {
+    evergreen: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp",
+    recording: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-ondemand-clapperboard-XGLnb93SFV6vDUAxePhB3u.webp",
+    exclusive: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-live-star-KjxqVKGQiBBpKDhmiVbebz.webp",
+  };
 
   // Resolve the selected icon component from the stored name
   const ICON_MAP: Record<string, LucideIcon> = {
@@ -286,9 +290,9 @@ function WebinarCard({
         className="relative w-full overflow-hidden flex-shrink-0"
         style={{ height: "140px" }}
       >
-        {/* Universal dark circuit-board background — consistent across all section types */}
+        {/* Per-section background image — neon icon baked in, no overlay needed */}
         <img
-          src={UNIVERSAL_BG}
+          src={SECTION_BG[variant] ?? SECTION_BG.exclusive}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           style={{ opacity: 0.9 }}
@@ -303,24 +307,7 @@ function WebinarCard({
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
         )}
-        {/* Small icon overlay for On-Demand sections — Exclusive Live shows the star image only */}
-        {(variant === "evergreen" || variant === "recording") && CardIcon && !webinar.thumbnailUrl && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div
-              className="flex items-center justify-center rounded-full"
-              style={{
-                width: 48,
-                height: 48,
-                background: "rgba(0,0,0,0.55)",
-                backdropFilter: "blur(4px)",
-                border: `1.5px solid ${accentColor}55`,
-                boxShadow: `0 0 18px ${accentColor}33`,
-              }}
-            >
-              <CardIcon size={20} style={{ color: accentColor, filter: `drop-shadow(0 0 6px ${accentColor}99)` }} />
-            </div>
-          </div>
-        )}
+        {/* No icon overlay — icon is baked into the section background image */}
         {/* Bottom gradient overlay */}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
         {/* Type badge top-right */}
