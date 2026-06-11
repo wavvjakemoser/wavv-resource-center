@@ -1415,7 +1415,7 @@ function UsersTab() {
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
       if (promoteDialog) {
-        const roleLabels: Record<UserRole, string> = { owner: "an Owner", content_admin: "a Content Admin", partner_admin: "a Partner Admin", admin: "an Admin" };
+        const roleLabels: Record<UserRole, string> = { owner: "an Owner", content_admin: "a WAVV Publisher", partner_admin: "a WAVV Partner Manager", admin: "a WAVV Viewer" };
         toast.success(`${promoteDialog.userName} is now ${roleLabels[promoteDialog.selectedRole]}.`);
         setPromoteDialog(null);
       } else {
@@ -1470,7 +1470,7 @@ function UsersTab() {
       const q = search.trim().toLowerCase();
       list = list.filter((u) => (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q));
     }
-    // Sort by role order: Owner → Content Admin → Partner Admin → Admin
+    // Sort by role order: Owner → WAVV Publisher → WAVV Partner Manager → WAVV Viewer
     list = [...list].sort((a, b) => (ROLE_ORDER[a.role ?? ""] ?? 99) - (ROLE_ORDER[b.role ?? ""] ?? 99));
     return list;
   }, [users, search, roleFilter]);
@@ -1503,7 +1503,7 @@ function UsersTab() {
     },
     {
       filter: "content_admin",
-      label: "Content Admins",
+      label: "WAVV Publishers",
       value: superAdminCount,
       iconEl: <SuperAdminIcon size={20} />,
       color: "#a78bfa",
@@ -1513,7 +1513,7 @@ function UsersTab() {
     },
     {
       filter: "partner_admin",
-      label: "Partner Admins",
+      label: "WAVV Partner Managers",
       value: partnerAdminCount,
       iconEl: <Shield className="h-5 w-5" style={{ color: "#00A9E2" }} />,
       color: "#00A9E2",
@@ -1523,7 +1523,7 @@ function UsersTab() {
     },
     {
       filter: "admin",
-      label: "Admins",
+      label: "WAVV Viewers",
       value: adminCount,
       iconEl: <Shield className="h-5 w-5" style={{ color: "#fbbf24" }} />,
       color: "#fbbf24",
@@ -1625,7 +1625,7 @@ function UsersTab() {
             style={{ background: "rgba(6,182,212,0.1)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.2)" }}
           >
             <FileDown size={13} />
-            Export{roleFilter !== "all" ? ` ${roleFilter === "content_admin" ? "Content Admins" : roleFilter === "admin" ? "Admins" : "Users"}` : " All"}
+            Export{roleFilter !== "all" ? ` ${roleFilter === "content_admin" ? "WAVV Publishers" : roleFilter === "admin" ? "WAVV Viewers" : roleFilter === "partner_admin" ? "WAVV Partner Managers" : "Users"}` : " All"}
           </button>
           {isOwner && (
             <>
@@ -1776,15 +1776,15 @@ function UsersTab() {
                         ) : u.role === "content_admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.4)" }}>
                             <SuperAdminIcon size={12} />
-                            Content Admin
+                            WAVV Publisher
                           </Badge>
                         ) : u.role === "partner_admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
-                            <Users className="h-3 w-3" /> Partner Admin
+                            <Users className="h-3 w-3" /> WAVV Partner Manager
                           </Badge>
                         ) : u.role === "admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
-                            <Shield className="h-3 w-3" /> Admin
+                            <Shield className="h-3 w-3" /> WAVV Viewer
                           </Badge>
                         ) : (
                           <Badge variant="secondary" className="text-[10px]">User</Badge>
@@ -1953,9 +1953,9 @@ function UsersTab() {
                 {promoteDialog && (["owner", "content_admin", "partner_admin", "admin"] as UserRole[]).map((role) => {
                   const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
                     owner:        { label: "Owner",        color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
-                    content_admin:  { label: "Content Admin",  color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
-                    partner_admin:{ label: "Partner Admin",color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
-                    admin:        { label: "Admin",        color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
+                    content_admin:  { label: "WAVV Publisher",       color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
+                    partner_admin:{ label: "WAVV Partner Manager", color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
+                    admin:        { label: "WAVV Viewer",          color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
                   };
                   const cfg = roleConfig[role];
                   const isSelected = promoteDialog.selectedRole === role;
@@ -2103,9 +2103,9 @@ function UsersTab() {
                 style={{ background: "#111", border: "1px solid #2a2a2a" }}
               >
                 <option value="owner">Owner</option>
-                <option value="content_admin">Content Admin</option>
-                <option value="partner_admin">Partner Admin</option>
-                <option value="admin">Admin</option>
+                <option value="content_admin">WAVV Publisher</option>
+                <option value="partner_admin">WAVV Partner Manager</option>
+                <option value="admin">WAVV Viewer</option>
               </select>
             </div>
           </div>
@@ -2263,7 +2263,7 @@ function UsersTab() {
               {/* Success banner */}
               <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
                 <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
-                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "content_admin" ? "Content Admin" : inviteResult.role === "partner_admin" ? "Partner Admin" : "Admin"}.</p>
+                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "content_admin" ? "WAVV Publisher" : inviteResult.role === "partner_admin" ? "WAVV Partner Manager" : "WAVV Viewer"}.</p>
               </div>
 
               {/* Slack instructions block */}
@@ -2339,9 +2339,9 @@ function UsersTab() {
                   style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
                   <option value="owner">Owner</option>
-                  <option value="content_admin">Content Admin</option>
-                  <option value="partner_admin">Partner Admin</option>
-                  <option value="admin">Admin</option>
+                  <option value="content_admin">WAVV Publisher</option>
+                  <option value="partner_admin">WAVV Partner Manager</option>
+                  <option value="admin">WAVV Viewer</option>
                 </select>
               </div>
             </div>

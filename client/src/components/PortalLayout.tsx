@@ -28,7 +28,7 @@ const baseNavItems = [
 ];
 const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
 
-const adminItem = { href: "/wavvadmin", label: "WAVV Admin", icon: Shield, color: "#f43f5e" };
+const adminItem = { href: "/wavvadmin", label: "WAVV Owner", icon: Shield, color: "#f43f5e" };
 
 interface PortalLayoutProps {
   children: React.ReactNode;
