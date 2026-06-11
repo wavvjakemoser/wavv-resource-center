@@ -1316,3 +1316,17 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] FloatingVideoPlayer: new custom in-page draggable overlay component (closes on navigation, Escape key, and X button; expand/compact toggle)
 - [x] AcademyCategory: replace native Document PiP with FloatingVideoPlayer; "Pop out" button launches floating player
 - [x] Webinars: replace VideoModal component with inline modal + FloatingVideoPlayer; "Pop out" button launches floating player
+
+## Intercom Help Articles Sync
+
+- [x] Add help_articles and help_article_collections tables to schema (intercom_id, title, body, collection, visible, synced_at)
+- [x] Run schema migration for new tables
+- [x] Build server-side Intercom sync helper (fetch collections + articles from Intercom API)
+- [x] Add tRPC procedures: helpArticles.list, helpArticles.getById, helpArticles.adminListAll, helpArticles.adminListCollections, helpArticles.setArticleVisible, helpArticles.setCollectionVisible, helpArticles.sync
+- [x] Update GuidesAndDocs page: HelpArticlesSection component added, organized by collection
+- [x] Help Articles section: display articles in same row-based layout as other Guides & Docs sections (collapsible by collection)
+- [x] Help Articles: clicking article opens full article content in a modal
+- [x] Admin panel: Help Articles tab — table of all synced articles with visible toggle per article and per collection
+- [x] Admin panel: "Sync Now" button to manually trigger re-sync from Intercom
+- [x] Set up scheduled sync job (hourly) using Heartbeat cron (task_uid: EM4irvNUBnMSNfggVYJotZ, next: 2026-06-11T04:00:00Z)
+- [x] Write vitest tests for helpArticles procedures (10 tests passing)

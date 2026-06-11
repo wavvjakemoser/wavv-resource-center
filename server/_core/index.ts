@@ -7,6 +7,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { runIntercomSync } from "../intercomSync";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -34,6 +35,26 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
+
+  // ── Scheduled: Intercom Help Center sync ──────────────────────────────────
+  app.post("/api/scheduled/intercom-sync", async (req, res) => {
+    // Validate cron caller via platform header (no §5c patches needed)
+    const taskUid = req.headers["x-manus-cron-task-uid"] as string | undefined;
+    if (!taskUid) {
+      return res.status(403).json({ error: "cron-only endpoint" });
+    }
+    try {
+      const result = await runIntercomSync();
+      console.log(`[IntercomSync] Scheduled sync complete:`, result);
+      return res.json({ ok: true, ...result });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      const stack = err instanceof Error ? err.stack : undefined;
+      console.error("[IntercomSync] Scheduled sync failed:", message);
+      return res.status(500).json({ error: message, stack, timestamp: new Date().toISOString() });
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

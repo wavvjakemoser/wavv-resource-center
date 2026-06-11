@@ -149,6 +149,7 @@ import {
   PlayCircle,
   Clapperboard,
   MonitorPlay,
+  HelpCircle,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -158,7 +159,7 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
+type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "help_articles" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -180,6 +181,7 @@ export default function Admin() {
     if ((t === "academy" || t === "content") && isSuperAdmin) return "academy";
     if (t === "webinars" && isSuperAdmin) return "webinars";
     if (t === "guides" && isSuperAdmin) return "guides";
+    if (t === "help_articles" && isSuperAdmin) return "help_articles";
     if (t === "playground" && isSuperAdmin) return "playground";
     if (t === "support" && isSuperAdmin) return "support";
     if (t === "content_requests" && isSuperAdmin) return "content_requests";
@@ -208,6 +210,7 @@ export default function Admin() {
     else if ((t === "academy" || t === "content") && isSuperAdmin) setActiveTab("academy");
     else if (t === "webinars" && isSuperAdmin) setActiveTab("webinars");
     else if (t === "guides" && isSuperAdmin) setActiveTab("guides");
+    else if (t === "help_articles" && isSuperAdmin) setActiveTab("help_articles");
     else if (t === "playground" && isSuperAdmin) setActiveTab("playground");
     else if (t === "support" && isSuperAdmin) setActiveTab("support");
     else if (t === "content_requests" && isSuperAdmin) setActiveTab("content_requests");
@@ -254,6 +257,7 @@ export default function Admin() {
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />, show: isSuperAdmin },
     { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,         show: isSuperAdmin },
     { id: "guides",           label: "Guides & Docs",     icon: <FileText size={13} />,      show: isSuperAdmin },
+    { id: "help_articles",    label: "Help Articles",     icon: <HelpCircle size={13} />,    show: isSuperAdmin },
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,  show: isSuperAdmin },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,    show: isSuperAdmin },
     { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
@@ -315,6 +319,7 @@ export default function Admin() {
         {activeTab === "academy" && isSuperAdmin && <ContentTab />}
         {activeTab === "webinars" && isSuperAdmin && <WebinarsTab />}
         {activeTab === "guides" && isSuperAdmin && <GuidesTab />}
+        {activeTab === "help_articles" && isSuperAdmin && <HelpArticlesAdminTab />}
         {activeTab === "playground" && isSuperAdmin && <PlaygroundTab />}
         {activeTab === "support" && isSuperAdmin && <SupportTab />}
         {activeTab === "partners_content" && (isOwner || isPartnerAdmin) && <PartnersContentTab />}
@@ -7924,6 +7929,233 @@ function PartnersContentTab() {
               ))}
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Help Articles Admin Tab ──────────────────────────────────────────────────
+function HelpArticlesAdminTab() {
+  const ACCENT = "#8B5CF6";
+  const utils = trpc.useUtils();
+
+  const { data: collections, isLoading: colLoading } = trpc.helpArticles.adminListCollections.useQuery();
+  const { data: articles, isLoading: artLoading } = trpc.helpArticles.adminListAll.useQuery();
+  const syncMutation = trpc.helpArticles.sync.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Sync complete — ${result.synced} articles synced, ${result.skipped} skipped`);
+      utils.helpArticles.adminListAll.invalidate();
+      utils.helpArticles.adminListCollections.invalidate();
+    },
+    onError: (err) => toast.error(`Sync failed: ${err.message}`),
+  });
+  const setArticleVisible = trpc.helpArticles.setArticleVisible.useMutation({
+    onSuccess: () => utils.helpArticles.adminListAll.invalidate(),
+    onError: (err) => toast.error(err.message),
+  });
+  const setCollectionVisible = trpc.helpArticles.setCollectionVisible.useMutation({
+    onSuccess: () => utils.helpArticles.adminListCollections.invalidate(),
+    onError: (err) => toast.error(err.message),
+  });
+
+  const [expandedCol, setExpandedCol] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const isLoading = colLoading || artLoading;
+
+  const inputStyle: React.CSSProperties = {
+    background: "#1d2230",
+    border: "1px solid #2a2a2a",
+    borderRadius: 8,
+    color: "#fff",
+    padding: "6px 10px",
+    fontSize: 13,
+    outline: "none",
+    width: "100%",
+  };
+
+  const filteredArticles = (articles ?? []).filter(
+    (a) =>
+      !search ||
+      a.title.toLowerCase().includes(search.toLowerCase()) ||
+      (a.summary ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  const colMap = new Map((collections ?? []).map((c) => [c.intercomId, c]));
+
+  // Group articles by collectionId
+  const grouped = new Map<string, typeof filteredArticles>();
+  const uncategorized: typeof filteredArticles = [];
+  for (const a of filteredArticles) {
+    const colId = a.collectionId ?? "";
+    if (colId) {
+      if (!grouped.has(colId)) grouped.set(colId, []);
+      grouped.get(colId)!.push(a);
+    } else {
+      uncategorized.push(a);
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div
+        className="flex items-center justify-between p-4 rounded-xl"
+        style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${ACCENT}18` }}>
+            <HelpCircle size={18} style={{ color: ACCENT }} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-white">Help Articles</p>
+            <p className="text-xs text-gray-500">
+              {articles?.length ?? 0} articles synced from Intercom Help Center
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => syncMutation.mutate()}
+          disabled={syncMutation.isPending}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+          style={{ background: `${ACCENT}18`, color: ACCENT, border: `1px solid ${ACCENT}35` }}
+        >
+          {syncMutation.isPending ? (
+            <span className="animate-spin w-3 h-3 border border-current border-t-transparent rounded-full" />
+          ) : (
+            <RotateCcw size={13} />
+          )}
+          {syncMutation.isPending ? "Syncing…" : "Sync Now"}
+        </button>
+      </div>
+
+      {/* Search */}
+      <input
+        style={inputStyle}
+        placeholder="Search articles…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full" />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Collections */}
+          {(collections ?? []).sort((a, b) => a.sortOrder - b.sortOrder).map((col) => {
+            const colArticles = grouped.get(col.intercomId) ?? [];
+            const isOpen = expandedCol === col.intercomId;
+            return (
+              <div key={col.intercomId} style={{ background: "#1d2230", border: "1px solid #2a2a2a", borderRadius: 12 }}>
+                {/* Collection header */}
+                <div
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                  onClick={() => setExpandedCol(isOpen ? null : col.intercomId)}
+                >
+                  <div className="flex-1 flex items-center gap-2 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{col.name}</p>
+                    <span className="text-xs text-gray-500 flex-shrink-0">({colArticles.length})</span>
+                  </div>
+                  {/* Collection visibility toggle */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCollectionVisible.mutate({ id: col.id, visible: !col.visible });
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                    style={
+                      col.visible
+                        ? { background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }
+                        : { background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
+                    }
+                  >
+                    {col.visible ? "Visible" : "Hidden"}
+                  </button>
+                  {isOpen ? <ChevronUp size={14} className="text-gray-500 flex-shrink-0" /> : <ChevronDown size={14} className="text-gray-500 flex-shrink-0" />}
+                </div>
+
+                {/* Articles */}
+                {isOpen && (
+                  <div className="px-4 pb-3 space-y-2" style={{ borderTop: "1px solid #2a2a2a" }}>
+                    {colArticles.length === 0 ? (
+                      <p className="text-xs text-gray-500 py-3">No articles in this collection.</p>
+                    ) : (
+                      colArticles.map((a) => (
+                        <div
+                          key={a.id}
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg mt-2"
+                          style={{ background: "#111827", border: "1px solid #1f2937" }}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-white truncate">{a.title}</p>
+                            {a.summary && <p className="text-xs text-gray-500 truncate mt-0.5">{a.summary}</p>}
+                          </div>
+                          <button
+                            onClick={() => setArticleVisible.mutate({ id: a.id, visible: !a.visible })}
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                            style={
+                              a.visible
+                                ? { background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }
+                                : { background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
+                            }
+                          >
+                            {a.visible ? "Visible" : "Hidden"}
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* Uncategorized */}
+          {uncategorized.length > 0 && (
+            <div style={{ background: "#1d2230", border: "1px solid #2a2a2a", borderRadius: 12 }}>
+              <div
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+                onClick={() => setExpandedCol(expandedCol === "__uncategorized" ? null : "__uncategorized")}
+              >
+                <p className="text-sm font-semibold text-white flex-1">Uncategorized</p>
+                <span className="text-xs text-gray-500">({uncategorized.length})</span>
+                {expandedCol === "__uncategorized" ? <ChevronUp size={14} className="text-gray-500" /> : <ChevronDown size={14} className="text-gray-500" />}
+              </div>
+              {expandedCol === "__uncategorized" && (
+                <div className="px-4 pb-3 space-y-2" style={{ borderTop: "1px solid #2a2a2a" }}>
+                  {uncategorized.map((a) => (
+                    <div
+                      key={a.id}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg mt-2"
+                      style={{ background: "#111827", border: "1px solid #1f2937" }}
+                    >
+                      <p className="text-xs font-medium text-white flex-1 truncate">{a.title}</p>
+                      <button
+                        onClick={() => setArticleVisible.mutate({ id: a.id, visible: !a.visible })}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                        style={
+                          a.visible
+                            ? { background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }
+                            : { background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
+                        }
+                      >
+                        {a.visible ? "Visible" : "Hidden"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {filteredArticles.length === 0 && (
+            <div className="text-center py-8 text-gray-500 text-sm">
+              {search ? `No articles match "${search}"` : "No articles synced yet. Click Sync Now to pull from Intercom."}
+            </div>
+          )}
         </div>
       )}
     </div>

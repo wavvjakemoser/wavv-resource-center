@@ -336,6 +336,49 @@ export const magicLinkTokens = mysqlTable("magic_link_tokens", {
 });
 export type MagicLinkToken = typeof magicLinkTokens.$inferSelect;
 
+// ─── Intercom Help Article Collections ───────────────────────────────────────
+export const helpArticleCollections = mysqlTable("help_article_collections", {
+  id: int("id").autoincrement().primaryKey(),
+  // Intercom collection ID (string to avoid bigint issues)
+  intercomId: varchar("intercom_id", { length: 64 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  // Admin visibility toggle — hide entire collection from public
+  visible: boolean("visible").default(true).notNull(),
+  sortOrder: int("sort_order").default(0).notNull(),
+  syncedAt: timestamp("synced_at").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type HelpArticleCollection = typeof helpArticleCollections.$inferSelect;
+
+// ─── Intercom Help Articles ───────────────────────────────────────────────────
+export const helpArticles = mysqlTable("help_articles", {
+  id: int("id").autoincrement().primaryKey(),
+  // Intercom article ID
+  intercomId: varchar("intercom_id", { length: 64 }).notNull().unique(),
+  collectionId: varchar("collection_id", { length: 64 }),
+  title: varchar("title", { length: 500 }).notNull(),
+  // Full HTML body from Intercom
+  body: text("body"),
+  // Plain text summary (first ~200 chars stripped of HTML)
+  summary: text("summary"),
+  // Direct URL to article on Intercom Help Center
+  url: text("url"),
+  // Admin visibility toggle — hide individual article from public
+  visible: boolean("visible").default(true).notNull(),
+  // Intercom article state: published | draft
+  state: varchar("state", { length: 32 }).default("published"),
+  // Author name from Intercom
+  authorName: varchar("author_name", { length: 255 }),
+  // When the article was last updated in Intercom
+  intercomUpdatedAt: bigint("intercom_updated_at", { mode: "number" }),
+  syncedAt: timestamp("synced_at").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type HelpArticle = typeof helpArticles.$inferSelect;
+
 // ─── Partner Content ──────────────────────────────────────────────────────────
 // Stores editable content blocks for /partners (public) and /wavvpartner (portal)
 export const partnerContent = mysqlTable("partner_content", {

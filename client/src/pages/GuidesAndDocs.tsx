@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FileText, Download, ExternalLink, Search, BookOpen, CheckSquare, Map, HelpCircle, ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { ContentRequestCTA } from "./Academy";
+import HelpArticlesSection from "@/components/HelpArticlesSection";
 
 // Category metadata
 const CATEGORY_META: Record<string, { label: string; color: string; icon: React.ElementType; description: string }> = {
@@ -14,7 +15,8 @@ const CATEGORY_META: Record<string, { label: string; color: string; icon: React.
   other:     { label: "Resources",  color: "#FF9900", icon: BookOpen,    description: "Reference materials and templates" },
 };
 
-const CATEGORY_ORDER = ["help_article", "pdf", "checklist", "playbook", "other"] as const;
+// help_article category is now handled by HelpArticlesSection (Intercom sync)
+const CATEGORY_ORDER = ["pdf", "checklist", "playbook", "other"] as const;
 
 type GuideItem = {
   id: number;
@@ -216,6 +218,8 @@ export default function GuidesAndDocs() {
   // Group + filter
   const grouped = (guides ?? []).reduce<Record<string, GuideItem[]>>((acc, g) => {
     const key = g.fileType ?? "other";
+    // skip help_article type — those come from Intercom sync now
+    if (key === "help_article") return acc;
     if (!acc[key]) acc[key] = [];
     if (
       !search ||
@@ -306,7 +310,14 @@ export default function GuidesAndDocs() {
           </div>
         )}
 
-        {/* Grouped sections */}
+        {/* Help Articles — synced from Intercom */}
+        {guideVisibility["help_article"] !== false && (
+          <div>
+            <HelpArticlesSection search={search} />
+          </div>
+        )}
+
+        {/* Grouped sections (PDFs, Checklists, Playbooks, Other) */}
         {!isLoading && (
           <div className="space-y-8">
             {CATEGORY_ORDER.map((categoryKey) => {

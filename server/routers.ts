@@ -126,7 +126,15 @@ import {
   resetGuideDownloads,
   getContentLeaderboard,
   updateLastSignedIn,
+  getHelpCollections,
+  getAllHelpCollections,
+  getHelpArticles,
+  getAllHelpArticles,
+  getHelpArticleById,
+  setHelpArticleVisible,
+  setHelpCollectionVisible,
 } from "./db";
+import { runIntercomSync } from "./intercomSync";
 
 // ─── Login rate-limit store (in-memory, per email+IP, 5 attempts / 15 min) ────
 const loginAttemptStore = new Map<string, { count: number; windowStart: number }>();
@@ -2035,6 +2043,70 @@ export const appRouter = router({
         const appUrl = input.origin ?? process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
         const inviteLink = `${appUrl}/accept-invite?token=${token}`;
         return { success: true, inviteLink };
+      }),
+  }),
+
+  helpArticles: router({
+    // Public: list collections with their visible articles
+    listCollections: publicProcedure.query(() => getHelpCollections()),
+
+    // Public: list visible articles (optionally by collection)
+    list: publicProcedure
+      .input(z.object({ collectionId: z.string().optional() }))
+      .query(({ input }) => getHelpArticles(input.collectionId)),
+
+    // Public: get single article by id
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const article = await getHelpArticleById(input.id);
+        if (!article || !article.visible) throw new TRPCError({ code: "NOT_FOUND" });
+        return article;
+      }),
+
+    // Admin: list all articles (including hidden)
+    adminListAll: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .query(() => getAllHelpArticles()),
+
+    // Admin: list all collections (including hidden)
+    adminListCollections: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .query(() => getAllHelpCollections()),
+
+    // Admin: toggle article visibility
+    setArticleVisible: protectedProcedure
+      .input(z.object({ id: z.number(), visible: z.boolean() }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => setHelpArticleVisible(input.id, input.visible)),
+
+    // Admin: toggle collection visibility
+    setCollectionVisible: protectedProcedure
+      .input(z.object({ id: z.number(), visible: z.boolean() }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => setHelpCollectionVisible(input.id, input.visible)),
+
+    // Admin: trigger manual sync from Intercom
+    sync: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(async () => {
+        const result = await runIntercomSync();
+        return result;
       }),
   }),
 

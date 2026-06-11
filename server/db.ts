@@ -2241,3 +2241,75 @@ export async function getUserByMfaSetupToken(token: string) {
   const result = await db.select().from(users).where(eq(users.mfaSetupToken, token)).limit(1);
   return result[0] ?? null;
 }
+
+// ─── Help Articles ────────────────────────────────────────────────────────────
+import { helpArticleCollections, helpArticles, HelpArticle, HelpArticleCollection } from "../drizzle/schema";
+
+/** List all visible collections with their visible article counts */
+export async function getHelpCollections(): Promise<HelpArticleCollection[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(helpArticleCollections)
+    .orderBy(helpArticleCollections.sortOrder, helpArticleCollections.name);
+}
+
+/** List all collections (admin — includes hidden) */
+export async function getAllHelpCollections(): Promise<HelpArticleCollection[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(helpArticleCollections)
+    .orderBy(helpArticleCollections.sortOrder, helpArticleCollections.name);
+}
+
+/** List visible articles, optionally filtered by collection */
+export async function getHelpArticles(collectionId?: string): Promise<HelpArticle[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = [eq(helpArticles.visible, true)];
+  if (collectionId) conditions.push(eq(helpArticles.collectionId, collectionId));
+  return db
+    .select()
+    .from(helpArticles)
+    .where(and(...conditions))
+    .orderBy(helpArticles.title);
+}
+
+/** List all articles (admin — includes hidden) */
+export async function getAllHelpArticles(): Promise<HelpArticle[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(helpArticles)
+    .orderBy(helpArticles.collectionId, helpArticles.title);
+}
+
+/** Get a single article by local DB id */
+export async function getHelpArticleById(id: number): Promise<HelpArticle | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(helpArticles)
+    .where(eq(helpArticles.id, id))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/** Toggle visibility of a single article */
+export async function setHelpArticleVisible(id: number, visible: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(helpArticles).set({ visible }).where(eq(helpArticles.id, id));
+}
+
+/** Toggle visibility of an entire collection */
+export async function setHelpCollectionVisible(id: number, visible: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(helpArticleCollections).set({ visible }).where(eq(helpArticleCollections.id, id));
+}
