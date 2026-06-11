@@ -333,7 +333,7 @@ export default function Academy() {
             {/* Headline */}
             <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Structured Learning for WAVV
+                Learn WAVV, Your Way
               </span>
             </h1>
 
@@ -344,7 +344,7 @@ export default function Academy() {
 
             {/* Subline */}
             <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
-              Structured learning paths to help you and your team get the most out of WAVV. Every lesson is designed to solve a specific problem — faster onboarding, higher connection rates, and better team performance.
+              Every lesson is built around a specific outcome — faster onboarding, higher connection rates, better team performance. Watch what's relevant to you, skip what isn't.
             </p>
           </div>
         </div>
