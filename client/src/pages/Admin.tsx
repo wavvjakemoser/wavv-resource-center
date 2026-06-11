@@ -5740,7 +5740,6 @@ function GuidesTab() {
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Category (Section)</label>
                 <select style={{ ...inputStyle, appearance: "none" as const }} value={form.fileType} onChange={e => setForm(f => ({ ...f, fileType: e.target.value as "pdf" | "checklist" | "playbook" | "other" | "help_article" }))}>
-                  <option value="help_article">Help Article</option>
                   <option value="pdf">PDF</option>
                   <option value="checklist">Checklist</option>
                   <option value="playbook">Playbook</option>
@@ -5893,7 +5892,8 @@ function GuideGroups({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-  const groupOrder = ["help_article", "pdf", "checklist", "playbook", "resource", "other"];
+  // help_article is managed by HelpArticlesInline (Intercom sync) — exclude from manual guide groups
+  const groupOrder = ["pdf", "checklist", "playbook", "resource", "other"];
   const grouped = groupOrder.reduce((acc, type) => {
     acc[type] = guides.filter(g => (g.fileType ?? "other") === type);
     return acc;

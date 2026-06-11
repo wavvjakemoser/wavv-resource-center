@@ -1336,4 +1336,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix MFA: stop prompting on every login — only require MFA setup once; do not generate a new TOTP secret on each login
 - [x] Fix MFA: prevent duplicate authenticator entries — new secret should only be generated if user has no existing secret
 - [x] Fix Admin Help Articles tab — merged into Guides & Docs admin tab (HelpArticlesInline at bottom of GuidesTab)
+- [x] Fix duplicate Help Articles in Admin Guides tab — removed help_article from GuideGroups groupOrder and Add Guide dropdown (Intercom sync is the source of truth)
 - [x] Reformat Help Articles section on customer-facing Guides & Docs — collections collapsed by default, lightweight article rows (dot + title + hover Read →), no per-row icon/card weight
