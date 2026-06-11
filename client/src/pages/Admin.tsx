@@ -252,12 +252,12 @@ export default function Admin() {
   ];
 
   const contentRow: TabDef[] = [
-    { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />, show: isSuperAdmin },
-    { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,         show: isSuperAdmin },
-    { id: "guides",           label: "Resource Hub",      icon: <FileText size={13} />,      show: isSuperAdmin },
-    { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,  show: isSuperAdmin },
-    { id: "support",          label: "Support",           icon: <Headphones size={13} />,    show: isSuperAdmin },
-    { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
+    { id: "academy",          label: "WAVV Academy",      icon: <GraduationCap size={13} />, show: isSuperAdmin },
+    { id: "webinars",         label: "WAVV Webinars",     icon: <Video size={13} />,         show: isSuperAdmin },
+    { id: "guides",           label: "WAVV Resource Hub", icon: <FileText size={13} />,      show: isSuperAdmin },
+    { id: "playground",       label: "WAVV Playground",   icon: <FlaskConical size={13} />,  show: isSuperAdmin },
+    { id: "support",          label: "WAVV Support",      icon: <Headphones size={13} />,    show: isSuperAdmin },
+    { id: "partners_content", label: "WAVV Partners",     icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />, show: isSuperAdmin },
   ];
 
@@ -5871,7 +5871,7 @@ function GuidesTab() {
         {/* ── Help Articles master toggle ── */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: "#67C728" }} />
+            <span className="w-2 h-2 rounded-full" style={{ background: "#8B5CF6" }} />
             <span className="text-xs text-gray-300 font-medium">Help Articles</span>
           </div>
           <button
