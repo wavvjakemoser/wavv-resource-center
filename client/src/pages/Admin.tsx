@@ -5742,18 +5742,33 @@ function GuidesTab() {
               <div>
                 <label className="block text-xs text-gray-400 mb-1">
                   Section
-                  <span className="text-gray-600 ml-1">(optional — groups PDFs, e.g. "WAVV Dialer")</span>
+                  <span className="text-gray-600 ml-1">(optional — groups PDFs)</span>
                 </label>
+                {/* Existing sections as clickable pills */}
+                {pdfSections.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {pdfSections.map(s => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, section: f.section === s ? "" : s }))}
+                        className="px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+                        style={form.section === s
+                          ? { background: "rgba(239,68,68,0.2)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.4)" }
+                          : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
+                        }
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <input
-                  list="pdf-sections-list"
                   style={inputStyle}
                   value={form.section}
                   onChange={e => setForm(f => ({ ...f, section: e.target.value }))}
-                  placeholder="e.g. WAVV Dialer, Call Boards, Settings"
+                  placeholder={pdfSections.length > 0 ? "Or type a new section name…" : "e.g. WAVV Dialer, Call Boards, Settings"}
                 />
-                <datalist id="pdf-sections-list">
-                  {pdfSections.map(s => <option key={s} value={s} />)}
-                </datalist>
               </div>
             </div>
             {/* Row 2: Description */}
@@ -5848,7 +5863,10 @@ function GuidesTab() {
           </div>
         ))}
       </div>
-      {/* Grouped by category */}
+      {/* ── Help Articles Management (Published + Synced) ── */}
+      <HelpArticlesInline />
+
+      {/* ── PDF Resources ── */}
       {isLoading ? (
         <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
       ) : (
@@ -5858,9 +5876,6 @@ function GuidesTab() {
           onDelete={(id) => { if (confirm("Delete this guide?")) deleteMutation.mutate({ id }); }}
         />
       )}
-
-      {/* ── Intercom Help Articles Management ── */}
-      <HelpArticlesInline />
     </div>
   );
 }
@@ -6266,7 +6281,7 @@ function SupportTab() {
           {/* Description */}
           <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
             This section will surface <span className="text-white font-medium">AskWAVV AI usage stats</span>,{" "}
-            <span className="text-white font-medium">Help Center engagement metrics</span>, and{" "}
+            <span className="text-white font-medium">engagement metrics</span>, and{" "}
             <span className="text-white font-medium">support volume trends</span> once instrumentation
             is complete. Ticket management is handled separately outside this portal.
           </p>
@@ -6277,7 +6292,7 @@ function SupportTab() {
           >
             {[
               { icon: <Activity size={14} />, label: "AskWAVV AI Stats" },
-              { icon: <TrendingUp size={14} />, label: "Help Center Metrics" },
+              { icon: <TrendingUp size={14} />, label: "Engagement Metrics" },
               { icon: <BarChart3 size={14} />, label: "Support Volume Trends" },
             ].map(({ icon, label }) => (
               <div
@@ -8171,11 +8186,11 @@ function SyncedHelpArticlesPanel() {
       </div>
 
       {/* Visual separator */}
-      <div className="flex items-center gap-3 py-1">
+      <div className="flex items-center gap-3 py-2">
         <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <RotateCcw size={11} style={{ color: "#6b7280" }} />
-          <span className="text-xs text-gray-500">Synced from Intercom Help Center</span>
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "#1a1f2e", border: "1px solid #2a2a2a" }}>
+          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#8B5CF6" }} />
+          <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#6b7280" }}>SYNCED HELP ARTICLES</span>
         </div>
         <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
       </div>
@@ -8188,7 +8203,7 @@ function SyncedHelpArticlesPanel() {
           </div>
           <div>
             <p className="text-sm font-bold text-white">Synced Help Articles</p>
-            <p className="text-xs text-gray-500">{articles?.length ?? 0} articles synced from Intercom — select to publish to customers</p>
+            <p className="text-xs text-gray-500">All Help Articles (New/Updated). Select articles to publish to customers. Syncs every hour.</p>
           </div>
         </div>
         <button
@@ -8379,7 +8394,7 @@ function HelpArticlesAdminTab() {
           <div>
             <p className="text-sm font-bold text-white">Help Articles</p>
             <p className="text-xs text-gray-500">
-              {articles?.length ?? 0} articles synced from Intercom Help Center
+              {articles?.length ?? 0} articles synced — select to publish to customers
             </p>
           </div>
         </div>

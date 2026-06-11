@@ -6,8 +6,7 @@
  * that a content admin has explicitly published appear here.
  *
  * Grouped by sectionName (e.g. "Dialer Settings", "Call Boards"),
- * each section is collapsible. Clicking an article opens it on the Intercom
- * Help Center in a new tab.
+ * each section is collapsible. Clicking an article opens it in a new tab.
  */
 
 import { useState } from "react";
@@ -186,7 +185,7 @@ export default function HelpArticlesSection({ search }: { search: string }) {
         </div>
         <div className="flex-1 text-left">
           <span className="text-sm font-bold text-white">Help Articles</span>
-          <span className="ml-2 text-xs text-gray-500">Answers to common questions and troubleshooting guides</span>
+          <span className="ml-2 text-xs text-gray-500">Answers, how-tos, and troubleshooting for WAVV</span>
         </div>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
