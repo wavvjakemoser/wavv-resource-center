@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { Route, Switch, useLocation, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Academy from "./pages/Academy";
 import CourseDetail from "./pages/CourseDetail";
@@ -88,7 +87,6 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/login" component={Login} />
       <Route path="/auth/google/callback" component={GoogleCallback} />
-      <Route path="/home" component={Dashboard} />
       <Route path="/academy" component={Academy} />
       <Route path="/academy/category/:categoryKey" component={AcademyCategory} />
       <Route path="/academy/:courseId" component={CourseDetail} />
