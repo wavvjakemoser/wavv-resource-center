@@ -12,6 +12,7 @@ import {
   playgroundRequests,
   publishedHelpArticles,
   InsertPublishedHelpArticle,
+  helpArticleSections,
   supportTickets,
   users,
   webinarRegistrations,
@@ -2394,5 +2395,49 @@ export async function reorderPublishedArticles(
       .update(publishedHelpArticles)
       .set({ sortOrder: u.sortOrder, sectionOrder: u.sectionOrder })
       .where(eq(publishedHelpArticles.intercomArticleId, u.intercomArticleId));
+  }
+}
+
+// ─── Help Article Sections ────────────────────────────────────────────────────
+/** List all help article sections ordered by sort_order */
+export async function getHelpArticleSections() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(helpArticleSections).orderBy(helpArticleSections.sortOrder);
+}
+
+/** Create a new help article section */
+export async function createHelpArticleSection(name: string, sortOrder?: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const maxOrder = sortOrder ?? (await db.select().from(helpArticleSections)).length;
+  await db.insert(helpArticleSections).values({ name, sortOrder: maxOrder });
+}
+
+/** Delete a help article section by id */
+export async function deleteHelpArticleSection(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(helpArticleSections).where(eq(helpArticleSections.id, id));
+}
+
+/** Rename a help article section */
+export async function renameHelpArticleSection(id: number, name: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(helpArticleSections).set({ name }).where(eq(helpArticleSections.id, id));
+}
+
+/** Reorder help article sections */
+export async function reorderHelpArticleSections(
+  updates: Array<{ id: number; sortOrder: number }>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  for (const u of updates) {
+    await db
+      .update(helpArticleSections)
+      .set({ sortOrder: u.sortOrder })
+      .where(eq(helpArticleSections.id, u.id));
   }
 }
