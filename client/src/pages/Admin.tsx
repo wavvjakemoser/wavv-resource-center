@@ -254,7 +254,7 @@ export default function Admin() {
   const contentRow: TabDef[] = [
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />, show: isSuperAdmin },
     { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,         show: isSuperAdmin },
-    { id: "guides",           label: "WAVV Resource Hub", icon: <FileText size={13} />,      show: isSuperAdmin },
+    { id: "guides",           label: "Resource Hub",      icon: <FileText size={13} />,      show: isSuperAdmin },
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,  show: isSuperAdmin },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,    show: isSuperAdmin },
     { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
@@ -723,7 +723,7 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
 
   const SECTION_TABS: { key: "academy" | "webinars" | "guides"; label: string; color: string }[] = [
     { key: "academy",  label: "WAVV Academy",    color: "#22d3ee" },
-    { key: "webinars", label: "Webinars",         color: "#f59e0b" },
+    { key: "webinars", label: "WAVV Webinars",     color: "#f59e0b" },
     { key: "guides",   label: "Resource Hub",     color: "#4ade80" },
   ];
 
@@ -820,7 +820,7 @@ const PAGE_LABELS: Record<string, string> = {
   "/guides": "Resource Hub",
   "/playground": "WAVV Playground",
   "/support": "WAVV Support",
-  "/wavvpartner": "Partners Portal",
+  "/wavvpartner": "WAVV Partners",
   "/wavvadmin": "Admin Panel",
   "/profile": "My Profile",
   "/search": "Search",
@@ -861,9 +861,9 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
 
   const PANEL_TABS = [
     { key: "overview" as const, label: "Overview", color: "#22d3ee", icon: <Activity size={13} /> },
-    { key: "academy" as const, label: "WAVV Academy", color: "#22d3ee", icon: <GraduationCap size={13} /> },
-    { key: "webinars" as const, label: "Webinars", color: "#f59e0b", icon: <Video size={13} /> },
-    { key: "guides" as const, label: "Resource Hub",  color: "#4ade80", icon: <FileText size={13} /> },
+    { key: "academy" as const, label: "WAVV Academy",  color: "#22d3ee", icon: <GraduationCap size={13} /> },
+    { key: "webinars" as const, label: "WAVV Webinars", color: "#f59e0b", icon: <Video size={13} /> },
+    { key: "guides" as const, label: "Resource Hub",   color: "#4ade80", icon: <FileText size={13} /> },
   ];
 
   if (isLoading) {
@@ -5867,32 +5867,45 @@ function GuidesTab() {
           <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
           <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
         </div>
-        {helpArticleSectionsAdmin.length === 0 ? (
-          <p className="text-xs text-gray-500">No sections created yet. Click "+ Add Help Article Section" to create one.</p>
-        ) : (
-          helpArticleSectionsAdmin.map((sec, idx) => {
-            const dotColors = ["#67C728", "#0074F4", "#FF9900", "#8B5CF6", "#ef4444", "#06b6d4"];
-            const dotColor = dotColors[idx % dotColors.length];
-            return (
-              <div key={sec.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full" style={{ background: dotColor }} />
-                  <span className="text-xs text-gray-300">{sec.name}</span>
-                </div>
-                <button
-                  onClick={() => toggleSectionVisibilityMutation.mutate({ id: sec.id, isVisible: !sec.isVisible })}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-                  style={sec.isVisible
-                    ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-                  }
-                >
-                  {sec.isVisible ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
-                </button>
-              </div>
-            );
-          })
-        )}
+
+        {/* ── Help Articles master toggle ── */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ background: "#67C728" }} />
+            <span className="text-xs text-gray-300 font-medium">Help Articles</span>
+          </div>
+          <button
+            onClick={() => toggleGuideSection("help_article")}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+            style={guideVisibility.help_article !== false
+              ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+              : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+            }
+          >
+            {guideVisibility.help_article !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+          </button>
+        </div>
+
+        {/* ── Separator ── */}
+        <div className="h-px" style={{ background: "#2a2a2a" }} />
+
+        {/* ── PDFs master toggle ── */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ background: "#ef4444" }} />
+            <span className="text-xs text-gray-300 font-medium">PDFs</span>
+          </div>
+          <button
+            onClick={() => toggleGuideSection("pdf")}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+            style={guideVisibility.pdf !== false
+              ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+              : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+            }
+          >
+            {guideVisibility.pdf !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+          </button>
+        </div>
       </div>
 
       {/* ── Published Help Articles ── */}
