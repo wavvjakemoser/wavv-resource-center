@@ -3154,6 +3154,16 @@ function ContentTab() {
   const utils = trpc.useUtils();
   const { data: lessons = [], isLoading: lessonsLoading } = trpc.academy.adminGetAllLessons.useQuery();
   const { data: courses = [], isLoading: coursesLoading } = trpc.academy.adminGetAllCourses.useQuery();
+  // ── Academy Section Visibility ──
+  const { data: academyVisRaw } = trpc.siteSettings.get.useQuery({ key: "academy_sections_visibility" });
+  const academyVis: Record<string, boolean> = (academyVisRaw as Record<string, boolean> | null) ?? { Onboarding: true, "How-To": true, "Strategy and Best Practices": true };
+  const updateAcademyVis = trpc.siteSettings.update.useMutation({
+    onSuccess: () => { utils.siteSettings.get.invalidate(); toast.success("Visibility updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  function toggleAcademySection(key: string) {
+    updateAcademyVis.mutate({ key: "academy_sections_visibility", value: { ...academyVis, [key]: !academyVis[key] } });
+  }
   const updateLesson = trpc.academy.adminUpdateLesson.useMutation({
     onSuccess: () => {
       utils.academy.adminGetAllLessons.invalidate();
@@ -3370,6 +3380,40 @@ function ContentTab() {
           <h2 className="text-base font-bold text-white">WAVV Academy</h2>
           <p className="text-xs text-gray-500">Manage courses, lessons, and learning content for all Academy categories</p>
         </div>
+      </div>
+
+      {/* ── Section Visibility ── */}
+      <div className="rounded-xl p-4 space-y-3 mb-6" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-2 mb-1">
+          <Eye size={13} style={{ color: "#9ca3af" }} />
+          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide categories from users</span>
+        </div>
+        {[
+          { key: "Onboarding",                    label: "Onboarding",                    color: "#0074F4" },
+          { key: "How-To",                         label: "How-To",                         color: "#00A9E2" },
+          { key: "Strategy and Best Practices",    label: "Strategy & Best Practices",      color: "#67C728" },
+        ].map(({ key, label, color }, i, arr) => (
+          <React.Fragment key={key}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+                <span className="text-xs text-gray-300">{label}</span>
+              </div>
+              <button
+                onClick={() => toggleAcademySection(key)}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                style={academyVis[key] !== false
+                  ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                }
+              >
+                {academyVis[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+              </button>
+            </div>
+            {i < arr.length - 1 && <div className="h-px" style={{ background: "#2a2a2a" }} />}
+          </React.Fragment>
+        ))}
       </div>
 
       {/* ── Top-level Add Section bar ── */}
