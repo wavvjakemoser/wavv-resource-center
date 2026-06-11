@@ -2281,7 +2281,7 @@ function UsersTab() {
                         "You've been invited to the WAVV Success Center admin portal.",
                         "",
                         "Here's how to get set up:",
-                        `1. Click <${inviteResult!.link}|WAVV Success Center Admin Token> to accept your invite and create your password`,
+                        `1. Click the "WAVV Success Center Admin Token" to accept your invite and create your password: ${inviteResult!.link}`,
                         "2. Sign in using your newly created password",
                         "3. You'll be prompted to set up Google Authenticator (required for all admins)",
                         "4. Once MFA is active, you'll have full access",
@@ -2300,7 +2300,7 @@ function UsersTab() {
                   <p>You've been invited to the <strong style={{ color: "#fff" }}>WAVV Success Center</strong> admin portal.</p>
                   <p className="text-gray-400">Here's how to get set up:</p>
                   <ol className="list-none space-y-1 pl-1">
-                    <li>1. Click <a href={inviteResult.link} target="_blank" rel="noopener noreferrer" style={{ color: "#93c5fd" }} className="underline">WAVV Success Center Admin Token</a> to accept your invite and create your password</li>
+                    <li>1. Click the <strong style={{ color: "#fff" }}>"WAVV Success Center Admin Token"</strong> to accept your invite and create your password:<br /><a href={inviteResult.link} target="_blank" rel="noopener noreferrer" style={{ color: "#93c5fd", wordBreak: "break-all" }} className="underline text-[10px]">{inviteResult.link}</a></li>
                     <li>2. Sign in using your newly created password</li>
                     <li>3. You'll be prompted to set up <strong style={{ color: "#fff" }}>Google Authenticator</strong> (required for all admins)</li>
                     <li>4. Once MFA is active, you'll have full access</li>
