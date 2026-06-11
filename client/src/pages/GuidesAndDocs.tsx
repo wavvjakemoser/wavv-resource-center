@@ -1,10 +1,62 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
-import { FileText, Download, ExternalLink, Search, ChevronDown, ChevronRight } from "lucide-react";
+import { FileText, Download, ExternalLink, Search, ChevronDown, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 import { ContentRequestCTA } from "./Academy";
 import HelpArticlesSection from "@/components/HelpArticlesSection";
+
+// ─── PDF Viewer Modal ─────────────────────────────────────────────────────────
+function PdfViewerModal({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.85)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative flex flex-col rounded-2xl overflow-hidden"
+        style={{ width: "min(90vw, 1100px)", height: "min(90vh, 820px)", background: "#0f1318", border: "1px solid #252d3d", boxShadow: "0 24px 80px rgba(0,0,0,0.7)" }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ borderBottom: "1px solid #1e2030" }}>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(239,68,68,0.15)" }}>
+              <FileText size={14} style={{ color: "#ef4444" }} />
+            </div>
+            <span className="text-sm font-semibold text-white truncate max-w-[500px]">{title}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{ background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}
+            >
+              <ExternalLink size={11} />
+              Open in tab
+            </a>
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+              style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af" }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+        {/* PDF iframe */}
+        <iframe
+          src={url}
+          title={title}
+          className="flex-1 w-full"
+          style={{ border: "none", background: "#fff" }}
+        />
+      </div>
+    </div>
+  );
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type GuideItem = {
@@ -26,11 +78,13 @@ function PdfRow({
   guide,
   onDownload,
   onView,
+  onOpenModal,
   isPending,
 }: {
   guide: GuideItem;
   onDownload: (guide: GuideItem) => void;
   onView?: (guide: GuideItem) => void;
+  onOpenModal?: (guide: GuideItem) => void;
   isPending: boolean;
 }) {
   return (
@@ -76,18 +130,15 @@ function PdfRow({
           <span className="hidden sm:inline">Download</span>
         </button>
         {guide.fileUrl && (
-          <a
-            href={guide.fileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all max-w-[180px] truncate"
             style={{ background: "#252d3d", color: "#9ca3af" }}
-            onClick={() => onView?.(guide)}
+            onClick={() => { onView?.(guide); onOpenModal?.(guide); }}
             title={guide.linkLabel ?? guide.fileUrl}
           >
             <ExternalLink size={11} className="flex-shrink-0" />
             <span className="hidden sm:inline truncate">{guide.linkLabel ?? "View"}</span>
-          </a>
+          </button>
         )}
       </div>
     </div>
@@ -100,12 +151,14 @@ function PdfSubSection({
   items,
   onDownload,
   onView,
+  onOpenModal,
   isPending,
 }: {
   sectionName: string;
   items: GuideItem[];
   onDownload: (guide: GuideItem) => void;
   onView?: (guide: GuideItem) => void;
+  onOpenModal?: (guide: GuideItem) => void;
   isPending: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -157,6 +210,7 @@ function PdfSubSection({
                 guide={guide}
                 onDownload={onDownload}
                 onView={onView}
+                onOpenModal={onOpenModal}
                 isPending={isPending}
               />
             ))}
@@ -172,11 +226,13 @@ function PdfSection({
   items,
   onDownload,
   onView,
+  onOpenModal,
   isPending,
 }: {
   items: GuideItem[];
   onDownload: (guide: GuideItem) => void;
   onView?: (guide: GuideItem) => void;
+  onOpenModal?: (guide: GuideItem) => void;
   isPending: boolean;
 }) {
   // Group by section (category), unsectioned last
@@ -235,6 +291,7 @@ function PdfSection({
               items={bySection[sec]}
               onDownload={onDownload}
               onView={onView}
+              onOpenModal={onOpenModal}
               isPending={isPending}
             />
           ))}
@@ -248,6 +305,7 @@ function PdfSection({
               guide={guide}
               onDownload={onDownload}
               onView={onView}
+              onOpenModal={onOpenModal}
               isPending={isPending}
             />
           ))}
@@ -260,6 +318,11 @@ function PdfSection({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GuidesAndDocs() {
   const [search, setSearch] = useState("");
+  const [selectedPdf, setSelectedPdf] = useState<{ url: string; title: string } | null>(null);
+
+  const handleOpenModal = (guide: GuideItem) => {
+    if (guide.fileUrl) setSelectedPdf({ url: guide.fileUrl, title: guide.title });
+  };
   const { data: guides, isLoading } = trpc.guides.list.useQuery();
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
   const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true };
@@ -392,6 +455,7 @@ export default function GuidesAndDocs() {
             items={pdfItems}
             onDownload={handleDownload}
             onView={handleView}
+            onOpenModal={handleOpenModal}
             isPending={downloadMutation.isPending}
           />
         )}
@@ -410,6 +474,14 @@ export default function GuidesAndDocs() {
       <div className="px-4 lg:px-8 pb-10">
         <ContentRequestCTA requestType="guide" />
       </div>
+      {/* PDF Viewer Modal */}
+      {selectedPdf && (
+        <PdfViewerModal
+          url={selectedPdf.url}
+          title={selectedPdf.title}
+          onClose={() => setSelectedPdf(null)}
+        />
+      )}
     </PortalLayout>
   );
 }
