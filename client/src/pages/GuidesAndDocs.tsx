@@ -108,7 +108,7 @@ function PdfSubSection({
   onView?: (guide: GuideItem) => void;
   isPending: boolean;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const label = sectionName || "General";
 
   return (
@@ -179,8 +179,6 @@ function PdfSection({
   onView?: (guide: GuideItem) => void;
   isPending: boolean;
 }) {
-  const [open, setOpen] = useState(true);
-
   // Group by section (category), unsectioned last
   const sectionOrder = Array.from(new Set(items.map(g => g.category ?? ""))).sort((a, b) => {
     if (a === "") return 1;
@@ -196,12 +194,8 @@ function PdfSection({
 
   return (
     <section>
-      {/* Section header — collapsible */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 mb-3 group"
-      >
+      {/* Section header — NOT collapsible, always visible */}
+      <div className="w-full flex items-center gap-3 mb-3">
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{ background: `${PDF_COLOR}18` }}
@@ -218,51 +212,46 @@ function PdfSection({
         >
           {items.length}
         </span>
-        {open
-          ? <ChevronDown size={14} className="text-gray-500 flex-shrink-0" />
-          : <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />}
-      </button>
+      </div>
 
       {/* Divider */}
-      <div className="mb-3 h-px" style={{ background: `${PDF_COLOR}25` }} />
+      <div className="mb-4 h-px" style={{ background: `${PDF_COLOR}25` }} />
 
-      {open && (
-        items.length === 0 ? (
-          <div
-            className="flex items-center gap-3 px-4 py-3 rounded-lg"
-            style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
-          >
-            <FileText size={14} style={{ color: PDF_COLOR, opacity: 0.4 }} />
-            <p className="text-xs text-gray-500">No PDFs yet. Please check back soon!</p>
-          </div>
-        ) : hasSections ? (
-          // Render sub-sections
-          <div className="space-y-6 pl-2">
-            {sectionOrder.map((sec) => (
-              <PdfSubSection
-                key={sec || "__unsectioned"}
-                sectionName={sec}
-                items={bySection[sec]}
-                onDownload={onDownload}
-                onView={onView}
-                isPending={isPending}
-              />
-            ))}
-          </div>
-        ) : (
-          // No sections — flat list
-          <div className="space-y-2">
-            {items.map((guide) => (
-              <PdfRow
-                key={guide.id}
-                guide={guide}
-                onDownload={onDownload}
-                onView={onView}
-                isPending={isPending}
-              />
-            ))}
-          </div>
-        )
+      {items.length === 0 ? (
+        <div
+          className="flex items-center gap-3 px-4 py-3 rounded-lg"
+          style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
+        >
+          <FileText size={14} style={{ color: PDF_COLOR, opacity: 0.4 }} />
+          <p className="text-xs text-gray-500">No PDFs yet. Please check back soon!</p>
+        </div>
+      ) : hasSections ? (
+        // Render sub-sections (collapsed by default)
+        <div className="space-y-4 pl-2">
+          {sectionOrder.map((sec) => (
+            <PdfSubSection
+              key={sec || "__unsectioned"}
+              sectionName={sec}
+              items={bySection[sec]}
+              onDownload={onDownload}
+              onView={onView}
+              isPending={isPending}
+            />
+          ))}
+        </div>
+      ) : (
+        // No sections — flat list
+        <div className="space-y-2">
+          {items.map((guide) => (
+            <PdfRow
+              key={guide.id}
+              guide={guide}
+              onDownload={onDownload}
+              onView={onView}
+              isPending={isPending}
+            />
+          ))}
+        </div>
       )}
     </section>
   );
@@ -339,13 +328,13 @@ export default function GuidesAndDocs() {
             <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
               style={{ background: "rgba(103,199,40,0.12)", border: "1px solid rgba(103,199,40,0.25)" }}>
               <FileText size={12} style={{ color: "#67C728" }} />
-              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#67C728" }}>Quick Answers &amp; Reference Docs</span>
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#67C728" }}>WAVV Resource Hub</span>
             </div>
 
             {/* Headline */}
             <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #d9f99d 30%, #86efac 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Find Answers Fast
+                Your WAVV Reference Library
               </span>
             </h1>
 
