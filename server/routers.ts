@@ -677,6 +677,14 @@ const guidesRouter = router({
 
   adminList: superAdminProcedure.query(() => getGuides(false)),
   adminExportDownloaders: superAdminProcedure.query(() => getGuideDownloadersExport()),
+  // Returns distinct section (category) names used by PDF guides — for autocomplete in Add Guide form
+  listSections: publicProcedure.query(async () => {
+    const all = await getGuides(false);
+    const sections = Array.from(new Set(
+      all.filter(g => g.fileType === 'pdf' && g.category).map(g => g.category as string)
+    )).sort();
+    return sections;
+  }),
 
   // Reorder: swap sortOrder between two guides (content_admin only)
   adminReorder: superAdminProcedure

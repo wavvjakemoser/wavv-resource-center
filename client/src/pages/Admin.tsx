@@ -5615,7 +5615,7 @@ function GuidesTab() {
   const utils = trpc.useUtils();
   const { data: guides = [], isLoading } = trpc.guides.adminList.useQuery();
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
-  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { pdf: true, checklist: true, playbook: true, resource: true };
+  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true };
   const updateGuideVisibility = trpc.siteSettings.update.useMutation({
     onSuccess: () => { utils.siteSettings.get.invalidate(); toast.success("Visibility updated"); },
     onError: (e) => toast.error(e.message),
@@ -5626,13 +5626,15 @@ function GuidesTab() {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const { data: pdfSections = [] } = trpc.guides.listSections.useQuery();
   const [form, setForm] = useState({
     title: "",
     description: "",
     fileUrl: "",
     linkLabel: "",
-    // fileType = the section/category this guide belongs to
-    fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article",
+    section: "",
+    // fileType is always pdf now — Checklist/Playbook/Resource removed
+    fileType: "pdf" as "pdf",
   });
   const uploadFileMutation = trpc.guides.uploadFile.useMutation({
     onError: (e) => toast.error("Upload failed: " + e.message),
@@ -5649,10 +5651,10 @@ function GuidesTab() {
     onSuccess: () => { utils.guides.adminList.invalidate(); toast.success("Guide deleted"); },
     onError: (e) => toast.error(e.message),
   });
-  function resetForm() { setForm({ title: "", description: "", fileUrl: "", linkLabel: "", fileType: "pdf" as "pdf" | "checklist" | "playbook" | "other" | "help_article" }); }
+  function resetForm() { setForm({ title: "", description: "", fileUrl: "", linkLabel: "", section: "", fileType: "pdf" as "pdf" }); }
   function startEdit(g: typeof guides[0]) {
     setEditId(g.id);
-    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", linkLabel: (g as any).linkLabel ?? "", fileType: (g.fileType as "pdf" | "checklist" | "playbook" | "other" | "help_article") ?? "pdf" });
+    setForm({ title: g.title, description: g.description ?? "", fileUrl: g.fileUrl ?? "", linkLabel: (g as any).linkLabel ?? "", section: g.category ?? "", fileType: "pdf" as "pdf" });
     setShowForm(true);
   }
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -5685,9 +5687,9 @@ function GuidesTab() {
     e.preventDefault();
     if (!form.title.trim()) { toast.error("Title is required"); return; }
     if (editId !== null) {
-      updateMutation.mutate({ id: editId, data: { title: form.title, description: form.description || undefined, fileType: form.fileType, fileUrl: form.fileUrl || undefined, linkLabel: form.linkLabel.trim() || null } });
+      updateMutation.mutate({ id: editId, data: { title: form.title, description: form.description || undefined, fileType: form.fileType, category: form.section.trim() || undefined, fileUrl: form.fileUrl || undefined, linkLabel: form.linkLabel.trim() || null } });
     } else {
-      createMutation.mutate({ title: form.title, description: form.description || undefined, fileType: form.fileType, fileUrl: form.fileUrl || undefined, linkLabel: form.linkLabel.trim() || undefined });
+      createMutation.mutate({ title: form.title, description: form.description || undefined, fileType: form.fileType, category: form.section.trim() || undefined, fileUrl: form.fileUrl || undefined, linkLabel: form.linkLabel.trim() || undefined });
     }
   }
   const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
@@ -5700,7 +5702,7 @@ function GuidesTab() {
           </div>
           <div>
             <h2 className="text-base font-bold text-white">WAVV Guides & Docs</h2>
-            <p className="text-xs text-gray-500">Manage PDFs, checklists, playbooks, and help articles</p>
+            <p className="text-xs text-gray-500">Manage PDFs and Help Articles for the WAVV Success Center</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -5731,20 +5733,27 @@ function GuidesTab() {
         <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit Guide" : "New Guide"}</h3>
           <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Row 1: Title + Category */}
+            {/* Row 1: Title + Section */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Title *</label>
                 <input style={inputStyle} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Guide title" />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Category (Section)</label>
-                <select style={{ ...inputStyle, appearance: "none" as const }} value={form.fileType} onChange={e => setForm(f => ({ ...f, fileType: e.target.value as "pdf" | "checklist" | "playbook" | "other" | "help_article" }))}>
-                  <option value="pdf">PDF</option>
-                  <option value="checklist">Checklist</option>
-                  <option value="playbook">Playbook</option>
-                  <option value="other">Resource</option>
-                </select>
+                <label className="block text-xs text-gray-400 mb-1">
+                  Section
+                  <span className="text-gray-600 ml-1">(optional — groups PDFs, e.g. "WAVV Dialer")</span>
+                </label>
+                <input
+                  list="pdf-sections-list"
+                  style={inputStyle}
+                  value={form.section}
+                  onChange={e => setForm(f => ({ ...f, section: e.target.value }))}
+                  placeholder="e.g. WAVV Dialer, Call Boards, Settings"
+                />
+                <datalist id="pdf-sections-list">
+                  {pdfSections.map(s => <option key={s} value={s} />)}
+                </datalist>
               </div>
             </div>
             {/* Row 2: Description */}
@@ -5819,10 +5828,7 @@ function GuidesTab() {
         </div>
         {[
           { key: "help_article", label: "Help Articles", color: "#8B5CF6" },
-          { key: "pdf",       label: "PDFs",       color: "#ef4444" },
-          { key: "checklist", label: "Checklists", color: "#67C728" },
-          { key: "playbook",  label: "Playbooks",  color: "#0074F4" },
-          { key: "resource",  label: "Resources",  color: "#FF9900" },
+          { key: "pdf",         label: "PDFs",          color: "#ef4444" },
         ].map(({ key, label, color }) => (
           <div key={key} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -5892,62 +5898,80 @@ function GuideGroups({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-  // help_article is managed by HelpArticlesInline (Intercom sync) — exclude from manual guide groups
-  const groupOrder = ["pdf", "checklist", "playbook", "resource", "other"];
-  const grouped = groupOrder.reduce((acc, type) => {
-    acc[type] = guides.filter(g => (g.fileType ?? "other") === type);
+  // Only PDFs remain — grouped by section (category field). help_article is managed by HelpArticlesInline.
+  const pdfGuides = guides.filter(g => (g.fileType ?? "pdf") === "pdf");
+  // Collect distinct sections in order of first appearance
+  const sectionOrder = Array.from(new Set(pdfGuides.map(g => g.category ?? ""))).sort((a, b) => {
+    if (a === "") return 1; // unsectioned last
+    if (b === "") return -1;
+    return a.localeCompare(b);
+  });
+  const bySection = sectionOrder.reduce((acc, sec) => {
+    acc[sec] = pdfGuides.filter(g => (g.category ?? "") === sec);
     return acc;
-  }, {} as Record<string, typeof guides>);
+  }, {} as Record<string, typeof pdfGuides>);
 
-  const getOrderedGroup = useCallback((type: string, group: typeof guides) => {
-    const order = localOrder[type];
+  const getOrderedGroup = useCallback((key: string, group: typeof pdfGuides) => {
+    const order = localOrder[key];
     if (!order) return [...group].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-    return order.map(id => group.find(g => g.id === id)).filter(Boolean) as typeof guides;
+    return order.map(id => group.find(g => g.id === id)).filter(Boolean) as typeof pdfGuides;
   }, [localOrder]);
 
-  function handleDragEnd(type: string, group: typeof guides, event: DragEndEvent) {
+  function handleDragEnd(key: string, group: typeof pdfGuides, event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const ordered = getOrderedGroup(type, group);
+    const ordered = getOrderedGroup(key, group);
     const oldIndex = ordered.findIndex(g => g.id === active.id);
     const newIndex = ordered.findIndex(g => g.id === over.id);
     const newOrder = arrayMove(ordered, oldIndex, newIndex);
-    setLocalOrder(prev => ({ ...prev, [type]: newOrder.map(g => g.id) }));
+    setLocalOrder(prev => ({ ...prev, [key]: newOrder.map(g => g.id) }));
     reorderMutation.mutate({ id1: Number(active.id), id2: Number(over.id) });
   }
 
+  const PDF_COLOR = "#ef4444";
+
   return (
     <div className="space-y-4">
-      {groupOrder.map((type) => {
-        const group = grouped[type];
-        if (group.length === 0 && type === "other") return null;
-        const meta = GUIDE_GROUP_META[type];
-        const isCollapsed = collapsed[type];
-        const orderedGroup = getOrderedGroup(type, group);
+      {/* PDF section header */}
+      <div className="flex items-center gap-3 px-1">
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PDF_COLOR }} />
+        <span className="text-sm font-semibold text-white">PDF</span>
+        <span className="text-xs text-gray-500">Viewable and Downloadable PDF documents</span>
+        <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}20`, color: PDF_COLOR }}>{pdfGuides.length}</span>
+      </div>
+      {pdfGuides.length === 0 && (
+        <div className="px-5 py-8 text-center rounded-xl" style={{ background: "#111", border: "1px solid #2a2a2a" }}>
+          <p className="text-gray-600 text-xs">No PDF guides yet. Click "Add Guide" above to add one.</p>
+        </div>
+      )}
+      {sectionOrder.map((sec) => {
+        const group = bySection[sec];
+        const label = sec || "Unsectioned";
+        const isCollapsed = collapsed[sec ?? "__unsectioned"];
+        const orderedGroup = getOrderedGroup(sec, group);
         return (
-          <div key={type} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+          <div key={sec || "__unsectioned"} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <button
               className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
               style={{ background: "#1d2230" }}
-              onClick={() => setCollapsed(c => ({ ...c, [type]: !c[type] }))}
+              onClick={() => setCollapsed(c => ({ ...c, [sec ?? "__unsectioned"]: !c[sec ?? "__unsectioned"] }))}
             >
               <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: meta.color }} />
-                <span className="text-sm font-semibold text-white">{meta.label}</span>
-                <span className="text-xs text-gray-500">{meta.description}</span>
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PDF_COLOR }} />
+                <span className="text-sm font-semibold text-white">{label}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${meta.color}20`, color: meta.color }}>{group.length}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}20`, color: PDF_COLOR }}>{group.length}</span>
                 <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
               </div>
             </button>
             {!isCollapsed && (
               group.length === 0 ? (
                 <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
-                  <p className="text-gray-600 text-xs">No {meta.label.toLowerCase()} guides yet. Click "Add Guide" above and set the type.</p>
+                  <p className="text-gray-600 text-xs">No PDFs in this section yet.</p>
                 </div>
               ) : (
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(type, group, e)}>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(sec, group, e)}>
                   <SortableContext items={orderedGroup.map(g => g.id)} strategy={verticalListSortingStrategy}>
                     <Table>
                       <TableHeader>
@@ -5955,7 +5979,7 @@ function GuideGroups({
                           <TableHead className="text-gray-400 text-xs w-6"></TableHead>
                           <TableHead className="text-gray-400 text-xs">Title</TableHead>
                           <TableHead className="text-gray-400 text-xs">Link Display Name</TableHead>
-                          <TableHead className="text-gray-400 text-xs">Category</TableHead>
+                          <TableHead className="text-gray-400 text-xs">Section</TableHead>
                           <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
                           <TableHead className="text-gray-400 text-xs">Status</TableHead>
                           <TableHead className="text-gray-400 text-xs">Actions</TableHead>

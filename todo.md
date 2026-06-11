@@ -1338,3 +1338,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix Admin Help Articles tab — merged into Guides & Docs admin tab (HelpArticlesInline at bottom of GuidesTab)
 - [x] Fix duplicate Help Articles in Admin Guides tab — removed help_article from GuideGroups groupOrder and Add Guide dropdown (Intercom sync is the source of truth)
 - [x] Reformat Help Articles section on customer-facing Guides & Docs — collections collapsed by default, lightweight article rows (dot + title + hover Read →), no per-row icon/card weight
+
+## Guides & Docs Restructure — Jun 11 2026
+
+- [x] Schema: add pdf_section (varchar) field to guides table for PDF sub-grouping — reused existing category field, no migration needed
+- [x] Admin Guides tab: reorder sections — Help Articles first (via HelpArticlesInline), then PDFs; removed Checklist/Playbook/Resource groups
+- [x] Admin Guides tab: simplified Section Visibility to only Help Articles + PDFs
+- [x] Admin Guides tab: Add Guide form — always PDF, added Section field with datalist autocomplete from existing sections
+- [x] Admin Guides tab: GuideGroups rewritten to show PDFs grouped by section with consistent header style
+- [x] Customer-facing Guides & Docs: reordered — Help Articles first, then PDFs with sub-sections; removed Checklist/Playbook/Resource
+- [x] Customer-facing Guides & Docs: unified formatting — both sections use same header pattern (icon + label + description + count + chevron + color divider)
+- [x] Customer-facing Guides & Docs: PDFs grouped by section (category field), each section collapsible; flat list fallback when no sections set
