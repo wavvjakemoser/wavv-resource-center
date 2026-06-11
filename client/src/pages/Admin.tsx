@@ -8102,13 +8102,23 @@ function AdminHelpArticlesSection() {
 function PublishedHelpArticlesPanel() {
   const ACCENT = "#8B5CF6";
   const utils = trpc.useUtils();
-  const { data: published = [], isLoading } = trpc.helpArticles.listPublished.useQuery();
+  // Use sections as the source of truth — show all sections even if empty
+  const { data: adminSections = [], isLoading: sectionsLoading } = trpc.helpArticles.listSectionsAdmin.useQuery();
+  const { data: published = [], isLoading: articlesLoading } = trpc.helpArticles.listPublished.useQuery();
   const unpublishMutation = trpc.helpArticles.unpublish.useMutation({
     onSuccess: () => { utils.helpArticles.listPublished.invalidate(); toast.success("Article removed from Help Articles"); },
     onError: (e) => toast.error(e.message),
   });
-  const updateSectionMutation = trpc.helpArticles.updateSection.useMutation({
-    onSuccess: () => utils.helpArticles.listPublished.invalidate(),
+  const renameSectionMutation = trpc.helpArticles.renameSection.useMutation({
+    onSuccess: () => { utils.helpArticles.listSectionsAdmin.invalidate(); utils.helpArticles.listPublished.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const toggleSectionMutation = trpc.helpArticles.toggleSectionVisibility.useMutation({
+    onSuccess: () => { utils.helpArticles.listSectionsAdmin.invalidate(); utils.helpArticles.listSections.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const deleteSectionMutation = trpc.helpArticles.deleteSection.useMutation({
+    onSuccess: () => { utils.helpArticles.listSectionsAdmin.invalidate(); utils.helpArticles.listPublished.invalidate(); toast.success("Section deleted"); },
     onError: (e) => toast.error(e.message),
   });
   const reorderMutation = trpc.helpArticles.reorder.useMutation({
@@ -8121,71 +8131,64 @@ function PublishedHelpArticlesPanel() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  // Group by sectionName, ordered by sectionOrder
-  const sections = Array.from(new Set(published.map(a => a.sectionName))).sort((a, b) => {
-    const ao = published.find(x => x.sectionName === a)?.sectionOrder ?? 0;
-    const bo = published.find(x => x.sectionName === b)?.sectionOrder ?? 0;
-    return ao - bo;
-  });
-  const bySection = sections.reduce((acc, sec) => {
-    acc[sec] = [...published.filter(a => a.sectionName === sec)].sort((a, b) => a.sortOrder - b.sortOrder);
+  // Build article map keyed by section name
+  const bySection = adminSections.reduce((acc, sec) => {
+    acc[sec.name] = [...published.filter(a => a.sectionName === sec.name)].sort((a, b) => a.sortOrder - b.sortOrder);
     return acc;
   }, {} as Record<string, typeof published>);
 
-  // Default all sections to collapsed (true = collapsed)
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(sections.map(s => [s, true]))
-  );
-  const [editingSection, setEditingSection] = useState<{ id: string; value: string } | null>(null);
+  // Default all sections to collapsed
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [editingSection, setEditingSection] = useState<{ id: number; name: string; value: string } | null>(null);
 
-  function handleDragEnd(sec: string, event: DragEndEvent) {
+  function handleDragEnd(secName: string, event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const group = bySection[sec];
+    const group = bySection[secName] ?? [];
     const oldIdx = group.findIndex(a => a.intercomArticleId === active.id);
     const newIdx = group.findIndex(a => a.intercomArticleId === over.id);
     const newOrder = arrayMove(group, oldIdx, newIdx);
-    // Compute sectionOrder from the first item in the section
-    const sectionOrder = published.find(a => a.sectionName === sec)?.sectionOrder ?? 0;
+    const sectionOrder = published.find(a => a.sectionName === secName)?.sectionOrder ?? 0;
     reorderMutation.mutate(newOrder.map((a, i) => ({ intercomArticleId: a.intercomArticleId, sortOrder: i, sectionOrder })));
   }
 
+  const isLoading = sectionsLoading || articlesLoading;
   if (isLoading) return <div className="flex items-center justify-center py-8"><div className="animate-spin w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full" /></div>;
 
-  if (published.length === 0) {
+  if (adminSections.length === 0) {
     return (
       <div className="rounded-xl p-6 text-center" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <HelpCircle size={24} className="mx-auto mb-2" style={{ color: ACCENT, opacity: 0.5 }} />
-        <p className="text-sm text-gray-400 font-medium">No articles published yet</p>
-        <p className="text-xs text-gray-600 mt-1">Use the Synced Help Articles panel below to select and publish articles to the customer-facing section.</p>
+        <p className="text-sm text-gray-400 font-medium">No sections created yet</p>
+        <p className="text-xs text-gray-600 mt-1">Click "+ Add Help Article Section" above to create your first section.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      {sections.map((sec) => {
-        const group = bySection[sec];
-        const isCollapsed = collapsed[sec];
+      {adminSections.map((sec) => {
+        const group = bySection[sec.name] ?? [];
+        const isCollapsed = collapsed[sec.name] !== false; // default collapsed
+        const isVisible = sec.isVisible !== false;
         return (
-          <div key={sec} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-            <button
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-white/5 transition"
+          <div key={sec.id} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+            <div
+              className="px-4 py-3 flex items-center justify-between hover:bg-white/5 transition cursor-pointer"
               style={{ background: "#1d2230" }}
-              onClick={() => setCollapsed(c => ({ ...c, [sec]: !c[sec] }))}
+              onClick={() => setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true }))}
             >
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ACCENT }} />
-                {editingSection?.id === sec ? (
+                {editingSection?.id === sec.id ? (
                   <input
                     className="text-sm font-semibold text-white bg-transparent border-b border-purple-500 outline-none px-1"
                     value={editingSection.value}
                     onClick={e => e.stopPropagation()}
-                    onChange={e => setEditingSection({ id: sec, value: e.target.value })}
+                    onChange={e => setEditingSection(prev => prev ? { ...prev, value: e.target.value } : null)}
                     onBlur={() => {
-                      if (editingSection.value.trim() && editingSection.value !== sec) {
-                        // Update all articles in this section to new section name
-                        group.forEach(a => updateSectionMutation.mutate({ intercomArticleId: a.intercomArticleId, sectionName: editingSection.value.trim() }));
+                      if (editingSection.value.trim() && editingSection.value !== editingSection.name) {
+                        renameSectionMutation.mutate({ id: editingSection.id, name: editingSection.value.trim() });
                       }
                       setEditingSection(null);
                     }}
@@ -8193,30 +8196,55 @@ function PublishedHelpArticlesPanel() {
                     autoFocus
                   />
                 ) : (
-                  <span className="text-sm font-semibold text-white">{sec}</span>
+                  <span className="text-sm font-semibold text-white">{sec.name}</span>
                 )}
                 <button
-                  onClick={e => { e.stopPropagation(); setEditingSection({ id: sec, value: sec }); }}
+                  onClick={e => { e.stopPropagation(); setEditingSection({ id: sec.id, name: sec.name, value: sec.name }); }}
                   className="text-gray-600 hover:text-gray-300 transition"
                   title="Rename section"
                 ><Pencil size={11} /></button>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                 <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${ACCENT}20`, color: ACCENT }}>{group.length}</span>
+                {/* Per-section visibility toggle */}
+                <button
+                  onClick={() => toggleSectionMutation.mutate({ id: sec.id, isVisible: !isVisible })}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition"
+                  style={isVisible
+                    ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                  }
+                  title={isVisible ? "Hide this section from users" : "Show this section to users"}
+                >
+                  {isVisible ? <><Eye size={10} /> Visible</> : <><EyeOff size={10} /> Hidden</>}
+                </button>
+                <button
+                  onClick={() => { if (confirm(`Delete section "${sec.name}"? Articles in this section will be unassigned.`)) deleteSectionMutation.mutate({ id: sec.id }); }}
+                  className="text-gray-600 hover:text-red-400 transition"
+                  title="Delete section"
+                ><Trash2 size={13} /></button>
                 <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
               </div>
-            </button>
+            </div>
             {!isCollapsed && (
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(sec, e)}>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(sec.name, e)}>
                 <SortableContext items={group.map(a => a.intercomArticleId)} strategy={verticalListSortingStrategy}>
-                  <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#111" }}>
-                    {group.map((a) => (
-                      <SortableHelpArticleRow
-                        key={a.intercomArticleId}
-                        article={a}
-                        onUnpublish={() => unpublishMutation.mutate({ intercomArticleId: a.intercomArticleId })}
-                      />
-                    ))}
+                  <div style={{ borderTop: "1px solid #2a2a2a", background: "#111" }}>
+                    {group.length === 0 ? (
+                      <div className="px-4 py-4 text-center">
+                        <p className="text-xs text-gray-600">No articles in this section yet. Use Synced Help Articles below to publish articles here.</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y" style={{ borderColor: "#2a2a2a" }}>
+                        {group.map((a) => (
+                          <SortableHelpArticleRow
+                            key={a.intercomArticleId}
+                            article={a}
+                            onUnpublish={() => unpublishMutation.mutate({ intercomArticleId: a.intercomArticleId })}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </SortableContext>
               </DndContext>
