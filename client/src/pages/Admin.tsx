@@ -7452,7 +7452,7 @@ function SettingsTab() {
                     : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
                 >
                   {maintenanceMode ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                  {maintenanceMode ? "Active" : "Off"}
+                  {maintenanceMode ? "Enabled" : "Disabled"}
                 </button>
               </div>
             </div>
