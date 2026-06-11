@@ -5860,57 +5860,43 @@ function GuidesTab() {
           </form>
         </div>
       )}
-      {/* ── Help Articles Section (with visibility toggles) ── */}
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-        {/* Non-collapsible header */}
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(139,92,246,0.15)" }}>
-              <HelpCircle size={14} style={{ color: "#8B5CF6" }} />
-            </div>
-            <div>
-              <span className="text-sm font-bold text-white">Help Articles</span>
-              <span className="text-xs text-gray-500 ml-2">Customer-facing published articles</span>
-            </div>
-          </div>
+      {/* ── Section Visibility ── */}
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-2 mb-1">
+          <Eye size={13} style={{ color: "#9ca3af" }} />
+          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
         </div>
-        {/* Section Visibility Panel */}
-        {helpArticleSectionsAdmin.length > 0 && (
-          <div className="px-4 py-3 space-y-2" style={{ background: "#111", borderBottom: "1px solid #1a1a1a" }}>
-            <div className="flex items-center gap-2 mb-2">
-              <Eye size={12} className="text-gray-500" />
-              <span className="text-xs font-semibold text-gray-400">Section Visibility</span>
-              <span className="text-xs text-gray-600">— toggle to show/hide sections from users</span>
-            </div>
-            {helpArticleSectionsAdmin.map((sec, idx) => {
-              const dotColors = ["#67C728", "#0074F4", "#FF9900", "#8B5CF6", "#ef4444", "#06b6d4"];
-              const dotColor = dotColors[idx % dotColors.length];
-              return (
-                <div key={sec.id} className="flex items-center justify-between px-2 py-1.5 rounded-lg" style={{ background: "#1d2230" }}>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: dotColor }} />
-                    <span className="text-xs text-white">{sec.name}</span>
-                  </div>
-                  <button
-                    onClick={() => toggleSectionVisibilityMutation.mutate({ id: sec.id, isVisible: !sec.isVisible })}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all"
-                    style={sec.isVisible
-                      ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-                      : { background: "rgba(107,114,128,0.15)", color: "#6b7280", border: "1px solid rgba(107,114,128,0.3)" }
-                    }
-                  >
-                    {sec.isVisible ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
-                  </button>
+        {helpArticleSectionsAdmin.length === 0 ? (
+          <p className="text-xs text-gray-500">No sections created yet. Click "+ Add Help Article Section" to create one.</p>
+        ) : (
+          helpArticleSectionsAdmin.map((sec, idx) => {
+            const dotColors = ["#67C728", "#0074F4", "#FF9900", "#8B5CF6", "#ef4444", "#06b6d4"];
+            const dotColor = dotColors[idx % dotColors.length];
+            return (
+              <div key={sec.id} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full" style={{ background: dotColor }} />
+                  <span className="text-xs text-gray-300">{sec.name}</span>
                 </div>
-              );
-            })}
-          </div>
+                <button
+                  onClick={() => toggleSectionVisibilityMutation.mutate({ id: sec.id, isVisible: !sec.isVisible })}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                  style={sec.isVisible
+                    ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                  }
+                >
+                  {sec.isVisible ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+                </button>
+              </div>
+            );
+          })
         )}
-        {/* Published articles list */}
-        <div className="p-4" style={{ background: "#111" }}>
-          <PublishedHelpArticlesPanel />
-        </div>
       </div>
+
+      {/* ── Published Help Articles ── */}
+      <PublishedHelpArticlesPanel />
 
       {/* ── PDF Resources ── */}
       {isLoading ? (
