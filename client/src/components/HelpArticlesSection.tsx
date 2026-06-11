@@ -114,46 +114,45 @@ function ArticleRow({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all text-left group"
-      style={{ background: "#1d2230", border: "1px solid #252d3d" }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT}50`; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#252d3d"; }}
+      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-left group"
+      style={{ background: "transparent", border: "1px solid transparent" }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "#1d2230";
+        (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT}30`;
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "transparent";
+        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+      }}
     >
-      {/* Icon */}
+      {/* Dot indicator */}
       <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{ background: `${ACCENT}18` }}
-      >
-        <HelpCircle size={15} style={{ color: ACCENT }} />
-      </div>
+        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+        style={{ background: `${ACCENT}60` }}
+      />
 
-      {/* Title + summary */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-white leading-snug truncate">{article.title}</p>
-          {isNew && (
-            <span
-              className="text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wide uppercase flex-shrink-0"
-              style={{ background: "rgba(74,222,128,0.2)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.4)" }}
-            >
-              New
-            </span>
-          )}
-        </div>
-        {article.summary && (
-          <p className="text-xs text-gray-500 truncate mt-0.5">{article.summary}</p>
+      {/* Title */}
+      <div className="flex-1 min-w-0 flex items-center gap-2">
+        <p className="text-sm text-gray-200 leading-snug truncate group-hover:text-white transition-colors">
+          {article.title}
+        </p>
+        {isNew && (
+          <span
+            className="text-[9px] font-bold px-1.5 py-0.5 rounded-full tracking-wide uppercase flex-shrink-0"
+            style={{ background: "rgba(74,222,128,0.2)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.4)" }}
+          >
+            New
+          </span>
         )}
       </div>
 
-      {/* Read button */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <span
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-          style={{ background: `${ACCENT}18`, color: ACCENT, border: `1px solid ${ACCENT}35` }}
-        >
-          Read
-        </span>
-      </div>
+      {/* Read link — appears on hover */}
+      <span
+        className="flex-shrink-0 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ color: ACCENT }}
+      >
+        Read →
+      </span>
     </button>
   );
 }
@@ -162,14 +161,17 @@ function ArticleRow({
 
 function CollectionSection({
   name,
+  description,
   articles,
   onArticleClick,
 }: {
   name: string;
+  description?: string | null;
   articles: Array<{ id: number; title: string; summary?: string | null; url?: string | null; intercomUpdatedAt?: number | null }>;
   onArticleClick: (id: number) => void;
 }) {
-  const [open, setOpen] = useState(true);
+  // Default collapsed — 19 collections × 175 articles would be overwhelming if all open
+  const [open, setOpen] = useState(false);
 
   return (
     <section>
@@ -184,8 +186,11 @@ function CollectionSection({
         >
           <HelpCircle size={14} style={{ color: ACCENT }} />
         </div>
-        <div className="flex-1 text-left">
+        <div className="flex-1 text-left min-w-0">
           <span className="text-sm font-bold text-white">{name}</span>
+          {description && (
+            <span className="ml-2 text-xs text-gray-500">{description}</span>
+          )}
         </div>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
@@ -210,7 +215,7 @@ function CollectionSection({
             <p className="text-xs text-gray-500">No articles in this collection yet.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-0.5 mb-2">
             {articles.map((a) => (
               <ArticleRow key={a.id} article={a} onClick={() => onArticleClick(a.id)} />
             ))}
@@ -271,10 +276,10 @@ export default function HelpArticlesSection({ search }: { search: string }) {
       (a.summary ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
-  // Group by collection
-  const collectionMap = new Map<string, string>(); // intercomId → name
+  // Build collection name+description map
+  const collectionMap = new Map<string, { name: string; description?: string | null }>();
   (collections ?? []).forEach((c) => {
-    if (c.visible) collectionMap.set(c.intercomId, c.name);
+    if (c.visible) collectionMap.set(c.intercomId, { name: c.name, description: c.description });
   });
 
   // Group articles by collectionId
@@ -320,11 +325,12 @@ export default function HelpArticlesSection({ search }: { search: string }) {
       <div className="mb-4 h-px" style={{ background: `${ACCENT}25` }} />
 
       {/* Collections */}
-      <div className="space-y-8 pl-2">
+      <div className="space-y-6 pl-2">
         {orderedCollections.map((col) => (
           <CollectionSection
             key={col.intercomId}
             name={col.name}
+            description={col.description}
             articles={grouped.get(col.intercomId) ?? []}
             onArticleClick={setSelectedId}
           />

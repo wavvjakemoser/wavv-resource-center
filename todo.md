@@ -1330,3 +1330,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin panel: "Sync Now" button to manually trigger re-sync from Intercom
 - [x] Set up scheduled sync job (hourly) using Heartbeat cron (task_uid: EM4irvNUBnMSNfggVYJotZ, next: 2026-06-11T04:00:00Z)
 - [x] Write vitest tests for helpArticles procedures (10 tests passing)
+
+## Bug Fixes + Help Articles Reformat — Jun 11 2026
+
+- [x] Fix MFA: stop prompting on every login — only require MFA setup once; do not generate a new TOTP secret on each login
+- [x] Fix MFA: prevent duplicate authenticator entries — new secret should only be generated if user has no existing secret
+- [x] Fix Admin Help Articles tab — merged into Guides & Docs admin tab (HelpArticlesInline at bottom of GuidesTab)
+- [x] Reformat Help Articles section on customer-facing Guides & Docs — collections collapsed by default, lightweight article rows (dot + title + hover Read →), no per-row icon/card weight

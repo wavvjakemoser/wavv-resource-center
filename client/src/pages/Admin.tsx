@@ -159,7 +159,7 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
-type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "help_articles" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
+type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -181,7 +181,6 @@ export default function Admin() {
     if ((t === "academy" || t === "content") && isSuperAdmin) return "academy";
     if (t === "webinars" && isSuperAdmin) return "webinars";
     if (t === "guides" && isSuperAdmin) return "guides";
-    if (t === "help_articles" && isSuperAdmin) return "help_articles";
     if (t === "playground" && isSuperAdmin) return "playground";
     if (t === "support" && isSuperAdmin) return "support";
     if (t === "content_requests" && isSuperAdmin) return "content_requests";
@@ -210,7 +209,6 @@ export default function Admin() {
     else if ((t === "academy" || t === "content") && isSuperAdmin) setActiveTab("academy");
     else if (t === "webinars" && isSuperAdmin) setActiveTab("webinars");
     else if (t === "guides" && isSuperAdmin) setActiveTab("guides");
-    else if (t === "help_articles" && isSuperAdmin) setActiveTab("help_articles");
     else if (t === "playground" && isSuperAdmin) setActiveTab("playground");
     else if (t === "support" && isSuperAdmin) setActiveTab("support");
     else if (t === "content_requests" && isSuperAdmin) setActiveTab("content_requests");
@@ -257,7 +255,6 @@ export default function Admin() {
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />, show: isSuperAdmin },
     { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,         show: isSuperAdmin },
     { id: "guides",           label: "Guides & Docs",     icon: <FileText size={13} />,      show: isSuperAdmin },
-    { id: "help_articles",    label: "Help Articles",     icon: <HelpCircle size={13} />,    show: isSuperAdmin },
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,  show: isSuperAdmin },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,    show: isSuperAdmin },
     { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
@@ -319,7 +316,6 @@ export default function Admin() {
         {activeTab === "academy" && isSuperAdmin && <ContentTab />}
         {activeTab === "webinars" && isSuperAdmin && <WebinarsTab />}
         {activeTab === "guides" && isSuperAdmin && <GuidesTab />}
-        {activeTab === "help_articles" && isSuperAdmin && <HelpArticlesAdminTab />}
         {activeTab === "playground" && isSuperAdmin && <PlaygroundTab />}
         {activeTab === "support" && isSuperAdmin && <SupportTab />}
         {activeTab === "partners_content" && (isOwner || isPartnerAdmin) && <PartnersContentTab />}
@@ -5857,6 +5853,9 @@ function GuidesTab() {
           onDelete={(id) => { if (confirm("Delete this guide?")) deleteMutation.mutate({ id }); }}
         />
       )}
+
+      {/* ── Intercom Help Articles Management ── */}
+      <HelpArticlesInline />
     </div>
   );
 }
@@ -7933,6 +7932,11 @@ function PartnersContentTab() {
       )}
     </div>
   );
+}
+
+// ─── Help Articles Inline (embedded in Guides & Docs tab) ───────────────────
+function HelpArticlesInline() {
+  return <HelpArticlesAdminTab />;
 }
 
 // ─── Help Articles Admin Tab ──────────────────────────────────────────────────

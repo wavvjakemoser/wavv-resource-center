@@ -1092,8 +1092,10 @@ export const appRouter = router({
           await setMfaSetupToken(user.id, user.mfaSecret, challengeToken, Date.now() + 10 * 60 * 1000);
           return { success: true, mfaRequired: true, challengeToken, user: null };
         }
-        // Issue session — mark mfaPending if MFA is not yet configured
-        const mfaPending = !user.mfaEnabled;
+        // Issue session — only admin/owner roles require MFA setup
+        const MFA_REQUIRED_ROLES = ["owner", "admin", "content_admin", "partner_admin"];
+        const requiresMfa = MFA_REQUIRED_ROLES.includes(user.role);
+        const mfaPending = requiresMfa && !user.mfaEnabled;
         const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role, mfaPending });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 });
@@ -1289,7 +1291,9 @@ export const appRouter = router({
       .mutation(async ({ ctx }) => {
         const otplib = await import("otplib");
         const cryptoMod = await import("crypto");
-        const secret = otplib.generateSecret();
+        // Reuse existing secret if one exists — prevents duplicate Authenticator entries
+        const existingUser = await getUserById(ctx.user.id);
+        const secret = existingUser?.mfaSecret ?? otplib.generateSecret();
         const setupToken = cryptoMod.randomBytes(32).toString("hex");
         const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
         await setMfaSetupToken(ctx.user.id, secret, setupToken, expiresAt);
