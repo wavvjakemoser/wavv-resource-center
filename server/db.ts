@@ -808,22 +808,43 @@ export async function upsertGoogleUser(data: {
 export async function searchContent(query: string) {
   const db = await getDb();
   if (!db) return { courses: [], lessons: [], webinars: [], guides: [] };
-  const q = `%${query.toLowerCase()}%`;
 
-  const [matchedCourses, matchedLessons, matchedWebinars, matchedGuides] = await Promise.all([
-    db.select().from(courses).where(
-      and(eq(courses.published, true), or(like(courses.title, q), like(courses.description, q)))
-    ).limit(5),
-    db.select().from(lessons).where(
-      and(eq(lessons.published, true), or(like(lessons.title, q), like(lessons.description, q)))
-    ).limit(8),
-    db.select().from(webinars).where(
-      or(like(webinars.title, q), like(webinars.description, q))
-    ).limit(5),
-    db.select().from(guides).where(
-      and(eq(guides.published, true), or(like(guides.title, q), like(guides.description, q)))
-    ).limit(5),
+  // ── Fuzzy helpers ──────────────────────────────────────────────────────────
+  // Normalize: lowercase, strip non-alphanumeric chars (removes spaces, hyphens, etc.)
+  const norm = (s: string) => (s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  // Split query into words for token matching
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const normQ = norm(query);
+
+  function fuzzyMatch(title: string, description: string | null): boolean {
+    const t = (title ?? "").toLowerCase();
+    const d = (description ?? "").toLowerCase();
+    const normT = norm(title);
+    const normD = norm(description ?? "");
+    // 1. Exact substring (original LIKE behaviour)
+    if (t.includes(normQ) || d.includes(normQ)) return true;
+    // 2. Normalized substring — catches "callboards" matching "Call Boards"
+    if (normT.includes(normQ) || normD.includes(normQ)) return true;
+    // 3. All query tokens appear somewhere in title or description
+    if (tokens.length > 1 && tokens.every(tok => t.includes(tok) || d.includes(tok))) return true;
+    // 4. Each token appears in the normalized title/description
+    if (tokens.every(tok => normT.includes(norm(tok)) || normD.includes(norm(tok)))) return true;
+    return false;
+  }
+
+  // ── Broad DB fetch (no filter — we filter in-memory for fuzzy) ─────────────
+  // Fetch a reasonable pool then apply fuzzy matching
+  const [allCourseRows, allLessonRows, allWebinarRows, allGuideRows] = await Promise.all([
+    db.select().from(courses).where(eq(courses.published, true)).limit(200),
+    db.select().from(lessons).where(eq(lessons.published, true)).limit(500),
+    db.select().from(webinars).limit(200),
+    db.select().from(guides).where(eq(guides.published, true)).limit(200),
   ]);
+
+  const matchedCourses = allCourseRows.filter(r => fuzzyMatch(r.title, r.description)).slice(0, 5);
+  const matchedLessons = allLessonRows.filter(r => fuzzyMatch(r.title, r.description)).slice(0, 8);
+  const matchedWebinars = allWebinarRows.filter(r => fuzzyMatch(r.title, r.description)).slice(0, 5);
+  const matchedGuides = allGuideRows.filter(r => fuzzyMatch(r.title, r.description)).slice(0, 5);
 
   return {
     courses: matchedCourses,
