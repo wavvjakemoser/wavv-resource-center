@@ -182,10 +182,7 @@ export default function AISearchBar() {
             </ResultSection>
           )}
 
-          <div className="px-3 py-2 border-t border-[#2a2a2a] flex items-center gap-1.5">
-            <Sparkles size={10} style={{ color: "#0074F4" }} />
-            <span className="text-xs text-gray-600">AI-powered search</span>
-          </div>
+
         </div>
       )}
     </div>

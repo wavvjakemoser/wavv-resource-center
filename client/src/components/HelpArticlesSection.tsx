@@ -109,7 +109,7 @@ function SectionGroup({
             style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
           >
             <HelpCircle size={14} style={{ color: ACCENT, opacity: 0.4 }} />
-            <p className="text-xs text-gray-500">No articles in this section yet.</p>
+            <p className="text-xs text-gray-500">Help articles coming soon.</p>
           </div>
         ) : (
           <div className="space-y-0.5 mb-2">
@@ -124,9 +124,11 @@ function SectionGroup({
 }
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
-
 export default function HelpArticlesSection({ search }: { search: string }) {
-  const { data: published = [], isLoading } = trpc.helpArticles.listPublished.useQuery();
+  // Use visible sections as source of truth — show sections even if no articles yet
+  const { data: sections = [], isLoading: sectionsLoading } = trpc.helpArticles.listSections.useQuery();
+  const { data: published = [], isLoading: articlesLoading } = trpc.helpArticles.listPublished.useQuery();
+  const isLoading = sectionsLoading || articlesLoading;
 
   if (isLoading) {
     return (
@@ -143,7 +145,7 @@ export default function HelpArticlesSection({ search }: { search: string }) {
     );
   }
 
-  if (published.length === 0) {
+  if (sections.length === 0) {
     return (
       <div
         className="flex items-center gap-3 px-4 py-3 rounded-lg"
@@ -155,23 +157,17 @@ export default function HelpArticlesSection({ search }: { search: string }) {
     );
   }
 
-  // Filter by search
-  const filtered = published.filter(
-    (a) =>
-      !search ||
-      a.title.toLowerCase().includes(search.toLowerCase())
-  );
-
-  // Group by sectionName, preserving sectionOrder
-  const sections = Array.from(new Set(filtered.map(a => a.sectionName))).sort((a, b) => {
-    const ao = filtered.find(x => x.sectionName === a)?.sectionOrder ?? 0;
-    const bo = filtered.find(x => x.sectionName === b)?.sectionOrder ?? 0;
-    return ao - bo;
-  });
+  // Build article map keyed by section name, filtered by search
   const bySection = sections.reduce((acc, sec) => {
-    acc[sec] = [...filtered.filter(a => a.sectionName === sec)].sort((a, b) => a.sortOrder - b.sortOrder);
+    const articles = published
+      .filter(a => a.sectionName === sec.name)
+      .filter(a => !search || a.title.toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+    acc[sec.name] = articles;
     return acc;
-  }, {} as Record<string, typeof filtered>);
+  }, {} as Record<string, typeof published>);
+
+  const totalFiltered = Object.values(bySection).reduce((sum, arr) => sum + arr.length, 0);
 
   return (
     <>
@@ -191,24 +187,22 @@ export default function HelpArticlesSection({ search }: { search: string }) {
           className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
           style={{ background: `${ACCENT}15`, color: ACCENT }}
         >
-          {filtered.length}
+          {totalFiltered}
         </span>
       </div>
       <div className="mb-4 h-px" style={{ background: `${ACCENT}25` }} />
-
-      {/* Sections */}
+      {/* Sections — always shown, even if empty */}
       <div className="space-y-6 pl-2">
         {sections.map((sec) => (
           <SectionGroup
-            key={sec}
-            name={sec}
-            articles={bySection[sec]}
+            key={sec.id}
+            name={sec.name}
+            articles={bySection[sec.name] ?? []}
           />
         ))}
       </div>
-
       {/* No search results */}
-      {search && filtered.length === 0 && (
+      {search && totalFiltered === 0 && (
         <div className="flex items-center gap-3 px-4 py-3 rounded-lg mt-2"
           style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}>
           <Search size={14} style={{ color: ACCENT, opacity: 0.4 }} />

@@ -7339,7 +7339,7 @@ function SettingsTab() {
     { href: "/home",        label: "Home",                   icon: Home },
     { href: "/academy",    label: "WAVV Academy",            icon: GraduationCapIcon },
     { href: "/webinars",   label: "WAVV Webinars",           icon: VideoIcon },
-    { href: "/guides",     label: "Resource Hub",             icon: FileTextIcon },
+    { href: "/guides",     label: "WAVV Resource Hub",         icon: FileTextIcon },
     { href: "/playground",   label: "WAVV Playground",         icon: FlaskConical },
     { href: "/support",    label: "WAVV Support",            icon: HeadphonesIcon },
     { href: "/partners",   label: "WAVV Partners",          icon: UsersIcon },
