@@ -428,3 +428,16 @@ export const publishedHelpArticles = mysqlTable("published_help_articles", {
 });
 export type PublishedHelpArticle = typeof publishedHelpArticles.$inferSelect;
 export type InsertPublishedHelpArticle = typeof publishedHelpArticles.$inferInsert;
+
+// ─── Help Article Sections ────────────────────────────────────────────────────
+// Admin-created named sections for the customer-facing Help Articles panel.
+// Articles are published into these sections from the Synced Help Articles panel.
+export const helpArticleSections = mysqlTable("help_article_sections", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  sortOrder: int("sort_order").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type HelpArticleSection = typeof helpArticleSections.$inferSelect;
+export type InsertHelpArticleSection = typeof helpArticleSections.$inferInsert;

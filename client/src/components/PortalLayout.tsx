@@ -22,7 +22,7 @@ const baseNavItems = [
   { href: "/home", label: "Home",              icon: Home,          color: "#6366f1" },
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
-  { href: "/guides",    label: "WAVV Guides & Docs",  icon: FileText,      color: "#67C728" },
+  { href: "/guides",    label: "Resource Hub",        icon: FileText,      color: "#67C728" },
   { href: "/playground",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
   { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
 ];

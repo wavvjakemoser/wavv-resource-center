@@ -254,7 +254,7 @@ export default function Admin() {
   const contentRow: TabDef[] = [
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />, show: isSuperAdmin },
     { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,         show: isSuperAdmin },
-    { id: "guides",           label: "Guides & Docs",     icon: <FileText size={13} />,      show: isSuperAdmin },
+    { id: "guides",           label: "Resource Hub",      icon: <FileText size={13} />,      show: isSuperAdmin },
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,  show: isSuperAdmin },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,    show: isSuperAdmin },
     { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
@@ -724,7 +724,7 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
   const SECTION_TABS: { key: "academy" | "webinars" | "guides"; label: string; color: string }[] = [
     { key: "academy",  label: "WAVV Academy",    color: "#22d3ee" },
     { key: "webinars", label: "Webinars",         color: "#f59e0b" },
-    { key: "guides",   label: "Guides & Docs",    color: "#4ade80" },
+    { key: "guides",   label: "Resource Hub",     color: "#4ade80" },
   ];
 
   return (
@@ -737,7 +737,7 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
         <StatCard icon={<Video size={18} />}         label="On-Demand Webinars Watched"     value={stats?.ondemandWatched ?? 0}  color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("On-Demand Webinars Watched",      ["webinar_ondemand_watched", "webinar_watched"],             "#a78bfa")} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<Download size={18} />}      label="Guides & Docs Downloads"        value={stats?.guideDownloaded ?? 0}  color="green"  subtitle={`last ${days}d`} onClick={() => openDrawer("Guides & Docs Downloads",         ["guide_downloaded"],                                        "#4ade80")} />
+        <StatCard icon={<Download size={18} />}      label="Resource Hub Downloads"         value={stats?.guideDownloaded ?? 0}  color="green"  subtitle={`last ${days}d`} onClick={() => openDrawer("Resource Hub Downloads",          ["guide_downloaded"],                                        "#4ade80")} />
         <StatCard icon={<Search size={18} />}        label="Total Searches"                 value={stats?.searches ?? 0}         color="teal"   subtitle={`last ${days}d`} onClick={() => openDrawer("Total Searches",                  ["search"],                                                  "#2dd4bf")} />
         <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"          value={stats?.aiChats ?? 0}          color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("WAVV AI Conversations",           ["ai_chat"],                                                 "#a78bfa")} />
       </div>
@@ -817,7 +817,7 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
 const PAGE_LABELS: Record<string, string> = {
   "/academy": "WAVV Academy",
   "/webinars": "WAVV Webinars",
-  "/guides": "Guides & Docs",
+  "/guides": "Resource Hub",
   "/playground": "WAVV Playground",
   "/support": "WAVV Support",
   "/wavvpartner": "Partners Portal",
@@ -863,7 +863,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
     { key: "overview" as const, label: "Overview", color: "#22d3ee", icon: <Activity size={13} /> },
     { key: "academy" as const, label: "WAVV Academy", color: "#22d3ee", icon: <GraduationCap size={13} /> },
     { key: "webinars" as const, label: "Webinars", color: "#f59e0b", icon: <Video size={13} /> },
-    { key: "guides" as const, label: "Guides & Docs", color: "#4ade80", icon: <FileText size={13} /> },
+    { key: "guides" as const, label: "Resource Hub",  color: "#4ade80", icon: <FileText size={13} /> },
   ];
 
   if (isLoading) {
@@ -1071,7 +1071,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
         </div>
       )}
 
-      {/* Guides & Docs panel */}
+      {/* Resource Hub panel */}
       {activePanel === "guides" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -5610,7 +5610,7 @@ function CompletedExclusiveWebinars() {
   );
 }
 
-// ─── Guides & Docs Tab ────────────────────────────────────────────────────────
+// ─── Resource Hub Tab ────────────────────────────────────────────────────────
 function GuidesTab() {
   const utils = trpc.useUtils();
   const { data: guides = [], isLoading } = trpc.guides.adminList.useQuery();
@@ -5701,8 +5701,8 @@ function GuidesTab() {
             <FileTextIcon size={18} style={{ color: "#67C728" }} />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white">WAVV Guides & Docs</h2>
-            <p className="text-xs text-gray-500">Manage PDFs and Help Articles for the WAVV Success Center</p>
+            <h2 className="text-base font-bold text-white">WAVV Resource Hub</h2>
+            <p className="text-xs text-gray-500">Manage PDFs and Help Articles for the Resource Hub</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -7238,7 +7238,7 @@ function SettingsTab() {
     { href: "/home",        label: "Home",                   icon: Home },
     { href: "/academy",    label: "WAVV Academy",            icon: GraduationCapIcon },
     { href: "/webinars",   label: "WAVV Webinars",           icon: VideoIcon },
-    { href: "/guides",     label: "WAVV Guides & Docs",      icon: FileTextIcon },
+    { href: "/guides",     label: "Resource Hub",             icon: FileTextIcon },
     { href: "/playground",   label: "WAVV Playground",         icon: FlaskConical },
     { href: "/support",    label: "WAVV Support",            icon: HeadphonesIcon },
     { href: "/partners",   label: "WAVV Partners",          icon: UsersIcon },
@@ -7973,7 +7973,7 @@ function PartnersContentTab() {
   );
 }
 
-// ─── Help Articles Inline (embedded in Guides & Docs tab) ───────────────────
+// ─── Help Articles Inline (embedded in Resource Hub tab) ────────────────────
 // ─── Published Help Articles Management Panel ─────────────────────────────────
 function PublishedHelpArticlesPanel() {
   const ACCENT = "#8B5CF6";
@@ -8180,7 +8180,7 @@ function SyncedHelpArticlesPanel() {
         <div className="flex items-center gap-2">
           <CheckCircle2 size={14} style={{ color: ACCENT }} />
           <span className="text-sm font-semibold text-white">Published Help Articles</span>
-          <span className="text-xs text-gray-500 ml-1">— visible to customers on Guides & Docs</span>
+          <span className="text-xs text-gray-500 ml-1">— visible to customers on Resource Hub</span>
         </div>
         <PublishedHelpArticlesPanel />
       </div>

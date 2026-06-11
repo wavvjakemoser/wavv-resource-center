@@ -1362,3 +1362,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Customer-facing Guides & Docs: Help Articles top-level section — reads from published_help_articles, collapsible sub-sections (by section_name), article rows link to Intercom URL
 - [x] Customer-facing Guides & Docs: PDFs top-level section — collapsible sub-sections (by category), PDFs as rows with download + view
 - [x] Customer-facing Guides & Docs: both top-level sections collapsible, sub-sections collapsible, consistent header style
+
+## Admin Guides UX Revamp
+- [ ] Schema: add help_article_sections table (id, name, sort_order, created_at)
+- [ ] Backend: tRPC procedures for help article sections (list, create, delete, reorder)
+- [ ] Admin header: replace single Add Guide button with Export + Add Help Article Section + Add PDF
+- [ ] Add Help Article Section modal: name input, creates section, appears in Published panel
+- [ ] Add PDF modal: section field shows dropdown of existing PDF sections (not free-type datalist)
+- [ ] Synced panel publish flow: replace per-row text input with dropdown of created help article sections
+- [ ] All sub-sections collapsed by default on admin and customer-facing sides
+- [ ] Top-level Help Articles and PDF headers are NOT collapsible (only sub-sections collapse)
+- [ ] Page name / hero copy update on Guides & Docs page

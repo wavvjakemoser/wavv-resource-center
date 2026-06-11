@@ -1,7 +1,7 @@
 /**
  * HelpArticlesSection
  *
- * Renders PUBLISHED help articles on the customer-facing Guides & Docs page.
+ * Renders PUBLISHED help articles on the customer-facing Resource Hub page.
  * Articles are sourced from the published_help_articles table — only articles
  * that a content admin has explicitly published appear here.
  *

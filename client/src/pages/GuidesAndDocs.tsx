@@ -314,7 +314,7 @@ export default function GuidesAndDocs() {
   });
 
   return (
-    <PortalLayout title="WAVV Guides & Docs">
+    <PortalLayout title="WAVV Resource Hub">
       <div className="px-4 lg:px-8 py-6 space-y-6">
         {/* Header */}
         <div
@@ -339,13 +339,13 @@ export default function GuidesAndDocs() {
             <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
               style={{ background: "rgba(103,199,40,0.12)", border: "1px solid rgba(103,199,40,0.25)" }}>
               <FileText size={12} style={{ color: "#67C728" }} />
-              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#67C728" }}>WAVV Guides &amp; Docs</span>
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#67C728" }}>WAVV Resource Hub</span>
             </div>
 
             {/* Headline */}
             <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #d9f99d 30%, #86efac 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Guides, Articles &amp; Docs
+                WAVV Resource Hub
               </span>
             </h1>
 
@@ -356,7 +356,7 @@ export default function GuidesAndDocs() {
 
             {/* Subline */}
             <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
-              Help articles and reference documents to accelerate your WAVV success. Browse by topic or search below.
+              Browse help articles and downloadable guides by topic.
             </p>
           </div>
         </div>

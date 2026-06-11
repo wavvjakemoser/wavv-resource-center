@@ -59,8 +59,8 @@ export default function Support() {
               Need help? Start a chat with our support team and we'll take it from there. If a ticket needs to be opened, your rep will handle it for you.
             </p>
             <p className="mx-auto mt-3" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.82rem" }}>
-              Looking for guides, playbooks, or how-to docs? Visit{" "}
-              <a href="/guides" className="text-blue-400 hover:underline">WAVV Guides &amp; Docs</a>.
+              Looking for help articles or downloadable guides? Visit{" "}
+              <a href="/guides" className="text-blue-400 hover:underline">the Resource Hub</a>.
             </p>
           </div>
         </div>
