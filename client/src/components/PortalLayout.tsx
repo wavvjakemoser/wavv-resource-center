@@ -81,7 +81,7 @@ function NavLink({
       >
         <Icon size={17} style={{ color }} />
       </div>
-      <span className="truncate flex-1">{label}</span>
+      <span className="flex-1 min-w-0" style={{ whiteSpace: "nowrap", overflow: "visible" }}>{label}</span>
 
       {comingSoon && !isHidden && (
         <span
@@ -193,7 +193,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
-            width: "260px",
+            width: "280px",
             background: "#0f1318",
             borderRight: "1px solid #1e2030",
             flexShrink: 0,
