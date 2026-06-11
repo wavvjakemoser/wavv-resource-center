@@ -66,7 +66,7 @@ const CATEGORIES = [
   {
     key: "How-To",
     label: "How-To",
-    subtitle: "Know the tool cold. Walkthroughs for every feature you'll use every day.",
+    subtitle: "Step-by-step walkthroughs for the features you use most.",
     color: "#00A9E2",
     icon: Wrench,
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v6-K3TYV9Xeg5ZaWLpmZiJwHh.webp",

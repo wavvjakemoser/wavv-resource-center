@@ -817,7 +817,7 @@ export default function AcademyCategory() {
               section={section}
               accentColor={cat.color}
               categoryKey={cat.key}
-              defaultOpen={idx === 0}
+              defaultOpen={false}
               dbLessonMap={dbLessonMap}
               courseTags={
                 dbCourseMap[section.title.toLowerCase().trim()]?.tags
