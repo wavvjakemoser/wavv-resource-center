@@ -1415,7 +1415,7 @@ function UsersTab() {
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
       if (promoteDialog) {
-        const roleLabels: Record<UserRole, string> = { owner: "an Owner", content_admin: "a WAVV Publisher", partner_admin: "a WAVV Partner Manager", admin: "a WAVV Viewer" };
+        const roleLabels: Record<UserRole, string> = { owner: "a WAVV Owner", content_admin: "a WAVV Publisher", partner_admin: "a WAVV Partner Manager", admin: "a WAVV Viewer" };
         toast.success(`${promoteDialog.userName} is now ${roleLabels[promoteDialog.selectedRole]}.`);
         setPromoteDialog(null);
       } else {
@@ -1493,7 +1493,7 @@ function UsersTab() {
     },
     {
       filter: "owner",
-      label: "Owners",
+      label: "WAVV Owners",
       value: ownerCount,
       iconEl: <Crown className="h-5 w-5" style={{ color: "#fb923c" }} />,
       color: "#fb923c",
@@ -1771,7 +1771,7 @@ function UsersTab() {
                       <div className="flex flex-wrap items-center gap-1.5">
                         {u.role === "owner" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.4)" }}>
-                            <Crown className="h-3 w-3" /> Owner
+                            <Crown className="h-3 w-3" /> WAVV Owner
                           </Badge>
                         ) : u.role === "content_admin" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.4)" }}>
@@ -1952,7 +1952,7 @@ function UsersTab() {
               <div className="space-y-2 py-2">
                 {promoteDialog && (["owner", "content_admin", "partner_admin", "admin"] as UserRole[]).map((role) => {
                   const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
-                    owner:        { label: "Owner",        color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
+                    owner:        { label: "WAVV Owner",   color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
                     content_admin:  { label: "WAVV Publisher",       color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
                     partner_admin:{ label: "WAVV Partner Manager", color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
                     admin:        { label: "WAVV Viewer",          color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
@@ -2102,7 +2102,7 @@ function UsersTab() {
                 className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                 style={{ background: "#111", border: "1px solid #2a2a2a" }}
               >
-                <option value="owner">Owner</option>
+                <option value="owner">WAVV Owner</option>
                 <option value="content_admin">WAVV Publisher</option>
                 <option value="partner_admin">WAVV Partner Manager</option>
                 <option value="admin">WAVV Viewer</option>
@@ -2263,7 +2263,7 @@ function UsersTab() {
               {/* Success banner */}
               <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
                 <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
-                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "content_admin" ? "WAVV Publisher" : inviteResult.role === "partner_admin" ? "WAVV Partner Manager" : "WAVV Viewer"}.</p>
+                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "WAVV Owner" : inviteResult.role === "content_admin" ? "WAVV Publisher" : inviteResult.role === "partner_admin" ? "WAVV Partner Manager" : "WAVV Viewer"}.</p>
               </div>
 
               {/* Slack instructions block */}
@@ -2338,7 +2338,7 @@ function UsersTab() {
                   className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                   style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
-                  <option value="owner">Owner</option>
+                  <option value="owner">WAVV Owner</option>
                   <option value="content_admin">WAVV Publisher</option>
                   <option value="partner_admin">WAVV Partner Manager</option>
                   <option value="admin">WAVV Viewer</option>
