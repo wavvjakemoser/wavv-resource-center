@@ -32,7 +32,7 @@ const CATEGORIES = [
   {
     key: "Onboarding",
     label: "Onboarding",
-    subtitle: "Get your team up and running with WAVV",
+    subtitle: "Everything you need to hit the ground running — from day one to fully dialing.",
     color: "#0074F4",
     icon: Rocket,
     thumbnail: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663417013740/JHIRajYPPlnohilQ.png",
@@ -66,7 +66,7 @@ const CATEGORIES = [
   {
     key: "How-To",
     label: "How-To",
-    subtitle: "Step-by-step guides for core WAVV features",
+    subtitle: "Know the tool cold. Walkthroughs for every feature you'll use every day.",
     color: "#00A9E2",
     icon: Wrench,
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v6-K3TYV9Xeg5ZaWLpmZiJwHh.webp",
@@ -100,7 +100,7 @@ const CATEGORIES = [
   {
     key: "Strategy and Best Practices",
     label: "Strategy & Best Practices",
-    subtitle: "Maximize connection rates, conversions, and team performance",
+    subtitle: "Dial smarter, not harder. Frameworks and tactics to get more out of every session.",
     color: "#67C728",
     icon: Lightbulb,
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v7-h4rfU3p4xkyGFotsGxeuPW.webp",
@@ -344,7 +344,7 @@ export default function Academy() {
 
             {/* Subline */}
             <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
-              Every lesson is built around a specific outcome — faster onboarding, higher connection rates, better team performance. Watch what's relevant to you, skip what isn't.
+              Every lesson is built around a specific outcome — faster onboarding, sharper skills, better team performance. Start anywhere, go at your own pace.
             </p>
           </div>
         </div>
