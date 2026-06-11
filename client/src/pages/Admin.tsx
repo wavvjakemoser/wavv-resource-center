@@ -254,7 +254,7 @@ export default function Admin() {
   const contentRow: TabDef[] = [
     { id: "academy",          label: "Academy",           icon: <GraduationCap size={13} />, show: isSuperAdmin },
     { id: "webinars",         label: "Webinars",          icon: <Video size={13} />,         show: isSuperAdmin },
-    { id: "guides",           label: "Resource Hub",      icon: <FileText size={13} />,      show: isSuperAdmin },
+    { id: "guides",           label: "WAVV Resource Hub", icon: <FileText size={13} />,      show: isSuperAdmin },
     { id: "playground",       label: "Playground",        icon: <FlaskConical size={13} />,  show: isSuperAdmin },
     { id: "support",          label: "Support",           icon: <Headphones size={13} />,    show: isSuperAdmin },
     { id: "partners_content", label: "Partners",          icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
@@ -5627,6 +5627,18 @@ function GuidesTab() {
   const [editId, setEditId] = useState<number | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const { data: pdfSections = [] } = trpc.guides.listSections.useQuery();
+  // Add Help Article Section modal
+  const [showAddSectionModal, setShowAddSectionModal] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+  const createSectionMutation = trpc.helpArticles.createSection.useMutation({
+    onSuccess: () => {
+      utils.helpArticles.listPublished.invalidate();
+      toast.success("Section created");
+      setShowAddSectionModal(false);
+      setNewSectionName("");
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -5721,11 +5733,19 @@ function GuidesTab() {
           </button>
 
           <button
+            onClick={() => { setShowAddSectionModal(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(139,92,246,0.15)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.3)" }}
+          >
+            <Plus size={13} /> Add Help Article Section
+          </button>
+
+          <button
             onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
-            style={{ background: "#0074F4" }}
+            style={{ background: "#ef4444" }}
           >
-            <Plus size={13} /> Add Guide
+            <Plus size={13} /> Add PDF
           </button>
         </div>
       </div>
@@ -5834,37 +5854,8 @@ function GuidesTab() {
           </form>
         </div>
       )}
-      {/* Section Visibility Toggles */}
-      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Eye size={13} style={{ color: "#9ca3af" }} />
-          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
-          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
-        </div>
-        {[
-          { key: "help_article", label: "Help Articles", color: "#8B5CF6" },
-          { key: "pdf",         label: "PDFs",          color: "#ef4444" },
-        ].map(({ key, label, color }) => (
-          <div key={key} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-              <span className="text-xs text-gray-300">{label}</span>
-            </div>
-            <button
-              onClick={() => toggleGuideSection(key)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-              style={guideVisibility[key] !== false
-                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-              }
-            >
-              {guideVisibility[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
-            </button>
-          </div>
-        ))}
-      </div>
-      {/* ── Help Articles Management (Published + Synced) ── */}
-      <HelpArticlesInline />
+      {/* ── Help Articles (Published) ── */}
+      <AdminHelpArticlesSection />
 
       {/* ── PDF Resources ── */}
       {isLoading ? (
@@ -5876,6 +5867,52 @@ function GuidesTab() {
           onDelete={(id) => { if (confirm("Delete this guide?")) deleteMutation.mutate({ id }); }}
         />
       )}
+
+      {/* ── Divider ── */}
+      <div className="flex items-center gap-3 py-1">
+        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "#1a1f2e", border: "1px solid #2a2a2a" }}>
+          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#8B5CF6" }} />
+          <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#6b7280" }}>SYNCED HELP ARTICLES</span>
+        </div>
+        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
+      </div>
+
+      {/* ── Synced Help Articles (Intercom source) ── */}
+      <SyncedHelpArticlesPanel />
+
+      {/* ── Add Help Article Section Modal ── */}
+      <Dialog open={showAddSectionModal} onOpenChange={setShowAddSectionModal}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Add Help Article Section</DialogTitle>
+            <DialogDescription className="text-gray-400">Create a named section to group published help articles for customers.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <label className="block text-xs text-gray-400 mb-1">Section Name *</label>
+            <input
+              style={{ background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, padding: "8px 10px", fontSize: 13, width: "100%", outline: "none" }}
+              placeholder="e.g. Dialer Settings"
+              value={newSectionName}
+              onChange={e => setNewSectionName(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && newSectionName.trim()) createSectionMutation.mutate({ name: newSectionName.trim() }); }}
+              autoFocus
+            />
+            <p className="text-xs text-gray-500">After creating, go to Synced Help Articles below to assign articles to this section.</p>
+          </div>
+          <DialogFooter>
+            <button onClick={() => { setShowAddSectionModal(false); setNewSectionName(""); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+            <button
+              onClick={() => { if (newSectionName.trim()) createSectionMutation.mutate({ name: newSectionName.trim() }); }}
+              disabled={!newSectionName.trim() || createSectionMutation.isPending}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              style={{ background: "#8B5CF6" }}
+            >
+              {createSectionMutation.isPending ? "Creating…" : "Create Section"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -5907,7 +5944,6 @@ function GuideGroups({
     onSuccess: () => utils.guides.adminList.invalidate(),
     onError: (e) => toast.error("Reorder failed: " + e.message),
   });
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [localOrder, setLocalOrder] = useState<Record<string, number[]>>({});
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -5925,6 +5961,10 @@ function GuideGroups({
     acc[sec] = pdfGuides.filter(g => (g.category ?? "") === sec);
     return acc;
   }, {} as Record<string, typeof pdfGuides>);
+  // Default all sub-sections collapsed
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(sectionOrder.map(s => [s, true]))
+  );
 
   const getOrderedGroup = useCallback((key: string, group: typeof pdfGuides) => {
     const order = localOrder[key];
@@ -7973,7 +8013,30 @@ function PartnersContentTab() {
   );
 }
 
-// ─── Help Articles Inline (embedded in Resource Hub tab) ────────────────────
+// ─── Admin Help Articles Section (header + PublishedHelpArticlesPanel) ──────────
+function AdminHelpArticlesSection() {
+  const ACCENT = "#8B5CF6";
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+      {/* Non-collapsible top-level header */}
+      <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${ACCENT}20` }}>
+            <HelpCircle size={14} style={{ color: ACCENT }} />
+          </div>
+          <div>
+            <span className="text-sm font-bold text-white">Help Articles</span>
+            <span className="text-xs text-gray-500 ml-2">Customer-facing published articles</span>
+          </div>
+        </div>
+      </div>
+      <div className="p-4" style={{ background: "#111" }}>
+        <PublishedHelpArticlesPanel />
+      </div>
+    </div>
+  );
+}
+
 // ─── Published Help Articles Management Panel ─────────────────────────────────
 function PublishedHelpArticlesPanel() {
   const ACCENT = "#8B5CF6";
@@ -8008,7 +8071,10 @@ function PublishedHelpArticlesPanel() {
     return acc;
   }, {} as Record<string, typeof published>);
 
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  // Default all sections to collapsed (true = collapsed)
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(sections.map(s => [s, true]))
+  );
   const [editingSection, setEditingSection] = useState<{ id: string; value: string } | null>(null);
 
   function handleDragEnd(sec: string, event: DragEndEvent) {

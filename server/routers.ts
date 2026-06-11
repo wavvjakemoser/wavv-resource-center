@@ -138,6 +138,11 @@ import {
   unpublishHelpArticle,
   updatePublishedArticleSection,
   reorderPublishedArticles,
+  getHelpArticleSections,
+  createHelpArticleSection,
+  deleteHelpArticleSection,
+  renameHelpArticleSection,
+  reorderHelpArticleSections,
 } from "./db";
 import { runIntercomSync } from "./intercomSync";
 
@@ -2176,6 +2181,46 @@ export const appRouter = router({
         return next({ ctx });
       })
       .mutation(({ input }) => reorderPublishedArticles(input)),
+
+    // ── Help Article Sections (named groups for customer-facing display) ──────
+    // Public: list sections
+    listSections: publicProcedure.query(() => getHelpArticleSections()),
+
+    // Admin: create a new section
+    createSection: protectedProcedure
+      .input(z.object({ name: z.string().min(1) }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => createHelpArticleSection(input.name)),
+
+    // Admin: delete a section
+    deleteSection: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => deleteHelpArticleSection(input.id)),
+
+    // Admin: rename a section
+    renameSection: protectedProcedure
+      .input(z.object({ id: z.number(), name: z.string().min(1) }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => renameHelpArticleSection(input.id, input.name)),
+
+    // Admin: reorder sections
+    reorderSections: protectedProcedure
+      .input(z.array(z.object({ id: z.number(), sortOrder: z.number() })))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => reorderHelpArticleSections(input)),
   }),
 
   readiness: router({
