@@ -5908,6 +5908,13 @@ function GuidesTab() {
         </div>
       </div>
 
+      {/* ── Help Articles category header ── */}
+      <div className="flex items-center gap-3 px-1">
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#8B5CF6" }} />
+        <span className="text-sm font-semibold text-white">Help Articles</span>
+        <span className="text-xs text-gray-500">Published help articles grouped by section</span>
+      </div>
+
       {/* ── Published Help Articles ── */}
       <PublishedHelpArticlesPanel />
 
@@ -6044,7 +6051,7 @@ function GuideGroups({
       {/* PDF section header */}
       <div className="flex items-center gap-3 px-1">
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PDF_COLOR }} />
-        <span className="text-sm font-semibold text-white">PDF</span>
+        <span className="text-sm font-semibold text-white">PDFs</span>
         <span className="text-xs text-gray-500">Viewable and Downloadable PDF documents</span>
         <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}20`, color: PDF_COLOR }}>{pdfGuides.length}</span>
       </div>
