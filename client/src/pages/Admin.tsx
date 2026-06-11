@@ -7959,8 +7959,348 @@ function PartnersContentTab() {
 }
 
 // ─── Help Articles Inline (embedded in Guides & Docs tab) ───────────────────
+// ─── Published Help Articles Management Panel ─────────────────────────────────
+function PublishedHelpArticlesPanel() {
+  const ACCENT = "#8B5CF6";
+  const utils = trpc.useUtils();
+  const { data: published = [], isLoading } = trpc.helpArticles.listPublished.useQuery();
+  const unpublishMutation = trpc.helpArticles.unpublish.useMutation({
+    onSuccess: () => { utils.helpArticles.listPublished.invalidate(); toast.success("Article removed from Help Articles"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const updateSectionMutation = trpc.helpArticles.updateSection.useMutation({
+    onSuccess: () => utils.helpArticles.listPublished.invalidate(),
+    onError: (e) => toast.error(e.message),
+  });
+  const reorderMutation = trpc.helpArticles.reorder.useMutation({
+    onSuccess: () => utils.helpArticles.listPublished.invalidate(),
+    onError: (e) => toast.error(e.message),
+  });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  // Group by sectionName, ordered by sectionOrder
+  const sections = Array.from(new Set(published.map(a => a.sectionName))).sort((a, b) => {
+    const ao = published.find(x => x.sectionName === a)?.sectionOrder ?? 0;
+    const bo = published.find(x => x.sectionName === b)?.sectionOrder ?? 0;
+    return ao - bo;
+  });
+  const bySection = sections.reduce((acc, sec) => {
+    acc[sec] = [...published.filter(a => a.sectionName === sec)].sort((a, b) => a.sortOrder - b.sortOrder);
+    return acc;
+  }, {} as Record<string, typeof published>);
+
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [editingSection, setEditingSection] = useState<{ id: string; value: string } | null>(null);
+
+  function handleDragEnd(sec: string, event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const group = bySection[sec];
+    const oldIdx = group.findIndex(a => a.intercomArticleId === active.id);
+    const newIdx = group.findIndex(a => a.intercomArticleId === over.id);
+    const newOrder = arrayMove(group, oldIdx, newIdx);
+    // Compute sectionOrder from the first item in the section
+    const sectionOrder = published.find(a => a.sectionName === sec)?.sectionOrder ?? 0;
+    reorderMutation.mutate(newOrder.map((a, i) => ({ intercomArticleId: a.intercomArticleId, sortOrder: i, sectionOrder })));
+  }
+
+  if (isLoading) return <div className="flex items-center justify-center py-8"><div className="animate-spin w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full" /></div>;
+
+  if (published.length === 0) {
+    return (
+      <div className="rounded-xl p-6 text-center" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+        <HelpCircle size={24} className="mx-auto mb-2" style={{ color: ACCENT, opacity: 0.5 }} />
+        <p className="text-sm text-gray-400 font-medium">No articles published yet</p>
+        <p className="text-xs text-gray-600 mt-1">Use the Synced Help Articles panel below to select and publish articles to the customer-facing section.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {sections.map((sec) => {
+        const group = bySection[sec];
+        const isCollapsed = collapsed[sec];
+        return (
+          <div key={sec} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+            <button
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-white/5 transition"
+              style={{ background: "#1d2230" }}
+              onClick={() => setCollapsed(c => ({ ...c, [sec]: !c[sec] }))}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ACCENT }} />
+                {editingSection?.id === sec ? (
+                  <input
+                    className="text-sm font-semibold text-white bg-transparent border-b border-purple-500 outline-none px-1"
+                    value={editingSection.value}
+                    onClick={e => e.stopPropagation()}
+                    onChange={e => setEditingSection({ id: sec, value: e.target.value })}
+                    onBlur={() => {
+                      if (editingSection.value.trim() && editingSection.value !== sec) {
+                        // Update all articles in this section to new section name
+                        group.forEach(a => updateSectionMutation.mutate({ intercomArticleId: a.intercomArticleId, sectionName: editingSection.value.trim() }));
+                      }
+                      setEditingSection(null);
+                    }}
+                    onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") setEditingSection(null); }}
+                    autoFocus
+                  />
+                ) : (
+                  <span className="text-sm font-semibold text-white">{sec}</span>
+                )}
+                <button
+                  onClick={e => { e.stopPropagation(); setEditingSection({ id: sec, value: sec }); }}
+                  className="text-gray-600 hover:text-gray-300 transition"
+                  title="Rename section"
+                ><Pencil size={11} /></button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${ACCENT}20`, color: ACCENT }}>{group.length}</span>
+                <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
+              </div>
+            </button>
+            {!isCollapsed && (
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(sec, e)}>
+                <SortableContext items={group.map(a => a.intercomArticleId)} strategy={verticalListSortingStrategy}>
+                  <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#111" }}>
+                    {group.map((a) => (
+                      <SortableHelpArticleRow
+                        key={a.intercomArticleId}
+                        article={a}
+                        onUnpublish={() => unpublishMutation.mutate({ intercomArticleId: a.intercomArticleId })}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SortableHelpArticleRow({ article, onUnpublish }: { article: { intercomArticleId: string; title: string; url: string | null; sectionName: string }; onUnpublish: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: article.intercomArticleId });
+  const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 px-4 py-2.5">
+      <span {...attributes} {...listeners} className="text-gray-600 cursor-grab hover:text-gray-400 transition flex-shrink-0">⠿</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-white truncate">{article.title}</p>
+      </div>
+      {article.url && (
+        <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-400 transition flex-shrink-0"><ExternalLink size={12} /></a>
+      )}
+      <button onClick={onUnpublish} className="text-gray-600 hover:text-red-400 transition flex-shrink-0" title="Remove from Help Articles"><X size={13} /></button>
+    </div>
+  );
+}
+
+// ─── Synced Help Articles Panel (Intercom → Publish) ─────────────────────────
 function HelpArticlesInline() {
-  return <HelpArticlesAdminTab />;
+  return <SyncedHelpArticlesPanel />;
+}
+
+function SyncedHelpArticlesPanel() {
+  const ACCENT = "#8B5CF6";
+  const utils = trpc.useUtils();
+  const { data: collections, isLoading: colLoading } = trpc.helpArticles.adminListCollections.useQuery();
+  const { data: articles, isLoading: artLoading } = trpc.helpArticles.adminListAll.useQuery();
+  const { data: published = [] } = trpc.helpArticles.listPublished.useQuery();
+  const syncMutation = trpc.helpArticles.sync.useMutation({
+    onSuccess: (result) => {
+      toast.success(`Sync complete — ${result.synced} articles synced, ${result.skipped} skipped`);
+      utils.helpArticles.adminListAll.invalidate();
+      utils.helpArticles.adminListCollections.invalidate();
+    },
+    onError: (err) => toast.error(`Sync failed: ${err.message}`),
+  });
+  const publishMutation = trpc.helpArticles.publish.useMutation({
+    onSuccess: () => { utils.helpArticles.listPublished.invalidate(); toast.success("Article published to Help Articles"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const unpublishMutation = trpc.helpArticles.unpublish.useMutation({
+    onSuccess: () => { utils.helpArticles.listPublished.invalidate(); toast.success("Article removed"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const [expandedCol, setExpandedCol] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  // Per-article section assignment state (before publishing)
+  const [sectionInputs, setSectionInputs] = useState<Record<string, string>>({});
+
+  const isLoading = colLoading || artLoading;
+  const publishedIds = new Set(published.map(a => a.intercomArticleId));
+  const publishedSections = Array.from(new Set(published.map(a => a.sectionName)));
+
+  const filteredArticles = (articles ?? []).filter(
+    (a) => !search || a.title.toLowerCase().includes(search.toLowerCase()) || (a.summary ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+  const colMap = new Map((collections ?? []).map((c) => [c.intercomId, c]));
+  const grouped = new Map<string, typeof filteredArticles>();
+  const uncategorized: typeof filteredArticles = [];
+  for (const a of filteredArticles) {
+    const colId = a.collectionId ?? "";
+    if (colId) { if (!grouped.has(colId)) grouped.set(colId, []); grouped.get(colId)!.push(a); }
+    else uncategorized.push(a);
+  }
+
+  const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", borderRadius: 6, color: "#fff", padding: "4px 8px", fontSize: 12, outline: "none" };
+
+  function getSection(articleId: string, collectionName: string) {
+    return sectionInputs[articleId] ?? collectionName;
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Published Help Articles Management */}
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-2">
+          <CheckCircle2 size={14} style={{ color: ACCENT }} />
+          <span className="text-sm font-semibold text-white">Published Help Articles</span>
+          <span className="text-xs text-gray-500 ml-1">— visible to customers on Guides & Docs</span>
+        </div>
+        <PublishedHelpArticlesPanel />
+      </div>
+
+      {/* Visual separator */}
+      <div className="flex items-center gap-3 py-1">
+        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <RotateCcw size={11} style={{ color: "#6b7280" }} />
+          <span className="text-xs text-gray-500">Synced from Intercom Help Center</span>
+        </div>
+        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
+      </div>
+
+      {/* Sync header */}
+      <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${ACCENT}18` }}>
+            <HelpCircle size={18} style={{ color: ACCENT }} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-white">Synced Help Articles</p>
+            <p className="text-xs text-gray-500">{articles?.length ?? 0} articles synced from Intercom — select to publish to customers</p>
+          </div>
+        </div>
+        <button
+          onClick={() => syncMutation.mutate()}
+          disabled={syncMutation.isPending}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+          style={{ background: `${ACCENT}18`, color: ACCENT, border: `1px solid ${ACCENT}35` }}
+        >
+          {syncMutation.isPending ? <span className="animate-spin w-3 h-3 border border-current border-t-transparent rounded-full" /> : <RotateCcw size={13} />}
+          {syncMutation.isPending ? "Syncing…" : "Sync Now"}
+        </button>
+      </div>
+
+      {/* Search */}
+      <input
+        style={{ background: "#1d2230", border: "1px solid #2a2a2a", borderRadius: 8, color: "#fff", padding: "6px 10px", fontSize: 13, outline: "none", width: "100%" }}
+        placeholder="Search synced articles…"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full" />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {(collections ?? []).sort((a, b) => a.sortOrder - b.sortOrder).map((col) => {
+            const colArticles = grouped.get(col.intercomId) ?? [];
+            const isOpen = expandedCol === col.intercomId;
+            const publishedInCol = colArticles.filter(a => publishedIds.has(a.intercomId)).length;
+            return (
+              <div key={col.intercomId} style={{ background: "#1d2230", border: "1px solid #2a2a2a", borderRadius: 12 }}>
+                <div className="flex items-center gap-3 px-4 py-3 cursor-pointer" onClick={() => setExpandedCol(isOpen ? null : col.intercomId)}>
+                  <div className="flex-1 flex items-center gap-2 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{col.name}</p>
+                    <span className="text-xs text-gray-500 flex-shrink-0">({colArticles.length})</span>
+                    {publishedInCol > 0 && (
+                      <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0" style={{ background: `${ACCENT}20`, color: ACCENT }}>{publishedInCol} published</span>
+                    )}
+                  </div>
+                  {isOpen ? <ChevronUp size={14} className="text-gray-500 flex-shrink-0" /> : <ChevronDown size={14} className="text-gray-500 flex-shrink-0" />}
+                </div>
+                {isOpen && (
+                  <div className="px-4 pb-3 space-y-2" style={{ borderTop: "1px solid #2a2a2a" }}>
+                    {colArticles.length === 0 ? (
+                      <p className="text-xs text-gray-500 py-3">No articles in this collection.</p>
+                    ) : (
+                      colArticles.map((a) => {
+                        const isPublished = publishedIds.has(a.intercomId);
+                        const sectionVal = getSection(a.intercomId, col.name);
+                        return (
+                          <div key={a.id} className="flex items-center gap-3 px-3 py-2 rounded-lg mt-2" style={{ background: "#111827", border: `1px solid ${isPublished ? `${ACCENT}30` : "#1f2937"}` }}>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-white truncate">{a.title}</p>
+                              {a.summary && <p className="text-xs text-gray-500 truncate mt-0.5">{a.summary}</p>}
+                            </div>
+                            {/* Section input */}
+                            {!isPublished && (
+                              <div className="flex-shrink-0">
+                                <input
+                                  list={`sections-list-${a.intercomId}`}
+                                  style={inputStyle}
+                                  value={sectionVal}
+                                  onChange={e => setSectionInputs(s => ({ ...s, [a.intercomId]: e.target.value }))}
+                                  placeholder="Section name"
+                                  className="w-36"
+                                />
+                                <datalist id={`sections-list-${a.intercomId}`}>
+                                  {publishedSections.map(s => <option key={s} value={s} />)}
+                                  <option value={col.name} />
+                                </datalist>
+                              </div>
+                            )}
+                            {isPublished ? (
+                              <button
+                                onClick={() => unpublishMutation.mutate({ intercomArticleId: a.intercomId })}
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                                style={{ background: `${ACCENT}20`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+                              >
+                                <CheckCircle2 size={11} /> Published
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  const sec = sectionVal.trim() || col.name;
+                                  publishMutation.mutate({ intercomArticleId: a.intercomId, title: a.title, url: a.url, sectionName: sec, sortOrder: 0, sectionOrder: publishedSections.indexOf(sec) >= 0 ? publishedSections.indexOf(sec) : publishedSections.length });
+                                }}
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                                style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+                              >
+                                <Plus size={11} /> Publish
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {filteredArticles.length === 0 && (
+            <div className="text-center py-8 text-gray-500 text-sm">
+              {search ? `No articles match "${search}"` : "No articles synced yet. Click Sync Now to pull from Intercom."}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── Help Articles Admin Tab ──────────────────────────────────────────────────

@@ -133,6 +133,11 @@ import {
   getHelpArticleById,
   setHelpArticleVisible,
   setHelpCollectionVisible,
+  getPublishedHelpArticles,
+  publishHelpArticle,
+  unpublishHelpArticle,
+  updatePublishedArticleSection,
+  reorderPublishedArticles,
 } from "./db";
 import { runIntercomSync } from "./intercomSync";
 
@@ -2120,6 +2125,57 @@ export const appRouter = router({
         const result = await runIntercomSync();
         return result;
       }),
+
+    // ── Published Help Articles (customer-facing) ──────────────────────────
+    // Public: list published articles (for customer-facing Guides & Docs)
+    listPublished: publicProcedure.query(() => getPublishedHelpArticles()),
+
+    // Admin: publish an article (or update its section/order)
+    publish: protectedProcedure
+      .input(z.object({
+        intercomArticleId: z.string(),
+        title: z.string(),
+        url: z.string().optional().nullable(),
+        sectionName: z.string().min(1),
+        sortOrder: z.number().optional(),
+        sectionOrder: z.number().optional(),
+      }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => publishHelpArticle(input)),
+
+    // Admin: unpublish (remove from customer-facing section)
+    unpublish: protectedProcedure
+      .input(z.object({ intercomArticleId: z.string() }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => unpublishHelpArticle(input.intercomArticleId)),
+
+    // Admin: update section assignment for a published article
+    updateSection: protectedProcedure
+      .input(z.object({ intercomArticleId: z.string(), sectionName: z.string().min(1) }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => updatePublishedArticleSection(input.intercomArticleId, input.sectionName)),
+
+    // Admin: bulk reorder published articles (update sortOrder + sectionOrder)
+    reorder: protectedProcedure
+      .input(z.array(z.object({
+        intercomArticleId: z.string(),
+        sortOrder: z.number(),
+        sectionOrder: z.number(),
+      })))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => reorderPublishedArticles(input)),
   }),
 
   readiness: router({

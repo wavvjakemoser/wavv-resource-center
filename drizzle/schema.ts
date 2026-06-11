@@ -403,3 +403,28 @@ export const partnerContent = mysqlTable("partner_content", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type PartnerContent = typeof partnerContent.$inferSelect;
+
+// ─── Published Help Articles (customer-facing) ────────────────────────────────
+// Tracks which Intercom articles have been manually published to the
+// customer-facing Guides & Docs "Help Articles" section.
+// Admins select articles from the synced Intercom data and assign them
+// to a named section (e.g. "Dialer Settings", "Call Boards").
+export const publishedHelpArticles = mysqlTable("published_help_articles", {
+  id: int("id").autoincrement().primaryKey(),
+  // References helpArticles.intercomId (not FK to keep it loose)
+  intercomArticleId: varchar("intercom_article_id", { length: 64 }).notNull().unique(),
+  // Denormalized for fast reads without joins
+  title: varchar("title", { length: 500 }).notNull(),
+  url: text("url"),
+  // Section name shown on the customer-facing page (e.g. "Dialer Settings")
+  sectionName: varchar("section_name", { length: 255 }).notNull().default("General"),
+  // Sort order within the section (lower = first)
+  sortOrder: int("sort_order").default(0).notNull(),
+  // Sort order of the section itself (lower = first section shown)
+  sectionOrder: int("section_order").default(0).notNull(),
+  publishedAt: timestamp("published_at").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PublishedHelpArticle = typeof publishedHelpArticles.$inferSelect;
+export type InsertPublishedHelpArticle = typeof publishedHelpArticles.$inferInsert;

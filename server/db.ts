@@ -10,6 +10,8 @@ import {
   lessonProgress,
   lessons,
   playgroundRequests,
+  publishedHelpArticles,
+  InsertPublishedHelpArticle,
   supportTickets,
   users,
   webinarRegistrations,
@@ -2312,4 +2314,85 @@ export async function setHelpCollectionVisible(id: number, visible: boolean): Pr
   const db = await getDb();
   if (!db) return;
   await db.update(helpArticleCollections).set({ visible }).where(eq(helpArticleCollections.id, id));
+}
+
+// ─── Published Help Articles (customer-facing) ────────────────────────────────
+
+/** List all published help articles ordered by sectionOrder then sortOrder */
+export async function getPublishedHelpArticles() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(publishedHelpArticles)
+    .orderBy(publishedHelpArticles.sectionOrder, publishedHelpArticles.sortOrder);
+}
+
+/** Publish an Intercom article to the customer-facing section */
+export async function publishHelpArticle(data: {
+  intercomArticleId: string;
+  title: string;
+  url?: string | null;
+  sectionName: string;
+  sortOrder?: number;
+  sectionOrder?: number;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Upsert: if already published, update section/order
+  await db
+    .insert(publishedHelpArticles)
+    .values({
+      intercomArticleId: data.intercomArticleId,
+      title: data.title,
+      url: data.url ?? null,
+      sectionName: data.sectionName,
+      sortOrder: data.sortOrder ?? 0,
+      sectionOrder: data.sectionOrder ?? 0,
+    })
+    .onDuplicateKeyUpdate({
+      set: {
+        title: data.title,
+        url: data.url ?? null,
+        sectionName: data.sectionName,
+        sortOrder: data.sortOrder ?? 0,
+        sectionOrder: data.sectionOrder ?? 0,
+      },
+    });
+}
+
+/** Unpublish (remove) an article from the customer-facing section */
+export async function unpublishHelpArticle(intercomArticleId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .delete(publishedHelpArticles)
+    .where(eq(publishedHelpArticles.intercomArticleId, intercomArticleId));
+}
+
+/** Update section name for a published article */
+export async function updatePublishedArticleSection(
+  intercomArticleId: string,
+  sectionName: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(publishedHelpArticles)
+    .set({ sectionName })
+    .where(eq(publishedHelpArticles.intercomArticleId, intercomArticleId));
+}
+
+/** Bulk update sort orders for articles within a section */
+export async function reorderPublishedArticles(
+  updates: Array<{ intercomArticleId: string; sortOrder: number; sectionOrder: number }>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  for (const u of updates) {
+    await db
+      .update(publishedHelpArticles)
+      .set({ sortOrder: u.sortOrder, sectionOrder: u.sectionOrder })
+      .where(eq(publishedHelpArticles.intercomArticleId, u.intercomArticleId));
+  }
 }

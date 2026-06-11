@@ -260,6 +260,13 @@
       "when": 1781148399315,
       "tag": "0035_lucky_solo",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1781155319484,
+      "tag": "0036_worried_yellowjacket",
+      "breakpoints": true
     }
   ]
 }

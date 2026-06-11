@@ -1349,3 +1349,16 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Customer-facing Guides & Docs: reordered — Help Articles first, then PDFs with sub-sections; removed Checklist/Playbook/Resource
 - [x] Customer-facing Guides & Docs: unified formatting — both sections use same header pattern (icon + label + description + count + chevron + color divider)
 - [x] Customer-facing Guides & Docs: PDFs grouped by section (category field), each section collapsible; flat list fallback when no sections set
+
+## Guides & Docs Revamp — Help Articles + PDF Two-Section Model
+
+- [x] Schema: create published_help_articles table (intercom_article_id, title, url, section_name, sort_order, section_order, published_at)
+- [x] Backend: tRPC procedures — list published articles, publish article (with section), unpublish, reorder (sort_order), update section assignment
+- [x] Backend: tRPC procedure — list Intercom collections with their articles (for admin browse panel)
+- [x] Admin Guides tab: PDF section — drag-to-reorder PDFs within sections
+- [x] Admin Guides tab: visual separator + "Synced from Intercom Help Center" label between PDF section and Synced Help Articles section
+- [x] Admin Guides tab: Synced Help Articles section — browse Intercom collections, expand collection to see articles, Publish button per article, section name input with autocomplete
+- [x] Admin Guides tab: Published Help Articles panel — shows published articles grouped by section, drag-to-reorder within section, rename section inline, remove article
+- [x] Customer-facing Guides & Docs: Help Articles top-level section — reads from published_help_articles, collapsible sub-sections (by section_name), article rows link to Intercom URL
+- [x] Customer-facing Guides & Docs: PDFs top-level section — collapsible sub-sections (by category), PDFs as rows with download + view
+- [x] Customer-facing Guides & Docs: both top-level sections collapsible, sub-sections collapsible, consistent header style
