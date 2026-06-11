@@ -436,6 +436,7 @@ export const helpArticleSections = mysqlTable("help_article_sections", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull().unique(),
   sortOrder: int("sort_order").default(0).notNull(),
+  isVisible: boolean("is_visible").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

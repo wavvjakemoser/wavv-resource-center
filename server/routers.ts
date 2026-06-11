@@ -143,6 +143,8 @@ import {
   deleteHelpArticleSection,
   renameHelpArticleSection,
   reorderHelpArticleSections,
+  toggleHelpArticleSectionVisibility,
+  getVisibleHelpArticleSections,
 } from "./db";
 import { runIntercomSync } from "./intercomSync";
 
@@ -2183,8 +2185,25 @@ export const appRouter = router({
       .mutation(({ input }) => reorderPublishedArticles(input)),
 
     // ── Help Article Sections (named groups for customer-facing display) ──────
-    // Public: list sections
-    listSections: publicProcedure.query(() => getHelpArticleSections()),
+    // Public: list visible sections only
+    listSections: publicProcedure.query(() => getVisibleHelpArticleSections()),
+
+    // Admin: list all sections (including hidden)
+    listSectionsAdmin: protectedProcedure
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .query(() => getHelpArticleSections()),
+
+    // Admin: toggle section visibility
+    toggleSectionVisibility: protectedProcedure
+      .input(z.object({ id: z.number(), isVisible: z.boolean() }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => toggleHelpArticleSectionVisibility(input.id, input.isVisible)),
 
     // Admin: create a new section
     createSection: protectedProcedure

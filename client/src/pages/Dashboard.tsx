@@ -58,7 +58,7 @@ const START_HERE_CARDS = [
     id: "guides",
     href: "/guides",
     navHref: "/guides",
-    label: "Resource Hub",
+    label: "WAVV Resource Hub",
     icon: FileText,
     color: "#67C728",
     description: "Browse help articles and downloadable PDF guides organized by topic.",

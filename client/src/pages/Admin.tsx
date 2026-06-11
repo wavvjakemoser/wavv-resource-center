@@ -5628,11 +5628,17 @@ function GuidesTab() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const { data: pdfSections = [] } = trpc.guides.listSections.useQuery();
   // Add Help Article Section modal
+  const { data: helpArticleSectionsAdmin = [] } = trpc.helpArticles.listSectionsAdmin.useQuery();
+  const toggleSectionVisibilityMutation = trpc.helpArticles.toggleSectionVisibility.useMutation({
+    onSuccess: () => { utils.helpArticles.listSectionsAdmin.invalidate(); utils.helpArticles.listSections.invalidate(); toast.success("Visibility updated"); },
+    onError: (e) => toast.error(e.message),
+  });
   const [showAddSectionModal, setShowAddSectionModal] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const createSectionMutation = trpc.helpArticles.createSection.useMutation({
     onSuccess: () => {
       utils.helpArticles.listPublished.invalidate();
+      utils.helpArticles.listSectionsAdmin.invalidate();
       toast.success("Section created");
       setShowAddSectionModal(false);
       setNewSectionName("");
@@ -5854,8 +5860,57 @@ function GuidesTab() {
           </form>
         </div>
       )}
-      {/* ── Help Articles (Published) ── */}
-      <AdminHelpArticlesSection />
+      {/* ── Help Articles Section (with visibility toggles) ── */}
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+        {/* Non-collapsible header */}
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(139,92,246,0.15)" }}>
+              <HelpCircle size={14} style={{ color: "#8B5CF6" }} />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-white">Help Articles</span>
+              <span className="text-xs text-gray-500 ml-2">Customer-facing published articles</span>
+            </div>
+          </div>
+        </div>
+        {/* Section Visibility Panel */}
+        {helpArticleSectionsAdmin.length > 0 && (
+          <div className="px-4 py-3 space-y-2" style={{ background: "#111", borderBottom: "1px solid #1a1a1a" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Eye size={12} className="text-gray-500" />
+              <span className="text-xs font-semibold text-gray-400">Section Visibility</span>
+              <span className="text-xs text-gray-600">— toggle to show/hide sections from users</span>
+            </div>
+            {helpArticleSectionsAdmin.map((sec, idx) => {
+              const dotColors = ["#67C728", "#0074F4", "#FF9900", "#8B5CF6", "#ef4444", "#06b6d4"];
+              const dotColor = dotColors[idx % dotColors.length];
+              return (
+                <div key={sec.id} className="flex items-center justify-between px-2 py-1.5 rounded-lg" style={{ background: "#1d2230" }}>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: dotColor }} />
+                    <span className="text-xs text-white">{sec.name}</span>
+                  </div>
+                  <button
+                    onClick={() => toggleSectionVisibilityMutation.mutate({ id: sec.id, isVisible: !sec.isVisible })}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all"
+                    style={sec.isVisible
+                      ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                      : { background: "rgba(107,114,128,0.15)", color: "#6b7280", border: "1px solid rgba(107,114,128,0.3)" }
+                    }
+                  >
+                    {sec.isVisible ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {/* Published articles list */}
+        <div className="p-4" style={{ background: "#111" }}>
+          <PublishedHelpArticlesPanel />
+        </div>
+      </div>
 
       {/* ── PDF Resources ── */}
       {isLoading ? (
@@ -8195,6 +8250,7 @@ function SyncedHelpArticlesPanel() {
   const { data: collections, isLoading: colLoading } = trpc.helpArticles.adminListCollections.useQuery();
   const { data: articles, isLoading: artLoading } = trpc.helpArticles.adminListAll.useQuery();
   const { data: published = [] } = trpc.helpArticles.listPublished.useQuery();
+  const { data: adminSections = [] } = trpc.helpArticles.listSectionsAdmin.useQuery();
   const syncMutation = trpc.helpArticles.sync.useMutation({
     onSuccess: (result) => {
       toast.success(`Sync complete — ${result.synced} articles synced, ${result.skipped} skipped`);
@@ -8214,8 +8270,8 @@ function SyncedHelpArticlesPanel() {
 
   const [expandedCol, setExpandedCol] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  // Per-article section assignment state (before publishing)
-  const [sectionInputs, setSectionInputs] = useState<Record<string, string>>({});
+  // Per-article section assignment state (before publishing) — maps articleId → sectionId (string)
+  const [sectionSelects, setSectionSelects] = useState<Record<string, string>>({});
 
   const isLoading = colLoading || artLoading;
   const publishedIds = new Set(published.map(a => a.intercomArticleId));
@@ -8235,8 +8291,14 @@ function SyncedHelpArticlesPanel() {
 
   const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", borderRadius: 6, color: "#fff", padding: "4px 8px", fontSize: 12, outline: "none" };
 
-  function getSection(articleId: string, collectionName: string) {
-    return sectionInputs[articleId] ?? collectionName;
+  function getSelectedSectionName(articleId: string): string {
+    const selectedId = sectionSelects[articleId];
+    if (selectedId) {
+      const found = adminSections.find(s => String(s.id) === selectedId);
+      if (found) return found.name;
+    }
+    // Default to first section if available
+    return adminSections[0]?.name ?? "";
   }
 
   return (
@@ -8320,29 +8382,30 @@ function SyncedHelpArticlesPanel() {
                     ) : (
                       colArticles.map((a) => {
                         const isPublished = publishedIds.has(a.intercomId);
-                        const sectionVal = getSection(a.intercomId, col.name);
                         return (
                           <div key={a.id} className="flex items-center gap-3 px-3 py-2 rounded-lg mt-2" style={{ background: "#111827", border: `1px solid ${isPublished ? `${ACCENT}30` : "#1f2937"}` }}>
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium text-white truncate">{a.title}</p>
                               {a.summary && <p className="text-xs text-gray-500 truncate mt-0.5">{a.summary}</p>}
                             </div>
-                            {/* Section input */}
-                            {!isPublished && (
+                            {/* Section select dropdown */}
+                            {!isPublished && adminSections.length > 0 && (
                               <div className="flex-shrink-0">
-                                <input
-                                  list={`sections-list-${a.intercomId}`}
-                                  style={inputStyle}
-                                  value={sectionVal}
-                                  onChange={e => setSectionInputs(s => ({ ...s, [a.intercomId]: e.target.value }))}
-                                  placeholder="Section name"
-                                  className="w-36"
-                                />
-                                <datalist id={`sections-list-${a.intercomId}`}>
-                                  {publishedSections.map(s => <option key={s} value={s} />)}
-                                  <option value={col.name} />
-                                </datalist>
+                                <select
+                                  style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 6, color: "#fff", padding: "4px 8px", fontSize: 12, outline: "none", cursor: "pointer" }}
+                                  value={sectionSelects[a.intercomId] ?? ""}
+                                  onChange={e => setSectionSelects(s => ({ ...s, [a.intercomId]: e.target.value }))}
+                                  className="w-40"
+                                >
+                                  <option value="">Pick a section…</option>
+                                  {adminSections.map(sec => (
+                                    <option key={sec.id} value={String(sec.id)}>{sec.name}</option>
+                                  ))}
+                                </select>
                               </div>
+                            )}
+                            {!isPublished && adminSections.length === 0 && (
+                              <span className="text-xs text-gray-500 flex-shrink-0">Create a section first</span>
                             )}
                             {isPublished ? (
                               <button
@@ -8355,8 +8418,9 @@ function SyncedHelpArticlesPanel() {
                             ) : (
                               <button
                                 onClick={() => {
-                                  const sec = sectionVal.trim() || col.name;
-                                  publishMutation.mutate({ intercomArticleId: a.intercomId, title: a.title, url: a.url, sectionName: sec, sortOrder: 0, sectionOrder: publishedSections.indexOf(sec) >= 0 ? publishedSections.indexOf(sec) : publishedSections.length });
+                                  const sec = getSelectedSectionName(a.intercomId);
+                                  if (!sec) { toast.error("Please select a section first"); return; }
+                                  publishMutation.mutate({ intercomArticleId: a.intercomId, title: a.title, url: a.url, sectionName: sec, sortOrder: 0, sectionOrder: adminSections.findIndex(s => s.name === sec) });
                                 }}
                                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex-shrink-0"
                                 style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af", border: "1px solid #2a2a2a" }}

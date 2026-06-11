@@ -1,0 +1,1 @@
+ALTER TABLE `help_article_sections` ADD `is_visible` boolean DEFAULT true NOT NULL;

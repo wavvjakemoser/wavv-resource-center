@@ -30,7 +30,7 @@ function inputBlur(e: React.FocusEvent<HTMLInputElement>) {
 const features = [
   { icon: GraduationCap, label: "WAVV Academy", color: "#0074F4" },
   { icon: Video,         label: "Live & On-Demand Webinars", color: "#00A9E2" },
-  { icon: FileText,      label: "Resource Hub", color: "#67C728" },
+  { icon: FileText,      label: "WAVV Resource Hub", color: "#67C728" },
   { icon: Headphones,    label: "Dedicated Support", color: "#a78bfa" },
 ];
 

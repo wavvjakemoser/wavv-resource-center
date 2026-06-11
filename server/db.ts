@@ -2441,3 +2441,17 @@ export async function reorderHelpArticleSections(
       .where(eq(helpArticleSections.id, u.id));
   }
 }
+
+/** Toggle visibility of a help article section */
+export async function toggleHelpArticleSectionVisibility(id: number, isVisible: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(helpArticleSections).set({ isVisible }).where(eq(helpArticleSections.id, id));
+}
+
+/** List only visible help article sections (for customer-facing page) */
+export async function getVisibleHelpArticleSections() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(helpArticleSections).where(eq(helpArticleSections.isVisible, true)).orderBy(helpArticleSections.sortOrder);
+}
