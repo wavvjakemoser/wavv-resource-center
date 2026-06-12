@@ -2243,6 +2243,7 @@ export async function activateMfa(userId: number) {
     mfaEnabled: true,
     mfaSetupToken: null,
     mfaSetupTokenExpiresAt: null,
+    mfaForceReenroll: false, // Clear force-reenroll flag on successful re-setup
   }).where(eq(users.id, userId));
 }
 

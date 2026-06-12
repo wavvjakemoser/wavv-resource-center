@@ -1,0 +1,3 @@
+ALTER TABLE `invite_tokens` MODIFY COLUMN `role` enum('user','viewer','publisher','partner_manager','partner','owner') NOT NULL DEFAULT 'user';--> statement-breakpoint
+ALTER TABLE `users` MODIFY COLUMN `role` enum('user','viewer','publisher','partner_manager','partner','owner') NOT NULL DEFAULT 'user';--> statement-breakpoint
+ALTER TABLE `users` ADD `mfa_force_reenroll` boolean DEFAULT false NOT NULL;

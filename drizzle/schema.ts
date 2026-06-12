@@ -32,6 +32,8 @@ export const users = mysqlTable("users", {
   mfaEnabled: boolean("mfa_enabled").default(false).notNull(),
   mfaSetupToken: text("mfa_setup_token"),
   mfaSetupTokenExpiresAt: bigint("mfa_setup_token_expires_at", { mode: "number" }),
+  // Force re-enrollment: when true, user must complete MFA setup again before accessing the app
+  mfaForceReenroll: boolean("mfa_force_reenroll").default(false).notNull(),
 });
 
 export type User = typeof users.$inferSelect;

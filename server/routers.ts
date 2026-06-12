@@ -1075,6 +1075,7 @@ export const appRouter = router({
         lastSignedIn: u.lastSignedIn,
         strikes: u.strikes,
         mfaPending: opts.ctx.mfaPending,
+        mfaForceReenroll: u.mfaForceReenroll ?? false,
       };
     }),
 

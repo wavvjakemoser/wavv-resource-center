@@ -281,6 +281,13 @@
       "when": 1781161930995,
       "tag": "0038_third_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "5",
+      "when": 1781298475267,
+      "tag": "0039_heavy_puck",
+      "breakpoints": true
     }
   ]
 }

@@ -71,9 +71,13 @@ function MfaGate({ children }: { children: React.ReactNode }) {
     if (user && (user as { mfaPending?: boolean }).mfaPending) {
       navigate("/mfa-required");
     }
+    // Force re-enrollment: MFA secret was rotated server-side; user must complete fresh MFA setup
+    if (user && (user as { mfaForceReenroll?: boolean }).mfaForceReenroll) {
+      navigate("/mfa-required");
+    }
   }, [user, loading, isExempt, navigate]);
 
-  if (!loading && !isExempt && user && (user as { mfaPending?: boolean }).mfaPending) {
+  if (!loading && !isExempt && user && ((user as { mfaPending?: boolean }).mfaPending || (user as { mfaForceReenroll?: boolean }).mfaForceReenroll)) {
     return null; // suppress flash while redirect fires
   }
   return <>{children}</>;
