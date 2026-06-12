@@ -158,34 +158,42 @@ setInterval(() => {
   });
 }, 30 * 60 * 1000);
 
-// // ─── Role guards ─────────────────────────────────────────────────────
-// Owner only — full access, promote/demote, remove users
+// ─── Role guards ─────────────────────────────────────────────────────────────
+// Canonical roles: owner | content_admin (Publisher) | partner_admin (Partner Manager) | admin (Viewer)
+
+// Owner only — full platform control
 const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Owner access required" });
   }
   return next({ ctx });
 });
-// Content Admin or Owner — edit all content except Partners
-const superAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
+// Publisher (content_admin) or Owner — manage all content in Academy, Webinars, Guides; view analytics
+const publisherProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "content_admin" && ctx.user.role !== "owner") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Customer admin access required" });
+    throw new TRPCError({ code: "FORBIDDEN", message: "Publisher access required" });
   }
   return next({ ctx });
 });
-// Any internal role (admin, content_admin, partner_admin, owner) — read-only admin panel access
-const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+// Alias for backward compatibility within this file
+const superAdminProcedure = publisherProcedure;
+// Any Command Center role (Viewer/admin, Publisher/content_admin, Partner Manager/partner_admin, Owner) — read-only access
+const commandCenterProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+    throw new TRPCError({ code: "FORBIDDEN", message: "Command Center access required" });
   }  return next({ ctx });
 });
-// Partner Admin, Content Admin, or Owner — can manage team invites
-const partnerAdminOrSuperProcedure = protectedProcedure.use(({ ctx, next }) => {
+// Alias for backward compatibility within this file
+const adminProcedure = commandCenterProcedure;
+// Partner Manager (partner_admin), Publisher (content_admin), or Owner — can manage team invites
+const partnerManagerOrPublisherProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "content_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Partner admin or customer admin access required" });
+    throw new TRPCError({ code: "FORBIDDEN", message: "Partner Manager or Publisher access required" });
   }
   return next({ ctx });
 });
+// Alias for backward compatibility within this file
+const partnerAdminOrSuperProcedure = partnerManagerOrPublisherProcedure;
 // ─── Academy Router ───────────────────────────────────────────────────────────
 const academyRouter = router({
   getCourses: publicProcedure.query(async () => {

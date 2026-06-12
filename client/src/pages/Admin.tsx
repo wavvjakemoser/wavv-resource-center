@@ -222,7 +222,7 @@ export default function Admin() {
   // to prevent the race condition where loading=true + user=null triggers a login redirect
   if (loading) {
     return (
-      <PortalLayout title="Admin">
+      <PortalLayout title="Command Center">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin w-8 h-8 border-2 border-[#0074F4] border-t-transparent rounded-full" />
         </div>
@@ -283,7 +283,7 @@ export default function Admin() {
   }
 
   return (
-    <PortalLayout title="Admin">
+    <PortalLayout title="Command Center">
       <div className="px-4 lg:px-6 py-6 space-y-4">
 
         {/* ── Row 1: Operations ── */}
@@ -821,7 +821,7 @@ const PAGE_LABELS: Record<string, string> = {
   "/playground": "WAVV Playground",
   "/support": "WAVV Support",
   "/wavvpartner": "WAVV Partners",
-  "/wavvadmin": "Admin Panel",
+  "/wavvadmin": "WAVV Command Center",
   "/profile": "My Profile",
   "/search": "Search",
 };
@@ -7482,7 +7482,7 @@ function SettingsTab() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">Maintenance Mode</p>
-                    <p className="text-xs text-gray-500">Replace the public site with a "Coming soon" message. Owners can still access /wavvadmin.</p>
+                        <p className="text-xs text-gray-500">Replace the public site with a "Coming soon" message. Owners can still access the Command Center.</p>
                   </div>
                 </div>
                 <button
