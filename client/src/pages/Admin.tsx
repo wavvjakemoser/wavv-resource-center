@@ -2278,12 +2278,12 @@ function UsersTab() {
                       const slackMsg = [
                         `Hey ${inviteResult!.name}!`,
                         "",
-                        "You've been invited to the WAVV Success Center admin portal.",
+                        "You've been invited to the WAVV Command Center.",
                         "",
                         "Here's how to get set up:",
-                        `1. Click the "WAVV Success Center Admin Token" to accept your invite and create your password: ${inviteResult!.link}`,
+                        `1. Click the "WAVV Command Center Invite Link" to accept your invite and create your password: ${inviteResult!.link}`,
                         "2. Sign in using your newly created password",
-                        "3. You'll be prompted to set up Google Authenticator (required for all admins)",
+                        "3. You'll be prompted to set up Google Authenticator (required for all Command Center users)",
                         "4. Once MFA is active, you'll have full access",
                         "",
                         "This link expires in 72 hours and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.",
@@ -2297,12 +2297,12 @@ function UsersTab() {
                 </div>
                 <div className="p-3 text-xs leading-relaxed space-y-2" style={{ background: "#0a0a0a", color: "#c9d1d9", fontFamily: "monospace" }}>
                   <p>Hey <strong style={{ color: "#fff" }}>{inviteResult.name}</strong>!</p>
-                  <p>You've been invited to the <strong style={{ color: "#fff" }}>WAVV Success Center</strong> admin portal.</p>
+                  <p>You've been invited to the <strong style={{ color: "#fff" }}>WAVV Command Center</strong>.</p>
                   <p className="text-gray-400">Here's how to get set up:</p>
                   <ol className="list-none space-y-1 pl-1">
-                    <li>1. Click the <strong style={{ color: "#fff" }}>"WAVV Success Center Admin Token"</strong> to accept your invite and create your password:<br /><a href={inviteResult.link} target="_blank" rel="noopener noreferrer" style={{ color: "#93c5fd", wordBreak: "break-all" }} className="underline text-[10px]">{inviteResult.link}</a></li>
+                    <li>1. Click the <strong style={{ color: "#fff" }}>"WAVV Command Center Invite Link"</strong> to accept your invite and create your password:<br /><a href={inviteResult.link} target="_blank" rel="noopener noreferrer" style={{ color: "#93c5fd", wordBreak: "break-all" }} className="underline text-[10px]">{inviteResult.link}</a></li>
                     <li>2. Sign in using your newly created password</li>
-                    <li>3. You'll be prompted to set up <strong style={{ color: "#fff" }}>Google Authenticator</strong> (required for all admins)</li>
+                    <li>3. You'll be prompted to set up <strong style={{ color: "#fff" }}>Google Authenticator</strong> (required for all Command Center users)</li>
                     <li>4. Once MFA is active, you'll have full access</li>
                   </ol>
                   <p className="text-gray-500 text-[10px] mt-2">This link expires in <strong style={{ color: "#fbbf24" }}>72 hours</strong> and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.</p>
