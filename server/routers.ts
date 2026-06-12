@@ -1073,7 +1073,6 @@ export const appRouter = router({
         mfaEnabled: u.mfaEnabled,
         createdAt: u.createdAt,
         lastSignedIn: u.lastSignedIn,
-        strikes: u.strikes,
         mfaPending: opts.ctx.mfaPending,
         mfaForceReenroll: u.mfaForceReenroll ?? false,
       };
