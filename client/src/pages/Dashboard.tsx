@@ -85,7 +85,7 @@ const START_HERE_CARDS = [
     label: "WAVV Support",
     icon: Headphones,
     color: "#FF9900",
-    description: "Browse help articles, ask WAVV AI for an instant answer, or connect directly with a support rep.",
+    description: "Browse help articles and connect directly with a support rep.",
     cta: "Get Support",
     ctaIcon: MessageCircle,
     badge: null,

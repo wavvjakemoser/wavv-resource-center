@@ -27,7 +27,7 @@ const EVENT_META: Record<string, { label: string; icon: React.ElementType; color
   webinar_registered: { label: "Registered for a webinar",  icon: Video,        color: "#60a5fa" },
   webinar_watched:    { label: "Watched a webinar",          icon: Video,        color: "#60a5fa" },
   guide_downloaded:   { label: "Downloaded a guide",         icon: Download,     color: "#a78bfa" },
-  ai_chat:            { label: "Used WAVV AI",               icon: MessageSquare,color: "#f472b6" },
+  ai_chat:            { label: "Used AI search",             icon: MessageSquare,color: "#f472b6" },
   search:             { label: "Searched content",           icon: Search,       color: "#94a3b8" },
   login:              { label: "Signed in",                  icon: User,         color: "#64748b" },
   page_view:          { label: "Visited a page",             icon: BookOpen,     color: "#475569" },

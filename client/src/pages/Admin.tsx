@@ -739,7 +739,7 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<Download size={18} />}      label="Resource Hub Downloads"         value={stats?.guideDownloaded ?? 0}  color="green"  subtitle={`last ${days}d`} onClick={() => openDrawer("Resource Hub Downloads",          ["guide_downloaded"],                                        "#4ade80")} />
         <StatCard icon={<Search size={18} />}        label="Total Searches"                 value={stats?.searches ?? 0}         color="teal"   subtitle={`last ${days}d`} onClick={() => openDrawer("Total Searches",                  ["search"],                                                  "#2dd4bf")} />
-        <StatCard icon={<MessageSquare size={18} />} label="WAVV AI Conversations"          value={stats?.aiChats ?? 0}          color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("WAVV AI Conversations",           ["ai_chat"],                                                 "#a78bfa")} />
+        <StatCard icon={<MessageSquare size={18} />} label="AI Search Sessions"             value={stats?.aiChats ?? 0}          color="purple" subtitle={`last ${days}d`} onClick={() => openDrawer("AI Search Sessions",              ["ai_chat"],                                                 "#a78bfa")} />
       </div>
 
       {/* Charts row: Sign-In Trend + Event Distribution */}
@@ -6425,7 +6425,7 @@ function SupportTab() {
 
           {/* Description */}
           <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
-            This section will surface <span className="text-white font-medium">AskWAVV AI usage stats</span>,{" "}
+            This section will surface <span className="text-white font-medium">AI search usage stats</span>,{" "}
             <span className="text-white font-medium">engagement metrics</span>, and{" "}
             <span className="text-white font-medium">support volume trends</span> once instrumentation
             is complete. Ticket management is handled separately outside this portal.
@@ -6436,7 +6436,7 @@ function SupportTab() {
             className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2"
           >
             {[
-              { icon: <Activity size={14} />, label: "AskWAVV AI Stats" },
+              { icon: <Activity size={14} />, label: "AI Search Stats" },
               { icon: <TrendingUp size={14} />, label: "Engagement Metrics" },
               { icon: <BarChart3 size={14} />, label: "Support Volume Trends" },
             ].map(({ icon, label }) => (
