@@ -1509,7 +1509,7 @@ function UsersTab() {
       color: "#a78bfa",
       bg: "rgba(139,92,246,0.1)",
       activeBorder: "#a78bfa",
-      description: "Can manage all content (Academy, Webinars, Guides, Support, Playground) and view analytics. Cannot access Partner Analytics or Site Settings.",
+      description: "Can add and manage content in WAVV Academy, WAVV Webinars, and WAVV Resource Hub. Cannot access Partner content, Partner Analytics, or Site Settings.",
     },
     {
       filter: "partner_manager",
@@ -1519,7 +1519,7 @@ function UsersTab() {
       color: "#00A9E2",
       bg: "rgba(0,169,226,0.1)",
       activeBorder: "#00A9E2",
-      description: "Access to WAVV Knowledge and Partner Analytics. Can invite and manage WAVV Partner accounts. Read-only access to Team Access.",
+      description: "Access to WAVV Partners content and the WAVV Partners portal. Can invite and manage WAVV Partner accounts. Read-only access to Team Access.",
     },
     {
       filter: "viewer",
