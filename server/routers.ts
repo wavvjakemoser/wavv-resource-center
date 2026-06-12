@@ -1058,9 +1058,24 @@ export const appRouter = router({
     me: publicProcedure.query((opts) => {
       const u = opts.ctx.user;
       if (!u) return null;
-      // Never expose passwordHash or other sensitive fields to the client
-      const { passwordHash: _ph, openId: _oid, ...safeUser } = u;
-      return { ...safeUser, mfaPending: opts.ctx.mfaPending };
+      // Explicit allow-list — NEVER spread the full DB row.
+      // Sensitive fields (mfaSecret, mfaSetupToken, mfaSetupTokenExpiresAt,
+      // passwordHash, passwordResetToken, passwordResetExpires, openId, googleId)
+      // must never reach the client.
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        avatarUrl: u.avatarUrl,
+        isActive: u.isActive,
+        loginMethod: u.loginMethod,
+        mfaEnabled: u.mfaEnabled,
+        createdAt: u.createdAt,
+        lastSignedIn: u.lastSignedIn,
+        strikes: u.strikes,
+        mfaPending: opts.ctx.mfaPending,
+      };
     }),
 
     login: publicProcedure

@@ -50,7 +50,7 @@ export default function AdminPanel() {
           <div>
             <h1 className="text-xl font-bold text-white">Admin Panel</h1>
             <p className="text-gray-400 text-sm">
-              Manage courses, webinars, guides, and support tickets for the WAVV Resource Center.
+              Manage courses, webinars, guides, and support tickets for the WAVV Success Center.
             </p>
           </div>
         </div>

@@ -42,10 +42,17 @@ export function useAuth(options?: UseAuthOptions) {
   }, [logoutMutation, utils]);
 
   const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
+    // Only cache non-sensitive fields in localStorage.
+    // Never write credential or secret fields (mfaSecret, tokens, hashes) to client storage.
+    if (meQuery.data) {
+      const { id, name, email, role, avatarUrl, isActive, loginMethod, mfaEnabled, createdAt, lastSignedIn, strikes, mfaPending } = meQuery.data as Record<string, unknown>;
+      localStorage.setItem(
+        "manus-runtime-user-info",
+        JSON.stringify({ id, name, email, role, avatarUrl, isActive, loginMethod, mfaEnabled, createdAt, lastSignedIn, strikes, mfaPending })
+      );
+    } else {
+      localStorage.removeItem("manus-runtime-user-info");
+    }
     return {
       user: meQuery.data ?? null,
       loading: meQuery.isLoading || logoutMutation.isPending,

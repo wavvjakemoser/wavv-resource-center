@@ -98,7 +98,7 @@ function Router() {
       <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
       <Route path="/wavvpartner">{() => <PartnerPortalGuard><WavvPartnerPortal /></PartnerPortalGuard>}</Route>
       <Route path="/wavvcommandcenter" component={Admin} />
-      <Route path="/wavvcommandcenter">{() => <Redirect to="/wavvcommandcenter" />}</Route>
+      <Route path="/wavvadmin">{() => <Redirect to="/wavvcommandcenter" />}</Route>
       <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>
       <Route path="/hands-on">{() => <Redirect to="/playground" />}</Route>
       <Route path="/accept-invite" component={AcceptInvite} />
