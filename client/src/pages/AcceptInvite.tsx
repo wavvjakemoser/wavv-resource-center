@@ -35,8 +35,8 @@ export default function AcceptInvite() {
       // Route by role: partner_admin → /wavvpartner, other internal roles → /wavvadmin, else → /home
       const role = data?.user?.role;
       const dest =
-        (role === "partner_admin" || role === "partner") ? "/wavvpartner" :
-        (role === "admin" || role === "content_admin" || role === "owner") ? "/wavvadmin" :
+        (role === "partner_manager" || role === "partner") ? "/wavvpartner" :
+        (role === "viewer" || role === "publisher" || role === "owner") ? "/wavvcommandcenter" :
         "/home";
       setTimeout(() => navigate(dest), 2000);
     },

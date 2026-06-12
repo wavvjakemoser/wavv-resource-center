@@ -28,10 +28,10 @@ export default function MfaSetup() {
       setSuccess(true);
       setTimeout(() => {
         const role = result?.user?.role;
-        if (role === "partner_admin" || role === "partner") {
+        if (role === "partner_manager" || role === "partner") {
           navigate("/wavvpartner");
         } else {
-          navigate("/wavvadmin");
+          navigate("/wavvcommandcenter");
         }
       }, 1500);
     },

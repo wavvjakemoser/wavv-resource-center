@@ -204,7 +204,7 @@ describe("support.adminGetAll", () => {
   });
 
   it("allows content_admin users", async () => {
-    const { ctx } = makeCtx(makeUser({ role: "content_admin" }));
+    const { ctx } = makeCtx(makeUser({ role: "publisher" }));
     const caller = appRouter.createCaller(ctx);
     const result = await caller.support.adminGetAll();
     expect(Array.isArray(result)).toBe(true);
@@ -219,7 +219,7 @@ describe("academy.adminGetAllCourses", () => {
   });
 
   it("allows content_admin users", async () => {
-    const { ctx } = makeCtx(makeUser({ role: "content_admin" }));
+    const { ctx } = makeCtx(makeUser({ role: "publisher" }));
     const caller = appRouter.createCaller(ctx);
     const result = await caller.academy.adminGetAllCourses();
     expect(Array.isArray(result)).toBe(true);
@@ -283,7 +283,7 @@ describe("academy.adminAddSectionResource", () => {
   });
 
   it("allows content_admin users to add a resource", async () => {
-    const { ctx } = makeCtx(makeUser({ role: "content_admin" }));
+    const { ctx } = makeCtx(makeUser({ role: "publisher" }));
     const caller = appRouter.createCaller(ctx);
     // This will fail if courseId 99999 doesn't exist, but we just check it doesn't throw auth error
     await expect(

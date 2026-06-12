@@ -66,8 +66,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     values.role = user.role;
     updateSet.role = user.role;
   } else if (user.openId === ENV.ownerOpenId) {
-    values.role = "admin";
-    updateSet.role = "admin";
+    values.role = "viewer";
+    updateSet.role = "viewer";
   }
 
   if (!values.lastSignedIn) values.lastSignedIn = new Date();
@@ -113,7 +113,7 @@ export async function updateLastSignedIn(userId: number) {
   await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, userId));
 }
 
-export async function updateUserRole(userId: number, role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner") {
+export async function updateUserRole(userId: number, role: "user" | "viewer" | "publisher" | "partner_manager" | "partner" | "owner") {
   const db = await getDb();
   if (!db) return;
   await db.update(users).set({ role }).where(eq(users.id, userId));
@@ -745,7 +745,7 @@ export async function createNativeUser(data: {
   email: string;
   name: string;
   passwordHash: string | null;
-  role?: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner";
+  role?: "user" | "viewer" | "publisher" | "partner_manager" | "partner" | "owner";
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -1530,7 +1530,7 @@ export async function removeStrikeFromUser(userId: number) {
 export async function createManualUser(data: {
   name: string;
   email: string;
-  role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner";
+  role: "user" | "viewer" | "publisher" | "partner_manager" | "partner" | "owner";
 }) {
   const db = await getDb();
   if (!db) return null;
@@ -1554,7 +1554,7 @@ export async function createManualUser(data: {
 export async function generateInvite(data: {
   email: string;
   name?: string;
-  role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner";
+  role: "user" | "viewer" | "publisher" | "partner_manager" | "partner" | "owner";
   createdBy: number;
 }) {
   const db = await getDb();
@@ -1896,7 +1896,7 @@ export async function getPartnerUsers() {
 // These helpers are used by the revamped analytics dashboard.
 // All queries filter to events where userId IS NULL (anonymous visitors only).
 
-const ANON_ROLES = ["owner", "admin", "content_admin", "partner_admin", "partner"] as const;
+const ANON_ROLES = ["owner", "viewer", "publisher", "partner_manager", "partner"] as const;
 
 /** Track an anonymous event. If userId is provided, the event is silently dropped. */
 export async function trackAnonEvent(data: {
@@ -1966,7 +1966,7 @@ export async function getTopAnonPages(sinceDate: Date, limit = 10) {
 // Pages we want to track — only these 7 customer-facing routes count
 const TRACKED_PAGES = ['/', '/academy', '/webinars', '/guides', '/playground', '/support', '/wavvpartner'];
 // Internal roles that should never be counted in analytics
-const INTERNAL_ROLES = ['owner', 'admin', 'content_admin', 'partner_admin'];
+const INTERNAL_ROLES = ['owner', 'viewer', 'publisher', 'partner_manager'];
 
 /** Total page views across the 7 tracked pages, excluding internal team members */
 export async function getAllPageViews(sinceDate: Date) {

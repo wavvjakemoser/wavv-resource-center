@@ -226,7 +226,7 @@ export default function HandsOn() {
   const { data: user } = trpc.auth.me.useQuery(undefined, { retry: false });
   const { data: playgroundStats } = trpc.playground.getStats.useQuery(
     undefined,
-    { enabled: !!user && (user.role === 'owner' || user.role === 'content_admin' || user.role === 'admin'), retry: false }
+    { enabled: !!user && (user.role === 'owner' || user.role === 'publisher' || user.role === 'viewer'), retry: false }
   );
   const { data: requestStatus } = trpc.playground.hasRequested.useQuery(
     undefined,

@@ -65,7 +65,7 @@ export default function WavvPartnerPortal() {
   const [, navigate] = useLocation();
 
   // Roles allowed on the partner portal
-  const PARTNER_ROLES = ["partner", "partner_admin", "owner"];
+  const PARTNER_ROLES = ["partner", "partner_manager", "owner"];
 
   useEffect(() => {
     if (isLoading) return;
@@ -75,7 +75,7 @@ export default function WavvPartnerPortal() {
     }
     // Internal admin roles (admin, content_admin) belong in the admin panel, not here
     if (!PARTNER_ROLES.includes(user.role)) {
-      navigate("/wavvadmin");
+      navigate("/wavvcommandcenter");
     }
   }, [user, isLoading, navigate]);
 

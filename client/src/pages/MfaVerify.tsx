@@ -11,7 +11,7 @@ export default function MfaVerify() {
   // Challenge token and next path come from URL params
   const params = new URLSearchParams(window.location.search);
   const challengeToken = params.get("challenge") ?? "";
-  const nextPath = params.get("next") ?? "/wavvadmin";
+  const nextPath = params.get("next") ?? "/wavvcommandcenter";
 
   const utils = trpc.useUtils();
 
@@ -21,7 +21,7 @@ export default function MfaVerify() {
         utils.auth.me.setData(undefined, result.user as Parameters<typeof utils.auth.me.setData>[1]);
       }
       const role = result?.user?.role;
-      if (role === "partner_admin" || role === "partner") {
+      if (role === "partner_manager" || role === "partner") {
         navigate("/wavvpartner");
       } else {
         navigate(nextPath);

@@ -28,7 +28,7 @@ const baseNavItems = [
 ];
 const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
 
-const adminItem = { href: "/wavvadmin", label: "WAVV Command Center", icon: Shield, color: "#f43f5e" };
+const adminItem = { href: "/wavvcommandcenter", label: "WAVV Command Center", icon: Shield, color: "#f43f5e" };
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -101,7 +101,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const isAdminPage = location.startsWith("/wavvadmin");
+  const isAdminPage = location.startsWith("/wavvcommandcenter");
 
   // Site settings
   const { data: allSettings = {}, isLoading: settingsLoading } = trpc.siteSettings.getAll.useQuery();
@@ -135,7 +135,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   }, [title]);
 
   // `partner` role has portal access but is NOT an internal admin — they must not see the Admin panel link
-  const isAdmin = user?.role === "admin" || user?.role === "content_admin" || user?.role === "partner_admin" || user?.role === "owner";
+  const isAdmin = user?.role === "viewer" || user?.role === "publisher" || user?.role === "partner_manager" || user?.role === "owner";
   const isOwner = user?.role === "owner";
 
   // All users see all base nav items + partner item
@@ -255,7 +255,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 onClick={() => setSidebarOpen(false)}
               />
               {/* Partner portal — owner/partner_admin only */}
-              {(user?.role === "owner" || user?.role === "partner_admin") && (() => {
+              {(user?.role === "owner" || user?.role === "partner_manager") && (() => {
                 const isPartnerPortalHidden = !settingsLoading && navVisibility["/wavvpartner"] === false;
                 return (
                   <a

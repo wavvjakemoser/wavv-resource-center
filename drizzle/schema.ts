@@ -20,7 +20,7 @@ export const users = mysqlTable("users", {
   passwordResetToken: text("password_reset_token"),
   passwordResetExpires: bigint("password_reset_expires", { mode: "number" }),
   isActive: boolean("isActive").default(true).notNull(),
-  role: mysqlEnum("role", ["user", "admin", "content_admin", "partner_admin", "partner", "owner"]).default("user").notNull(),
+  role: mysqlEnum("role", ["user", "viewer", "publisher", "partner_manager", "partner", "owner"]).default("user").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -284,7 +284,7 @@ export const inviteTokens = mysqlTable("invite_tokens", {
   // Secure random token (UUID or crypto hex)
   token: varchar("token", { length: 128 }).notNull().unique(),
   // Role to assign on account creation
-  role: mysqlEnum("role", ["user", "admin", "content_admin", "partner_admin", "partner", "owner"]).default("user").notNull(),
+  role: mysqlEnum("role", ["user", "viewer", "publisher", "partner_manager", "partner", "owner"]).default("user").notNull(),
   // Whether the invite has been claimed
   used: boolean("used").default(false).notNull(),
   // Token expiry (72 hours from creation)

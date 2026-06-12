@@ -52,7 +52,7 @@ function PartnerPortalGuard({ children }: { children: React.ReactNode }) {
   const { data: allSettings, isLoading } = trpc.siteSettings.getAll.useQuery();
   // Wait for auth to resolve before making a decision
   if (isLoading || user === undefined) return null;
-  const isAllowed = user?.role === "owner" || user?.role === "partner_admin";
+  const isAllowed = user?.role === "owner" || user?.role === "partner_manager";
   if (!isAllowed) return <Redirect to="/404" />;
   // If allowed role but page is hidden, still let them through (they can see it in admin sidebar)
   return <>{children}</>;
@@ -95,9 +95,10 @@ function Router() {
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support" component={Support} />
-      <Route path="/partners" component={Partners} />
+      <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
       <Route path="/wavvpartner">{() => <PartnerPortalGuard><WavvPartnerPortal /></PartnerPortalGuard>}</Route>
-      <Route path="/wavvadmin" component={Admin} />
+      <Route path="/wavvcommandcenter" component={Admin} />
+      <Route path="/wavvcommandcenter">{() => <Redirect to="/wavvcommandcenter" />}</Route>
       <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>
       <Route path="/hands-on">{() => <Redirect to="/playground" />}</Route>
       <Route path="/accept-invite" component={AcceptInvite} />

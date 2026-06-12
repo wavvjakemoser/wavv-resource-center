@@ -32,7 +32,7 @@ export default function AdminUsers() {
     userId: number;
     userName: string;
     currentRole: string;
-    newRole: "user" | "admin";
+    newRole: "user" | "viewer";
   } | null>(null);
 
   const {
@@ -40,12 +40,12 @@ export default function AdminUsers() {
     isLoading,
     refetch,
   } = trpc.admin.listUsers.useQuery(undefined, {
-    enabled: currentUser?.role === "admin",
+    enabled: currentUser?.role === "viewer",
   });
 
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
-      toast.success(`${confirmDialog?.userName} is now ${confirmDialog?.newRole === "admin" ? "an admin" : "a standard user"}.`);
+      toast.success(`${confirmDialog?.userName} is now ${confirmDialog?.newRole === "viewer" ? "a viewer" : "a standard user"}.`);
       setConfirmDialog(null);
       refetch();
     },
@@ -66,12 +66,12 @@ export default function AdminUsers() {
   }, [users, search]);
 
   const adminCount = useMemo(
-    () => (users ?? []).filter((u) => u.role === "admin").length,
+    () => (users ?? []).filter((u) => u.role === "viewer").length,
     [users]
   );
   const totalCount = users?.length ?? 0;
 
-  if (currentUser?.role !== "admin") {
+  if (currentUser?.role !== "viewer") {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">Access denied. Admin only.</p>
@@ -190,7 +190,7 @@ export default function AdminUsers() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">{u.email ?? "—"}</TableCell>
                     <TableCell>
-                      {u.role === "admin" ? (
+                      {u.role === "viewer" ? (
                         <Badge variant="default" className="bg-amber-500/20 text-amber-400 border-amber-500/30 hover:bg-amber-500/30">
                           <Shield className="h-3 w-3 mr-1" />
                           Admin
@@ -211,7 +211,7 @@ export default function AdminUsers() {
                     <TableCell className="text-right">
                       {isSelf ? (
                         <span className="text-xs text-muted-foreground">—</span>
-                      ) : u.role === "admin" ? (
+                      ) : u.role === "viewer" ? (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -240,7 +240,7 @@ export default function AdminUsers() {
                               userId: u.id,
                               userName: u.name ?? u.email ?? "User",
                               currentRole: u.role,
-                              newRole: "admin",
+                              newRole: "viewer",
                             })
                           }
                         >
@@ -267,10 +267,10 @@ export default function AdminUsers() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {confirmDialog?.newRole === "admin" ? "Promote to Admin" : "Revoke Admin Access"}
+              {confirmDialog?.newRole === "viewer" ? "Promote to Viewer" : "Revoke Viewer Access"}
             </DialogTitle>
             <DialogDescription>
-              {confirmDialog?.newRole === "admin" ? (
+              {confirmDialog?.newRole === "viewer" ? (
                 <>
                   <strong>{confirmDialog.userName}</strong> will gain access to the admin
                   analytics dashboard, user management, and content management tools.
@@ -289,7 +289,7 @@ export default function AdminUsers() {
               Cancel
             </Button>
             <Button
-              variant={confirmDialog?.newRole === "admin" ? "default" : "destructive"}
+              variant={confirmDialog?.newRole === "viewer" ? "default" : "destructive"}
               onClick={() => {
                 if (confirmDialog) {
                   updateRole.mutate({
@@ -302,7 +302,7 @@ export default function AdminUsers() {
             >
               {updateRole.isPending
                 ? "Updating..."
-                : confirmDialog?.newRole === "admin"
+                : confirmDialog?.newRole === "viewer"
                   ? "Promote to Admin"
                   : "Revoke Admin"}
             </Button>

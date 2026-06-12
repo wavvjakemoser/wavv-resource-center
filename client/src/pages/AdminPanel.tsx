@@ -25,7 +25,7 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<AdminTab>("overview");
 
   // Redirect non-admins
-  if (user && user.role !== "admin") {
+  if (user && user.role !== "viewer") {
     navigate("/home");
     return null;
   }

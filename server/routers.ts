@@ -170,7 +170,7 @@ const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 // Publisher (content_admin) or Owner — manage all content in Academy, Webinars, Guides; view analytics
 const publisherProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "content_admin" && ctx.user.role !== "owner") {
+  if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Publisher access required" });
   }
   return next({ ctx });
@@ -179,7 +179,7 @@ const publisherProcedure = protectedProcedure.use(({ ctx, next }) => {
 const superAdminProcedure = publisherProcedure;
 // Any Command Center role (Viewer/admin, Publisher/content_admin, Partner Manager/partner_admin, Owner) — read-only access
 const commandCenterProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
+  if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "partner_manager" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Command Center access required" });
   }  return next({ ctx });
 });
@@ -187,7 +187,7 @@ const commandCenterProcedure = protectedProcedure.use(({ ctx, next }) => {
 const adminProcedure = commandCenterProcedure;
 // Partner Manager (partner_admin), Publisher (content_admin), or Owner — can manage team invites
 const partnerManagerOrPublisherProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "content_admin" && ctx.user.role !== "partner_admin" && ctx.user.role !== "owner") {
+  if (ctx.user.role !== "publisher" && ctx.user.role !== "partner_manager" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Partner Manager or Publisher access required" });
   }
   return next({ ctx });
@@ -851,7 +851,7 @@ const analyticsRouter = router({
   getSummary: adminProcedure.query(() => getAnalyticsSummary()),
   getUsers: superAdminProcedure.query(() => getAllUsers()),
   updateUserRole: superAdminProcedure
-    .input(z.object({ userId: z.number(), role: z.enum(["user", "admin"]) }))
+    .input(z.object({ userId: z.number(), role: z.enum(["user", "viewer"]) }))
     .mutation(({ input }) => updateUserRole(input.userId, input.role)),
 
   // ── Advanced analytics for admin dashboard ──
@@ -1121,7 +1121,7 @@ export const appRouter = router({
           return { success: true, mfaRequired: true, challengeToken, user: null };
         }
         // Issue session — only admin/owner roles require MFA setup
-        const MFA_REQUIRED_ROLES = ["owner", "admin", "content_admin", "partner_admin"];
+        const MFA_REQUIRED_ROLES = ["owner", "viewer", "publisher", "partner_manager"];
         const requiresMfa = MFA_REQUIRED_ROLES.includes(user.role);
         const mfaPending = requiresMfa && !user.mfaEnabled;
         const token = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role, mfaPending });
@@ -1229,7 +1229,7 @@ export const appRouter = router({
         email: z.string().email(),
         name: z.string().min(1),
         password: z.string().min(8),
-        role: z.enum(["user", "admin"]).default("user"),
+        role: z.enum(["user", "viewer"]).default("user"),
       }))
       .mutation(async ({ input }) => {
         const existing = await getUserByEmail(input.email);
@@ -1282,7 +1282,7 @@ export const appRouter = router({
         let user = await getUserByEmail(result.email);
         if (!user) {
           // Invite flow: create the user account on first use
-          user = await createNativeUser({ email: result.email, name: result.email.split("@")[0], passwordHash: null, role: "admin" });
+          user = await createNativeUser({ email: result.email, name: result.email.split("@")[0], passwordHash: null, role: "viewer" });
         }
         if (!user.isActive) throw new TRPCError({ code: "FORBIDDEN", message: "This account has been deactivated." });
         const sessionToken = await createSessionToken({ userId: user.id, email: user.email ?? "", role: user.role });
@@ -1333,7 +1333,7 @@ export const appRouter = router({
       .input(z.object({ userId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         // Only owner or partner_admin can generate setup links for others; users can generate their own
-        const isAdmin = ctx.user.role === "owner" || ctx.user.role === "admin" || ctx.user.role === "content_admin" || ctx.user.role === "partner_admin";
+        const isAdmin = ctx.user.role === "owner" || ctx.user.role === "viewer" || ctx.user.role === "publisher" || ctx.user.role === "partner_manager";
         if (!isAdmin && ctx.user.id !== input.userId) {
           throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
         }
@@ -1413,7 +1413,7 @@ export const appRouter = router({
     resetMfa: protectedProcedure
       .input(z.object({ userId: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        const isAdmin = ctx.user.role === "owner" || ctx.user.role === "admin" || ctx.user.role === "content_admin" || ctx.user.role === "partner_admin";
+        const isAdmin = ctx.user.role === "owner" || ctx.user.role === "viewer" || ctx.user.role === "publisher" || ctx.user.role === "partner_manager";
         if (!isAdmin) throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
         await resetMfa(input.userId);
         return { success: true };
@@ -1442,7 +1442,7 @@ export const appRouter = router({
         );
       }),
     updateRole: ownerProcedure
-      .input(z.object({ userId: z.number(), role: z.enum(["user", "admin", "content_admin", "partner_admin", "partner", "owner"]) }))
+      .input(z.object({ userId: z.number(), role: z.enum(["user", "viewer", "publisher", "partner_manager", "partner", "owner"]) }))
       .mutation(async ({ ctx, input }) => {
         if (input.userId === ctx.user.id) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own role" });
@@ -1482,7 +1482,7 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
-        role: z.enum(["admin", "content_admin", "partner_admin", "partner", "owner"]).default("admin"),
+        role: z.enum(["viewer", "publisher", "partner_manager", "partner", "owner"]).default("viewer"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1503,7 +1503,7 @@ export const appRouter = router({
     resendInvite: superAdminProcedure
       .input(z.object({
         email: z.string().email(),
-        role: z.enum(["admin", "content_admin", "partner_admin", "partner", "owner"]).default("admin"),
+        role: z.enum(["viewer", "publisher", "partner_manager", "partner", "owner"]).default("viewer"),
         origin: z.string().url(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1520,7 +1520,7 @@ export const appRouter = router({
       .input(z.object({
         name: z.string().min(1).max(255),
         email: z.string().email(),
-        role: z.enum(["owner", "content_admin", "partner_admin", "admin"]).default("admin"),
+        role: z.enum(["owner", "publisher", "partner_manager", "viewer"]).default("viewer"),
         origin: z.string().url().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1554,7 +1554,7 @@ export const appRouter = router({
         entries: z.array(z.object({
           name: z.string().min(1).max(255),
           email: z.string().email(),
-          role: z.enum(["owner", "content_admin", "partner_admin", "admin"]).default("admin"),
+          role: z.enum(["owner", "publisher", "partner_manager", "viewer"]).default("viewer"),
         })).min(1).max(50),
         origin: z.string().url().optional(),
       }))
@@ -1604,7 +1604,7 @@ export const appRouter = router({
         const { token } = await generateInvite({
           email: target.email,
           name: target.name ?? target.email,
-          role: target.role as "admin" | "content_admin" | "partner_admin" | "partner" | "owner",
+          role: target.role as "viewer" | "publisher" | "partner_manager" | "partner" | "owner",
           createdBy: ctx.user.id,
         });
         const appUrl = input.origin ?? process.env.VITE_APP_URL ?? "https://wavvsuccesscenter.manus.space";
@@ -1946,7 +1946,7 @@ export const appRouter = router({
 
     create: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_manager") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .input(z.object({
@@ -1964,7 +1964,7 @@ export const appRouter = router({
 
     update: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_manager") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .input(z.object({
@@ -1984,7 +1984,7 @@ export const appRouter = router({
 
     delete: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_manager") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .input(z.object({ id: z.number() }))
@@ -1995,14 +1995,14 @@ export const appRouter = router({
   approvedPartners: router({
     list: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_manager") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(() => getPartnerUsers()),
 
     invite: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_manager") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .input(z.object({
@@ -2035,7 +2035,7 @@ export const appRouter = router({
 
     deactivate: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_manager") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .input(z.object({ userId: z.number() }))
@@ -2047,7 +2047,7 @@ export const appRouter = router({
 
     remove: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_manager") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .input(z.object({ userId: z.number() }))
@@ -2058,7 +2058,7 @@ export const appRouter = router({
 
     resendInvite: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_admin") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "owner" && ctx.user.role !== "partner_manager") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .input(z.object({ userId: z.number(), origin: z.string().url().optional() }))
@@ -2099,7 +2099,7 @@ export const appRouter = router({
     // Admin: list all articles (including hidden)
     adminListAll: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(() => getAllHelpArticles()),
@@ -2107,7 +2107,7 @@ export const appRouter = router({
     // Admin: list all collections (including hidden)
     adminListCollections: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(() => getAllHelpCollections()),
@@ -2116,7 +2116,7 @@ export const appRouter = router({
     setArticleVisible: protectedProcedure
       .input(z.object({ id: z.number(), visible: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => setHelpArticleVisible(input.id, input.visible)),
@@ -2125,7 +2125,7 @@ export const appRouter = router({
     setCollectionVisible: protectedProcedure
       .input(z.object({ id: z.number(), visible: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => setHelpCollectionVisible(input.id, input.visible)),
@@ -2133,7 +2133,7 @@ export const appRouter = router({
     // Admin: trigger manual sync from Intercom
     sync: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(async () => {
@@ -2156,7 +2156,7 @@ export const appRouter = router({
         sectionOrder: z.number().optional(),
       }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => publishHelpArticle(input)),
@@ -2165,7 +2165,7 @@ export const appRouter = router({
     unpublish: protectedProcedure
       .input(z.object({ intercomArticleId: z.string() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => unpublishHelpArticle(input.intercomArticleId)),
@@ -2174,7 +2174,7 @@ export const appRouter = router({
     updateSection: protectedProcedure
       .input(z.object({ intercomArticleId: z.string(), sectionName: z.string().min(1) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => updatePublishedArticleSection(input.intercomArticleId, input.sectionName)),
@@ -2187,7 +2187,7 @@ export const appRouter = router({
         sectionOrder: z.number(),
       })))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => reorderPublishedArticles(input)),
@@ -2199,7 +2199,7 @@ export const appRouter = router({
     // Admin: list all sections (including hidden)
     listSectionsAdmin: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(() => getHelpArticleSections()),
@@ -2208,7 +2208,7 @@ export const appRouter = router({
     toggleSectionVisibility: protectedProcedure
       .input(z.object({ id: z.number(), isVisible: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => toggleHelpArticleSectionVisibility(input.id, input.isVisible)),
@@ -2217,7 +2217,7 @@ export const appRouter = router({
     createSection: protectedProcedure
       .input(z.object({ name: z.string().min(1) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => createHelpArticleSection(input.name)),
@@ -2226,7 +2226,7 @@ export const appRouter = router({
     deleteSection: protectedProcedure
       .input(z.object({ id: z.number() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => deleteHelpArticleSection(input.id)),
@@ -2235,7 +2235,7 @@ export const appRouter = router({
     renameSection: protectedProcedure
       .input(z.object({ id: z.number(), name: z.string().min(1) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => renameHelpArticleSection(input.id, input.name)),
@@ -2244,7 +2244,7 @@ export const appRouter = router({
     reorderSections: protectedProcedure
       .input(z.array(z.object({ id: z.number(), sortOrder: z.number() })))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "admin" && ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => reorderHelpArticleSections(input)),
@@ -2254,7 +2254,7 @@ export const appRouter = router({
     getItems: protectedProcedure
       .input(z.object({ page: z.enum(["academy", "webinars", "guides", "playground", "support"]) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(({ input }) => getReadinessItems(input.page)),
@@ -2262,7 +2262,7 @@ export const appRouter = router({
     toggleItem: protectedProcedure
       .input(z.object({ id: z.number(), checked: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "content_admin" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => toggleReadinessItem(input.id, input.checked)),

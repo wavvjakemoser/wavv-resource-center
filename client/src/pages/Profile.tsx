@@ -195,7 +195,7 @@ export default function Profile() {
                 <h1 className="text-2xl font-bold text-white">{profile?.name ?? "User"}</h1>
                 <p className="text-gray-400 text-sm mt-0.5">{profile?.email ?? ""}</p>
                 <div className="flex flex-wrap items-center gap-3 mt-3">
-                  {profile?.role === "admin" && (
+                  {profile?.role === "viewer" && (
                     <span
                       className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
                       style={{ background: "rgba(251,191,36,0.12)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}

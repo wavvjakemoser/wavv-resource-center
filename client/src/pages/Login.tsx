@@ -10,7 +10,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [, navigate] = useLocation();
 
-  const nextPath = new URLSearchParams(window.location.search).get("next") || "/wavvadmin";
+  const nextPath = new URLSearchParams(window.location.search).get("next") || "/wavvcommandcenter";
 
   const utils = trpc.useUtils();
 
@@ -33,7 +33,7 @@ export default function Login() {
         return;
       }
       const role = data?.user?.role;
-      if (role === "partner_admin" || role === "partner") {
+      if (role === "partner_manager" || role === "partner") {
         navigate("/wavvpartner");
       } else {
         navigate(nextPath);

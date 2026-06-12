@@ -168,8 +168,8 @@ export default function Admin() {
   const [location, navigate] = useLocation();
 
   const isOwner = user?.role === "owner";
-  const isSuperAdmin = user?.role === "content_admin" || isOwner;
-  const isPartnerAdmin = user?.role === "partner_admin" || isOwner;
+  const isSuperAdmin = user?.role === "publisher" || isOwner;
+  const isPartnerAdmin = user?.role === "partner_manager" || isOwner;
 
   // Read ?tab= from the URL to set the initial active tab
   const initialTab = (): AdminTab => {
@@ -189,7 +189,7 @@ export default function Admin() {
     // defaults by role
     if (isOwner || (isSuperAdmin && !isPartnerAdmin)) return "users";
     if (isPartnerAdmin && !isOwner) return "approved_partners";
-    if (user?.role === "admin") return "users";
+    if (user?.role === "viewer") return "users";
     return "users";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
@@ -232,11 +232,11 @@ export default function Admin() {
 
   // Not logged in at all → send to /login with ?next=/wavvadmin
   if (!user) {
-    navigate("/login?next=/wavvadmin");
+    navigate("/login?next=/wavvcommandcenter");
     return null;
   }
   // Logged in but not an admin → send back to dashboard
-  if (user.role !== "admin" && user.role !== "content_admin" && user.role !== "partner_admin" && user.role !== "owner") {
+  if (user.role !== "viewer" && user.role !== "publisher" && user.role !== "partner_manager" && user.role !== "owner") {
     navigate("/home");
     return null;
   }
@@ -338,7 +338,7 @@ function AnalyticsTab({ days: daysProp, onDaysChange }: { days?: AnonTimeRange; 
   const [resetConfirmText, setResetConfirmText] = useState("");
   const utils = trpc.useUtils();
   const { user: analyticsUser } = useAuth();
-  const isSuperAdmin = analyticsUser?.role === "content_admin" || analyticsUser?.role === "owner";
+  const isSuperAdmin = analyticsUser?.role === "publisher" || analyticsUser?.role === "owner";
   const { data: tabSettings = {} } = trpc.siteSettings.getAll.useQuery();
   const resetAnalytics = trpc.analytics.resetAnalytics.useMutation({
     onSuccess: () => {
@@ -821,7 +821,7 @@ const PAGE_LABELS: Record<string, string> = {
   "/playground": "WAVV Playground",
   "/support": "WAVV Support",
   "/wavvpartner": "WAVV Partners",
-  "/wavvadmin": "WAVV Command Center",
+  "/wavvcommandcenter": "WAVV Command Center",
   "/profile": "My Profile",
   "/search": "Search",
 };
@@ -1329,8 +1329,8 @@ function SearchAIChart({ days, height = 192 }: { days: number; height?: number }
 }
 
 // ─── Users Tab ────────────────────────────────────────────────────────────────
-type RoleFilter = "all" | "content_admin" | "admin" | "user" | "owner" | "partner_admin";
-type UserRole = "owner" | "content_admin" | "partner_admin" | "admin";
+type RoleFilter = "all" | "publisher" | "viewer" | "user" | "owner" | "partner_manager";
+type UserRole = "owner" | "publisher" | "partner_manager" | "viewer";
 
 // Super Admin icon: plain Shield in fuchsia, matching Admin amber shield style
 function SuperAdminIcon({ size = 14 }: { size?: number }) {
@@ -1340,7 +1340,7 @@ function SuperAdminIcon({ size = 14 }: { size?: number }) {
 
 function UsersTab() {
   const { user: currentUser } = useAuth();
-  const isSuperAdmin = currentUser?.role === "content_admin" || currentUser?.role === "owner";
+  const isSuperAdmin = currentUser?.role === "publisher" || currentUser?.role === "owner";
   const isOwner = currentUser?.role === "owner";
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
@@ -1364,11 +1364,11 @@ function UsersTab() {
   } | null>(null);
 
   const { data: users, isLoading, refetch } = trpc.admin.listUsers.useQuery(undefined, {
-    enabled: currentUser?.role === "admin" || currentUser?.role === "content_admin" || currentUser?.role === "partner_admin" || currentUser?.role === "owner",
+    enabled: currentUser?.role === "viewer" || currentUser?.role === "publisher" || currentUser?.role === "partner_manager" || currentUser?.role === "owner",
   });
 
   const [addUserOpen, setAddUserOpen] = useState(false);
-  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "admin" as "admin" | "content_admin" | "partner_admin" | "owner" });
+  const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "viewer" as "viewer" | "publisher" | "partner_manager" | "owner" });
   const [inviteLinkModal, setInviteLinkModal] = useState<{ open: boolean; url: string; name: string }>({
     open: false, url: "", name: "",
   });
@@ -1376,7 +1376,7 @@ function UsersTab() {
     onSuccess: (data) => {
       const userName = addUserForm.name;
       setAddUserOpen(false);
-      setAddUserForm({ name: "", email: "", role: "admin" });
+      setAddUserForm({ name: "", email: "", role: "viewer" });
       refetch();
       if (data.inviteUrl) {
         setInviteLinkModal({ open: true, url: data.inviteUrl, name: userName });
@@ -1389,7 +1389,7 @@ function UsersTab() {
 
   // Magic link invite
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ name: "", email: "", role: "admin" as "owner" | "content_admin" | "partner_admin" | "admin" });
+  const [inviteForm, setInviteForm] = useState({ name: "", email: "", role: "viewer" as "owner" | "publisher" | "partner_manager" | "viewer" });
   const [inviteResult, setInviteResult] = useState<{ link: string; name: string; role: string } | null>(null);
 
   // Bulk import state
@@ -1406,7 +1406,7 @@ function UsersTab() {
   const inviteTeamMember = trpc.admin.inviteTeamMember.useMutation({
     onSuccess: (data) => {
       setInviteResult({ link: data.inviteLink, name: inviteForm.name, role: data.role ?? inviteForm.role });
-      setInviteForm({ name: "", email: "", role: "admin" });
+      setInviteForm({ name: "", email: "", role: "viewer" });
       refetch();
     },
     onError: (e) => toast.error(e.message),
@@ -1415,7 +1415,7 @@ function UsersTab() {
   const updateRole = trpc.admin.updateRole.useMutation({
     onSuccess: () => {
       if (promoteDialog) {
-        const roleLabels: Record<UserRole, string> = { owner: "an Owner", content_admin: "a Publisher", partner_admin: "a Partner Manager", admin: "a Viewer" };
+        const roleLabels: Record<UserRole, string> = { owner: "an Owner", publisher: "a Publisher", partner_manager: "a Partner Manager", viewer: "a Viewer" };
         toast.success(`${promoteDialog.userName} is now ${roleLabels[promoteDialog.selectedRole]}.`);
         setPromoteDialog(null);
       } else {
@@ -1464,7 +1464,7 @@ function UsersTab() {
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     // Only show internal team members — no public users or partners in this panel
-    let list = (users ?? []).filter((u) => u.role === "admin" || u.role === "content_admin" || u.role === "partner_admin" || u.role === "owner");
+    let list = (users ?? []).filter((u) => u.role === "viewer" || u.role === "publisher" || u.role === "partner_manager" || u.role === "owner");
     if (roleFilter !== "all") list = list.filter((u) => u.role === roleFilter);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
@@ -1476,9 +1476,9 @@ function UsersTab() {
   }, [users, search, roleFilter]);
 
   const ownerCount = useMemo(() => (users ?? []).filter((u) => u.role === "owner").length, [users]);
-  const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "content_admin").length, [users]);
-  const partnerAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "partner_admin").length, [users]);
-  const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "admin").length, [users]);
+  const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "publisher").length, [users]);
+  const partnerAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "partner_manager").length, [users]);
+  const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "viewer").length, [users]);
   const totalCount = ownerCount + superAdminCount + partnerAdminCount + adminCount;
   const statCards: { filter: RoleFilter; label: string; value: number; iconEl: React.ReactNode; color: string; bg: string; activeBorder: string; description: string }[] = [
     {
@@ -1502,7 +1502,7 @@ function UsersTab() {
       description: "Full platform control. Can invite and remove all users, change any role, manage all content, and access every admin tab including Settings.",
     },
     {
-      filter: "content_admin",
+      filter: "publisher",
       label: "Publishers",
       value: superAdminCount,
       iconEl: <SuperAdminIcon size={20} />,
@@ -1512,7 +1512,7 @@ function UsersTab() {
       description: "Can manage all content (Academy, Webinars, Guides, Support, Playground) and view analytics. Cannot access Partner Analytics or Site Settings.",
     },
     {
-      filter: "partner_admin",
+      filter: "partner_manager",
       label: "Partner Managers",
       value: partnerAdminCount,
       iconEl: <Shield className="h-5 w-5" style={{ color: "#00A9E2" }} />,
@@ -1522,7 +1522,7 @@ function UsersTab() {
       description: "Access to WAVV Knowledge and Partner Analytics. Can invite and manage WAVV Partner accounts. Read-only access to Team Access.",
     },
     {
-      filter: "admin",
+      filter: "viewer",
       label: "Viewers",
       value: adminCount,
       iconEl: <Shield className="h-5 w-5" style={{ color: "#fbbf24" }} />,
@@ -1553,8 +1553,8 @@ function UsersTab() {
       removeUser.mutate({ userId: confirmDialog.userId });
     } else {
       // demote → drop one level
-      const demotedRole: Record<string, string> = { owner: "content_admin", content_admin: "admin", partner_admin: "admin", admin: "admin" };
-      updateRole.mutate({ userId: confirmDialog.userId, role: (demotedRole[confirmDialog.currentRole] ?? "admin") as any });
+      const demotedRole: Record<string, string> = { owner: "publisher", publisher: "viewer", partner_manager: "viewer", viewer: "viewer" };
+      updateRole.mutate({ userId: confirmDialog.userId, role: (demotedRole[confirmDialog.currentRole] ?? "viewer") as any });
     }
   }
 
@@ -1566,21 +1566,21 @@ function UsersTab() {
     const myRole = currentUser?.role;
     if (myRole === "owner") {
       // Owner can promote to owner, content_admin, or partner_admin (anything above admin, up to owner)
-      const all: UserRole[] = ["partner_admin", "content_admin", "owner"];
+      const all: UserRole[] = ["partner_manager", "publisher", "owner"];
       // Only show roles strictly above the target's current role
-      const hierarchy: UserRole[] = ["admin", "partner_admin", "content_admin", "owner"];
+      const hierarchy: UserRole[] = ["viewer", "partner_manager", "publisher", "owner"];
       const targetIdx = hierarchy.indexOf(targetCurrentRole as UserRole);
       return all.filter(r => hierarchy.indexOf(r) > targetIdx);
     }
-    if (myRole === "content_admin") {
+    if (myRole === "publisher") {
       // Super Admin can only promote admin → content_admin
-      if (targetCurrentRole === "admin") return ["content_admin"];
+      if (targetCurrentRole === "viewer") return ["publisher"];
       return [];
     }
-    if (myRole === "partner_admin") {
+    if (myRole === "partner_manager") {
       // Partner Admin can promote admin → content_admin or partner_admin; content_admin → partner_admin
-      if (targetCurrentRole === "admin") return ["content_admin", "partner_admin"];
-      if (targetCurrentRole === "content_admin") return ["partner_admin"];
+      if (targetCurrentRole === "viewer") return ["publisher", "partner_manager"];
+      if (targetCurrentRole === "publisher") return ["partner_manager"];
       return [];
     }
     return [];
@@ -1625,7 +1625,7 @@ function UsersTab() {
             style={{ background: "rgba(6,182,212,0.1)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.2)" }}
           >
             <FileDown size={13} />
-            Export{roleFilter !== "all" ? ` ${roleFilter === "content_admin" ? "Publishers" : roleFilter === "admin" ? "Viewers" : roleFilter === "partner_admin" ? "Partner Managers" : "Users"}` : " All"}
+            Export{roleFilter !== "all" ? ` ${roleFilter === "publisher" ? "Publishers" : roleFilter === "viewer" ? "Viewers" : roleFilter === "partner_manager" ? "Partner Managers" : "Users"}` : " All"}
           </button>
           {isOwner && (
             <>
@@ -1773,16 +1773,16 @@ function UsersTab() {
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(251,146,60,0.15)", color: "#fb923c", border: "1px solid rgba(251,146,60,0.4)" }}>
                             <Crown className="h-3 w-3" /> Owner
                           </Badge>
-                        ) : u.role === "content_admin" ? (
+                        ) : u.role === "publisher" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.4)" }}>
                             <SuperAdminIcon size={12} />
                             Publisher
                           </Badge>
-                        ) : u.role === "partner_admin" ? (
+                        ) : u.role === "partner_manager" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
                             <Users className="h-3 w-3" /> Partner Manager
                           </Badge>
-                        ) : u.role === "admin" ? (
+                        ) : u.role === "viewer" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
                             <Shield className="h-3 w-3" /> Viewer
                           </Badge>
@@ -1950,12 +1950,12 @@ function UsersTab() {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-2 py-2">
-                {promoteDialog && (["owner", "content_admin", "partner_admin", "admin"] as UserRole[]).map((role) => {
+                {promoteDialog && (["owner", "publisher", "partner_manager", "viewer"] as UserRole[]).map((role) => {
                   const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
                     owner:        { label: "Owner",          color: "#fb923c", bg: "rgba(251,146,60,0.12)",  border: "rgba(251,146,60,0.35)" },
-                    content_admin:  { label: "Publisher",          color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
-                    partner_admin:{ label: "Partner Manager",     color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
-                    admin:        { label: "Viewer",              color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
+                    publisher:      { label: "Publisher",          color: "#38bdf8", bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.35)" },
+                    partner_manager: { label: "Partner Manager",  color: "#00A9E2", bg: "rgba(0,169,226,0.12)",   border: "rgba(0,169,226,0.35)" },
+                    viewer:       { label: "Viewer",              color: "#fbbf24", bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.35)" },
                   };
                   const cfg = roleConfig[role];
                   const isSelected = promoteDialog.selectedRole === role;
@@ -2068,7 +2068,7 @@ function UsersTab() {
       </Dialog>
 
       {/* Add User Dialog */}
-      <Dialog open={addUserOpen} onOpenChange={(open) => { if (!open) { setAddUserOpen(false); setAddUserForm({ name: "", email: "", role: "admin" }); } }}>
+      <Dialog open={addUserOpen} onOpenChange={(open) => { if (!open) { setAddUserOpen(false); setAddUserForm({ name: "", email: "", role: "viewer" }); } }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white">Add User</DialogTitle>
@@ -2098,14 +2098,14 @@ function UsersTab() {
               <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Access Level</label>
               <select
                 value={addUserForm.role}
-                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "admin" | "content_admin" | "partner_admin" | "owner" }))}
+                onChange={(e) => setAddUserForm(f => ({ ...f, role: e.target.value as "viewer" | "publisher" | "partner_manager" | "owner" }))}
                 className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                 style={{ background: "#111", border: "1px solid #2a2a2a" }}
               >
                 <option value="owner">Owner</option>
-                <option value="content_admin">Publisher</option>
-                <option value="partner_admin">Partner Manager</option>
-                <option value="admin">Viewer</option>
+                <option value="publisher">Publisher</option>
+                <option value="partner_manager">Partner Manager</option>
+                <option value="viewer">Viewer</option>
               </select>
             </div>
           </div>
@@ -2246,7 +2246,7 @@ function UsersTab() {
       </Dialog>
 
       {/* ── Invite Team Member Dialog ── */}
-      <Dialog open={inviteOpen} onOpenChange={(open) => { if (!open) { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "admin" }); } }}>
+      <Dialog open={inviteOpen} onOpenChange={(open) => { if (!open) { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "viewer" }); } }}>
         <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
@@ -2263,7 +2263,7 @@ function UsersTab() {
               {/* Success banner */}
               <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
                 <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
-                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["admin","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "content_admin" ? "Publisher" : inviteResult.role === "partner_admin" ? "Partner Manager" : "Viewer"}.</p>
+                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["viewer","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "publisher" ? "Publisher" : inviteResult.role === "partner_manager" ? "Partner Manager" : "Viewer"}.</p>
               </div>
 
               {/* Slack instructions block */}
@@ -2334,21 +2334,21 @@ function UsersTab() {
                 <label className="text-xs text-gray-400">Access Level</label>
                 <select
                   value={inviteForm.role}
-                  onChange={(e) => setInviteForm(f => ({ ...f, role: e.target.value as "owner" | "content_admin" | "partner_admin" | "admin" }))}
+                  onChange={(e) => setInviteForm(f => ({ ...f, role: e.target.value as "owner" | "publisher" | "partner_manager" | "viewer" }))}
                   className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
                   style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)" }}
                 >
                   <option value="owner">Owner</option>
-                  <option value="content_admin">Publisher</option>
-                  <option value="partner_admin">Partner Manager</option>
-                  <option value="admin">Viewer</option>
+                  <option value="publisher">Publisher</option>
+                  <option value="partner_manager">Partner Manager</option>
+                  <option value="viewer">Viewer</option>
                 </select>
               </div>
             </div>
           )}
 
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "admin" }); }} className="text-gray-400">Close</Button>
+            <Button variant="ghost" onClick={() => { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "viewer" }); }} className="text-gray-400">Close</Button>
             {!inviteResult && (
               <Button
                 disabled={inviteTeamMember.isPending || !inviteForm.name.trim() || !inviteForm.email.trim()}
@@ -2443,13 +2443,13 @@ function UsersTab() {
                 disabled={bulkInviteMutation.isPending || !bulkCsvText.trim()}
                 onClick={() => {
                   const csvLines = bulkCsvText.split("\n").map((l: string) => l.trim()).filter(Boolean);
-                  const entries: { name: string; email: string; role: "owner" | "content_admin" | "partner_admin" | "admin" }[] = [];
-                  const validRoles = ["owner", "content_admin", "partner_admin", "admin"];
+                  const entries: { name: string; email: string; role: "owner" | "publisher" | "partner_manager" | "viewer" }[] = [];
+                  const validRoles = ["owner", "publisher", "partner_manager", "viewer"];
                   for (const line of csvLines) {
                     const parts = line.split(",").map((p: string) => p.trim());
                     if (parts.length < 2) { toast.error(`Invalid line: "${line}" — expected Name, Email[, Role]`); return; }
                     const [name, email, roleRaw] = parts;
-                    const role = (validRoles.includes(roleRaw ?? "") ? roleRaw : "admin") as "owner" | "content_admin" | "partner_admin" | "admin";
+                    const role = (validRoles.includes(roleRaw ?? "") ? roleRaw : "viewer") as "owner" | "publisher" | "partner_manager" | "viewer";
                     entries.push({ name, email, role });
                   }
                   if (entries.length === 0) { toast.error("No valid entries found."); return; }
@@ -3756,7 +3756,7 @@ function SectionResourcesPanel({
 }) {
   const utils = trpc.useUtils();
   const { user } = useAuth();
-  const isSuperAdmin = user?.role === "content_admin";
+  const isSuperAdmin = user?.role === "publisher";
 
   const { data: resources = [], isLoading } = trpc.academy.adminGetSectionResources.useQuery();
 

@@ -40,7 +40,7 @@ export default function AdminAnalytics() {
   const [days, setDays] = useState<TimeRange>(30);
 
   // Redirect non-admin users
-  if (!loading && user && user.role !== "admin") {
+  if (!loading && user && user.role !== "viewer") {
     navigate("/home");
     return null;
   }

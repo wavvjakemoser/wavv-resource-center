@@ -21,7 +21,7 @@ export async function verifyPassword(plain: string, hash: string): Promise<boole
 export interface SessionPayload {
   userId: number;
   email: string;
-  role: "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner";
+  role: "user" | "viewer" | "publisher" | "partner_manager" | "partner" | "owner";
   mfaPending?: boolean; // true when session issued but MFA not yet configured
 }
 
@@ -39,7 +39,7 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
     return {
       userId: payload.userId as number,
       email: payload.email as string,
-      role: payload.role as "user" | "admin" | "content_admin" | "partner_admin" | "partner" | "owner",
+      role: payload.role as "user" | "viewer" | "publisher" | "partner_manager" | "partner" | "owner",
       mfaPending: payload.mfaPending as boolean | undefined,
     };
   } catch {
