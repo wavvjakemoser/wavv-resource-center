@@ -87,6 +87,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/login" component={Login} />
       <Route path="/auth/google/callback" component={GoogleCallback} />
+      <Route path="/home">{() => <Redirect to="/" />}</Route>
       <Route path="/academy" component={Academy} />
       <Route path="/academy/category/:categoryKey" component={AcademyCategory} />
       <Route path="/academy/:courseId" component={CourseDetail} />
