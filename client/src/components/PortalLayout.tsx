@@ -343,7 +343,23 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <AISearchBar />
             </div>
 
-
+            {/* Sign In button — shown only when not logged in */}
+            {!user && (
+              <a
+                href="/api/oauth/login"
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
+                style={{
+                  background: "#0074F4",
+                  color: "#fff",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#0060d4"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "#0074F4"; }}
+              >
+                Sign In
+              </a>
+            )}
           </header>
 
           {/* Page content */}
