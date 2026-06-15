@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { runIntercomSync } from "../intercomSync";
+import { registerOAuthRoutes } from "./oauth";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -42,6 +43,9 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
+
+  // ── WAVV IdP OIDC routes (/api/oauth/login, /api/oauth/callback) ──────────
+  registerOAuthRoutes(app);
 
   // ── Scheduled: Intercom Help Center sync ──────────────────────────────────
   app.post("/api/scheduled/intercom-sync", async (req, res) => {
