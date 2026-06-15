@@ -9,4 +9,8 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   intercomApiKey: process.env.INTERCOM_API_KEY ?? "",
   intercomWorkspaceId: process.env.INTERCOM_WORKSPACE_ID ?? "",
+  // WAVV IdP OIDC
+  wavvOidcClientId: process.env.WAVV_OIDC_CLIENT_ID ?? "",
+  wavvOidcClientSecret: process.env.WAVV_OIDC_CLIENT_SECRET ?? "",
+  wavvOidcRedirectUri: process.env.WAVV_OIDC_REDIRECT_URI ?? "https://success.wavv.com/api/oauth/callback",
 };

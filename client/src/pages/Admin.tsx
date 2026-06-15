@@ -232,7 +232,7 @@ export default function Admin() {
 
   // Not logged in at all → send to /login with ?next=/wavvadmin
   if (!user) {
-    navigate("/login?next=/wavvcommandcenter");
+    window.location.href = "/api/oauth/login?return_path=/wavvcommandcenter";
     return null;
   }
   // Logged in but not an admin → send back to dashboard

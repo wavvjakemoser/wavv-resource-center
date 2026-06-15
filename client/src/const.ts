@@ -1,5 +1,13 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
-// Login URL now points to the local login page (self-contained auth).
-// When WAVV API auth becomes available, swap the backend validation only.
-export const getLoginUrl = () => "/login";
+/**
+ * Returns the WAVV IdP OIDC login URL.
+ * Passes the current return path so the user lands back where they started after auth.
+ */
+export const getLoginUrl = (returnPath?: string): string => {
+  const base = "/api/oauth/login";
+  if (returnPath && returnPath !== "/") {
+    return `${base}?return_path=${encodeURIComponent(returnPath)}`;
+  }
+  return base;
+};
