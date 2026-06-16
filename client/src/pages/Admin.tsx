@@ -1685,7 +1685,8 @@ function UsersTab() {
                 const initials = (u.name ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
                 // Guard: only use avatarUrl if it's a non-empty, non-whitespace string
                 const rawAvatarUrl = (u.avatarUrl ?? "").trim();
-                const pictureSrc = rawAvatarUrl ? `${rawAvatarUrl}=s40-c` : null;
+                // Strip any existing Google size suffix (e.g. =s96-c) before appending our own
+                const pictureSrc = rawAvatarUrl ? `${rawAvatarUrl.replace(/=s\d+(-c)?$/, "")}=s40-c` : null;
                 const pending = isSuperAdmin && u.role === "user" && isPendingPromotion(u.email);
                 return (
                   <TableRow key={u.id} className="hover:bg-white/5 transition" style={{ borderBottom: "1px solid #1e1e1e", background: isSelf ? "rgba(0,116,244,0.05)" : "transparent" }}>

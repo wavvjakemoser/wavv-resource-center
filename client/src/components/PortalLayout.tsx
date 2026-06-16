@@ -347,7 +347,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             {user && (() => {
               const initials = (user.name ?? user.email ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
               const rawAvatarUrl = (user.avatarUrl ?? "").trim();
-              const pictureSrc = rawAvatarUrl ? `${rawAvatarUrl}=s40-c` : null;
+              // Strip any existing Google size suffix (e.g. =s96-c) before appending our own
+              const pictureSrc = rawAvatarUrl ? `${rawAvatarUrl.replace(/=s\d+(-c)?$/, "")}=s40-c` : null;
               return (
                 <a
                   href="/profile"
