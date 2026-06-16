@@ -343,6 +343,37 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <AISearchBar />
             </div>
 
+            {/* User avatar — shown when logged in */}
+            {user && (() => {
+              const initials = (user.name ?? user.email ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+              const pictureSrc = user.avatarUrl ? `${user.avatarUrl}=s40-c` : null;
+              return (
+                <a
+                  href="/profile"
+                  className="flex-shrink-0 flex items-center gap-2 rounded-full transition-all duration-150"
+                  style={{ textDecoration: "none" }}
+                  title={user.name ?? user.email ?? "Profile"}
+                >
+                  {pictureSrc ? (
+                    <img
+                      src={pictureSrc}
+                      alt={user.name ?? "Avatar"}
+                      className="w-8 h-8 rounded-full object-cover"
+                      style={{ border: "2px solid rgba(255,255,255,0.12)" }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    />
+                  ) : (
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                      style={{ background: "linear-gradient(135deg,#0074F4,#00A9E2)", color: "#fff" }}
+                    >
+                      {initials}
+                    </div>
+                  )}
+                </a>
+              );
+            })()}
+
             {/* Sign In button — shown only when not logged in */}
             {!user && (
               <a

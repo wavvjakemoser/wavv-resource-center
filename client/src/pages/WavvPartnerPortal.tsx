@@ -70,7 +70,7 @@ export default function WavvPartnerPortal() {
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
-      navigate("/login?next=/wavvpartner");
+      window.location.href = "/api/oauth/login?return_path=/wavvpartner";
       return;
     }
     // Internal admin roles (admin, content_admin) belong in the admin panel, not here

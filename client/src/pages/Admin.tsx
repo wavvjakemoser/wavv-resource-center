@@ -1369,45 +1369,13 @@ function UsersTab() {
 
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "viewer" as "viewer" | "publisher" | "partner_manager" | "owner" });
-  const [inviteLinkModal, setInviteLinkModal] = useState<{ open: boolean; url: string; name: string }>({
-    open: false, url: "", name: "",
-  });
   const addUserMutation = trpc.admin.addUser.useMutation({
-    onSuccess: (data) => {
+    onSuccess: () => {
       const userName = addUserForm.name;
       setAddUserOpen(false);
       setAddUserForm({ name: "", email: "", role: "viewer" });
       refetch();
-      if (data.inviteUrl) {
-        setInviteLinkModal({ open: true, url: data.inviteUrl, name: userName });
-      } else {
-        toast.success(`User ${userName} added successfully.`);
-      }
-    },
-    onError: (e) => toast.error(e.message),
-  });
-
-  // Magic link invite
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteForm, setInviteForm] = useState({ name: "", email: "", role: "viewer" as "owner" | "publisher" | "partner_manager" | "viewer" });
-  const [inviteResult, setInviteResult] = useState<{ link: string; name: string; role: string } | null>(null);
-
-  // Bulk import state
-  const [bulkImportOpen, setBulkImportOpen] = useState(false);
-  const [bulkCsvText, setBulkCsvText] = useState("");
-  const [bulkResults, setBulkResults] = useState<{ email: string; name: string; inviteLink: string; status: string; error?: string }[] | null>(null);
-  const bulkInviteMutation = trpc.admin.bulkInviteTeamMembers.useMutation({
-    onSuccess: (data) => {
-      setBulkResults(data.results);
-      refetch();
-    },
-    onError: (e) => toast.error(e.message),
-  });
-  const inviteTeamMember = trpc.admin.inviteTeamMember.useMutation({
-    onSuccess: (data) => {
-      setInviteResult({ link: data.inviteLink, name: inviteForm.name, role: data.role ?? inviteForm.role });
-      setInviteForm({ name: "", email: "", role: "viewer" });
-      refetch();
+      toast.success(`${userName} added. They can sign in via WAVV.`);
     },
     onError: (e) => toast.error(e.message),
   });
@@ -1436,24 +1404,6 @@ function UsersTab() {
     onError: (err) => { toast.error(err.message); },
   });
 
-  const [resetLinkModal, setResetLinkModal] = React.useState<{ open: boolean; url: string; name: string }>({ open: false, url: "", name: "" });
-  const sendPasswordReset = trpc.admin.sendPasswordReset.useMutation({
-    onSuccess: (data) => {
-      setResetLinkModal({ open: true, url: data.resetLink, name: "" });
-    },
-    onError: (e) => toast.error(e.message),
-  });
-
-  // MFA setup link modal
-  const [mfaLinkModal, setMfaLinkModal] = React.useState<{ open: boolean; url: string; name: string }>({ open: false, url: "", name: "" });
-  const generateMfaSetup = trpc.auth.generateMfaSetup.useMutation({
-    onSuccess: (data) => {
-      const setupUrl = `${window.location.origin}/mfa-setup?token=${data.setupToken}`;
-      setMfaLinkModal({ open: true, url: setupUrl, name: "" });
-    },
-    onError: (e) => toast.error(e.message),
-  });
-  // resetMfaMutation removed — full reset handled by Send Setup Link
 
   const isPendingPromotion = (email: string | null | undefined) => {
     if (!email) return false;
@@ -1627,24 +1577,6 @@ function UsersTab() {
             <FileDown size={13} />
             Export{roleFilter !== "all" ? ` ${roleFilter === "publisher" ? "Publishers" : roleFilter === "viewer" ? "Viewers" : roleFilter === "partner_manager" ? "Partner Managers" : "Users"}` : " All"}
           </button>
-          {isOwner && (
-            <>
-              <button
-                onClick={() => { setInviteOpen(true); setInviteResult(null); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
-                style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.25)" }}
-              >
-                <UserPlus size={13} /> Invite Team Member
-              </button>
-              <button
-                onClick={() => setBulkImportOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition hover:opacity-90"
-                style={{ background: "rgba(103,199,40,0.1)", color: "#86efac", border: "1px solid rgba(103,199,40,0.25)" }}
-              >
-                <Users size={13} /> Bulk Import
-              </button>
-            </>
-          )}
         </div>
       </div>
 
@@ -1861,24 +1793,6 @@ function UsersTab() {
                             onClick={() => setPromoteDialog({ open: true, userId: u.id, userName: u.name ?? u.email ?? "User", currentRole: u.role, selectedRole: u.role as UserRole, step: 1 })}>
                             <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                           </button>
-                          {/* Col 2: Send / Resend Setup Link — combined password reset + MFA setup */}
-                          {(() => {
-                            const hadInvite = !!(u as any).inviteSentAt;
-                            const label = hadInvite ? "Resend Setup Link" : "Send Setup Link";
-                            return (
-                              <button
-                                className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                                style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
-                                onClick={() => {
-                                  setResetLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
-                                  sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin });
-                                }}
-                                disabled={sendPasswordReset.isPending}
-                              >
-                                <KeyRound className="h-3 w-3 flex-shrink-0" /> {label}
-                              </button>
-                            );
-                          })()}
                           {/* Col 4: Remove — triggers confirmation dialog */}
                           <button
                             className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
@@ -1898,24 +1812,6 @@ function UsersTab() {
                               <ShieldOff className="h-3 w-3 flex-shrink-0" /> Change Role
                             </button>
                           )}
-                          {/* Send / Resend Setup Link — combined password reset + MFA (owner only, not self) */}
-                          {isOwner && !isSelf && (() => {
-                            const hadInvite = !!(u as any).inviteSentAt;
-                            const label = hadInvite ? "Resend Setup Link" : "Send Setup Link";
-                            return (
-                              <button
-                                className="flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors"
-                                style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.2)" }}
-                                onClick={() => {
-                                  setResetLinkModal(prev => ({ ...prev, name: u.name ?? u.email ?? "User" }));
-                                  sendPasswordReset.mutate({ userId: u.id, origin: window.location.origin });
-                                }}
-                                disabled={sendPasswordReset.isPending}
-                              >
-                                <KeyRound className="h-3 w-3 flex-shrink-0" /> {label}
-                              </button>
-                            );
-                          })()}
                           {/* Remove — owner only, cannot remove self */}
                           {isOwner && !isSelf && (
                             <button
@@ -2114,7 +2010,7 @@ function UsersTab() {
             <Button
               onClick={() => {
                 if (!addUserForm.name.trim() || !addUserForm.email.trim()) { toast.error("Name and email are required."); return; }
-                addUserMutation.mutate({ ...addUserForm, origin: window.location.origin });
+                addUserMutation.mutate({ ...addUserForm });
               }}
               disabled={addUserMutation.isPending || !addUserForm.name.trim() || !addUserForm.email.trim()}
               style={{ background: "#4ade80", color: "#000" }}
@@ -2122,344 +2018,6 @@ function UsersTab() {
             >
               {addUserMutation.isPending ? "Adding..." : "Add User"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Invite Link Modal ── */}
-      <Dialog open={inviteLinkModal.open} onOpenChange={(open) => { if (!open) setInviteLinkModal({ open: false, url: "", name: "" }); }}>
-        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <UserPlus size={18} style={{ color: "#4ade80" }} />
-              User Added — Share Invite Link
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              <strong className="text-white">{inviteLinkModal.name}</strong> has been added. Send them this link to claim their account and set a password. It expires in 72 hours.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-2 space-y-3">
-            <div
-              className="flex flex-col gap-1 p-3 rounded-lg"
-              style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
-            >
-              <p className="text-[10px] text-gray-500 font-mono">{(() => { try { return new URL(inviteLinkModal.url).origin; } catch { return ""; } })()}</p>
-              <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
-                /accept-invite?token=<span style={{ color: "#93c5fd" }}>{inviteLinkModal.url.split("token=")[1]?.slice(0, 12)}…</span>
-              </p>
-            </div>
-            <Button
-              className="w-full font-semibold"
-              style={{ background: "#0074F4", color: "#fff" }}
-              onClick={() => {
-                navigator.clipboard.writeText(inviteLinkModal.url);
-                toast.success("Invite link copied to clipboard!");
-              }}
-            >
-              Copy Invite Link
-            </Button>
-            <p className="text-xs text-gray-500 text-center">Paste this link in Slack, email, or any message to the user.</p>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setInviteLinkModal({ open: false, url: "", name: "" })} className="text-gray-400">Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Reset Password Link Modal ── */}
-      <Dialog open={resetLinkModal.open} onOpenChange={(open) => { if (!open) setResetLinkModal({ open: false, url: "", name: "" }); }}>
-        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <KeyRound size={18} style={{ color: "#fbbf24" }} />
-              Password Reset Link
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Send this link directly to <strong className="text-white">{resetLinkModal.name}</strong> via Slack or email. They'll use it to set a new password. It expires in 24 hours and can only be used once.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-2 space-y-3">
-            <div
-              className="flex flex-col gap-1 p-3 rounded-lg"
-              style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
-            >
-              <p className="text-[10px] text-gray-500 font-mono">{(() => { try { return new URL(resetLinkModal.url).origin; } catch { return ""; } })()}</p>
-              <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
-                /accept-invite?token=<span style={{ color: "#93c5fd" }}>{resetLinkModal.url.split("token=")[1]?.slice(0, 12)}…</span>
-              </p>
-            </div>
-            <Button
-              className="w-full font-semibold"
-              style={{ background: "#0074F4", color: "#fff" }}
-              onClick={() => {
-                navigator.clipboard.writeText(resetLinkModal.url);
-                toast.success("Reset link copied to clipboard!");
-              }}
-            >
-              Copy Reset Link
-            </Button>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setResetLinkModal({ open: false, url: "", name: "" })} className="text-gray-400">Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── MFA Setup Link Modal ── */}
-      <Dialog open={mfaLinkModal.open} onOpenChange={(open) => { if (!open) setMfaLinkModal({ open: false, url: "", name: "" }); }}>
-        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <ShieldCheck size={18} style={{ color: "#22c55e" }} />
-              MFA Setup Link
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Send this link to <strong className="text-white">{mfaLinkModal.name}</strong> via Slack or email. They'll open it, scan the QR code with Google Authenticator, and enter their first 6-digit code to activate MFA. The link expires in 24 hours.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-2 space-y-3">
-            <div
-              className="flex flex-col gap-1 p-3 rounded-lg"
-              style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
-            >
-              <p className="text-[10px] text-gray-500 font-mono">{(() => { try { return new URL(mfaLinkModal.url).origin; } catch { return ""; } })()}</p>
-              <p className="text-xs font-mono" style={{ color: "#22c55e" }}>
-                /mfa-setup?token=<span style={{ color: "#86efac" }}>{mfaLinkModal.url.split("token=")[1]?.slice(0, 12)}…</span>
-              </p>
-            </div>
-            <Button
-              className="w-full font-semibold"
-              style={{ background: "#22c55e", color: "#000" }}
-              onClick={() => {
-                navigator.clipboard.writeText(mfaLinkModal.url);
-                toast.success("MFA setup link copied to clipboard!");
-              }}
-            >
-              Copy MFA Setup Link
-            </Button>
-            <p className="text-xs text-gray-500 text-center">Paste this link in Slack or email. The user scans the QR code with Google Authenticator and enters their first code to activate.</p>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setMfaLinkModal({ open: false, url: "", name: "" })} className="text-gray-400">Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Invite Team Member Dialog ── */}
-      <Dialog open={inviteOpen} onOpenChange={(open) => { if (!open) { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "viewer" }); } }}>
-        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <UserPlus size={18} style={{ color: "#60a5fa" }} />
-              Invite Team Member
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Enter their name, email, and role. An invite link will be generated — they'll use it to set their password and activate their account.
-            </DialogDescription>
-          </DialogHeader>
-
-          {inviteResult ? (
-            <div className="py-2 space-y-4">
-              {/* Success banner */}
-              <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
-                <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
-                <p className="text-sm text-white"><strong>{inviteResult.name}</strong> has been added as a{["viewer","owner"].includes(inviteResult.role) ? "n" : ""} {inviteResult.role === "owner" ? "Owner" : inviteResult.role === "publisher" ? "Publisher" : inviteResult.role === "partner_manager" ? "Partner Manager" : "Viewer"}.</p>
-              </div>
-
-              {/* Slack instructions block */}
-              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
-                <div className="px-3 py-2 flex items-center justify-between" style={{ background: "rgba(0,116,244,0.12)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                  <p className="text-xs font-semibold" style={{ color: "#60a5fa" }}>Slack Message — Copy &amp; Send</p>
-                  <button
-                    className="text-[10px] px-2 py-0.5 rounded font-medium transition-colors"
-                    style={{ background: "rgba(0,116,244,0.2)", color: "#93c5fd", border: "1px solid rgba(0,116,244,0.3)" }}
-                    onClick={() => {
-                      const origin = (() => { try { return new URL(inviteResult!.link).origin; } catch { return "the portal"; } })();
-                      const slackMsg = [
-                        `Hey ${inviteResult!.name}!`,
-                        "",
-                        "You've been invited to the WAVV Command Center.",
-                        "",
-                        "Here's how to get set up:",
-                        `1. Click the "WAVV Command Center Invite Link" to accept your invite and create your password: ${inviteResult!.link}`,
-                        "2. Sign in using your newly created password",
-                        "3. You'll be prompted to set up Google Authenticator (required for all Command Center users)",
-                        "4. Once MFA is active, you'll have full access",
-                        "",
-                        "This link expires in 72 hours and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.",
-                      ].join("\n");
-                      navigator.clipboard.writeText(slackMsg);
-                      toast.success("Slack message copied to clipboard!");
-                    }}
-                  >
-                    Copy
-                  </button>
-                </div>
-                <div className="p-3 text-xs leading-relaxed space-y-2" style={{ background: "#0a0a0a", color: "#c9d1d9", fontFamily: "monospace" }}>
-                  <p>Hey <strong style={{ color: "#fff" }}>{inviteResult.name}</strong>!</p>
-                  <p>You've been invited to the <strong style={{ color: "#fff" }}>WAVV Command Center</strong>.</p>
-                  <p className="text-gray-400">Here's how to get set up:</p>
-                  <ol className="list-none space-y-1 pl-1">
-                    <li>1. Click the <strong style={{ color: "#fff" }}>"WAVV Command Center Invite Link"</strong> to accept your invite and create your password:<br /><a href={inviteResult.link} target="_blank" rel="noopener noreferrer" style={{ color: "#93c5fd", wordBreak: "break-all" }} className="underline text-[10px]">{inviteResult.link}</a></li>
-                    <li>2. Sign in using your newly created password</li>
-                    <li>3. You'll be prompted to set up <strong style={{ color: "#fff" }}>Google Authenticator</strong> (required for all Command Center users)</li>
-                    <li>4. Once MFA is active, you'll have full access</li>
-                  </ol>
-                  <p className="text-gray-500 text-[10px] mt-2">This link expires in <strong style={{ color: "#fbbf24" }}>72 hours</strong> and can only be used once. If it expires, reach out to Jake or another Owner to get a new one.</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="py-2 space-y-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-400">Full Name</label>
-                <Input
-                  value={inviteForm.name}
-                  onChange={(e) => setInviteForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="e.g. John Smith"
-                  className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-400">Work Email</label>
-                <Input
-                  type="email"
-                  value={inviteForm.email}
-                  onChange={(e) => setInviteForm(f => ({ ...f, email: e.target.value }))}
-                  placeholder="e.g. john@wavv.com"
-                  className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-400">Access Level</label>
-                <select
-                  value={inviteForm.role}
-                  onChange={(e) => setInviteForm(f => ({ ...f, role: e.target.value as "owner" | "publisher" | "partner_manager" | "viewer" }))}
-                  className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                  style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)" }}
-                >
-                  <option value="owner">Owner</option>
-                  <option value="publisher">Publisher</option>
-                  <option value="partner_manager">Partner Manager</option>
-                  <option value="viewer">Viewer</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => { setInviteOpen(false); setInviteResult(null); setInviteForm({ name: "", email: "", role: "viewer" }); }} className="text-gray-400">Close</Button>
-            {!inviteResult && (
-              <Button
-                disabled={inviteTeamMember.isPending || !inviteForm.name.trim() || !inviteForm.email.trim()}
-                onClick={() => {
-                  if (!inviteForm.name.trim() || !inviteForm.email.trim()) { toast.error("Name and email are required."); return; }
-                  inviteTeamMember.mutate({ name: inviteForm.name.trim(), email: inviteForm.email.trim().toLowerCase(), role: inviteForm.role, origin: window.location.origin });
-                }}
-                style={{ background: "#0074F4", color: "#fff" }}
-              >
-                {inviteTeamMember.isPending ? "Creating…" : "Create Invite Link"}
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Bulk Import Dialog ── */}
-      <Dialog open={bulkImportOpen} onOpenChange={(open) => { if (!open) { setBulkImportOpen(false); setBulkCsvText(""); setBulkResults(null); } }}>
-        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a", maxWidth: 560 }}>
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Users size={18} style={{ color: "#86efac" }} />
-              Bulk Import Team Members
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Paste a CSV or list of users below. Each line: <code className="text-green-400 bg-black/30 px-1 rounded">Name, Email, Role</code>. Role is optional (defaults to admin).
-            </DialogDescription>
-          </DialogHeader>
-
-          {bulkResults ? (
-            <div className="py-2 space-y-3">
-              <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: "rgba(103,199,40,0.08)", border: "1px solid rgba(103,199,40,0.2)" }}>
-                <CheckCircle2 size={16} style={{ color: "#67C728", flexShrink: 0 }} />
-                <p className="text-sm text-white">{bulkResults.filter(r => r.status !== "error").length} of {bulkResults.length} users invited successfully.</p>
-              </div>
-              <div className="max-h-60 overflow-y-auto rounded-lg" style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}>
-                {bulkResults.map((r, i) => (
-                  <div key={i} className="flex items-start gap-2 px-3 py-2 border-b last:border-b-0" style={{ borderColor: "#1a1a1a" }}>
-                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full mt-0.5 ${r.status === "error" ? "text-red-400" : "text-green-400"}`}
-                      style={{ background: r.status === "error" ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)", border: `1px solid ${r.status === "error" ? "rgba(239,68,68,0.2)" : "rgba(34,197,94,0.2)"}` }}>
-                      {r.status === "error" ? "Error" : "OK"}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-white truncate">{r.name} — {r.email}</p>
-                      {r.status === "error" ? (
-                        <p className="text-[10px] text-red-400">{r.error}</p>
-                      ) : (
-                        <p className="text-[10px] text-gray-500 truncate">{r.inviteLink}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button
-                className="w-full font-semibold"
-                style={{ background: "rgba(103,199,40,0.15)", color: "#86efac", border: "1px solid rgba(103,199,40,0.3)" }}
-                onClick={() => {
-                  const lines = bulkResults.filter(r => r.status !== "error").map(r =>
-                    `${r.name} (${r.email}):\n${r.inviteLink}`
-                  ).join("\n\n");
-                  navigator.clipboard.writeText(lines);
-                  toast.success("All invite links copied!");
-                }}
-              >
-                Copy All Invite Links
-              </Button>
-            </div>
-          ) : (
-            <div className="py-2 space-y-3">
-              <div className="text-xs text-gray-500 rounded-lg p-2" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <p className="font-medium text-gray-400 mb-1">Format (one per line):</p>
-                <p className="font-mono">John Smith, john@wavv.com, admin</p>
-                <p className="font-mono">Jane Doe, jane@wavv.com, content_admin</p>
-                <p className="font-mono text-gray-600">Alex Lee, alex@wavv.com  ← role defaults to admin</p>
-              </div>
-              <textarea
-                value={bulkCsvText}
-                onChange={(e) => setBulkCsvText(e.target.value)}
-                placeholder={"John Smith, john@wavv.com, admin\nJane Doe, jane@wavv.com"}
-                rows={8}
-                className="w-full rounded-lg px-3 py-2 text-sm text-white font-mono outline-none resize-none"
-                style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.1)" }}
-              />
-              <p className="text-[10px] text-gray-600">Max 50 users per import. Existing users will have their role updated and a new invite link generated.</p>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => { setBulkImportOpen(false); setBulkCsvText(""); setBulkResults(null); }} className="text-gray-400">Close</Button>
-            {!bulkResults && (
-              <Button
-                disabled={bulkInviteMutation.isPending || !bulkCsvText.trim()}
-                onClick={() => {
-                  const csvLines = bulkCsvText.split("\n").map((l: string) => l.trim()).filter(Boolean);
-                  const entries: { name: string; email: string; role: "owner" | "publisher" | "partner_manager" | "viewer" }[] = [];
-                  const validRoles = ["owner", "publisher", "partner_manager", "viewer"];
-                  for (const line of csvLines) {
-                    const parts = line.split(",").map((p: string) => p.trim());
-                    if (parts.length < 2) { toast.error(`Invalid line: "${line}" — expected Name, Email[, Role]`); return; }
-                    const [name, email, roleRaw] = parts;
-                    const role = (validRoles.includes(roleRaw ?? "") ? roleRaw : "viewer") as "owner" | "publisher" | "partner_manager" | "viewer";
-                    entries.push({ name, email, role });
-                  }
-                  if (entries.length === 0) { toast.error("No valid entries found."); return; }
-                  bulkInviteMutation.mutate({ entries, origin: window.location.origin });
-                }}
-                style={{ background: "rgba(103,199,40,0.15)", color: "#86efac", border: "1px solid rgba(103,199,40,0.3)" }}
-              >
-                {bulkInviteMutation.isPending ? "Importing…" : "Generate Invite Links"}
-              </Button>
-            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -7026,11 +6584,8 @@ function NotificationsTab() {
 function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: boolean }) {
   const { data: allUsers = [], isLoading, refetch } = trpc.admin.listUsers.useQuery();
   const [showInvite, setShowInvite] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
-  const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [inviteError, setInviteError] = useState("");
-  const [inviteUrl, setInviteUrl] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
   const [partnerSearch, setPartnerSearch] = useState("");
   const addUserMutation = trpc.admin.addUser.useMutation();
   const toggleStatus = trpc.admin.toggleUserStatus.useMutation({
@@ -7075,7 +6630,7 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
           <p className="text-xs text-gray-500 mt-0.5">Track partner accounts, engagement, and program health</p>
         </div>
         <button
-          onClick={() => { setShowInvite(true); setInviteStatus("idle"); setInviteError(""); setInviteEmail(""); setInviteName(""); }}
+          onClick={() => { setShowInvite(true); setInviteEmail(""); setInviteName(""); }}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
           style={{ background: "#0074F4", color: "#fff" }}
         >
@@ -7086,104 +6641,43 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
 
       {/* Invite modal */}
       {showInvite && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.7)" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowInvite(false); }}
-        >
-          <div className="rounded-2xl p-6 w-full max-w-sm space-y-4" style={{ background: "#1a1a2e", border: "1px solid #2a2a2a" }}>
-            <h3 className="text-base font-semibold text-white">Invite WAVV Partner</h3>
-            <p className="text-xs text-gray-500">They will receive access to the WAVV Partners section and required onboarding content.</p>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Full Name</label>
-                <input
-                  className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                  style={{ background: "#0d0d0d", border: "1px solid #333" }}
-                  placeholder="Jane Smith"
-                  value={inviteName}
-                  onChange={(e) => setInviteName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Email Address</label>
-                <input
-                  className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                  style={{ background: "#0d0d0d", border: "1px solid #333" }}
-                  placeholder="jane@company.com"
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Access Level</label>
-                <div
-                  className="w-full rounded-lg px-3 py-2 text-sm flex items-center gap-2"
-                  style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.2)", color: "#60a5fa" }}
-                >
-                  <Users size={13} />
-                  WAVV Partner
-                  <span className="ml-auto text-[10px] text-gray-600">{isPartnerAdmin ? "Partner Admin can only assign this role" : "Fixed"}</span>
-                </div>
-              </div>
-            </div>
-            {inviteStatus === "error" && (
-              <p className="text-xs text-red-400">{inviteError}</p>
-            )}
-            {inviteStatus === "success" && inviteUrl && (
-              <div className="space-y-2">
-                <p className="text-xs text-green-400">Partner invited successfully. Share this link:</p>
-                <div
-                  className="flex flex-col gap-1 p-3 rounded-lg"
-                  style={{ background: "#0a0a0a", border: "1px solid #2a2a2a" }}
-                >
-                  <p className="text-[10px] text-gray-500 font-mono">{(() => { try { return new URL(inviteUrl).origin; } catch { return ""; } })()}</p>
-                  <p className="text-xs font-mono" style={{ color: "#60a5fa" }}>
-                    /accept-invite?token=<span style={{ color: "#93c5fd" }}>{inviteUrl.split("token=")[1]?.slice(0, 12)}…</span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => { navigator.clipboard.writeText(inviteUrl); toast.success("Invite link copied!"); }}
-                  className="w-full rounded-lg py-2 text-sm font-medium transition-all"
-                  style={{ background: "#0074F4", color: "#fff" }}
-                >
-                  Copy Invite Link
-                </button>
-              </div>
-            )}
-            {inviteStatus === "success" && !inviteUrl && (
-              <p className="text-xs text-green-400">Partner invited successfully.</p>
-            )}
-            <div className="flex gap-2 pt-1">
-              <button
-                onClick={() => setShowInvite(false)}
-                className="flex-1 rounded-lg py-2 text-sm font-medium text-gray-400 transition-all"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid #333" }}
-              >
-                Cancel
-              </button>
-              <button
-                disabled={inviteStatus === "loading" || !inviteEmail.trim() || !inviteName.trim()}
-                onClick={async () => {
-                  setInviteStatus("loading");
-                  setInviteError("");
-                  try {
-                    const result = await addUserMutation.mutateAsync({ name: inviteName.trim(), email: inviteEmail.trim(), role: "partner", origin: window.location.origin });
-                    setInviteUrl(result.inviteUrl ?? "");
-                    setInviteStatus("success");
-                    refetch();
-                  } catch (err: any) {
-                    setInviteStatus("error");
-                    setInviteError(err?.message ?? "Failed to invite partner. Please try again.");
-                  }
-                }}
-                className="flex-1 rounded-lg py-2 text-sm font-medium transition-all disabled:opacity-50"
-                style={{ background: "#0074F4", color: "#fff" }}
-              >
-                {inviteStatus === "loading" ? "Inviting..." : "Send Invite"}
-              </button>
-            </div>
+        <div className="rounded-xl p-4 border border-white/10 space-y-3" style={{ background: "rgba(0,116,244,0.05)" }}>
+          <h3 className="text-sm font-semibold text-white">Add WAVV Partner</h3>
+          <p className="text-xs text-gray-500">They will be able to sign in via WAVV and access the Partners portal.</p>
+          <div className="flex gap-2">
+            <input
+              className="flex-1 rounded-lg px-3 py-2 text-sm text-white outline-none"
+              style={{ background: "#0d0d0d", border: "1px solid #333" }}
+              placeholder="Full Name"
+              value={inviteName}
+              onChange={(e) => setInviteName(e.target.value)}
+            />
+            <input
+              className="flex-1 rounded-lg px-3 py-2 text-sm text-white outline-none"
+              style={{ background: "#0d0d0d", border: "1px solid #333" }}
+              placeholder="Email"
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+            />
+            <button
+              disabled={addUserMutation.isPending || !inviteEmail.trim() || !inviteName.trim()}
+              onClick={async () => {
+                try {
+                  await addUserMutation.mutateAsync({ name: inviteName.trim(), email: inviteEmail.trim(), role: "partner" });
+                  toast.success(`${inviteName.trim()} added as a WAVV Partner.`);
+                  setInviteName(""); setInviteEmail(""); setShowInvite(false);
+                  refetch();
+                } catch (err: any) {
+                  toast.error(err?.message ?? "Failed to add partner.");
+                }
+              }}
+              className="rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50"
+              style={{ background: "#0074F4", color: "#fff" }}
+            >
+              {addUserMutation.isPending ? "Adding…" : "Add"}
+            </button>
+            <button onClick={() => setShowInvite(false)} className="rounded-lg px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
           </div>
         </div>
       )}
@@ -7643,20 +7137,12 @@ function ApprovedPartnersTab() {
   const approvedPartnersEnabled = (settings as Record<string, unknown>)["approved_partners_enabled"] !== false;
   const { data: partners = [], refetch } = trpc.approvedPartners.list.useQuery();
   const [search, setSearch] = useState("");
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteName, setInviteName] = useState("");
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
-  const [inviteError, setInviteError] = useState("");
   const inviteMutation = trpc.approvedPartners.invite.useMutation({
-    onSuccess: (data) => { setInviteLink(data.inviteLink); refetch(); },
-    onError: (e) => setInviteError(e.message),
+    onSuccess: () => { refetch(); toast.success("Partner added. They can sign in via WAVV."); },
+    onError: (e) => toast.error(e.message),
   });
   const deactivateMutation = trpc.approvedPartners.deactivate.useMutation({ onSuccess: () => refetch() });
   const removeMutation = trpc.approvedPartners.remove.useMutation({ onSuccess: () => refetch() });
-  const resendMutation = trpc.approvedPartners.resendInvite.useMutation({
-    onSuccess: (data) => { setInviteLink(data.inviteLink); setInviteOpen(true); },
-  });
   const filtered = partners.filter(p =>
     (p.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
     (p.email ?? "").toLowerCase().includes(search.toLowerCase())
@@ -7750,11 +7236,6 @@ function ApprovedPartnersTab() {
             style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
             <FileDown size={13} /> Export Partners
           </button>
-          <button onClick={() => { setInviteOpen(true); setInviteLink(null); setInviteError(""); setInviteName(""); setInviteEmail(""); }}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium text-white flex items-center gap-1.5"
-            style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
-            <UserPlus size={13} /> Invite Partner
-          </button>
         </div>
       </div>
       <div className="relative">
@@ -7800,8 +7281,6 @@ function ApprovedPartnersTab() {
                 <td className="px-4 py-3 text-gray-400 text-xs">{new Date(p.createdAt).toLocaleDateString()}</td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
-                    <button onClick={() => resendMutation.mutate({ userId: p.id, origin: window.location.origin })}
-                      className="px-2 py-1 rounded text-xs text-blue-400 hover:bg-blue-500/10 transition-colors">Resend Invite</button>
                     <button onClick={() => deactivateMutation.mutate({ userId: p.id })}
                       className="px-2 py-1 rounded text-xs text-yellow-400 hover:bg-yellow-500/10 transition-colors">
                       {p.isActive ? "Deactivate" : "Reactivate"}
@@ -7815,43 +7294,6 @@ function ApprovedPartnersTab() {
           </tbody>
         </table>
       </div>
-      {inviteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setInviteOpen(false)}>
-          <div className="rounded-2xl p-6 w-full max-w-md space-y-4" style={{ background: "#1a1f2e", border: "1px solid #2a2a3a" }} onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-bold text-white">Invite WAVV Partner</h3>
-            {inviteLink ? (
-              <div className="space-y-3">
-                <p className="text-sm text-green-400">Invite created! Share this link with the partner:</p>
-                <div className="p-3 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-300 break-all">{inviteLink}</div>
-                <button onClick={() => navigator.clipboard.writeText(inviteLink ?? "")}
-                  className="w-full py-2 rounded-lg text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>Copy Link</button>
-                <button onClick={() => setInviteOpen(false)} className="w-full py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors">Close</button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">Full Name</label>
-                  <input value={inviteName} onChange={e => setInviteName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" placeholder="Jane Smith" />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">Email Address</label>
-                  <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} type="email"
-                    className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-blue-500/50" placeholder="jane@company.com" />
-                </div>
-                {inviteError && <p className="text-xs text-red-400">{inviteError}</p>}
-                <button onClick={() => inviteMutation.mutate({ name: inviteName, email: inviteEmail, origin: window.location.origin })}
-                  disabled={!inviteName || !inviteEmail || inviteMutation.isPending}
-                  className="w-full py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-                  style={{ background: "linear-gradient(135deg,#3b82f6,#8b5cf6)" }}>
-                  {inviteMutation.isPending ? "Sending..." : "Send Invite"}
-                </button>
-                <button onClick={() => setInviteOpen(false)} className="w-full py-2 rounded-lg text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

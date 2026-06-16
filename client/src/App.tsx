@@ -1,8 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { useEffect } from "react";
-import { Route, Switch, useLocation, Redirect } from "wouter";
+import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Dashboard from "./pages/Dashboard";
@@ -17,14 +16,8 @@ import Admin from "./pages/Admin";
 import HandsOn from "./pages/HandsOn";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
-import GoogleCallback from "./pages/GoogleCallback";
-import AcceptInvite from "./pages/AcceptInvite";
 import Partners from "./pages/Partners";
 import WavvPartnerPortal from "./pages/WavvPartnerPortal";
-import MagicAuth from "./pages/MagicAuth";
-import MfaSetup from "./pages/MfaSetup";
-import MfaVerify from "./pages/MfaVerify";
-import MfaRequired from "./pages/MfaRequired";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { useIntercom } from "./hooks/useIntercom";
 import { trpc } from "./lib/trpc";
@@ -58,31 +51,6 @@ function PartnerPortalGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Intercepts any portal route when user is logged in but MFA is not yet configured.
-function MfaGate({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  const [, navigate] = useLocation();
-  const path = window.location.pathname;
-  const MFA_EXEMPT = ["/login", "/mfa-setup", "/mfa-verify", "/mfa-required", "/accept-invite", "/auth/google/callback", "/auth/magic"];
-  const isExempt = MFA_EXEMPT.some(p => path.startsWith(p));
-
-  useEffect(() => {
-    if (loading || isExempt) return;
-    if (user && (user as { mfaPending?: boolean }).mfaPending) {
-      navigate("/mfa-required");
-    }
-    // Force re-enrollment: MFA secret was rotated server-side; user must complete fresh MFA setup
-    if (user && (user as { mfaForceReenroll?: boolean }).mfaForceReenroll) {
-      navigate("/mfa-required");
-    }
-  }, [user, loading, isExempt, navigate]);
-
-  if (!loading && !isExempt && user && ((user as { mfaPending?: boolean }).mfaPending || (user as { mfaForceReenroll?: boolean }).mfaForceReenroll)) {
-    return null; // suppress flash while redirect fires
-  }
-  return <>{children}</>;
-}
-
 function Router() {
   usePageTracking();
   useIntercom();
@@ -90,7 +58,6 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/login" component={Login} />
-      <Route path="/auth/google/callback" component={GoogleCallback} />
       <Route path="/home">{() => <Redirect to="/" />}</Route>
       <Route path="/academy" component={Academy} />
       <Route path="/academy/category/:categoryKey" component={AcademyCategory} />
@@ -105,11 +72,6 @@ function Router() {
       <Route path="/wavvadmin">{() => <Redirect to="/wavvcommandcenter" />}</Route>
       <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>
       <Route path="/hands-on">{() => <Redirect to="/playground" />}</Route>
-      <Route path="/accept-invite" component={AcceptInvite} />
-      <Route path="/auth/magic" component={MagicAuth} />
-      <Route path="/mfa-setup" component={MfaSetup} />
-      <Route path="/mfa-verify" component={MfaVerify} />
-      <Route path="/mfa-required" component={MfaRequired} />
       <Route path="/profile" component={Profile} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
@@ -132,9 +94,7 @@ function App() {
               },
             }}
           />
-          <MfaGate>
-            <Router />
-          </MfaGate>
+          <Router />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

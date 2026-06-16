@@ -152,6 +152,7 @@ export function registerOAuthRoutes(app: Express) {
             loginMethod: "wavv_oidc",
             lastSignedIn: new Date(),
             role: existingByEmail.role,
+            avatarUrl: userInfo.picture || idClaims.picture || existingByEmail.avatarUrl || null,
           });
           user = await db.getUserByOpenId(externalId);
         }
@@ -165,6 +166,7 @@ export function registerOAuthRoutes(app: Express) {
           loginMethod: "wavv_oidc",
           lastSignedIn: new Date(),
           role: internalRole,
+          avatarUrl: userInfo.picture || idClaims.picture || null,
         });
         user = await db.getUserByOpenId(externalId);
       } else {
@@ -172,6 +174,7 @@ export function registerOAuthRoutes(app: Express) {
           openId: externalId,
           lastSignedIn: new Date(),
           name: userInfo.name || user.name || null,
+          avatarUrl: userInfo.picture || idClaims.picture || user.avatarUrl || null,
         });
       }
 

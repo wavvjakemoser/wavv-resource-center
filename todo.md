@@ -1373,3 +1373,40 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] All sub-sections collapsed by default on admin and customer-facing sides
 - [ ] Top-level Help Articles and PDF headers are NOT collapsible (only sub-sections collapse)
 - [ ] Page name / hero copy update on Guides & Docs page
+
+## OIDC-Only Auth Migration (Session — Jun 15 2026)
+- [ ] Replace /login route: redirect to /api/oauth/login instead of showing password form
+- [ ] Remove Login.tsx password form (replace with OIDC redirect component)
+- [ ] Remove Register.tsx and /register route (not used, no route registered)
+- [ ] Remove MagicAuth.tsx and /auth/magic route
+- [ ] Remove MfaVerify.tsx and /mfa-verify route (MFA handled by WAVV IdP)
+- [ ] Remove MfaRequired.tsx and /mfa-required route
+- [ ] Remove MfaSetup.tsx and /mfa-setup route
+- [ ] Remove MfaGate component from App.tsx
+- [ ] Remove GoogleCallback.tsx and /auth/google/callback route
+- [ ] Update WavvPartnerPortal: replace navigate("/login?next=/wavvpartner") with /api/oauth/login?return_path=/wavvpartner
+- [ ] Update AcceptInvite: remove password fields; after token validation, redirect to /api/oauth/login
+- [ ] Update acceptInvite server procedure: remove password requirement; just claim invite token and issue session
+- [ ] Update MfaVerify "sign in again" links to point to /api/oauth/login
+- [ ] Remove auth.login, auth.register, auth.checkEmail, auth.requestMagicLink, auth.verifyMagicLink, auth.googleAuth, auth.getMfaSetupData, auth.initiateMfaSetupForSelf, auth.generateMfaSetup, auth.verifyMfaSetup, auth.verifyMfaSetupByToken, auth.verifyMfaLogin, auth.resetMfa server procedures
+- [ ] Remove sendPasswordReset server procedure (no passwords in OIDC-only model)
+- [ ] Remove MFA-related columns from users table (mfa_secret, mfa_enabled, mfa_setup_token, mfa_setup_token_expires_at, mfa_force_reenroll)
+- [ ] Remove passwordHash column from users table
+
+## Remove Invite System (OIDC-only, roles managed post-login)
+- [ ] Remove AcceptInvite.tsx page and /accept-invite route from App.tsx
+- [ ] Remove auth.validateInvite, auth.acceptInvite, auth.inviteTeamMember, auth.bulkInviteTeamMembers, auth.sendPasswordReset server procedures
+- [ ] Remove invite_tokens table references from schema and db.ts
+- [ ] Remove invite UI from Admin Team Access tab (Invite button, Bulk Import, Send Setup Link, Reset Password buttons)
+- [ ] Admin Team Access: show user list with role-change dropdown only (no invite flow)
+- [ ] Remove MagicAuth.tsx, MfaSetup.tsx, MfaVerify.tsx, MfaRequired.tsx, GoogleCallback.tsx, Register.tsx pages
+- [ ] Remove auth.login, auth.register, auth.checkEmail, auth.requestMagicLink, auth.verifyMagicLink, auth.googleAuth, auth.getMfaSetupData, auth.initiateMfaSetupForSelf, auth.generateMfaSetup, auth.verifyMfaSetup, auth.verifyMfaSetupByToken, auth.verifyMfaLogin, auth.resetMfa server procedures
+- [ ] Remove passwordHash, mfa_secret, mfa_enabled, mfa_setup_token, mfa_setup_token_expires_at, mfa_force_reenroll columns from users table (DB migration)
+
+## Avatar / Picture Claim (OIDC)
+- [x] Add `picture` column to users table in drizzle schema and run migration (avatarUrl column already existed)
+- [x] Persist `picture` claim from OIDC id_token in oauth callback upsert
+- [x] Expose `picture` field via auth.me response (avatarUrl already in allow-list)
+- [x] Wire picture into PortalLayout header avatar (fallback to initials)
+- [x] Wire picture into Admin panel user rows (initials fallback already in place)
+- [x] Wire picture into Partner Portal header (uses PortalLayout, covered)
