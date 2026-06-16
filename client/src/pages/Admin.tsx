@@ -1683,15 +1683,26 @@ function UsersTab() {
               filteredUsers.map((u) => {
                 const isSelf = u.id === currentUser?.id;
                 const initials = (u.name ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+                const pictureSrc = u.avatarUrl ? `${u.avatarUrl}=s40-c` : null;
                 const pending = isSuperAdmin && u.role === "user" && isPendingPromotion(u.email);
                 return (
                   <TableRow key={u.id} className="hover:bg-white/5 transition" style={{ borderBottom: "1px solid #1e1e1e", background: isSelf ? "rgba(0,116,244,0.05)" : "transparent" }}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                          style={{ background: "linear-gradient(135deg, #0074F4, #67C728)" }}>
-                          {initials}
-                        </div>
+                        {pictureSrc ? (
+                          <img
+                            src={pictureSrc}
+                            alt={u.name ?? "Avatar"}
+                            className="h-8 w-8 rounded-full object-cover shrink-0"
+                            style={{ border: "2px solid rgba(255,255,255,0.1)" }}
+                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                          />
+                        ) : (
+                          <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                            style={{ background: "linear-gradient(135deg, #0074F4, #67C728)" }}>
+                            {initials}
+                          </div>
+                        )}
                         <span className="font-medium text-white">
                           {u.name ?? "—"}
                           {isSelf && <span className="ml-2 text-xs text-gray-500">(you)</span>}
