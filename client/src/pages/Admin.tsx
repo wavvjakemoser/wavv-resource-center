@@ -1683,7 +1683,9 @@ function UsersTab() {
               filteredUsers.map((u) => {
                 const isSelf = u.id === currentUser?.id;
                 const initials = (u.name ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
-                const pictureSrc = u.avatarUrl ? `${u.avatarUrl}=s40-c` : null;
+                // Guard: only use avatarUrl if it's a non-empty, non-whitespace string
+                const rawAvatarUrl = (u.avatarUrl ?? "").trim();
+                const pictureSrc = rawAvatarUrl ? `${rawAvatarUrl}=s40-c` : null;
                 const pending = isSuperAdmin && u.role === "user" && isPendingPromotion(u.email);
                 return (
                   <TableRow key={u.id} className="hover:bg-white/5 transition" style={{ borderBottom: "1px solid #1e1e1e", background: isSelf ? "rgba(0,116,244,0.05)" : "transparent" }}>
@@ -1695,14 +1697,21 @@ function UsersTab() {
                             alt={u.name ?? "Avatar"}
                             className="h-8 w-8 rounded-full object-cover shrink-0"
                             style={{ border: "2px solid rgba(255,255,255,0.1)" }}
-                            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                            onError={(e) => {
+                              // On load failure, hide img and show sibling initials div
+                              const img = e.currentTarget as HTMLImageElement;
+                              img.style.display = "none";
+                              const fallback = img.nextElementSibling as HTMLElement | null;
+                              if (fallback) fallback.style.display = "flex";
+                            }}
                           />
-                        ) : (
-                          <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                            style={{ background: "linear-gradient(135deg, #0074F4, #67C728)" }}>
-                            {initials}
-                          </div>
-                        )}
+                        ) : null}
+                        <div
+                          className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                          style={{ background: "linear-gradient(135deg, #0074F4, #67C728)", display: pictureSrc ? "none" : "flex" }}
+                        >
+                          {initials}
+                        </div>
                         <span className="font-medium text-white">
                           {u.name ?? "—"}
                           {isSelf && <span className="ml-2 text-xs text-gray-500">(you)</span>}

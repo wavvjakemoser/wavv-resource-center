@@ -346,7 +346,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             {/* User avatar — shown when logged in */}
             {user && (() => {
               const initials = (user.name ?? user.email ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
-              const pictureSrc = user.avatarUrl ? `${user.avatarUrl}=s40-c` : null;
+              const rawAvatarUrl = (user.avatarUrl ?? "").trim();
+              const pictureSrc = rawAvatarUrl ? `${rawAvatarUrl}=s40-c` : null;
               return (
                 <a
                   href="/profile"
@@ -359,17 +360,21 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                       src={pictureSrc}
                       alt={user.name ?? "Avatar"}
                       className="w-8 h-8 rounded-full object-cover"
-                      style={{ border: "2px solid rgba(255,255,255,0.12)" }}
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                      style={{ border: "2px solid rgba(255,255,255,0.12)", display: "block" }}
+                      onError={(e) => {
+                        const img = e.currentTarget as HTMLImageElement;
+                        img.style.display = "none";
+                        const fallback = img.nextElementSibling as HTMLElement | null;
+                        if (fallback) fallback.style.display = "flex";
+                      }}
                     />
-                  ) : (
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                      style={{ background: "linear-gradient(135deg,#0074F4,#00A9E2)", color: "#fff" }}
-                    >
-                      {initials}
-                    </div>
-                  )}
+                  ) : null}
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    style={{ background: "linear-gradient(135deg,#0074F4,#00A9E2)", color: "#fff", display: pictureSrc ? "none" : "flex" }}
+                  >
+                    {initials}
+                  </div>
                 </a>
               );
             })()}
