@@ -56,7 +56,7 @@ export function useIntercom() {
 
   const intercomEnabled =
     allSettings === undefined
-      ? true // default true while loading
+      ? false // default false while loading — prevents Fin widget appearing before settings resolve
       : (allSettings as Record<string, unknown>)["intercom_enabled"] !== false;
 
   // Step 1: Load the Intercom script once on mount

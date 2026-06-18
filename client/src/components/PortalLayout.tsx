@@ -96,7 +96,7 @@ function NavLink({
 }
 
 export default function PortalLayout({ children, title }: PortalLayoutProps) {
-  const { data: user } = trpc.auth.me.useQuery();
+  const { data: user, isLoading: authLoading } = trpc.auth.me.useQuery();
   const { logout } = useAuth();
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -385,8 +385,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 </a>
                             );            })()}
 
-            {/* Sign In button — shown only when not logged in */}
-            {!user && (
+            {/* Sign In button — shown only when confirmed not logged in (suppress during auth load to prevent flash) */}
+            {!authLoading && !user && (
               <a
                 href="/api/oauth/login"
                 className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"

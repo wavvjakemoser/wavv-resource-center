@@ -450,3 +450,16 @@ export const helpArticleSections = mysqlTable("help_article_sections", {
 });
 export type HelpArticleSection = typeof helpArticleSections.$inferSelect;
 export type InsertHelpArticleSection = typeof helpArticleSections.$inferInsert;
+// ─── PDF Sections ─────────────────────────────────────────────────────────────
+// Admin-created named sections for the customer-facing PDFs panel.
+// PDFs are assigned to these sections via the `category` field on guides.
+export const pdfSections = mysqlTable("pdf_sections", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  sortOrder: int("sort_order").default(0).notNull(),
+  isVisible: boolean("is_visible").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PdfSection = typeof pdfSections.$inferSelect;
+export type InsertPdfSection = typeof pdfSections.$inferInsert;
