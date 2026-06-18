@@ -5219,6 +5219,41 @@ function GuidesTab() {
     },
     onError: (e) => toast.error(e.message),
   });
+  // Add PDF Section modal
+  const [showAddPdfSectionModal, setShowAddPdfSectionModal] = useState(false);
+  const [newPdfSectionName, setNewPdfSectionName] = useState("");
+  const createPdfSectionMutation = trpc.guides.createSection.useMutation({
+    onSuccess: () => {
+      utils.guides.adminList.invalidate();
+      utils.guides.listSections.invalidate();
+      toast.success("PDF section created");
+      setShowAddPdfSectionModal(false);
+      setNewPdfSectionName("");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  // Add Help Article (native) modal
+  const [showNativeArticleModal, setShowNativeArticleModal] = useState(false);
+  const [editingNativeArticle, setEditingNativeArticle] = useState<{ id: number; title: string; nativeBody: string; sectionName: string } | null>(null);
+  const createNativeMutation = trpc.helpArticles.createNativeArticle.useMutation({
+    onSuccess: () => {
+      utils.helpArticles.listPublished.invalidate();
+      utils.helpArticles.listSectionsAdmin.invalidate();
+      toast.success("Article published");
+      setShowNativeArticleModal(false);
+      setEditingNativeArticle(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const updateNativeMutation = trpc.helpArticles.updateNativeArticle.useMutation({
+    onSuccess: () => {
+      utils.helpArticles.listPublished.invalidate();
+      toast.success("Article updated");
+      setShowNativeArticleModal(false);
+      setEditingNativeArticle(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -5298,7 +5333,6 @@ function GuidesTab() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-
           <button
             onClick={() => { setShowAddSectionModal(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
@@ -5306,7 +5340,20 @@ function GuidesTab() {
           >
             <Plus size={13} /> Add Help Article Section
           </button>
-
+          <button
+            onClick={() => { setEditingNativeArticle(null); setShowNativeArticleModal(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
+            style={{ background: "#8B5CF6" }}
+          >
+            <Plus size={13} /> Add Help Article
+          </button>
+          <button
+            onClick={() => { setShowAddPdfSectionModal(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}
+          >
+            <Plus size={13} /> Add PDF Section
+          </button>
           <button
             onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
@@ -5535,6 +5582,56 @@ function GuidesTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* ── Add PDF Section Modal ── */}
+      <Dialog open={showAddPdfSectionModal} onOpenChange={setShowAddPdfSectionModal}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Add PDF Section</DialogTitle>
+            <DialogDescription className="text-gray-400">Create a named section to group PDF documents.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <label className="block text-xs text-gray-400 mb-1">Section Name *</label>
+            <input
+              style={{ background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, padding: "8px 10px", fontSize: 13, width: "100%", outline: "none" }}
+              placeholder="e.g. WAVV Dialer, Call Boards"
+              value={newPdfSectionName}
+              onChange={e => setNewPdfSectionName(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && newPdfSectionName.trim()) createPdfSectionMutation.mutate({ name: newPdfSectionName.trim() }); }}
+              autoFocus
+            />
+            <p className="text-xs text-gray-500">After creating, use "Add PDF" to add documents to this section.</p>
+          </div>
+          <DialogFooter>
+            <button onClick={() => { setShowAddPdfSectionModal(false); setNewPdfSectionName(""); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+            <button
+              onClick={() => { if (newPdfSectionName.trim()) createPdfSectionMutation.mutate({ name: newPdfSectionName.trim() }); }}
+              disabled={!newPdfSectionName.trim() || createPdfSectionMutation.isPending}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              style={{ background: "#ef4444" }}
+            >
+              {createPdfSectionMutation.isPending ? "Creating…" : "Create Section"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Add / Edit Native Help Article Modal ── */}
+      <NativeArticleEditor
+        open={showNativeArticleModal}
+        onClose={() => { setShowNativeArticleModal(false); setEditingNativeArticle(null); }}
+        sections={helpArticleSectionsAdmin.map(s => s.name)}
+        mode={editingNativeArticle ? "edit" : "create"}
+        initial={editingNativeArticle ? { title: editingNativeArticle.title, nativeBody: editingNativeArticle.nativeBody, sectionName: editingNativeArticle.sectionName } : undefined}
+        isSaving={createNativeMutation.isPending || updateNativeMutation.isPending}
+        onSave={(data) => {
+          if (editingNativeArticle) {
+            updateNativeMutation.mutate({ id: editingNativeArticle.id, ...data });
+          } else {
+            createNativeMutation.mutate(data);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -5572,7 +5669,8 @@ function GuideGroups({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   // Only PDFs remain — grouped by section (category field). help_article is managed by HelpArticlesInline.
-  const pdfGuides = guides.filter(g => (g.fileType ?? "pdf") === "pdf");
+  // Exclude placeholder guides created by "Add PDF Section" (title starts with __section__)
+  const pdfGuides = guides.filter(g => (g.fileType ?? "pdf") === "pdf" && !g.title.startsWith("__section__"));
   // Collect distinct sections in order of first appearance
   const sectionOrder = Array.from(new Set(pdfGuides.map(g => g.category ?? ""))).sort((a, b) => {
     if (a === "") return 1; // unsectioned last
@@ -7728,10 +7826,28 @@ function PublishedHelpArticlesPanel() {
           </div>
         );
       })}
+      {/* Native article editor for per-section + Article button */}
+      <NativeArticleEditor
+        open={showNativeEditor || editingNativeArticle !== null}
+        onClose={() => { setShowNativeEditor(false); setNativeEditorSection(""); setEditingNativeArticle(null); }}
+        sections={adminSections.map(s => s.name)}
+        mode={editingNativeArticle ? "edit" : "create"}
+        initial={editingNativeArticle
+          ? { title: editingNativeArticle.title, nativeBody: editingNativeArticle.nativeBody, sectionName: editingNativeArticle.sectionName }
+          : nativeEditorSection ? { title: "", nativeBody: "", sectionName: nativeEditorSection } : undefined
+        }
+        isSaving={createNativeMutation.isPending || updateNativeMutation.isPending}
+        onSave={(data) => {
+          if (editingNativeArticle) {
+            updateNativeMutation.mutate({ id: editingNativeArticle.id, ...data });
+          } else {
+            createNativeMutation.mutate(data);
+          }
+        }}
+      />
     </div>
   );
 }
-
 function SortableHelpArticleRow({ article, onUnpublish, onEdit }: { article: { id: number; intercomArticleId: string | null; source?: string; title: string; url: string | null; sectionName: string; nativeBody?: string | null }; onUnpublish: () => void; onEdit?: () => void }) {
   const ACCENT = "#8B5CF6";
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: article.intercomArticleId ?? article.id.toString() });

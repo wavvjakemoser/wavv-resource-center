@@ -693,6 +693,8 @@ const guidesRouter = router({
   // Returns distinct section (category) names used by PDF guides — for autocomplete in Add Guide form
   listSections: publicProcedure.query(async () => {
     const all = await getGuides(false);
+    // Include all PDF guides (published or not) that have a category — this ensures sections
+    // created via createSection (unpublished placeholder guides) appear in the dropdown.
     const sections = Array.from(new Set(
       all.filter(g => g.fileType === 'pdf' && g.category).map(g => g.category as string)
     )).sort();
@@ -708,6 +710,14 @@ const guidesRouter = router({
   adminResetDownloads: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => resetGuideDownloads(input.id)),
+  // Create a named PDF section (sections are derived from the `category` field on guides)
+  createSection: superAdminProcedure
+    .input(z.object({ name: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      // A section is just a category name. We create a placeholder guide (unpublished)
+      // so the section name appears in the dropdown immediately.
+      return createGuide({ title: `__section__${input.name}`, category: input.name, fileType: 'pdf', published: false });
+    }),
 });
 
 // ─── Support Router ───────────────────────────────────────────────────────────
