@@ -1410,3 +1410,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Wire picture into PortalLayout header avatar (fallback to initials)
 - [x] Wire picture into Admin panel user rows (initials fallback already in place)
 - [x] Wire picture into Partner Portal header (uses PortalLayout, covered)
+
+## Top Bar + Profile Page Cleanup (Jun 18)
+- [x] Move Sign In / avatar button to top-right corner of PortalLayout top bar
+- [x] Profile page: remove Lessons Completed, Webinars Watched, Guides Downloaded, Badges Earned stat cards
+- [x] Profile page: remove Your Activity section
+- [x] Profile page: replace Bookmarks section with Coming Soon placeholder
+- [x] Profile page: replace Badges section with Coming Soon placeholder

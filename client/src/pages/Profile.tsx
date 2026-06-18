@@ -218,171 +218,39 @@ export default function Profile() {
           <p className="text-[11px] text-gray-600 sm:self-end">Click photo to change</p>
         </div>
 
-        {/* ── Stats row ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: "Lessons Completed", value: completedLessons, icon: CheckCircle2, color: "#4ade80" },
-            { label: "Webinars Watched",  value: watchedWebinars,  icon: Video,        color: "#60a5fa" },
-            { label: "Guides Downloaded", value: downloadedGuides, icon: FileText,     color: "#a78bfa" },
-            { label: "Badges Earned",     value: earnedBadges,     icon: Award,        color: "#fbbf24" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl p-4 flex flex-col gap-2"
-              style={{ background: "#111", border: "1px solid #222" }}
-            >
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: `${stat.color}18` }}
-              >
-                <stat.icon size={16} style={{ color: stat.color }} />
-              </div>
-              <div className="text-2xl font-bold text-white">{stat.value}</div>
-              <div className="text-xs text-gray-500">{stat.label}</div>
-            </div>
-          ))}
-        </div>
 
-        {/* ── Activity feed ── */}
-        <section id="activity" className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Activity size={17} style={{ color: "#0074F4" }} />
-            <h2 className="text-base font-bold text-white">Your Activity</h2>
-          </div>
-
-          {activityLoading ? (
-            <div className="space-y-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-12 rounded-xl animate-pulse" style={{ background: "#1d2230" }} />
-              ))}
-            </div>
-          ) : feedEvents.length === 0 ? (
-            <div
-              className="rounded-xl p-8 text-center"
-              style={{ background: "#111", border: "1px solid #222" }}
-            >
-              <Activity size={32} className="text-gray-700 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">No activity yet. Start exploring WAVV Academy!</p>
-            </div>
-          ) : (
-            <div
-              className="rounded-xl overflow-hidden divide-y"
-              style={{ background: "#111", border: "1px solid #222", borderColor: "#222" }}
-            >
-              {feedEvents.map((event) => {
-                const meta = getEventMeta(event.eventType);
-                const Icon = meta.icon;
-                let detail = "";
-                try {
-                  if (event.metadata) {
-                    const parsed = JSON.parse(event.metadata);
-                    detail = parsed.title ?? parsed.query ?? parsed.path ?? "";
-                  }
-                } catch {}
-                return (
-                  <div key={event.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
-                    <div
-                      className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                      style={{ background: `${meta.color}18` }}
-                    >
-                      <Icon size={13} style={{ color: meta.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm text-gray-300">{meta.label}</span>
-                      {detail && (
-                        <span className="text-xs text-gray-600 ml-1.5 truncate">— {detail}</span>
-                      )}
-                    </div>
-                    <span className="text-[11px] text-gray-600 flex-shrink-0">
-                      {formatRelative(event.createdAt)}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
 
         {/* ── Bookmarks ── */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <Bookmark size={17} style={{ color: "#fbbf24" }} />
             <h2 className="text-base font-bold text-white">Bookmarks</h2>
-            {bookmarks.length > 0 && (
-              <span className="text-xs text-gray-500 ml-1">({bookmarks.length} saved)</span>
-            )}
           </div>
-          {bookmarks.length === 0 ? (
-            <div
-              className="rounded-xl p-8 text-center"
-              style={{ background: "#111", border: "1px solid #1a1a1a" }}
-            >
-              <BookmarkCheck size={28} className="text-gray-700 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">No bookmarks yet.</p>
-              <p className="text-gray-600 text-xs mt-1">Bookmark videos from any Academy category page.</p>
-            </div>
-          ) : (
-            <div
-              className="rounded-xl overflow-hidden divide-y"
-              style={{ background: "#111", border: "1px solid #222" }}
-            >
-              {bookmarks.map((bm) => (
-                <div key={bm.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: "rgba(251,191,36,0.12)" }}
-                  >
-                    <Bookmark size={13} style={{ color: "#fbbf24" }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-300 truncate">{bm.contentTitle ?? `${bm.contentType} #${bm.contentId}`}</p>
-                    <p className="text-[11px] text-gray-600 capitalize">{bm.contentType}</p>
-                  </div>
-                  <span className="text-[11px] text-gray-600 flex-shrink-0 mr-2">
-                    {new Date(bm.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => removeBookmark.mutate({ contentType: bm.contentType as "lesson" | "webinar" | "guide", contentId: bm.contentId })}
-                    className="p-1.5 rounded-lg transition-colors hover:bg-red-500/10 text-gray-600 hover:text-red-400"
-                    title="Remove bookmark"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          <div
+            className="rounded-xl p-8 text-center"
+            style={{ background: "#111", border: "1px solid #1a1a1a" }}
+          >
+            <Bookmark size={28} className="text-gray-700 mx-auto mb-3" />
+            <p className="text-gray-400 text-sm font-medium">Coming Soon</p>
+            <p className="text-gray-600 text-xs mt-1">Bookmarks will be available in a future update.</p>
+          </div>
         </section>
 
         {/* ── Badges ── */}
-        {trophies && trophies.badges.length > 0 && (
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Award size={17} style={{ color: "#fbbf24" }} />
-              <h2 className="text-base font-bold text-white">Badges</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {trophies.badges.map((badge) => (
-                <div
-                  key={badge.id}
-                  className="rounded-xl p-4 flex items-center gap-3"
-                  style={{
-                    background: badge.earned ? "#111" : "#0f1318",
-                    border: `1px solid ${badge.earned ? "#252d3d" : "#1d2230"}`,
-                    opacity: badge.earned ? 1 : 0.45,
-                  }}
-                >
-                  <span className="text-2xl">{badge.icon}</span>
-                  <div>
-                    <p className="text-sm font-semibold text-white">{badge.label}</p>
-                    <p className="text-xs text-gray-500">{badge.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Award size={17} style={{ color: "#fbbf24" }} />
+            <h2 className="text-base font-bold text-white">Badges</h2>
+          </div>
+          <div
+            className="rounded-xl p-8 text-center"
+            style={{ background: "#111", border: "1px solid #1a1a1a" }}
+          >
+            <Award size={28} className="text-gray-700 mx-auto mb-3" />
+            <p className="text-gray-400 text-sm font-medium">Coming Soon</p>
+            <p className="text-gray-600 text-xs mt-1">Badges will be available in a future update.</p>
+          </div>
+        </section>
 
       </div>
     </PortalLayout>

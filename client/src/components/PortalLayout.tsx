@@ -343,7 +343,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <AISearchBar />
             </div>
 
-            {/* User avatar — shown when logged in */}
+            {/* Sign In / Avatar — always pinned to far right */}
+            <div className="ml-auto flex-shrink-0 flex items-center">
             {user && (() => {
               const initials = (user.name ?? user.email ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
               const rawAvatarUrl = (user.avatarUrl ?? "").trim();
@@ -377,8 +378,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     {initials}
                   </div>
                 </a>
-              );
-            })()}
+                            );            })()}
 
             {/* Sign In button — shown only when not logged in */}
             {!user && (
@@ -397,6 +397,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 Sign In
               </a>
             )}
+            </div>
           </header>
 
           {/* Page content */}
