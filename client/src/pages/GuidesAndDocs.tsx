@@ -222,31 +222,41 @@ function PdfSubSection({
 }
 
 // ─── PDF Section (top-level, wraps sub-sections) ──────────────────────────────
+type DbSection = { id: number; name: string; sortOrder: number; isVisible: boolean };
 function PdfSection({
   items,
+  dbSections,
   onDownload,
   onView,
   onOpenModal,
   isPending,
 }: {
   items: GuideItem[];
+  dbSections: DbSection[];
   onDownload: (guide: GuideItem) => void;
   onView?: (guide: GuideItem) => void;
   onOpenModal?: (guide: GuideItem) => void;
   isPending: boolean;
 }) {
-  // Group by section (category), unsectioned last
-  const sectionOrder = Array.from(new Set(items.map(g => g.category ?? ""))).sort((a, b) => {
-    if (a === "") return 1;
-    if (b === "") return -1;
-    return a.localeCompare(b);
-  });
+  // Use DB sections (visible only, sorted by sortOrder) as the authoritative section list.
+  const visibleDbSections = dbSections.filter(s => s.isVisible);
+  const dbSectionNames = new Set(visibleDbSections.map(s => s.name));
+  // Any guide categories not in DB sections (orphaned) sorted alphabetically
+  const orphanCategories = Array.from(new Set(
+    items.map(g => g.category ?? "").filter(c => c !== "" && !dbSectionNames.has(c))
+  )).sort();
+  // Unsectioned guides go last
+  const hasUnsectioned = items.some(g => !g.category);
+  const sectionOrder: string[] = [
+    ...visibleDbSections.map(s => s.name),
+    ...orphanCategories,
+    ...(hasUnsectioned ? [""] : []),
+  ];
   const bySection = sectionOrder.reduce((acc, sec) => {
     acc[sec] = items.filter(g => (g.category ?? "") === sec);
     return acc;
   }, {} as Record<string, GuideItem[]>);
-
-  const hasSections = sectionOrder.some(s => s !== "");
+  const hasSections = sectionOrder.length > 0 && (visibleDbSections.length > 0 || orphanCategories.length > 0);
 
   return (
     <section>
@@ -324,6 +334,8 @@ export default function GuidesAndDocs() {
     if (guide.fileUrl) setSelectedPdf({ url: guide.fileUrl, title: guide.title });
   };
   const { data: guides, isLoading } = trpc.guides.list.useQuery();
+  const { data: pdfSectionsRaw } = trpc.guides.listPdfSectionsPublic.useQuery();
+  const dbPdfSections: DbSection[] = (pdfSectionsRaw as DbSection[] | undefined) ?? [];
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
   const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true };
   const downloadMutation = trpc.guides.download.useMutation();
@@ -453,6 +465,7 @@ export default function GuidesAndDocs() {
         {!isLoading && guideVisibility["pdf"] !== false && (
           <PdfSection
             items={pdfItems}
+            dbSections={dbPdfSections}
             onDownload={handleDownload}
             onView={handleView}
             onOpenModal={handleOpenModal}

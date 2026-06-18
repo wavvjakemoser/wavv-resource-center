@@ -1448,3 +1448,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add PDF form section pills: uses pdfSectionsAdmin (DB-backed) not guide-derived categories
 - [x] Add Help Article inline form: moved to correct position (immediately after 4-button header, before Add PDF form)
 - [x] createNativeHelpArticle: auto-creates helpArticleSections row if section doesn't exist
+
+## PDF Sections Customer-Side Fix (Jun 18 - Session 3)
+- [x] GuidesAndDocs: fetch listPdfSectionsPublic and pass dbSections to PdfSection component
+- [x] PdfSection: use DB sections (visible only, sorted by sortOrder) as authoritative section order instead of deriving from guide category strings
+- [x] PdfSection: orphaned guide categories (not in DB sections) still appear alphabetically after DB sections
+- [x] PdfSection: unsectioned guides always render last
