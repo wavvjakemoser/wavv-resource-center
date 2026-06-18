@@ -150,6 +150,19 @@ import {
   Clapperboard,
   MonitorPlay,
   HelpCircle,
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  List,
+  ListOrdered,
+  Heading2,
+  Heading3,
+  Link as LinkIcon,
+  Undo,
+  Redo,
+  Code,
+  Quote,
+  GripVertical,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -4569,20 +4582,6 @@ function WebinarsTab() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={async () => {
-              const rows = await utils.webinars.adminExportRegistrants.fetch();
-              if (!rows?.length) { toast.error("No registrants to export"); return; }
-              const headers = ["Name","Email","Webinar","Registered At"];
-              const csv = [headers.join(","), ...rows.map(r => [r.userName ?? "", r.userEmail ?? "", r.webinarTitle ?? "", r.registeredAt ? new Date(r.registeredAt).toLocaleString() : ""].map(v => `"${v}"`).join(","))].join("\n");
-              const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "webinar-registrants.csv"; a.click();
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-            style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
-          >
-            <FileDown size={13} /> Export
-          </button>
-
-          <button
             onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
             style={{ background: "#0074F4" }}
@@ -5232,16 +5231,27 @@ function GuidesTab() {
     },
     onError: (e) => toast.error(e.message),
   });
-  // Add Help Article (native) modal
-  const [showNativeArticleModal, setShowNativeArticleModal] = useState(false);
+  // Add Help Article (native) inline form
+  const [showNativeArticleForm, setShowNativeArticleForm] = useState(false);
   const [editingNativeArticle, setEditingNativeArticle] = useState<{ id: number; title: string; nativeBody: string; sectionName: string } | null>(null);
+  const [nativeForm, setNativeForm] = useState({ title: "", sectionName: "", nativeBody: "" });
+  const nativeEditor = useEditor({
+    extensions: [StarterKit, Underline, Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-blue-400 underline" } })],
+    content: "",
+    editorProps: { attributes: { class: "prose prose-invert max-w-none min-h-[160px] px-4 py-3 focus:outline-none text-sm text-gray-200" } },
+  });
+  function resetNativeForm() {
+    setNativeForm({ title: "", sectionName: helpArticleSectionsAdmin[0]?.name ?? "", nativeBody: "" });
+    nativeEditor?.commands.setContent("");
+    setEditingNativeArticle(null);
+  }
   const createNativeMutation = trpc.helpArticles.createNativeArticle.useMutation({
     onSuccess: () => {
       utils.helpArticles.listPublished.invalidate();
       utils.helpArticles.listSectionsAdmin.invalidate();
       toast.success("Article published");
-      setShowNativeArticleModal(false);
-      setEditingNativeArticle(null);
+      setShowNativeArticleForm(false);
+      resetNativeForm();
     },
     onError: (e) => toast.error(e.message),
   });
@@ -5249,8 +5259,8 @@ function GuidesTab() {
     onSuccess: () => {
       utils.helpArticles.listPublished.invalidate();
       toast.success("Article updated");
-      setShowNativeArticleModal(false);
-      setEditingNativeArticle(null);
+      setShowNativeArticleForm(false);
+      resetNativeForm();
     },
     onError: (e) => toast.error(e.message),
   });
@@ -5341,7 +5351,7 @@ function GuidesTab() {
             <Plus size={13} /> Add Help Article Section
           </button>
           <button
-            onClick={() => { setEditingNativeArticle(null); setShowNativeArticleModal(true); }}
+            onClick={() => { resetNativeForm(); setShowNativeArticleForm(f => !f); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
             style={{ background: "#8B5CF6" }}
           >
@@ -5616,22 +5626,80 @@ function GuidesTab() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Add / Edit Native Help Article Modal ── */}
-      <NativeArticleEditor
-        open={showNativeArticleModal}
-        onClose={() => { setShowNativeArticleModal(false); setEditingNativeArticle(null); }}
-        sections={helpArticleSectionsAdmin.map(s => s.name)}
-        mode={editingNativeArticle ? "edit" : "create"}
-        initial={editingNativeArticle ? { title: editingNativeArticle.title, nativeBody: editingNativeArticle.nativeBody, sectionName: editingNativeArticle.sectionName } : undefined}
-        isSaving={createNativeMutation.isPending || updateNativeMutation.isPending}
-        onSave={(data) => {
-          if (editingNativeArticle) {
-            updateNativeMutation.mutate({ id: editingNativeArticle.id, ...data });
-          } else {
-            createNativeMutation.mutate(data);
-          }
-        }}
-      />
+      {/* ── Add / Edit Native Help Article Inline Form ── */}
+      {showNativeArticleForm && (
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <h3 className="text-sm font-semibold text-white">{editingNativeArticle ? "Edit Help Article" : "New Help Article"}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Title *</label>
+              <input style={inputStyle} value={nativeForm.title} onChange={e => setNativeForm(f => ({ ...f, title: e.target.value }))} placeholder="Article title" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Section *</label>
+              {helpArticleSectionsAdmin.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {helpArticleSectionsAdmin.map(s => (
+                    <button key={s.id} type="button"
+                      onClick={() => setNativeForm(f => ({ ...f, sectionName: s.name }))}
+                      className="px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+                      style={nativeForm.sectionName === s.name
+                        ? { background: "rgba(139,92,246,0.2)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.4)" }
+                        : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
+                      }>{s.name}</button>
+                  ))}
+                </div>
+              ) : null}
+              <input style={inputStyle} value={nativeForm.sectionName} onChange={e => setNativeForm(f => ({ ...f, sectionName: e.target.value }))} placeholder="Section name" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Content *</label>
+            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+              <div className="flex items-center flex-wrap gap-0.5 px-2 py-1.5" style={{ background: "#161b27", borderBottom: "1px solid #2a2a2a" }}>
+                {[{ icon: <Bold size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBold().run(), active: nativeEditor?.isActive("bold"), title: "Bold" },
+                  { icon: <Italic size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleItalic().run(), active: nativeEditor?.isActive("italic"), title: "Italic" },
+                  { icon: <UnderlineIcon size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleUnderline().run(), active: nativeEditor?.isActive("underline"), title: "Underline" },
+                  null,
+                  { icon: <Heading2 size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleHeading({ level: 2 }).run(), active: nativeEditor?.isActive("heading", { level: 2 }), title: "H2" },
+                  { icon: <Heading3 size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleHeading({ level: 3 }).run(), active: nativeEditor?.isActive("heading", { level: 3 }), title: "H3" },
+                  null,
+                  { icon: <List size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBulletList().run(), active: nativeEditor?.isActive("bulletList"), title: "Bullets" },
+                  { icon: <ListOrdered size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleOrderedList().run(), active: nativeEditor?.isActive("orderedList"), title: "Numbered" },
+                  { icon: <Quote size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBlockquote().run(), active: nativeEditor?.isActive("blockquote"), title: "Quote" },
+                  { icon: <Code size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleCode().run(), active: nativeEditor?.isActive("code"), title: "Code" },
+                  null,
+                  { icon: <LinkIcon size={13}/>, cmd: () => { const url = window.prompt("URL:", "https://"); if (url) nativeEditor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run(); }, active: nativeEditor?.isActive("link"), title: "Link" },
+                  null,
+                  { icon: <Undo size={13}/>, cmd: () => nativeEditor?.chain().focus().undo().run(), active: false, title: "Undo" },
+                  { icon: <Redo size={13}/>, cmd: () => nativeEditor?.chain().focus().redo().run(), active: false, title: "Redo" },
+                ].map((btn, i) => btn === null
+                  ? <div key={i} className="w-px h-4 mx-1" style={{ background: "#2a2a2a" }} />
+                  : <button key={i} type="button" onClick={btn.cmd} title={btn.title} className="p-1.5 rounded transition" style={{ background: btn.active ? "rgba(139,92,246,0.15)" : "transparent", color: btn.active ? "#8B5CF6" : "#9ca3af", border: "none", cursor: "pointer" }}>{btn.icon}</button>
+                )}
+              </div>
+              <div style={{ background: "#111", minHeight: "160px" }}><EditorContent editor={nativeEditor} /></div>
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={() => { setShowNativeArticleForm(false); resetNativeForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+            <button type="button"
+              disabled={createNativeMutation.isPending || updateNativeMutation.isPending || !nativeForm.title.trim() || !nativeForm.sectionName.trim()}
+              onClick={() => {
+                const body = nativeEditor?.getHTML() ?? "";
+                if (!nativeForm.title.trim() || !nativeForm.sectionName.trim() || !body.trim() || body === "<p></p>") { toast.error("Title, section, and content are required"); return; }
+                if (editingNativeArticle) {
+                  updateNativeMutation.mutate({ id: editingNativeArticle.id, title: nativeForm.title, nativeBody: body, sectionName: nativeForm.sectionName });
+                } else {
+                  createNativeMutation.mutate({ title: nativeForm.title, nativeBody: body, sectionName: nativeForm.sectionName });
+                }
+              }}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              style={{ background: "#8B5CF6" }}
+            >{editingNativeArticle ? "Save Changes" : "Publish Article"}</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -7668,18 +7736,34 @@ function PublishedHelpArticlesPanel() {
     onSuccess: () => utils.helpArticles.listPublished.invalidate(),
     onError: (e) => toast.error(e.message),
   });
-
+  const reorderSectionsMutation = trpc.helpArticles.reorderSections.useMutation({
+    onSuccess: () => utils.helpArticles.listSectionsAdmin.invalidate(),
+    onError: (e) => toast.error(e.message),
+  });
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-
   // Build article map keyed by section name
   const bySection = adminSections.reduce((acc, sec) => {
     acc[sec.name] = [...published.filter(a => a.sectionName === sec.name)].sort((a, b) => a.sortOrder - b.sortOrder);
     return acc;
   }, {} as Record<string, typeof published>);
-
+  // Local section order for optimistic drag reorder
+  const [localSectionOrder, setLocalSectionOrder] = useState<number[]>([]);
+  const orderedSections = localSectionOrder.length === adminSections.length
+    ? localSectionOrder.map(id => adminSections.find(s => s.id === id)!).filter(Boolean)
+    : adminSections;
+  function handleSectionDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const ids = orderedSections.map(s => s.id);
+    const oldIdx = ids.indexOf(active.id as number);
+    const newIdx = ids.indexOf(over.id as number);
+    const newOrder = arrayMove(ids, oldIdx, newIdx);
+    setLocalSectionOrder(newOrder);
+    reorderSectionsMutation.mutate(newOrder.map((id, i) => ({ id, sortOrder: i })));
+  }
   // Default all sections to collapsed
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [editingSection, setEditingSection] = useState<{ id: number; name: string; value: string } | null>(null);
@@ -7726,19 +7810,21 @@ function PublishedHelpArticlesPanel() {
 
   return (
     <div className="space-y-3">
-      {adminSections.map((sec) => {
-        const group = bySection[sec.name] ?? [];
-        const isCollapsed = collapsed[sec.name] !== false; // default collapsed
-        const isVisible = sec.isVisible !== false;
-        return (
-          <div key={sec.id} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSectionDragEnd}>
+        <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+          {orderedSections.map((sec) => {
+            const group = bySection[sec.name] ?? [];
+            const isCollapsed = collapsed[sec.name] !== false; // default collapsed
+            const isVisible = sec.isVisible !== false;
+            return (
+              <SortableHelpSectionRow key={sec.id} id={sec.id}>
+              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <div
               className="px-4 py-3 flex items-center justify-between hover:bg-white/5 transition cursor-pointer"
               style={{ background: "#1d2230" }}
               onClick={() => setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true }))}
             >
               <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: ACCENT }} />
                 {editingSection?.id === sec.id ? (
                   <input
                     className="text-sm font-semibold text-white bg-transparent border-b border-purple-500 outline-none px-1"
@@ -7776,14 +7862,6 @@ function PublishedHelpArticlesPanel() {
                   title={isVisible ? "Hide this section from users" : "Show this section to users"}
                 >
                   {isVisible ? <><Eye size={10} /> Visible</> : <><EyeOff size={10} /> Hidden</>}
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setNativeEditorSection(sec.name); setShowNativeEditor(true); }}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold transition"
-                  style={{ background: "rgba(139,92,246,0.12)", color: ACCENT, border: "1px solid rgba(139,92,246,0.25)" }}
-                  title="Write a native article for this section"
-                >
-                  <Plus size={10} /> Article
                 </button>
                 <button
                   onClick={() => { if (confirm(`Delete section "${sec.name}"? Articles in this section will be unassigned.`)) deleteSectionMutation.mutate({ id: sec.id }); }}
@@ -7824,8 +7902,11 @@ function PublishedHelpArticlesPanel() {
               </DndContext>
             )}
           </div>
-        );
-      })}
+              </SortableHelpSectionRow>
+            );
+          })}
+        </SortableContext>
+      </DndContext>
       {/* Native article editor for per-section + Article button */}
       <NativeArticleEditor
         open={showNativeEditor || editingNativeArticle !== null}
@@ -7845,6 +7926,24 @@ function PublishedHelpArticlesPanel() {
           }
         }}
       />
+    </div>
+  );
+}
+function SortableHelpSectionRow({ id, children }: { id: number; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  return (
+    <div ref={setNodeRef} style={style} className="relative group">
+      <span
+        {...attributes}
+        {...listeners}
+        className="absolute left-0 top-0 bottom-0 w-5 flex items-center justify-center cursor-grab text-gray-600 hover:text-gray-400 transition z-10 opacity-0 group-hover:opacity-100"
+        title="Drag to reorder section"
+        onClick={e => e.stopPropagation()}
+      >
+        <GripVertical size={12} />
+      </span>
+      {children}
     </div>
   );
 }
