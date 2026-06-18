@@ -380,7 +380,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     {initials}
                   </div>
                   <span className="text-sm font-medium text-white hidden sm:block" style={{ maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {user.name?.split(" ")[0] ?? user.email?.split("@")[0]}
+                    {user.name ?? user.email?.split("@")[0]}
                   </span>
                 </a>
                             );            })()}
