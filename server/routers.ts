@@ -148,6 +148,12 @@ import {
   createNativeHelpArticle,
   updateNativeHelpArticle,
   unpublishHelpArticleById,
+  getPdfSections,
+  createPdfSection,
+  renamePdfSection,
+  togglePdfSectionVisibility,
+  deletePdfSection,
+  reorderPdfSections,
 } from "./db";
 import { runIntercomSync } from "./intercomSync";
 
@@ -710,14 +716,32 @@ const guidesRouter = router({
   adminResetDownloads: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => resetGuideDownloads(input.id)),
-  // Create a named PDF section (sections are derived from the `category` field on guides)
+  // Create a named PDF section (stored in pdf_sections table)
   createSection: superAdminProcedure
     .input(z.object({ name: z.string().min(1) }))
-    .mutation(async ({ input }) => {
-      // A section is just a category name. We create a placeholder guide (unpublished)
-      // so the section name appears in the dropdown immediately.
-      return createGuide({ title: `__section__${input.name}`, category: input.name, fileType: 'pdf', published: false });
-    }),
+    .mutation(({ input }) => createPdfSection(input.name)),
+  // List all PDF sections (admin)
+  listPdfSections: superAdminProcedure
+    .query(() => getPdfSections()),
+  // List PDF sections (public — for portal)
+  listPdfSectionsPublic: publicProcedure
+    .query(() => getPdfSections()),
+  // Rename a PDF section
+  renamePdfSection: superAdminProcedure
+    .input(z.object({ id: z.number(), name: z.string().min(1) }))
+    .mutation(({ input }) => renamePdfSection(input.id, input.name)),
+  // Toggle visibility of a PDF section
+  togglePdfSectionVisibility: superAdminProcedure
+    .input(z.object({ id: z.number(), isVisible: z.boolean() }))
+    .mutation(({ input }) => togglePdfSectionVisibility(input.id, input.isVisible)),
+  // Delete a PDF section
+  deletePdfSection: superAdminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(({ input }) => deletePdfSection(input.id)),
+  // Reorder PDF sections
+  reorderPdfSections: superAdminProcedure
+    .input(z.array(z.object({ id: z.number(), sortOrder: z.number() })))
+    .mutation(({ input }) => reorderPdfSections(input)),
 });
 
 // ─── Support Router ───────────────────────────────────────────────────────────
@@ -1635,7 +1659,7 @@ export const appRouter = router({
     // Admin: list all articles (including hidden)
     adminListAll: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(() => getAllHelpArticles()),
@@ -1643,7 +1667,7 @@ export const appRouter = router({
     // Admin: list all collections (including hidden)
     adminListCollections: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(() => getAllHelpCollections()),
@@ -1652,7 +1676,7 @@ export const appRouter = router({
     setArticleVisible: protectedProcedure
       .input(z.object({ id: z.number(), visible: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => setHelpArticleVisible(input.id, input.visible)),
@@ -1661,7 +1685,7 @@ export const appRouter = router({
     setCollectionVisible: protectedProcedure
       .input(z.object({ id: z.number(), visible: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => setHelpCollectionVisible(input.id, input.visible)),
@@ -1669,7 +1693,7 @@ export const appRouter = router({
     // Admin: trigger manual sync from Intercom
     sync: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(async () => {
@@ -1692,7 +1716,7 @@ export const appRouter = router({
         sectionOrder: z.number().optional(),
       }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => publishHelpArticle(input)),
@@ -1701,7 +1725,7 @@ export const appRouter = router({
     unpublish: protectedProcedure
       .input(z.object({ intercomArticleId: z.string() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => unpublishHelpArticle(input.intercomArticleId)),
@@ -1710,7 +1734,7 @@ export const appRouter = router({
     updateSection: protectedProcedure
       .input(z.object({ intercomArticleId: z.string(), sectionName: z.string().min(1) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => updatePublishedArticleSection(input.intercomArticleId, input.sectionName)),
@@ -1723,7 +1747,7 @@ export const appRouter = router({
         sectionOrder: z.number(),
       })))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => reorderPublishedArticles(input)),
@@ -1735,7 +1759,7 @@ export const appRouter = router({
     // Admin: list all sections (including hidden)
     listSectionsAdmin: protectedProcedure
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .query(() => getHelpArticleSections()),
@@ -1744,7 +1768,7 @@ export const appRouter = router({
     toggleSectionVisibility: protectedProcedure
       .input(z.object({ id: z.number(), isVisible: z.boolean() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => toggleHelpArticleSectionVisibility(input.id, input.isVisible)),
@@ -1753,7 +1777,7 @@ export const appRouter = router({
     createSection: protectedProcedure
       .input(z.object({ name: z.string().min(1) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => createHelpArticleSection(input.name)),
@@ -1762,7 +1786,7 @@ export const appRouter = router({
     deleteSection: protectedProcedure
       .input(z.object({ id: z.number() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => deleteHelpArticleSection(input.id)),
@@ -1771,7 +1795,7 @@ export const appRouter = router({
     renameSection: protectedProcedure
       .input(z.object({ id: z.number(), name: z.string().min(1) }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => renameHelpArticleSection(input.id, input.name)),
@@ -1780,7 +1804,7 @@ export const appRouter = router({
     reorderSections: protectedProcedure
       .input(z.array(z.object({ id: z.number(), sortOrder: z.number() })))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => reorderHelpArticleSections(input)),
@@ -1793,7 +1817,7 @@ export const appRouter = router({
         nativeAuthorName: z.string().optional().nullable(),
       }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input, ctx }) => createNativeHelpArticle({
@@ -1810,7 +1834,7 @@ export const appRouter = router({
         nativeAuthorName: z.string().optional().nullable(),
       }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => updateNativeHelpArticle(input.id, input)),
@@ -1818,7 +1842,7 @@ export const appRouter = router({
     unpublishById: protectedProcedure
       .input(z.object({ id: z.number() }))
       .use(({ ctx, next }) => {
-        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
         return next({ ctx });
       })
       .mutation(({ input }) => unpublishHelpArticleById(input.id)),

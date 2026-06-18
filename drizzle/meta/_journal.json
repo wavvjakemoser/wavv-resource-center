@@ -295,6 +295,13 @@
       "when": 1781808337984,
       "tag": "0040_futuristic_toxin",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1781821640050,
+      "tag": "0041_new_human_cannonball",
+      "breakpoints": true
     }
   ]
 }

@@ -1439,3 +1439,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Portal UI: Intercom articles render synced `body` HTML; native articles render `nativeBody`
 - [x] Portal UI: no source label shown to customers
 - [x] Portal UI: fallback to external link only if both `body` and `nativeBody` are null
+
+## PDF Sections + Help Article Form Fixes (Jun 18 - Session 2)
+- [x] pdf_sections table: schema added, migration applied, DB helpers (getPdfSections, createPdfSection, renamePdfSection, togglePdfSectionVisibility, deletePdfSection, reorderPdfSections) added
+- [x] guides router: listPdfSections, createSection, renamePdfSection, togglePdfSectionVisibility, deletePdfSection, reorderPdfSections procedures added
+- [x] PdfSectionsPanel: DB-backed, fetches from listPdfSections internally, drag-to-reorder, rename, toggle visibility, delete
+- [x] Add PDF Section modal: wired to createSection mutation, invalidates listPdfSections on success
+- [x] Add PDF form section pills: uses pdfSectionsAdmin (DB-backed) not guide-derived categories
+- [x] Add Help Article inline form: moved to correct position (immediately after 4-button header, before Add PDF form)
+- [x] createNativeHelpArticle: auto-creates helpArticleSections row if section doesn't exist

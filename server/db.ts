@@ -23,6 +23,7 @@ import {
   siteSettings,
   inviteTokens,
   magicLinkTokens,
+  pdfSections,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -2490,6 +2491,12 @@ export async function createNativeHelpArticle(data: {
 }): Promise<{ id: number }> {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
+  // Auto-create the section row if it doesn't already exist
+  const existingSection = await db.select().from(helpArticleSections).where(eq(helpArticleSections.name, data.sectionName)).limit(1);
+  if (existingSection.length === 0) {
+    const allSections = await db.select().from(helpArticleSections);
+    await db.insert(helpArticleSections).values({ name: data.sectionName, sortOrder: allSections.length });
+  }
   const [result] = await db
     .insert(publishedHelpArticles)
     .values({
@@ -2532,4 +2539,47 @@ export async function unpublishHelpArticleById(id: number): Promise<void> {
   const db = await getDb();
   if (!db) return;
   await db.delete(publishedHelpArticles).where(eq(publishedHelpArticles.id, id));
+}
+
+// ─── PDF Sections ─────────────────────────────────────────────────────────────
+export async function getPdfSections() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(pdfSections).orderBy(asc(pdfSections.sortOrder), asc(pdfSections.createdAt));
+}
+
+export async function createPdfSection(name: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const existing = await db.select().from(pdfSections).where(eq(pdfSections.name, name)).limit(1);
+  if (existing.length > 0) throw new Error(`Section "${name}" already exists`);
+  const maxOrder = await db.select({ m: sql<number>`COALESCE(MAX(${pdfSections.sortOrder}), -1)` }).from(pdfSections);
+  const nextOrder = (maxOrder[0]?.m ?? -1) + 1;
+  await db.insert(pdfSections).values({ name, sortOrder: nextOrder });
+}
+
+export async function renamePdfSection(id: number, name: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(pdfSections).set({ name }).where(eq(pdfSections.id, id));
+}
+
+export async function togglePdfSectionVisibility(id: number, isVisible: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(pdfSections).set({ isVisible }).where(eq(pdfSections.id, id));
+}
+
+export async function deletePdfSection(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(pdfSections).where(eq(pdfSections.id, id));
+}
+
+export async function reorderPdfSections(items: { id: number; sortOrder: number }[]): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await Promise.all(items.map(({ id, sortOrder }) =>
+    db.update(pdfSections).set({ sortOrder }).where(eq(pdfSections.id, id))
+  ));
 }

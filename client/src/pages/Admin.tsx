@@ -5200,6 +5200,23 @@ function GuidesTab() {
   const [editId, setEditId] = useState<number | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
   const { data: pdfSections = [] } = trpc.guides.listSections.useQuery();
+  // PDF sections from dedicated table (DB-backed, shows empty sections immediately)
+  const { data: pdfSectionsAdmin = [] } = trpc.guides.listPdfSections.useQuery();
+  const renamePdfSectionMutation = trpc.guides.renamePdfSection.useMutation({
+    onSuccess: () => { utils.guides.listPdfSections.invalidate(); toast.success("Section renamed"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const togglePdfSectionVisibilityMutation = trpc.guides.togglePdfSectionVisibility.useMutation({
+    onSuccess: () => { utils.guides.listPdfSections.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const deletePdfSectionMutation = trpc.guides.deletePdfSection.useMutation({
+    onSuccess: () => { utils.guides.listPdfSections.invalidate(); toast.success("Section deleted"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const reorderPdfSectionsMutation = trpc.guides.reorderPdfSections.useMutation({
+    onError: (e) => toast.error(e.message),
+  });
   // Add Help Article Section modal
   const { data: helpArticleSectionsAdmin = [] } = trpc.helpArticles.listSectionsAdmin.useQuery();
   const toggleSectionVisibilityMutation = trpc.helpArticles.toggleSectionVisibility.useMutation({
@@ -5225,6 +5242,7 @@ function GuidesTab() {
     onSuccess: () => {
       utils.guides.adminList.invalidate();
       utils.guides.listSections.invalidate();
+      utils.guides.listPdfSections.invalidate();
       toast.success("PDF section created");
       setShowAddPdfSectionModal(false);
       setNewPdfSectionName("");
@@ -5373,6 +5391,81 @@ function GuidesTab() {
           </button>
         </div>
       </div>
+      {/* ── Add / Edit Native Help Article Inline Form ── */}
+      {showNativeArticleForm && (
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <h3 className="text-sm font-semibold text-white">{editingNativeArticle ? "Edit Help Article" : "New Help Article"}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Title *</label>
+              <input style={inputStyle} value={nativeForm.title} onChange={e => setNativeForm(f => ({ ...f, title: e.target.value }))} placeholder="Article title" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Section *</label>
+              {helpArticleSectionsAdmin.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {helpArticleSectionsAdmin.map(s => (
+                    <button key={s.id} type="button"
+                      onClick={() => setNativeForm(f => ({ ...f, sectionName: s.name }))}
+                      className="px-2.5 py-1 rounded-full text-xs font-medium transition-all"
+                      style={nativeForm.sectionName === s.name
+                        ? { background: "rgba(139,92,246,0.2)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.4)" }
+                        : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
+                      }>{s.name}</button>
+                  ))}
+                </div>
+              ) : null}
+              <input style={inputStyle} value={nativeForm.sectionName} onChange={e => setNativeForm(f => ({ ...f, sectionName: e.target.value }))} placeholder="Section name" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Content *</label>
+            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+              <div className="flex items-center flex-wrap gap-0.5 px-2 py-1.5" style={{ background: "#161b27", borderBottom: "1px solid #2a2a2a" }}>
+                {[{ icon: <Bold size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBold().run(), active: nativeEditor?.isActive("bold"), title: "Bold" },
+                  { icon: <Italic size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleItalic().run(), active: nativeEditor?.isActive("italic"), title: "Italic" },
+                  { icon: <UnderlineIcon size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleUnderline().run(), active: nativeEditor?.isActive("underline"), title: "Underline" },
+                  null,
+                  { icon: <Heading2 size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleHeading({ level: 2 }).run(), active: nativeEditor?.isActive("heading", { level: 2 }), title: "H2" },
+                  { icon: <Heading3 size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleHeading({ level: 3 }).run(), active: nativeEditor?.isActive("heading", { level: 3 }), title: "H3" },
+                  null,
+                  { icon: <List size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBulletList().run(), active: nativeEditor?.isActive("bulletList"), title: "Bullets" },
+                  { icon: <ListOrdered size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleOrderedList().run(), active: nativeEditor?.isActive("orderedList"), title: "Numbered" },
+                  { icon: <Quote size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBlockquote().run(), active: nativeEditor?.isActive("blockquote"), title: "Quote" },
+                  { icon: <Code size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleCode().run(), active: nativeEditor?.isActive("code"), title: "Code" },
+                  null,
+                  { icon: <LinkIcon size={13}/>, cmd: () => { const url = window.prompt("URL:", "https://"); if (url) nativeEditor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run(); }, active: nativeEditor?.isActive("link"), title: "Link" },
+                  null,
+                  { icon: <Undo size={13}/>, cmd: () => nativeEditor?.chain().focus().undo().run(), active: false, title: "Undo" },
+                  { icon: <Redo size={13}/>, cmd: () => nativeEditor?.chain().focus().redo().run(), active: false, title: "Redo" },
+                ].map((btn, i) => btn === null
+                  ? <div key={i} className="w-px h-4 mx-1" style={{ background: "#2a2a2a" }} />
+                  : <button key={i} type="button" onClick={btn.cmd} title={btn.title} className="p-1.5 rounded transition" style={{ background: btn.active ? "rgba(139,92,246,0.15)" : "transparent", color: btn.active ? "#8B5CF6" : "#9ca3af", border: "none", cursor: "pointer" }}>{btn.icon}</button>
+                )}
+              </div>
+              <div style={{ background: "#111", minHeight: "160px" }}><EditorContent editor={nativeEditor} /></div>
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={() => { setShowNativeArticleForm(false); resetNativeForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+            <button type="button"
+              disabled={createNativeMutation.isPending || updateNativeMutation.isPending || !nativeForm.title.trim() || !nativeForm.sectionName.trim()}
+              onClick={() => {
+                const body = nativeEditor?.getHTML() ?? "";
+                if (!nativeForm.title.trim() || !nativeForm.sectionName.trim() || !body.trim() || body === "<p></p>") { toast.error("Title, section, and content are required"); return; }
+                if (editingNativeArticle) {
+                  updateNativeMutation.mutate({ id: editingNativeArticle.id, title: nativeForm.title, nativeBody: body, sectionName: nativeForm.sectionName });
+                } else {
+                  createNativeMutation.mutate({ title: nativeForm.title, nativeBody: body, sectionName: nativeForm.sectionName });
+                }
+              }}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              style={{ background: "#8B5CF6" }}
+            >{editingNativeArticle ? "Save Changes" : "Publish Article"}</button>
+          </div>
+        </div>
+      )}
+
       {showForm && (
         <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit Guide" : "New Guide"}</h3>
@@ -5388,21 +5481,21 @@ function GuidesTab() {
                   Section
                   <span className="text-gray-600 ml-1">(optional — groups PDFs)</span>
                 </label>
-                {/* Existing sections as clickable pills */}
-                {pdfSections.length > 0 && (
+                {/* Existing sections as clickable pills — DB-backed pdf_sections table */}
+                {pdfSectionsAdmin.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-2">
-                    {pdfSections.map(s => (
+                    {pdfSectionsAdmin.map(s => (
                       <button
-                        key={s}
+                        key={s.id}
                         type="button"
-                        onClick={() => setForm(f => ({ ...f, section: f.section === s ? "" : s }))}
+                        onClick={() => setForm(f => ({ ...f, section: f.section === s.name ? "" : s.name }))}
                         className="px-2.5 py-1 rounded-full text-xs font-medium transition-all"
-                        style={form.section === s
+                        style={form.section === s.name
                           ? { background: "rgba(239,68,68,0.2)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.4)" }
                           : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
                         }
                       >
-                        {s}
+                        {s.name}
                       </button>
                     ))}
                   </div>
@@ -5411,7 +5504,7 @@ function GuidesTab() {
                   style={inputStyle}
                   value={form.section}
                   onChange={e => setForm(f => ({ ...f, section: e.target.value }))}
-                  placeholder={pdfSections.length > 0 ? "Or type a new section name…" : "e.g. WAVV Dialer, Call Boards, Settings"}
+                  placeholder={pdfSectionsAdmin.length > 0 ? "Or type a new section name…" : "e.g. WAVV Dialer, Call Boards, Settings"}
                 />
               </div>
             </div>
@@ -5540,7 +5633,7 @@ function GuidesTab() {
       {isLoading ? (
         <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
       ) : (
-        <GuideGroups
+        <PdfSectionsPanel
           guides={guides}
           onEdit={startEdit}
           onDelete={(id) => { if (confirm("Delete this guide?")) deleteMutation.mutate({ id }); }}
@@ -5626,80 +5719,6 @@ function GuidesTab() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Add / Edit Native Help Article Inline Form ── */}
-      {showNativeArticleForm && (
-        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <h3 className="text-sm font-semibold text-white">{editingNativeArticle ? "Edit Help Article" : "New Help Article"}</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Title *</label>
-              <input style={inputStyle} value={nativeForm.title} onChange={e => setNativeForm(f => ({ ...f, title: e.target.value }))} placeholder="Article title" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Section *</label>
-              {helpArticleSectionsAdmin.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {helpArticleSectionsAdmin.map(s => (
-                    <button key={s.id} type="button"
-                      onClick={() => setNativeForm(f => ({ ...f, sectionName: s.name }))}
-                      className="px-2.5 py-1 rounded-full text-xs font-medium transition-all"
-                      style={nativeForm.sectionName === s.name
-                        ? { background: "rgba(139,92,246,0.2)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.4)" }
-                        : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
-                      }>{s.name}</button>
-                  ))}
-                </div>
-              ) : null}
-              <input style={inputStyle} value={nativeForm.sectionName} onChange={e => setNativeForm(f => ({ ...f, sectionName: e.target.value }))} placeholder="Section name" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Content *</label>
-            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-              <div className="flex items-center flex-wrap gap-0.5 px-2 py-1.5" style={{ background: "#161b27", borderBottom: "1px solid #2a2a2a" }}>
-                {[{ icon: <Bold size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBold().run(), active: nativeEditor?.isActive("bold"), title: "Bold" },
-                  { icon: <Italic size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleItalic().run(), active: nativeEditor?.isActive("italic"), title: "Italic" },
-                  { icon: <UnderlineIcon size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleUnderline().run(), active: nativeEditor?.isActive("underline"), title: "Underline" },
-                  null,
-                  { icon: <Heading2 size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleHeading({ level: 2 }).run(), active: nativeEditor?.isActive("heading", { level: 2 }), title: "H2" },
-                  { icon: <Heading3 size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleHeading({ level: 3 }).run(), active: nativeEditor?.isActive("heading", { level: 3 }), title: "H3" },
-                  null,
-                  { icon: <List size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBulletList().run(), active: nativeEditor?.isActive("bulletList"), title: "Bullets" },
-                  { icon: <ListOrdered size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleOrderedList().run(), active: nativeEditor?.isActive("orderedList"), title: "Numbered" },
-                  { icon: <Quote size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBlockquote().run(), active: nativeEditor?.isActive("blockquote"), title: "Quote" },
-                  { icon: <Code size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleCode().run(), active: nativeEditor?.isActive("code"), title: "Code" },
-                  null,
-                  { icon: <LinkIcon size={13}/>, cmd: () => { const url = window.prompt("URL:", "https://"); if (url) nativeEditor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run(); }, active: nativeEditor?.isActive("link"), title: "Link" },
-                  null,
-                  { icon: <Undo size={13}/>, cmd: () => nativeEditor?.chain().focus().undo().run(), active: false, title: "Undo" },
-                  { icon: <Redo size={13}/>, cmd: () => nativeEditor?.chain().focus().redo().run(), active: false, title: "Redo" },
-                ].map((btn, i) => btn === null
-                  ? <div key={i} className="w-px h-4 mx-1" style={{ background: "#2a2a2a" }} />
-                  : <button key={i} type="button" onClick={btn.cmd} title={btn.title} className="p-1.5 rounded transition" style={{ background: btn.active ? "rgba(139,92,246,0.15)" : "transparent", color: btn.active ? "#8B5CF6" : "#9ca3af", border: "none", cursor: "pointer" }}>{btn.icon}</button>
-                )}
-              </div>
-              <div style={{ background: "#111", minHeight: "160px" }}><EditorContent editor={nativeEditor} /></div>
-            </div>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <button type="button" onClick={() => { setShowNativeArticleForm(false); resetNativeForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
-            <button type="button"
-              disabled={createNativeMutation.isPending || updateNativeMutation.isPending || !nativeForm.title.trim() || !nativeForm.sectionName.trim()}
-              onClick={() => {
-                const body = nativeEditor?.getHTML() ?? "";
-                if (!nativeForm.title.trim() || !nativeForm.sectionName.trim() || !body.trim() || body === "<p></p>") { toast.error("Title, section, and content are required"); return; }
-                if (editingNativeArticle) {
-                  updateNativeMutation.mutate({ id: editingNativeArticle.id, title: nativeForm.title, nativeBody: body, sectionName: nativeForm.sectionName });
-                } else {
-                  createNativeMutation.mutate({ title: nativeForm.title, nativeBody: body, sectionName: nativeForm.sectionName });
-                }
-              }}
-              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-              style={{ background: "#8B5CF6" }}
-            >{editingNativeArticle ? "Save Changes" : "Publish Article"}</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -5713,7 +5732,7 @@ const GUIDE_GROUP_META: Record<string, { label: string; color: string; descripti
   other:     { label: "Other",     color: "#6b7280", description: "Miscellaneous guides" },
 };
 
-function GuideGroups({
+function PdfSectionsPanel({
   guides,
   onEdit,
   onDelete,
@@ -5723,52 +5742,74 @@ function GuideGroups({
   onDelete: (id: number) => void;
 }) {
   const utils = trpc.useUtils();
+  const { data: pdfSections = [] } = trpc.guides.listPdfSections.useQuery();
   const resetDownloadsMutation = trpc.guides.adminResetDownloads.useMutation({
     onSuccess: () => { utils.guides.adminList.invalidate(); toast.success("Downloads reset to 0"); },
     onError: (e) => toast.error(e.message),
   });
-  const reorderMutation = trpc.guides.adminReorder.useMutation({
+  const reorderGuidesMutation = trpc.guides.adminReorder.useMutation({
     onSuccess: () => utils.guides.adminList.invalidate(),
     onError: (e) => toast.error("Reorder failed: " + e.message),
   });
-  const [localOrder, setLocalOrder] = useState<Record<string, number[]>>({});
+  const reorderSectionsMutation = trpc.guides.reorderPdfSections.useMutation({
+    onError: (e) => toast.error("Reorder failed: " + e.message),
+  });
+  const renameSectionMutation = trpc.guides.renamePdfSection.useMutation({
+    onSuccess: () => { utils.guides.listPdfSections.invalidate(); toast.success("Section renamed"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const toggleSectionVisibilityMutation = trpc.guides.togglePdfSectionVisibility.useMutation({
+    onSuccess: () => { utils.guides.listPdfSections.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const deleteSectionMutation = trpc.guides.deletePdfSection.useMutation({
+    onSuccess: () => { utils.guides.listPdfSections.invalidate(); toast.success("Section deleted"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const [localSectionOrder, setLocalSectionOrder] = useState<number[]>([]);
+  const [localGuideOrder, setLocalGuideOrder] = useState<Record<number, number[]>>({});
+  const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
+  const [editingSectionId, setEditingSectionId] = useState<number | null>(null);
+  const [editingSectionName, setEditingSectionName] = useState("");
+
+  const orderedSections = localSectionOrder.length > 0
+    ? localSectionOrder.map(id => pdfSections.find(s => s.id === id)).filter(Boolean) as typeof pdfSections
+    : [...pdfSections];
+
+  const pdfGuides = guides.filter(g => (g.fileType ?? "pdf") === "pdf" && !g.title.startsWith("__section__"));
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-  // Only PDFs remain — grouped by section (category field). help_article is managed by HelpArticlesInline.
-  // Exclude placeholder guides created by "Add PDF Section" (title starts with __section__)
-  const pdfGuides = guides.filter(g => (g.fileType ?? "pdf") === "pdf" && !g.title.startsWith("__section__"));
-  // Collect distinct sections in order of first appearance
-  const sectionOrder = Array.from(new Set(pdfGuides.map(g => g.category ?? ""))).sort((a, b) => {
-    if (a === "") return 1; // unsectioned last
-    if (b === "") return -1;
-    return a.localeCompare(b);
-  });
-  const bySection = sectionOrder.reduce((acc, sec) => {
-    acc[sec] = pdfGuides.filter(g => (g.category ?? "") === sec);
-    return acc;
-  }, {} as Record<string, typeof pdfGuides>);
-  // Default all sub-sections collapsed
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(sectionOrder.map(s => [s, true]))
-  );
 
-  const getOrderedGroup = useCallback((key: string, group: typeof pdfGuides) => {
-    const order = localOrder[key];
-    if (!order) return [...group].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-    return order.map(id => group.find(g => g.id === id)).filter(Boolean) as typeof pdfGuides;
-  }, [localOrder]);
-
-  function handleDragEnd(key: string, group: typeof pdfGuides, event: DragEndEvent) {
+  function handleSectionDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const ordered = getOrderedGroup(key, group);
+    const ids = orderedSections.map(s => s.id);
+    const oldIndex = ids.indexOf(Number(active.id));
+    const newIndex = ids.indexOf(Number(over.id));
+    const newOrder = arrayMove(ids, oldIndex, newIndex);
+    setLocalSectionOrder(newOrder);
+    reorderSectionsMutation.mutate(newOrder.map((id, i) => ({ id, sortOrder: i })));
+  }
+
+  function handleGuideDragEnd(sectionId: number, sectionGuides: typeof pdfGuides, event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const ordered = getOrderedGuides(sectionId, sectionGuides);
     const oldIndex = ordered.findIndex(g => g.id === active.id);
     const newIndex = ordered.findIndex(g => g.id === over.id);
     const newOrder = arrayMove(ordered, oldIndex, newIndex);
-    setLocalOrder(prev => ({ ...prev, [key]: newOrder.map(g => g.id) }));
-    reorderMutation.mutate({ id1: Number(active.id), id2: Number(over.id) });
+    setLocalGuideOrder(prev => ({ ...prev, [sectionId]: newOrder.map(g => g.id) }));
+    reorderGuidesMutation.mutate({ id1: Number(active.id), id2: Number(over.id) });
+  }
+
+  function getOrderedGuides(sectionId: number, sectionGuides: typeof pdfGuides) {
+    const order = localGuideOrder[sectionId];
+    if (!order) return [...sectionGuides].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    return order.map(id => sectionGuides.find(g => g.id === id)).filter(Boolean) as typeof pdfGuides;
   }
 
   const PDF_COLOR = "#ef4444";
@@ -5782,94 +5823,205 @@ function GuideGroups({
         <span className="text-xs text-gray-500">Viewable and Downloadable PDF documents</span>
         <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}20`, color: PDF_COLOR }}>{pdfGuides.length}</span>
       </div>
-      {pdfGuides.length === 0 && (
+      {pdfSections.length === 0 && pdfGuides.length === 0 && (
         <div className="px-5 py-8 text-center rounded-xl" style={{ background: "#111", border: "1px solid #2a2a2a" }}>
-          <p className="text-gray-600 text-xs">No PDF guides yet. Click "Add Guide" above to add one.</p>
+          <p className="text-gray-600 text-xs">No PDF sections yet. Click "Add PDF Section" above to create one.</p>
         </div>
       )}
-      {sectionOrder.map((sec) => {
-        const group = bySection[sec];
-        const label = sec || "Unsectioned";
-        const isCollapsed = collapsed[sec ?? "__unsectioned"];
-        const orderedGroup = getOrderedGroup(sec, group);
-        return (
-          <div key={sec || "__unsectioned"} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-            <button
-              className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
-              style={{ background: "#1d2230" }}
-              onClick={() => setCollapsed(c => ({ ...c, [sec ?? "__unsectioned"]: !c[sec ?? "__unsectioned"] }))}
-            >
-              <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PDF_COLOR }} />
-                <span className="text-sm font-semibold text-white">{label}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}20`, color: PDF_COLOR }}>{group.length}</span>
-                <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
-              </div>
-            </button>
-            {!isCollapsed && (
-              group.length === 0 ? (
-                <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
-                  <p className="text-gray-600 text-xs">No PDFs in this section yet.</p>
-                </div>
-              ) : (
-                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(sec, group, e)}>
-                  <SortableContext items={orderedGroup.map(g => g.id)} strategy={verticalListSortingStrategy}>
-                    <Table>
-                      <TableHeader>
-                        <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
-                          <TableHead className="text-gray-400 text-xs w-6"></TableHead>
-                          <TableHead className="text-gray-400 text-xs">Title</TableHead>
-                          <TableHead className="text-gray-400 text-xs">Link Display Name</TableHead>
-                          <TableHead className="text-gray-400 text-xs">Section</TableHead>
-                          <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
-                          <TableHead className="text-gray-400 text-xs">Status</TableHead>
-                          <TableHead className="text-gray-400 text-xs">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {orderedGroup.map((g) => (
-                          <SortableTableRow key={g.id} id={g.id}>
-                            <TableCell className="text-gray-600 text-xs w-6" style={{ cursor: "grab" }}>⠿</TableCell>
-                            <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
-                            <TableCell className="text-xs max-w-[160px] truncate">
-                              {(g as any).linkLabel
-                                ? <span className="text-green-400">{(g as any).linkLabel}</span>
-                                : <span className="text-gray-600 italic">Not set</span>}
-                            </TableCell>
-                            <TableCell className="text-gray-400 text-xs">{g.category ?? "—"}</TableCell>
-                            <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
-                            <TableCell>
-                              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: g.published ? "rgba(103,199,40,0.15)" : "rgba(239,68,68,0.15)", color: g.published ? "#67C728" : "#f87171" }}>
-                                {g.published ? "Published" : "Hidden"}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2" onPointerDown={e => e.stopPropagation()}>
-                                {g.fileUrl && (
-                                  <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
-                                )}
-                                <button
-                                  onClick={() => { if (confirm(`Reset downloads for "${g.title}" to 0?`)) resetDownloadsMutation.mutate({ id: g.id }); }}
-                                  title="Reset download count"
-                                  className="text-gray-500 hover:text-amber-400 transition"
-                                ><ArrowDown size={13} /></button>
-                                <button onClick={() => onEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
-                                <button onClick={() => onDelete(g.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
-                              </div>
-                            </TableCell>
-                          </SortableTableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </SortableContext>
-                </DndContext>
-              )
-            )}
+      {/* DB-backed sections with drag-to-reorder */}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSectionDragEnd}>
+        <SortableContext items={orderedSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-2">
+            {orderedSections.map(section => {
+              const sectionGuides = pdfGuides.filter(g => g.category === section.name);
+              const isCollapsed = collapsed[section.id] !== false; // default collapsed
+              const orderedGuides = getOrderedGuides(section.id, sectionGuides);
+              return (
+                <SortablePdfSectionRow key={section.id} id={section.id}>
+                  <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+                    <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
+                        {editingSectionId === section.id ? (
+                          <input
+                            className="text-sm font-semibold text-white bg-transparent border-b border-purple-500 outline-none flex-1 min-w-0"
+                            value={editingSectionName}
+                            onChange={e => setEditingSectionName(e.target.value)}
+                            onBlur={() => {
+                              if (editingSectionName.trim() && editingSectionName !== section.name) {
+                                renameSectionMutation.mutate({ id: section.id, name: editingSectionName.trim() });
+                              }
+                              setEditingSectionId(null);
+                            }}
+                            onKeyDown={e => {
+                              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                              if (e.key === "Escape") { setEditingSectionId(null); }
+                            }}
+                            autoFocus
+                          />
+                        ) : (
+                          <span className="text-sm font-semibold text-white truncate">{section.name}</span>
+                        )}
+                        <button
+                          onClick={() => { setEditingSectionId(section.id); setEditingSectionName(section.name); }}
+                          className="text-gray-600 hover:text-gray-300 transition flex-shrink-0"
+                          title="Rename section"
+                        ><Pencil size={12} /></button>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}20`, color: PDF_COLOR }}>{sectionGuides.length}</span>
+                        <button
+                          onClick={() => toggleSectionVisibilityMutation.mutate({ id: section.id, isVisible: !section.isVisible })}
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                          style={section.isVisible
+                            ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                            : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                          }
+                        >
+                          {section.isVisible ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+                        </button>
+                        <button
+                          onClick={() => { if (confirm(`Delete section "${section.name}"? PDFs in this section will become unsectioned.`)) deleteSectionMutation.mutate({ id: section.id }); }}
+                          className="text-gray-600 hover:text-red-400 transition"
+                          title="Delete section"
+                        ><Trash2 size={13} /></button>
+                        <button
+                          onClick={() => setCollapsed(c => ({ ...c, [section.id]: !isCollapsed }))}
+                          className="text-gray-500 transition"
+                        ><ChevronDown size={14} className={`transition-transform ${isCollapsed ? "" : "rotate-180"}`} /></button>
+                      </div>
+                    </div>
+                    {!isCollapsed && (
+                      sectionGuides.length === 0 ? (
+                        <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
+                          <p className="text-gray-600 text-xs">No PDFs in this section yet. Use "Add PDF" above and select this section.</p>
+                        </div>
+                      ) : (
+                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleGuideDragEnd(section.id, sectionGuides, e)}>
+                          <SortableContext items={orderedGuides.map(g => g.id)} strategy={verticalListSortingStrategy}>
+                            <Table>
+                              <TableHeader>
+                                <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
+                                  <TableHead className="text-gray-400 text-xs w-6"></TableHead>
+                                  <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                                  <TableHead className="text-gray-400 text-xs">Link Display Name</TableHead>
+                                  <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
+                                  <TableHead className="text-gray-400 text-xs">Status</TableHead>
+                                  <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {orderedGuides.map((g) => (
+                                  <SortableTableRow key={g.id} id={g.id}>
+                                    <TableCell className="text-gray-600 text-xs w-6" style={{ cursor: "grab" }}>⠿</TableCell>
+                                    <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
+                                    <TableCell className="text-xs max-w-[160px] truncate">
+                                      {(g as any).linkLabel
+                                        ? <span className="text-green-400">{(g as any).linkLabel}</span>
+                                        : <span className="text-gray-600 italic">Not set</span>}
+                                    </TableCell>
+                                    <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
+                                    <TableCell>
+                                      <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: g.published ? "rgba(103,199,40,0.15)" : "rgba(239,68,68,0.15)", color: g.published ? "#67C728" : "#f87171" }}>
+                                        {g.published ? "Published" : "Hidden"}
+                                      </span>
+                                    </TableCell>
+                                    <TableCell>
+                                      <div className="flex items-center gap-2" onPointerDown={e => e.stopPropagation()}>
+                                        {g.fileUrl && (
+                                          <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
+                                        )}
+                                        <button
+                                          onClick={() => { if (confirm(`Reset downloads for "${g.title}" to 0?`)) resetDownloadsMutation.mutate({ id: g.id }); }}
+                                          title="Reset download count"
+                                          className="text-gray-500 hover:text-amber-400 transition"
+                                        ><ArrowDown size={13} /></button>
+                                        <button onClick={() => onEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+                                        <button onClick={() => onDelete(g.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+                                      </div>
+                                    </TableCell>
+                                  </SortableTableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </SortableContext>
+                        </DndContext>
+                      )
+                    )}
+                  </div>
+                </SortablePdfSectionRow>
+              );
+            })}
           </div>
-        );
-      })}
+        </SortableContext>
+      </DndContext>
+      {/* Unsectioned PDFs */}
+      {pdfGuides.filter(g => !g.category || !pdfSections.find(s => s.name === g.category)).length > 0 && (
+        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+          <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
+            <div className="flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#6b7280" }} />
+              <span className="text-sm font-semibold text-gray-400">Unsectioned</span>
+            </div>
+            <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(107,114,128,0.2)", color: "#6b7280" }}>
+              {pdfGuides.filter(g => !g.category || !pdfSections.find(s => s.name === g.category)).length}
+            </span>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
+                <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                <TableHead className="text-gray-400 text-xs">Link Display Name</TableHead>
+                <TableHead className="text-gray-400 text-xs">Downloads</TableHead>
+                <TableHead className="text-gray-400 text-xs">Status</TableHead>
+                <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pdfGuides.filter(g => !g.category || !pdfSections.find(s => s.name === g.category)).map(g => (
+                <TableRow key={g.id} style={{ borderColor: "#252d3d" }}>
+                  <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
+                  <TableCell className="text-xs max-w-[160px] truncate">
+                    {(g as any).linkLabel
+                      ? <span className="text-green-400">{(g as any).linkLabel}</span>
+                      : <span className="text-gray-600 italic">Not set</span>}
+                  </TableCell>
+                  <TableCell className="text-gray-400 text-xs">{g.downloadCount ?? 0}</TableCell>
+                  <TableCell>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: g.published ? "rgba(103,199,40,0.15)" : "rgba(239,68,68,0.15)", color: g.published ? "#67C728" : "#f87171" }}>
+                      {g.published ? "Published" : "Hidden"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {g.fileUrl && (
+                        <a href={g.fileUrl} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0074F4] transition"><ExternalLink size={13} /></a>
+                      )}
+                      <button onClick={() => onEdit(g)} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+                      <button onClick={() => onDelete(g.id)} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SortablePdfSectionRow({ id, children }: { id: number; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: "relative" as const,
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
     </div>
   );
 }
