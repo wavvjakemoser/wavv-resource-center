@@ -353,15 +353,17 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               return (
                 <a
                   href="/profile"
-                  className="flex-shrink-0 flex items-center gap-2 rounded-full transition-all duration-150"
-                  style={{ textDecoration: "none" }}
+                  className="flex-shrink-0 flex items-center gap-2 px-2 py-1 rounded-xl transition-all duration-150"
+                  style={{ textDecoration: "none", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
                   title={user.name ?? user.email ?? "Profile"}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
                 >
                   {pictureSrc ? (
                     <img
                       src={pictureSrc}
                       alt={user.name ?? "Avatar"}
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-7 h-7 rounded-full object-cover flex-shrink-0"
                       style={{ border: "2px solid rgba(255,255,255,0.12)", display: "block" }}
                       onError={(e) => {
                         const img = e.currentTarget as HTMLImageElement;
@@ -372,11 +374,14 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     />
                   ) : null}
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                     style={{ background: "linear-gradient(135deg,#0074F4,#00A9E2)", color: "#fff", display: pictureSrc ? "none" : "flex" }}
                   >
                     {initials}
                   </div>
+                  <span className="text-sm font-medium text-white hidden sm:block" style={{ maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {user.name?.split(" ")[0] ?? user.email?.split("@")[0]}
+                  </span>
                 </a>
                             );            })()}
 

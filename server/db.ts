@@ -2477,3 +2477,59 @@ export async function getVisibleHelpArticleSections() {
   if (!db) return [];
   return db.select().from(helpArticleSections).where(eq(helpArticleSections.isVisible, true)).orderBy(helpArticleSections.sortOrder);
 }
+
+// ─── Native Help Articles (portal-authored) ────────────────────────────────────
+/** Create a native (portal-authored) help article */
+export async function createNativeHelpArticle(data: {
+  title: string;
+  nativeBody: string;
+  sectionName: string;
+  nativeAuthorName?: string | null;
+  sortOrder?: number;
+  sectionOrder?: number;
+}): Promise<{ id: number }> {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  const [result] = await db
+    .insert(publishedHelpArticles)
+    .values({
+      source: "native",
+      intercomArticleId: null,
+      title: data.title,
+      url: null,
+      nativeBody: data.nativeBody,
+      nativeAuthorName: data.nativeAuthorName ?? null,
+      sectionName: data.sectionName,
+      sortOrder: data.sortOrder ?? 0,
+      sectionOrder: data.sectionOrder ?? 0,
+    });
+  return { id: (result as any).insertId };
+}
+
+/** Update a native help article */
+export async function updateNativeHelpArticle(
+  id: number,
+  data: {
+    title?: string;
+    nativeBody?: string;
+    sectionName?: string;
+    nativeAuthorName?: string | null;
+  }
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const set: Record<string, unknown> = {};
+  if (data.title !== undefined) set.title = data.title;
+  if (data.nativeBody !== undefined) set.nativeBody = data.nativeBody;
+  if (data.sectionName !== undefined) set.sectionName = data.sectionName;
+  if (data.nativeAuthorName !== undefined) set.nativeAuthorName = data.nativeAuthorName;
+  if (Object.keys(set).length === 0) return;
+  await db.update(publishedHelpArticles).set(set).where(eq(publishedHelpArticles.id, id));
+}
+
+/** Unpublish (delete) an article by numeric id — works for both intercom and native */
+export async function unpublishHelpArticleById(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(publishedHelpArticles).where(eq(publishedHelpArticles.id, id));
+}

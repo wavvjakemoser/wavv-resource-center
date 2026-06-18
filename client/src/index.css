@@ -199,3 +199,58 @@
 .relative:hover .demo-stamp-overlay {
   opacity: 0.15 !important;
 }
+
+/* ─── Native Article Body ────────────────────────────────────────────────────── */
+.native-article-body {
+  color: #d1d5db;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.native-article-body h2 {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.native-article-body h3 {
+  color: #e5e7eb;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+.native-article-body p { margin-bottom: 0.75rem; }
+.native-article-body ul,
+.native-article-body ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.native-article-body ul { list-style-type: disc; }
+.native-article-body ol { list-style-type: decimal; }
+.native-article-body li { margin-bottom: 0.25rem; }
+.native-article-body a { color: #60a5fa; text-decoration: underline; }
+.native-article-body a:hover { color: #93c5fd; }
+.native-article-body code {
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #a78bfa;
+}
+.native-article-body blockquote {
+  border-left: 3px solid #8B5CF6;
+  padding-left: 1rem;
+  color: #9ca3af;
+  font-style: italic;
+  margin: 1rem 0;
+}
+.native-article-body strong { color: #fff; font-weight: 600; }
+.native-article-body em { color: #d1d5db; }
+/* Tiptap editor dark theme */
+.ProseMirror { outline: none; }
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #4b5563;
+  pointer-events: none;
+  height: 0;
+}

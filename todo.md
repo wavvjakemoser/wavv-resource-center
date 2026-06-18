@@ -1417,3 +1417,25 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Profile page: remove Your Activity section
 - [x] Profile page: replace Bookmarks section with Coming Soon placeholder
 - [x] Profile page: replace Badges section with Coming Soon placeholder
+
+## Profile Button + Resource Hub Cleanup (Jun 18)
+- [ ] Profile button in top bar: show avatar photo + name side by side
+- [ ] Remove export button from WAVV Resource Hub
+- [ ] Resource Hub admin: add Add PDF section alongside Add Help Article
+- [ ] Schema: add body/content column to help_articles for inline content
+- [ ] Admin: rich text editor for help article body (headers, bold, bullets, links)
+- [ ] Portal: render help article body inline instead of redirecting to external URL
+
+## Inline Help Article Authoring (Native Articles)
+- [x] Schema: add `source` enum (`intercom` | `native`) and `nativeBody` text column to `published_help_articles`; run migration
+- [x] Server: update `guides.publishArticle` to accept `source`, `nativeBody`, `nativeAuthorName`
+- [x] Server: add `guides.updateNativeArticle` mutation for editing native article body
+- [x] Server: update `guides.getPublishedArticles` to return `nativeBody` (and `source` for admin only)
+- [x] Admin UI: install Tiptap rich text editor (`@tiptap/react`, `@tiptap/starter-kit`, `@tiptap/extension-link`)
+- [x] Admin UI: "Add Help Article" form shows Tiptap editor for body content (native articles only)
+- [x] Admin UI: source badge (`Intercom` / `Native`) visible only in admin article list
+- [x] Admin UI: edit button for native articles opens Tiptap editor pre-populated with existing body
+- [x] Portal UI: clicking a help article opens inline modal showing rendered body HTML
+- [x] Portal UI: Intercom articles render synced `body` HTML; native articles render `nativeBody`
+- [x] Portal UI: no source label shown to customers
+- [x] Portal UI: fallback to external link only if both `body` and `nativeBody` are null

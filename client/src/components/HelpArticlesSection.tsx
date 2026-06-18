@@ -6,22 +6,123 @@
  * that a content admin has explicitly published appear here.
  *
  * Grouped by sectionName (e.g. "Dialer Settings", "Call Boards"),
- * each section is collapsible. Clicking an article opens it in a new tab.
+ * each section is collapsible.
+ *
+ * Behavior:
+ * - Native articles (source='native'): open inline in a modal with rendered HTML
+ * - Intercom articles (source='intercom'): open url in a new tab (existing behavior)
  */
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { HelpCircle, ExternalLink, ChevronDown, ChevronRight, Search } from "lucide-react";
+import { HelpCircle, ExternalLink, ChevronDown, ChevronRight, Search, X, ArrowLeft } from "lucide-react";
 
 const ACCENT = "#8B5CF6";
+
+// ─── Inline Article Modal ─────────────────────────────────────────────────────
+
+function NativeArticleModal({
+  article,
+  onClose,
+}: {
+  article: { title: string; nativeBody: string };
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative w-full max-w-2xl max-h-[85vh] overflow-auto rounded-2xl"
+        style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+      >
+        {/* Header */}
+        <div
+          className="sticky top-0 flex items-center gap-3 px-6 py-4"
+          style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a", zIndex: 1 }}
+        >
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition"
+          >
+            <ArrowLeft size={14} /> Back
+          </button>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-bold text-white truncate">{article.title}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-white transition flex-shrink-0"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="px-6 py-5">
+          <div
+            className="native-article-body"
+            dangerouslySetInnerHTML={{ __html: article.nativeBody }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── Article Row ──────────────────────────────────────────────────────────────
 
 function ArticleRow({
   article,
+  onOpenNative,
 }: {
-  article: { intercomArticleId: string; title: string; url: string | null };
+  article: { id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null };
+  onOpenNative: (article: { title: string; nativeBody: string }) => void;
 }) {
+  const isNative = !!(article.nativeBody && article.nativeBody.trim() && article.nativeBody !== "<p></p>");
+
+  if (isNative) {
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenNative({ title: article.title, nativeBody: article.nativeBody! })}
+        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-left group"
+        style={{ background: "transparent", border: "1px solid transparent" }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.background = "#1d2230";
+          (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT}30`;
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.background = "transparent";
+          (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+        }}
+      >
+        {/* Dot indicator */}
+        <div
+          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+          style={{ background: `${ACCENT}60` }}
+        />
+
+        {/* Title */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-gray-200 leading-snug truncate group-hover:text-white transition-colors">
+            {article.title}
+          </p>
+        </div>
+
+        {/* Read cue — appears on hover */}
+        <span
+          className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ color: ACCENT }}
+        >
+          Read
+        </span>
+      </button>
+    );
+  }
+
   return (
     <a
       href={article.url ?? "#"}
@@ -67,9 +168,11 @@ function ArticleRow({
 function SectionGroup({
   name,
   articles,
+  onOpenNative,
 }: {
   name: string;
-  articles: Array<{ intercomArticleId: string; title: string; url: string | null }>;
+  articles: Array<{ id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null }>;
+  onOpenNative: (article: { title: string; nativeBody: string }) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -114,7 +217,7 @@ function SectionGroup({
         ) : (
           <div className="space-y-0.5 mb-2">
             {articles.map((a) => (
-              <ArticleRow key={a.intercomArticleId} article={a} />
+              <ArticleRow key={a.intercomArticleId ?? a.id} article={a} onOpenNative={onOpenNative} />
             ))}
           </div>
         )
@@ -129,6 +232,9 @@ export default function HelpArticlesSection({ search }: { search: string }) {
   const { data: sections = [], isLoading: sectionsLoading } = trpc.helpArticles.listSections.useQuery();
   const { data: published = [], isLoading: articlesLoading } = trpc.helpArticles.listPublished.useQuery();
   const isLoading = sectionsLoading || articlesLoading;
+
+  // Inline native article modal state
+  const [openArticle, setOpenArticle] = useState<{ title: string; nativeBody: string } | null>(null);
 
   if (isLoading) {
     return (
@@ -198,6 +304,7 @@ export default function HelpArticlesSection({ search }: { search: string }) {
             key={sec.id}
             name={sec.name}
             articles={bySection[sec.name] ?? []}
+            onOpenNative={setOpenArticle}
           />
         ))}
       </div>
@@ -208,6 +315,14 @@ export default function HelpArticlesSection({ search }: { search: string }) {
           <Search size={14} style={{ color: ACCENT, opacity: 0.4 }} />
           <p className="text-xs text-gray-500">No help articles match "{search}".</p>
         </div>
+      )}
+
+      {/* Inline native article modal */}
+      {openArticle && (
+        <NativeArticleModal
+          article={openArticle}
+          onClose={() => setOpenArticle(null)}
+        />
       )}
     </>
   );

@@ -158,6 +158,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
+import Underline from "@tiptap/extension-underline";
+import NativeArticleEditor from "@/components/NativeArticleEditor";
 
 type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
 type TimeRange = 7 | 30 | 90 | 365;
@@ -5293,19 +5298,6 @@ function GuidesTab() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={async () => {
-              const rows = await utils.guides.adminExportDownloaders.fetch();
-              if (!rows?.length) { toast.error("No downloads to export"); return; }
-              const headers = ["Name","Email","Guide","Category","Downloaded At"];
-              const csv = [headers.join(","), ...rows.map(r => [r.userName ?? "", r.userEmail ?? "", r.guideTitle ?? "", r.guideCategory ?? "", r.createdAt ? new Date(r.createdAt).toLocaleString() : ""].map(v => `"${v}"`).join(","))].join("\n");
-              const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "guide-downloaders.csv"; a.click();
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-            style={{ background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
-          >
-            <FileDown size={13} /> Export
-          </button>
 
           <button
             onClick={() => { setShowAddSectionModal(true); }}
@@ -7593,6 +7585,22 @@ function PublishedHelpArticlesPanel() {
   // Default all sections to collapsed
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [editingSection, setEditingSection] = useState<{ id: number; name: string; value: string } | null>(null);
+  // Native article creation
+  const [showNativeEditor, setShowNativeEditor] = useState(false);
+  const [nativeEditorSection, setNativeEditorSection] = useState<string>("");
+  const [editingNativeArticle, setEditingNativeArticle] = useState<{ id: number; title: string; nativeBody: string; sectionName: string } | null>(null);
+  const createNativeMutation = trpc.helpArticles.createNativeArticle.useMutation({
+    onSuccess: () => { utils.helpArticles.listPublished.invalidate(); setShowNativeEditor(false); toast.success("Native article published"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const updateNativeMutation = trpc.helpArticles.updateNativeArticle.useMutation({
+    onSuccess: () => { utils.helpArticles.listPublished.invalidate(); setEditingNativeArticle(null); toast.success("Article updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const unpublishByIdMutation = trpc.helpArticles.unpublishById.useMutation({
+    onSuccess: () => { utils.helpArticles.listPublished.invalidate(); toast.success("Article removed"); },
+    onError: (e) => toast.error(e.message),
+  });
 
   function handleDragEnd(secName: string, event: DragEndEvent) {
     const { active, over } = event;
@@ -7602,7 +7610,7 @@ function PublishedHelpArticlesPanel() {
     const newIdx = group.findIndex(a => a.intercomArticleId === over.id);
     const newOrder = arrayMove(group, oldIdx, newIdx);
     const sectionOrder = published.find(a => a.sectionName === secName)?.sectionOrder ?? 0;
-    reorderMutation.mutate(newOrder.map((a, i) => ({ intercomArticleId: a.intercomArticleId, sortOrder: i, sectionOrder })));
+    reorderMutation.mutate(newOrder.map((a, i) => ({ intercomArticleId: a.intercomArticleId ?? a.id.toString(), sortOrder: i, sectionOrder })));
   }
 
   const isLoading = sectionsLoading || articlesLoading;
@@ -7672,6 +7680,14 @@ function PublishedHelpArticlesPanel() {
                   {isVisible ? <><Eye size={10} /> Visible</> : <><EyeOff size={10} /> Hidden</>}
                 </button>
                 <button
+                  onClick={(e) => { e.stopPropagation(); setNativeEditorSection(sec.name); setShowNativeEditor(true); }}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold transition"
+                  style={{ background: "rgba(139,92,246,0.12)", color: ACCENT, border: "1px solid rgba(139,92,246,0.25)" }}
+                  title="Write a native article for this section"
+                >
+                  <Plus size={10} /> Article
+                </button>
+                <button
                   onClick={() => { if (confirm(`Delete section "${sec.name}"? Articles in this section will be unassigned.`)) deleteSectionMutation.mutate({ id: sec.id }); }}
                   className="text-gray-600 hover:text-red-400 transition"
                   title="Delete section"
@@ -7681,7 +7697,7 @@ function PublishedHelpArticlesPanel() {
             </div>
             {!isCollapsed && (
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(sec.name, e)}>
-                <SortableContext items={group.map(a => a.intercomArticleId)} strategy={verticalListSortingStrategy}>
+                <SortableContext items={group.map(a => a.intercomArticleId ?? a.id.toString())} strategy={verticalListSortingStrategy}>
                   <div style={{ borderTop: "1px solid #2a2a2a", background: "#111" }}>
                     {group.length === 0 ? (
                       <div className="px-4 py-4 text-center">
@@ -7691,9 +7707,16 @@ function PublishedHelpArticlesPanel() {
                       <div className="divide-y" style={{ borderColor: "#2a2a2a" }}>
                         {group.map((a) => (
                           <SortableHelpArticleRow
-                            key={a.intercomArticleId}
+                            key={a.intercomArticleId ?? a.id}
                             article={a}
-                            onUnpublish={() => unpublishMutation.mutate({ intercomArticleId: a.intercomArticleId })}
+                            onUnpublish={() => {
+                              if (a.source === "native") {
+                                unpublishByIdMutation.mutate({ id: a.id });
+                              } else {
+                                unpublishMutation.mutate({ intercomArticleId: a.intercomArticleId ?? a.id.toString() });
+                              }
+                            }}
+                            onEdit={a.source === "native" ? () => setEditingNativeArticle({ id: a.id, title: a.title, nativeBody: a.nativeBody ?? "", sectionName: a.sectionName }) : undefined}
                           />
                         ))}
                       </div>
@@ -7709,17 +7732,27 @@ function PublishedHelpArticlesPanel() {
   );
 }
 
-function SortableHelpArticleRow({ article, onUnpublish }: { article: { intercomArticleId: string; title: string; url: string | null; sectionName: string }; onUnpublish: () => void }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: article.intercomArticleId });
+function SortableHelpArticleRow({ article, onUnpublish, onEdit }: { article: { id: number; intercomArticleId: string | null; source?: string; title: string; url: string | null; sectionName: string; nativeBody?: string | null }; onUnpublish: () => void; onEdit?: () => void }) {
+  const ACCENT = "#8B5CF6";
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: article.intercomArticleId ?? article.id.toString() });
   const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  const isNative = article.source === "native";
   return (
     <div ref={setNodeRef} style={style} className="flex items-center gap-3 px-4 py-2.5">
       <span {...attributes} {...listeners} className="text-gray-600 cursor-grab hover:text-gray-400 transition flex-shrink-0">⠿</span>
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 flex items-center gap-2">
         <p className="text-xs font-medium text-white truncate">{article.title}</p>
+        {isNative && (
+          <span className="text-xs px-1.5 py-0.5 rounded font-semibold flex-shrink-0" style={{ background: `${ACCENT}20`, color: ACCENT, fontSize: "10px" }}>
+            Native
+          </span>
+        )}
       </div>
-      {article.url && (
+      {article.url && !isNative && (
         <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-blue-400 transition flex-shrink-0"><ExternalLink size={12} /></a>
+      )}
+      {isNative && onEdit && (
+        <button onClick={onEdit} className="text-gray-600 hover:text-purple-400 transition flex-shrink-0" title="Edit article"><Pencil size={12} /></button>
       )}
       <button onClick={onUnpublish} className="text-gray-600 hover:text-red-400 transition flex-shrink-0" title="Remove from Help Articles"><X size={13} /></button>
     </div>

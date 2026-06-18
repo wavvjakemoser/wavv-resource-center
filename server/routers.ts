@@ -145,6 +145,9 @@ import {
   reorderHelpArticleSections,
   toggleHelpArticleSectionVisibility,
   getVisibleHelpArticleSections,
+  createNativeHelpArticle,
+  updateNativeHelpArticle,
+  unpublishHelpArticleById,
 } from "./db";
 import { runIntercomSync } from "./intercomSync";
 
@@ -1771,6 +1774,44 @@ export const appRouter = router({
         return next({ ctx });
       })
       .mutation(({ input }) => reorderHelpArticleSections(input)),
+    // Admin: create a native (portal-authored) article
+    createNativeArticle: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        nativeBody: z.string().min(1),
+        sectionName: z.string().min(1),
+        nativeAuthorName: z.string().optional().nullable(),
+      }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input, ctx }) => createNativeHelpArticle({
+        ...input,
+        nativeAuthorName: input.nativeAuthorName ?? ctx.user.name ?? null,
+      })),
+    // Admin: update a native article
+    updateNativeArticle: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        nativeBody: z.string().min(1).optional(),
+        sectionName: z.string().min(1).optional(),
+        nativeAuthorName: z.string().optional().nullable(),
+      }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => updateNativeHelpArticle(input.id, input)),
+    // Admin: unpublish by numeric id (works for both intercom and native articles)
+    unpublishById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(({ input }) => unpublishHelpArticleById(input.id)),
   }),
 
   readiness: router({

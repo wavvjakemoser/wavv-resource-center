@@ -1,6 +1,7 @@
 import {
   boolean,
   int,
+  mediumtext,
   mysqlEnum,
   mysqlTable,
   text,
@@ -407,17 +408,22 @@ export const partnerContent = mysqlTable("partner_content", {
 export type PartnerContent = typeof partnerContent.$inferSelect;
 
 // ─── Published Help Articles (customer-facing) ────────────────────────────────
-// Tracks which Intercom articles have been manually published to the
-// customer-facing Guides & Docs "Help Articles" section.
-// Admins select articles from the synced Intercom data and assign them
-// to a named section (e.g. "Dialer Settings", "Call Boards").
+// Tracks articles published to the customer-facing Guides & Docs "Help Articles" section.
+// source='intercom': synced from Intercom, published by admin
+// source='native': authored directly in the portal admin (never shown to customers)
 export const publishedHelpArticles = mysqlTable("published_help_articles", {
   id: int("id").autoincrement().primaryKey(),
-  // References helpArticles.intercomId (not FK to keep it loose)
-  intercomArticleId: varchar("intercom_article_id", { length: 64 }).notNull().unique(),
+  // 'intercom' = synced from Intercom; 'native' = authored directly in the portal (admin-only flag)
+  source: mysqlEnum("source", ["intercom", "native"]).default("intercom").notNull(),
+  // References helpArticles.intercomId — null for native articles
+  intercomArticleId: varchar("intercom_article_id", { length: 64 }).unique(),
   // Denormalized for fast reads without joins
   title: varchar("title", { length: 500 }).notNull(),
   url: text("url"),
+  // Full HTML body for native (portal-authored) articles; also used for Intercom body cache
+  nativeBody: mediumtext("native_body"),
+  // Author name for native articles (admin-only, never shown to customers)
+  nativeAuthorName: varchar("native_author_name", { length: 255 }),
   // Section name shown on the customer-facing page (e.g. "Dialer Settings")
   sectionName: varchar("section_name", { length: 255 }).notNull().default("General"),
   // Sort order within the section (lower = first)
