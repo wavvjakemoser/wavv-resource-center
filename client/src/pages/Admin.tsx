@@ -1541,14 +1541,13 @@ function UsersTab() {
   // Export users filtered by current roleFilter
   function exportUsersCSV() {
     const list = roleFilter === "all" ? (users ?? []) : (users ?? []).filter((u) => u.role === roleFilter);
-      const header = ["Name", "Email", "Access Level", "Invite Sent", "Status"].join(",");
+      const header = ["Name", "Email", "Access Level", "Last Login"].join(",");
     const rows = list.map((u) =>
       [
         `"${(u.name ?? "").replace(/"/g, '""')}"`,
         `"${(u.email ?? "").replace(/"/g, '""')}"`,
         u.role,
-        u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
-        ((u as any).hasPassword || !!(u as any).lastSignedIn) ? "Active" : "Pending",
+        (u as any).lastSignedIn ? new Date((u as any).lastSignedIn).toLocaleDateString() : "Never",
       ].join(",")
     );
     const csv = [header, ...rows].join("\n");
@@ -1662,8 +1661,7 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[240px]">Name</TableHead>
               <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
-              <TableHead className="text-gray-400 w-[160px]">Invite Sent</TableHead>
-              <TableHead className="text-gray-400 w-[110px]">Status</TableHead>
+              <TableHead className="text-gray-400 w-[160px]">Last Login</TableHead>
 
               {isOwner && <TableHead className="text-gray-400">Actions</TableHead>}
             </TableRow>
@@ -1745,63 +1743,11 @@ function UsersTab() {
 
                       </div>
                     </TableCell>
-                    {/* Invite Sent — date only, with Resend button if expired */}
+                    {/* Last Login */}
                     <TableCell className="text-gray-400 text-sm">
-                      {(u as any).inviteSentAt ? (() => {
-                        const sentDate = new Date((u as any).inviteSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-                        const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
-                        const expiresDate = expiresAt ? expiresAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
-                        const isExpired = expiresAt && expiresAt < new Date();
-                        return (
-                          <div className="flex flex-col gap-0.5">
-                            <span>{sentDate}</span>
-                            {expiresDate && (
-                              <span className="text-[10px]" style={{ color: isExpired ? "#ef4444" : "#6b7280" }}>
-                                Exp: {expiresDate}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })() : <span className="text-gray-600 italic">—</span>}
-                    </TableCell>
-                    {/* Status — Active = logged in or has password; Pending = invite live; Expired = invite lapsed unclaimed */}
-                    <TableCell>
-                      {(() => {
-                        const hasPassword = !!(u as any).hasPassword;
-                        const lastSignedIn = (u as any).lastSignedIn;
-                        const createdAt = (u as any).createdAt;
-                        // lastSignedIn defaults to createdAt on account creation, so only count it as
-                        // a real login if it's meaningfully later than createdAt (>60s)
-                        const lastMs = lastSignedIn ? new Date(lastSignedIn).getTime() : 0;
-                        const createdMs = createdAt ? new Date(createdAt).getTime() : 0;
-                        const hasLoggedIn = lastMs > createdMs + 60_000;
-                        // Expired: invite was sent, token lapsed, and never claimed
-                        const expiresAt = (u as any).inviteExpiresAt ? new Date((u as any).inviteExpiresAt) : null;
-                        const inviteUsed = !!(u as any).inviteUsed;
-                        const inviteExpired = !inviteUsed && expiresAt && expiresAt < new Date();
-                        // Active only if the user actually logged in or set a password AND their invite
-                        // was either claimed or they have no invite (direct Manus OAuth user)
-                        const isActive = (hasLoggedIn || hasPassword) && !inviteExpired;
-                        if (isActive) {
-                          return (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>
-                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Active
-                            </span>
-                          );
-                        } else if (inviteExpired) {
-                          return (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
-                              <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" /> Expired
-                            </span>
-                          );
-                        } else {
-                          return (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}>
-                              <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" /> Pending
-                            </span>
-                          );
-                        }
-                      })()}
+                      {(u as any).lastSignedIn
+                        ? new Date((u as any).lastSignedIn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                        : <span className="text-gray-600 italic">Never</span>}
                     </TableCell>
 
                     {isOwner && <TableCell>
