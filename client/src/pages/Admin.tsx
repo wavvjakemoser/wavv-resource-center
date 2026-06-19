@@ -1559,13 +1559,12 @@ function UsersTab() {
   // Export users filtered by current roleFilter
   function exportUsersCSV() {
     const list = roleFilter === "all" ? (users ?? []) : (users ?? []).filter((u) => u.role === roleFilter);
-      const header = ["Name", "Email", "Access Level", "Last Login"].join(",");
+      const header = ["Name", "Email", "Access Level"].join(",");
     const rows = list.map((u) =>
       [
         `"${(u.name ?? "").replace(/"/g, '""')}"`,
         `"${(u.email ?? "").replace(/"/g, '""')}"`,
         u.role,
-        (u as any).lastSignedIn ? new Date((u as any).lastSignedIn).toLocaleDateString() : "Never",
       ].join(",")
     );
     const csv = [header, ...rows].join("\n");
@@ -1679,7 +1678,7 @@ function UsersTab() {
               <TableHead className="text-gray-400 w-[240px]">Name</TableHead>
               <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
               <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
-              <TableHead className="text-gray-400 w-[160px]">Last Login</TableHead>
+
 
               {isOwner && <TableHead className="text-gray-400">Actions</TableHead>}
             </TableRow>
@@ -1761,12 +1760,7 @@ function UsersTab() {
 
                       </div>
                     </TableCell>
-                    {/* Last Login */}
-                    <TableCell className="text-gray-400 text-sm">
-                      {(u as any).lastSignedIn
-                        ? new Date((u as any).lastSignedIn).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                        : <span className="text-gray-600 italic">Never</span>}
-                    </TableCell>
+
 
                     {isOwner && <TableCell>
                       {isSelf ? (
