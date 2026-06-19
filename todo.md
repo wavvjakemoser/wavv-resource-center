@@ -1455,6 +1455,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] PdfSection: orphaned guide categories (not in DB sections) still appear alphabetically after DB sections
 - [x] PdfSection: unsectioned guides always render last
 
+## FAQ Visual Consistency + Icon Fix (Jun 19 - Session 2)
+- [x] FaqSubSection customer-side: replaced ? text characters with HelpCircle icon (matches PdfSubSection pattern exactly)
+- [x] FaqSection header: replaced ? text character with HelpCircle icon
+- [x] Admin FaqSectionsPanel: verified visual consistency with PdfSectionsPanel (same rounded-xl, #1d2230 bg, GripVertical drag handle, Pencil rename, Trash2 delete, green/gray visibility toggle)
+- [x] Vite clean, TypeScript 0 errors, 47/47 tests passing
+
 ## Audit Remediation (Jun 19 - Audit Session)
 
 ### Verify / Fix

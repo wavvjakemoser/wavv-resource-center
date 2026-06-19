@@ -1,7 +1,7 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
-import { FileText, Download, ExternalLink, Search, ChevronDown, ChevronRight, X } from "lucide-react";
+import { FileText, Download, ExternalLink, Search, ChevronDown, ChevronRight, X, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ContentRequestCTA } from "./Academy";
 import HelpArticlesSection from "@/components/HelpArticlesSection";
@@ -364,43 +364,84 @@ function FaqEntryRow({ entry }: { entry: FaqEntry }) {
   );
 }
 
+function FaqSubSection({ section, search }: { section: FaqSectionType; search: string }) {
+  const [open, setOpen] = useState(false);
+  const filteredEntries = section.entries.filter(e =>
+    !search ||
+    e.question.toLowerCase().includes(search.toLowerCase()) ||
+    e.answer.toLowerCase().includes(search.toLowerCase())
+  );
+  return (
+    <section>
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-3 mb-3 group"
+      >
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${FAQ_COLOR}18` }}>
+          <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
+        </div>
+        <div className="flex-1 text-left">
+          <span className="text-sm font-bold text-white">{section.name}</span>
+        </div>
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
+          {filteredEntries.length}
+        </span>
+        {open
+          ? <ChevronDown size={14} className="text-gray-500 flex-shrink-0" />
+          : <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />}
+      </button>
+      <div className="mb-3 h-px" style={{ background: `${FAQ_COLOR}25` }} />
+      {open && (
+        filteredEntries.length === 0 ? (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}>
+            <HelpCircle size={14} style={{ color: FAQ_COLOR, opacity: 0.4 }} />
+            <p className="text-xs text-gray-500">No FAQs in this section yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filteredEntries.map(entry => (
+              <FaqEntryRow key={entry.id} entry={entry} />
+            ))}
+          </div>
+        )
+      )}
+    </section>
+  );
+}
+
 function FaqSection({ sections, search }: { sections: FaqSectionType[]; search: string }) {
-  const filteredSections = sections.map(s => ({
-    ...s,
-    entries: s.entries.filter(e =>
-      !search ||
+  const visibleSections = sections.filter(s => s.isVisible);
+  const filteredSections = visibleSections.filter(s =>
+    !search || s.entries.some(e =>
       e.question.toLowerCase().includes(search.toLowerCase()) ||
       e.answer.toLowerCase().includes(search.toLowerCase())
-    ),
-  })).filter(s => !search || s.entries.length > 0);
+    )
+  );
 
   if (filteredSections.length === 0) return null;
 
   return (
     <section>
+      {/* Section header — NOT collapsible, always visible */}
       <div className="w-full flex items-center gap-3 mb-3">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${FAQ_COLOR}18` }}>
-          <span style={{ color: FAQ_COLOR, fontSize: 14, fontWeight: 700 }}>?</span>
+          <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
         </div>
         <div className="flex-1 text-left">
           <span className="text-sm font-bold text-white">FAQs</span>
           <span className="ml-2 text-xs text-gray-500">Frequently asked questions</span>
         </div>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
-          {filteredSections.reduce((acc, s) => acc + s.entries.length, 0)}
+          {filteredSections.reduce((acc, s) => acc + s.entries.filter(e => !search || e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())).length, 0)}
         </span>
       </div>
+      {/* Divider */}
       <div className="mb-4 h-px" style={{ background: `${FAQ_COLOR}25` }} />
-      <div className="space-y-6 pl-2">
+      {/* Sub-sections */}
+      <div className="space-y-4 pl-2">
         {filteredSections.map(section => (
-          <div key={section.id}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: FAQ_COLOR }}>{section.name}</p>
-            <div className="space-y-2">
-              {section.entries.map(entry => (
-                <FaqEntryRow key={entry.id} entry={entry} />
-              ))}
-            </div>
-          </div>
+          <FaqSubSection key={section.id} section={section} search={search} />
         ))}
       </div>
     </section>
@@ -503,7 +544,7 @@ export default function GuidesAndDocs() {
 
             {/* Subline */}
             <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
-              Not a course — a reference. Search help articles, troubleshooting guides, and downloadable PDFs organized by topic. Get the answer and get back to selling.
+              Not a course — a reference. Search help articles, FAQs, troubleshooting guides, and downloadable PDFs organized by topic. Get the answer and get back to selling.
             </p>
           </div>
         </div>

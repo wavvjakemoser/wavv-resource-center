@@ -6347,6 +6347,24 @@ function FaqSectionsPanel() {
   const [addingEntryTo, setAddingEntryTo] = useState<number | null>(null);
   const [newEntry, setNewEntry] = useState({ question: "", answer: "", fileUrl: "", fileName: "" });
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [localFaqOrder, setLocalFaqOrder] = useState<number[]>([]);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const reorderFaqMutation = trpc.faq.reorderSections.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); },
+  });
+  function handleFaqSectionDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const ids = localFaqOrder.length === sections.length ? localFaqOrder : sections.map(s => s.id);
+    const oldIdx = ids.indexOf(active.id as number);
+    const newIdx = ids.indexOf(over.id as number);
+    const newOrder = arrayMove(ids, oldIdx, newIdx);
+    setLocalFaqOrder(newOrder);
+    reorderFaqMutation.mutate({ items: newOrder.map((id, i) => ({ id, sortOrder: i })) });
+  }
   const uploadEntryFileMutation = trpc.faq.uploadEntryFile.useMutation({
     onSuccess: (data) => { setNewEntry(v => ({ ...v, fileUrl: data.url, fileName: data.fileName })); setUploadingFile(false); toast.success("File uploaded"); },
     onError: (e) => { setUploadingFile(false); toast.error(e.message); },
@@ -6379,10 +6397,15 @@ function FaqSectionsPanel() {
       {sections.length === 0 && (
         <div className="text-center py-8 text-gray-500 text-sm">No FAQ sections yet. Click "Add FAQ Section" to get started.</div>
       )}
-      {sections.map(section => (
-        <div key={section.id} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleFaqSectionDragEnd}>
+        <SortableContext items={localFaqOrder.length === sections.length ? localFaqOrder : sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-2">
+      {(localFaqOrder.length === sections.length ? localFaqOrder.map(id => sections.find(s => s.id === id)!).filter(Boolean) : sections).map(section => (
+        <SortableFaqSectionRow key={section.id} id={section.id}>
+        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
           {/* Section row */}
           <div className="flex items-center gap-3 px-4 py-3" style={{ background: "#1d2230" }}>
+            <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
             <button onClick={() => toggleExpand(section.id)} className="text-gray-400 hover:text-white transition">
               {expandedSections.has(section.id) ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
             </button>
@@ -6530,7 +6553,25 @@ function FaqSectionsPanel() {
             </div>
           )}
         </div>
+        </SortableFaqSectionRow>
       ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+    </div>
+  );
+}
+function SortableFaqSectionRow({ id, children }: { id: number; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    position: "relative" as const,
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
     </div>
   );
 }
