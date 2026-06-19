@@ -5213,7 +5213,7 @@ function GuidesTab() {
   const utils = trpc.useUtils();
   const { data: guides = [], isLoading } = trpc.guides.adminList.useQuery();
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
-  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true };
+  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true, faq: true };
   const updateGuideVisibility = trpc.siteSettings.update.useMutation({
     onSuccess: () => { utils.siteSettings.get.invalidate(); toast.success("Visibility updated"); },
     onError: (e) => toast.error(e.message),
@@ -5661,6 +5661,25 @@ function GuidesTab() {
             }
           >
             {guideVisibility.pdf !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+          </button>
+        </div>
+        {/* ── Separator ── */}
+        <div className="h-px" style={{ background: "#2a2a2a" }} />
+        {/* ── FAQs master toggle ── */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ background: "#eab308" }} />
+            <span className="text-xs text-gray-300 font-medium">FAQs</span>
+          </div>
+          <button
+            onClick={() => toggleGuideSection("faq")}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+            style={guideVisibility.faq !== false
+              ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+              : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+            }
+          >
+            {guideVisibility.faq !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
           </button>
         </div>
       </div>
@@ -6326,7 +6345,12 @@ function FaqSectionsPanel() {
   const [renamingSection, setRenamingSection] = useState<{ id: number; name: string } | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
   const [addingEntryTo, setAddingEntryTo] = useState<number | null>(null);
-  const [newEntry, setNewEntry] = useState({ question: "", answer: "" });
+  const [newEntry, setNewEntry] = useState({ question: "", answer: "", fileUrl: "", fileName: "" });
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const uploadEntryFileMutation = trpc.faq.uploadEntryFile.useMutation({
+    onSuccess: (data) => { setNewEntry(v => ({ ...v, fileUrl: data.url, fileName: data.fileName })); setUploadingFile(false); toast.success("File uploaded"); },
+    onError: (e) => { setUploadingFile(false); toast.error(e.message); },
+  });
   const [editingEntry, setEditingEntry] = useState<{ id: number; sectionId: number; question: string; answer: string } | null>(null);
 
   function toggleExpand(id: number) {
@@ -6454,12 +6478,35 @@ function FaqSectionsPanel() {
                     onChange={e => setNewEntry(v => ({ ...v, answer: e.target.value }))}
                     placeholder="Answer *"
                   />
+                  {/* Optional file attachment */}
+                  <div className="flex items-center gap-2">
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition" style={{ background: "#252d3d", color: "#9ca3af", border: "1px solid #2a2a2a" }}>
+                      <Paperclip size={12} />
+                      {newEntry.fileName ? newEntry.fileName : "Attach PDF (optional)"}
+                      <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" className="hidden" onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 16 * 1024 * 1024) { toast.error("File too large (max 16MB)"); return; }
+                        setUploadingFile(true);
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          const base64 = (reader.result as string).split(",")[1];
+                          uploadEntryFileMutation.mutate({ fileName: file.name, fileBase64: base64, mimeType: file.type || "application/pdf" });
+                        };
+                        reader.readAsDataURL(file);
+                      }} />
+                    </label>
+                    {newEntry.fileUrl && (
+                      <button onClick={() => setNewEntry(v => ({ ...v, fileUrl: "", fileName: "" }))} className="text-xs text-red-400 hover:text-red-300 transition">Remove</button>
+                    )}
+                    {uploadingFile && <span className="text-xs text-gray-500">Uploading…</span>}
+                  </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
                         if (newEntry.question.trim() && newEntry.answer.trim()) {
-                          createEntryMutation.mutate({ sectionId: section.id, question: newEntry.question.trim(), answer: newEntry.answer.trim() });
-                          setNewEntry({ question: "", answer: "" });
+                          createEntryMutation.mutate({ sectionId: section.id, question: newEntry.question.trim(), answer: newEntry.answer.trim(), fileUrl: newEntry.fileUrl || undefined, fileName: newEntry.fileName || undefined });
+                          setNewEntry({ question: "", answer: "", fileUrl: "", fileName: "" });
                           setAddingEntryTo(null);
                         }
                       }}
@@ -6467,7 +6514,7 @@ function FaqSectionsPanel() {
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
                       style={{ background: "#eab308" }}
                     >{createEntryMutation.isPending ? "Saving…" : "Add Entry"}</button>
-                    <button onClick={() => { setAddingEntryTo(null); setNewEntry({ question: "", answer: "" }); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white" style={{ background: "#252d3d" }}>Cancel</button>
+                    <button onClick={() => { setAddingEntryTo(null); setNewEntry({ question: "", answer: "", fileUrl: "", fileName: "" }); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white" style={{ background: "#252d3d" }}>Cancel</button>
                   </div>
                 </div>
               ) : (

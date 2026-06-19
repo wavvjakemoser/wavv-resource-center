@@ -483,6 +483,8 @@ export const faqEntries = mysqlTable("faq_entries", {
   sectionId: int("section_id").notNull(),
   question: varchar("question", { length: 500 }).notNull(),
   answer: text("answer").notNull(),
+  fileUrl: varchar("file_url", { length: 1024 }),
+  fileName: varchar("file_name", { length: 255 }),
   sortOrder: int("sort_order").default(0).notNull(),
   isVisible: boolean("is_visible").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

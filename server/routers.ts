@@ -1919,11 +1919,21 @@ export const appRouter = router({
       .mutation(({ input }) => reorderFaqSections(input.items)),
     // Entry CRUD
     createEntry: publisherProcedure
-      .input(z.object({ sectionId: z.number(), question: z.string().min(1).max(500), answer: z.string().min(1) }))
+      .input(z.object({ sectionId: z.number(), question: z.string().min(1).max(500), answer: z.string().min(1), fileUrl: z.string().optional(), fileName: z.string().optional() }))
       .mutation(({ input }) => createFaqEntry(input)),
     updateEntry: publisherProcedure
-      .input(z.object({ id: z.number(), question: z.string().min(1).max(500).optional(), answer: z.string().min(1).optional() }))
-      .mutation(({ input }) => updateFaqEntry(input.id, { question: input.question, answer: input.answer })),
+      .input(z.object({ id: z.number(), question: z.string().min(1).max(500).optional(), answer: z.string().min(1).optional(), fileUrl: z.string().nullable().optional(), fileName: z.string().nullable().optional() }))
+      .mutation(({ input }) => updateFaqEntry(input.id, { question: input.question, answer: input.answer, fileUrl: input.fileUrl, fileName: input.fileName })),
+    uploadEntryFile: publisherProcedure
+      .input(z.object({ fileName: z.string(), fileBase64: z.string(), mimeType: z.string().default("application/pdf") }))
+      .mutation(async ({ input }) => {
+        const { storagePut } = await import("./storage");
+        const buffer = Buffer.from(input.fileBase64, "base64");
+        const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").substring(0, 80);
+        const key = `faq-files/${Date.now()}-${safeName}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        return { url, fileName: input.fileName };
+      }),
     toggleEntryVisibility: publisherProcedure
       .input(z.object({ id: z.number(), isVisible: z.boolean() }))
       .mutation(({ input }) => toggleFaqEntryVisibility(input.id, input.isVisible)),

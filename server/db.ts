@@ -2651,7 +2651,7 @@ export async function createFaqEntry(data: { sectionId: number; question: string
   return result;
 }
 
-export async function updateFaqEntry(id: number, data: { question?: string; answer?: string }) {
+export async function updateFaqEntry(id: number, data: { question?: string; answer?: string; fileUrl?: string | null; fileName?: string | null }) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   await db.update(faqEntries).set(data).where(eq(faqEntries.id, id));

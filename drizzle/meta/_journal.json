@@ -316,6 +316,13 @@
       "when": 1781886965862,
       "tag": "0043_opposite_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "5",
+      "when": 1781888231461,
+      "tag": "0044_bitter_daredevil",
+      "breakpoints": true
     }
   ]
 }

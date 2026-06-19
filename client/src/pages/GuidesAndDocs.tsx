@@ -256,7 +256,7 @@ function PdfSection({
     acc[sec] = items.filter(g => (g.category ?? "") === sec);
     return acc;
   }, {} as Record<string, GuideItem[]>);
-  const hasSections = sectionOrder.length > 0 && (visibleDbSections.length > 0 || orphanCategories.length > 0);
+  const hasSections = visibleDbSections.length > 0 || orphanCategories.length > 0;
 
   return (
     <section>
@@ -283,16 +283,8 @@ function PdfSection({
       {/* Divider */}
       <div className="mb-4 h-px" style={{ background: `${PDF_COLOR}25` }} />
 
-      {items.length === 0 ? (
-        <div
-          className="flex items-center gap-3 px-4 py-3 rounded-lg"
-          style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
-        >
-          <FileText size={14} style={{ color: PDF_COLOR, opacity: 0.4 }} />
-          <p className="text-xs text-gray-500">No PDFs yet. Please check back soon!</p>
-        </div>
-      ) : hasSections ? (
-        // Render sub-sections (collapsed by default)
+      {hasSections ? (
+        // Always render DB sections — show empty state per-section if no items yet
         <div className="space-y-4 pl-2">
           {sectionOrder.map((sec) => (
             <PdfSubSection
@@ -305,6 +297,14 @@ function PdfSection({
               isPending={isPending}
             />
           ))}
+        </div>
+      ) : items.length === 0 ? (
+        <div
+          className="flex items-center gap-3 px-4 py-3 rounded-lg"
+          style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
+        >
+          <FileText size={14} style={{ color: PDF_COLOR, opacity: 0.4 }} />
+          <p className="text-xs text-gray-500">No PDFs yet. Please check back soon!</p>
         </div>
       ) : (
         // No sections — flat list
@@ -327,7 +327,7 @@ function PdfSection({
 
 // ─── FAQ Section (customer-facing) ───────────────────────────────────────────
 const FAQ_COLOR = "#eab308";
-type FaqEntry = { id: number; question: string; answer: string; isVisible: boolean; sortOrder: number };
+type FaqEntry = { id: number; question: string; answer: string; isVisible: boolean; sortOrder: number; fileUrl?: string | null; fileName?: string | null };
 type FaqSectionType = { id: number; name: string; isVisible: boolean; sortOrder: number; entries: FaqEntry[] };
 
 function FaqEntryRow({ entry }: { entry: FaqEntry }) {
@@ -344,8 +344,20 @@ function FaqEntryRow({ entry }: { entry: FaqEntry }) {
         {open ? <ChevronDown size={14} className="text-gray-500 flex-shrink-0" /> : <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />}
       </button>
       {open && (
-        <div className="px-4 py-3" style={{ background: "#1d2230", borderTop: "1px solid #2a2a2a" }}>
+        <div className="px-4 py-3 space-y-3" style={{ background: "#1d2230", borderTop: "1px solid #2a2a2a" }}>
           <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{entry.answer}</p>
+          {entry.fileUrl && (
+            <a
+              href={entry.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition"
+              style={{ background: "rgba(234,179,8,0.12)", color: "#eab308", border: "1px solid rgba(234,179,8,0.25)" }}
+            >
+              <Download size={12} />
+              {entry.fileName ?? "Download Document"}
+            </a>
+          )}
         </div>
       )}
     </div>
@@ -408,7 +420,7 @@ export default function GuidesAndDocs() {
   const dbPdfSections: DbSection[] = (pdfSectionsRaw as DbSection[] | undefined) ?? [];
   const { data: faqSections = [] } = trpc.faq.listSectionsPublic.useQuery();
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
-  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true };
+  const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true, faq: true };
   const downloadMutation = trpc.guides.download.useMutation();
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
 
@@ -545,7 +557,7 @@ export default function GuidesAndDocs() {
         )}
 
         {/* 3. FAQ — grouped by section */}
-        {faqSections.length > 0 && (
+        {guideVisibility["faq"] !== false && faqSections.length > 0 && (
           <FaqSection sections={faqSections} search={search} />
         )}
 
