@@ -275,7 +275,7 @@ export default function Admin() {
     { id: "academy",          label: "WAVV Academy",      icon: <GraduationCap size={13} />, show: isSuperAdmin },
     { id: "webinars",         label: "WAVV Webinars",     icon: <Video size={13} />,         show: isSuperAdmin },
     { id: "guides",           label: "WAVV Resource Hub", icon: <FileText size={13} />,      show: isSuperAdmin },
-    { id: "playground",       label: "WAVV Playground",   icon: <FlaskConical size={13} />,  show: false },
+    { id: "playground",       label: "WAVV Playground",   icon: <FlaskConical size={13} />,  show: isSuperAdmin },
     { id: "support",          label: "WAVV Support",      icon: <Headphones size={13} />,    show: isSuperAdmin },
     { id: "partners_content", label: "WAVV Partners",     icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />, show: isSuperAdmin },
@@ -4211,7 +4211,7 @@ function PlaygroundTab() {
   const { data: stats, isLoading: statsLoading } = trpc.playground.getStats.useQuery();
   const { data: requests, isLoading: reqLoading } = trpc.playground.getRequests.useQuery();
   const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const playgroundUnderConstruction = true; // Permanently under construction — toggle removed from Settings
+  const playgroundUnderConstruction = true; // Always under construction in Content Management
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const deleteRequestMutation = trpc.playground.deleteRequest.useMutation({
     onSuccess: () => {
