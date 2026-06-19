@@ -332,6 +332,19 @@ type FaqSectionType = { id: number; name: string; isVisible: boolean; sortOrder:
 
 function FaqEntryRow({ entry }: { entry: FaqEntry }) {
   const [open, setOpen] = useState(false);
+  const hasFile = !!entry.fileUrl;
+  // No file: show Q+A inline, no expand/chevron
+  if (!hasFile) {
+    return (
+      <div className="rounded-lg px-4 py-3 space-y-1.5" style={{ background: "#161b27", border: "1px solid #2a2a2a" }}>
+        <p className="text-sm font-medium text-white">{entry.question}</p>
+        {entry.answer && entry.answer !== "See attached document" && (
+          <p className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{entry.answer}</p>
+        )}
+      </div>
+    );
+  }
+  // Has file: expandable row with chevron
   return (
     <div className="rounded-lg overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
       <button
@@ -345,19 +358,19 @@ function FaqEntryRow({ entry }: { entry: FaqEntry }) {
       </button>
       {open && (
         <div className="px-4 py-3 space-y-3" style={{ background: "#1d2230", borderTop: "1px solid #2a2a2a" }}>
-          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{entry.answer}</p>
-          {entry.fileUrl && (
-            <a
-              href={entry.fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition"
-              style={{ background: "rgba(234,179,8,0.12)", color: "#eab308", border: "1px solid rgba(234,179,8,0.25)" }}
-            >
-              <Download size={12} />
-              {entry.fileName ?? "Download Document"}
-            </a>
+          {entry.answer && entry.answer !== "See attached document" && (
+            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{entry.answer}</p>
           )}
+          <a
+            href={entry.fileUrl!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition"
+            style={{ background: "rgba(234,179,8,0.12)", color: "#eab308", border: "1px solid rgba(234,179,8,0.25)" }}
+          >
+            <Download size={12} />
+            {entry.fileName ?? "Download Document"}
+          </a>
         </div>
       )}
     </div>

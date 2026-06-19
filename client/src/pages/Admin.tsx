@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import {
   DndContext,
   closestCenter,
@@ -4210,6 +4210,8 @@ function PlaygroundTab() {
   const utils = trpc.useUtils();
   const { data: stats, isLoading: statsLoading } = trpc.playground.getStats.useQuery();
   const { data: requests, isLoading: reqLoading } = trpc.playground.getRequests.useQuery();
+  const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const playgroundUnderConstruction = siteSettings["playground_under_construction"] === true;
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const deleteRequestMutation = trpc.playground.deleteRequest.useMutation({
     onSuccess: () => {
@@ -4247,6 +4249,37 @@ function PlaygroundTab() {
 
   return (
     <div className="space-y-6">
+      {/* ── Under Construction overlay ── */}
+      {playgroundUnderConstruction && (
+        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(168,85,247,0.07)", border: "2px dashed rgba(168,85,247,0.35)" }}>
+          <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.15)" }}>
+              <AlertTriangle size={40} style={{ color: "#a855f7" }} />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-white tracking-tight">WAVV Playground</h3>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider" style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc" }}>
+                <AlertTriangle size={11} />
+                Under Construction
+              </div>
+            </div>
+            <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+              The WAVV Playground is currently <span className="text-white font-medium">under construction</span>. Disable this banner in Settings when the Playground is ready to go live.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
+              {[
+                { icon: <FlaskConical size={14} />, label: "Hands-On Demos" },
+                { icon: <Bell size={14} />, label: "Session Requests" },
+                { icon: <BarChart3 size={14} />, label: "Usage Analytics" },
+              ].map(({ icon, label }) => (
+                <div key={label} className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium" style={{ background: "rgba(168,85,247,0.1)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.2)" }}>
+                  {icon} {label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(168,85,247,0.15)" }}>
@@ -5278,16 +5311,17 @@ function GuidesTab() {
   const [showAddFaqSectionModal, setShowAddFaqSectionModal] = useState(false);
   const [newFaqSectionName, setNewFaqSectionName] = useState("");
   const { data: faqSectionsAdmin = [] } = trpc.faq.listSectionsAdmin.useQuery();
-  // Global Add FAQ Entry modal
+  // Global Add FAQ Entry inline form
   const [showAddFaqEntryModal, setShowAddFaqEntryModal] = useState(false);
-  const [globalFaqEntry, setGlobalFaqEntry] = useState({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "" });
+  const [showAddFaqForm, setShowAddFaqForm] = useState(false);
+  const [globalFaqEntry, setGlobalFaqEntry] = useState({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "", description: "", linkLabel: "" });
   const [globalFaqUploadingFile, setGlobalFaqUploadingFile] = useState(false);
   const uploadGlobalFaqFileMutation = trpc.faq.uploadEntryFile.useMutation({
     onSuccess: (data) => { setGlobalFaqEntry(v => ({ ...v, fileUrl: data.url, fileName: data.fileName })); setGlobalFaqUploadingFile(false); toast.success("File uploaded"); },
     onError: (e) => { setGlobalFaqUploadingFile(false); toast.error(e.message); },
   });
   const createGlobalFaqEntryMutation = trpc.faq.createEntry.useMutation({
-    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); toast.success("FAQ entry added"); setShowAddFaqEntryModal(false); setGlobalFaqEntry({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "" }); },
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); toast.success("FAQ entry added"); setShowAddFaqEntryModal(false); setShowAddFaqForm(false); setGlobalFaqEntry({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "", description: "", linkLabel: "" }); },
     onError: (e) => toast.error(e.message),
   });
   const createFaqSectionMutation = trpc.faq.createSection.useMutation({
@@ -5434,7 +5468,7 @@ function GuidesTab() {
             <Plus size={13} /> Add FAQ Section
           </button>
           <button
-            onClick={() => { setGlobalFaqEntry(v => ({ ...v, sectionId: faqSectionsAdmin[0]?.id ?? 0 })); setShowAddFaqEntryModal(true); }}
+            onClick={() => { setGlobalFaqEntry(v => ({ ...v, sectionId: faqSectionsAdmin[0]?.id ?? 0 })); setShowAddFaqForm(f => !f); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
             style={{ background: "#eab308" }}
           >
@@ -5456,6 +5490,84 @@ function GuidesTab() {
           </button>
         </div>
       </div>
+      {/* ── Add FAQ Entry Inline Form ── */}
+      {showAddFaqForm && (
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <h3 className="text-sm font-semibold text-white">New FAQ Entry</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Title *</label>
+              <input style={inputStyle} value={globalFaqEntry.question} onChange={e => setGlobalFaqEntry(v => ({ ...v, question: e.target.value }))} placeholder="e.g. How do I set up call boards?" autoFocus />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Section *</label>
+              <select style={{ ...inputStyle, cursor: "pointer" }} value={globalFaqEntry.sectionId} onChange={e => setGlobalFaqEntry(v => ({ ...v, sectionId: Number(e.target.value) }))}>
+                {faqSectionsAdmin.length === 0 && <option value={0}>No sections yet — create one first</option>}
+                {faqSectionsAdmin.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Description <span className="text-gray-600">(optional)</span></label>
+            <input style={inputStyle} value={globalFaqEntry.description} onChange={e => setGlobalFaqEntry(v => ({ ...v, description: e.target.value }))} placeholder="Brief description" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Link Display Name <span className="text-gray-600 ml-1">(optional — shown to users instead of the raw URL)</span></label>
+            <input style={inputStyle} value={globalFaqEntry.linkLabel} onChange={e => setGlobalFaqEntry(v => ({ ...v, linkLabel: e.target.value }))} placeholder="e.g. WAVV Call Boards FAQ.pdf" />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs text-gray-400 mb-1">File Attachment <span className="text-gray-600">(PDF, DOCX, or XLSX — max 16 MB)</span></label>
+            <div className="flex items-center gap-3">
+              <label
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90"
+                style={{ background: globalFaqUploadingFile ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: globalFaqUploadingFile ? "#9ca3af" : "#fff" }}
+              >
+                {globalFaqUploadingFile ? (
+                  <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                ) : (
+                  <><FileDown size={13} /> Choose File</>
+                )}
+                <input type="file" accept=".pdf,.docx,.xlsx" className="hidden" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 16 * 1024 * 1024) { toast.error("File too large — max 16 MB"); return; }
+                  setGlobalFaqUploadingFile(true);
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const base64 = (reader.result as string).split(",")[1];
+                    uploadGlobalFaqFileMutation.mutate({ fileName: file.name, fileBase64: base64, mimeType: file.type || "application/pdf" });
+                  };
+                  reader.readAsDataURL(file);
+                }} disabled={globalFaqUploadingFile} />
+              </label>
+              {globalFaqEntry.fileUrl && (
+                <span className="text-xs text-green-400 flex items-center gap-1 truncate max-w-xs">
+                  <CheckCircle2 size={12} /> File attached
+                  <a href={globalFaqEntry.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline ml-1">Preview</a>
+                  <button onClick={() => setGlobalFaqEntry(v => ({ ...v, fileUrl: "", fileName: "" }))} className="ml-1 text-red-400 hover:text-red-300">Remove</button>
+                </span>
+              )}
+              {!globalFaqEntry.fileUrl && <span className="text-xs text-gray-600">No file attached</span>}
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Or paste a URL directly</label>
+              <input style={{ ...inputStyle, fontSize: "12px" }} value={globalFaqEntry.fileUrl} onChange={e => setGlobalFaqEntry(v => ({ ...v, fileUrl: e.target.value }))} placeholder="https://..." />
+            </div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <button type="button" onClick={() => { setShowAddFaqForm(false); setGlobalFaqEntry({ sectionId: faqSectionsAdmin[0]?.id ?? 0, question: "", answer: "", fileUrl: "", fileName: "", description: "", linkLabel: "" }); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+            <button type="button"
+              disabled={createGlobalFaqEntryMutation.isPending || globalFaqUploadingFile || !globalFaqEntry.question.trim() || !globalFaqEntry.sectionId}
+              onClick={() => {
+                if (!globalFaqEntry.question.trim() || !globalFaqEntry.sectionId) { toast.error("Title and section are required"); return; }
+                createGlobalFaqEntryMutation.mutate({ sectionId: globalFaqEntry.sectionId, question: globalFaqEntry.question.trim(), answer: globalFaqEntry.description.trim() || "See attached document", fileUrl: globalFaqEntry.fileUrl || undefined, fileName: globalFaqEntry.linkLabel || globalFaqEntry.fileName || undefined });
+              }}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              style={{ background: "#eab308" }}
+            >{createGlobalFaqEntryMutation.isPending ? "Saving…" : "Add FAQ Entry"}</button>
+          </div>
+        </div>
+      )}
       {/* ── Add / Edit Native Help Article Inline Form ── */}
       {showNativeArticleForm && (
         <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
@@ -5467,11 +5579,11 @@ function GuidesTab() {
             </div>
             <div>
               <label className="block text-xs text-gray-400 mb-1">Section *</label>
-              {helpArticleSectionsAdmin.length > 0 ? (
+              {helpArticleSectionsAdmin.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {helpArticleSectionsAdmin.map(s => (
                     <button key={s.id} type="button"
-                      onClick={() => setNativeForm(f => ({ ...f, sectionName: s.name }))}
+                      onClick={() => setNativeForm(f => ({ ...f, sectionName: f.sectionName === s.name ? "" : s.name }))}
                       className="px-2.5 py-1 rounded-full text-xs font-medium transition-all"
                       style={nativeForm.sectionName === s.name
                         ? { background: "rgba(139,92,246,0.2)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.4)" }
@@ -5479,54 +5591,77 @@ function GuidesTab() {
                       }>{s.name}</button>
                   ))}
                 </div>
-              ) : null}
-              <input style={inputStyle} value={nativeForm.sectionName} onChange={e => setNativeForm(f => ({ ...f, sectionName: e.target.value }))} placeholder="Section name" />
+              )}
+              <input style={inputStyle} value={nativeForm.sectionName} onChange={e => setNativeForm(f => ({ ...f, sectionName: e.target.value }))} placeholder={helpArticleSectionsAdmin.length > 0 ? "Or type a new section name…" : "e.g. WAVV Dialer, Call Boards"} />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Content *</label>
-            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-              <div className="flex items-center flex-wrap gap-0.5 px-2 py-1.5" style={{ background: "#161b27", borderBottom: "1px solid #2a2a2a" }}>
-                {[{ icon: <Bold size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBold().run(), active: nativeEditor?.isActive("bold"), title: "Bold" },
-                  { icon: <Italic size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleItalic().run(), active: nativeEditor?.isActive("italic"), title: "Italic" },
-                  { icon: <UnderlineIcon size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleUnderline().run(), active: nativeEditor?.isActive("underline"), title: "Underline" },
-                  null,
-                  { icon: <Heading2 size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleHeading({ level: 2 }).run(), active: nativeEditor?.isActive("heading", { level: 2 }), title: "H2" },
-                  { icon: <Heading3 size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleHeading({ level: 3 }).run(), active: nativeEditor?.isActive("heading", { level: 3 }), title: "H3" },
-                  null,
-                  { icon: <List size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBulletList().run(), active: nativeEditor?.isActive("bulletList"), title: "Bullets" },
-                  { icon: <ListOrdered size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleOrderedList().run(), active: nativeEditor?.isActive("orderedList"), title: "Numbered" },
-                  { icon: <Quote size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleBlockquote().run(), active: nativeEditor?.isActive("blockquote"), title: "Quote" },
-                  { icon: <Code size={13}/>, cmd: () => nativeEditor?.chain().focus().toggleCode().run(), active: nativeEditor?.isActive("code"), title: "Code" },
-                  null,
-                  { icon: <LinkIcon size={13}/>, cmd: () => { const url = window.prompt("URL:", "https://"); if (url) nativeEditor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run(); }, active: nativeEditor?.isActive("link"), title: "Link" },
-                  null,
-                  { icon: <Undo size={13}/>, cmd: () => nativeEditor?.chain().focus().undo().run(), active: false, title: "Undo" },
-                  { icon: <Redo size={13}/>, cmd: () => nativeEditor?.chain().focus().redo().run(), active: false, title: "Redo" },
-                ].map((btn, i) => btn === null
-                  ? <div key={i} className="w-px h-4 mx-1" style={{ background: "#2a2a2a" }} />
-                  : <button key={i} type="button" onClick={btn.cmd} title={btn.title} className="p-1.5 rounded transition" style={{ background: btn.active ? "rgba(139,92,246,0.15)" : "transparent", color: btn.active ? "#8B5CF6" : "#9ca3af", border: "none", cursor: "pointer" }}>{btn.icon}</button>
+            <label className="block text-xs text-gray-400 mb-1">Description</label>
+            <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={nativeForm.nativeBody} onChange={e => setNativeForm(f => ({ ...f, nativeBody: e.target.value }))} placeholder="Brief description" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Link Display Name <span className="text-gray-600 ml-1">(optional — shown to users instead of the raw URL)</span></label>
+            <input style={inputStyle} value={(nativeForm as any).linkLabel ?? ""} onChange={e => setNativeForm(f => ({ ...f, linkLabel: e.target.value } as any))} placeholder="e.g. WAVV Call Boards Guide.pdf" />
+          </div>
+          {/* File Attachment */}
+          <div className="space-y-2">
+            <label className="block text-xs text-gray-400 mb-1">File Attachment <span className="text-gray-600">(PDF, DOCX, or XLSX — max 16 MB)</span></label>
+            <div className="flex items-center gap-3">
+              <label
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90"
+                style={{ background: uploadingFile ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingFile ? "#9ca3af" : "#fff" }}
+              >
+                {uploadingFile ? (
+                  <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                ) : (
+                  <><FileDown size={13} /> Choose File</>
                 )}
-              </div>
-              <div style={{ background: "#111", minHeight: "160px" }}><EditorContent editor={nativeEditor} /></div>
+                <input type="file" accept=".pdf,.docx,.xlsx" className="hidden" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 16 * 1024 * 1024) { toast.error("File too large — max 16 MB"); return; }
+                  const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
+                  type AllowedMime = "application/pdf" | "application/vnd.openxmlformats-officedocument.wordprocessingml.document" | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                  const mimeMap: Record<string, AllowedMime> = { pdf: "application/pdf", docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" };
+                  const mimeType = mimeMap[ext];
+                  if (!mimeType) { toast.error("Unsupported format — use PDF, DOCX, or XLSX"); return; }
+                  setUploadingFile(true);
+                  try {
+                    const reader = new FileReader();
+                    const base64 = await new Promise<string>((resolve, reject) => { reader.onload = () => resolve((reader.result as string).split(",")[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+                    const result = await uploadFileMutation.mutateAsync({ base64, mimeType, fileName: file.name });
+                    setNativeForm(f => ({ ...f, fileUrl: result.url, linkLabel: file.name } as any));
+                  } catch { toast.error("Upload failed"); } finally { setUploadingFile(false); }
+                }} disabled={uploadingFile} />
+              </label>
+              {(nativeForm as any).fileUrl && (
+                <span className="text-xs text-green-400 flex items-center gap-1 truncate max-w-xs">
+                  <CheckCircle2 size={12} /> File attached
+                  <a href={(nativeForm as any).fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline ml-1">Preview</a>
+                </span>
+              )}
+              {!(nativeForm as any).fileUrl && <span className="text-xs text-gray-600">No file attached</span>}
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Or paste a URL directly</label>
+              <input style={{ ...inputStyle, fontSize: "12px" }} value={(nativeForm as any).fileUrl ?? ""} onChange={e => setNativeForm(f => ({ ...f, fileUrl: e.target.value } as any))} placeholder="https://..." />
             </div>
           </div>
           <div className="flex gap-2 justify-end">
             <button type="button" onClick={() => { setShowNativeArticleForm(false); resetNativeForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
             <button type="button"
-              disabled={createNativeMutation.isPending || updateNativeMutation.isPending || !nativeForm.title.trim() || !nativeForm.sectionName.trim()}
+              disabled={createNativeMutation.isPending || uploadingFile || !nativeForm.title.trim() || !nativeForm.sectionName.trim()}
               onClick={() => {
-                const body = nativeEditor?.getHTML() ?? "";
-                if (!nativeForm.title.trim() || !nativeForm.sectionName.trim() || !body.trim() || body === "<p></p>") { toast.error("Title, section, and content are required"); return; }
-                if (editingNativeArticle) {
-                  updateNativeMutation.mutate({ id: editingNativeArticle.id, title: nativeForm.title, nativeBody: body, sectionName: nativeForm.sectionName });
-                } else {
-                  createNativeMutation.mutate({ title: nativeForm.title, nativeBody: body, sectionName: nativeForm.sectionName });
-                }
+                const fileUrl = (nativeForm as any).fileUrl ?? "";
+                const linkLabel = (nativeForm as any).linkLabel ?? "";
+                if (!nativeForm.title.trim() || !nativeForm.sectionName.trim()) { toast.error("Title and section are required"); return; }
+                createMutation.mutate({ title: nativeForm.title, description: nativeForm.nativeBody || undefined, fileUrl: fileUrl || undefined, linkLabel: linkLabel || undefined, category: nativeForm.sectionName, fileType: "help_article" });
+                setShowNativeArticleForm(false);
+                resetNativeForm();
               }}
               className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
               style={{ background: "#8B5CF6" }}
-            >{editingNativeArticle ? "Save Changes" : "Publish Article"}</button>
+            >{createNativeMutation.isPending ? "Saving…" : "Add Help Article"}</button>
           </div>
         </div>
       )}
@@ -5899,7 +6034,7 @@ function GuidesTab() {
             </div>
           </div>
           <DialogFooter>
-            <button onClick={() => { setShowAddFaqEntryModal(false); setGlobalFaqEntry({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "" }); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+            <button onClick={() => { setShowAddFaqEntryModal(false); setGlobalFaqEntry({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "", description: "", linkLabel: "" }); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
             <button
               onClick={() => {
                 if (!globalFaqEntry.sectionId || !globalFaqEntry.question.trim() || !globalFaqEntry.answer.trim()) { toast.error("Section, question, and answer are required"); return; }
@@ -7810,11 +7945,11 @@ function SettingsTab() {
                   onClick={() => toggle("playground_under_construction", settings["playground_under_construction"] === true)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0"
                   style={settings["playground_under_construction"] === true
-                    ? { background: "rgba(168,85,247,0.15)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }
-                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                    ? { background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
+                    : { background: "rgba(34,197,94,0.12)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.25)" }}
                 >
                   {settings["playground_under_construction"] === true ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                  {settings["playground_under_construction"] === true ? "Under Construction" : "Live"}
+                  {settings["playground_under_construction"] === true ? "Enabled" : "Disabled"}
                 </button>
               </div>
             </div>

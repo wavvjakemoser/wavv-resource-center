@@ -1494,3 +1494,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Guides tab header: add "+ Add FAQ" button (solid yellow, opens Add FAQ Entry modal with section picker + Q&A + optional file attachment)
 - [x] Admin panels: section count + article count badges on all 3 panels (Help Articles: N sections + N articles; PDFs: N sections + N PDFs; FAQs: N sections + N entries)
 - [x] TypeScript: 0 errors | Tests: 47/47 passing
+
+## Batch 3 + 4 Fixes (Jun 19 - Sessions 4+5)
+- [x] Playground toggle: Enabled = Under Construction (red/warning badge), Disabled = Live (green badge)
+- [x] Admin PlaygroundTab: shows under-construction overlay when toggle is Enabled
+- [x] Add FAQ form: redesigned to match PDF New Guide pattern (Title, Description, Section picker, File Attachment, URL paste) — inline form, no popup modal
+- [x] Add Help Article form: redesigned to match PDF New Guide pattern (Title, Description, Section picker, File Attachment, URL paste) — replaces TipTap editor
+- [x] Customer FAQ FaqEntryRow: no file = inline Q+A display (no chevron); has file = expandable with chevron + download button
+- [x] TypeScript: 0 errors | Tests: 47/47 passing
