@@ -15,7 +15,6 @@ import Support from "./pages/Support";
 import Admin from "./pages/Admin";
 import HandsOn from "./pages/HandsOn";
 import Login from "./pages/Login";
-import SignIn from "./pages/SignIn";
 import Profile from "./pages/Profile";
 import Partners from "./pages/Partners";
 import WavvPartnerPortal from "./pages/WavvPartnerPortal";
@@ -73,7 +72,6 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/login" component={Login} />
-      <Route path="/signin" component={SignIn} />
       <Route path="/home">{() => <Redirect to="/" />}</Route>
       <Route path="/resources">{() => <Redirect to="/guides" />}</Route>
       <Route path="/academy" component={Academy} />
