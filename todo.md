@@ -1485,3 +1485,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [ ] #9: Help articles source of truth — discuss with leadership: redirect to Intercom vs. native rendering. Current state: redirect/new tab (acceptable for now)
 - [ ] #14: Per-article "Was this helpful?" feedback widget (future build)
 - [ ] #15: noindex/nofollow — discuss with Marketing Director before public launch; decide SEO strategy
+
+## Batch 2 Fixes (Jun 19 - Session 3)
+- [x] Search bar placeholder: change to "Search Help Articles, PDFs and FAQs"
+- [x] Help Articles section rows: add GripVertical drag handle (match PDF/FAQ panel style from screenshot)
+- [x] Admin Guides tab: move FAQ panel to render BELOW PDFs (currently at bottom, needs to be right after PDFs)
+- [x] Admin Settings tab: add Playground under-construction toggle (same pattern as Support/Partners under construction, using Playground color scheme)
+- [x] Admin Guides tab header: add "+ Add FAQ" button (solid yellow, opens Add FAQ Entry modal with section picker + Q&A + optional file attachment)
+- [x] Admin panels: section count + article count badges on all 3 panels (Help Articles: N sections + N articles; PDFs: N sections + N PDFs; FAQs: N sections + N entries)
+- [x] TypeScript: 0 errors | Tests: 47/47 passing

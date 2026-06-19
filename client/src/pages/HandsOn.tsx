@@ -12,6 +12,7 @@ import {
   Send,
   Bell,
   X,
+  AlertTriangle,
 } from "lucide-react";
 
 const PLAYGROUND_TOOLS = [
@@ -224,6 +225,8 @@ function RequestModal({
 
 export default function HandsOn() {
   const { data: user } = trpc.auth.me.useQuery(undefined, { retry: false });
+  const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const playgroundUnderConstruction = siteSettings["playground_under_construction"] === true;
   const { data: playgroundStats } = trpc.playground.getStats.useQuery(
     undefined,
     { enabled: !!user && (user.role === 'owner' || user.role === 'publisher' || user.role === 'viewer'), retry: false }
@@ -237,6 +240,58 @@ export default function HandsOn() {
 
   // Determine the most requested playground (if any requests exist)
   const mostRequested = playgroundStats?.byPlayground?.[0]?.playground ?? null;
+
+  if (playgroundUnderConstruction) {
+    return (
+      <PortalLayout title="WAVV Playground">
+        <div className="px-4 lg:px-8 py-6">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(168,85,247,0.15)" }}>
+              <FlaskConical size={18} style={{ color: "#a855f7" }} />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-white">WAVV Playground</h2>
+              <p className="text-xs text-gray-500">Hands-on demos and sandbox environments</p>
+            </div>
+          </div>
+          {/* Under-construction banner */}
+          <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(168,85,247,0.07)", border: "2px dashed rgba(168,85,247,0.35)" }}>
+            <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.15)" }}>
+                <Construction size={40} style={{ color: "#a855f7" }} />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold text-white tracking-tight">WAVV Playground</h3>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider" style={{ background: "rgba(168,85,247,0.2)", color: "#a855f7" }}>
+                  <AlertTriangle size={11} />
+                  Under Construction
+                </div>
+              </div>
+              <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+                The WAVV Playground is being built out. Soon you'll be able to explore{" "}
+                <span className="text-white font-medium">hands-on sandbox environments</span> for the Dialer,{" "}
+                <span className="text-white font-medium">Call Boards</span>, and{" "}
+                <span className="text-white font-medium">Settings</span> — all in a risk-free environment.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
+                {[
+                  { icon: <Phone size={14} />, label: "Dialer Playground" },
+                  { icon: <LayoutDashboard size={14} />, label: "Call Boards Playground" },
+                  { icon: <Settings size={14} />, label: "Settings Playground" },
+                ].map(({ icon, label }) => (
+                  <div key={label} className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium" style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.18)", color: "#a855f7" }}>
+                    <span style={{ color: "#a855f7" }}>{icon}</span>
+                    {label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
 
   return (
     <PortalLayout title="WAVV Playground">

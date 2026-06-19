@@ -558,7 +558,7 @@ export default function GuidesAndDocs() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search articles and PDFs..."
+            placeholder="Search Help Articles, PDFs and FAQs..."
             className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
           />
         </div>

@@ -5278,6 +5278,18 @@ function GuidesTab() {
   const [showAddFaqSectionModal, setShowAddFaqSectionModal] = useState(false);
   const [newFaqSectionName, setNewFaqSectionName] = useState("");
   const { data: faqSectionsAdmin = [] } = trpc.faq.listSectionsAdmin.useQuery();
+  // Global Add FAQ Entry modal
+  const [showAddFaqEntryModal, setShowAddFaqEntryModal] = useState(false);
+  const [globalFaqEntry, setGlobalFaqEntry] = useState({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "" });
+  const [globalFaqUploadingFile, setGlobalFaqUploadingFile] = useState(false);
+  const uploadGlobalFaqFileMutation = trpc.faq.uploadEntryFile.useMutation({
+    onSuccess: (data) => { setGlobalFaqEntry(v => ({ ...v, fileUrl: data.url, fileName: data.fileName })); setGlobalFaqUploadingFile(false); toast.success("File uploaded"); },
+    onError: (e) => { setGlobalFaqUploadingFile(false); toast.error(e.message); },
+  });
+  const createGlobalFaqEntryMutation = trpc.faq.createEntry.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); toast.success("FAQ entry added"); setShowAddFaqEntryModal(false); setGlobalFaqEntry({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "" }); },
+    onError: (e) => toast.error(e.message),
+  });
   const createFaqSectionMutation = trpc.faq.createSection.useMutation({
     onSuccess: () => {
       utils.faq.listSectionsAdmin.invalidate();
@@ -5420,6 +5432,13 @@ function GuidesTab() {
             style={{ background: "rgba(234,179,8,0.15)", color: "#eab308", border: "1px solid rgba(234,179,8,0.3)" }}
           >
             <Plus size={13} /> Add FAQ Section
+          </button>
+          <button
+            onClick={() => { setGlobalFaqEntry(v => ({ ...v, sectionId: faqSectionsAdmin[0]?.id ?? 0 })); setShowAddFaqEntryModal(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
+            style={{ background: "#eab308" }}
+          >
+            <Plus size={13} /> Add FAQ
           </button>
           <button
             onClick={() => { setShowAddPdfSectionModal(true); }}
@@ -5705,6 +5724,8 @@ function GuidesTab() {
         />
       )}
 
+            {/* ── FAQ Sections Panel ── */}
+      <FaqSectionsPanel />
       {/* ── Divider ── */}
       <div className="flex items-center gap-3 py-1">
         <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
@@ -5714,7 +5735,6 @@ function GuidesTab() {
         </div>
         <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
       </div>
-
       {/* ── Synced Help Articles (Intercom source) ── */}
       <SyncedHelpArticlesPanel />
 
@@ -5815,8 +5835,85 @@ function GuidesTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* ── FAQ Sections Panel ── */}
-      <FaqSectionsPanel />
+      {/* ── Add FAQ Entry Modal ── */}
+      <Dialog open={showAddFaqEntryModal} onOpenChange={setShowAddFaqEntryModal}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Add FAQ Entry</DialogTitle>
+            <DialogDescription className="text-gray-400">Add a new question and answer to a FAQ section.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Section *</label>
+              <select
+                style={{ background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, padding: "8px 10px", fontSize: 13, width: "100%", outline: "none" }}
+                value={globalFaqEntry.sectionId}
+                onChange={e => setGlobalFaqEntry(v => ({ ...v, sectionId: Number(e.target.value) }))}
+              >
+                {faqSectionsAdmin.length === 0 && <option value={0}>No sections yet — create one first</option>}
+                {faqSectionsAdmin.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Question *</label>
+              <input
+                style={{ background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, padding: "8px 10px", fontSize: 13, width: "100%", outline: "none" }}
+                placeholder="e.g. How do I set up call boards?"
+                value={globalFaqEntry.question}
+                onChange={e => setGlobalFaqEntry(v => ({ ...v, question: e.target.value }))}
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Answer *</label>
+              <textarea
+                style={{ background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, padding: "8px 10px", fontSize: 13, width: "100%", outline: "none", resize: "vertical" }}
+                rows={4}
+                placeholder="Provide a clear, concise answer…"
+                value={globalFaqEntry.answer}
+                onChange={e => setGlobalFaqEntry(v => ({ ...v, answer: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Attachment (optional)</label>
+              <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition w-fit" style={{ background: "#252d3d", color: "#9ca3af", border: "1px solid #2a2a2a" }}>
+                <Paperclip size={12} />
+                {globalFaqEntry.fileName ? globalFaqEntry.fileName : "Attach PDF (optional)"}
+                <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" className="hidden" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 16 * 1024 * 1024) { toast.error("File too large (max 16MB)"); return; }
+                  setGlobalFaqUploadingFile(true);
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const base64 = (reader.result as string).split(",")[1];
+                    uploadGlobalFaqFileMutation.mutate({ fileName: file.name, fileBase64: base64, mimeType: file.type || "application/pdf" });
+                  };
+                  reader.readAsDataURL(file);
+                }} />
+              </label>
+              {globalFaqEntry.fileUrl && (
+                <button onClick={() => setGlobalFaqEntry(v => ({ ...v, fileUrl: "", fileName: "" }))} className="ml-2 text-xs text-red-400 hover:text-red-300 transition">Remove</button>
+              )}
+              {globalFaqUploadingFile && <span className="ml-2 text-xs text-gray-500">Uploading…</span>}
+            </div>
+          </div>
+          <DialogFooter>
+            <button onClick={() => { setShowAddFaqEntryModal(false); setGlobalFaqEntry({ sectionId: 0, question: "", answer: "", fileUrl: "", fileName: "" }); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+            <button
+              onClick={() => {
+                if (!globalFaqEntry.sectionId || !globalFaqEntry.question.trim() || !globalFaqEntry.answer.trim()) { toast.error("Section, question, and answer are required"); return; }
+                createGlobalFaqEntryMutation.mutate({ sectionId: globalFaqEntry.sectionId, question: globalFaqEntry.question.trim(), answer: globalFaqEntry.answer.trim(), fileUrl: globalFaqEntry.fileUrl || undefined, fileName: globalFaqEntry.fileName || undefined });
+              }}
+              disabled={!globalFaqEntry.sectionId || !globalFaqEntry.question.trim() || !globalFaqEntry.answer.trim() || createGlobalFaqEntryMutation.isPending}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              style={{ background: "#eab308" }}
+            >
+              {createGlobalFaqEntryMutation.isPending ? "Saving…" : "Add Entry"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -5918,7 +6015,10 @@ function PdfSectionsPanel({
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PDF_COLOR }} />
         <span className="text-sm font-semibold text-white">PDFs</span>
         <span className="text-xs text-gray-500">Viewable and Downloadable PDF documents</span>
-        <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}20`, color: PDF_COLOR }}>{pdfGuides.length}</span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}18`, color: PDF_COLOR }}>{orderedSections.length} sections</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}18`, color: PDF_COLOR }}>{pdfGuides.length} PDFs</span>
+        </div>
       </div>
       {pdfSections.length === 0 && pdfGuides.length === 0 && (
         <div className="px-5 py-8 text-center rounded-xl" style={{ background: "#111", border: "1px solid #2a2a2a" }}>
@@ -6392,7 +6492,10 @@ function FaqSectionsPanel() {
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#eab308" }} />
         <span className="text-sm font-semibold text-white">FAQs</span>
         <span className="text-xs text-gray-500">Frequently asked questions grouped by topic</span>
-        <span className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(234,179,8,0.15)", color: "#eab308" }}>{sections.length}</span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(234,179,8,0.15)", color: "#eab308" }}>{sections.length} sections</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(234,179,8,0.15)", color: "#eab308" }}>{sections.reduce((sum, s) => sum + (s.entries?.length ?? 0), 0)} entries</span>
+        </div>
       </div>
       {sections.length === 0 && (
         <div className="text-center py-8 text-gray-500 text-sm">No FAQ sections yet. Click "Add FAQ Section" to get started.</div>
@@ -7691,6 +7794,30 @@ function SettingsTab() {
             </div>
 
 
+            {/* ── Playground Under Construction ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(168,85,247,0.12)" }}>
+                    <FlaskConical size={15} style={{ color: "#a855f7" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Playground Under Construction</p>
+                    <p className="text-xs text-gray-500">Show an "Under Construction" banner on the WAVV Playground page. Toggle off to show live content.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toggle("playground_under_construction", settings["playground_under_construction"] === true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0"
+                  style={settings["playground_under_construction"] === true
+                    ? { background: "rgba(168,85,247,0.15)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                >
+                  {settings["playground_under_construction"] === true ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  {settings["playground_under_construction"] === true ? "Under Construction" : "Live"}
+                </button>
+              </div>
+            </div>
             {/* ── Request Buttons ── */}
             <div className={sectionClass} style={sectionStyle}>
               <div className="flex items-center gap-3 mb-3">
@@ -8205,6 +8332,8 @@ function PartnersContentTab() {
 // ─── Admin Help Articles Section (header + PublishedHelpArticlesPanel) ──────────
 function AdminHelpArticlesSection() {
   const ACCENT = "#8B5CF6";
+  const { data: adminSections = [] } = trpc.helpArticles.listSectionsAdmin.useQuery();
+  const { data: published = [] } = trpc.helpArticles.listPublished.useQuery();
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
       {/* Non-collapsible top-level header */}
@@ -8217,6 +8346,10 @@ function AdminHelpArticlesSection() {
             <span className="text-sm font-bold text-white">Help Articles</span>
             <span className="text-xs text-gray-500 ml-2">Customer-facing published articles</span>
           </div>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${ACCENT}18`, color: ACCENT }}>{adminSections.length} sections</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${ACCENT}18`, color: ACCENT }}>{published.length} articles</span>
         </div>
       </div>
       <div className="p-4" style={{ background: "#111" }}>
@@ -8337,11 +8470,11 @@ function PublishedHelpArticlesPanel() {
               <SortableHelpSectionRow key={sec.id} id={sec.id}>
               <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <div
-              className="px-4 py-3 flex items-center justify-between hover:bg-white/5 transition cursor-pointer"
+              className="px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition"
               style={{ background: "#1d2230" }}
-              onClick={() => setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true }))}
             >
-              <div className="flex items-center gap-3">
+              <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
+              <div className="flex-1 flex items-center gap-3 cursor-pointer min-w-0" onClick={e => { e.stopPropagation(); setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true })); }}>
                 {editingSection?.id === sec.id ? (
                   <input
                     className="text-sm font-semibold text-white bg-transparent border-b border-purple-500 outline-none px-1"
@@ -8450,16 +8583,7 @@ function SortableHelpSectionRow({ id, children }: { id: number; children: React.
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
   return (
-    <div ref={setNodeRef} style={style} className="relative group">
-      <span
-        {...attributes}
-        {...listeners}
-        className="absolute left-0 top-0 bottom-0 w-5 flex items-center justify-center cursor-grab text-gray-600 hover:text-gray-400 transition z-10 opacity-0 group-hover:opacity-100"
-        title="Drag to reorder section"
-        onClick={e => e.stopPropagation()}
-      >
-        <GripVertical size={12} />
-      </span>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       {children}
     </div>
   );
