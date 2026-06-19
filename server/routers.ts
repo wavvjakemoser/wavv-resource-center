@@ -154,6 +154,18 @@ import {
   togglePdfSectionVisibility,
   deletePdfSection,
   reorderPdfSections,
+  getFaqSections,
+  createFaqSection,
+  renameFaqSection,
+  toggleFaqSectionVisibility,
+  deleteFaqSection,
+  reorderFaqSections,
+  getFaqEntriesBySection,
+  createFaqEntry,
+  updateFaqEntry,
+  toggleFaqEntryVisibility,
+  deleteFaqEntry,
+  reorderFaqEntries,
 } from "./db";
 import { runIntercomSync } from "./intercomSync";
 
@@ -308,6 +320,7 @@ const academyRouter = router({
         description: z.string().optional(),
         videoUrl: z.string().optional(),
         durationMinutes: z.number().optional(),
+        durationSeconds: z.number().optional(),
         sortOrder: z.number().optional(),
         pipEnabled: z.boolean().optional(),
       })
@@ -323,6 +336,7 @@ const academyRouter = router({
           description: z.string().optional(),
           videoUrl: z.string().optional(),
           durationMinutes: z.number().optional(),
+          durationSeconds: z.number().optional(),
           sortOrder: z.number().optional(),
           published: z.boolean().optional(),
           inactiveReason: z.string().nullable().optional(),
@@ -461,6 +475,23 @@ const academyRouter = router({
   adminDeleteSectionResource: superAdminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(({ input }) => deleteSectionResource(input.id)),
+  // Fetch Loom video duration via public oEmbed API (no API key needed)
+  fetchLoomDuration: superAdminProcedure
+    .input(z.object({ videoUrl: z.string() }))
+    .mutation(async ({ input }) => {
+      const { videoUrl } = input;
+      const loomMatch = videoUrl.match(/loom\.com\/(?:share|embed)\/([a-zA-Z0-9]+)/);
+      if (!loomMatch) return { durationSeconds: null as number | null, error: "Not a Loom URL" };
+      try {
+        const shareUrl = `https://www.loom.com/share/${loomMatch[1]}`;
+        const res = await fetch(`https://www.loom.com/v1/oembed?url=${encodeURIComponent(shareUrl)}`);
+        if (!res.ok) return { durationSeconds: null as number | null, error: `oEmbed fetch failed: ${res.status}` };
+        const data = await res.json() as { duration?: number };
+        return { durationSeconds: (data.duration ?? null) as number | null, error: null };
+      } catch (e) {
+        return { durationSeconds: null as number | null, error: String(e) };
+      }
+    }),
 });
 
 // ─── Webinars Router ──────────────────────────────────────────────────────────
@@ -1846,6 +1877,62 @@ export const appRouter = router({
         return next({ ctx });
       })
       .mutation(({ input }) => unpublishHelpArticleById(input.id)),
+  }),
+
+  faq: router({
+    // Public: list visible sections with their visible entries
+    listSectionsPublic: publicProcedure.query(async () => {
+      const sections = await getFaqSections(true);
+      const withEntries = await Promise.all(
+        sections.map(async (s) => ({
+          ...s,
+          entries: await getFaqEntriesBySection(s.id, true),
+        }))
+      );
+      return withEntries;
+    }),
+    // Admin: list all sections (including hidden)
+    listSectionsAdmin: publisherProcedure.query(async () => {
+      const sections = await getFaqSections(false);
+      const withEntries = await Promise.all(
+        sections.map(async (s) => ({
+          ...s,
+          entries: await getFaqEntriesBySection(s.id, false),
+        }))
+      );
+      return withEntries;
+    }),
+    createSection: publisherProcedure
+      .input(z.object({ name: z.string().min(1).max(255) }))
+      .mutation(({ input }) => createFaqSection(input.name)),
+    renameSection: publisherProcedure
+      .input(z.object({ id: z.number(), name: z.string().min(1).max(255) }))
+      .mutation(({ input }) => renameFaqSection(input.id, input.name)),
+    toggleSectionVisibility: publisherProcedure
+      .input(z.object({ id: z.number(), isVisible: z.boolean() }))
+      .mutation(({ input }) => toggleFaqSectionVisibility(input.id, input.isVisible)),
+    deleteSection: publisherProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input }) => deleteFaqSection(input.id)),
+    reorderSections: publisherProcedure
+      .input(z.object({ items: z.array(z.object({ id: z.number(), sortOrder: z.number() })) }))
+      .mutation(({ input }) => reorderFaqSections(input.items)),
+    // Entry CRUD
+    createEntry: publisherProcedure
+      .input(z.object({ sectionId: z.number(), question: z.string().min(1).max(500), answer: z.string().min(1) }))
+      .mutation(({ input }) => createFaqEntry(input)),
+    updateEntry: publisherProcedure
+      .input(z.object({ id: z.number(), question: z.string().min(1).max(500).optional(), answer: z.string().min(1).optional() }))
+      .mutation(({ input }) => updateFaqEntry(input.id, { question: input.question, answer: input.answer })),
+    toggleEntryVisibility: publisherProcedure
+      .input(z.object({ id: z.number(), isVisible: z.boolean() }))
+      .mutation(({ input }) => toggleFaqEntryVisibility(input.id, input.isVisible)),
+    deleteEntry: publisherProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input }) => deleteFaqEntry(input.id)),
+    reorderEntries: publisherProcedure
+      .input(z.object({ items: z.array(z.object({ id: z.number(), sortOrder: z.number() })) }))
+      .mutation(({ input }) => reorderFaqEntries(input.items)),
   }),
 
   readiness: router({

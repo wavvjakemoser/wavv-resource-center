@@ -1454,3 +1454,28 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] PdfSection: use DB sections (visible only, sorted by sortOrder) as authoritative section order instead of deriving from guide category strings
 - [x] PdfSection: orphaned guide categories (not in DB sections) still appear alphabetically after DB sections
 - [x] PdfSection: unsectioned guides always render last
+
+## Audit Remediation (Jun 19 - Audit Session)
+
+### Verify / Fix
+- [x] #1: Confirmed /resources → /guides redirect added; home page CTAs verified correct
+- [x] #2: Verified — Support/Playground/Partners hidden via NavGuard; route-gated so direct URL access blocked for non-owners
+- [x] #4: Verified — search.query covers courses, lessons, webinars, guides; FAQ will be added when FAQ content is populated
+- [x] Access control: AdminGuard added to /wavvcommandcenter route; explicit allowlist: owner, publisher, partner_manager only
+- [x] Access control: user/viewer roles redirect to /home from Command Center; hidden sections blocked via NavGuard regardless of login state
+
+### Build
+- [x] #12: FAQ section built — faq_sections + faq_entries tables, admin FaqSectionsPanel in GuidesTab, customer FaqSection in GuidesAndDocs
+- [x] #3: Breadcrumbs added to LessonViewer: Academy > Course Name > Lesson trail with clickable links
+- [x] #7: Loom oEmbed duration auto-fetch built — academy.fetchLoomDuration procedure, handleVideoUrlChange in Add Video dialog, durationSeconds stored in DB
+- [x] PDF sections: Fixed — GuidesAndDocs now fetches listPdfSectionsPublic and renders DB-ordered visible sections
+
+### Mobile Audit
+- [x] #13: Mobile audit complete — sidebar hamburger/overlay confirmed working; Team Access and Approved Partners tables wrapped with overflow-x-auto + min-width; all content grids use responsive breakpoints (grid-cols-1 sm:2 lg:3)
+
+### Flagged for Future / Leadership Discussion
+- [ ] #6: Analytics upgrade — Command Center should show per-user login history, content viewed, completion rates (pre-launch priority)
+- [ ] #8: CRM segmentation — tag content by CRM type (GHL vs HubSpot) for filtered views (future build)
+- [ ] #9: Help articles source of truth — discuss with leadership: redirect to Intercom vs. native rendering. Current state: redirect/new tab (acceptable for now)
+- [ ] #14: Per-article "Was this helpful?" feedback widget (future build)
+- [ ] #15: noindex/nofollow — discuss with Marketing Director before public launch; decide SEO strategy

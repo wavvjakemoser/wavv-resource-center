@@ -325,6 +325,76 @@ function PdfSection({
   );
 }
 
+// ─── FAQ Section (customer-facing) ───────────────────────────────────────────
+const FAQ_COLOR = "#eab308";
+type FaqEntry = { id: number; question: string; answer: string; isVisible: boolean; sortOrder: number };
+type FaqSectionType = { id: number; name: string; isVisible: boolean; sortOrder: number; entries: FaqEntry[] };
+
+function FaqEntryRow({ entry }: { entry: FaqEntry }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-lg overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all"
+        style={{ background: open ? "#1d2230" : "#161b27" }}
+      >
+        <span className="flex-1 text-sm font-medium text-white">{entry.question}</span>
+        {open ? <ChevronDown size={14} className="text-gray-500 flex-shrink-0" /> : <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />}
+      </button>
+      {open && (
+        <div className="px-4 py-3" style={{ background: "#1d2230", borderTop: "1px solid #2a2a2a" }}>
+          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{entry.answer}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FaqSection({ sections, search }: { sections: FaqSectionType[]; search: string }) {
+  const filteredSections = sections.map(s => ({
+    ...s,
+    entries: s.entries.filter(e =>
+      !search ||
+      e.question.toLowerCase().includes(search.toLowerCase()) ||
+      e.answer.toLowerCase().includes(search.toLowerCase())
+    ),
+  })).filter(s => !search || s.entries.length > 0);
+
+  if (filteredSections.length === 0) return null;
+
+  return (
+    <section>
+      <div className="w-full flex items-center gap-3 mb-3">
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${FAQ_COLOR}18` }}>
+          <span style={{ color: FAQ_COLOR, fontSize: 14, fontWeight: 700 }}>?</span>
+        </div>
+        <div className="flex-1 text-left">
+          <span className="text-sm font-bold text-white">FAQs</span>
+          <span className="ml-2 text-xs text-gray-500">Frequently asked questions</span>
+        </div>
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
+          {filteredSections.reduce((acc, s) => acc + s.entries.length, 0)}
+        </span>
+      </div>
+      <div className="mb-4 h-px" style={{ background: `${FAQ_COLOR}25` }} />
+      <div className="space-y-6 pl-2">
+        {filteredSections.map(section => (
+          <div key={section.id}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: FAQ_COLOR }}>{section.name}</p>
+            <div className="space-y-2">
+              {section.entries.map(entry => (
+                <FaqEntryRow key={entry.id} entry={entry} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GuidesAndDocs() {
   const [search, setSearch] = useState("");
@@ -336,6 +406,7 @@ export default function GuidesAndDocs() {
   const { data: guides, isLoading } = trpc.guides.list.useQuery();
   const { data: pdfSectionsRaw } = trpc.guides.listPdfSectionsPublic.useQuery();
   const dbPdfSections: DbSection[] = (pdfSectionsRaw as DbSection[] | undefined) ?? [];
+  const { data: faqSections = [] } = trpc.faq.listSectionsPublic.useQuery();
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
   const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true };
   const downloadMutation = trpc.guides.download.useMutation();
@@ -471,6 +542,11 @@ export default function GuidesAndDocs() {
             onOpenModal={handleOpenModal}
             isPending={downloadMutation.isPending}
           />
+        )}
+
+        {/* 3. FAQ — grouped by section */}
+        {faqSections.length > 0 && (
+          <FaqSection sections={faqSections} search={search} />
         )}
 
         {/* Empty state — no content at all */}

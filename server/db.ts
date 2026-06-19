@@ -24,6 +24,8 @@ import {
   inviteTokens,
   magicLinkTokens,
   pdfSections,
+  faqSections,
+  faqEntries,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -2581,5 +2583,96 @@ export async function reorderPdfSections(items: { id: number; sortOrder: number 
   if (!db) return;
   await Promise.all(items.map(({ id, sortOrder }) =>
     db.update(pdfSections).set({ sortOrder }).where(eq(pdfSections.id, id))
+  ));
+}
+
+// ─── FAQ Sections ─────────────────────────────────────────────────────────────
+export async function getFaqSections(visibleOnly = false) {
+  const db = await getDb();
+  if (!db) return [];
+  if (visibleOnly) {
+    return db.select().from(faqSections).where(eq(faqSections.isVisible, true)).orderBy(asc(faqSections.sortOrder), asc(faqSections.createdAt));
+  }
+  return db.select().from(faqSections).orderBy(asc(faqSections.sortOrder), asc(faqSections.createdAt));
+}
+
+export async function createFaqSection(name: string) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const maxOrder = await db.select({ max: sql<number>`COALESCE(MAX(${faqSections.sortOrder}), 0)` }).from(faqSections);
+  const nextOrder = (maxOrder[0]?.max ?? 0) + 1;
+  const result = await db.insert(faqSections).values({ name, sortOrder: nextOrder });
+  return result;
+}
+
+export async function renameFaqSection(id: number, name: string) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(faqSections).set({ name }).where(eq(faqSections.id, id));
+}
+
+export async function toggleFaqSectionVisibility(id: number, isVisible: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(faqSections).set({ isVisible }).where(eq(faqSections.id, id));
+}
+
+export async function deleteFaqSection(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.delete(faqEntries).where(eq(faqEntries.sectionId, id));
+  await db.delete(faqSections).where(eq(faqSections.id, id));
+}
+
+export async function reorderFaqSections(items: { id: number; sortOrder: number }[]) {
+  const db = await getDb();
+  if (!db) return;
+  await Promise.all(items.map(({ id, sortOrder }) =>
+    db.update(faqSections).set({ sortOrder }).where(eq(faqSections.id, id))
+  ));
+}
+
+// ─── FAQ Entries ──────────────────────────────────────────────────────────────
+export async function getFaqEntriesBySection(sectionId: number, visibleOnly = false) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = visibleOnly
+    ? and(eq(faqEntries.sectionId, sectionId), eq(faqEntries.isVisible, true))
+    : eq(faqEntries.sectionId, sectionId);
+  return db.select().from(faqEntries).where(conditions).orderBy(asc(faqEntries.sortOrder), asc(faqEntries.createdAt));
+}
+
+export async function createFaqEntry(data: { sectionId: number; question: string; answer: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const maxOrder = await db.select({ max: sql<number>`COALESCE(MAX(${faqEntries.sortOrder}), 0)` }).from(faqEntries).where(eq(faqEntries.sectionId, data.sectionId));
+  const nextOrder = (maxOrder[0]?.max ?? 0) + 1;
+  const result = await db.insert(faqEntries).values({ ...data, sortOrder: nextOrder });
+  return result;
+}
+
+export async function updateFaqEntry(id: number, data: { question?: string; answer?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(faqEntries).set(data).where(eq(faqEntries.id, id));
+}
+
+export async function toggleFaqEntryVisibility(id: number, isVisible: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(faqEntries).set({ isVisible }).where(eq(faqEntries.id, id));
+}
+
+export async function deleteFaqEntry(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.delete(faqEntries).where(eq(faqEntries.id, id));
+}
+
+export async function reorderFaqEntries(items: { id: number; sortOrder: number }[]) {
+  const db = await getDb();
+  if (!db) return;
+  await Promise.all(items.map(({ id, sortOrder }) =>
+    db.update(faqEntries).set({ sortOrder }).where(eq(faqEntries.id, id))
   ));
 }

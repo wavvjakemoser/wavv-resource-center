@@ -73,6 +73,7 @@ export const lessons = mysqlTable("lessons", {
   description: text("description"),
   videoUrl: text("videoUrl"),
   durationMinutes: int("durationMinutes").default(0),
+  durationSeconds: int("durationSeconds").default(0),
   sortOrder: int("sortOrder").default(0),
   published: boolean("published").default(true).notNull(),
   // Admin-only: reason why content was deactivated (e.g. "Outdated", "Feature removed", "Needs update")
@@ -463,3 +464,29 @@ export const pdfSections = mysqlTable("pdf_sections", {
 });
 export type PdfSection = typeof pdfSections.$inferSelect;
 export type InsertPdfSection = typeof pdfSections.$inferInsert;
+
+// ─── FAQ Sections ─────────────────────────────────────────────────────────────
+export const faqSections = mysqlTable("faq_sections", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  sortOrder: int("sort_order").default(0).notNull(),
+  isVisible: boolean("is_visible").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type FaqSection = typeof faqSections.$inferSelect;
+export type InsertFaqSection = typeof faqSections.$inferInsert;
+
+// ─── FAQ Entries ──────────────────────────────────────────────────────────────
+export const faqEntries = mysqlTable("faq_entries", {
+  id: int("id").autoincrement().primaryKey(),
+  sectionId: int("section_id").notNull(),
+  question: varchar("question", { length: 500 }).notNull(),
+  answer: text("answer").notNull(),
+  sortOrder: int("sort_order").default(0).notNull(),
+  isVisible: boolean("is_visible").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type FaqEntry = typeof faqEntries.$inferSelect;
+export type InsertFaqEntry = typeof faqEntries.$inferInsert;

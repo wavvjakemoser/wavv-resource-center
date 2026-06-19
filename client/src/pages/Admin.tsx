@@ -248,14 +248,16 @@ export default function Admin() {
     );
   }
 
-  // Not logged in at all → send to /login with ?next=/wavvadmin
+  // Not logged in at all → AdminGuard in App.tsx handles this, but keep as safety net
   if (!user) {
     window.location.href = "/api/oauth/login?return_path=/wavvcommandcenter";
     return null;
   }
-  // Logged in but not an admin → send back to dashboard
-  if (user.role !== "viewer" && user.role !== "publisher" && user.role !== "partner_manager" && user.role !== "owner") {
-    navigate("/home");
+  // Logged in but not an authorized admin role → redirect to home
+  // Explicit allowlist: only owner, publisher, partner_manager get access
+  const ADMIN_ROLES = ["owner", "publisher", "partner_manager"];
+  if (!ADMIN_ROLES.includes(user.role)) {
+    navigate("/");
     return null;
   }
 
@@ -1671,13 +1673,13 @@ function UsersTab() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-        <Table>
+      <div className="rounded-xl overflow-hidden overflow-x-auto" style={{ border: "1px solid #2a2a2a" }}>
+        <Table className="min-w-[560px]">
           <TableHeader>
             <TableRow style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
-              <TableHead className="text-gray-400 w-[240px]">Name</TableHead>
-              <TableHead className="text-gray-400 w-[260px]">Email</TableHead>
-              <TableHead className="text-gray-400 w-[160px]">Access Level</TableHead>
+              <TableHead className="text-gray-400">Name</TableHead>
+              <TableHead className="text-gray-400">Email</TableHead>
+              <TableHead className="text-gray-400">Access Level</TableHead>
 
 
               {isOwner && <TableHead className="text-gray-400">Actions</TableHead>}
@@ -2760,7 +2762,9 @@ function ContentTab() {
 
   // Dialog state: Add Video
   const [addVideoDialog, setAddVideoDialog] = useState<{ courseId: number; courseTitle: string } | null>(null);
-  const [newVideoForm, setNewVideoForm] = useState({ title: "", videoUrl: "", description: "", durationMinutes: "", tags: "" });
+  const [newVideoForm, setNewVideoForm] = useState({ title: "", videoUrl: "", description: "", durationMinutes: "", durationSeconds: 0, tags: "" });
+  const [loomFetchStatus, setLoomFetchStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const fetchLoomDurationMutation = trpc.academy.fetchLoomDuration.useMutation();
 
   // Derive a Loom embed URL from a share URL for preview
   function getLoomEmbedUrl(url: string): string | null {
@@ -2795,8 +2799,31 @@ function ContentTab() {
   }
 
   function handleAddVideo(courseId: number, courseTitle: string) {
-    setNewVideoForm({ title: "", videoUrl: "", description: "", durationMinutes: "", tags: "" });
+    setNewVideoForm({ title: "", videoUrl: "", description: "", durationMinutes: "", durationSeconds: 0, tags: "" });
+    setLoomFetchStatus("idle");
     setAddVideoDialog({ courseId, courseTitle });
+  }
+
+  async function handleVideoUrlChange(url: string) {
+    setNewVideoForm((f) => ({ ...f, videoUrl: url }));
+    if (url.includes("loom.com")) {
+      setLoomFetchStatus("loading");
+      try {
+        const result = await fetchLoomDurationMutation.mutateAsync({ videoUrl: url });
+        if (result.durationSeconds != null) {
+          const mins = Math.floor(result.durationSeconds / 60);
+          const secs = result.durationSeconds % 60;
+          setNewVideoForm((f) => ({ ...f, durationMinutes: String(mins), durationSeconds: secs }));
+          setLoomFetchStatus("done");
+        } else {
+          setLoomFetchStatus("error");
+        }
+      } catch {
+        setLoomFetchStatus("error");
+      }
+    } else {
+      setLoomFetchStatus("idle");
+    }
   }
 
   function confirmAddVideo() {
@@ -2807,6 +2834,7 @@ function ContentTab() {
       videoUrl: newVideoForm.videoUrl.trim() || undefined,
       description: newVideoForm.description.trim() || undefined,
       durationMinutes: newVideoForm.durationMinutes ? parseInt(newVideoForm.durationMinutes) : undefined,
+      durationSeconds: newVideoForm.durationSeconds || undefined,
       sortOrder: 99,
     });
   }
@@ -3144,9 +3172,12 @@ function ContentTab() {
               <Input
                 placeholder="https://www.loom.com/share/abc123..."
                 value={newVideoForm.videoUrl}
-                onChange={(e) => setNewVideoForm((f) => ({ ...f, videoUrl: e.target.value }))}
+                onChange={(e) => handleVideoUrlChange(e.target.value)}
                 className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
               />
+              {loomFetchStatus === "loading" && <p className="text-xs text-blue-400 mt-1">Fetching duration from Loom…</p>}
+              {loomFetchStatus === "done" && <p className="text-xs text-green-400 mt-1">Duration auto-filled from Loom.</p>}
+              {loomFetchStatus === "error" && <p className="text-xs text-amber-400 mt-1">Could not fetch duration — enter manually.</p>}
               {/* Live embed preview — shows as soon as a valid Loom URL is detected */}
               {newVideoForm.videoUrl && getLoomEmbedUrl(newVideoForm.videoUrl) && (
                 <div className="mt-2 rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", background: "#000" }}>
@@ -5243,6 +5274,20 @@ function GuidesTab() {
     },
     onError: (e) => toast.error(e.message),
   });
+  // FAQ section state
+  const [showAddFaqSectionModal, setShowAddFaqSectionModal] = useState(false);
+  const [newFaqSectionName, setNewFaqSectionName] = useState("");
+  const { data: faqSectionsAdmin = [] } = trpc.faq.listSectionsAdmin.useQuery();
+  const createFaqSectionMutation = trpc.faq.createSection.useMutation({
+    onSuccess: () => {
+      utils.faq.listSectionsAdmin.invalidate();
+      utils.faq.listSectionsPublic.invalidate();
+      toast.success("FAQ section created");
+      setShowAddFaqSectionModal(false);
+      setNewFaqSectionName("");
+    },
+    onError: (e) => toast.error(e.message),
+  });
   // Add Help Article (native) inline form
   const [showNativeArticleForm, setShowNativeArticleForm] = useState(false);
   const [editingNativeArticle, setEditingNativeArticle] = useState<{ id: number; title: string; nativeBody: string; sectionName: string } | null>(null);
@@ -5368,6 +5413,13 @@ function GuidesTab() {
             style={{ background: "#8B5CF6" }}
           >
             <Plus size={13} /> Add Help Article
+          </button>
+          <button
+            onClick={() => { setShowAddFaqSectionModal(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(234,179,8,0.15)", color: "#eab308", border: "1px solid rgba(234,179,8,0.3)" }}
+          >
+            <Plus size={13} /> Add FAQ Section
           </button>
           <button
             onClick={() => { setShowAddPdfSectionModal(true); }}
@@ -5709,14 +5761,46 @@ function GuidesTab() {
             >
               {createPdfSectionMutation.isPending ? "Creating…" : "Create Section"}
             </button>
+                    </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* ── Add FAQ Section Modal ── */}
+      <Dialog open={showAddFaqSectionModal} onOpenChange={setShowAddFaqSectionModal}>
+        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}>
+          <DialogHeader>
+            <DialogTitle className="text-white">Add FAQ Section</DialogTitle>
+            <DialogDescription className="text-gray-400">Create a named section to group FAQ entries (e.g. "Call Boards", "Number Rotation").</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <label className="block text-xs text-gray-400 mb-1">Section Name *</label>
+            <input
+              style={{ background: "#252d3d", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, padding: "8px 12px", width: "100%", fontSize: 13 }}
+              value={newFaqSectionName}
+              onChange={e => setNewFaqSectionName(e.target.value)}
+              placeholder="e.g. Call Boards"
+              onKeyDown={e => { if (e.key === "Enter" && newFaqSectionName.trim()) createFaqSectionMutation.mutate({ name: newFaqSectionName.trim() }); }}
+              autoFocus
+            />
+            <p className="text-xs text-gray-500">After creating, use "Add FAQ Entry" within the section to add Q&amp;A entries.</p>
+          </div>
+          <DialogFooter>
+            <button onClick={() => { setShowAddFaqSectionModal(false); setNewFaqSectionName(""); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+            <button
+              onClick={() => { if (newFaqSectionName.trim()) createFaqSectionMutation.mutate({ name: newFaqSectionName.trim() }); }}
+              disabled={!newFaqSectionName.trim() || createFaqSectionMutation.isPending}
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+              style={{ background: "#eab308" }}
+            >
+              {createFaqSectionMutation.isPending ? "Creating…" : "Create Section"}
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
+      {/* ── FAQ Sections Panel ── */}
+      <FaqSectionsPanel />
     </div>
   );
 }
-
 const GUIDE_GROUP_META: Record<string, { label: string; color: string; description: string }> = {
   help_article: { label: "Help Article", color: "#8B5CF6", description: "Common questions and troubleshooting" },
   pdf:       { label: "PDF",       color: "#ef4444", description: "Downloadable PDF documents" },
@@ -6202,6 +6286,204 @@ function TicketGroups({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ─── FAQ Sections Panel ─────────────────────────────────────────────────────
+function FaqSectionsPanel() {
+  const utils = trpc.useUtils();
+  const { data: sections = [], isLoading } = trpc.faq.listSectionsAdmin.useQuery();
+  const renameMutation = trpc.faq.renameSection.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); toast.success("Section renamed"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const toggleVisibilityMutation = trpc.faq.toggleSectionVisibility.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const deleteSectionMutation = trpc.faq.deleteSection.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); toast.success("Section deleted"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const createEntryMutation = trpc.faq.createEntry.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); toast.success("FAQ entry added"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const updateEntryMutation = trpc.faq.updateEntry.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); toast.success("FAQ entry updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const toggleEntryMutation = trpc.faq.toggleEntryVisibility.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const deleteEntryMutation = trpc.faq.deleteEntry.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); toast.success("FAQ entry deleted"); },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const [renamingSection, setRenamingSection] = useState<{ id: number; name: string } | null>(null);
+  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
+  const [addingEntryTo, setAddingEntryTo] = useState<number | null>(null);
+  const [newEntry, setNewEntry] = useState({ question: "", answer: "" });
+  const [editingEntry, setEditingEntry] = useState<{ id: number; sectionId: number; question: string; answer: string } | null>(null);
+
+  function toggleExpand(id: number) {
+    setExpandedSections(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+  }
+
+  if (isLoading) return <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-yellow-500 border-t-transparent rounded-full" /></div>;
+
+  return (
+    <div className="space-y-3">
+      {/* Section header */}
+      <div className="flex items-center gap-3 py-1">
+        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "#1a1f2e", border: "1px solid #2a2a2a" }}>
+          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#eab308" }} />
+          <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#6b7280" }}>FAQ SECTIONS</span>
+        </div>
+        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#eab308" }} />
+        <span className="text-sm font-semibold text-white">FAQs</span>
+        <span className="text-xs text-gray-500">Frequently asked questions grouped by topic</span>
+        <span className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(234,179,8,0.15)", color: "#eab308" }}>{sections.length}</span>
+      </div>
+      {sections.length === 0 && (
+        <div className="text-center py-8 text-gray-500 text-sm">No FAQ sections yet. Click "Add FAQ Section" to get started.</div>
+      )}
+      {sections.map(section => (
+        <div key={section.id} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+          {/* Section row */}
+          <div className="flex items-center gap-3 px-4 py-3" style={{ background: "#1d2230" }}>
+            <button onClick={() => toggleExpand(section.id)} className="text-gray-400 hover:text-white transition">
+              {expandedSections.has(section.id) ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
+            </button>
+            {renamingSection?.id === section.id ? (
+              <input
+                className="flex-1 bg-transparent border-b border-yellow-500 text-white text-sm outline-none"
+                value={renamingSection.name}
+                onChange={e => setRenamingSection(s => s ? { ...s, name: e.target.value } : null)}
+                onKeyDown={e => {
+                  if (e.key === "Enter" && renamingSection.name.trim()) { renameMutation.mutate({ id: section.id, name: renamingSection.name.trim() }); setRenamingSection(null); }
+                  if (e.key === "Escape") setRenamingSection(null);
+                }}
+                autoFocus
+              />
+            ) : (
+              <span className="flex-1 text-sm font-semibold text-white">{section.name}</span>
+            )}
+            <span className="text-xs text-gray-500">{section.entries?.length ?? 0} entries</span>
+            <button
+              onClick={() => toggleVisibilityMutation.mutate({ id: section.id, isVisible: !section.isVisible })}
+              className="text-xs px-2 py-0.5 rounded-full font-semibold transition"
+              style={section.isVisible
+                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                : { background: "rgba(107,114,128,0.15)", color: "#6b7280", border: "1px solid rgba(107,114,128,0.3)" }
+              }
+            >{section.isVisible ? "Visible" : "Hidden"}</button>
+            <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
+            <button onClick={() => { if (confirm(`Delete "${section.name}" and all its entries?`)) deleteSectionMutation.mutate({ id: section.id }); }} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+          </div>
+          {/* Entries */}
+          {expandedSections.has(section.id) && (
+            <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#161b27" }}>
+              {(section.entries ?? []).map(entry => (
+                <div key={entry.id} className="px-5 py-3 space-y-1">
+                  {editingEntry?.id === entry.id ? (
+                    <div className="space-y-2">
+                      <input
+                        className="w-full text-sm text-white bg-transparent border-b border-yellow-500 outline-none pb-1"
+                        value={editingEntry.question}
+                        onChange={e => setEditingEntry(v => v ? { ...v, question: e.target.value } : null)}
+                        placeholder="Question"
+                      />
+                      <textarea
+                        className="w-full text-xs text-gray-300 bg-transparent border border-gray-700 rounded p-2 outline-none resize-none"
+                        rows={3}
+                        value={editingEntry.answer}
+                        onChange={e => setEditingEntry(v => v ? { ...v, answer: e.target.value } : null)}
+                        placeholder="Answer"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => { updateEntryMutation.mutate({ id: entry.id, question: editingEntry.question, answer: editingEntry.answer }); setEditingEntry(null); }}
+                          className="px-3 py-1 rounded text-xs font-semibold text-white" style={{ background: "#eab308" }}
+                        >Save</button>
+                        <button onClick={() => setEditingEntry(null)} className="px-3 py-1 rounded text-xs text-gray-400 hover:text-white" style={{ background: "#252d3d" }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-white">{entry.question}</p>
+                        <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">{entry.answer}</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => toggleEntryMutation.mutate({ id: entry.id, isVisible: !entry.isVisible })}
+                          className="text-xs px-2 py-0.5 rounded-full font-semibold transition"
+                          style={entry.isVisible
+                            ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                            : { background: "rgba(107,114,128,0.15)", color: "#6b7280", border: "1px solid rgba(107,114,128,0.3)" }
+                          }
+                        >{entry.isVisible ? "Visible" : "Hidden"}</button>
+                        <button onClick={() => setEditingEntry({ id: entry.id, sectionId: section.id, question: entry.question, answer: entry.answer })} className="text-gray-500 hover:text-white transition"><Pencil size={12} /></button>
+                        <button onClick={() => { if (confirm("Delete this FAQ entry?")) deleteEntryMutation.mutate({ id: entry.id }); }} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={12} /></button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {/* Add entry form */}
+              {addingEntryTo === section.id ? (
+                <div className="px-5 py-3 space-y-2">
+                  <input
+                    style={{ background: "#252d3d", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, padding: "7px 10px", width: "100%", fontSize: 13 }}
+                    value={newEntry.question}
+                    onChange={e => setNewEntry(v => ({ ...v, question: e.target.value }))}
+                    placeholder="Question *"
+                  />
+                  <textarea
+                    style={{ background: "#252d3d", border: "1px solid #2a2a2a", color: "#fff", borderRadius: 8, padding: "7px 10px", width: "100%", fontSize: 13, resize: "vertical" }}
+                    rows={3}
+                    value={newEntry.answer}
+                    onChange={e => setNewEntry(v => ({ ...v, answer: e.target.value }))}
+                    placeholder="Answer *"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (newEntry.question.trim() && newEntry.answer.trim()) {
+                          createEntryMutation.mutate({ sectionId: section.id, question: newEntry.question.trim(), answer: newEntry.answer.trim() });
+                          setNewEntry({ question: "", answer: "" });
+                          setAddingEntryTo(null);
+                        }
+                      }}
+                      disabled={!newEntry.question.trim() || !newEntry.answer.trim() || createEntryMutation.isPending}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
+                      style={{ background: "#eab308" }}
+                    >{createEntryMutation.isPending ? "Saving…" : "Add Entry"}</button>
+                    <button onClick={() => { setAddingEntryTo(null); setNewEntry({ question: "", answer: "" }); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white" style={{ background: "#252d3d" }}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="px-5 py-2">
+                  <button
+                    onClick={() => { setAddingEntryTo(section.id); setExpandedSections(prev => new Set([...prev, section.id])); }}
+                    className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-yellow-400 transition"
+                  >
+                    <Plus size={12} /> Add FAQ Entry
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
@@ -7034,7 +7316,8 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
             </p>
           </div>
         ) : (
-          <Table>
+          <div className="overflow-x-auto">
+          <Table className="min-w-[520px]">
             <TableHeader>
               <TableRow style={{ borderColor: "#2a2a2a" }}>
                 <TableHead className="text-gray-500 text-xs">Name</TableHead>
@@ -7090,11 +7373,11 @@ function PartnerAnalyticsTab({ isPartnerAdmin = false }: { isPartnerAdmin?: bool
                   </TableCell>
                 </TableRow>
               ))}
-            </TableBody>
+                        </TableBody>
           </Table>
+          </div>
         )}
       </div>
-
       {/* Placeholder for future metrics */}
       <div
         className="rounded-xl p-6 text-center"

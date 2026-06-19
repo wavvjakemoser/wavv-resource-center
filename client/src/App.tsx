@@ -37,6 +37,20 @@ function NavGuard({ href, children }: { href: string; children: React.ReactNode 
   return <>{children}</>;
 }
 
+// Strict guard for /wavvcommandcenter — only owner, publisher, and partner_manager roles.
+// Any signed-in customer (role="user") or viewer is redirected to home.
+function AdminGuard({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  if (user === undefined) return null; // still loading
+  if (!user) {
+    window.location.href = "/api/oauth/login?return_path=/wavvcommandcenter";
+    return null;
+  }
+  const ADMIN_ROLES = ["owner", "publisher", "partner_manager"];
+  if (!ADMIN_ROLES.includes(user.role)) return <Redirect to="/" />;
+  return <>{children}</>;
+}
+
 // Strict guard for /wavvpartner — only owner and partner_admin can access, regardless of visibility.
 // Everyone else (including other admins, content_admin, regular users) gets /404.
 // When hidden in nav_visibility, even owner/partner_admin see it but others always get /404.
@@ -59,16 +73,17 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/login" component={Login} />
       <Route path="/home">{() => <Redirect to="/" />}</Route>
+      <Route path="/resources">{() => <Redirect to="/guides" />}</Route>
       <Route path="/academy" component={Academy} />
       <Route path="/academy/category/:categoryKey" component={AcademyCategory} />
       <Route path="/academy/:courseId" component={CourseDetail} />
       <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
-      <Route path="/support" component={Support} />
+      <Route path="/support">{() => <NavGuard href="/support"><Support /></NavGuard>}</Route>
       <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
       <Route path="/wavvpartner">{() => <PartnerPortalGuard><WavvPartnerPortal /></PartnerPortalGuard>}</Route>
-      <Route path="/wavvcommandcenter" component={Admin} />
+      <Route path="/wavvcommandcenter">{() => <AdminGuard><Admin /></AdminGuard>}</Route>
       <Route path="/wavvadmin">{() => <Redirect to="/wavvcommandcenter" />}</Route>
       <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>
       <Route path="/hands-on">{() => <Redirect to="/playground" />}</Route>

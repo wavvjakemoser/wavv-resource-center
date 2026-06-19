@@ -1,7 +1,7 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { Link, useParams } from "wouter";
-import { ArrowLeft, CheckCircle, PlayCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, PlayCircle, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -53,11 +53,16 @@ export default function LessonViewer() {
   return (
     <PortalLayout title={lesson?.title ?? "Lesson"}>
       <div className="px-4 lg:px-6 py-6 max-w-5xl mx-auto space-y-5">
-        {/* Back */}
-        <Link href={`/academy/${cId}`}>
-            <ArrowLeft size={15} />
-            Back to {courseData?.course?.title ?? "Course"}
-        </Link>
+        {/* Breadcrumb: Academy > Course > Lesson */}
+        <nav className="flex items-center gap-1.5 text-xs text-gray-500">
+          <Link href="/academy" className="hover:text-gray-300 transition-colors">WAVV Academy</Link>
+          <ChevronRight size={11} className="text-gray-700 flex-shrink-0" />
+          <Link href={`/academy/${cId}`} className="hover:text-gray-300 transition-colors truncate max-w-[200px]">
+            {courseData?.course?.title ?? "Course"}
+          </Link>
+          <ChevronRight size={11} className="text-gray-700 flex-shrink-0" />
+          <span className="text-gray-300 truncate max-w-[200px]">{lesson?.title ?? "Lesson"}</span>
+        </nav>
 
         {/* Video player */}
         <div

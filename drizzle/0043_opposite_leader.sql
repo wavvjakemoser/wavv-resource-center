@@ -1,0 +1,1 @@
+ALTER TABLE `lessons` ADD `durationSeconds` int DEFAULT 0;
