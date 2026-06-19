@@ -5772,6 +5772,12 @@ function GuidesTab() {
           </form>
         </div>
       )}
+      {/* ── Section Visibility Divider ── */}
+      <div className="flex items-center gap-3 pt-2">
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, #2a2a2a, transparent)" }} />
+        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#4b5563" }}>Visibility Controls</span>
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to left, #2a2a2a, transparent)" }} />
+      </div>
       {/* ── Section Visibility ── */}
       <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-2 mb-1">
@@ -7908,8 +7914,8 @@ function SettingsTab() {
             <div className={sectionClass} style={sectionStyle}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(245,158,11,0.12)" }}>
-                    <UserPlus size={15} style={{ color: "#f59e0b" }} />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,169,226,0.12)" }}>
+                    <UserPlus size={15} style={{ color: "#00A9E2" }} />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">Approved Partners</p>
@@ -7923,7 +7929,7 @@ function SettingsTab() {
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0"
                   style={approvedPartnersEnabled
-                    ? { background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "1px solid rgba(245,158,11,0.3)" }
+                    ? { background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }
                     : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
                 >
                   {approvedPartnersEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}

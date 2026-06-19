@@ -350,17 +350,6 @@ export default function HandsOn() {
           </div>
         </div>
 
-        {/* ── Coming soon notice ── */}
-        <div
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm"
-          style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}
-        >
-          <Construction size={14} style={{ color: "#a855f7", flexShrink: 0 }} />
-          <span className="text-gray-400">
-            These playgrounds are under construction — here's what's coming.
-          </span>
-        </div>
-
         {/* ── Playground cards ── */}
         <div>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
