@@ -226,7 +226,7 @@ function RequestModal({
 export default function HandsOn() {
   const { data: user } = trpc.auth.me.useQuery(undefined, { retry: false });
   const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const playgroundUnderConstruction = siteSettings["playground_under_construction"] === true;
+  const playgroundUnderConstruction = true; // Permanently under construction — no toggle
   const { data: playgroundStats } = trpc.playground.getStats.useQuery(
     undefined,
     { enabled: !!user && (user.role === 'owner' || user.role === 'publisher' || user.role === 'viewer'), retry: false }

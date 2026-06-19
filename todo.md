@@ -1502,3 +1502,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add Help Article form: redesigned to match PDF New Guide pattern (Title, Description, Section picker, File Attachment, URL paste) — replaces TipTap editor
 - [x] Customer FAQ FaqEntryRow: no file = inline Q+A display (no chevron); has file = expandable with chevron + download button
 - [x] TypeScript: 0 errors | Tests: 47/47 passing
+
+## Batch 5
+
+- [x] Help Articles panel header: add sections count + total articles count badges (same format as PDF/FAQ panels)
+- [x] PDF dropdown bug: newly added PDFs not appearing in section dropdown in Add PDF form (cache invalidation fix)
+- [x] Expand/collapse parity: add chevron expand/collapse to Help Articles section rows and PDF section rows to match FAQ section rows exactly
+- [x] Playground content management tab: permanently under construction — remove screenshot, add under-construction overlay (same as Support/Partners)
+- [x] Settings: remove Playground Under Construction toggle (state hardcoded permanently)
+- [x] Content Management nav: WAVV Playground tab hidden (show: false)
+- [x] User-facing HandsOn.tsx: permanently shows under-construction (no toggle dependency)

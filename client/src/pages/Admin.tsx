@@ -275,7 +275,7 @@ export default function Admin() {
     { id: "academy",          label: "WAVV Academy",      icon: <GraduationCap size={13} />, show: isSuperAdmin },
     { id: "webinars",         label: "WAVV Webinars",     icon: <Video size={13} />,         show: isSuperAdmin },
     { id: "guides",           label: "WAVV Resource Hub", icon: <FileText size={13} />,      show: isSuperAdmin },
-    { id: "playground",       label: "WAVV Playground",   icon: <FlaskConical size={13} />,  show: isSuperAdmin },
+    { id: "playground",       label: "WAVV Playground",   icon: <FlaskConical size={13} />,  show: false },
     { id: "support",          label: "WAVV Support",      icon: <Headphones size={13} />,    show: isSuperAdmin },
     { id: "partners_content", label: "WAVV Partners",     icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />, show: isSuperAdmin },
@@ -4211,7 +4211,7 @@ function PlaygroundTab() {
   const { data: stats, isLoading: statsLoading } = trpc.playground.getStats.useQuery();
   const { data: requests, isLoading: reqLoading } = trpc.playground.getRequests.useQuery();
   const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const playgroundUnderConstruction = siteSettings["playground_under_construction"] === true;
+  const playgroundUnderConstruction = true; // Permanently under construction — toggle removed from Settings
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const deleteRequestMutation = trpc.playground.deleteRequest.useMutation({
     onSuccess: () => {
@@ -5277,6 +5277,7 @@ function GuidesTab() {
   });
   // Add Help Article Section modal
   const { data: helpArticleSectionsAdmin = [] } = trpc.helpArticles.listSectionsAdmin.useQuery();
+  const { data: helpArticlesPublished = [] } = trpc.helpArticles.listPublished.useQuery();
   const toggleSectionVisibilityMutation = trpc.helpArticles.toggleSectionVisibility.useMutation({
     onSuccess: () => { utils.helpArticles.listSectionsAdmin.invalidate(); utils.helpArticles.listSections.invalidate(); toast.success("Visibility updated"); },
     onError: (e) => toast.error(e.message),
@@ -5380,7 +5381,7 @@ function GuidesTab() {
     onError: (e) => toast.error("Upload failed: " + e.message),
   });
   const createMutation = trpc.guides.adminCreate.useMutation({
-    onSuccess: () => { utils.guides.adminList.invalidate(); setShowForm(false); resetForm(); toast.success("Guide created"); },
+    onSuccess: () => { utils.guides.adminList.invalidate(); utils.guides.listPdfSections.invalidate(); setShowForm(false); resetForm(); toast.success("Guide created"); },
     onError: (e) => toast.error(e.message),
   });
   const updateMutation = trpc.guides.adminUpdate.useMutation({
@@ -5843,6 +5844,10 @@ function GuidesTab() {
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#8B5CF6" }} />
         <span className="text-sm font-semibold text-white">Help Articles</span>
         <span className="text-xs text-gray-500">Published help articles grouped by section</span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(139,92,246,0.15)", color: "#8B5CF6" }}>{helpArticleSectionsAdmin.length} sections</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(139,92,246,0.15)", color: "#8B5CF6" }}>{helpArticlesPublished.length} articles</span>
+        </div>
       </div>
 
       {/* ── Published Help Articles ── */}
@@ -6174,6 +6179,9 @@ function PdfSectionsPanel({
                     <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
+                        <button onClick={() => setCollapsed(c => ({ ...c, [section.id]: !isCollapsed }))} className="text-gray-400 hover:text-white transition flex-shrink-0">
+                          {isCollapsed ? <ChevronRightIcon size={15} /> : <ChevronDown size={15} />}
+                        </button>
                         {editingSectionId === section.id ? (
                           <input
                             className="text-sm font-semibold text-white bg-transparent border-b border-purple-500 outline-none flex-1 min-w-0"
@@ -6217,10 +6225,6 @@ function PdfSectionsPanel({
                           className="text-gray-600 hover:text-red-400 transition"
                           title="Delete section"
                         ><Trash2 size={13} /></button>
-                        <button
-                          onClick={() => setCollapsed(c => ({ ...c, [section.id]: !isCollapsed }))}
-                          className="text-gray-500 transition"
-                        ><ChevronDown size={14} className={`transition-transform ${isCollapsed ? "" : "rotate-180"}`} /></button>
                       </div>
                     </div>
                     {!isCollapsed && (
@@ -7929,30 +7933,7 @@ function SettingsTab() {
             </div>
 
 
-            {/* ── Playground Under Construction ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(168,85,247,0.12)" }}>
-                    <FlaskConical size={15} style={{ color: "#a855f7" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Playground Under Construction</p>
-                    <p className="text-xs text-gray-500">Show an "Under Construction" banner on the WAVV Playground page. Toggle off to show live content.</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => toggle("playground_under_construction", settings["playground_under_construction"] === true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0"
-                  style={settings["playground_under_construction"] === true
-                    ? { background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
-                    : { background: "rgba(34,197,94,0.12)", color: "#4ade80", border: "1px solid rgba(34,197,94,0.25)" }}
-                >
-                  {settings["playground_under_construction"] === true ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                  {settings["playground_under_construction"] === true ? "Enabled" : "Disabled"}
-                </button>
-              </div>
-            </div>
+
             {/* ── Request Buttons ── */}
             <div className={sectionClass} style={sectionStyle}>
               <div className="flex items-center gap-3 mb-3">
@@ -8609,7 +8590,10 @@ function PublishedHelpArticlesPanel() {
               style={{ background: "#1d2230" }}
             >
               <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
-              <div className="flex-1 flex items-center gap-3 cursor-pointer min-w-0" onClick={e => { e.stopPropagation(); setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true })); }}>
+              <button onClick={e => { e.stopPropagation(); setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true })); }} className="text-gray-400 hover:text-white transition flex-shrink-0">
+                {isCollapsed ? <ChevronRightIcon size={15} /> : <ChevronDown size={15} />}
+              </button>
+              <div className="flex-1 flex items-center gap-3 min-w-0">
                 {editingSection?.id === sec.id ? (
                   <input
                     className="text-sm font-semibold text-white bg-transparent border-b border-purple-500 outline-none px-1"
@@ -8653,7 +8637,6 @@ function PublishedHelpArticlesPanel() {
                   className="text-gray-600 hover:text-red-400 transition"
                   title="Delete section"
                 ><Trash2 size={13} /></button>
-                <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
               </div>
             </div>
             {!isCollapsed && (
