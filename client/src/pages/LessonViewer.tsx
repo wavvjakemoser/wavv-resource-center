@@ -15,9 +15,9 @@ function getEmbedUrl(url: string): string | null {
   if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
   // Loom — handle both already-embedded URLs and share URLs
   const loomEmbedMatch = url.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/);
-  if (loomEmbedMatch) return `https://www.loom.com/embed/${loomEmbedMatch[1]}`;
+  if (loomEmbedMatch) return `https://www.loom.com/embed/${loomEmbedMatch[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true&hideEmbedTopBar=true`;
   const loomShareMatch = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
-  if (loomShareMatch) return `https://www.loom.com/embed/${loomShareMatch[1]}`;
+  if (loomShareMatch) return `https://www.loom.com/embed/${loomShareMatch[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true&hideEmbedTopBar=true`;
   // Direct video URL
   return null;
 }
@@ -77,6 +77,7 @@ export default function LessonViewer() {
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
                 title={lesson?.title}
               />
             </div>

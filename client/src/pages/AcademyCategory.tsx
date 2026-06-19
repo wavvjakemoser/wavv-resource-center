@@ -287,9 +287,9 @@ type DbLessonMeta = { id: number; courseId: number; tags: string | null; created
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
   const loomShare = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
-  if (loomShare) return `https://www.loom.com/embed/${loomShare[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true`;
+  if (loomShare) return `https://www.loom.com/embed/${loomShare[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true&hideEmbedTopBar=true`;
   const loomEmbed = url.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/);
-  if (loomEmbed) return `https://www.loom.com/embed/${loomEmbed[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true`;
+  if (loomEmbed) return `https://www.loom.com/embed/${loomEmbed[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true&hideEmbedTopBar=true`;
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
   if (yt) return `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`;
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
@@ -573,6 +573,7 @@ export default function AcademyCategory() {
   }
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
   const handlePlay = (embedUrl: string, title: string, sectionTitle: string, lessonId?: string) => {
+    setFloatingVideo(null); // close any existing floating player before opening a new video
     setPlayingVideo({ embedUrl, title });
     trackAnon.mutate({
       eventType: "academy_video_play",
@@ -879,6 +880,7 @@ export default function AcademyCategory() {
                 title={playingVideo.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
+                sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
                 className="absolute inset-0 w-full h-full"
                 style={{ border: "none" }}
               />

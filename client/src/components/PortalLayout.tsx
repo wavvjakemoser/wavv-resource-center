@@ -388,7 +388,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             {/* Sign In button — shown only when confirmed not logged in (suppress during auth load to prevent flash) */}
             {!authLoading && !user && (
               <a
-                href="/api/oauth/login"
+                href="/signin"
                 className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
                 style={{
                   background: "#0074F4",

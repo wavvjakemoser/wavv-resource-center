@@ -138,6 +138,7 @@ export default function FloatingVideoPlayer({ title, embedUrl, onClose }: Floati
           title={title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           allowFullScreen
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
           className="absolute inset-0 w-full h-full"
           style={{ border: "none" }}
         />

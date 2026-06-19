@@ -1512,3 +1512,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Settings: remove Playground Under Construction toggle (state hardcoded permanently)
 - [x] Content Management nav: WAVV Playground tab hidden (show: false)
 - [x] User-facing HandsOn.tsx: permanently shows under-construction (no toggle dependency)
+
+## Batch 6 — Loom iframe fixes + Sign-in landing page
+
+- [x] Add hideEmbedTopBar=true to Loom embed URLs in AcademyCategory.tsx (was missing)
+- [x] Add hideEmbedTopBar=true to Loom embed URLs in LessonViewer.tsx (was missing)
+- [x] Add sandbox attribute to all iframes (AcademyCategory, Webinars, LessonViewer, FloatingVideoPlayer) to block Loom redirect/clickthrough
+- [x] Close floating player when new video starts (AcademyCategory.tsx handlePlay + Webinars.tsx handlePlay)
+- [x] Create custom /signin landing page (SignIn.tsx) with WAVV branding, back button, and benefit copy
+- [x] Add /signin route to App.tsx
+- [x] Update PortalLayout.tsx Sign In button to point to /signin instead of /api/oauth/login
