@@ -2947,6 +2947,12 @@ function ContentTab() {
         </div>
       </div>
 
+      {/* ── Section Visibility Divider ── */}
+      <div className="flex items-center gap-3 pt-2 mb-3">
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, #2a2a2a, transparent)" }} />
+        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#4b5563" }}>Visibility Controls</span>
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to left, #2a2a2a, transparent)" }} />
+      </div>
       {/* ── Section Visibility ── */}
       <div className="rounded-xl p-4 space-y-3 mb-6" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-2 mb-1">
@@ -4937,6 +4943,12 @@ function WebinarsTab() {
         </div>
       )}
 
+      {/* ── Section Visibility Divider ── */}
+      <div className="flex items-center gap-3 pt-2 mb-3">
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, #2a2a2a, transparent)" }} />
+        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#4b5563" }}>Visibility Controls</span>
+        <div className="h-px flex-1" style={{ background: "linear-gradient(to left, #2a2a2a, transparent)" }} />
+      </div>
       {/* Section Visibility Toggles */}
       <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-2 mb-1">
@@ -6624,15 +6636,7 @@ function FaqSectionsPanel() {
 
   return (
     <div className="space-y-3">
-      {/* Section header */}
-      <div className="flex items-center gap-3 py-1">
-        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "#1a1f2e", border: "1px solid #2a2a2a" }}>
-          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#eab308" }} />
-          <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#6b7280" }}>FAQ SECTIONS</span>
-        </div>
-        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
-      </div>
+      {/* Section header removed — FAQs flow inline with Help Articles and PDFs */}
       <div className="flex items-center gap-2">
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#eab308" }} />
         <span className="text-sm font-semibold text-white">FAQs</span>
