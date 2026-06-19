@@ -2937,7 +2937,7 @@ function ContentTab() {
   return (
     <div className="space-y-0">
       {/* Hero header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="rounded-xl p-4 mb-6 flex items-center gap-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
           <GraduationCap size={18} style={{ color: "#0074F4" }} />
         </div>
@@ -4628,7 +4628,7 @@ function WebinarsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(16,185,129,0.15)" }}>
             <VideoIcon size={18} style={{ color: "#10b981" }} />
@@ -5436,7 +5436,7 @@ function GuidesTab() {
   const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(103,199,40,0.15)" }}>
             <FileTextIcon size={18} style={{ color: "#67C728" }} />
