@@ -20,6 +20,9 @@ function makeUser(overrides: Partial<AuthUser> = {}): AuthUser {
     name: "Test User",
     loginMethod: "manus",
     role: "user",
+    // publisherProcedure requires accountType=employee + approvalStatus=approved
+    accountType: "employee",
+    approvalStatus: "approved",
     createdAt: new Date(),
     updatedAt: new Date(),
     lastSignedIn: new Date(),
@@ -229,8 +232,10 @@ describe("academy.adminGetAllCourses", () => {
 // ─── Analytics Tests ─────────────────────────────────────────────────────────
 
 describe("analytics.getSummary", () => {
-  it("rejects non-admin users", async () => {
-    const { ctx } = makeCtx(makeUser({ role: "user" }));
+  it("rejects non-employee users", async () => {
+    // commandCenterProcedure gates on accountType=employee, not role.
+    // Use a customer account to correctly trigger the FORBIDDEN error.
+    const { ctx } = makeCtx(makeUser({ role: "user", accountType: "customer", approvalStatus: undefined }));
     const caller = appRouter.createCaller(ctx);
     await expect(caller.analytics.getSummary()).rejects.toThrow();
   });
