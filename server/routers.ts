@@ -176,6 +176,7 @@ import {
   getDropOffFunnel,
   getContentPerformance,
   getZeroResultSearches,
+  getUserIdentityStats,
 } from "./db";
 import { runIntercomSync } from "./intercomSync";
 
@@ -1162,6 +1163,11 @@ const analyticsRouter = router({
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getZeroResultSearches(since, input.limit);
+    }),
+
+  getUserIdentityStats: adminProcedure
+    .query(async () => {
+      return getUserIdentityStats();
     }),
 });
 
