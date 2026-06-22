@@ -410,6 +410,8 @@
 - [x] Remove Google OAuth button from sign-in modal (deferred — no credentials available)
 - [x] Keep Google OAuth backend code in place but dormant (activate when Client ID is available)
 - [x] Document customer-gating strategy: active WAVV customer verification via API
+- [x] Add Google Analytics GA4 (G-5QB2WDFD8K) to site
+- [x] Simplify internal analytics to identity-focused view (account types, approval status, subscription status, recent sign-ins)
 - [ ] Future: wire WAVV customer status API to gate login (only active subscribers can access)
 - [ ] Future: Google OAuth as secondary sign-in option once Client ID is available
 

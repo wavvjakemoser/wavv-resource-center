@@ -92,6 +92,7 @@ import {
   Headphones,
   AlertCircle,
   Clock,
+  CreditCard,
   CheckCircle2,
   Star,
   EyeOff,
@@ -858,46 +859,24 @@ function friendlyPage(path: string) {
 }
 
 function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
-  const { data: overview, isLoading } = trpc.analytics.getAnonOverview.useQuery({ days });
-  const { data: pageTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "page_view", days });
-  const { data: academyTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "academy_video_play", days });
-  const { data: webinarTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "webinar_video_play", days });
-  const { data: guideTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "guide_download", days });
-  // Enhanced analytics queries
-  const { data: enhancedSummary } = trpc.analytics.getEnhancedSummary.useQuery({ days });
-  const { data: contentPerformance } = trpc.analytics.getContentPerformance.useQuery({ days });
-  const { data: dropOffFunnel } = trpc.analytics.getDropOffFunnel.useQuery({ days });
-  const { data: topSearchTerms } = trpc.analytics.getTopSearchTerms.useQuery({ days });
-  const { data: zeroResultSearches } = trpc.analytics.getZeroResultSearches.useQuery({ days });
+  const { data: identityStats, isLoading } = trpc.analytics.getUserIdentityStats.useQuery();
 
-  const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides" | "insights">("overview");
-
-  const [showPageDrilldown, setShowPageDrilldown] = useState(false);
-  const { data: drilldown } = trpc.analytics.getPageViewDrilldown.useQuery({ days }, { enabled: showPageDrilldown });
-
-  const GUIDE_TYPE_LABELS: Record<string, string> = {
-    help_article: "Help Articles", pdf: "PDFs", checklist: "Checklists",
-    playbook: "Playbooks", other: "Resources",
+  const SUB_STATUS_COLORS: Record<string, string> = {
+    ACTIVE: "#4ade80",
+    TRIALING: "#22d3ee",
+    SCHEDULED_CANCEL: "#f59e0b",
+    CANCELED: "#f87171",
+    INCOMPLETE: "#a78bfa",
+    NONE: "#6b7280",
   };
-  const GUIDE_TYPE_COLORS: Record<string, string> = {
-    help_article: "#8B5CF6", pdf: "#ef4444", checklist: "#67C728",
-    playbook: "#0074F4", other: "#FF9900",
+  const SUB_STATUS_LABELS: Record<string, string> = {
+    ACTIVE: "Active",
+    TRIALING: "Trial",
+    SCHEDULED_CANCEL: "Canceling",
+    CANCELED: "Canceled",
+    INCOMPLETE: "Incomplete",
+    NONE: "No Sub",
   };
-  const WEBINAR_TYPE_COLORS: Record<string, string> = {
-    exclusive: "#a78bfa", evergreen: "#22d3ee", recording: "#f59e0b",
-  };
-
-  const totalAcademyPlays = (overview?.academyByCategory ?? []).reduce((s, r) => s + (r.count ?? 0), 0);
-  const totalWebinarPlays = (overview?.webinarByType ?? []).reduce((s, r) => s + (r.count ?? 0), 0);
-  const totalGuideDownloads = (overview?.guidesByType ?? []).reduce((s, r) => s + (r.count ?? 0), 0);
-
-  const PANEL_TABS = [
-    { key: "overview" as const, label: "Overview", color: "#22d3ee", icon: <Activity size={13} /> },
-    { key: "academy" as const, label: "WAVV Academy",  color: "#22d3ee", icon: <GraduationCap size={13} /> },
-    { key: "webinars" as const, label: "WAVV Webinars", color: "#f59e0b", icon: <Video size={13} /> },
-    { key: "guides" as const, label: "Resource Hub",   color: "#4ade80", icon: <FileText size={13} /> },
-    { key: "insights" as const, label: "Insights",     color: "#a78bfa", icon: <Search size={13} /> },
-  ];
 
   if (isLoading) {
     return (
@@ -910,380 +889,190 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
     );
   }
 
+  const stats = identityStats ?? {
+    totalAccounts: 0,
+    byAccountType: { employee: 0, customer: 0, guest: 0 },
+    byApprovalStatus: { approved: 0, pending: 0, denied: 0 },
+    bySubscriptionStatus: {},
+    recentSignIns: [],
+    newAccountsTrend: [],
+  };
+
+  const accountTypeItems = [
+    { label: "Customers", value: stats.byAccountType.customer, color: "#22d3ee", bg: "rgba(34,211,238,0.08)", border: "rgba(34,211,238,0.2)" },
+    { label: "WAVV Team", value: stats.byAccountType.employee, color: "#60a5fa", bg: "rgba(96,165,250,0.08)", border: "rgba(96,165,250,0.2)" },
+    { label: "Guests / Pending", value: stats.byAccountType.guest, color: "#a78bfa", bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.2)" },
+  ];
+
+  const approvalItems = [
+    { label: "Approved", value: stats.byApprovalStatus.approved, color: "#4ade80" },
+    { label: "Pending", value: stats.byApprovalStatus.pending, color: "#f59e0b" },
+    { label: "Denied", value: stats.byApprovalStatus.denied, color: "#f87171" },
+  ];
+
+  const totalApproval = approvalItems.reduce((s, i) => s + i.value, 0) || 1;
+
+  const subEntries = Object.entries(stats.bySubscriptionStatus).sort((a, b) => b[1] - a[1]);
+  const totalSubs = subEntries.reduce((s, [, v]) => s + v, 0) || 1;
+
   return (
     <div className="space-y-6">
       {/* ── Headline KPI row ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.2)" }}>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
             <Users size={18} style={{ color: "#60a5fa" }} />
           </div>
           <div>
-            <p className="text-xs text-gray-400 mb-0.5">Total Signed-In Users</p>
-            <p className="text-2xl font-bold text-white">{(enhancedSummary?.totalSignedInUsers ?? 0).toLocaleString()}</p>
+            <p className="text-xs text-gray-400 mb-0.5">Total Accounts</p>
+            <p className="text-2xl font-bold text-white">{stats.totalAccounts.toLocaleString()}</p>
             <p className="text-[10px] text-gray-500 mt-0.5">All time</p>
           </div>
         </div>
-        <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)" }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(34,211,238,0.15)" }}>
-            <GraduationCap size={18} style={{ color: "#22d3ee" }} />
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-0.5">Lessons Completed</p>
-            <p className="text-2xl font-bold text-white">{(enhancedSummary?.totalLessonsCompleted ?? 0).toLocaleString()}</p>
-            <p className="text-[10px] text-gray-500 mt-0.5">In selected period</p>
-          </div>
-        </div>
-        <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.2)" }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(167,139,250,0.15)" }}>
-            <Search size={18} style={{ color: "#a78bfa" }} />
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs text-gray-400 mb-0.5">Top Search Term</p>
-            <p className="text-lg font-bold text-white truncate">{enhancedSummary?.mostSearchedTerm ?? "—"}</p>
-            <p className="text-[10px] text-gray-500 mt-0.5">Most searched in period</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary stat tiles */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Page Views tile — clickable for drilldown */}
-        <div
-          className="relative cursor-pointer group"
-          onClick={() => setShowPageDrilldown(true)}
-          title="Click to see per-page breakdown"
-        >
-          <StatCard icon={<Eye size={18} />} label="Page Views" value={overview?.totalPageViews ?? 0} color="blue" />
-          <span className="absolute bottom-2 right-3 text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#60a5fa" }}>View breakdown →</span>
-        </div>
-        <StatCard icon={<GraduationCap size={18} />} label="Academy Plays"      value={totalAcademyPlays}              color="cyan"   />
-        <StatCard icon={<Video size={18} />}         label="Webinar Plays"      value={totalWebinarPlays}              color="amber"  />
-        <StatCard icon={<Download size={18} />}      label="Guide Downloads"    value={totalGuideDownloads}            color="green"  />
-      </div>
-
-      {/* Page View Drilldown Modal */}
-      {showPageDrilldown && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.7)" }}
-          onClick={(e) => { if (e.target === e.currentTarget) setShowPageDrilldown(false); }}
-        >
-          <div className="w-full max-w-2xl rounded-2xl overflow-hidden" style={{ background: "#161b22", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "80vh" }}>
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-              <div className="flex items-center gap-2">
-                <Eye size={16} style={{ color: "#60a5fa" }} />
-                <span className="font-semibold text-white text-sm">Page View Breakdown</span>
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(96,165,250,0.12)", color: "#60a5fa" }}>
-                  {drilldown?.total ?? overview?.totalPageViews ?? 0} total
-                </span>
-              </div>
-              <button onClick={() => setShowPageDrilldown(false)} className="text-gray-400 hover:text-white transition-colors">
-                <X size={18} />
-              </button>
+        {accountTypeItems.map((item) => (
+          <div key={item.label} className="rounded-xl p-5 flex items-center gap-4" style={{ background: item.bg, border: `1px solid ${item.border}` }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: item.bg }}>
+              <UserCheck size={18} style={{ color: item.color }} />
             </div>
-            {/* Table */}
-            <div className="overflow-y-auto" style={{ maxHeight: "calc(80vh - 72px)" }}>
-              {!drilldown ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="w-6 h-6 rounded-full border-2 border-blue-400 border-t-transparent animate-spin" />
-                </div>
-              ) : drilldown.pages.length === 0 ? (
-                <p className="text-center text-gray-500 py-12 text-sm">No page views recorded yet.</p>
-              ) : (
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                      <th className="text-left px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Page</th>
-                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Views</th>
-                      <th className="text-right px-6 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.4)" }}>Share</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {drilldown.pages.map((p, i) => {
-                      const pct = drilldown.total > 0 ? Math.round((p.total / drilldown.total) * 100) : 0;
-                      return (
-                        <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-                          className="hover:bg-white/[0.02] transition-colors">
-                          <td className="px-6 py-3">
-                            <div className="font-medium text-white">{friendlyPage(p.path ?? "")}</div>
-                            <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{p.path}</div>
-                          </td>
-                          <td className="px-6 py-3 text-right font-semibold text-white">{p.total.toLocaleString()}</td>
-                          <td className="px-6 py-3 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-                                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#60a5fa" }} />
-                              </div>
-                              <span className="text-xs w-8 text-right" style={{ color: "#60a5fa" }}>{pct}%</span>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5">{item.label}</p>
+              <p className="text-2xl font-bold text-white">{item.value.toLocaleString()}</p>
+              <p className="text-[10px] mt-0.5" style={{ color: item.color }}>
+                {stats.totalAccounts > 0 ? Math.round((item.value / stats.totalAccounts) * 100) : 0}% of total
+              </p>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Panel tabs */}
-      <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-        {PANEL_TABS.map((t) => (
-          <button key={t.key} onClick={() => setActivePanel(t.key as "overview" | "academy" | "webinars" | "guides" | "insights")}
-            className="flex items-center gap-1.5 flex-1 justify-center py-2 text-xs font-medium rounded-lg transition"
-            style={activePanel === t.key
-              ? { background: "rgba(255,255,255,0.1)", color: t.color }
-              : { color: "#6b7280" }}>
-            {t.icon} {t.label}
-          </button>
         ))}
       </div>
 
-      {/* Overview panel */}
-      {activePanel === "overview" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Page views trend */}
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Eye size={13} style={{ color: "#60a5fa" }} /> Page Views Trend</p>
-            <AnonTrendChart data={pageTrend ?? []} color="#60a5fa" />
-          </div>
-          {/* Top pages */}
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Navigation size={13} style={{ color: "#22d3ee" }} /> Top Pages (excl. home)</p>
-            <AnonRankedList
-              items={(overview?.topPages ?? []).map((p) => ({ label: friendlyPage(p.path ?? "unknown"), count: p.total ?? 0 }))}
-              color="#22d3ee"
-              emptyText="No page views recorded yet"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Academy panel */}
-      {activePanel === "academy" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><GraduationCap size={13} style={{ color: "#22d3ee" }} /> Plays by Category</p>
-            <AnonBarChart
-              data={(overview?.academyByCategory ?? []).map((r) => ({ name: r.category ?? "Unknown", count: r.count ?? 0 }))}
-              color="#22d3ee"
-            />
-          </div>
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Activity size={13} style={{ color: "#22d3ee" }} /> Academy Plays Trend</p>
-            <AnonTrendChart data={academyTrend ?? []} color="#22d3ee" />
-          </div>
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Layers size={13} style={{ color: "#22d3ee" }} /> Top Sections</p>
-            <AnonRankedList
-              items={(overview?.academyBySection ?? []).map((r) => ({ label: r.section ?? "Unknown", sublabel: r.category ?? undefined, count: r.count ?? 0 }))}
-              color="#22d3ee"
-              emptyText="No academy plays yet"
-            />
-          </div>
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Star size={13} style={{ color: "#fbbf24" }} /> Top Individual Lessons</p>
-            <AnonRankedList
-              items={(overview?.topLessons ?? []).map((r) => ({ label: r.title ?? "Unknown", sublabel: r.section ?? undefined, count: r.count ?? 0 }))}
-              color="#fbbf24"
-              emptyText="No lesson plays yet"
-            />
+      {/* ── Status + Subscription breakdown ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Approval status */}
+        <div className="rounded-xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+            <ShieldCheck size={13} style={{ color: "#4ade80" }} /> Account Status
+          </p>
+          <div className="space-y-3">
+            {approvalItems.map((item) => {
+              const pct = Math.round((item.value / totalApproval) * 100);
+              return (
+                <div key={item.label} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-300">{item.label}</span>
+                    <span className="font-semibold text-white">{item.value.toLocaleString()} <span className="text-gray-500 font-normal">({pct}%)</span></span>
+                  </div>
+                  <div className="h-2 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, background: item.color }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-      )}
 
-      {/* Webinars panel */}
-      {activePanel === "webinars" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Video size={13} style={{ color: "#f59e0b" }} /> Plays by Type</p>
-            <div className="space-y-2">
-              {(overview?.webinarByType ?? []).length === 0
-                ? <p className="text-gray-500 text-sm text-center py-6">No webinar plays yet</p>
-                : (overview?.webinarByType ?? []).map((r, i) => {
-                    const color = WEBINAR_TYPE_COLORS[r.type ?? ""] ?? "#9ca3af";
-                    const total = totalWebinarPlays || 1;
-                    const pct = Math.round(((r.count ?? 0) / total) * 100);
-                    return (
-                      <div key={i} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-300 capitalize">{r.type ?? "unknown"}</span>
-                          <span className="font-semibold text-white">{r.count ?? 0} <span className="text-gray-500 font-normal">({pct}%)</span></span>
-                        </div>
-                        <div className="h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
-                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
-                        </div>
+        {/* Subscription status (customers only) */}
+        <div className="rounded-xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+            <CreditCard size={13} style={{ color: "#22d3ee" }} /> Subscription Status <span className="text-gray-600 font-normal">(customers)</span>
+          </p>
+          {subEntries.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-6">No customer subscription data</p>
+          ) : (
+            <div className="space-y-3">
+              {subEntries.map(([status, count]) => {
+                const pct = Math.round((count / totalSubs) * 100);
+                const color = SUB_STATUS_COLORS[status] ?? "#9ca3af";
+                const label = SUB_STATUS_LABELS[status] ?? status;
+                return (
+                  <div key={status} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
+                        <span className="text-gray-300">{label}</span>
                       </div>
-                    );
-                  })
-              }
-            </div>
-          </div>
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Activity size={13} style={{ color: "#f59e0b" }} /> Webinar Plays Trend</p>
-            <AnonTrendChart data={webinarTrend ?? []} color="#f59e0b" />
-          </div>
-          <div className="rounded-xl p-5 space-y-3 lg:col-span-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Star size={13} style={{ color: "#fbbf24" }} /> Top Individual Webinars</p>
-            <AnonRankedList
-              items={(overview?.topWebinars ?? []).map((r) => ({ label: r.title ?? "Unknown", sublabel: r.type ?? undefined, count: r.count ?? 0 }))}
-              color="#f59e0b"
-              emptyText="No webinar plays yet"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Resource Hub panel */}
-      {activePanel === "guides" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Download size={13} style={{ color: "#4ade80" }} /> Downloads by Category</p>
-            <div className="space-y-2">
-              {(overview?.guidesByType ?? []).length === 0
-                ? <p className="text-gray-500 text-sm text-center py-6">No guide downloads yet</p>
-                : (overview?.guidesByType ?? []).map((r, i) => {
-                    const color = GUIDE_TYPE_COLORS[r.fileType ?? ""] ?? "#9ca3af";
-                    const label = GUIDE_TYPE_LABELS[r.fileType ?? ""] ?? (r.fileType ?? "Other");
-                    const total = totalGuideDownloads || 1;
-                    const pct = Math.round(((r.count ?? 0) / total) * 100);
-                    return (
-                      <div key={i} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-300">{label}</span>
-                          <span className="font-semibold text-white">{r.count ?? 0} <span className="text-gray-500 font-normal">({pct}%)</span></span>
-                        </div>
-                        <div className="h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
-                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
-                        </div>
-                      </div>
-                    );
-                  })
-              }
-            </div>
-          </div>
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Activity size={13} style={{ color: "#4ade80" }} /> Downloads Trend</p>
-            <AnonTrendChart data={guideTrend ?? []} color="#4ade80" />
-          </div>
-          <div className="rounded-xl p-5 space-y-3 lg:col-span-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Star size={13} style={{ color: "#fbbf24" }} /> Top Individual Guides</p>
-            <AnonRankedList
-              items={(overview?.topGuides ?? []).map((r) => ({ label: r.title ?? "Unknown", sublabel: GUIDE_TYPE_LABELS[r.fileType ?? ""] ?? r.fileType ?? undefined, count: r.count ?? 0 }))}
-              color="#4ade80"
-              emptyText="No guide downloads yet"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Insights panel */}
-      {activePanel === "insights" && (
-        <div className="space-y-6">
-          {/* Drop-off Funnel */}
-          <div className="rounded-xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><TrendingDown size={13} style={{ color: "#f59e0b" }} /> Customer Journey Funnel</p>
-            {!dropOffFunnel ? (
-              <div className="flex items-center justify-center h-24"><div className="w-5 h-5 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" /></div>
-            ) : (
-              <div className="space-y-3">
-                {[
-                  { label: "Anonymous Visitors", value: dropOffFunnel.anonymousVisitors, color: "#60a5fa" },
-                  { label: "Signed-In Users", value: dropOffFunnel.signedInUsers, color: "#22d3ee" },
-                  { label: "Started a Lesson", value: dropOffFunnel.startedLesson, color: "#a78bfa" },
-                  { label: "Completed a Lesson", value: dropOffFunnel.completedLesson, color: "#4ade80" },
-                ].map((step, idx, arr) => {
-                  const maxVal = arr[0]?.value || 1;
-                  const pct = Math.round((step.value / maxVal) * 100);
-                  const dropPct = idx > 0 ? Math.round(((arr[idx-1].value - step.value) / (arr[idx-1].value || 1)) * 100) : null;
-                  return (
-                    <div key={idx} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-300 flex items-center gap-1.5">
-                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: step.color + "22", color: step.color }}>{idx+1}</span>
-                          {step.label}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          {dropPct !== null && dropPct > 0 && <span className="text-[10px] text-red-400">-{dropPct}% drop</span>}
-                          <span className="font-semibold text-white">{step.value.toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <div className="h-2 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
-                        <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, background: step.color }} />
-                      </div>
+                      <span className="font-semibold text-white">{count.toLocaleString()} <span className="text-gray-500 font-normal">({pct}%)</span></span>
                     </div>
+                    <div className="h-2 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── New Accounts Trend (30 days) ── */}
+      {stats.newAccountsTrend.length > 0 && (
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+            <TrendingUp size={13} style={{ color: "#22d3ee" }} /> New Accounts — Last 30 Days
+          </p>
+          <AnonTrendChart data={stats.newAccountsTrend} color="#22d3ee" />
+        </div>
+      )}
+
+      {/* ── Recent Sign-Ins ── */}
+      <div className="rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+            <Clock size={13} style={{ color: "#a78bfa" }} /> Recent Sign-Ins
+          </p>
+        </div>
+        {stats.recentSignIns.length === 0 ? (
+          <p className="text-gray-500 text-sm text-center py-8">No sign-in data yet</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                  <th className="text-left px-5 py-3 text-gray-500 font-semibold uppercase tracking-wider">Name</th>
+                  <th className="text-left px-5 py-3 text-gray-500 font-semibold uppercase tracking-wider">Email</th>
+                  <th className="text-left px-5 py-3 text-gray-500 font-semibold uppercase tracking-wider">Type</th>
+                  <th className="text-left px-5 py-3 text-gray-500 font-semibold uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-3 text-gray-500 font-semibold uppercase tracking-wider">Subscription</th>
+                  <th className="text-right px-5 py-3 text-gray-500 font-semibold uppercase tracking-wider">Last Seen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.recentSignIns.map((u) => {
+                  const typeColor = u.accountType === "customer" ? "#22d3ee" : u.accountType === "employee" ? "#60a5fa" : "#a78bfa";
+                  const statusColor = u.approvalStatus === "approved" ? "#4ade80" : u.approvalStatus === "pending" ? "#f59e0b" : "#f87171";
+                  const subColor = SUB_STATUS_COLORS[u.subscriptionStatus ?? "NONE"] ?? "#6b7280";
+                  const subLabel = SUB_STATUS_LABELS[u.subscriptionStatus ?? "NONE"] ?? u.subscriptionStatus ?? "—";
+                  return (
+                    <tr key={u.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="px-5 py-3 text-gray-200 font-medium">{u.name ?? "—"}</td>
+                      <td className="px-5 py-3 text-gray-400">{u.email ?? "—"}</td>
+                      <td className="px-5 py-3">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize" style={{ background: typeColor + "22", color: typeColor }}>
+                          {u.accountType}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize" style={{ background: statusColor + "22", color: statusColor }}>
+                          {u.approvalStatus}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        {u.accountType === "customer" ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold" style={{ background: subColor + "22", color: subColor }}>
+                            {subLabel}
+                          </span>
+                        ) : <span className="text-gray-600">—</span>}
+                      </td>
+                      <td className="px-5 py-3 text-right text-gray-400">
+                        {new Date(u.lastSignedIn).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                      </td>
+                    </tr>
                   );
                 })}
-              </div>
-            )}
+              </tbody>
+            </table>
           </div>
-
-          {/* Content Performance Table */}
-          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><BarChart3 size={13} style={{ color: "#22d3ee" }} /> Content Performance — Lessons</p>
-            {!contentPerformance ? (
-              <div className="flex items-center justify-center h-24"><div className="w-5 h-5 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" /></div>
-            ) : contentPerformance.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-6">No lesson data yet</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                      <th className="text-left py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Lesson</th>
-                      <th className="text-left py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Course</th>
-                      <th className="text-right py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Views</th>
-                      <th className="text-right py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Completions</th>
-                      <th className="text-right py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {contentPerformance.slice(0, 20).map((row, i) => (
-                      <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-2 px-2 text-gray-200 max-w-[200px] truncate">{row.lessonTitle}</td>
-                        <td className="py-2 px-2 text-gray-500 max-w-[150px] truncate">{row.courseTitle}</td>
-                        <td className="py-2 px-2 text-right text-white font-medium">{row.views.toLocaleString()}</td>
-                        <td className="py-2 px-2 text-right text-white font-medium">{row.completions.toLocaleString()}</td>
-                        <td className="py-2 px-2 text-right">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{
-                            background: row.completionRate >= 50 ? "rgba(74,222,128,0.15)" : row.completionRate >= 20 ? "rgba(251,191,36,0.15)" : "rgba(239,68,68,0.15)",
-                            color: row.completionRate >= 50 ? "#4ade80" : row.completionRate >= 20 ? "#fbbf24" : "#f87171",
-                          }}>{row.completionRate}%</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Search Insights */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Search size={13} style={{ color: "#a78bfa" }} /> Top Search Terms</p>
-              <AnonRankedList
-                items={(topSearchTerms ?? []).map((r) => ({ label: r.term, count: r.count ?? 0 }))}
-                color="#a78bfa"
-                emptyText="No search data yet"
-              />
-            </div>
-            <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-              <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><AlertTriangle size={13} style={{ color: "#f87171" }} /> Zero-Result Searches</p>
-              <p className="text-[10px] text-gray-500">Queries that returned no content — content gaps to address</p>
-              <AnonRankedList
-                items={(zeroResultSearches ?? []).map((r) => ({ label: r.topic, count: r.count ?? 0 }))}
-                color="#f87171"
-                emptyText="No zero-result searches yet"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
