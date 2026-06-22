@@ -863,8 +863,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
   const { data: academyTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "academy_video_play", days });
   const { data: webinarTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "webinar_video_play", days });
   const { data: guideTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "guide_download", days });
-
-  // Enhanced analytics
+  // Enhanced analytics queries
   const { data: enhancedSummary } = trpc.analytics.getEnhancedSummary.useQuery({ days });
   const { data: contentPerformance } = trpc.analytics.getContentPerformance.useQuery({ days });
   const { data: dropOffFunnel } = trpc.analytics.getDropOffFunnel.useQuery({ days });
@@ -872,6 +871,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
   const { data: zeroResultSearches } = trpc.analytics.getZeroResultSearches.useQuery({ days });
 
   const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides" | "insights">("overview");
+
   const [showPageDrilldown, setShowPageDrilldown] = useState(false);
   const { data: drilldown } = trpc.analytics.getPageViewDrilldown.useQuery({ days }, { enabled: showPageDrilldown });
 

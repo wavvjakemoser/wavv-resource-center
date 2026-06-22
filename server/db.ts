@@ -2705,9 +2705,6 @@ export async function reorderFaqEntries(items: { id: number; sortOrder: number }
   ));
 }
 
-=======
-
->>>>>>> Stashed changes
 // ─── Enhanced Analytics Helpers ──────────────────────────────────────────────
 
 /** Top N search terms within a date range */
@@ -2749,7 +2746,6 @@ export async function getTotalSignedInUsers() {
 export async function getTotalLessonsCompleted(sinceDate?: Date) {
   const db = await getDb();
   if (!db) return 0;
-<<<<<<< Updated upstream
   const conditions = [eq(lessonProgress.completed, true)];
   if (sinceDate) conditions.push(gte(lessonProgress.completedAt, sinceDate));
   const [result] = await db
