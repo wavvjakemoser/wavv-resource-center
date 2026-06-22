@@ -146,11 +146,12 @@ export function registerOAuthRoutes(app: Express) {
       const tokenAccountType = userInfo.account_type ?? idClaims.account_type ?? null;
       const tokenIsEmployee = userInfo.is_employee ?? idClaims.is_employee ?? null;
 
-      // Resolve account_type: trust token if present, otherwise use email domain heuristic
+      // Resolve account_type:
+      // - @wavv.com email = always employee (authoritative, regardless of token)
+      // - Non-@wavv.com email = NEVER employee, even if token claims employee/is_employee
+      //   (personal/Gmail accounts cannot be WAVV employees in this system)
       const resolvedAccountType: "employee" | "customer" | "guest" =
         isWavvEmail
-          ? "employee"
-          : tokenAccountType === "employee" || tokenIsEmployee === true
           ? "employee"
           : tokenAccountType === "customer" || (userInfo.is_customer ?? idClaims.is_customer ?? false)
           ? "customer"
@@ -172,8 +173,10 @@ export function registerOAuthRoutes(app: Express) {
       if (!user && email) {
         const existingByEmail = await db.getUserByEmail(email);
         if (existingByEmail) {
-          // Never downgrade an existing employee to guest — preserve their accountType if already elevated
+          // Never downgrade an existing @wavv.com employee to guest — preserve their accountType if already elevated.
+          // However, non-@wavv.com emails can NEVER be employee, even if the DB previously had them as one.
           const mergedAccountType =
+            !isWavvEmail && existingByEmail.accountType === "employee" ? accountType :
             existingByEmail.accountType === "employee" ? "employee" :
             existingByEmail.accountType === "customer" && accountType === "guest" ? "customer" :
             accountType;
@@ -225,8 +228,10 @@ export function registerOAuthRoutes(app: Express) {
         user = await db.getUserByOpenId(externalId);
       } else {
         // Update live metadata on every login (but never overwrite approvalStatus or downgrade accountType)
+        // Exception: non-@wavv.com emails can NEVER be employee, even if DB has them as one
         const existingAccountType = user.accountType;
         const safeAccountType =
+          !isWavvEmail && existingAccountType === "employee" ? accountType :
           existingAccountType === "employee" ? "employee" :
           existingAccountType === "customer" && accountType === "guest" ? "customer" :
           accountType;
