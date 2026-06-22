@@ -1,4 +1,7 @@
 import { TRPCError } from "@trpc/server";
+import { and, desc, eq, ne, sql } from "drizzle-orm";
+import { getDb } from "./db";
+import { users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { getReadinessItems, toggleReadinessItem } from "./db";
 import { z } from "zod";
@@ -172,8 +175,11 @@ import { runIntercomSync } from "./intercomSync";
 // ─── Role guards ─────────────────────────────────────────────────────────────
 // Canonical roles: owner | content_admin (Publisher) | partner_admin (Partner Manager) | admin (Viewer)
 
-// Owner only — full platform control
+// Owner only — full platform control (must be approved employee)
 const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.accountType !== "employee" || ctx.user.approvalStatus !== "approved") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "WAVV employees only" });
+  }
   if (ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Owner access required" });
   }
@@ -181,6 +187,9 @@ const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 // Publisher (content_admin) or Owner — manage all content in Academy, Webinars, Guides; view analytics
 const publisherProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.accountType !== "employee" || ctx.user.approvalStatus !== "approved") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "WAVV employees only" });
+  }
   if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Publisher access required" });
   }
@@ -188,11 +197,15 @@ const publisherProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 // Alias for backward compatibility within this file
 const superAdminProcedure = publisherProcedure;
-// Any Command Center role (Viewer/admin, Publisher/content_admin, Partner Manager/partner_admin, Owner) — read-only access
+// Any WAVV employee with approved status — Command Center access
 const commandCenterProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "viewer" && ctx.user.role !== "publisher" && ctx.user.role !== "partner_manager" && ctx.user.role !== "owner") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Command Center access required" });
-  }  return next({ ctx });
+  if (ctx.user.accountType !== "employee") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "WAVV employees only" });
+  }
+  if (ctx.user.approvalStatus !== "approved") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Command Center access pending approval" });
+  }
+  return next({ ctx });
 });
 // Alias for backward compatibility within this file
 const adminProcedure = commandCenterProcedure;
@@ -1133,6 +1146,11 @@ export const appRouter = router({
         lastSignedIn: u.lastSignedIn,
         mfaPending: opts.ctx.mfaPending,
         mfaForceReenroll: u.mfaForceReenroll ?? false,
+        // WAVV IdP identity fields
+        accountType: u.accountType,
+        approvalStatus: u.approvalStatus,
+        isEmployee: u.isEmployee,
+        isCustomer: u.isCustomer,
       };
     }),
 
@@ -1245,6 +1263,97 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await deleteNotification(input.id);
+        return { success: true };
+      }),
+
+    // ── Users Management ─────────────────────────────────────────────────────
+    /** List all WAVV employees (account_type = 'employee'), with lesson/bookmark counts */
+    listEmployees: commandCenterProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      const rows = await db
+        .select()
+        .from(users)
+        .where(eq(users.accountType, "employee"))
+        .orderBy(desc(users.createdAt));
+      return rows.map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        accountType: u.accountType,
+        approvalStatus: u.approvalStatus,
+        isEmployee: u.isEmployee,
+        lastSignedIn: u.lastSignedIn,
+        createdAt: u.createdAt,
+        avatarUrl: u.avatarUrl,
+        isActive: u.isActive,
+      }));
+    }),
+
+    /** List all portal users (customers + guests), with metadata from IdP */
+    listPortalUsers: commandCenterProcedure
+      .input(z.object({
+        accountType: z.enum(["customer", "guest", "all"]).default("all"),
+        subscriptionStatus: z.string().optional(),
+        search: z.string().optional(),
+        limit: z.number().min(1).max(500).default(100),
+        offset: z.number().min(0).default(0),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return { users: [], total: 0 };
+        const conditions = [ne(users.accountType, "employee")];
+        if (input.accountType !== "all") {
+          conditions.push(eq(users.accountType, input.accountType));
+        }
+        if (input.subscriptionStatus) {
+          conditions.push(eq(users.subscriptionStatus, input.subscriptionStatus));
+        }
+        if (input.search) {
+          const s = `%${input.search}%`;
+          conditions.push(
+            sql`(${users.name} LIKE ${s} OR ${users.email} LIKE ${s})`
+          );
+        }
+        const whereClause = conditions.length === 1 ? conditions[0] : and(...conditions);
+        const [rows, countRows] = await Promise.all([
+          db.select().from(users).where(whereClause).orderBy(desc(users.lastSignedIn)).limit(input.limit).offset(input.offset),
+          db.select({ count: sql<number>`COUNT(*)` }).from(users).where(whereClause),
+        ]);
+        const total = countRows[0]?.count ?? 0;
+        return {
+          total,
+          users: rows.map(u => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            accountType: u.accountType,
+            isCustomer: u.isCustomer,
+            wavvAccountId: u.wavvAccountId,
+            subscriptionStatus: u.subscriptionStatus,
+            wavvPlan: u.wavvPlan,
+            createdAt: u.createdAt,
+            lastSignedIn: u.lastSignedIn,
+            avatarUrl: u.avatarUrl,
+            isActive: u.isActive,
+          })),
+        };
+      }),
+
+    /** Approve or deny a WAVV employee's Command Center access */
+    updateApproval: ownerProcedure
+      .input(z.object({
+        userId: z.number(),
+        approvalStatus: z.enum(["approved", "denied", "pending"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (input.userId === ctx.user.id) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot change your own approval status" });
+        }
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        await db.update(users).set({ approvalStatus: input.approvalStatus }).where(eq(users.id, input.userId));
         return { success: true };
       }),
   }),

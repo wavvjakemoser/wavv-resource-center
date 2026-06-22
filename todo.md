@@ -1522,3 +1522,17 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Create custom /signin landing page (SignIn.tsx) with WAVV branding, back button, and benefit copy
 - [x] Add /signin route to App.tsx
 - [x] Update PortalLayout.tsx Sign In button to point to /signin instead of /api/oauth/login
+
+## Batch 7 — WAVV IdP Integration + Command Center Access Control
+
+- [x] Schema: add account_type (employee/customer/guest), approval_status (pending/approved/denied), wavv_sub columns to users table
+- [x] Schema: add wavv_account_id, subscription_status, plan, is_employee, is_customer columns to users table
+- [x] Migration: apply schema changes via webdev_execute_sql
+- [x] OAuth callback: parse Steve's token claims (account_type, sub, is_employee, is_customer, wavv_account_id, subscription_status, plan) and store on login
+- [x] Update AdminGuard in App.tsx: gate on account_type=employee AND approval_status=approved
+- [x] Update all admin tRPC procedures: server-side check for employee+approved
+- [x] Seed Jake (jake@wavv.com) as approved employee/owner in DB
+- [x] Admin Users tab: WAVV Team sub-tab with pending approval queue + team table (approve/deny/revoke)
+- [x] Admin Users tab: Portal Users sub-tab with customer/guest table (account_type, subscription_status, plan, wavv_account_id, first seen, last login, lessons watched, bookmarks)
+- [x] Owner notification when new employee signs in and enters pending queue
+- [x] TypeScript check + checkpoint

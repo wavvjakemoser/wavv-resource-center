@@ -35,6 +35,16 @@ export const users = mysqlTable("users", {
   mfaSetupTokenExpiresAt: bigint("mfa_setup_token_expires_at", { mode: "number" }),
   // Force re-enrollment: when true, user must complete MFA setup again before accessing the app
   mfaForceReenroll: boolean("mfa_force_reenroll").default(false).notNull(),
+  // WAVV IdP token claims
+  wavvSub: varchar("wavv_sub", { length: 128 }),           // stable sub from IdP (employee:<id> / customer:<id> / guest:<id>)
+  accountType: mysqlEnum("account_type", ["employee", "customer", "guest"]).default("guest").notNull(),
+  approvalStatus: mysqlEnum("approval_status", ["pending", "approved", "denied"]).default("pending").notNull(),
+  isEmployee: boolean("is_employee").default(false).notNull(),
+  isCustomer: boolean("is_customer").default(false).notNull(),
+  // Customer-specific metadata (null for employees and guests)
+  wavvAccountId: varchar("wavv_account_id", { length: 128 }),
+  subscriptionStatus: varchar("subscription_status", { length: 64 }),  // NONE | INCOMPLETE | TRIALING | ACTIVE | SCHEDULED_CANCEL | CANCELED
+  wavvPlan: varchar("wavv_plan", { length: 128 }),
 });
 
 export type User = typeof users.$inferSelect;

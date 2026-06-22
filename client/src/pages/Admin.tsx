@@ -1580,10 +1580,32 @@ function UsersTab() {
     URL.revokeObjectURL(url);
   }
 
+  const [usersSubTab, setUsersSubTab] = useState<"team" | "portal">("team");
+
   return (
     <div className="space-y-6">
+      {/* Sub-tab switcher */}
+      <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", width: "fit-content" }}>
+        <button
+          onClick={() => setUsersSubTab("team")}
+          className="px-4 py-1.5 rounded-md text-xs font-medium transition-all"
+          style={usersSubTab === "team" ? { background: "#0074F4", color: "#fff" } : { color: "rgba(255,255,255,0.5)" }}
+        >
+          WAVV Team
+        </button>
+        <button
+          onClick={() => setUsersSubTab("portal")}
+          className="px-4 py-1.5 rounded-md text-xs font-medium transition-all"
+          style={usersSubTab === "portal" ? { background: "#0074F4", color: "#fff" } : { color: "rgba(255,255,255,0.5)" }}
+        >
+          Portal Users
+        </button>
+      </div>
+
+      {usersSubTab === "portal" && <PortalUsersPanel />}
+      {usersSubTab === "team" && <>
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-base font-semibold text-white">Team Access</h2>
+        <h2 className="text-base font-semibold text-white">WAVV Team</h2>
         <div className="flex items-center gap-2">
 
           <button
@@ -2002,9 +2024,208 @@ function UsersTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </> /* end WAVV Team sub-tab */}
     </div>
   );
 }
+// ─── Portal Users Panel ────────────────────────────────────────────────────────────
+const SUBSCRIPTION_LABELS: Record<string, { label: string; color: string }> = {
+  ACTIVE:            { label: "Active",           color: "#4ade80" },
+  TRIALING:          { label: "Trialing",         color: "#60a5fa" },
+  SCHEDULED_CANCEL:  { label: "Canceling",        color: "#fb923c" },
+  CANCELED:          { label: "Canceled",         color: "#f87171" },
+  INCOMPLETE:        { label: "Incomplete",       color: "#fbbf24" },
+  NONE:              { label: "No Subscription",  color: "rgba(255,255,255,0.3)" },
+};
+
+function PortalUsersPanel() {
+  const [accountTypeFilter, setAccountTypeFilter] = useState<"all" | "customer" | "guest">("all");
+  const [subStatusFilter, setSubStatusFilter] = useState<string>("all");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 50;
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => { setDebouncedSearch(search); setPage(0); }, 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const { data, isLoading } = trpc.admin.listPortalUsers.useQuery({
+    accountType: accountTypeFilter,
+    subscriptionStatus: subStatusFilter === "all" ? undefined : subStatusFilter,
+    search: debouncedSearch || undefined,
+    limit: PAGE_SIZE,
+    offset: page * PAGE_SIZE,
+  });
+
+  const portalUsers = data?.users ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const customerCount = portalUsers.filter(u => u.accountType === "customer").length;
+  const guestCount = portalUsers.filter(u => u.accountType === "guest").length;
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-base font-semibold text-white">Portal Users</h2>
+        <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+          {total.toLocaleString()} total users
+        </div>
+      </div>
+
+      {/* Stat chips */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {([
+          { key: "all",      label: "All",       count: total },
+          { key: "customer", label: "Customers", count: customerCount },
+          { key: "guest",    label: "Guests",    count: guestCount },
+        ] as const).map(chip => (
+          <button
+            key={chip.key}
+            onClick={() => { setAccountTypeFilter(chip.key); setPage(0); }}
+            className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+            style={accountTypeFilter === chip.key
+              ? { background: "#0074F4", color: "#fff" }
+              : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            {chip.label} {chip.count > 0 && <span className="opacity-70">({chip.count})</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* Filters row */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search name or email..."
+          className="px-3 py-1.5 rounded-lg text-xs outline-none w-56"
+          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff" }}
+        />
+        <select
+          value={subStatusFilter}
+          onChange={e => { setSubStatusFilter(e.target.value); setPage(0); }}
+          className="px-3 py-1.5 rounded-lg text-xs outline-none"
+          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff" }}
+        >
+          <option value="all">All Subscription Statuses</option>
+          {Object.entries(SUBSCRIPTION_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Table */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 rounded-full border-2 border-[#0074F4] border-t-transparent animate-spin" />
+        </div>
+      ) : portalUsers.length === 0 ? (
+        <div className="text-center py-12 text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>No users found.</div>
+      ) : (
+        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+          <Table>
+            <TableHeader>
+              <TableRow style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}>
+                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>User</TableHead>
+                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Type</TableHead>
+                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Subscription</TableHead>
+                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Plan</TableHead>
+                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>WAVV Account ID</TableHead>
+                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>First Seen</TableHead>
+                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Last Login</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {portalUsers.map(u => {
+                const sub = u.subscriptionStatus ? SUBSCRIPTION_LABELS[u.subscriptionStatus] : null;
+                return (
+                  <TableRow key={u.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {u.avatarUrl ? (
+                          <img src={u.avatarUrl} className="w-7 h-7 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold" style={{ background: "rgba(0,116,244,0.2)", color: "#60a5fa" }}>
+                            {(u.name ?? u.email ?? "?")[0].toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <div className="text-xs font-medium text-white">{u.name ?? "—"}</div>
+                          <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{u.email ?? "—"}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={u.accountType === "customer" ? { background: "rgba(74,222,128,0.1)", color: "#4ade80" } : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}>
+                        {u.accountType === "customer" ? "Customer" : "Guest"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {sub ? (
+                        <span className="text-xs font-medium" style={{ color: sub.color }}>{sub.label}</span>
+                      ) : (
+                        <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs" style={{ color: u.wavvPlan ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)" }}>
+                        {u.wavvPlan ?? "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs font-mono" style={{ color: u.wavvAccountId ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.2)" }}>
+                        {u.wavvAccountId ?? "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                        {u.lastSignedIn ? new Date(u.lastSignedIn).toLocaleDateString() : "—"}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total.toLocaleString()}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="px-3 py-1 rounded text-xs disabled:opacity-30 transition"
+              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)" }}
+            >← Prev</button>
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{page + 1} / {totalPages}</span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="px-3 py-1 rounded text-xs disabled:opacity-30 transition"
+              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)" }}
+            >Next →</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function StatCard({ icon, label, value, color, subtitle, onClick }: {
   icon: React.ReactNode; label: string; value: number; color: string; subtitle?: string;

@@ -139,6 +139,16 @@ export function registerOAuthRoutes(app: Express) {
       }
 
       const internalRole = mapWavvRoleToInternal(userInfo);
+      const accountType = userInfo.account_type ?? idClaims.account_type ?? "guest";
+      const isEmployee = userInfo.is_employee ?? idClaims.is_employee ?? (accountType === "employee");
+      const isCustomer = userInfo.is_customer ?? idClaims.is_customer ?? (accountType === "customer");
+      // Determine initial approvalStatus: employees start as "pending", others as "approved"
+      const initialApprovalStatus = isEmployee ? "pending" : "approved";
+
+      // Customer-specific metadata
+      const wavvAccountId = userInfo.wavv_account_id ?? idClaims.wavv_account_id ?? null;
+      const subscriptionStatus = userInfo.subscription_status ?? idClaims.subscription_status ?? null;
+      const wavvPlan = userInfo.plan ?? idClaims.plan ?? null;
 
       let user = await db.getUserByOpenId(externalId);
 
@@ -153,6 +163,14 @@ export function registerOAuthRoutes(app: Express) {
             lastSignedIn: new Date(),
             role: existingByEmail.role,
             avatarUrl: userInfo.picture || idClaims.picture || existingByEmail.avatarUrl || null,
+            wavvSub: externalId,
+            accountType,
+            approvalStatus: initialApprovalStatus,
+            isEmployee,
+            isCustomer,
+            wavvAccountId,
+            subscriptionStatus,
+            wavvPlan,
           });
           user = await db.getUserByOpenId(externalId);
         }
@@ -167,26 +185,60 @@ export function registerOAuthRoutes(app: Express) {
           lastSignedIn: new Date(),
           role: internalRole,
           avatarUrl: userInfo.picture || idClaims.picture || null,
+          wavvSub: externalId,
+          accountType,
+          approvalStatus: initialApprovalStatus,
+          isEmployee,
+          isCustomer,
+          wavvAccountId,
+          subscriptionStatus,
+          wavvPlan,
         });
         user = await db.getUserByOpenId(externalId);
       } else {
+        // Update live metadata on every login (but never overwrite approvalStatus)
         await db.upsertUser({
           openId: externalId,
           lastSignedIn: new Date(),
           name: userInfo.name || user.name || null,
           avatarUrl: userInfo.picture || idClaims.picture || user.avatarUrl || null,
+          wavvSub: externalId,
+          accountType,
+          isEmployee,
+          isCustomer,
+          wavvAccountId,
+          subscriptionStatus,
+          wavvPlan,
         });
       }
 
-      if (!user) {
+      // Re-fetch the final user record
+      const finalUser = await db.getUserByOpenId(externalId);
+
+      if (!finalUser) {
         res.status(500).json({ error: "Failed to resolve user after upsert" });
         return;
       }
 
+      // Notify owner if a new employee just hit the pending queue for the first time
+      // (was a new user before this login — user was null before upsert)
+      const isNewPendingEmployee = !user && finalUser.accountType === "employee" && finalUser.approvalStatus === "pending";
+      if (isNewPendingEmployee) {
+        try {
+          const { notifyOwner } = await import("./notification");
+          await notifyOwner({
+            title: "New Employee Pending Approval",
+            content: `${finalUser.name || finalUser.email} (${finalUser.email}) signed in for the first time and is waiting for Command Center approval. Visit the WAVV Command Center → Users → WAVV Team to approve or deny access.`,
+          });
+        } catch (notifyErr) {
+          console.error("[WAVV OIDC] Failed to send approval notification", notifyErr);
+        }
+      }
+
       const sessionToken = await createSessionToken({
-        userId: user.id,
-        email: user.email || email,
-        role: user.role as any,
+        userId: finalUser.id,
+        email: finalUser.email || email,
+        role: finalUser.role as any,
       });
 
       const cookieOptions = getSessionCookieOptions(req);

@@ -51,7 +51,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
   const values: InsertUser = { openId: user.openId };
   const updateSet: Record<string, unknown> = {};
-  const textFields = ["name", "email", "loginMethod", "avatarUrl"] as const;
+  const textFields = ["name", "email", "loginMethod", "avatarUrl", "wavvSub", "wavvAccountId", "subscriptionStatus", "wavvPlan"] as const;
 
   for (const field of textFields) {
     const value = user[field];
@@ -71,6 +71,23 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   } else if (user.openId === ENV.ownerOpenId) {
     values.role = "viewer";
     updateSet.role = "viewer";
+  }
+  if (user.accountType !== undefined) {
+    values.accountType = user.accountType;
+    updateSet.accountType = user.accountType;
+  }
+  // Only set approvalStatus on INSERT (new user) — never overwrite an existing approval decision
+  if (user.approvalStatus !== undefined) {
+    values.approvalStatus = user.approvalStatus;
+    // Do NOT add to updateSet — approval is set once and managed by admins
+  }
+  if (user.isEmployee !== undefined) {
+    values.isEmployee = user.isEmployee;
+    updateSet.isEmployee = user.isEmployee;
+  }
+  if (user.isCustomer !== undefined) {
+    values.isCustomer = user.isCustomer;
+    updateSet.isCustomer = user.isCustomer;
   }
 
   if (!values.lastSignedIn) values.lastSignedIn = new Date();

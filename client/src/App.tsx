@@ -37,8 +37,8 @@ function NavGuard({ href, children }: { href: string; children: React.ReactNode 
   return <>{children}</>;
 }
 
-// Strict guard for /wavvcommandcenter — only owner, publisher, and partner_manager roles.
-// Any signed-in customer (role="user") or viewer is redirected to home.
+// Strict guard for /wavvcommandcenter — WAVV employees only (accountType=employee AND approvalStatus=approved).
+// Customers and guests are silently redirected to home. Pending employees see an approval-pending screen.
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   if (user === undefined) return null; // still loading
@@ -46,8 +46,26 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
     window.location.href = "/api/oauth/login?return_path=/wavvcommandcenter";
     return null;
   }
-  const ADMIN_ROLES = ["owner", "publisher", "partner_manager"];
-  if (!ADMIN_ROLES.includes(user.role)) return <Redirect to="/" />;
+  // Must be a WAVV employee
+  if ((user as any).accountType !== "employee") return <Redirect to="/" />;
+  // Must be approved — pending employees see a holding screen
+  if ((user as any).approvalStatus === "pending") {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0d1117" }}>
+        <div className="text-center max-w-md px-6">
+          <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Approval Pending</h2>
+          <p className="text-gray-400 text-sm">Your account has been flagged for Command Center access review. Jake has been notified and will approve your access shortly.</p>
+          <a href="/" className="mt-6 inline-block text-sm text-[#0074F4] hover:underline">← Return to Success Center</a>
+        </div>
+      </div>
+    );
+  }
+  if ((user as any).approvalStatus === "denied") return <Redirect to="/" />;
   return <>{children}</>;
 }
 

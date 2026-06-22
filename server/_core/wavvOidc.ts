@@ -112,19 +112,27 @@ export async function exchangeCodeForTokens(
 // ─── ID token verification ────────────────────────────────────────────────────
 
 export interface WavvIdTokenClaims {
-  sub: string;                   // stable external ID, e.g. "employee:<uuid>"
+  sub: string;                   // stable external ID, namespaced: employee:<id> / customer:<id> / guest:<id>
   email: string;
   email_verified?: boolean;
   name?: string;
   given_name?: string;
   family_name?: string;
   picture?: string;
-  account_type?: string;         // "employee" today; "customer" later
+  // Always present
+  account_type?: "employee" | "customer" | "guest";
+  is_employee?: boolean;
+  is_customer?: boolean;
+  // Employee-only
   role?: string;                 // "user" | "admin" | "super_admin"
   permissions?: string[];
   sections?: string[];
   is_super_admin?: boolean;
   has_admin_access?: boolean;
+  // Customer-only
+  wavv_account_id?: string;
+  plan?: string | null;
+  subscription_status?: string;  // NONE | INCOMPLETE | TRIALING | ACTIVE | SCHEDULED_CANCEL | CANCELED
 }
 
 export async function verifyIdToken(idToken: string, clientId: string): Promise<WavvIdTokenClaims> {
