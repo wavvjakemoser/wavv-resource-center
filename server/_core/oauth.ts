@@ -220,9 +220,13 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      // Notify owner if a new employee just hit the pending queue for the first time
-      // (was a new user before this login — user was null before upsert)
-      const isNewPendingEmployee = !user && finalUser.accountType === "employee" && finalUser.approvalStatus === "pending";
+      // Notify owner whenever an employee signs in and is still pending approval.
+      // This covers: (a) first-ever login, (b) users who existed via another login method
+      // and are now signing in via WAVV OIDC for the first time as an employee.
+      // We avoid re-notifying on every login by checking whether they were already
+      // an employee+pending before this login (i.e. user existed and was already pending).
+      const wasAlreadyPending = user && user.accountType === "employee" && user.approvalStatus === "pending";
+      const isNewPendingEmployee = !wasAlreadyPending && finalUser.accountType === "employee" && finalUser.approvalStatus === "pending";
       if (isNewPendingEmployee) {
         try {
           const { notifyOwner } = await import("./notification");

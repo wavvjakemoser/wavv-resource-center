@@ -134,9 +134,13 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
     if (title) document.title = `${title} — WAVV Success Center`;
   }, [title]);
 
-  // `partner` role has portal access but is NOT an internal admin — they must not see the Admin panel link
-  const isAdmin = user?.role === "viewer" || user?.role === "publisher" || user?.role === "partner_manager" || user?.role === "owner";
-  const isOwner = user?.role === "owner";
+  // Command Center link is only visible to approved WAVV employees.
+  // Pending employees see the approval-pending screen but NOT the nav link.
+  const isApprovedEmployee = user?.accountType === "employee" && user?.approvalStatus === "approved";
+  const isAdmin = isApprovedEmployee && (
+    user?.role === "viewer" || user?.role === "publisher" || user?.role === "partner_manager" || user?.role === "owner"
+  );
+  const isOwner = isApprovedEmployee && user?.role === "owner";
 
   // All users see all base nav items + partner item
   // Only the owner bypasses nav_visibility toggles (for QA/admin purposes)
