@@ -100,7 +100,7 @@ function Router() {
       <Route path="/guides" component={GuidesAndDocs} />
       <Route path="/support">{() => <NavGuard href="/support"><Support /></NavGuard>}</Route>
       <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
-      <Route path="/wavvpartner">{() => <PartnerPortalGuard><WavvPartnerPortal /></PartnerPortalGuard>}</Route>
+      <Route path="/wavvpartner">{() => <Redirect to="/404" />}</Route>
       <Route path="/wavvcommandcenter">{() => <AdminGuard><Admin /></AdminGuard>}</Route>
       <Route path="/wavvadmin">{() => <Redirect to="/wavvcommandcenter" />}</Route>
       <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>

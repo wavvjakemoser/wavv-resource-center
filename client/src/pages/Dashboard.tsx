@@ -446,7 +446,7 @@ export default function Dashboard() {
                       </div>
                     )}
                     <div className="mt-auto">
-                      {w.registrationUrl ? (
+                      {w.registrationUrl && (
                         <a
                           href={w.registrationUrl}
                           target="_blank"
@@ -457,8 +457,6 @@ export default function Dashboard() {
                         >
                           <ExternalLink size={12} /> Register →
                         </a>
-                      ) : (
-                        <span className="text-xs text-gray-600">Registration link coming soon</span>
                       )}
                     </div>
                   </div>

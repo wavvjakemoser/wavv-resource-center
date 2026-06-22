@@ -378,12 +378,7 @@ function WebinarCard({
             </p>
           </div>
         )}
-        {variant === "evergreen" && !embedUrl && !isHostedVideo && (
-          <p className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-            <RefreshCw size={11} style={{ color: accentColor }} />
-            Session details coming soon
-          </p>
-        )}
+        {/* Session details shown only when content is available */}
 
         <div className="mt-auto">
           {/* Platform-hosted (manus-storage) video */}
@@ -413,28 +408,19 @@ function WebinarCard({
             </button>
           )}
 
-          {/* No video yet — recording coming soon */}
-          {!isHostedVideo && !embedUrl && variant === "recording" && (
-            <span className="text-xs text-gray-600">Recording coming soon</span>
-          )}
-
-          {/* Registration link (exclusive live, no video yet) */}
-          {!isHostedVideo && !embedUrl && variant !== "recording" && (
-            webinar.registrationUrl ? (
-              <a
-                href={webinar.registrationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => registerClickMutation.mutate({ webinarId: webinar.id })}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-                style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
-              >
-                <ExternalLink size={12} />
-                {variant === "evergreen" ? "Join Next Session →" : "Register →"}
-              </a>
-            ) : variant === "exclusive" ? (
-              <span className="text-xs text-gray-600">Registration link coming soon</span>
-            ) : null
+          {/* Registration link — only shown when registrationUrl is set */}
+          {!isHostedVideo && !embedUrl && variant !== "recording" && webinar.registrationUrl && (
+            <a
+              href={webinar.registrationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => registerClickMutation.mutate({ webinarId: webinar.id })}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
+            >
+              <ExternalLink size={12} />
+              {variant === "evergreen" ? "Join Next Session →" : "Register →"}
+            </a>
           )}
         </div>
       </div>
