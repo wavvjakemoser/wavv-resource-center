@@ -164,6 +164,7 @@ import {
   Code,
   Quote,
   GripVertical,
+  RefreshCw,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -1617,11 +1618,19 @@ function UsersTab() {
       </div>
 
       {usersSubTab === "portal" && <PortalUsersPanel />}
-      {usersSubTab === "team" && <>
+            {usersSubTab === "team" && <>
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-base font-semibold text-white">Access</h2>
         <div className="flex items-center gap-2">
-
+          <button
+            onClick={() => { refetch(); refetchEmployees(); }}
+            disabled={isLoading || employeesLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition disabled:opacity-40"
+            style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <RefreshCw size={13} className={(isLoading || employeesLoading) ? "animate-spin" : ""} />
+            Refresh
+          </button>
           <button
             onClick={exportUsersCSV}
             disabled={!users || users.length === 0}
@@ -1761,12 +1770,12 @@ function UsersTab() {
       <div className="rounded-xl overflow-hidden overflow-x-auto" style={{ border: "1px solid #2a2a2a" }}>
         <Table className="min-w-[560px]">
           <TableHeader>
-            <TableRow style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
+                        <TableRow style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
               <TableHead className="text-gray-400">Name</TableHead>
               <TableHead className="text-gray-400">Email</TableHead>
               <TableHead className="text-gray-400">Access Level</TableHead>
-
-
+              <TableHead className="text-gray-400">Status</TableHead>
+              <TableHead className="text-gray-400">Last Login</TableHead>
               {isOwner && <TableHead className="text-gray-400">Actions</TableHead>}
             </TableRow>
           </TableHeader>
@@ -1845,10 +1854,28 @@ function UsersTab() {
                           <Badge variant="secondary" className="text-[10px]">User</Badge>
                         )}
 
-                      </div>
+                                            </div>
                     </TableCell>
-
-
+                    <TableCell>
+                      {u.approvalStatus === "approved" ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(74,222,128,0.1)", color: "#4ade80" }}>
+                          <CheckCircle2 size={10} /> Approved
+                        </span>
+                      ) : u.approvalStatus === "denied" ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>
+                          <X size={10} /> Denied
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.1)", color: "#fbbf24" }}>
+                          <Clock size={10} /> Pending
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+                        {u.lastSignedIn ? new Date(u.lastSignedIn).toLocaleDateString() : "Never"}
+                      </span>
+                    </TableCell>
                     {isOwner && <TableCell>
                       {isSelf ? (
                         <div className="flex flex-wrap gap-1.5 items-center">
@@ -2115,7 +2142,7 @@ function PortalUsersPanel() {
     return () => clearTimeout(t);
   }, [search]);
 
-  const { data, isLoading } = trpc.admin.listPortalUsers.useQuery({
+  const { data, isLoading, refetch: refetchPortal } = trpc.admin.listPortalUsers.useQuery({
     accountType: accountTypeFilter,
     subscriptionStatus: subStatusFilter === "all" ? undefined : subStatusFilter,
     search: debouncedSearch || undefined,
@@ -2161,6 +2188,14 @@ function PortalUsersPanel() {
           <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
             {total.toLocaleString()} total users
           </div>
+          <button
+            onClick={() => refetchPortal()}
+            disabled={isLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
+            style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} /> Refresh
+          </button>
           <button
             onClick={exportPortalCSV}
             disabled={!portalUsers.length}
@@ -2237,7 +2272,9 @@ function PortalUsersPanel() {
             </TableHeader>
             <TableBody>
               {portalUsers.map(u => {
-                const sub = u.subscriptionStatus ? SUBSCRIPTION_LABELS[u.subscriptionStatus] : null;
+                // null/undefined/empty = treat as NONE (no subscription)
+                const subKey = u.subscriptionStatus ?? "NONE";
+                const sub = SUBSCRIPTION_LABELS[subKey] ?? SUBSCRIPTION_LABELS["NONE"];
                 return (
                   <TableRow key={u.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                     <TableCell>
@@ -2261,11 +2298,7 @@ function PortalUsersPanel() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      {sub ? (
-                        <span className="text-xs font-medium" style={{ color: sub.color }}>{sub.label}</span>
-                      ) : (
-                        <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>—</span>
-                      )}
+                      <span className="text-xs font-medium" style={{ color: sub.color }}>{sub.label}</span>
                     </TableCell>
                     <TableCell>
                       <span className="text-xs" style={{ color: u.wavvPlan ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)" }}>
