@@ -11,7 +11,6 @@ import AcademyCategory from "./pages/AcademyCategory";
 import LessonViewer from "./pages/LessonViewer";
 import Webinars from "./pages/Webinars";
 import GuidesAndDocs from "./pages/GuidesAndDocs";
-import Support from "./pages/Support";
 import Admin from "./pages/Admin";
 import HandsOn from "./pages/HandsOn";
 import Login from "./pages/Login";
@@ -98,7 +97,7 @@ function Router() {
       <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
-      <Route path="/support">{() => <NavGuard href="/support"><Support /></NavGuard>}</Route>
+      <Route path="/support">{() => <Redirect to="/404" />}</Route>
       <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
       <Route path="/wavvpartner">{() => <Redirect to="/404" />}</Route>
       <Route path="/wavvcommandcenter">{() => <AdminGuard><Admin /></AdminGuard>}</Route>

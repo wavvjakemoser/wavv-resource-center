@@ -18,6 +18,7 @@ import {
   Bookmark,
   BookmarkCheck,
   Trash2,
+  LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -118,6 +119,32 @@ function AvatarSection({
   );
 }
 
+// ─── Sign Out button ─────────────────────────────────────────────────────────
+function SignOutButton() {
+  const logout = trpc.auth.logout.useMutation({
+    onSuccess: () => { window.location.href = "/"; },
+  });
+  return (
+    <button
+      onClick={() => logout.mutate()}
+      disabled={logout.isPending}
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+      style={{
+        background: "rgba(239,68,68,0.08)",
+        border: "1px solid rgba(239,68,68,0.2)",
+        color: "#f87171",
+      }}
+    >
+      {logout.isPending ? (
+        <div className="w-3 h-3 border border-red-400/40 border-t-red-400 rounded-full animate-spin" />
+      ) : (
+        <LogOut size={12} />
+      )}
+      Sign Out
+    </button>
+  );
+}
+
 // ─── Main Profile page ────────────────────────────────────────────────────────
 export default function Profile() {
   const utils = trpc.useUtils();
@@ -215,7 +242,10 @@ export default function Profile() {
               </>
             )}
           </div>
-          <p className="text-[11px] text-gray-600 sm:self-end">Click photo to change</p>
+          <div className="flex flex-col items-end gap-2 sm:self-end">
+            <p className="text-[11px] text-gray-600">Click photo to change</p>
+            <SignOutButton />
+          </div>
         </div>
 
 

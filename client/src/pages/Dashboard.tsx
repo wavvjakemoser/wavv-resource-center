@@ -78,18 +78,7 @@ const START_HERE_CARDS = [
     ctaIcon: Bell,
     badge: "Coming Soon",
   },
-  {
-    id: "support",
-    href: "/support",
-    navHref: "/support",
-    label: "WAVV Support",
-    icon: Headphones,
-    color: "#FF9900",
-    description: "Browse help articles and connect directly with a support rep.",
-    cta: "Get Support",
-    ctaIcon: MessageCircle,
-    badge: null,
-  },
+
   {
     id: "partners",
     href: "/partners",

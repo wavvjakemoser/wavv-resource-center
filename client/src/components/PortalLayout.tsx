@@ -7,7 +7,6 @@ import {
   GraduationCap,
   Video,
   FileText,
-  Headphones,
   Home,
   Menu,
   X,
@@ -24,7 +23,6 @@ const baseNavItems = [
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Resource Hub",   icon: FileText,      color: "#67C728" },
   { href: "/playground",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
-  { href: "/support",   label: "WAVV Support",       icon: Headphones,    color: "#FF9900" },
 ];
 const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
 
