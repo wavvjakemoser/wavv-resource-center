@@ -1447,10 +1447,9 @@ function UsersTab() {
   };
 
   const ROLE_ORDER: Record<string, number> = { owner: 0, content_admin: 1, partner_admin: 2, admin: 3 };
-  const filteredUsers = useMemo(() => {
-    if (!users) return [];
-    // Only show internal team members — no public users or partners in this panel
-    let list = (users ?? []).filter((u) => u.role === "viewer" || u.role === "publisher" || u.role === "partner_manager" || u.role === "owner");
+    const filteredUsers = useMemo(() => {
+    // WAVV Team tab: use employees list (account_type=employee, @wavv.com only)
+    let list = [...approvedEmployees];
     if (roleFilter !== "all") list = list.filter((u) => u.role === roleFilter);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
@@ -1459,12 +1458,11 @@ function UsersTab() {
     // Sort by role order: Owner → Publisher → Partner Manager → Viewer
     list = [...list].sort((a, b) => (ROLE_ORDER[a.role ?? ""] ?? 99) - (ROLE_ORDER[b.role ?? ""] ?? 99));
     return list;
-  }, [users, search, roleFilter]);
-
-  const ownerCount = useMemo(() => (users ?? []).filter((u) => u.role === "owner").length, [users]);
-  const superAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "publisher").length, [users]);
-  const partnerAdminCount = useMemo(() => (users ?? []).filter((u) => u.role === "partner_manager").length, [users]);
-  const adminCount = useMemo(() => (users ?? []).filter((u) => u.role === "viewer").length, [users]);
+  }, [approvedEmployees, search, roleFilter]);
+  const ownerCount = useMemo(() => approvedEmployees.filter((u) => u.role === "owner").length, [approvedEmployees]);
+  const superAdminCount = useMemo(() => approvedEmployees.filter((u) => u.role === "publisher").length, [approvedEmployees]);
+  const partnerAdminCount = useMemo(() => approvedEmployees.filter((u) => u.role === "partner_manager").length, [approvedEmployees]);
+  const adminCount = useMemo(() => approvedEmployees.filter((u) => u.role === "viewer").length, [approvedEmployees]);
   const totalCount = ownerCount + superAdminCount + partnerAdminCount + adminCount;
   const statCards: { filter: RoleFilter; label: string; value: number; iconEl: React.ReactNode; color: string; bg: string; activeBorder: string; description: string }[] = [
     {
