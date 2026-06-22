@@ -1381,11 +1381,7 @@ export const appRouter = router({
     query: publicProcedure
       .input(z.object({ q: z.string().min(1).max(200) }))
       .query(async ({ ctx, input }) => {
-<<<<<<< Updated upstream
         if (input.q.trim().length < 2) return { courses: [], lessons: [], webinars: [], guides: [], helpArticles: [] };
-=======
-        // short queries handled by searchContent
->>>>>>> Stashed changes
         // Only track search events for logged-in users
         if (ctx.user) {
           await trackEvent({ userId: ctx.user.id, eventType: "search", metadata: JSON.stringify({ query: input.q.trim() }) });

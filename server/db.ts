@@ -827,11 +827,7 @@ export async function upsertGoogleUser(data: {
 // ─── Search ──────────────────────────────────────────────────────────────────
 export async function searchContent(query: string) {
   const db = await getDb();
-<<<<<<< Updated upstream
   if (!db) return { courses: [], lessons: [], webinars: [], guides: [], helpArticles: [] };
-=======
-  if (!db) return { courses: [] as { id: number; title: string; description: string | null; category: string; thumbnailUrl: string | null; durationMinutes: number | null; sortOrder: number | null; published: boolean; tags: string | null; createdAt: Date; updatedAt: Date }[], lessons: [] as { id: number; courseId: number; title: string; description: string | null; videoUrl: string | null; durationMinutes: number | null; sortOrder: number | null; published: boolean; createdAt: Date; updatedAt: Date; inactiveReason: string | null; tags: string | null; fileUrl: string | null; starred: boolean; hidden: boolean; durationSeconds: number | null; pipEnabled: boolean }[], webinars: [] as { id: number; title: string; description: string | null; type: string; scheduledAt: Date | null; registrationUrl: string | null; recordingUrl: string | null; thumbnailUrl: string | null; hostName: string | null; published: boolean; sortOrder: number | null; createdAt: Date; updatedAt: Date; viewCount: number }[], guides: [] as { id: number; title: string; description: string | null; category: string | null; fileUrl: string | null; fileType: string | null; fileSize: number | null; published: boolean; sortOrder: number | null; downloadCount: number; createdAt: Date; updatedAt: Date; thumbnailUrl: string | null }[], helpArticles: [] as { id: number; title: string; url: string | null; sectionName: string | null; source: string | null; intercomArticleId: string | null; nativeBody: string | null }[] };
->>>>>>> Stashed changes
 
   // ── Fuzzy helpers ──────────────────────────────────────────────────────────
   // Normalize: lowercase, strip non-alphanumeric chars (removes spaces, hyphens, etc.)
