@@ -139,11 +139,28 @@ export function registerOAuthRoutes(app: Express) {
       }
 
       const internalRole = mapWavvRoleToInternal(userInfo);
-      const accountType = userInfo.account_type ?? idClaims.account_type ?? "guest";
-      const isEmployee = userInfo.is_employee ?? idClaims.is_employee ?? (accountType === "employee");
-      const isCustomer = userInfo.is_customer ?? idClaims.is_customer ?? (accountType === "customer");
+
+      // Email domain is the authoritative employee check until Steve's token sends account_type reliably.
+      // A @wavv.com email always means employee, regardless of what the token claims.
+      const isWavvEmail = email.toLowerCase().endsWith("@wavv.com");
+      const tokenAccountType = userInfo.account_type ?? idClaims.account_type ?? null;
+      const tokenIsEmployee = userInfo.is_employee ?? idClaims.is_employee ?? null;
+
+      // Resolve account_type: trust token if present, otherwise use email domain heuristic
+      const resolvedAccountType: "employee" | "customer" | "guest" =
+        isWavvEmail
+          ? "employee"
+          : tokenAccountType === "employee" || tokenIsEmployee === true
+          ? "employee"
+          : tokenAccountType === "customer" || (userInfo.is_customer ?? idClaims.is_customer ?? false)
+          ? "customer"
+          : "guest";
+
+      const isEmployee = resolvedAccountType === "employee";
+      const isCustomer = resolvedAccountType === "customer";
       // Determine initial approvalStatus: employees start as "pending", others as "approved"
       const initialApprovalStatus = isEmployee ? "pending" : "approved";
+      const accountType = resolvedAccountType;
 
       // Customer-specific metadata
       const wavvAccountId = userInfo.wavv_account_id ?? idClaims.wavv_account_id ?? null;
@@ -155,6 +172,17 @@ export function registerOAuthRoutes(app: Express) {
       if (!user && email) {
         const existingByEmail = await db.getUserByEmail(email);
         if (existingByEmail) {
+          // Never downgrade an existing employee to guest — preserve their accountType if already elevated
+          const mergedAccountType =
+            existingByEmail.accountType === "employee" ? "employee" :
+            existingByEmail.accountType === "customer" && accountType === "guest" ? "customer" :
+            accountType;
+          const mergedIsEmployee = mergedAccountType === "employee";
+          const mergedIsCustomer = mergedAccountType === "customer";
+          const mergedApprovalStatus =
+            existingByEmail.approvalStatus === "approved" ? "approved" :
+            existingByEmail.approvalStatus === "denied" ? "denied" :
+            mergedIsEmployee ? "pending" : "approved";
           await db.upsertUser({
             openId: externalId,
             email,
@@ -164,10 +192,10 @@ export function registerOAuthRoutes(app: Express) {
             role: existingByEmail.role,
             avatarUrl: userInfo.picture || idClaims.picture || existingByEmail.avatarUrl || null,
             wavvSub: externalId,
-            accountType,
-            approvalStatus: initialApprovalStatus,
-            isEmployee,
-            isCustomer,
+            accountType: mergedAccountType,
+            approvalStatus: mergedApprovalStatus,
+            isEmployee: mergedIsEmployee,
+            isCustomer: mergedIsCustomer,
             wavvAccountId,
             subscriptionStatus,
             wavvPlan,
@@ -196,16 +224,21 @@ export function registerOAuthRoutes(app: Express) {
         });
         user = await db.getUserByOpenId(externalId);
       } else {
-        // Update live metadata on every login (but never overwrite approvalStatus)
+        // Update live metadata on every login (but never overwrite approvalStatus or downgrade accountType)
+        const existingAccountType = user.accountType;
+        const safeAccountType =
+          existingAccountType === "employee" ? "employee" :
+          existingAccountType === "customer" && accountType === "guest" ? "customer" :
+          accountType;
         await db.upsertUser({
           openId: externalId,
           lastSignedIn: new Date(),
           name: userInfo.name || user.name || null,
           avatarUrl: userInfo.picture || idClaims.picture || user.avatarUrl || null,
           wavvSub: externalId,
-          accountType,
-          isEmployee,
-          isCustomer,
+          accountType: safeAccountType,
+          isEmployee: safeAccountType === "employee",
+          isCustomer: safeAccountType === "customer",
           wavvAccountId,
           subscriptionStatus,
           wavvPlan,
