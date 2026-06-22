@@ -20,6 +20,8 @@ export function usePageTracking() {
   const { data: user, isLoading: authLoading } = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
+    refetchInterval: false,
+    staleTime: 5 * 60_000,
   });
   const pageView = trpc.tracking.pageView.useMutation({
     onError: () => {},

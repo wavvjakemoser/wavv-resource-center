@@ -10,7 +10,20 @@ import superjson from "superjson";
 import App from "./App";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Data stays fresh for 60s — no redundant re-fetches within that window
+      staleTime: 60_000,
+      // Background re-fetch every 60s while the tab is open
+      refetchInterval: 60_000,
+      // Re-fetch when user returns to the tab (catches changes made elsewhere)
+      refetchOnWindowFocus: true,
+      // Re-fetch on mount if data is stale
+      refetchOnMount: true,
+    },
+  },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;

@@ -16,6 +16,9 @@ export function useAuth(options?: UseAuthOptions) {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
+    // Auth state doesn't need background polling — override the global 60s interval
+    refetchInterval: false,
+    staleTime: 5 * 60_000, // 5 minutes
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({
