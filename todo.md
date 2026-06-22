@@ -1536,3 +1536,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Users tab: Portal Users sub-tab with customer/guest table (account_type, subscription_status, plan, wavv_account_id, first seen, last login, lessons watched, bookmarks)
 - [x] Owner notification when new employee signs in and enters pending queue
 - [x] TypeScript check + checkpoint
+
+## Analytics Upgrade — Date Range + Headline KPIs + Insights Tab (Session — Jun 22 2026)
+- [x] Analytics date range switcher: 7D / 30D / 90D / 180D / 1Y / All (server validators updated to accept 180 and 365)
+- [x] Headline KPI row: Total Signed-In Users (all time), Lessons Completed (period), Top Search Term (period)
+- [x] Add Insights tab to Analytics panel tabs (alongside Overview, Academy, Webinars, Resource Hub)
+- [x] Insights tab: Customer Journey Funnel (Anonymous → Signed-In → Started Lesson → Completed Lesson with drop-off %)
+- [x] Insights tab: Content Performance table (Lessons — views, completions, completion rate with color-coded badges)
+- [x] Insights tab: Top Search Terms ranked list
+- [x] Insights tab: Zero-Result Searches ranked list (content gap signal)
+- [x] Add getZeroResultSearches DB helper (queries content_requests where requestType=search_query)
+- [x] Add getZeroResultSearches tRPC procedure to analytics router

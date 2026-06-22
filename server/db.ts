@@ -2709,6 +2709,10 @@ export async function reorderFaqEntries(items: { id: number; sortOrder: number }
   ));
 }
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 // ─── Enhanced Analytics Helpers ──────────────────────────────────────────────
 
 /** Top N search terms within a date range */
@@ -2750,7 +2754,11 @@ export async function getTotalSignedInUsers() {
 export async function getTotalLessonsCompleted(sinceDate?: Date) {
   const db = await getDb();
   if (!db) return 0;
+<<<<<<< Updated upstream
   const conditions = [eq(lessonProgress.completed, true)];
+=======
+  const conditions: any[] = [eq(lessonProgress.completed, true)];
+>>>>>>> Stashed changes
   if (sinceDate) conditions.push(gte(lessonProgress.completedAt, sinceDate));
   const [result] = await db
     .select({ count: sql<number>`COUNT(*)` })
@@ -2771,7 +2779,11 @@ export async function getDropOffFunnel(sinceDate: Date) {
   if (!db) return { anonymousVisitors: 0, signedInUsers: 0, startedLesson: 0, completedLesson: 0 };
 
   const [anonResult] = await db
+<<<<<<< Updated upstream
     .select({ count: sql<number>`COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.sid')))`  })
+=======
+    .select({ count: sql<number>`COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.sid')))` })
+>>>>>>> Stashed changes
     .from(analyticsEvents)
     .where(
       and(

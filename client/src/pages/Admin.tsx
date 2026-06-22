@@ -351,7 +351,7 @@ export default function Admin() {
 
 
 // ─── Analytics Tab ────────────────────────────────────────────────────────────
-type AnonTimeRange = 7 | 30 | 90 | 0; // 0 = All Time
+type AnonTimeRange = 7 | 30 | 90 | 180 | 365 | 0; // 0 = All Time
 
 function AnalyticsTab({ days: daysProp, onDaysChange }: { days?: AnonTimeRange; onDaysChange?: (d: AnonTimeRange) => void } = {}) {
   const [localDays, setLocalDays] = useState<AnonTimeRange>(daysProp ?? 30);
@@ -375,10 +375,12 @@ function AnalyticsTab({ days: daysProp, onDaysChange }: { days?: AnonTimeRange; 
   });
 
   const TIME_OPTIONS: { value: AnonTimeRange; label: string }[] = [
-    { value: 7,  label: "7D" },
-    { value: 30, label: "30D" },
-    { value: 90, label: "90D" },
-    { value: 0,  label: "All Time" },
+    { value: 7,   label: "7D" },
+    { value: 30,  label: "30D" },
+    { value: 90,  label: "90D" },
+    { value: 180, label: "180D" },
+    { value: 365, label: "1Y" },
+    { value: 0,   label: "All" },
   ];
 
   return (
@@ -862,7 +864,14 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
   const { data: webinarTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "webinar_video_play", days });
   const { data: guideTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "guide_download", days });
 
-  const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides">("overview");
+  // Enhanced analytics
+  const { data: enhancedSummary } = trpc.analytics.getEnhancedSummary.useQuery({ days });
+  const { data: contentPerformance } = trpc.analytics.getContentPerformance.useQuery({ days });
+  const { data: dropOffFunnel } = trpc.analytics.getDropOffFunnel.useQuery({ days });
+  const { data: topSearchTerms } = trpc.analytics.getTopSearchTerms.useQuery({ days });
+  const { data: zeroResultSearches } = trpc.analytics.getZeroResultSearches.useQuery({ days });
+
+  const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides" | "insights">("overview");
   const [showPageDrilldown, setShowPageDrilldown] = useState(false);
   const { data: drilldown } = trpc.analytics.getPageViewDrilldown.useQuery({ days }, { enabled: showPageDrilldown });
 
@@ -903,6 +912,40 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
 
   return (
     <div className="space-y-6">
+      {/* ── Headline KPI row ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.2)" }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+            <Users size={18} style={{ color: "#60a5fa" }} />
+          </div>
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">Total Signed-In Users</p>
+            <p className="text-2xl font-bold text-white">{(enhancedSummary?.totalSignedInUsers ?? 0).toLocaleString()}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">All time</p>
+          </div>
+        </div>
+        <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)" }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(34,211,238,0.15)" }}>
+            <GraduationCap size={18} style={{ color: "#22d3ee" }} />
+          </div>
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">Lessons Completed</p>
+            <p className="text-2xl font-bold text-white">{(enhancedSummary?.totalLessonsCompleted ?? 0).toLocaleString()}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">In selected period</p>
+          </div>
+        </div>
+        <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.2)" }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(167,139,250,0.15)" }}>
+            <Search size={18} style={{ color: "#a78bfa" }} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs text-gray-400 mb-0.5">Top Search Term</p>
+            <p className="text-lg font-bold text-white truncate">{enhancedSummary?.mostSearchedTerm ?? "—"}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">Most searched in period</p>
+          </div>
+        </div>
+      </div>
+
       {/* Summary stat tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Page Views tile — clickable for drilldown */}
@@ -990,7 +1033,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
       {/* Panel tabs */}
       <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {PANEL_TABS.map((t) => (
-          <button key={t.key} onClick={() => setActivePanel(t.key)}
+          <button key={t.key} onClick={() => setActivePanel(t.key as "overview" | "academy" | "webinars" | "guides" | "insights")}
             className="flex items-center gap-1.5 flex-1 justify-center py-2 text-xs font-medium rounded-lg transition"
             style={activePanel === t.key
               ? { background: "rgba(255,255,255,0.1)", color: t.color }
