@@ -80,7 +80,7 @@ export default function AdminAnalytics() {
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition"
             >
               <FileDown size={14} />
-              Export CSV
+              Export
             </button>
             <div className="flex items-center gap-2 bg-white/5 rounded-lg p-1">
               {([7, 30, 90, 365] as TimeRange[]).map((d) => (

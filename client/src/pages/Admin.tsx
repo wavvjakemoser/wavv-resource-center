@@ -602,7 +602,7 @@ function StatDetailDrawer({
               title="Export this data as CSV"
             >
               <FileDown size={13} />
-              Export CSV
+              Export
             </button>
             <button
               onClick={onClose}
@@ -1598,7 +1598,7 @@ function UsersTab() {
           className="px-4 py-1.5 rounded-md text-xs font-medium transition-all"
           style={usersSubTab === "portal" ? { background: "#0074F4", color: "#fff" } : { color: "rgba(255,255,255,0.5)" }}
         >
-          Portal Users
+          WAVV Users
         </button>
       </div>
 
@@ -1615,7 +1615,7 @@ function UsersTab() {
             style={{ background: "rgba(6,182,212,0.1)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.2)" }}
           >
             <FileDown size={13} />
-            Export{roleFilter !== "all" ? ` ${roleFilter === "publisher" ? "Publishers" : roleFilter === "viewer" ? "Viewers" : roleFilter === "partner_manager" ? "Partner Managers" : "Users"}` : " All"}
+            Export
           </button>
         </div>
       </div>
@@ -2104,7 +2104,7 @@ function PortalUsersPanel() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
             style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.3)", color: "#60a5fa" }}
           >
-            <Download size={12} /> Export CSV
+            <Download size={12} /> Export
           </button>
         </div>
       </div>
