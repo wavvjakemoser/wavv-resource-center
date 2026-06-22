@@ -1152,38 +1152,6 @@ const analyticsRouter = router({
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getZeroResultSearches(since);
     }),
-
-  // ── Enhanced analytics for Insights tab ──
-  getEnhancedSummary: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
-    .query(async ({ input }) => {
-      const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getEnhancedAnalyticsSummary(since);
-    }),
-  getContentPerformance: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
-    .query(async ({ input }) => {
-      const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getContentPerformance(since);
-    }),
-  getDropOffFunnel: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
-    .query(async ({ input }) => {
-      const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getDropOffFunnel(since);
-    }),
-  getTopSearchTerms: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
-    .query(async ({ input }) => {
-      const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getTopSearchTerms(since);
-    }),
-  getZeroResultSearches: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
-    .query(async ({ input }) => {
-      const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getZeroResultSearches(since);
-    }),
 });
 
 // ─── Scheduled Task endpoint ──────────────────────────────────────────────────
