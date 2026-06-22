@@ -827,7 +827,7 @@ export async function upsertGoogleUser(data: {
 // ─── Search ──────────────────────────────────────────────────────────────────
 export async function searchContent(query: string) {
   const db = await getDb();
-  if (!db) return { courses: [], lessons: [], webinars: [], guides: [] };
+  if (!db) return { courses: [], lessons: [], webinars: [], guides: [], helpArticles: [] };
 
   // ── Fuzzy helpers ──────────────────────────────────────────────────────────
   // Normalize: lowercase, strip non-alphanumeric chars (removes spaces, hyphens, etc.)
@@ -854,23 +854,34 @@ export async function searchContent(query: string) {
 
   // ── Broad DB fetch (no filter — we filter in-memory for fuzzy) ─────────────
   // Fetch a reasonable pool then apply fuzzy matching
-  const [allCourseRows, allLessonRows, allWebinarRows, allGuideRows] = await Promise.all([
+  const [allCourseRows, allLessonRows, allWebinarRows, allGuideRows, allHelpArticleRows] = await Promise.all([
     db.select().from(courses).where(eq(courses.published, true)).limit(200),
     db.select().from(lessons).where(eq(lessons.published, true)).limit(500),
     db.select().from(webinars).limit(200),
     db.select().from(guides).where(eq(guides.published, true)).limit(200),
+    db.select({
+      id: publishedHelpArticles.id,
+      title: publishedHelpArticles.title,
+      url: publishedHelpArticles.url,
+      sectionName: publishedHelpArticles.sectionName,
+      source: publishedHelpArticles.source,
+      intercomArticleId: publishedHelpArticles.intercomArticleId,
+      nativeBody: publishedHelpArticles.nativeBody,
+    }).from(publishedHelpArticles).limit(300),
   ]);
 
   const matchedCourses = allCourseRows.filter(r => fuzzyMatch(r.title, r.description)).slice(0, 5);
   const matchedLessons = allLessonRows.filter(r => fuzzyMatch(r.title, r.description)).slice(0, 8);
   const matchedWebinars = allWebinarRows.filter(r => fuzzyMatch(r.title, r.description)).slice(0, 5);
   const matchedGuides = allGuideRows.filter(r => fuzzyMatch(r.title, r.description)).slice(0, 5);
+  const matchedHelpArticles = allHelpArticleRows.filter(r => fuzzyMatch(r.title, null)).slice(0, 6);
 
   return {
     courses: matchedCourses,
     lessons: matchedLessons,
     webinars: matchedWebinars,
     guides: matchedGuides,
+    helpArticles: matchedHelpArticles,
   };
 }
 

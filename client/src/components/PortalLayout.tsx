@@ -342,8 +342,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
               <Menu size={20} />
             </button>
 
-            {/* Search bar */}
-            <div className="flex-1 max-w-2xl">
+            {/* Search bar — shrinks on mobile so avatar stays visible */}
+            <div className="flex-1 min-w-0 max-w-2xl">
               <AISearchBar />
             </div>
 

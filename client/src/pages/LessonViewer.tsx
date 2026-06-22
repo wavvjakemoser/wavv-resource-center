@@ -1,9 +1,10 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
-import { Link, useParams } from "wouter";
+import { Link, useParams, useLocation } from "wouter";
 import { ArrowLeft, CheckCircle, PlayCircle, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
@@ -28,6 +29,7 @@ export default function LessonViewer() {
   const lId = parseInt(lessonId ?? "0");
 
   const { user } = useAuth();
+  const [location] = useLocation();
   const { data: courseData } = trpc.academy.getCourse.useQuery({ id: cId });
   const { data: progress, refetch: refetchProgress } = trpc.academy.getProgress.useQuery({ courseId: cId }, { enabled: !!user });
 
@@ -109,7 +111,16 @@ export default function LessonViewer() {
               <p className="text-gray-400 text-sm mt-1">{lesson.description}</p>
             )}
           </div>
-          {!isCompleted ? (
+          {!user ? (
+            <a
+              href={getLoginUrl(location)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all flex-shrink-0 hover:opacity-80"
+              style={{ background: "#0074F420", color: "#0074F4", border: "1px solid #0074F440" }}
+            >
+              <CheckCircle size={15} />
+              Sign in to track progress
+            </a>
+          ) : !isCompleted ? (
             <button
               onClick={() => markComplete.mutate({ lessonId: lId, courseId: cId })}
               disabled={markComplete.isPending}
