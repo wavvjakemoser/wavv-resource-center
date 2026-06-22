@@ -67,6 +67,11 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Trust the first proxy hop (Manus/Cloud Run load balancer)
+  // Required for express-rate-limit to correctly read the real client IP
+  // from X-Forwarded-For instead of the proxy's IP
+  app.set("trust proxy", 1);
+
   // Security headers
   app.use((_req, res, next) => {
     res.setHeader("X-Frame-Options", "DENY");
