@@ -862,7 +862,14 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
   const { data: webinarTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "webinar_video_play", days });
   const { data: guideTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "guide_download", days });
 
-  const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides">("overview");
+  // Enhanced analytics queries
+  const { data: enhancedSummary } = trpc.analytics.getEnhancedSummary.useQuery({ days });
+  const { data: contentPerformance } = trpc.analytics.getContentPerformance.useQuery({ days });
+  const { data: dropOffFunnel } = trpc.analytics.getDropOffFunnel.useQuery({ days });
+  const { data: topSearchTerms } = trpc.analytics.getTopSearchTerms.useQuery({ days });
+  const { data: zeroResultSearches } = trpc.analytics.getZeroResultSearches.useQuery({ days });
+
+  const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides" | "insights">("overview");
   const [showPageDrilldown, setShowPageDrilldown] = useState(false);
   const { data: drilldown } = trpc.analytics.getPageViewDrilldown.useQuery({ days }, { enabled: showPageDrilldown });
 
@@ -1199,7 +1206,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {contentPerformance.slice(0, 20).map((row, i) => (
+                    {contentPerformance.slice(0, 20).map((row: { lessonTitle: string; courseTitle: string; views: number; completions: number; completionRate: number }, i: number) => (
                       <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }} className="hover:bg-white/[0.02] transition-colors">
                         <td className="py-2 px-2 text-gray-200 max-w-[200px] truncate">{row.lessonTitle}</td>
                         <td className="py-2 px-2 text-gray-500 max-w-[150px] truncate">{row.courseTitle}</td>
@@ -1224,7 +1231,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
             <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
               <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Search size={13} style={{ color: "#a78bfa" }} /> Top Search Terms</p>
               <AnonRankedList
-                items={(topSearchTerms ?? []).map((r) => ({ label: r.term, count: r.count ?? 0 }))}
+                items={(topSearchTerms ?? []).map((r: { term: string; count: number }) => ({ label: r.term, count: r.count ?? 0 }))}
                 color="#a78bfa"
                 emptyText="No search data yet"
               />
@@ -1233,7 +1240,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
               <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><AlertTriangle size={13} style={{ color: "#f87171" }} /> Zero-Result Searches</p>
               <p className="text-[10px] text-gray-500">Queries that returned no content — content gaps to address</p>
               <AnonRankedList
-                items={(zeroResultSearches ?? []).map((r) => ({ label: r.topic, count: r.count ?? 0 }))}
+                items={(zeroResultSearches ?? []).map((r: { topic: string; count: number }) => ({ label: r.topic, count: r.count ?? 0 }))}
                 color="#f87171"
                 emptyText="No zero-result searches yet"
               />
