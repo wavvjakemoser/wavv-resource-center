@@ -1388,6 +1388,21 @@ function UsersTab() {
     enabled: currentUser?.role === "viewer" || currentUser?.role === "publisher" || currentUser?.role === "partner_manager" || currentUser?.role === "owner",
   });
 
+  // WAVV employee list (account_type=employee, @wavv.com) with approval status
+  const { data: employees = [], isLoading: employeesLoading, refetch: refetchEmployees } = trpc.admin.listEmployees.useQuery(undefined, {
+    enabled: !!(currentUser?.accountType === "employee" && currentUser?.approvalStatus === "approved"),
+  });
+  const updateApproval = trpc.admin.updateApproval.useMutation({
+    onSuccess: (_, vars) => {
+      const label = vars.approvalStatus === "approved" ? "approved" : vars.approvalStatus === "denied" ? "denied" : "set to pending";
+      toast.success(`User ${label} successfully.`);
+      refetchEmployees();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const pendingEmployees = employees.filter(e => e.approvalStatus === "pending");
+  const approvedEmployees = employees.filter(e => e.approvalStatus !== "pending");
+
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [addUserForm, setAddUserForm] = useState({ name: "", email: "", role: "viewer" as "viewer" | "publisher" | "partner_manager" | "owner" });
   const addUserMutation = trpc.admin.addUser.useMutation({
@@ -1620,6 +1635,55 @@ function UsersTab() {
           </button>
         </div>
       </div>
+
+      {/* Pending Approval Queue */}
+      {isOwner && pendingEmployees.length > 0 && (
+        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(251,191,36,0.3)", background: "rgba(251,191,36,0.04)" }}>
+          <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid rgba(251,191,36,0.15)" }}>
+            <Clock size={14} style={{ color: "#fbbf24" }} />
+            <span className="text-sm font-semibold" style={{ color: "#fbbf24" }}>Pending Approval</span>
+            <span className="ml-1 text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24" }}>{pendingEmployees.length}</span>
+          </div>
+          <div className="divide-y" style={{ borderColor: "rgba(251,191,36,0.1)" }}>
+            {pendingEmployees.map((emp) => {
+              const initials = (emp.name ?? "?").split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+              const rawAvatar = (emp.avatarUrl ?? "").trim();
+              const picSrc = rawAvatar ? `${rawAvatar.replace(/=s\d+(-c)?$/, "")}=s40-c` : null;
+              return (
+                <div key={emp.id} className="flex items-center gap-3 px-4 py-3">
+                  {picSrc ? (
+                    <img src={picSrc} alt={emp.name ?? ""} className="h-8 w-8 rounded-full object-cover shrink-0" style={{ border: "2px solid rgba(255,255,255,0.1)" }} />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: "linear-gradient(135deg, #0074F4, #67C728)" }}>{initials}</div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{emp.name ?? "—"}</p>
+                    <p className="text-xs text-gray-400 truncate">{emp.email ?? "—"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => updateApproval.mutate({ userId: emp.id, approvalStatus: "approved" })}
+                      disabled={updateApproval.isPending}
+                      className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition"
+                      style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)" }}
+                    >
+                      <Check size={12} /> Approve
+                    </button>
+                    <button
+                      onClick={() => updateApproval.mutate({ userId: emp.id, approvalStatus: "denied" })}
+                      disabled={updateApproval.isPending}
+                      className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg transition"
+                      style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
+                    >
+                      <X size={12} /> Deny
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Read-only notice for non-owners */}
       {!isOwner && (
