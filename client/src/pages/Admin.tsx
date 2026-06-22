@@ -68,6 +68,7 @@ import {
   Download,
   Ticket,
   FileDown,
+  ArrowDownToLine,
   Shield,
   ShieldOff,
   ShieldCheck,
@@ -601,7 +602,7 @@ function StatDetailDrawer({
               style={{ color, border: `1px solid ${color}40` }}
               title="Export this data as CSV"
             >
-              <FileDown size={13} />
+              <ArrowDownToLine size={13} />
               Export
             </button>
             <button
@@ -1614,7 +1615,7 @@ function UsersTab() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition disabled:opacity-40"
             style={{ background: "rgba(6,182,212,0.1)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.2)" }}
           >
-            <FileDown size={13} />
+            <ArrowDownToLine size={13} />
             Export
           </button>
         </div>
@@ -2104,7 +2105,7 @@ function PortalUsersPanel() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
             style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.3)", color: "#60a5fa" }}
           >
-            <Download size={12} /> Export
+            <ArrowDownToLine size={13} /> Export
           </button>
         </div>
       </div>
@@ -4555,7 +4556,7 @@ function PlaygroundTab() {
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
           style={{ background: "rgba(168,85,247,0.15)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.3)" }}
         >
-          <FileDown size={13} /> Export Notify Requests
+          <ArrowDownToLine size={13} /> Export Notify Requests
         </button>
       </div>
 
@@ -6681,7 +6682,7 @@ function SupportSection() {
           className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
           style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#67C728" }}
         >
-          <FileDown size={13} /> Export Tickets
+          <ArrowDownToLine size={13} /> Export Tickets
         </button>
       </div>
 
@@ -7230,7 +7231,7 @@ function ContentRequestsTab() {
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
           style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
         >
-          <FileDown size={13} /> Export All Requests
+          <ArrowDownToLine size={13} /> Export All Requests
         </button>
       </div>
 
@@ -7405,7 +7406,7 @@ function ContentRequestGroups({
                   style={{ background: `${color}18`, color, border: `1px solid ${color}40` }}
                   title={`Export ${label} as CSV`}
                 >
-                  <FileDown size={10} /> Export
+                  <ArrowDownToLine size={13} /> Export
                 </button>
                 <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
               </div>
@@ -8383,7 +8384,7 @@ function ApprovedPartnersTab() {
         <div className="flex gap-2">
           <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
             style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
-            <FileDown size={13} /> Export Partners
+            <ArrowDownToLine size={13} /> Export Partners
           </button>
         </div>
       </div>
