@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, ne, sql } from "drizzle-orm";
+import { and, desc, eq, like, ne, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import { users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -1274,7 +1274,7 @@ export const appRouter = router({
       const rows = await db
         .select()
         .from(users)
-        .where(eq(users.accountType, "employee"))
+        .where(and(eq(users.accountType, "employee"), like(users.email, "%@wavv.com")))
         .orderBy(desc(users.createdAt));
       return rows.map(u => ({
         id: u.id,
@@ -1303,7 +1303,11 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return { users: [], total: 0 };
-        const conditions = [ne(users.accountType, "employee")];
+        // Exclude employees AND anyone with a @wavv.com email (they belong in WAVV Team)
+        const conditions = [
+          ne(users.accountType, "employee"),
+          sql`(${users.email} IS NULL OR ${users.email} NOT LIKE '%@wavv.com')`,
+        ];
         if (input.accountType !== "all") {
           conditions.push(eq(users.accountType, input.accountType));
         }

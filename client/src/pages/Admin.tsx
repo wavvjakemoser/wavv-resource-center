@@ -265,7 +265,7 @@ export default function Admin() {
   type TabDef = { id: AdminTab; label: string; icon: React.ReactNode; show: boolean };
 
   const operationsRow: TabDef[] = [
-    { id: "users",            label: "Team Access",       icon: <Shield size={13} />,    show: true },
+    { id: "users",            label: "Access",            icon: <Shield size={13} />,    show: true },
     { id: "analytics",        label: "Analytics",         icon: <BarChart3 size={13} />, show: isSuperAdmin },
     { id: "settings",         label: "Settings",          icon: <Settings size={13} />,  show: isOwner },
     { id: "approved_partners",label: "Approved Partners", icon: <UserPlus size={13} />,  show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
@@ -1489,7 +1489,7 @@ function UsersTab() {
       color: "#00A9E2",
       bg: "rgba(0,169,226,0.1)",
       activeBorder: "#00A9E2",
-      description: "Access to WAVV Partners content and the WAVV Partners portal. Can invite and manage WAVV Partner accounts. Read-only access to Team Access.",
+      description: "Access to WAVV Partners content and the WAVV Partners portal. Can invite and manage WAVV Partner accounts. Read-only access to Access.",
     },
     {
       filter: "viewer",
@@ -1499,7 +1499,7 @@ function UsersTab() {
       color: "#fbbf24",
       bg: "rgba(251,191,36,0.1)",
       activeBorder: "#fbbf24",
-      description: "Support-level access. Can view Team Access (read-only) to look up users and verify access. Cannot make any changes to users or content.",
+      description: "Support-level access. Can view Access (read-only) to look up users and verify access. Cannot make any changes to users or content.",
     },
   ];
 
@@ -1605,7 +1605,7 @@ function UsersTab() {
       {usersSubTab === "portal" && <PortalUsersPanel />}
       {usersSubTab === "team" && <>
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-base font-semibold text-white">WAVV Team</h2>
+        <h2 className="text-base font-semibold text-white">Access</h2>
         <div className="flex items-center gap-2">
 
           <button
@@ -1627,7 +1627,7 @@ function UsersTab() {
           style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.15)", color: "#fbbf24" }}
         >
           <Info size={13} style={{ flexShrink: 0 }} />
-          <span>You have <strong>read-only</strong> access to Team Access. Use the search to look up users and verify their access. Contact an Owner to make changes.</span>
+          <span>You have <strong>read-only</strong> access. Use the search to look up users and verify their access. Contact an Owner to make changes.</span>
         </div>
       )}
 
@@ -2067,12 +2067,45 @@ function PortalUsersPanel() {
   const customerCount = portalUsers.filter(u => u.accountType === "customer").length;
   const guestCount = portalUsers.filter(u => u.accountType === "guest").length;
 
+  function exportPortalCSV() {
+    if (!portalUsers.length) return;
+    const headers = ["Name", "Email", "Account Type", "Subscription Status", "Plan", "WAVV Account ID", "First Seen", "Last Login"];
+    const rows = portalUsers.map(u => [
+      u.name ?? "",
+      u.email ?? "",
+      u.accountType ?? "",
+      u.subscriptionStatus ?? "",
+      u.wavvPlan ?? "",
+      u.wavvAccountId ?? "",
+      u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
+      u.lastSignedIn ? new Date(u.lastSignedIn).toLocaleDateString() : "",
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `portal-users-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-base font-semibold text-white">Portal Users</h2>
-        <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-          {total.toLocaleString()} total users
+        <div className="flex items-center gap-3">
+          <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+            {total.toLocaleString()} total users
+          </div>
+          <button
+            onClick={exportPortalCSV}
+            disabled={!portalUsers.length}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
+            style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.3)", color: "#60a5fa" }}
+          >
+            <Download size={12} /> Export CSV
+          </button>
         </div>
       </div>
 
