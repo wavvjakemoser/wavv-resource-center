@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, gte, lt, like, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, isNull, lt, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   analyticsEvents,
@@ -827,7 +827,11 @@ export async function upsertGoogleUser(data: {
 // ─── Search ──────────────────────────────────────────────────────────────────
 export async function searchContent(query: string) {
   const db = await getDb();
+<<<<<<< Updated upstream
   if (!db) return { courses: [], lessons: [], webinars: [], guides: [], helpArticles: [] };
+=======
+  if (!db) return { courses: [] as { id: number; title: string; description: string | null; category: string; thumbnailUrl: string | null; durationMinutes: number | null; sortOrder: number | null; published: boolean; tags: string | null; createdAt: Date; updatedAt: Date }[], lessons: [] as { id: number; courseId: number; title: string; description: string | null; videoUrl: string | null; durationMinutes: number | null; sortOrder: number | null; published: boolean; createdAt: Date; updatedAt: Date; inactiveReason: string | null; tags: string | null; fileUrl: string | null; starred: boolean; hidden: boolean; durationSeconds: number | null; pipEnabled: boolean }[], webinars: [] as { id: number; title: string; description: string | null; type: string; scheduledAt: Date | null; registrationUrl: string | null; recordingUrl: string | null; thumbnailUrl: string | null; hostName: string | null; published: boolean; sortOrder: number | null; createdAt: Date; updatedAt: Date; viewCount: number }[], guides: [] as { id: number; title: string; description: string | null; category: string | null; fileUrl: string | null; fileType: string | null; fileSize: number | null; published: boolean; sortOrder: number | null; downloadCount: number; createdAt: Date; updatedAt: Date; thumbnailUrl: string | null }[], helpArticles: [] as { id: number; title: string; url: string | null; sectionName: string | null; source: string | null; intercomArticleId: string | null; nativeBody: string | null }[] };
+>>>>>>> Stashed changes
 
   // ── Fuzzy helpers ──────────────────────────────────────────────────────────
   // Normalize: lowercase, strip non-alphanumeric chars (removes spaces, hyphens, etc.)
@@ -2703,4 +2707,208 @@ export async function reorderFaqEntries(items: { id: number; sortOrder: number }
   await Promise.all(items.map(({ id, sortOrder }) =>
     db.update(faqEntries).set({ sortOrder }).where(eq(faqEntries.id, id))
   ));
+}
+
+// ─── Enhanced Analytics Helpers ──────────────────────────────────────────────
+
+/** Top N search terms within a date range */
+export async function getTopSearchTerms(sinceDate: Date, limit = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      term: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.query'))`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        eq(analyticsEvents.eventType, "search"),
+        gte(analyticsEvents.createdAt, sinceDate),
+        sql`${analyticsEvents.metadata} IS NOT NULL`,
+        sql`JSON_EXTRACT(${analyticsEvents.metadata}, '$.query') IS NOT NULL`,
+      )
+    )
+    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.query'))`)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows.filter((r) => r.term && r.term !== "null");
+}
+
+/** Total signed-in customer/guest users */
+export async function getTotalSignedInUsers() {
+  const db = await getDb();
+  if (!db) return 0;
+  const [result] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(users)
+    .where(sql`${users.accountType} IN ('customer', 'guest')`);
+  return result?.count ?? 0;
+}
+
+/** Total lessons completed within a date range (or all time if no date) */
+export async function getTotalLessonsCompleted(sinceDate?: Date) {
+  const db = await getDb();
+  if (!db) return 0;
+  const conditions = [eq(lessonProgress.completed, true)];
+  if (sinceDate) conditions.push(gte(lessonProgress.completedAt, sinceDate));
+  const [result] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(lessonProgress)
+    .where(and(...conditions));
+  return result?.count ?? 0;
+}
+
+/** Most searched term in a date range */
+export async function getMostSearchedTerm(sinceDate: Date): Promise<string | null> {
+  const terms = await getTopSearchTerms(sinceDate, 1);
+  return terms[0]?.term ?? null;
+}
+
+/** Drop-off funnel: anonymous visitors → signed-in users → started lesson → completed lesson */
+export async function getDropOffFunnel(sinceDate: Date) {
+  const db = await getDb();
+  if (!db) return { anonymousVisitors: 0, signedInUsers: 0, startedLesson: 0, completedLesson: 0 };
+
+  const [anonResult] = await db
+    .select({ count: sql<number>`COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.sid')))`  })
+    .from(analyticsEvents)
+    .where(
+      and(
+        eq(analyticsEvents.eventType, "page_view"),
+        isNull(analyticsEvents.userId),
+        gte(analyticsEvents.createdAt, sinceDate),
+        sql`JSON_EXTRACT(${analyticsEvents.metadata}, '$.sid') IS NOT NULL`,
+      )
+    );
+
+  const [signedInResult] = await db
+    .select({ count: sql<number>`COUNT(DISTINCT ${analyticsEvents.userId})` })
+    .from(analyticsEvents)
+    .where(
+      and(
+        sql`${analyticsEvents.userId} IS NOT NULL`,
+        gte(analyticsEvents.createdAt, sinceDate),
+      )
+    );
+
+  const [startedResult] = await db
+    .select({ count: sql<number>`COUNT(DISTINCT ${analyticsEvents.userId})` })
+    .from(analyticsEvents)
+    .where(
+      and(
+        eq(analyticsEvents.eventType, "lesson_started"),
+        sql`${analyticsEvents.userId} IS NOT NULL`,
+        gte(analyticsEvents.createdAt, sinceDate),
+      )
+    );
+
+  const [completedResult] = await db
+    .select({ count: sql<number>`COUNT(DISTINCT ${lessonProgress.userId})` })
+    .from(lessonProgress)
+    .where(
+      and(
+        eq(lessonProgress.completed, true),
+        gte(lessonProgress.completedAt, sinceDate),
+      )
+    );
+
+  return {
+    anonymousVisitors: anonResult?.count ?? 0,
+    signedInUsers: signedInResult?.count ?? 0,
+    startedLesson: startedResult?.count ?? 0,
+    completedLesson: completedResult?.count ?? 0,
+  };
+}
+
+/** Per-lesson content performance: views, completions, completion rate */
+export async function getContentPerformance(sinceDate: Date, limit = 40) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const allLessons = await db
+    .select({
+      lessonId: lessons.id,
+      lessonTitle: lessons.title,
+      courseTitle: courses.title,
+      courseCategory: courses.category,
+    })
+    .from(lessons)
+    .innerJoin(courses, eq(lessons.courseId, courses.id))
+    .where(and(eq(lessons.published, true), eq(lessons.hidden, false)))
+    .orderBy(courses.title, lessons.sortOrder)
+    .limit(200);
+
+  if (allLessons.length === 0) return [];
+
+  const viewRows = await db
+    .select({
+      resourceId: analyticsEvents.resourceId,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(analyticsEvents)
+    .where(
+      and(
+        sql`${analyticsEvents.eventType} IN ('lesson_started', 'academy_video_play')`,
+        gte(analyticsEvents.createdAt, sinceDate),
+        sql`${analyticsEvents.resourceId} IS NOT NULL`,
+      )
+    )
+    .groupBy(analyticsEvents.resourceId);
+
+  const completionRows = await db
+    .select({
+      lessonId: lessonProgress.lessonId,
+      count: sql<number>`COUNT(DISTINCT ${lessonProgress.userId})`,
+    })
+    .from(lessonProgress)
+    .where(
+      and(
+        eq(lessonProgress.completed, true),
+        gte(lessonProgress.completedAt, sinceDate),
+      )
+    )
+    .groupBy(lessonProgress.lessonId);
+
+  const viewMap = new Map(viewRows.map((r) => [r.resourceId, Number(r.count)]));
+  const completionMap = new Map(completionRows.map((r) => [r.lessonId, Number(r.count)]));
+
+  const result = allLessons.map((l) => {
+    const views = viewMap.get(l.lessonId) ?? 0;
+    const completions = completionMap.get(l.lessonId) ?? 0;
+    const completionRate = views > 0 ? Math.round((completions / views) * 100) : 0;
+    return {
+      lessonId: l.lessonId,
+      lessonTitle: l.lessonTitle,
+      courseTitle: l.courseTitle,
+      courseCategory: l.courseCategory as string,
+      views,
+      completions,
+      completionRate,
+    };
+  });
+
+  return result.sort((a, b) => b.views - a.views).slice(0, limit);
+}
+
+/** Zero-result search queries from content_requests (search_query type), grouped by topic */
+export async function getZeroResultSearches(sinceDate: Date, limit = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      topic: contentRequests.topic,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(contentRequests)
+    .where(
+      and(
+        eq(contentRequests.requestType, "search_query"),
+        gte(contentRequests.createdAt, sinceDate),
+      )
+    )
+    .groupBy(contentRequests.topic)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return rows;
 }

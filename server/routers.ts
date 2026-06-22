@@ -1077,7 +1077,7 @@ const analyticsRouter = router({
     }),
 
   getAnonOverview: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(0)]).default(30) }))
+    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       const [totalPageViews, topPages, academyByCategory, academyBySection, topLessons, webinarByType, topWebinars, guidesByType, topGuides, askWavvCount] = await Promise.all([
@@ -1096,7 +1096,7 @@ const analyticsRouter = router({
     }),
 
   getPageViewDrilldown: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(0)]).default(30) }))
+    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       const [total, pages] = await Promise.all([
@@ -1109,7 +1109,7 @@ const analyticsRouter = router({
   getAnonTrend: adminProcedure
     .input(z.object({
       eventType: z.string(),
-      days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(0)]).default(30),
+      days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30),
     }))
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
@@ -1381,7 +1381,11 @@ export const appRouter = router({
     query: publicProcedure
       .input(z.object({ q: z.string().min(1).max(200) }))
       .query(async ({ ctx, input }) => {
+<<<<<<< Updated upstream
         if (input.q.trim().length < 2) return { courses: [], lessons: [], webinars: [], guides: [], helpArticles: [] };
+=======
+        // short queries handled by searchContent
+>>>>>>> Stashed changes
         // Only track search events for logged-in users
         if (ctx.user) {
           await trackEvent({ userId: ctx.user.id, eventType: "search", metadata: JSON.stringify({ query: input.q.trim() }) });

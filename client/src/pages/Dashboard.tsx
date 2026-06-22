@@ -268,7 +268,7 @@ export default function Dashboard() {
           <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
             style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
-          <div className="relative z-10 px-6 lg:px-16 py-14 lg:py-18 text-center">
+          <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-10 sm:py-14 lg:py-18 text-center">
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
               style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.25)" }}>

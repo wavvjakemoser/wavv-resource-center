@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Search, BookOpen, Video, FileText, GraduationCap, X, Send, CheckCircle2 } from "lucide-react";
+import { Sparkles, Search, BookOpen, Video, FileText, GraduationCap, X, Send, CheckCircle2, HelpCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
@@ -29,7 +29,7 @@ export default function AISearchBar() {
 
   const hasResults =
     data &&
-    (data.courses.length + data.lessons.length + data.webinars.length + data.guides.length) > 0;
+    (data.courses.length + data.lessons.length + data.webinars.length + data.guides.length + (data.helpArticles?.length ?? 0)) > 0;
 
   const [requestedQueries, setRequestedQueries] = useState<Set<string>>(new Set());
   const submitSearchQuery = trpc.contentRequests.submitSearchQuery.useMutation({
@@ -182,6 +182,26 @@ export default function AISearchBar() {
             </ResultSection>
           )}
 
+          {data?.helpArticles && data.helpArticles.length > 0 && (
+            <ResultSection title="Help Articles" icon={<HelpCircle size={12} />}>
+              {data.helpArticles.map((a) => (
+                <ResultItem
+                  key={a.id}
+                  label={a.title}
+                  sub={a.sectionName ?? "Help"}
+                  onClick={() => {
+                    setOpen(false);
+                    setQuery("");
+                    if (a.url) {
+                      window.open(a.url, "_blank", "noopener,noreferrer");
+                    } else {
+                      navigate("/guides");
+                    }
+                  }}
+                />
+              ))}
+            </ResultSection>
+          )}
 
         </div>
       )}

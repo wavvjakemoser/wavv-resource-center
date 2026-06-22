@@ -63,6 +63,7 @@ import {
   MessageSquare,
   Search,
   TrendingUp,
+  TrendingDown,
   Activity,
   Eye,
   Download,
@@ -886,6 +887,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
     { key: "academy" as const, label: "WAVV Academy",  color: "#22d3ee", icon: <GraduationCap size={13} /> },
     { key: "webinars" as const, label: "WAVV Webinars", color: "#f59e0b", icon: <Video size={13} /> },
     { key: "guides" as const, label: "Resource Hub",   color: "#4ade80", icon: <FileText size={13} /> },
+    { key: "insights" as const, label: "Insights",     color: "#a78bfa", icon: <Search size={13} /> },
   ];
 
   if (isLoading) {
@@ -1132,6 +1134,110 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
               color="#4ade80"
               emptyText="No guide downloads yet"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Insights panel */}
+      {activePanel === "insights" && (
+        <div className="space-y-6">
+          {/* Drop-off Funnel */}
+          <div className="rounded-xl p-5 space-y-4" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><TrendingDown size={13} style={{ color: "#f59e0b" }} /> Customer Journey Funnel</p>
+            {!dropOffFunnel ? (
+              <div className="flex items-center justify-center h-24"><div className="w-5 h-5 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" /></div>
+            ) : (
+              <div className="space-y-3">
+                {[
+                  { label: "Anonymous Visitors", value: dropOffFunnel.anonymousVisitors, color: "#60a5fa" },
+                  { label: "Signed-In Users", value: dropOffFunnel.signedInUsers, color: "#22d3ee" },
+                  { label: "Started a Lesson", value: dropOffFunnel.startedLesson, color: "#a78bfa" },
+                  { label: "Completed a Lesson", value: dropOffFunnel.completedLesson, color: "#4ade80" },
+                ].map((step, idx, arr) => {
+                  const maxVal = arr[0]?.value || 1;
+                  const pct = Math.round((step.value / maxVal) * 100);
+                  const dropPct = idx > 0 ? Math.round(((arr[idx-1].value - step.value) / (arr[idx-1].value || 1)) * 100) : null;
+                  return (
+                    <div key={idx} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-300 flex items-center gap-1.5">
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: step.color + "22", color: step.color }}>{idx+1}</span>
+                          {step.label}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          {dropPct !== null && dropPct > 0 && <span className="text-[10px] text-red-400">-{dropPct}% drop</span>}
+                          <span className="font-semibold text-white">{step.value.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="h-2 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
+                        <div className="h-2 rounded-full transition-all" style={{ width: `${pct}%`, background: step.color }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Content Performance Table */}
+          <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><BarChart3 size={13} style={{ color: "#22d3ee" }} /> Content Performance — Lessons</p>
+            {!contentPerformance ? (
+              <div className="flex items-center justify-center h-24"><div className="w-5 h-5 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" /></div>
+            ) : contentPerformance.length === 0 ? (
+              <p className="text-gray-500 text-sm text-center py-6">No lesson data yet</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      <th className="text-left py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Lesson</th>
+                      <th className="text-left py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Course</th>
+                      <th className="text-right py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Views</th>
+                      <th className="text-right py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Completions</th>
+                      <th className="text-right py-2 px-2 text-gray-500 font-semibold uppercase tracking-wider">Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {contentPerformance.slice(0, 20).map((row, i) => (
+                      <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="py-2 px-2 text-gray-200 max-w-[200px] truncate">{row.lessonTitle}</td>
+                        <td className="py-2 px-2 text-gray-500 max-w-[150px] truncate">{row.courseTitle}</td>
+                        <td className="py-2 px-2 text-right text-white font-medium">{row.views.toLocaleString()}</td>
+                        <td className="py-2 px-2 text-right text-white font-medium">{row.completions.toLocaleString()}</td>
+                        <td className="py-2 px-2 text-right">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{
+                            background: row.completionRate >= 50 ? "rgba(74,222,128,0.15)" : row.completionRate >= 20 ? "rgba(251,191,36,0.15)" : "rgba(239,68,68,0.15)",
+                            color: row.completionRate >= 50 ? "#4ade80" : row.completionRate >= 20 ? "#fbbf24" : "#f87171",
+                          }}>{row.completionRate}%</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Search Insights */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Search size={13} style={{ color: "#a78bfa" }} /> Top Search Terms</p>
+              <AnonRankedList
+                items={(topSearchTerms ?? []).map((r) => ({ label: r.term, count: r.count ?? 0 }))}
+                color="#a78bfa"
+                emptyText="No search data yet"
+              />
+            </div>
+            <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><AlertTriangle size={13} style={{ color: "#f87171" }} /> Zero-Result Searches</p>
+              <p className="text-[10px] text-gray-500">Queries that returned no content — content gaps to address</p>
+              <AnonRankedList
+                items={(zeroResultSearches ?? []).map((r) => ({ label: r.topic, count: r.count ?? 0 }))}
+                color="#f87171"
+                emptyText="No zero-result searches yet"
+              />
+            </div>
           </div>
         </div>
       )}

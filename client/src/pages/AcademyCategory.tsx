@@ -436,13 +436,13 @@ function SectionRow({
                   )}
                 </div>
                 {/* Badge / arrow / bookmark */}
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0">
                   {video.duration && (
-                    <span className="text-[11px] text-gray-600">{video.duration}</span>
+                    <span className="text-[11px] text-gray-600 hidden sm:inline">{video.duration}</span>
                   )}
                   {video.status === "coming_soon" && (
                     <span
-                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full hidden sm:inline"
                       style={{ background: "rgba(255,255,255,0.05)", color: "#555", border: "1px solid #333" }}
                     >
                       Coming Soon
@@ -454,10 +454,9 @@ function SectionRow({
                       style={{ background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}40` }}
                     >
                       <Play size={9} style={{ color: accentColor }} />
-                      Watch
+                      <span className="hidden sm:inline">Watch</span>
                     </span>
                   )}
-                  {/* bookmark removed — not tied to users */}
                 </div>
               </>
             );
