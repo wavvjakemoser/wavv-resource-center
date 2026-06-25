@@ -2908,3 +2908,80 @@ export async function getZeroResultSearches(sinceDate: Date, limit = 10) {
     .limit(limit);
   return rows;
 }
+
+/** Identity-focused user stats for the simplified analytics view */
+export async function getUserIdentityStats() {
+  const db = await getDb();
+  if (!db) return {
+    totalAccounts: 0,
+    byAccountType: { employee: 0, customer: 0, guest: 0 },
+    byApprovalStatus: { approved: 0, pending: 0, denied: 0 },
+    bySubscriptionStatus: {} as Record<string, number>,
+    recentSignIns: [] as { id: number; name: string | null; email: string | null; accountType: string; approvalStatus: string; subscriptionStatus: string | null; lastSignedIn: Date; role: string }[],
+    newAccountsTrend: [] as { date: string; count: number }[],
+  };
+
+  const [totalResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(users);
+  const totalAccounts = totalResult?.count ?? 0;
+
+  const accountTypeRows = await db
+    .select({ accountType: users.accountType, count: sql<number>`COUNT(*)` })
+    .from(users)
+    .groupBy(users.accountType);
+  const byAccountType = { employee: 0, customer: 0, guest: 0 };
+  for (const r of accountTypeRows) {
+    if (r.accountType === "employee") byAccountType.employee = r.count;
+    else if (r.accountType === "customer") byAccountType.customer = r.count;
+    else byAccountType.guest = r.count;
+  }
+
+  const approvalRows = await db
+    .select({ approvalStatus: users.approvalStatus, count: sql<number>`COUNT(*)` })
+    .from(users)
+    .groupBy(users.approvalStatus);
+  const byApprovalStatus = { approved: 0, pending: 0, denied: 0 };
+  for (const r of approvalRows) {
+    if (r.approvalStatus === "approved") byApprovalStatus.approved = r.count;
+    else if (r.approvalStatus === "pending") byApprovalStatus.pending = r.count;
+    else if (r.approvalStatus === "denied") byApprovalStatus.denied = r.count;
+  }
+
+  const subRows = await db
+    .select({ status: users.subscriptionStatus, count: sql<number>`COUNT(*)` })
+    .from(users)
+    .where(eq(users.accountType, "customer"))
+    .groupBy(users.subscriptionStatus);
+  const bySubscriptionStatus: Record<string, number> = {};
+  for (const r of subRows) {
+    bySubscriptionStatus[r.status ?? "NONE"] = r.count;
+  }
+
+  const recentSignIns = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      accountType: users.accountType,
+      approvalStatus: users.approvalStatus,
+      subscriptionStatus: users.subscriptionStatus,
+      lastSignedIn: users.lastSignedIn,
+      role: users.role,
+    })
+    .from(users)
+    .orderBy(desc(users.lastSignedIn))
+    .limit(50);
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const trendRows = await db
+    .select({
+      date: sql<string>`DATE(${users.createdAt})`,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(users)
+    .where(gte(users.createdAt, thirtyDaysAgo))
+    .groupBy(sql`DATE(${users.createdAt})`)
+    .orderBy(sql`DATE(${users.createdAt})`);
+  const newAccountsTrend = trendRows.map(r => ({ date: r.date, count: r.count }));
+
+  return { totalAccounts, byAccountType, byApprovalStatus, bySubscriptionStatus, recentSignIns, newAccountsTrend };
+}
