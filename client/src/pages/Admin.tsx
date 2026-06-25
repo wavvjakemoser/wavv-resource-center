@@ -92,6 +92,7 @@ import {
   Headphones,
   AlertCircle,
   Clock,
+  CreditCard,
   CheckCircle2,
   Star,
   EyeOff,
@@ -180,7 +181,7 @@ import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import NativeArticleEditor from "@/components/NativeArticleEditor";
 
-type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "support" | "content_requests" | "settings" | "approved_partners" | "partners_content";
+type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "content_requests" | "settings" | "approved_partners" | "partners_content";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -203,7 +204,6 @@ export default function Admin() {
     if (t === "webinars" && isSuperAdmin) return "webinars";
     if (t === "guides" && isSuperAdmin) return "guides";
     if (t === "playground" && isSuperAdmin) return "playground";
-    if (t === "support" && isSuperAdmin) return "support";
     if (t === "content_requests" && isSuperAdmin) return "content_requests";
     if (t === "partners_content" && (isSuperAdmin || isPartnerAdmin)) return "partners_content";
     if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) return "partner_analytics";
@@ -214,8 +214,6 @@ export default function Admin() {
     return "users";
   };
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
-  // Persist analytics time-range across tab switches
-  const [analyticsDays, setAnalyticsDays] = useState<AnonTimeRange>(30);
 
   // Must be called unconditionally before any early returns (Rules of Hooks)
   const { data: adminSettings = {} } = trpc.siteSettings.getAll.useQuery();
@@ -231,7 +229,6 @@ export default function Admin() {
     else if (t === "webinars" && isSuperAdmin) setActiveTab("webinars");
     else if (t === "guides" && isSuperAdmin) setActiveTab("guides");
     else if (t === "playground" && isSuperAdmin) setActiveTab("playground");
-    else if (t === "support" && isSuperAdmin) setActiveTab("support");
     else if (t === "content_requests" && isSuperAdmin) setActiveTab("content_requests");
     else if (t === "partners_content" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("partners_content");
     else if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) setActiveTab("partner_analytics");
@@ -279,7 +276,6 @@ export default function Admin() {
     { id: "webinars",         label: "WAVV Webinars",     icon: <Video size={13} />,         show: isSuperAdmin },
     { id: "guides",           label: "WAVV Resource Hub", icon: <FileText size={13} />,      show: isSuperAdmin },
     { id: "playground",       label: "WAVV Playground",   icon: <FlaskConical size={13} />,  show: isSuperAdmin },
-    { id: "support",          label: "WAVV Support",      icon: <Headphones size={13} />,    show: isSuperAdmin },
     { id: "partners_content", label: "WAVV Partners",     icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />, show: isSuperAdmin },
   ];
@@ -332,7 +328,7 @@ export default function Admin() {
         </div>
 
         {/* ── Tab content ── */}
-        {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab days={analyticsDays} onDaysChange={setAnalyticsDays} />}
+        {activeTab === "analytics" && isSuperAdmin && <AnalyticsTab />}
         {activeTab === "users" && <UsersTab />}
         {activeTab === "settings" && isOwner && <SettingsTab />}
         {activeTab === "approved_partners" && (isOwner || isPartnerAdmin) && <ApprovedPartnersTab />}
@@ -340,7 +336,6 @@ export default function Admin() {
         {activeTab === "webinars" && isSuperAdmin && <WebinarsTab />}
         {activeTab === "guides" && isSuperAdmin && <GuidesTab />}
         {activeTab === "playground" && isSuperAdmin && <PlaygroundTab />}
-        {activeTab === "support" && isSuperAdmin && <SupportTab />}
         {activeTab === "partners_content" && (isOwner || isPartnerAdmin) && <PartnersContentTab />}
         {activeTab === "content_requests" && isSuperAdmin && <ContentRequestsTab />}
         {activeTab === "partner_analytics" && (isSuperAdmin || isPartnerAdmin) && <PartnerAnalyticsTab isPartnerAdmin={isPartnerAdmin && !isOwner} />}
@@ -351,107 +346,70 @@ export default function Admin() {
 
 
 // ─── Analytics Tab ────────────────────────────────────────────────────────────
-type AnonTimeRange = 7 | 30 | 90 | 0; // 0 = All Time
+type AnonTimeRange = 7 | 30 | 90 | 180 | 365 | 0; // 0 = All Time
 
-function AnalyticsTab({ days: daysProp, onDaysChange }: { days?: AnonTimeRange; onDaysChange?: (d: AnonTimeRange) => void } = {}) {
-  const [localDays, setLocalDays] = useState<AnonTimeRange>(daysProp ?? 30);
-  const days = daysProp ?? localDays;
-  const setDays = (d: AnonTimeRange) => { setLocalDays(d); onDaysChange?.(d); };
-  const [resetOpen, setResetOpen] = useState(false);
-  const [resetConfirmText, setResetConfirmText] = useState("");
-  const utils = trpc.useUtils();
-  const { user: analyticsUser } = useAuth();
-  const isSuperAdmin = analyticsUser?.role === "publisher" || analyticsUser?.role === "owner";
-  const { data: tabSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const resetAnalytics = trpc.analytics.resetAnalytics.useMutation({
-    onSuccess: () => {
-      toast.success("All analytics data has been cleared.");
-      setResetOpen(false);
-      setResetConfirmText("");
-      utils.analytics.getAnonOverview.invalidate();
-      utils.analytics.getAnonTrend.invalidate();
-    },
-    onError: (e) => toast.error(e.message),
-  });
-
-  const TIME_OPTIONS: { value: AnonTimeRange; label: string }[] = [
-    { value: 7,  label: "7D" },
-    { value: 30, label: "30D" },
-    { value: 90, label: "90D" },
-    { value: 0,  label: "All Time" },
-  ];
-
+function AnalyticsTab() {
   return (
     <div className="space-y-6">
-      {/* Two-step reset confirmation dialog */}
-      <Dialog open={resetOpen} onOpenChange={(o) => { setResetOpen(o); if (!o) setResetConfirmText(""); }}>
-        <DialogContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <AlertTriangle size={18} style={{ color: "#ef4444" }} />
-              Reset All Analytics Data
-            </DialogTitle>
-            <DialogDescription className="text-gray-400">
-              This will permanently erase <strong className="text-white">all</strong> anonymous analytics event data. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="px-1 py-2">
-            <p className="text-xs text-gray-500 mb-2">Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm:</p>
-            <input
-              type="text"
-              value={resetConfirmText}
-              onChange={(e) => setResetConfirmText(e.target.value)}
-              placeholder="Type DELETE"
-              className="w-full px-3 py-2 rounded-lg text-sm text-white bg-transparent border outline-none"
-              style={{ borderColor: resetConfirmText === "DELETE" ? "#ef4444" : "rgba(255,255,255,0.15)" }}
-            />
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => { setResetOpen(false); setResetConfirmText(""); }} className="text-gray-400">Cancel</Button>
-            <Button
-              variant="destructive"
-              disabled={resetAnalytics.isPending || resetConfirmText !== "DELETE"}
-              onClick={() => resetAnalytics.mutate()}
-            >
-              {resetAnalytics.isPending ? "Resetting..." : "Confirm Reset"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Controls */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-white">Analytics Dashboard</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Anonymous visitors only — authenticated users are excluded</p>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: "rgba(0,116,244,0.15)" }}
+        >
+          <BarChart3 size={18} style={{ color: "#60a5fa" }} />
         </div>
-        <div className="flex items-center gap-3">
-          {isSuperAdmin && (
-            <button
-              onClick={() => setResetOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-              style={{ background: "rgba(239,68,68,0.08)", color: "#f87171", border: "1px solid rgba(239,68,68,0.2)" }}
+        <div>
+          <h2 className="text-base font-bold text-white">Analytics</h2>
+          <p className="text-xs text-gray-500">Platform usage and engagement data</p>
+        </div>
+      </div>
+      {/* Under-construction banner */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{ background: "rgba(0,116,244,0.05)", border: "2px dashed rgba(0,116,244,0.25)" }}
+      >
+        <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center"
+            style={{ background: "rgba(0,116,244,0.12)" }}
+          >
+            <BarChart3 size={40} style={{ color: "#60a5fa" }} />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold text-white tracking-tight">Analytics</h3>
+            <div
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+              style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa" }}
             >
-              <Trash2 size={13} />
-              Reset Data
-            </button>
-          )}
-          <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
-            {TIME_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => setDays(value)}
-                className="px-3 py-1.5 text-xs font-medium rounded-md transition"
-                style={days === value ? { background: "rgba(6,182,212,0.2)", color: "#22d3ee" } : { color: "#9ca3af" }}
+              <Activity size={11} />
+              Coming Soon
+            </div>
+          </div>
+          <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+            Traffic and engagement data is currently tracked via{" "}
+            <span className="text-white font-medium">Google Analytics</span>.
+            A native analytics dashboard will be built once we have enough traffic to identify
+            what signals matter most.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
+            {[
+              { icon: <Users size={14} />, label: "User Identity Tracking" },
+              { icon: <TrendingUp size={14} />, label: "Engagement Metrics" },
+              { icon: <Search size={14} />, label: "Content Performance" },
+            ].map(({ icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
               >
+                <span style={{ color: "#60a5fa" }}>{icon}</span>
                 {label}
-              </button>
+              </div>
             ))}
           </div>
         </div>
       </div>
-
-      <AnonAnalyticsContent days={days} />
     </div>
   );
 }
@@ -861,7 +819,6 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
   const { data: academyTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "academy_video_play", days });
   const { data: webinarTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "webinar_video_play", days });
   const { data: guideTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "guide_download", days });
-
   // Enhanced analytics queries
   const { data: enhancedSummary } = trpc.analytics.getEnhancedSummary.useQuery({ days });
   const { data: contentPerformance } = trpc.analytics.getContentPerformance.useQuery({ days });
@@ -870,6 +827,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
   const { data: zeroResultSearches } = trpc.analytics.getZeroResultSearches.useQuery({ days });
 
   const [activePanel, setActivePanel] = useState<"overview" | "academy" | "webinars" | "guides" | "insights">("overview");
+
   const [showPageDrilldown, setShowPageDrilldown] = useState(false);
   const { data: drilldown } = trpc.analytics.getPageViewDrilldown.useQuery({ days }, { enabled: showPageDrilldown });
 
@@ -910,6 +868,40 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
 
   return (
     <div className="space-y-6">
+      {/* ── Headline KPI row ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.2)" }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+            <Users size={18} style={{ color: "#60a5fa" }} />
+          </div>
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">Total Signed-In Users</p>
+            <p className="text-2xl font-bold text-white">{(enhancedSummary?.totalSignedInUsers ?? 0).toLocaleString()}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">All time</p>
+          </div>
+        </div>
+        <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(34,211,238,0.08)", border: "1px solid rgba(34,211,238,0.2)" }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(34,211,238,0.15)" }}>
+            <GraduationCap size={18} style={{ color: "#22d3ee" }} />
+          </div>
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">Lessons Completed</p>
+            <p className="text-2xl font-bold text-white">{(enhancedSummary?.totalLessonsCompleted ?? 0).toLocaleString()}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">In selected period</p>
+          </div>
+        </div>
+        <div className="rounded-xl p-5 flex items-center gap-4" style={{ background: "rgba(167,139,250,0.08)", border: "1px solid rgba(167,139,250,0.2)" }}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(167,139,250,0.15)" }}>
+            <Search size={18} style={{ color: "#a78bfa" }} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs text-gray-400 mb-0.5">Top Search Term</p>
+            <p className="text-lg font-bold text-white truncate">{enhancedSummary?.mostSearchedTerm ?? "—"}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">Most searched in period</p>
+          </div>
+        </div>
+      </div>
+
       {/* Summary stat tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Page Views tile — clickable for drilldown */}
@@ -997,7 +989,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
       {/* Panel tabs */}
       <div className="flex gap-1 p-1 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
         {PANEL_TABS.map((t) => (
-          <button key={t.key} onClick={() => setActivePanel(t.key)}
+          <button key={t.key} onClick={() => setActivePanel(t.key as "overview" | "academy" | "webinars" | "guides" | "insights")}
             className="flex items-center gap-1.5 flex-1 justify-center py-2 text-xs font-medium rounded-lg transition"
             style={activePanel === t.key
               ? { background: "rgba(255,255,255,0.1)", color: t.color }
@@ -1206,7 +1198,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {contentPerformance.slice(0, 20).map((row: { lessonTitle: string; courseTitle: string; views: number; completions: number; completionRate: number }, i: number) => (
+                    {contentPerformance.slice(0, 20).map((row, i) => (
                       <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }} className="hover:bg-white/[0.02] transition-colors">
                         <td className="py-2 px-2 text-gray-200 max-w-[200px] truncate">{row.lessonTitle}</td>
                         <td className="py-2 px-2 text-gray-500 max-w-[150px] truncate">{row.courseTitle}</td>
@@ -1231,7 +1223,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
             <div className="rounded-xl p-5 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
               <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><Search size={13} style={{ color: "#a78bfa" }} /> Top Search Terms</p>
               <AnonRankedList
-                items={(topSearchTerms ?? []).map((r: { term: string; count: number }) => ({ label: r.term, count: r.count ?? 0 }))}
+                items={(topSearchTerms ?? []).map((r) => ({ label: r.term, count: r.count ?? 0 }))}
                 color="#a78bfa"
                 emptyText="No search data yet"
               />
@@ -1240,7 +1232,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
               <p className="text-xs font-semibold text-gray-300 flex items-center gap-1.5"><AlertTriangle size={13} style={{ color: "#f87171" }} /> Zero-Result Searches</p>
               <p className="text-[10px] text-gray-500">Queries that returned no content — content gaps to address</p>
               <AnonRankedList
-                items={(zeroResultSearches ?? []).map((r: { topic: string; count: number }) => ({ label: r.topic, count: r.count ?? 0 }))}
+                items={(zeroResultSearches ?? []).map((r) => ({ label: r.topic, count: r.count ?? 0 }))}
                 color="#f87171"
                 emptyText="No zero-result searches yet"
               />
@@ -8236,7 +8228,6 @@ function SettingsTab() {
     { href: "/webinars",   label: "WAVV Webinars",           icon: VideoIcon },
     { href: "/guides",     label: "WAVV Resource Hub",         icon: FileTextIcon },
     { href: "/playground",   label: "WAVV Playground",         icon: FlaskConical },
-    { href: "/support",    label: "WAVV Support",            icon: HeadphonesIcon },
     { href: "/partners",   label: "WAVV Partners",          icon: UsersIcon },
     { href: "/wavvpartner",label: "WAVV Partner Portal",     icon: UsersIcon },
   ];

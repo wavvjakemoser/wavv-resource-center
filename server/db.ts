@@ -2708,53 +2708,6 @@ export async function reorderFaqEntries(items: { id: number; sortOrder: number }
 // ─── Enhanced Analytics Helpers ──────────────────────────────────────────────
 
 /** Top N search terms within a date range */
-/** Enhanced summary: total signed-in users (all-time), lessons completed in period, top search term in period */
-export async function getEnhancedAnalyticsSummary(sinceDate: Date) {
-  const db = await getDb();
-  if (!db) return { totalSignedInUsers: 0, lessonsCompleted: 0, topSearchTerm: null as string | null };
-
-  // Total signed-in users (all time)
-  const [userRow] = await db
-    .select({ count: sql<number>`COUNT(*)` })
-    .from(users);
-
-  // Lessons completed in period
-  const [lessonRow] = await db
-    .select({ count: sql<number>`COUNT(*)` })
-    .from(analyticsEvents)
-    .where(
-      and(
-        eq(analyticsEvents.eventType, "lesson_completed"),
-        gte(analyticsEvents.createdAt, sinceDate),
-      ),
-    );
-
-  // Top search term in period
-  const [topTermRow] = await db
-    .select({
-      term: sql<string>`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.query'))`,
-      count: sql<number>`COUNT(*)`,
-    })
-    .from(analyticsEvents)
-    .where(
-      and(
-        eq(analyticsEvents.eventType, "search"),
-        gte(analyticsEvents.createdAt, sinceDate),
-        sql`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.query')) IS NOT NULL`,
-        sql`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.query')) != 'null'`,
-      ),
-    )
-    .groupBy(sql`JSON_UNQUOTE(JSON_EXTRACT(${analyticsEvents.metadata}, '$.query'))`)
-    .orderBy(sql`COUNT(*) DESC`)
-    .limit(1);
-
-  return {
-    totalSignedInUsers: Number(userRow?.count ?? 0),
-    lessonsCompleted: Number(lessonRow?.count ?? 0),
-    topSearchTerm: topTermRow?.term ?? null,
-  };
-}
-
 export async function getTopSearchTerms(sinceDate: Date, limit = 10) {
   const db = await getDb();
   if (!db) return [];

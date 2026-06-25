@@ -169,10 +169,12 @@ import {
   toggleFaqEntryVisibility,
   deleteFaqEntry,
   reorderFaqEntries,
-  getEnhancedAnalyticsSummary,
-  getContentPerformance,
-  getDropOffFunnel,
   getTopSearchTerms,
+  getTotalSignedInUsers,
+  getTotalLessonsCompleted,
+  getMostSearchedTerm,
+  getDropOffFunnel,
+  getContentPerformance,
   getZeroResultSearches,
 } from "./db";
 import { runIntercomSync } from "./intercomSync";
@@ -1121,36 +1123,45 @@ const analyticsRouter = router({
       return getAnonDailyTrend(input.eventType, since);
     }),
 
-  // ── Enhanced analytics for Insights tab ──
+  // ── Enhanced analytics: content performance, funnel, search insights ──
   getEnhancedSummary: adminProcedure
     .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getEnhancedAnalyticsSummary(since);
+      const [totalSignedInUsers, totalLessonsCompleted, mostSearchedTerm] = await Promise.all([
+        getTotalSignedInUsers(),
+        getTotalLessonsCompleted(since),
+        getMostSearchedTerm(since),
+      ]);
+      return { totalSignedInUsers, totalLessonsCompleted, mostSearchedTerm };
     }),
+
   getContentPerformance: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
+    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30), limit: z.number().min(1).max(100).default(40) }))
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getContentPerformance(since);
+      return getContentPerformance(since, input.limit);
     }),
+
   getDropOffFunnel: adminProcedure
     .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       return getDropOffFunnel(since);
     }),
+
   getTopSearchTerms: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
+    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30), limit: z.number().min(1).max(20).default(10) }))
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getTopSearchTerms(since);
+      return getTopSearchTerms(since, input.limit);
     }),
+
   getZeroResultSearches: adminProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30) }))
+    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(180), z.literal(365), z.literal(0)]).default(30), limit: z.number().min(1).max(20).default(10) }))
     .query(async ({ input }) => {
       const since = input.days === 0 ? new Date(0) : new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
-      return getZeroResultSearches(since);
+      return getZeroResultSearches(since, input.limit);
     }),
 });
 
@@ -2115,4 +2126,3 @@ export const appRouter = router({
 });
 
 export type AppRouter = typeof appRouter;
-
