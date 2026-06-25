@@ -97,7 +97,6 @@ function Router() {
       <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
-      <Route path="/support">{() => <Redirect to="/404" />}</Route>
       <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
       <Route path="/wavvpartner">{() => <Redirect to="/404" />}</Route>
       <Route path="/wavvcommandcenter">{() => <AdminGuard><Admin /></AdminGuard>}</Route>

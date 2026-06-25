@@ -350,65 +350,32 @@ type AnonTimeRange = 7 | 30 | 90 | 180 | 365 | 0; // 0 = All Time
 
 function AnalyticsTab() {
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
+    <div
+      className="rounded-2xl overflow-hidden"
+      style={{ background: "rgba(255,153,0,0.07)", border: "2px dashed rgba(255,153,0,0.35)" }}
+    >
+      <div className="flex flex-col items-center justify-center text-center py-20 px-8 gap-5">
         <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(0,116,244,0.15)" }}
+          className="w-20 h-20 rounded-2xl flex items-center justify-center"
+          style={{ background: "rgba(255,153,0,0.15)" }}
         >
-          <BarChart3 size={18} style={{ color: "#60a5fa" }} />
+          <AlertTriangle size={40} style={{ color: "#FF9900" }} />
         </div>
-        <div>
-          <h2 className="text-base font-bold text-white">Analytics</h2>
-          <p className="text-xs text-gray-500">Platform usage and engagement data</p>
-        </div>
-      </div>
-      {/* Under-construction banner */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{ background: "rgba(0,116,244,0.05)", border: "2px dashed rgba(0,116,244,0.25)" }}
-      >
-        <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
+        <div className="space-y-2">
+          <h3 className="text-2xl font-bold text-white tracking-tight">Analytics</h3>
           <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ background: "rgba(0,116,244,0.12)" }}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+            style={{ background: "rgba(255,153,0,0.2)", color: "#FF9900" }}
           >
-            <BarChart3 size={40} style={{ color: "#60a5fa" }} />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-2xl font-bold text-white tracking-tight">Analytics</h3>
-            <div
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-              style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa" }}
-            >
-              <Activity size={11} />
-              Coming Soon
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
-            Traffic and engagement data is currently tracked via{" "}
-            <span className="text-white font-medium">Google Analytics</span>.
-            A native analytics dashboard will be built once we have enough traffic to identify
-            what signals matter most.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
-            {[
-              { icon: <Users size={14} />, label: "User Identity Tracking" },
-              { icon: <TrendingUp size={14} />, label: "Engagement Metrics" },
-              { icon: <Search size={14} />, label: "Content Performance" },
-            ].map(({ icon, label }) => (
-              <div
-                key={label}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
-              >
-                <span style={{ color: "#60a5fa" }}>{icon}</span>
-                {label}
-              </div>
-            ))}
+            <AlertTriangle size={11} />
+            Under Construction
           </div>
         </div>
+        <p className="text-sm text-gray-400 leading-relaxed max-w-md">
+          Analytics are currently tracked via{" "}
+          <span className="text-white font-medium">Google Analytics</span>.
+          A native dashboard will be built once we have enough traffic to identify what signals matter most.
+        </p>
       </div>
     </div>
   );
@@ -800,7 +767,6 @@ const PAGE_LABELS: Record<string, string> = {
   "/webinars": "WAVV Webinars",
   "/guides": "Resource Hub",
   "/playground": "WAVV Playground",
-  "/support": "WAVV Support",
   "/wavvpartner": "WAVV Partners",
   "/wavvcommandcenter": "WAVV Command Center",
   "/profile": "My Profile",
@@ -6834,193 +6800,6 @@ function SortablePdfSectionRow({ id, children }: { id: number; children: React.R
     </div>
   );
 }
-
-// ─── Support section (used inside PlaygroundTab) ──────────────────────────────
-function SupportSection() {
-  const utils = trpc.useUtils();
-  const { data: tickets = [], isLoading } = trpc.support.adminGetAll.useQuery();
-  const updateStatus = trpc.support.adminUpdateStatus.useMutation({
-    onSuccess: () => { utils.support.adminGetAll.invalidate(); toast.success("Status updated"); },
-    onError: (e) => toast.error(e.message),
-  });
-
-  const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
-    open: { label: "Open", color: "#f87171", bg: "rgba(239,68,68,0.15)", icon: <AlertCircle size={11} /> },
-    in_progress: { label: "In Progress", color: "#fbbf24", bg: "rgba(251,191,36,0.15)", icon: <Clock size={11} /> },
-    resolved: { label: "Resolved", color: "#67C728", bg: "rgba(103,199,40,0.15)", icon: <CheckCircle2 size={11} /> },
-    closed: { label: "Closed", color: "#6b7280", bg: "rgba(107,114,128,0.15)", icon: <X size={11} /> },
-  };
-
-  const PRIORITY_COLOR: Record<string, string> = { low: "#6b7280", medium: "#fbbf24", high: "#f97316", urgent: "#ef4444" };
-
-  const openCount = tickets.filter(t => t.status === "open").length;
-  const inProgressCount = tickets.filter(t => t.status === "in_progress").length;
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Headphones size={16} style={{ color: "#0074F4" }} />
-        <h3 className="text-sm font-semibold text-white">Support Tickets</h3>
-        {openCount > 0 && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(239,68,68,0.15)", color: "#f87171" }}>
-            {openCount} open
-          </span>
-        )}
-        {inProgressCount > 0 && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24" }}>
-            {inProgressCount} in progress
-          </span>
-        )}
-        <button
-          onClick={async () => {
-            const rows = await utils.support.adminExportSubmitters.fetch();
-            if (!rows?.length) { toast.error("No tickets to export"); return; }
-            const headers = ["Name","Email","Subject","Category","Priority","Status","Submitted At"];
-            const csv = [headers.join(","), ...rows.map(r => [r.userName ?? "", r.userEmail ?? "", r.subject ?? "", r.category ?? "", r.priority ?? "", r.status ?? "", r.createdAt ? new Date(r.createdAt).toLocaleString() : ""].map(v => `"${v}"`).join(","))].join("\n");
-            const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "support-submitters.csv"; a.click();
-          }}
-          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-          style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#67C728" }}
-        >
-          <ArrowDownToLine size={13} /> Export Tickets
-        </button>
-      </div>
-
-      {isLoading ? (
-        <div className="flex items-center justify-center h-24"><div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" /></div>
-      ) : tickets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
-          <Headphones size={28} className="text-gray-600 mb-2" />
-          <p className="text-gray-500 text-sm">No tickets yet</p>
-        </div>
-      ) : (
-        <TicketGroups tickets={tickets} STATUS_CONFIG={STATUS_CONFIG} PRIORITY_COLOR={PRIORITY_COLOR} onUpdateStatus={(id, status) => updateStatus.mutate({ id, status })} />
-      )}
-    </div>
-  );
-}
-
-const TICKET_CATEGORY_META: Record<string, { label: string; color: string }> = {
-  "Technical Issue":  { label: "Technical Issue",  color: "#ef4444" },
-  "Billing":          { label: "Billing",           color: "#fbbf24" },
-  "Feature Request":  { label: "Feature Request",  color: "#0074F4" },
-  "Onboarding":       { label: "Onboarding",        color: "#67C728" },
-  "General Question": { label: "General Question", color: "#9ca3af" },
-  "Other":            { label: "Other",             color: "#6b7280" },
-};
-
-function TicketGroups({
-  tickets,
-  STATUS_CONFIG,
-  PRIORITY_COLOR,
-  onUpdateStatus,
-}: {
-  tickets: Array<{ id: number; subject: string; category: string; priority: string; status: string; createdAt: Date | string }>;
-  STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }>;
-  PRIORITY_COLOR: Record<string, string>;
-  onUpdateStatus: (id: number, status: "open" | "in_progress" | "resolved" | "closed") => void;
-}) {
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const [showAll, setShowAll] = useState<Record<string, boolean>>({});
-  const PREVIEW_COUNT = 5;
-
-  const categories = Object.keys(TICKET_CATEGORY_META);
-  const grouped = categories.reduce((acc, cat) => {
-    acc[cat] = tickets.filter(t => t.category === cat);
-    return acc;
-  }, {} as Record<string, typeof tickets>);
-  // Catch-all for tickets with unknown categories
-  const unknownCat = tickets.filter(t => !categories.includes(t.category));
-  if (unknownCat.length > 0) grouped["Other"] = [...(grouped["Other"] ?? []), ...unknownCat];
-
-  return (
-    <div className="space-y-3">
-      {categories.map((cat) => {
-        const group = grouped[cat] ?? [];
-        if (group.length === 0) return null;
-        const meta = TICKET_CATEGORY_META[cat];
-        const isCollapsed = collapsed[cat];
-        const isShowAll = showAll[cat];
-        const displayed = isShowAll ? group : group.slice(0, PREVIEW_COUNT);
-        return (
-          <div key={cat} className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-            <button
-              className="w-full px-5 py-3 flex items-center justify-between hover:bg-white/5 transition"
-              style={{ background: "#1d2230" }}
-              onClick={() => setCollapsed(c => ({ ...c, [cat]: !c[cat] }))}
-            >
-              <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: meta.color }} />
-                <span className="text-sm font-semibold text-white">{meta.label}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${meta.color}20`, color: meta.color }}>{group.length}</span>
-                <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
-              </div>
-            </button>
-            {!isCollapsed && (
-              <>
-                <Table>
-                  <TableHeader>
-                    <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
-                      <TableHead className="text-gray-400 text-xs">Subject</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Priority</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Status</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Date</TableHead>
-                      <TableHead className="text-gray-400 text-xs">Update</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {displayed.map((t) => {
-                      const sc = STATUS_CONFIG[t.status] ?? STATUS_CONFIG.open;
-                      return (
-                        <TableRow key={t.id} style={{ borderColor: "#252d3d" }}>
-                          <TableCell className="text-white text-sm font-medium max-w-xs truncate">{t.subject}</TableCell>
-                          <TableCell>
-                            <span className="text-[10px] font-semibold uppercase" style={{ color: PRIORITY_COLOR[t.priority] ?? "#9ca3af" }}>{t.priority}</span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold w-fit" style={{ background: sc.bg, color: sc.color }}>
-                              {sc.icon}{sc.label}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-gray-500 text-xs">{new Date(t.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            <select
-                              value={t.status}
-                              onChange={e => onUpdateStatus(t.id, e.target.value as "open" | "in_progress" | "resolved" | "closed")}
-                              style={{ background: "#111", border: "1px solid #2a2a2a", color: "#9ca3af", borderRadius: "6px", padding: "3px 6px", fontSize: "11px", outline: "none", appearance: "none" as const }}
-                            >
-                              <option value="open">Open</option>
-                              <option value="in_progress">In Progress</option>
-                              <option value="resolved">Resolved</option>
-                              <option value="closed">Closed</option>
-                            </select>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-                {group.length > PREVIEW_COUNT && (
-                  <div className="px-5 py-2 border-t border-[#2a2a2a]" style={{ background: "#111" }}>
-                    <button
-                      onClick={() => setShowAll(s => ({ ...s, [cat]: !s[cat] }))}
-                      className="text-xs text-gray-500 hover:text-white transition"
-                    >
-                      {isShowAll ? "Show less" : `View all ${group.length} tickets`}
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 // ─── FAQ Sections Panel ─────────────────────────────────────────────────────
 function FaqSectionsPanel() {
   const utils = trpc.useUtils();
@@ -7279,85 +7058,6 @@ function SortableFaqSectionRow({ id, children }: { id: number; children: React.R
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       {children}
-    </div>
-  );
-}
-
-// ─── Support Tab ──────────────────────────────────────────────────────────────
-function SupportTab() {
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(255,153,0,0.15)" }}
-        >
-          <Headphones size={18} style={{ color: "#FF9900" }} />
-        </div>
-        <div>
-          <h2 className="text-base font-bold text-white">WAVV Support</h2>
-          <p className="text-xs text-gray-500">Support analytics and management tools</p>
-        </div>
-      </div>
-
-      {/* Under-construction banner */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{ background: "rgba(255,153,0,0.07)", border: "2px dashed rgba(255,153,0,0.35)" }}
-      >
-        <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
-          {/* Icon */}
-          <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ background: "rgba(255,153,0,0.15)" }}
-          >
-            <AlertTriangle size={40} style={{ color: "#FF9900" }} />
-          </div>
-
-          {/* Heading */}
-          <div className="space-y-2">
-            <h3 className="text-2xl font-bold text-white tracking-tight">
-              Support Analytics
-            </h3>
-            <div
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-              style={{ background: "rgba(255,153,0,0.2)", color: "#FF9900" }}
-            >
-              <AlertTriangle size={11} />
-              Under Construction
-            </div>
-          </div>
-
-          {/* Description */}
-          <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
-            This section will surface <span className="text-white font-medium">AI search usage stats</span>,{" "}
-            <span className="text-white font-medium">engagement metrics</span>, and{" "}
-            <span className="text-white font-medium">support volume trends</span> once instrumentation
-            is complete. Ticket management is handled separately outside this portal.
-          </p>
-
-          {/* Upcoming features list */}
-          <div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2"
-          >
-            {[
-              { icon: <Activity size={14} />, label: "AI Search Stats" },
-              { icon: <TrendingUp size={14} />, label: "Engagement Metrics" },
-              { icon: <BarChart3 size={14} />, label: "Support Volume Trends" },
-            ].map(({ icon, label }) => (
-              <div
-                key={label}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
-              >
-                <span style={{ color: "#FF9900" }}>{icon}</span>
-                {label}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
