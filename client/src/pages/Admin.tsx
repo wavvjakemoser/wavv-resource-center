@@ -806,7 +806,7 @@ function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
     playbook: "#0074F4", other: "#FF9900",
   };
   const WEBINAR_TYPE_COLORS: Record<string, string> = {
-    exclusive: "#a78bfa", evergreen: "#22d3ee", recording: "#f59e0b",
+    exclusive: "#D4AF37", evergreen: "#7C3AED", recording: "#00A9E2",
   };
 
   const totalAcademyPlays = (overview?.academyByCategory ?? []).reduce((s, r) => s + (r.count ?? 0), 0);
@@ -5313,9 +5313,9 @@ function WebinarsTab() {
           <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
         </div>
         {[
-          { key: "evergreen",  label: "WAVV On-Demand Series",                    color: "#67C728" },
-          { key: "exclusive",  label: "Upcoming WAVV Exclusive Live Webinars",     color: "#0074F4" },
-          { key: "recordings", label: "WAVV Exclusive On-Demand Webinars",         color: "#FF9900" },
+          { key: "evergreen",  label: "WAVV On-Demand Series",                    color: "#7C3AED" },
+          { key: "exclusive",  label: "Upcoming WAVV Exclusive Live Webinars",     color: "#D4AF37" },
+          { key: "recordings", label: "WAVV Exclusive On-Demand Webinars",         color: "#00A9E2" },
         ].map(({ key, label, color }) => (
           <div key={key} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -5352,9 +5352,9 @@ function WebinarsTab() {
 }
 
 const WEBINAR_GROUP_META: Record<string, { label: string; color: string; description: string }> = {
-  evergreen:  { label: "WAVV On-Demand Series",                color: "#67C728", description: "Always-available training content" },
-  exclusive:  { label: "Upcoming WAVV Exclusive Live Webinars", color: "#0074F4", description: "Live or invite-only sessions" },
-  recording:  { label: "WAVV Exclusive On-Demand Webinars",    color: "#FF9900", description: "Recorded sessions available anytime" },
+  evergreen:  { label: "WAVV On-Demand Series",                color: "#7C3AED", description: "Always-available training content" },
+  exclusive:  { label: "Upcoming WAVV Exclusive Live Webinars", color: "#D4AF37", description: "Live or invite-only sessions" },
+  recording:  { label: "WAVV Exclusive On-Demand Webinars",    color: "#00A9E2", description: "Recorded sessions available anytime" },
   upcoming:   { label: "Upcoming (Legacy)",    color: "#6b7280", description: "Legacy upcoming entries" },
 };
 
