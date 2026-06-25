@@ -1549,3 +1549,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Insights tab: Zero-Result Searches ranked list (content gap signal)
 - [x] Add getZeroResultSearches DB helper (queries content_requests where requestType=search_query)
 - [x] Add getZeroResultSearches tRPC procedure to analytics router
+
+## Session — Jun 25 2026
+- [x] Admin.tsx: fix Babel parse error at line 350 (git merge conflict marker <<<<<<< HEAD — already resolved in prior session, confirmed clean)
+- [x] Admin.tsx: replace AnonTimeRange type alias with inline union type (AnonTimeRange type removed, inline union used at usage site)
+- [x] PortalLayout.tsx: remove sidebar Sign Out button (button, handleSignOut, signingOut state, LogOut icon, useAuth import all removed)
+- [x] Profile.tsx: Badges icon color changed to teal #00A9E2 (Bookmarks=gold #fbbf24, Badges=teal #00A9E2)
+- [x] Admin.tsx: add Bookmark icon to lucide-react imports
+- [x] Admin.tsx Settings tab: add Profile Sections card with Bookmarks and Badges toggles (keys: bookmarks_enabled, badges_enabled, default visible)
+- [x] Profile.tsx: read bookmarks_enabled and badges_enabled from siteSettings.getAll, conditionally render Bookmarks and Badges sections
+- [x] TypeScript: 0 errors confirmed

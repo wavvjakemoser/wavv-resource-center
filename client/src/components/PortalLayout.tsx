@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import AISearchBar from "./AISearchBar";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import {
   GraduationCap,
   Video,
@@ -14,7 +13,6 @@ import {
   Shield,
   Users,
   ExternalLink,
-  LogOut,
 } from "lucide-react";
 
 const baseNavItems = [
@@ -95,10 +93,8 @@ function NavLink({
 
 export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const { data: user, isLoading: authLoading } = trpc.auth.me.useQuery();
-  const { logout } = useAuth();
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
   const isAdminPage = location.startsWith("/wavvcommandcenter");
 
   // Site settings
@@ -115,16 +111,6 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   useEffect(() => {
     setSidebarOpen(false);
   }, [location]);
-
-  async function handleSignOut() {
-    setSigningOut(true);
-    try {
-      await logout();
-    } finally {
-      setSigningOut(false);
-      window.location.href = "/";
-    }
-  }
 
   // (settings declared above, before Intercom effects)
 
@@ -294,35 +280,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             </div>
           )}
 
-          {/* ── Sign Out — slim text row pinned to very bottom ── */}
-          {user && (
-            <div className="px-4 pb-4 pt-2" style={{ borderTop: "1px solid #1e2030" }}>
-              <button
-                onClick={handleSignOut}
-                disabled={signingOut}
-                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-150 cursor-pointer"
-                style={{
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  background: "transparent",
-                  border: "none",
-                  color: "rgba(255,255,255,0.35)",
-                  letterSpacing: "0.01em",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#f85149";
-                  e.currentTarget.style.background = "rgba(248,81,73,0.06)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "rgba(255,255,255,0.35)";
-                  e.currentTarget.style.background = "transparent";
-                }}
-              >
-                <LogOut size={13} />
-                <span>{signingOut ? "Signing out…" : "Sign out"}</span>
-              </button>
-            </div>
-          )}
+
         </aside>
 
         {/* ── Main column ── */}

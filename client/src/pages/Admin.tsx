@@ -167,6 +167,7 @@ import {
   Quote,
   GripVertical,
   RefreshCw,
+  Bookmark,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -345,8 +346,7 @@ export default function Admin() {
 }
 
 
-// ─── Analytics Tab ────────────────────────────────────────────────────────────
-type AnonTimeRange = 7 | 30 | 90 | 180 | 365 | 0; // 0 = All Time
+// Analytics Tab
 
 function AnalyticsTab() {
   return (
@@ -779,7 +779,7 @@ function friendlyPage(path: string) {
   return parts.map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" › ");
 }
 
-function AnonAnalyticsContent({ days }: { days: AnonTimeRange }) {
+function AnonAnalyticsContent({ days }: { days: 7 | 30 | 90 | 180 | 365 | 0 }) {
   const { data: overview, isLoading } = trpc.analytics.getAnonOverview.useQuery({ days });
   const { data: pageTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "page_view", days });
   const { data: academyTrend } = trpc.analytics.getAnonTrend.useQuery({ eventType: "academy_video_play", days });
@@ -7850,6 +7850,9 @@ function SettingsTab() {
   const announcementText = typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "";
   const announcementEnabled = settings["announcement_enabled"] === true;
   const navVisibility = (settings["nav_visibility"] ?? {}) as Record<string, boolean>;
+  // Profile section toggles (default true = enabled)
+  const bookmarksEnabled = settings["bookmarks_enabled"] !== false;
+  const badgesEnabled = settings["badges_enabled"] !== false;
   // Request button toggles (default true = enabled)
   const videoRequestsEnabled = settings["video_requests_enabled"] !== false;
   const webinarRequestsEnabled = settings["webinar_requests_enabled"] !== false;
@@ -8032,6 +8035,42 @@ function SettingsTab() {
             </div>
 
 
+
+            {/* ── Profile Sections ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(251,191,36,0.12)" }}>
+                  <Bookmark size={15} style={{ color: "#fbbf24" }} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Profile Sections</p>
+                  <p className="text-xs text-gray-500">Show or hide Bookmarks and Badges on the customer Profile page</p>
+                </div>
+              </div>
+              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                {([
+                  { key: "bookmarks_enabled", label: "Bookmarks", icon: Bookmark, enabled: bookmarksEnabled, color: "#fbbf24" },
+                  { key: "badges_enabled", label: "Badges", icon: Award, enabled: badgesEnabled, color: "#00A9E2" },
+                ] as { key: string; label: string; icon: React.ElementType; enabled: boolean; color: string }[]).map(({ key, label, icon: SectionIcon, enabled, color }) => (
+                  <div key={key} className="flex items-center justify-between py-1">
+                    <div className="flex items-center gap-2">
+                      <SectionIcon size={14} style={{ color: enabled ? color : "#4b5563" }} />
+                      <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
+                    </div>
+                    <button
+                      onClick={() => toggle(key, enabled)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                      style={enabled
+                        ? { background: `${color}18`, color, border: `1px solid ${color}35` }
+                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                    >
+                      {enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
+                      {enabled ? "Visible" : "Hidden"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* ── Request Buttons ── */}
             <div className={sectionClass} style={sectionStyle}>

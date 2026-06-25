@@ -157,6 +157,11 @@ export default function Profile() {
     onSuccess: () => utils.bookmarks.getAll.invalidate(),
   });
 
+  // Site settings — control Bookmarks and Badges visibility for all users
+  const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const bookmarksEnabled = (siteSettings as Record<string, unknown>)["bookmarks_enabled"] !== false;
+  const badgesEnabled = (siteSettings as Record<string, unknown>)["badges_enabled"] !== false;
+
   const uploadAvatar = trpc.profile.uploadAvatar.useMutation({
     onSuccess: () => {
       utils.profile.get.invalidate();
@@ -248,43 +253,43 @@ export default function Profile() {
           </div>
         </div>
 
-
-
         {/* ── Bookmarks ── */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Bookmark size={17} style={{ color: "#fbbf24" }} />
-            <h2 className="text-base font-bold text-white">Bookmarks</h2>
-          </div>
-          <div
-            className="rounded-xl p-8 text-center"
-            style={{ background: "#111", border: "1px solid #1a1a1a" }}
-          >
-            <Bookmark size={28} className="text-gray-700 mx-auto mb-3" />
-            <p className="text-gray-400 text-sm font-medium">Coming Soon</p>
-            <p className="text-gray-600 text-xs mt-1">Bookmarks will be available in a future update.</p>
-          </div>
-        </section>
+        {bookmarksEnabled && (
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Bookmark size={17} style={{ color: "#fbbf24" }} />
+              <h2 className="text-base font-bold text-white">Bookmarks</h2>
+            </div>
+            <div
+              className="rounded-xl p-8 text-center"
+              style={{ background: "#111", border: "1px solid #1a1a1a" }}
+            >
+              <Bookmark size={28} className="text-gray-700 mx-auto mb-3" />
+              <p className="text-gray-400 text-sm font-medium">Coming Soon</p>
+              <p className="text-gray-600 text-xs mt-1">Bookmarks will be available in a future update.</p>
+            </div>
+          </section>
+        )}
 
         {/* ── Badges ── */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Award size={17} style={{ color: "#fbbf24" }} />
-            <h2 className="text-base font-bold text-white">Badges</h2>
-          </div>
-          <div
-            className="rounded-xl p-8 text-center"
-            style={{ background: "#111", border: "1px solid #1a1a1a" }}
-          >
-            <Award size={28} className="text-gray-700 mx-auto mb-3" />
-            <p className="text-gray-400 text-sm font-medium">Coming Soon</p>
-            <p className="text-gray-600 text-xs mt-1">Badges will be available in a future update.</p>
-          </div>
-        </section>
+        {badgesEnabled && (
+          <section className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Award size={17} style={{ color: "#00A9E2" }} />
+              <h2 className="text-base font-bold text-white">Badges</h2>
+            </div>
+            <div
+              className="rounded-xl p-8 text-center"
+              style={{ background: "#111", border: "1px solid #1a1a1a" }}
+            >
+              <Award size={28} className="text-gray-700 mx-auto mb-3" />
+              <p className="text-gray-400 text-sm font-medium">Coming Soon</p>
+              <p className="text-gray-600 text-xs mt-1">Badges will be available in a future update.</p>
+            </div>
+          </section>
+        )}
 
       </div>
     </PortalLayout>
   );
 }
-
-
