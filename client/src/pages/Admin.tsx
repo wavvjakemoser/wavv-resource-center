@@ -182,7 +182,7 @@ import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import NativeArticleEditor from "@/components/NativeArticleEditor";
 
-type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "content_requests" | "settings" | "approved_partners" | "partners_content";
+type AdminTab = "analytics" | "partner_analytics" | "users" | "academy" | "webinars" | "guides" | "playground" | "content_requests" | "settings" | "approved_partners" | "partners_content" | "accelerator";
 type TimeRange = 7 | 30 | 90 | 365;
 
 // ─── Main Admin Page ──────────────────────────────────────────────────────────
@@ -206,6 +206,7 @@ export default function Admin() {
     if (t === "guides" && isSuperAdmin) return "guides";
     if (t === "playground" && isSuperAdmin) return "playground";
     if (t === "content_requests" && isSuperAdmin) return "content_requests";
+    if (t === "accelerator" && isSuperAdmin) return "accelerator";
     if (t === "partners_content" && (isSuperAdmin || isPartnerAdmin)) return "partners_content";
     if (t === "partner_analytics" && (isSuperAdmin || isPartnerAdmin)) return "partner_analytics";
     // defaults by role
@@ -279,6 +280,7 @@ export default function Admin() {
     { id: "playground",       label: "WAVV Playground",   icon: <FlaskConical size={13} />,  show: isSuperAdmin },
     { id: "partners_content", label: "WAVV Partners",     icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />, show: isSuperAdmin },
+    { id: "accelerator",       label: "Accelerator",       icon: <Rocket size={13} />,        show: isSuperAdmin },
   ];
 
   function TabButton({ tab }: { tab: TabDef }) {
@@ -339,6 +341,7 @@ export default function Admin() {
         {activeTab === "playground" && isSuperAdmin && <PlaygroundTab />}
         {activeTab === "partners_content" && (isOwner || isPartnerAdmin) && <PartnersContentTab />}
         {activeTab === "content_requests" && isSuperAdmin && <ContentRequestsTab />}
+        {activeTab === "accelerator" && isSuperAdmin && <AcceleratorTab />}
         {activeTab === "partner_analytics" && (isSuperAdmin || isPartnerAdmin) && <PartnerAnalyticsTab isPartnerAdmin={isPartnerAdmin && !isOwner} />}
       </div>
     </PortalLayout>
@@ -9320,6 +9323,261 @@ function HelpArticlesAdminTab() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+
+// ─── Accelerator Tab ─────────────────────────────────────────────────────────
+function AcceleratorTab() {
+  const utils = trpc.useUtils();
+  const { data: sessions = [], isLoading } = trpc.accelerator.list.useQuery();
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState({
+    title: "",
+    wavvFocus: "",
+    outcome: "",
+    color: "#0074F4",
+    heroHeadline: "",
+    heroSubline: "",
+    bodyContent: "",
+    videoUrl: "",
+    resourceLinks: "",
+    isPublished: false,
+  });
+
+  const updateMutation = trpc.accelerator.update.useMutation({
+    onSuccess: () => {
+      utils.accelerator.list.invalidate();
+      toast.success("Session updated");
+      setEditingId(null);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  function startEdit(session: any) {
+    setEditingId(session.id);
+    setForm({
+      title: session.title ?? "",
+      wavvFocus: session.wavvFocus ?? "",
+      outcome: session.outcome ?? "",
+      color: session.color ?? "#0074F4",
+      heroHeadline: session.heroHeadline ?? "",
+      heroSubline: session.heroSubline ?? "",
+      bodyContent: session.bodyContent ?? "",
+      videoUrl: session.videoUrl ?? "",
+      resourceLinks: session.resourceLinks ?? "",
+      isPublished: session.isPublished ?? false,
+    });
+  }
+
+  function saveEdit() {
+    if (!editingId) return;
+    updateMutation.mutate({
+      id: editingId,
+      title: form.title,
+      wavvFocus: form.wavvFocus || null,
+      outcome: form.outcome || null,
+      color: form.color,
+      heroHeadline: form.heroHeadline || null,
+      heroSubline: form.heroSubline || null,
+      bodyContent: form.bodyContent || null,
+      videoUrl: form.videoUrl || null,
+      resourceLinks: form.resourceLinks || null,
+      isPublished: form.isPublished,
+    });
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 mt-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-white">WAVV Sales Accelerator</h2>
+          <p className="text-xs text-gray-400">Manage the 6 session landing pages. Edit content, toggle publish status, and build out each week.</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {sessions.map((session: any) => (
+          <div
+            key={session.id}
+            className="rounded-xl p-4 transition-all"
+            style={{
+              background: editingId === session.id ? "rgba(0,116,244,0.06)" : "rgba(255,255,255,0.03)",
+              border: editingId === session.id ? "1px solid rgba(0,116,244,0.25)" : "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            {editingId === session.id ? (
+              /* ── Edit mode ── */
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={{ background: `${form.color}18`, color: form.color }}>
+                    Week {session.week}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="text-xs px-3 py-1.5 rounded-lg"
+                      style={{ color: "#9ca3af" }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveEdit}
+                      disabled={updateMutation.isPending}
+                      className="text-xs px-3 py-1.5 rounded-lg font-medium"
+                      style={{ background: "#0074F4", color: "#fff" }}
+                    >
+                      {updateMutation.isPending ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div>
+                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Session Title</label>
+                  <Input
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                  />
+                </div>
+
+                {/* WAVV Focus + Outcome side by side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">WAVV Focus</label>
+                    <textarea
+                      value={form.wavvFocus}
+                      onChange={(e) => setForm({ ...form, wavvFocus: e.target.value })}
+                      rows={3}
+                      className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Outcome</label>
+                    <textarea
+                      value={form.outcome}
+                      onChange={(e) => setForm({ ...form, outcome: e.target.value })}
+                      rows={3}
+                      className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Hero Headline + Subline */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Hero Headline (landing page)</label>
+                    <Input
+                      value={form.heroHeadline}
+                      onChange={(e) => setForm({ ...form, heroHeadline: e.target.value })}
+                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                      placeholder="e.g. Build Your Number & Mindset Reset"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Hero Subline</label>
+                    <Input
+                      value={form.heroSubline}
+                      onChange={(e) => setForm({ ...form, heroSubline: e.target.value })}
+                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                      placeholder="Short description for the session page"
+                    />
+                  </div>
+                </div>
+
+                {/* Body Content */}
+                <div>
+                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Body Content (Markdown)</label>
+                  <textarea
+                    value={form.bodyContent}
+                    onChange={(e) => setForm({ ...form, bodyContent: e.target.value })}
+                    rows={8}
+                    className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 font-mono resize-y"
+                    placeholder="Write the session landing page content in Markdown..."
+                  />
+                </div>
+
+                {/* Video URL */}
+                <div>
+                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Video URL (optional)</label>
+                  <Input
+                    value={form.videoUrl}
+                    onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                    placeholder="https://www.loom.com/share/..."
+                  />
+                </div>
+
+                {/* Color + Published toggle */}
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] font-medium text-gray-400">Color</label>
+                    <input
+                      type="color"
+                      value={form.color}
+                      onChange={(e) => setForm({ ...form, color: e.target.value })}
+                      className="w-7 h-7 rounded border-0 cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] font-medium text-gray-400">Published</label>
+                    <button
+                      onClick={() => setForm({ ...form, isPublished: !form.isPublished })}
+                      className="flex items-center"
+                    >
+                      {form.isPublished ? (
+                        <ToggleRight size={20} style={{ color: "#10b981" }} />
+                      ) : (
+                        <ToggleLeft size={20} style={{ color: "#6b7280" }} />
+                      )}
+                    </button>
+                    <span className="text-[11px]" style={{ color: form.isPublished ? "#10b981" : "#6b7280" }}>
+                      {form.isPublished ? "Live" : "Draft"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* ── View mode ── */
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={{ background: `${session.color}18`, color: session.color }}>
+                    Week {session.week}
+                  </span>
+                  <h3 className="text-sm font-medium text-white">{session.title}</h3>
+                  {session.isPublished ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>Live</span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(107,114,128,0.12)", color: "#6b7280" }}>Draft</span>
+                  )}
+                </div>
+                <button
+                  onClick={() => startEdit(session)}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+                  style={{ color: "#9ca3af" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#fff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9ca3af"; }}
+                >
+                  <Pencil size={12} />
+                  Edit
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

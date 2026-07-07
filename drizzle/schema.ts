@@ -502,3 +502,25 @@ export const faqEntries = mysqlTable("faq_entries", {
 });
 export type FaqEntry = typeof faqEntries.$inferSelect;
 export type InsertFaqEntry = typeof faqEntries.$inferInsert;
+
+// ─── Accelerator Sessions ────────────────────────────────────────────────────
+export const acceleratorSessions = mysqlTable("accelerator_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  week: int("week").notNull(), // 1-6
+  title: varchar("title", { length: 255 }).notNull(),
+  wavvFocus: text("wavv_focus"),
+  outcome: text("outcome"),
+  color: varchar("color", { length: 32 }).default("#0074F4").notNull(),
+  // Landing page content (rich text / markdown)
+  heroHeadline: varchar("hero_headline", { length: 255 }),
+  heroSubline: text("hero_subline"),
+  bodyContent: mediumtext("body_content"), // markdown or HTML for the session landing page
+  videoUrl: text("video_url"), // optional embedded video
+  resourceLinks: text("resource_links"), // JSON array of { label, url }
+  isPublished: boolean("is_published").default(false).notNull(),
+  sortOrder: int("sort_order").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AcceleratorSession = typeof acceleratorSessions.$inferSelect;
+export type InsertAcceleratorSession = typeof acceleratorSessions.$inferInsert;

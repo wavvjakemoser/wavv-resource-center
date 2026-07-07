@@ -1199,6 +1199,8 @@ export const appRouter = router({
         approvalStatus: u.approvalStatus,
         isEmployee: u.isEmployee,
         isCustomer: u.isCustomer,
+        wavvPlan: u.wavvPlan,
+        subscriptionStatus: u.subscriptionStatus,
       };
     }),
 
@@ -2122,6 +2124,42 @@ export const appRouter = router({
         return next({ ctx });
       })
       .mutation(({ input }) => toggleReadinessItem(input.id, input.checked)),
+  }),
+
+  // ─── Accelerator Sessions ─────────────────────────────────────────────────
+  accelerator: router({
+    list: publicProcedure.query(async () => {
+      const { listAcceleratorSessions } = await import("./db");
+      return listAcceleratorSessions();
+    }),
+
+    get: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const { getAcceleratorSession } = await import("./db");
+        return getAcceleratorSession(input.id);
+      }),
+
+    update: publisherProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        wavvFocus: z.string().nullable().optional(),
+        outcome: z.string().nullable().optional(),
+        color: z.string().optional(),
+        heroHeadline: z.string().nullable().optional(),
+        heroSubline: z.string().nullable().optional(),
+        bodyContent: z.string().nullable().optional(),
+        videoUrl: z.string().nullable().optional(),
+        resourceLinks: z.string().nullable().optional(),
+        isPublished: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const { updateAcceleratorSession } = await import("./db");
+        return updateAcceleratorSession(id, data);
+      }),
   }),
 });
 

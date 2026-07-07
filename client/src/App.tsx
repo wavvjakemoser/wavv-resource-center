@@ -26,12 +26,13 @@ import { useAuth } from "@/_core/hooks/useAuth";
 
 
 // Guard for pages that can be disabled via nav_visibility in site settings.
-// Only the owner bypasses visibility checks. All other roles (including admin) are redirected to /404 when the page is hidden.
+// All approved WAVV employees bypass visibility checks (owner, publisher, viewer, partner_manager).
+// Customers and guests are redirected to /404 when the page is hidden.
 function NavGuard({ href, children }: { href: string; children: React.ReactNode }) {
   const { user } = useAuth();
-  const isOwner = user?.role === "owner";
+  const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
   const { data: allSettings, isLoading } = trpc.siteSettings.getAll.useQuery();
-  if (isOwner) return <>{children}</>;
+  if (isApprovedEmployee) return <>{children}</>;
   if (isLoading) return null; // brief flash prevention
   const navVisibility = ((allSettings ?? {}) as Record<string, unknown>)["nav_visibility"] as Record<string, boolean> | undefined;
   if (navVisibility && navVisibility[href] === false) return <Redirect to="/404" />;

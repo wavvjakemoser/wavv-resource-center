@@ -26,6 +26,7 @@ import {
   pdfSections,
   faqSections,
   faqEntries,
+  acceleratorSessions,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -2984,4 +2985,37 @@ export async function getUserIdentityStats() {
   const newAccountsTrend = trendRows.map(r => ({ date: r.date, count: r.count }));
 
   return { totalAccounts, byAccountType, byApprovalStatus, bySubscriptionStatus, recentSignIns, newAccountsTrend };
+}
+
+// ─── Accelerator Sessions ────────────────────────────────────────────────────
+export async function listAcceleratorSessions() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(acceleratorSessions).orderBy(asc(acceleratorSessions.sortOrder));
+}
+
+export async function getAcceleratorSession(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(acceleratorSessions).where(eq(acceleratorSessions.id, id));
+  return rows[0] ?? null;
+}
+
+export async function updateAcceleratorSession(id: number, data: Partial<{
+  title: string;
+  wavvFocus: string | null;
+  outcome: string | null;
+  color: string;
+  heroHeadline: string | null;
+  heroSubline: string | null;
+  bodyContent: string | null;
+  videoUrl: string | null;
+  resourceLinks: string | null;
+  isPublished: boolean;
+  sortOrder: number;
+}>) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(acceleratorSessions).set(data).where(eq(acceleratorSessions.id, id));
+  return getAcceleratorSession(id);
 }

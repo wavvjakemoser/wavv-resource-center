@@ -136,10 +136,10 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   const isOwner = isApprovedEmployee && user?.role === "owner";
 
   // Filter nav items based on visibility settings
-  // Only the owner bypasses nav_visibility toggles (for QA/admin purposes)
+  // All approved WAVV employees bypass nav_visibility toggles (for QA/preview)
   const allNavItems = [...resourceNavItems, ...programNavItems];
   const filterByVisibility = (items: typeof allNavItems) => items.filter((item) => {
-    if (isOwner) return true;
+    if (isApprovedEmployee) return true;
     if (settingsLoading) return false;
     if (navVisibility[item.href] === false) return false;
     return true;
@@ -227,7 +227,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             <div className="space-y-0.5 mb-3">
               {visibleResourceItems.map((item) => {
                 const isActive = location === item.href || (item.href !== "/home" && location.startsWith(item.href));
-                const isHiddenFromCustomers = isOwner && !settingsLoading && navVisibility[item.href] === false;
+                const isHiddenFromCustomers = isApprovedEmployee && !settingsLoading && navVisibility[item.href] === false;
                 return (
                   <NavLink
                     key={item.href}
@@ -248,7 +248,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 <div className="space-y-0.5">
                   {visibleProgramItems.map((item) => {
                     const isActive = location === item.href || location.startsWith(item.href + "/");
-                    const isHiddenFromCustomers = isOwner && !settingsLoading && navVisibility[item.href] === false;
+                    const isHiddenFromCustomers = isApprovedEmployee && !settingsLoading && navVisibility[item.href] === false;
                     return (
                       <NavLink
                         key={item.href}
@@ -287,7 +287,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     <circle cx="24" cy="24" r="5" fill="white"/>
                   </svg>
                 </div>
-                <span className="flex-1 min-w-0 truncate">WAVV Chrome Extension</span>
+                <span className="flex-1 min-w-0 truncate">Chrome Extension</span>
                 <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
               </a>
             </div>

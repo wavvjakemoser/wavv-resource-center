@@ -1605,3 +1605,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Member view: upcoming live calls section below sessions
 - [x] Member view: hide marketing copy (partnership, FAQ, social proof) for members who already have access
 - [ ] Member view: progress indicators on session tiles (future — placeholder for now)
+
+## Accelerator Revamp — Jul 7 2026 (Round 3)
+- [x] Member view: show ALL content (Partnership, FAQ, social proof, Money Math) — tiles first, marketing below
+- [x] Fix Partnership section blank space / formatting cleanup
+- [x] Gating logic: curriculum tiles grayed-out only for users without access (not hidden)
+- [x] Gating logic: owner + Team Access users see tiles unlocked/clickable
+- [x] Admin: Accelerator session editor — CRUD for 6 session landing pages in Command Center
+- [x] Fix Chrome Extension sidebar name truncation ("WAVV Chrome Exten..." → shorter or non-truncating)
+- [x] Session detail pages (/accelerator/session/:id) now load from database
+- [x] Expose wavvPlan + subscriptionStatus in auth.me
+- [x] NavGuard bypass expanded to all approved employees
+- [ ] CMO/CRO/COO audit of Accelerator marketing page for launch readiness
