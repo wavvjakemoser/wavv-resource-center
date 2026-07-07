@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 // ─── Qualifying plans (same as Accelerator.tsx) ─────────────────────────────
-const QUALIFYING_PLANS = ["quarterly", "annual", "enterprise"];
+const QUALIFYING_PLANS = ["quarterly", "annual"];
 
 function useAcceleratorAccess() {
   const { user } = useAuth();
@@ -80,7 +80,7 @@ export default function AcceleratorSession() {
             <h2 className="text-xl font-bold text-white">Session {session.week}: {session.title}</h2>
             <p className="text-sm text-gray-400 max-w-md mx-auto">
               This session is available to WAVV Quarterly and Annual subscribers.
-              Upgrade your plan to access the full Sales Accelerator bootcamp.
+              Upgrade your plan to access the full WAVV Sales Accelerator.
             </p>
             {reason === "unauthenticated" ? (
               <a

@@ -1670,3 +1670,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Bug Fix — Jul 7 2026
 - [x] Fix: WAVV Playground flashes briefly on Home page Explore section before nav_visibility hides it
+
+## Language & Plan Cleanup (Session Continuation)
+
+- [x] Remove "enterprise" from QUALIFYING_PLANS in AcceleratorSession.tsx (was still present)
+- [x] Remove all "bootcamp" language from Accelerator.tsx (replaced with "program" / "Accelerator")
+- [x] Remove "bootcamp" from AcceleratorSession.tsx locked state message

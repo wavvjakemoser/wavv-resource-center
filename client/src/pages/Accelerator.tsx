@@ -87,7 +87,7 @@ const VALUE_PROPS = [
   },
   {
     icon: Target,
-    title: "6-Week Sales Bootcamp",
+    title: "6-Week Sales Program",
     description: "Live coaching calls twice a week, built around the Money Math equation: more dials → more conversations → more closes.",
     color: "#0074F4",
   },
@@ -292,7 +292,7 @@ export default function Accelerator() {
 
             {/* Subline */}
             <p className="mx-auto mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)", maxWidth: "540px" }}>
-              A coaching bootcamp that combines live sales training with hands-on WAVV product mastery. More dials. More conversations. More closes.
+              A structured program that combines live sales training with hands-on WAVV product mastery. More dials. More conversations. More closes.
             </p>
             {/* Schedule line */}
             <div className="flex items-center justify-center gap-2">
@@ -589,7 +589,7 @@ export default function Accelerator() {
           </p>
           <p className="text-sm max-w-lg mx-auto" style={{ color: "rgba(255,255,255,0.45)" }}>
             Every module in the Accelerator is designed to improve one lever of this equation.
-            WAVV is the engine that drives the volume. The bootcamp teaches you how to maximize every other lever.
+            WAVV is the engine that drives the volume. The Accelerator teaches you how to maximize every other lever.
           </p>
         </section>
 
