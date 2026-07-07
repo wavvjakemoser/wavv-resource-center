@@ -162,8 +162,8 @@ function MarketingView({ user }: { user: any }) {
       <div
         className="relative overflow-hidden rounded-2xl"
         style={{
-          background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(249,115,22,0.24) 0%, rgba(234,88,12,0.12) 40%, rgba(251,191,36,0.05) 70%, transparent 90%), #080c14",
-          border: "1px solid rgba(249,115,22,0.2)",
+          background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,180,180,0.18) 0%, rgba(0,116,180,0.10) 40%, rgba(0,80,120,0.04) 70%, transparent 90%), #0d1117",
+          border: "1px solid rgba(0,180,180,0.15)",
           minHeight: "320px",
         }}
       >
@@ -177,16 +177,16 @@ function MarketingView({ user }: { user: any }) {
         />
         {/* Glow orbs */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(249,115,22,0.14), transparent 65%)", transform: "translate(25%, -30%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(0,180,180,0.12), transparent 65%)", transform: "translate(25%, -30%)" }} />
         <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(251,191,36,0.06), transparent 65%)", transform: "translate(-25%, 30%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(0,116,244,0.06), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
         <div className="relative z-10 px-6 lg:px-16 py-14 text-center">
           {/* Eyebrow */}
           <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
-            style={{ background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)" }}>
-            <Rocket size={12} style={{ color: "#f97316" }} />
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#f97316" }}>
+            style={{ background: "rgba(0,180,180,0.10)", border: "1px solid rgba(0,180,180,0.25)" }}>
+            <Rocket size={12} style={{ color: "#00b4b4" }} />
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#00b4b4" }}>
               WAVV × Prospecting On Demand
             </span>
           </div>
@@ -197,7 +197,7 @@ function MarketingView({ user }: { user: any }) {
             style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)" }}
           >
             <span style={{
-              background: "linear-gradient(135deg, #ffffff 0%, #fed7aa 30%, #fdba74 60%, #f97316 100%)",
+              background: "linear-gradient(135deg, #ffffff 0%, #94d8d8 40%, #4ade80 70%, #22c55e 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -208,7 +208,7 @@ function MarketingView({ user }: { user: any }) {
 
           {/* Accent line */}
           <div className="flex justify-center mb-6">
-            <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #f97316, #fb923c 50%, #fbbf24)" }} />
+            <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00b4b4 50%, #4ade80)" }} />
           </div>
 
           {/* Subline */}
@@ -227,7 +227,7 @@ function MarketingView({ user }: { user: any }) {
 
           {/* Schedule line */}
           <div className="flex items-center justify-center gap-2 mb-7">
-            <Clock size={13} style={{ color: "rgba(249,115,22,0.7)" }} />
+            <Clock size={13} style={{ color: "rgba(0,180,180,0.7)" }} />
             <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
               Live coaching calls every Tuesday & Thursday
             </span>
