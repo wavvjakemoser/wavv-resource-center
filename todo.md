@@ -1559,3 +1559,18 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin.tsx Settings tab: add Profile Sections card with Bookmarks and Badges toggles (keys: bookmarks_enabled, badges_enabled, default visible)
 - [x] Profile.tsx: read bookmarks_enabled and badges_enabled from siteSettings.getAll, conditionally render Bookmarks and Badges sections
 - [x] TypeScript: 0 errors confirmed
+
+## WAVV Accelerator — V1.0 Build (Jul 7 2026)
+- [x] Add nav separator (Resources / Programs sections) to sidebar
+- [x] Add WAVV Accelerator nav item in Programs section (hidden by default)
+- [x] Move WAVV Playground below Resource Hub in Resources section
+- [x] Create /accelerator route and Accelerator landing/marketing page
+- [x] Build gated member view with 6 session tiles
+- [x] Build individual session detail page (/accelerator/session/:id)
+- [x] Add Accelerator visibility toggle to Command Center Settings
+- [x] Subscription gating scaffold (placeholder until Stripe SKU integration confirmed)
+- [x] TypeScript check passes with 0 errors
+- [x] Tests pass
+
+## Backlog
+- [ ] Add WAVV Chrome Extension page/section to Success Center (placement TBD)

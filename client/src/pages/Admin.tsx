@@ -7866,6 +7866,7 @@ function SettingsTab() {
     { href: "/webinars",   label: "WAVV Webinars",           icon: VideoIcon },
     { href: "/guides",     label: "WAVV Resource Hub",         icon: FileTextIcon },
     { href: "/playground",   label: "WAVV Playground",         icon: FlaskConical },
+    { href: "/accelerator", label: "WAVV Accelerator",        icon: Rocket },
     { href: "/partners",   label: "WAVV Partners",          icon: UsersIcon },
     { href: "/wavvpartner",label: "WAVV Partner Portal",     icon: UsersIcon },
   ];

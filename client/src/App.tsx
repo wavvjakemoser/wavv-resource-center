@@ -17,6 +17,8 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Partners from "./pages/Partners";
 import WavvPartnerPortal from "./pages/WavvPartnerPortal";
+import Accelerator from "./pages/Accelerator";
+import AcceleratorSession from "./pages/AcceleratorSession";
 import { usePageTracking } from "./hooks/usePageTracking";
 import { useIntercom } from "./hooks/useIntercom";
 import { trpc } from "./lib/trpc";
@@ -97,6 +99,8 @@ function Router() {
       <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
       <Route path="/webinars" component={Webinars} />
       <Route path="/guides" component={GuidesAndDocs} />
+      <Route path="/accelerator">{() => <NavGuard href="/accelerator"><Accelerator /></NavGuard>}</Route>
+      <Route path="/accelerator/session/:id">{() => <NavGuard href="/accelerator"><AcceleratorSession /></NavGuard>}</Route>
       <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
       <Route path="/wavvpartner">{() => <Redirect to="/404" />}</Route>
       <Route path="/wavvcommandcenter">{() => <AdminGuard><Admin /></AdminGuard>}</Route>

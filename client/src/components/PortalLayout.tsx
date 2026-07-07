@@ -13,15 +13,24 @@ import {
   Shield,
   Users,
   ExternalLink,
+  Rocket,
 } from "lucide-react";
 
-const baseNavItems = [
+// ── Resources section nav items
+const resourceNavItems = [
   { href: "/home", label: "Home",              icon: Home,          color: "#6366f1" },
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
   { href: "/guides",    label: "WAVV Resource Hub",   icon: FileText,      color: "#67C728" },
   { href: "/playground",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
 ];
+// ── Programs section nav items
+const programNavItems = [
+  { href: "/accelerator", label: "WAVV Accelerator", icon: Rocket, color: "#f97316" },
+  { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" },
+];
+// Combined for backward compat with visibility logic
+const baseNavItems = [...resourceNavItems];
 const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
 
 const adminItem = { href: "/wavvcommandcenter", label: "WAVV Command Center", icon: Shield, color: "#f43f5e" };
@@ -126,20 +135,19 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
   );
   const isOwner = isApprovedEmployee && user?.role === "owner";
 
-  // All users see all base nav items + partner item
+  // Filter nav items based on visibility settings
   // Only the owner bypasses nav_visibility toggles (for QA/admin purposes)
-  // admin/content_admin/partner_admin roles respect visibility toggles like regular users
-  // While settings are loading, non-owners see no nav items to prevent flash of hidden content
-  const allNavItems = [...baseNavItems, publicPartnerItem];
-  const navItems = allNavItems.filter((item) => {
-    // Only the owner bypasses visibility toggles (and doesn't need to wait for settings)
+  const allNavItems = [...resourceNavItems, ...programNavItems];
+  const filterByVisibility = (items: typeof allNavItems) => items.filter((item) => {
     if (isOwner) return true;
-    // Suppress all items until settings have loaded to prevent flash of hidden content
     if (settingsLoading) return false;
-    // Check nav_visibility setting (missing key = visible)
     if (navVisibility[item.href] === false) return false;
     return true;
   });
+  const visibleResourceItems = filterByVisibility(resourceNavItems);
+  const visibleProgramItems = filterByVisibility(programNavItems);
+  // Legacy combined list for backward compat
+  const navItems = filterByVisibility(allNavItems);
 
   // Maintenance mode — show a holding page for non-owners on non-admin pages
   if (maintenanceMode && !isOwner && !isAdminPage) {
@@ -213,23 +221,47 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
           </div>
 
           {/* Main navigation — scrollable */}
-          <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
-            {navItems.map((item) => {
-              const isActive =
-                location === item.href ||
-                (item.href !== "/home" && location.startsWith(item.href));
-              // Show hidden badge only to the owner for items toggled off in nav_visibility
-              const isHiddenFromCustomers = isOwner && !settingsLoading && navVisibility[item.href] === false;
-              return (
-                <NavLink
-                  key={item.href}
-                  {...item}
-                  isActive={isActive}
-                  isHidden={isHiddenFromCustomers}
-                  onClick={() => setSidebarOpen(false)}
-                />
-              );
-            })}
+          <nav className="flex-1 px-3 py-4 overflow-y-auto">
+            {/* ── Resources ── */}
+            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Resources</p>
+            <div className="space-y-0.5 mb-3">
+              {visibleResourceItems.map((item) => {
+                const isActive = location === item.href || (item.href !== "/home" && location.startsWith(item.href));
+                const isHiddenFromCustomers = isOwner && !settingsLoading && navVisibility[item.href] === false;
+                return (
+                  <NavLink
+                    key={item.href}
+                    {...item}
+                    isActive={isActive}
+                    isHidden={isHiddenFromCustomers}
+                    onClick={() => setSidebarOpen(false)}
+                  />
+                );
+              })}
+            </div>
+
+            {/* ── Programs ── */}
+            {visibleProgramItems.length > 0 && (
+              <>
+                <div className="mx-3 my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Programs</p>
+                <div className="space-y-0.5">
+                  {visibleProgramItems.map((item) => {
+                    const isActive = location === item.href || location.startsWith(item.href + "/");
+                    const isHiddenFromCustomers = isOwner && !settingsLoading && navVisibility[item.href] === false;
+                    return (
+                      <NavLink
+                        key={item.href}
+                        {...item}
+                        isActive={isActive}
+                        isHidden={isHiddenFromCustomers}
+                        onClick={() => setSidebarOpen(false)}
+                      />
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </nav>
 
           {/* ── Admin Tools section — only for admins ── */}
