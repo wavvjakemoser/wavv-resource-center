@@ -173,8 +173,8 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
           href="https://www.wavv.com/pricing"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-          style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
+          className={`inline-flex items-center gap-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${variant === "sticky" ? "px-5 py-2" : "px-6 py-2.5"}`}
+          style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
           onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
         >
@@ -183,13 +183,12 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
         </a>
         <a
           href="/api/oauth/login?return_path=/accelerator"
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
-          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+          className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
+          style={{ background: "#0074F4", color: "#fff", textDecoration: "none", whiteSpace: "nowrap" }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "#0060d4"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "#0074F4"; }}
         >
           Sign In
-          <ArrowRight size={14} />
         </a>
       </div>
     );
@@ -301,32 +300,45 @@ export default function Accelerator() {
             </div>
 
             {/* Hero CTA buttons */}
-            {!hasAccess && (
+            {reason === "unauthenticated" && (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a
                   href="https://www.wavv.com/pricing"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-                  style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
+                  style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >
                   Become a WAVV Accelerator Member
                   <ArrowRight size={15} />
                 </a>
-                {reason === "unauthenticated" && (
-                  <a
-                    href="/api/oauth/login?return_path=/accelerator"
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
-                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-                  >
-                    Sign In
-                    <ArrowRight size={14} />
-                  </a>
-                )}
+                <a
+                  href="/api/oauth/login?return_path=/accelerator"
+                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
+                  style={{ background: "#0074F4", color: "#fff", textDecoration: "none", whiteSpace: "nowrap" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#0060d4"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#0074F4"; }}
+                >
+                  Sign In
+                </a>
+              </div>
+            )}
+            {reason === "no_access" && (
+              <div className="flex justify-center">
+                <a
+                  href="https://www.wavv.com/pricing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                  style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+                >
+                  Upgrade Your Plan
+                  <ArrowRight size={15} />
+                </a>
               </div>
             )}
           </div>
@@ -456,24 +468,26 @@ export default function Accelerator() {
               return (
                 <div
                   key={session.id}
-                  className="rounded-2xl p-6 space-y-4 h-full flex flex-col relative"
+                  className="rounded-2xl p-6 h-full flex flex-col relative overflow-hidden"
                   style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", opacity: 0.55 }}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                      style={{ background: `${session.color}12`, color: `${session.color}99` }}>
-                      Week {session.week}
-                    </span>
-                    <Lock size={14} style={{ color: "rgba(255,255,255,0.25)" }} />
-                  </div>
-                  <h3 className="text-[15px] font-semibold leading-snug" style={{ color: "rgba(255,255,255,0.6)" }}>{session.title}</h3>
-                  <p className="text-xs leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.35)" }}>
-                    <span className="font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>WAVV Focus:</span> {session.wavvFocus}
-                  </p>
-                  <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: `${session.color}66` }} />
-                      <span className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.35)" }}>{session.outcome}</span>
+                  <div className="space-y-4 h-full flex flex-col pointer-events-none select-none" style={{ filter: "blur(4px)" }}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                        style={{ background: `${session.color}12`, color: `${session.color}99` }}>
+                        Week {session.week}
+                      </span>
+                      <Lock size={14} style={{ color: "rgba(255,255,255,0.25)" }} />
+                    </div>
+                    <h3 className="text-[15px] font-semibold leading-snug" style={{ color: "rgba(255,255,255,0.6)" }}>{session.title}</h3>
+                    <p className="text-xs leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      <span className="font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>WAVV Focus:</span> {session.wavvFocus}
+                    </p>
+                    <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: `${session.color}66` }} />
+                        <span className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.35)" }}>{session.outcome}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -538,6 +552,7 @@ export default function Accelerator() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-5 object-contain" />
+                  <h3 className="text-sm font-bold text-white">WAVV</h3>
                 </div>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
                   WAVV is a native multi-line power dialer that lives inside your CRM. We provide the product training layer — short how-to clips, cheat sheets, and guided walkthroughs — so you can immediately apply every sales skill inside the dialer.
@@ -690,10 +705,10 @@ export default function Accelerator() {
         )}
       </div>
 
-      {/* ── Sticky floating upgrade bar (non-access users only) ── */}
+      {/* ── Sticky availability bar (non-access users only) ── */}
       {!hasAccess && (
         <div
-          className="sticky bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-4 px-4 py-3"
+          className="sticky bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4 py-3"
           style={{
             background: "linear-gradient(180deg, rgba(8,12,20,0.85) 0%, rgba(8,12,20,0.98) 100%)",
             borderTop: "1px solid rgba(0,116,244,0.15)",
@@ -703,10 +718,9 @@ export default function Accelerator() {
           <div className="flex items-center gap-2">
             <Lock size={14} style={{ color: "#4a9eff" }} />
             <span className="text-xs sm:text-sm font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
-              {reason === "no_access" ? "Upgrade your plan" : "Unlock the full Accelerator"}
+              Available on Quarterly and Annual Plans
             </span>
           </div>
-          <UpgradeCTA reason={reason} variant="sticky" />
         </div>
       )}
 

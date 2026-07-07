@@ -299,8 +299,8 @@ export default function Partners() {
               Refer customers to WAVV and earn recurring revenue for every active account you bring in. Built for sales leaders and agency owners ready to turn their network into a revenue stream.
             </p>
 
-            {/* CTA in hero — only for non-access */}
-            {!hasAccess && (
+            {/* CTA in hero — only for unauthenticated users */}
+            {reason === "unauthenticated" && (
               <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a
                   href="https://www.wavv.com/partner-program"
@@ -316,13 +316,12 @@ export default function Partners() {
                 </a>
                 <a
                   href="/api/oauth/login?return_path=/partners"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
+                  style={{ background: "#0074F4", color: "#fff", textDecoration: "none", whiteSpace: "nowrap" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#0060d4"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#0074F4"; }}
                 >
                   Sign In
-                  <ArrowRight size={14} />
                 </a>
               </div>
             )}
@@ -444,7 +443,8 @@ export default function Partners() {
           </div>
         </div>
 
-        {/* ── Bottom CTA ── */}
+        {/* ── Bottom CTA (only for unauthenticated users) ── */}
+        {reason === "unauthenticated" && (
         <div
           className="rounded-2xl p-8 flex flex-col items-center text-center gap-5"
           style={{
@@ -491,10 +491,11 @@ export default function Partners() {
             </a>
           </p>
         </div>
+        )}
 
-        {/* ── Sticky CTA for non-access users ── */}
-        {!hasAccess && (
-          <div className="fixed bottom-0 left-0 right-0 z-50 py-3 px-4 flex items-center justify-center gap-4"
+        {/* ── Sticky CTA for unauthenticated users only ── */}
+        {reason === "unauthenticated" && (
+          <div className="sticky bottom-0 left-0 right-0 z-40 py-3 px-4 flex items-center justify-center gap-4"
             style={{ background: "linear-gradient(to top, rgba(8,12,20,0.98), rgba(8,12,20,0.92))", borderTop: "1px solid rgba(0,116,244,0.15)", backdropFilter: "blur(12px)" }}>
             <span className="text-xs font-medium hidden sm:inline" style={{ color: "rgba(255,255,255,0.6)" }}>
               Become a WAVV Partner — earn recurring revenue on every referral

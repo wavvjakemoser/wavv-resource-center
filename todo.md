@@ -1698,3 +1698,23 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Accelerator signed-in not qualified: after dismissing pop-up, show "Upgrade your plan" button (no re-pop)
 - [x] Partners signed-in but not approved: show pop-up "Whoops, looks like you're not an approved partner. Please apply, and our WAVV Partner team will be in contact with you."
 - [x] Partners: same CTA pattern as Accelerator (Sign In button for non-signed-in users already existed)
+
+## Accelerator & Partners CTA Refinements (Jul 7 2026)
+- [ ] Accelerator: increase blur on locked 6-week curriculum session cards
+- [ ] Accelerator: unify all CTA buttons to orange (hero "Become a WAVV Accelerator Member" should be orange, not blue)
+- [ ] Accelerator: Sign In button matches top-right corner style (red/coral)
+- [ ] Accelerator: sticky bar copy → "Available on Quarterly and Annual Plans" (remove Upgrade button from sticky bar)
+- [ ] Accelerator: signed-in + qualified → hide all CTAs and sticky bar
+- [ ] Accelerator: signed-in + NOT qualified → hero shows "Upgrade Your Plan" (orange only), sticky bar informational only
+- [ ] Partners: Sign In button matches top-right corner style (red/coral)
+- [ ] Partners: sticky bar → sticky positioning (not fixed), doesn't block footer
+- [ ] Partners: signed-in + approved → hide all CTAs and sticky bar
+- [ ] Partners: signed-in + NOT approved → after pop-up dismiss, show page normally with toned-down content (no aggressive CTA)
+- [ ] Accelerator: fix "The Partnership" section spacing (WAVV side vs POD side alignment)
+- [x] Accelerator page: increase blur and disable interaction on locked 6-week curriculum cards
+- [x] Accelerator page: update hero CTA state logic for unauthenticated vs non-qualifying users
+- [x] Accelerator page: make unauthenticated UpgradeCTA styling orange and update sticky bar to informational-only copy
+- [x] Accelerator page: add WAVV heading in the Partnership section to align with POD column
+- [x] Partners page: show hero CTA buttons only for unauthenticated users
+- [x] Partners page: show bottom CTA card only for unauthenticated users
+- [x] Partners page: change sticky CTA bar from fixed to sticky and limit it to unauthenticated users
