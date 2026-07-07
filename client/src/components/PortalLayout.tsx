@@ -228,7 +228,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Resources</p>
             <div className="space-y-0.5 mb-3">
               {visibleResourceItems.map((item) => {
-                const isActive = location === item.href || location.startsWith(item.href + "/");
+                const isActive = location === item.href || location.startsWith(item.href + "/") || (item.href === "/home" && location === "/");
                 const isHiddenFromCustomers = isApprovedEmployee && !settingsLoading && navVisibility[item.href] === false;
                 return (
                   <NavLink
