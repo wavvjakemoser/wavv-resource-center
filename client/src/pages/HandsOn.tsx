@@ -37,9 +37,9 @@ const PLAYGROUND_CARDS = [
 ];
 
 const PLAYGROUND_SECTIONS = [
-  { title: "WAVV Playgrounds", cards: PLAYGROUND_CARDS },
   {
     title: "Go High Level",
+    logo: "/manus-storage/gohighlevel-icon_fa969308.jpeg",
     cards: [
       { label: "WAVV Dialer Playground", desc: "Practice calling flows and power dialer settings inside Go High Level.", icon: Phone, color: "#0074F4" },
       { label: "WAVV Call Boards Playground", desc: "Explore call board layouts and team queues within Go High Level.", icon: LayoutDashboard, color: "#00A9E2" },
@@ -48,6 +48,7 @@ const PLAYGROUND_SECTIONS = [
   },
   {
     title: "HubSpot",
+    logo: "/manus-storage/hubspot-icon_3afa13d9.png",
     cards: [
       { label: "WAVV Dialer Playground", desc: "Practice calling flows and power dialer settings inside HubSpot.", icon: Phone, color: "#0074F4" },
       { label: "WAVV Call Boards Playground", desc: "Explore call board layouts and team queues within HubSpot.", icon: LayoutDashboard, color: "#00A9E2" },
@@ -362,9 +363,18 @@ export default function HandsOn() {
         {/* ── Playground sections ── */}
         {PLAYGROUND_SECTIONS.map((section) => (
           <div key={section.title}>
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-              {section.title}
-            </h2>
+            <div className="flex items-center gap-3 mb-4">
+              {section.logo && (
+                <img
+                  src={section.logo}
+                  alt={section.title}
+                  className="w-7 h-7 rounded-md object-contain"
+                />
+              )}
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                {section.title}
+              </h2>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {section.cards.map((tool) => {
                 const Icon = tool.icon;
