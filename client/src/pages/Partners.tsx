@@ -311,7 +311,7 @@ export default function Partners() {
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >
-                  Become a WAVV Partner
+                  Apply Now
                   <ArrowRight size={15} />
                 </a>
                 {reason === "unauthenticated" && (
@@ -500,7 +500,7 @@ export default function Partners() {
           <div className="sticky bottom-0 left-0 right-0 z-40 py-3 px-4 flex items-center justify-center gap-4"
             style={{ background: "linear-gradient(to top, rgba(8,12,20,0.98), rgba(8,12,20,0.92))", borderTop: "1px solid rgba(0,116,244,0.15)", backdropFilter: "blur(12px)" }}>
             <span className="text-xs font-medium hidden sm:inline" style={{ color: "rgba(255,255,255,0.6)" }}>
-              Become a WAVV Partner — earn recurring revenue on every referral
+              Earn recurring revenue on every referral you bring to WAVV
             </span>
             <a
               href="https://www.wavv.com/partner-program"

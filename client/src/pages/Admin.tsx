@@ -1426,9 +1426,9 @@ function SearchAIChart({ days, height = 192 }: { days: number; height?: number }
 type RoleFilter = "all" | "publisher" | "viewer" | "user" | "owner" | "partner_manager";
 type UserRole = "owner" | "publisher" | "partner_manager" | "viewer";
 
-// Super Admin icon: plain Shield in fuchsia, matching Admin amber shield style
+// Super Admin icon: plain Shield in purple, matching Publisher color
 function SuperAdminIcon({ size = 14 }: { size?: number }) {
-  return <Shield style={{ width: size, height: size, color: "#f87171" }} />;
+  return <Shield style={{ width: size, height: size, color: "#a855f7" }} />;
 }
 
 
@@ -1552,10 +1552,10 @@ function UsersTab() {
       filter: "owner",
       label: "Owners",
       value: ownerCount,
-      iconEl: <Crown className="h-5 w-5" style={{ color: "#4ade80" }} />,
-      color: "#4ade80",
-      bg: "rgba(74,222,128,0.1)",
-      activeBorder: "#4ade80",
+      iconEl: <Crown className="h-5 w-5" style={{ color: "#f97316" }} />,
+      color: "#f97316",
+      bg: "rgba(249,115,22,0.1)",
+      activeBorder: "#f97316",
       description: "Full platform control. Can invite and remove all users, change any role, manage all content, and access every admin tab including Settings.",
     },
     {
@@ -1563,9 +1563,9 @@ function UsersTab() {
       label: "Publishers",
       value: superAdminCount,
       iconEl: <SuperAdminIcon size={20} />,
-      color: "#f87171",
-      bg: "rgba(239,68,68,0.1)",
-      activeBorder: "#f87171",
+      color: "#a855f7",
+      bg: "rgba(168,85,247,0.1)",
+      activeBorder: "#a855f7",
       description: "Can add and manage content in WAVV Academy, WAVV Webinars, and WAVV Resource Hub. Cannot access Partner content, Partner Analytics, or Site Settings.",
     },
     {
@@ -1582,10 +1582,10 @@ function UsersTab() {
       filter: "viewer",
       label: "Viewers",
       value: adminCount,
-      iconEl: <Shield className="h-5 w-5" style={{ color: "#94a3b8" }} />,
-      color: "#94a3b8",
-      bg: "rgba(148,163,184,0.08)",
-      activeBorder: "#94a3b8",
+      iconEl: <Shield className="h-5 w-5" style={{ color: "#eab308" }} />,
+      color: "#eab308",
+      bg: "rgba(234,179,8,0.1)",
+      activeBorder: "#eab308",
       description: "Support-level access. Can view Access (read-only) to look up users and verify access. Cannot make any changes to users or content.",
     },
   ];
@@ -1905,22 +1905,22 @@ function UsersTab() {
                     <TableCell className="text-gray-400 text-sm">{u.email ?? "—"}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        {u.role === "owner" ? (
-                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(74,222,128,0.12)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.4)" }}>
-                            <Crown className="h-3 w-3" /> Owner
+{u.role === "owner" ? (
+                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(249,115,22,0.12)", color: "#f97316", border: "1px solid rgba(249,115,22,0.4)" }}>
+                             <Crown className="h-3 w-3" /> Owner
                           </Badge>
-                        ) : u.role === "publisher" ? (
-                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.4)" }}>
-                            <SuperAdminIcon size={12} />
+) : u.role === "publisher" ? (
+                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(168,85,247,0.12)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.4)" }}>
+                             <SuperAdminIcon size={12} />
                             Publisher
                           </Badge>
                         ) : u.role === "partner_manager" ? (
                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.4)" }}>
                             <Users className="h-3 w-3" /> Partner Manager
                           </Badge>
-                        ) : u.role === "viewer" ? (
-                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(148,163,184,0.12)", color: "#94a3b8", border: "1px solid rgba(148,163,184,0.35)" }}>
-                            <Shield className="h-3 w-3" /> Viewer
+) : u.role === "viewer" ? (
+                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(234,179,8,0.12)", color: "#eab308", border: "1px solid rgba(234,179,8,0.4)" }}>
+                             <Shield className="h-3 w-3" /> Viewer
                           </Badge>
                         ) : (
                           <Badge className="text-[10px]" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.4)" }}>User</Badge>
@@ -2013,10 +2013,10 @@ function UsersTab() {
               <div className="space-y-2 py-2">
                 {promoteDialog && (["owner", "publisher", "partner_manager", "viewer"] as UserRole[]).map((role) => {
                   const roleConfig: Record<UserRole, { label: string; color: string; bg: string; border: string }> = {
-                    owner:           { label: "Owner",          color: "#4ade80", bg: "rgba(74,222,128,0.12)",  border: "rgba(74,222,128,0.4)" },
-                    publisher:       { label: "Publisher",      color: "#f87171", bg: "rgba(239,68,68,0.12)",   border: "rgba(239,68,68,0.4)" },
+                    owner:           { label: "Owner",          color: "#f97316", bg: "rgba(249,115,22,0.12)",  border: "rgba(249,115,22,0.4)" },
+                    publisher:       { label: "Publisher",      color: "#a855f7", bg: "rgba(168,85,247,0.12)",   border: "rgba(168,85,247,0.4)" },
                     partner_manager: { label: "Partner Manager", color: "#60a5fa", bg: "rgba(0,116,244,0.12)",  border: "rgba(0,116,244,0.4)" },
-                    viewer:          { label: "Viewer",         color: "#94a3b8", bg: "rgba(148,163,184,0.12)", border: "rgba(148,163,184,0.35)" },
+                    viewer:          { label: "Viewer",         color: "#eab308", bg: "rgba(234,179,8,0.12)", border: "rgba(234,179,8,0.4)" },
                   };
                   const cfg = roleConfig[role];
                   const isSelected = promoteDialog.selectedRole === role;

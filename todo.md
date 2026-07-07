@@ -1725,3 +1725,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Access tab: restore unique color-coding for role badges (Owner=green, Publisher=red, Partner Manager=blue, Viewer=slate)
 - [x] Admin Access tab: color-code stat cards to match role badge colors
 - [x] Admin Access tab: color-code Change Role dialog options to match role colors
+
+## Bug Fixes (Jul 7 2026 - Round 3)
+- [x] Admin Access tab: update role colors to Owner=orange, Publisher=purple, Partner Manager=blue, Viewer=yellow
+- [x] Chrome Extension link: update to correct URL (https://chromewebstore.google.com/detail/wavv/ioopokcefgfbajhpcmkkbmipeenohhpe)
+- [x] Chrome Extension sidebar: increase text size to match other nav items (text-sm)
+- [x] Chrome Extension sidebar: neon-style Chrome logo with glow filter
+- [x] Partners page: all CTA buttons consistently say "Apply Now"
+- [x] Hero sections: standardize all pages to same height/padding (minHeight 280px, py-8 sm:py-12)
