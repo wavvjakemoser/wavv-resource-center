@@ -521,8 +521,8 @@ export default function GuidesAndDocs() {
         <div
           className="relative overflow-hidden rounded-2xl"
           style={{
-            background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(103,199,40,0.22) 0%, rgba(0,116,244,0.12) 45%, rgba(0,169,226,0.06) 70%, transparent 90%), #080c14",
-            border: "1px solid rgba(103,199,40,0.2)",
+            background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,116,244,0.28) 0%, rgba(0,169,226,0.12) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
+            border: "1px solid rgba(0,116,244,0.18)",
             minHeight: "280px",
           }}
         >
@@ -531,21 +531,21 @@ export default function GuidesAndDocs() {
             style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
           {/* Glow orbs */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.14), transparent 65%)", transform: "translate(25%, -30%)" }} />
+            style={{ background: "radial-gradient(circle, rgba(0,116,244,0.14), transparent 65%)", transform: "translate(25%, -30%)" }} />
           <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(0,116,244,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
+            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
           <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
-              style={{ background: "rgba(103,199,40,0.12)", border: "1px solid rgba(103,199,40,0.25)" }}>
-              <FileText size={12} style={{ color: "#67C728" }} />
-              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#67C728" }}>WAVV Resource Hub</span>
+              style={{ background: "rgba(0,116,244,0.10)", border: "1px solid rgba(0,116,244,0.25)" }}>
+              <FileText size={12} style={{ color: "#4a9eff" }} />
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#4a9eff" }}>WAVV Resource Hub</span>
             </div>
 
             {/* Headline */}
             <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
-              <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #d9f99d 30%, #86efac 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 Your WAVV Reference Library
               </span>
             </h1>

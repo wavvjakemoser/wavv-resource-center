@@ -157,13 +157,13 @@ function MarketingView({ user }: { user: any }) {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div className="px-4 lg:px-8 py-8 max-w-6xl mx-auto space-y-12">
+    <div className="px-4 lg:px-8 py-6 space-y-12">
       {/* ── Hero (gradient box matching site pattern) ── */}
       <div
         className="relative overflow-hidden rounded-2xl"
         style={{
-          background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,180,180,0.18) 0%, rgba(0,116,180,0.10) 40%, rgba(0,80,120,0.04) 70%, transparent 90%), #0d1117",
-          border: "1px solid rgba(0,180,180,0.15)",
+          background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,116,244,0.28) 0%, rgba(0,169,226,0.12) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
+          border: "1px solid rgba(0,116,244,0.18)",
           minHeight: "320px",
         }}
       >
@@ -177,16 +177,16 @@ function MarketingView({ user }: { user: any }) {
         />
         {/* Glow orbs */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(0,180,180,0.12), transparent 65%)", transform: "translate(25%, -30%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(0,116,244,0.14), transparent 65%)", transform: "translate(25%, -30%)" }} />
         <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(0,116,244,0.06), transparent 65%)", transform: "translate(-25%, 30%)" }} />
+          style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
         <div className="relative z-10 px-6 lg:px-16 py-14 text-center">
           {/* Eyebrow */}
           <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
-            style={{ background: "rgba(0,180,180,0.10)", border: "1px solid rgba(0,180,180,0.25)" }}>
-            <Rocket size={12} style={{ color: "#00b4b4" }} />
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#00b4b4" }}>
+            style={{ background: "rgba(0,116,244,0.10)", border: "1px solid rgba(0,116,244,0.25)" }}>
+            <Rocket size={12} style={{ color: "#4a9eff" }} />
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#4a9eff" }}>
               WAVV × Prospecting On Demand
             </span>
           </div>
@@ -197,7 +197,7 @@ function MarketingView({ user }: { user: any }) {
             style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)" }}
           >
             <span style={{
-              background: "linear-gradient(135deg, #ffffff 0%, #94d8d8 40%, #4ade80 70%, #22c55e 100%)",
+              background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -208,7 +208,7 @@ function MarketingView({ user }: { user: any }) {
 
           {/* Accent line */}
           <div className="flex justify-center mb-6">
-            <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00b4b4 50%, #4ade80)" }} />
+            <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
           </div>
 
           {/* Subline */}
@@ -227,7 +227,7 @@ function MarketingView({ user }: { user: any }) {
 
           {/* Schedule line */}
           <div className="flex items-center justify-center gap-2 mb-7">
-            <Clock size={13} style={{ color: "rgba(0,180,180,0.7)" }} />
+            <Clock size={13} style={{ color: "rgba(0,169,226,0.7)" }} />
             <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
               Live coaching calls every Tuesday & Thursday
             </span>
