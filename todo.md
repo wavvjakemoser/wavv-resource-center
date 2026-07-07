@@ -1651,3 +1651,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Partners unlocked state: partner hub (gated by role === partner_manager)
 - [x] Employees see Partner page unlocked + Preview as Customer toggle
 - [x] Add WAVV Partners to sidebar navigation (already existed)
+
+## Toggle Labels + CTA Fixes — Jul 7 2026
+- [x] Accelerator toggle: "Viewing as: WAVV Accelerator Member" / "Customer"
+- [x] Partners toggle: "Viewing as: WAVV Partner" / "Customer"
+- [x] WAVV Partners Portal sidebar link should navigate to /partners page (not external)
+- [x] Fix Chrome Extension link (pointing to actual Chrome Web Store listing)
+- [x] Customer-view CTA: "Unlock the Full Accelerator" + "Sign In" on Accelerator
+- [x] Customer-view CTA: "Become a WAVV Partner" + "Sign In" on Partners page
+- [x] Consistent top spacing across all pages so content doesn't shift when toggle is present/absent

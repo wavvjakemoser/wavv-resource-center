@@ -219,13 +219,14 @@ export default function Partners() {
 
   return (
     <PortalLayout title="WAVV Partners">
-      <div className="px-4 lg:px-8 py-8 space-y-16 pb-24">
+      <div className="px-4 lg:px-8 py-6 space-y-16 pb-24">
 
-        {/* ── Employee Preview Toggle ── */}
+        {/* ── Employee Preview Toggle (fixed height to prevent layout shift) ── */}
+        <div style={{ minHeight: "32px" }}>
         {isApprovedEmployee && (
           <div className="flex items-center justify-end gap-3">
             <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
-              {previewAsCustomer ? "Viewing as: Non-Partner" : "Viewing as: Team Member"}
+              Viewing as: {previewAsCustomer ? "Customer" : "WAVV Partner"}
             </span>
             <button
               onClick={() => setPreviewAsCustomer(!previewAsCustomer)}
@@ -238,10 +239,11 @@ export default function Partners() {
               />
             </button>
             <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: previewAsCustomer ? "#f97316" : "rgba(255,255,255,0.4)" }}>
-              Preview as Non-Partner
+              {previewAsCustomer ? "Customer" : "Customer"}
             </span>
           </div>
         )}
+        </div>
 
         {/* ── Hero ── */}
         <div
@@ -313,21 +315,19 @@ export default function Partners() {
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >
-                  Apply Now
+                  Become a WAVV Partner
                   <ArrowRight size={15} />
                 </a>
-                {reason === "unauthenticated" && (
-                  <a
-                    href="/api/oauth/login?return_path=/partners"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
-                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-                  >
-                    Already Approved? Sign In
-                    <ArrowRight size={14} />
-                  </a>
-                )}
+                <a
+                  href="/api/oauth/login?return_path=/partners"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+                >
+                  Sign In
+                  <ArrowRight size={14} />
+                </a>
               </div>
             )}
           </div>

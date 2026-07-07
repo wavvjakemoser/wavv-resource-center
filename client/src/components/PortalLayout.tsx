@@ -308,9 +308,8 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 const isPartnerPortalHidden = !settingsLoading && navVisibility["/wavvpartner"] === false;
                 return (
                   <a
-                    href="/wavvpartner"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/partners"
+                    onClick={(e) => { e.preventDefault(); setSidebarOpen(false); window.location.href = '/partners'; }}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
                     style={{
                       fontSize: "14px",

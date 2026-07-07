@@ -169,16 +169,30 @@ function useAcceleratorAccess() {
 function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: "inline" | "sticky" }) {
   if (reason === "unauthenticated") {
     return (
-      <a
-        href="/api/oauth/login?return_path=/accelerator"
-        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-        style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-      >
-        Sign In to Check Access
-        <ArrowRight size={15} />
-      </a>
+      <div className="flex flex-col sm:flex-row items-center gap-3">
+        <a
+          href="https://www.wavv.com/pricing"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+          style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+        >
+          Unlock the Full Accelerator
+          <ArrowRight size={15} />
+        </a>
+        <a
+          href="/api/oauth/login?return_path=/accelerator"
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+        >
+          Sign In
+          <ArrowRight size={14} />
+        </a>
+      </div>
     );
   }
   return (
@@ -191,7 +205,7 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
       onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
     >
-      Upgrade Your Plan
+      Unlock the Full Accelerator
       <ArrowRight size={15} />
     </a>
   );
@@ -210,11 +224,12 @@ export default function Accelerator() {
   return (
     <PortalLayout title="WAVV Accelerator">
       <div className="px-4 lg:px-8 py-6 space-y-10 pb-24">
-        {/* ── Employee Preview Toggle ── */}
+        {/* ── Employee Preview Toggle (fixed height to prevent layout shift) ── */}
+        <div style={{ minHeight: "32px" }}>
         {isApprovedEmployee && (
           <div className="flex items-center justify-end gap-3">
             <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
-              {previewAsCustomer ? "Viewing as: Customer (no access)" : "Viewing as: Team Member"}
+              Viewing as: {previewAsCustomer ? "Customer" : "WAVV Accelerator Member"}
             </span>
             <button
               onClick={() => setPreviewAsCustomer(!previewAsCustomer)}
@@ -227,10 +242,11 @@ export default function Accelerator() {
               />
             </button>
             <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: previewAsCustomer ? "#f97316" : "rgba(255,255,255,0.4)" }}>
-              Preview as Customer
+              {previewAsCustomer ? "Customer" : "Customer"}
             </span>
           </div>
         )}
+        </div>
 
         {/* ── Hero (gradient box matching site pattern) ── */}
         <div

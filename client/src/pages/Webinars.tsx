@@ -512,6 +512,8 @@ export default function Webinars() {
   return (
     <PortalLayout title="Webinars">
       <div className="px-4 lg:px-8 py-6 space-y-6">
+        {/* Spacer for consistent vertical alignment with pages that have toggle bars */}
+        <div style={{ minHeight: "32px" }} />
 
         {/* ── Header ── */}
         <div
