@@ -1,6 +1,25 @@
 import { useState } from "react";
-import { Users, DollarSign, Megaphone, LifeBuoy, CheckCircle2, ChevronDown, ChevronUp, ArrowRight, Handshake, TrendingUp, Award } from "lucide-react";
+import { Users, DollarSign, Megaphone, LifeBuoy, CheckCircle2, ChevronDown, ChevronUp, ArrowRight, Handshake, TrendingUp, Award, BarChart3, FileText, ExternalLink, ChevronRight, Star } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
+import { useAuth } from "@/_core/hooks/useAuth";
+
+// ─── Access logic (mirrors Accelerator pattern) ─────────────────────────────
+function usePartnerAccess() {
+  const { user } = useAuth();
+
+  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, user: null };
+
+  // All approved WAVV employees always have access
+  const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
+  if (isApprovedEmployee) return { hasAccess: true, reason: "employee" as const, user };
+
+  // Partners: check role
+  const role = (user as any)?.role ?? "";
+  if (role === "partner_manager") return { hasAccess: true, reason: "partner" as const, user };
+
+  // Authenticated but no access
+  return { hasAccess: false, reason: "no_access" as const, user };
+}
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -93,12 +112,136 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+// ─── Partner Hub (unlocked view) ────────────────────────────────────────────
+function PartnerHub() {
+  return (
+    <div className="space-y-8">
+      {/* Welcome */}
+      <div className="rounded-2xl p-6" style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.15)" }}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: "rgba(16,185,129,0.15)" }}>
+            <Star size={20} style={{ color: "#10b981" }} />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-white">Welcome, Partner</h3>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Your WAVV Partner Hub</p>
+          </div>
+        </div>
+        <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+          This is your home base for partner resources, referral tracking, and co-marketing materials. Everything you need to grow your WAVV partnership is here.
+        </p>
+      </div>
+
+      {/* Quick Actions Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[
+          { icon: BarChart3, title: "Referral Dashboard", description: "Track referrals, conversions & earnings", color: "#0074F4", href: "https://wavv.firstpromoter.com/login" },
+          { icon: FileText, title: "Sales Materials", description: "Decks, one-pagers & demo scripts", color: "#8b5cf6", href: "#" },
+          { icon: Megaphone, title: "Co-Marketing", description: "Campaign assets & brand guidelines", color: "#f97316", href: "#" },
+          { icon: Users, title: "Demo Environment", description: "Sandbox account for prospect demos", color: "#06b6d4", href: "#" },
+          { icon: DollarSign, title: "Payouts & Billing", description: "Commission history & payment settings", color: "#10b981", href: "https://wavv.firstpromoter.com/login" },
+          { icon: Award, title: "Partner Tier", description: "Your current level & next milestone", color: "#ec4899", href: "#" },
+        ].map((item) => (
+          <a
+            key={item.title}
+            href={item.href}
+            target={item.href.startsWith("http") ? "_blank" : undefined}
+            rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+            className="group rounded-xl p-5 transition-all duration-200"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.borderColor = `${item.color}33`; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; }}
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${item.color}18` }}>
+                <item.icon size={18} style={{ color: item.color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-semibold text-white mb-0.5">{item.title}</h4>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>{item.description}</p>
+              </div>
+              <ChevronRight size={14} className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "rgba(255,255,255,0.4)" }} />
+            </div>
+          </a>
+        ))}
+      </div>
+
+      {/* Partner Resources */}
+      <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+        <h3 className="text-base font-bold text-white mb-4">Partner Resources</h3>
+        <div className="space-y-3">
+          {[
+            { title: "WAVV Partner Playbook", description: "Complete guide to selling and supporting WAVV", type: "PDF" },
+            { title: "Product Demo Script", description: "Talk track for live prospect demos", type: "DOC" },
+            { title: "Referral Link Generator", description: "Create tracked links for your campaigns", type: "TOOL", href: "https://wavv.firstpromoter.com/login" },
+            { title: "Partner Slack Channel", description: "Direct line to the WAVV partner team", type: "LINK" },
+          ].map((resource) => (
+            <div
+              key={resource.title}
+              className="flex items-center gap-3 p-3 rounded-lg transition-colors cursor-pointer"
+              style={{ background: "rgba(255,255,255,0.02)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+            >
+              <FileText size={16} style={{ color: "rgba(255,255,255,0.4)" }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white">{resource.title}</p>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{resource.description}</p>
+              </div>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded" style={{ background: "rgba(0,116,244,0.12)", color: "#4a9eff" }}>
+                {resource.type}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Contact */}
+      <div className="text-center py-4">
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
+          Need help? Reach your partner manager or email{" "}
+          <a href="mailto:partners@wavv.com" className="font-medium" style={{ color: "#0074F4" }}>partners@wavv.com</a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Partners() {
+  const { hasAccess: realAccess, reason: realReason, user } = usePartnerAccess();
+  const [previewAsCustomer, setPreviewAsCustomer] = useState(false);
+
+  const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
+  const hasAccess = previewAsCustomer ? false : realAccess;
+  const reason = previewAsCustomer ? "no_access" : realReason;
+
   return (
     <PortalLayout title="WAVV Partners">
-      <div className="px-4 lg:px-8 py-8 space-y-16">
+      <div className="px-4 lg:px-8 py-8 space-y-16 pb-24">
+
+        {/* ── Employee Preview Toggle ── */}
+        {isApprovedEmployee && (
+          <div className="flex items-center justify-end gap-3">
+            <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+              {previewAsCustomer ? "Viewing as: Non-Partner" : "Viewing as: Team Member"}
+            </span>
+            <button
+              onClick={() => setPreviewAsCustomer(!previewAsCustomer)}
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200"
+              style={{ background: previewAsCustomer ? "#f97316" : "rgba(0,116,244,0.3)" }}
+            >
+              <span
+                className="inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200"
+                style={{ transform: previewAsCustomer ? "translateX(22px)" : "translateX(4px)" }}
+              />
+            </button>
+            <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: previewAsCustomer ? "#f97316" : "rgba(255,255,255,0.4)" }}>
+              Preview as Non-Partner
+            </span>
+          </div>
+        )}
 
         {/* ── Hero ── */}
         <div
@@ -158,21 +301,42 @@ export default function Partners() {
               Refer customers to WAVV and earn recurring revenue for every active account you bring in. Built for sales leaders and agency owners ready to turn their network into a revenue stream.
             </p>
 
-            {/* CTA */}
-            <a
-              href="https://www.wavv.com/partner-program"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-              style={{ background: "linear-gradient(135deg, #0074F4, #0056b3)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-            >
-              Apply Now
-              <ArrowRight size={15} />
-            </a>
+            {/* CTA in hero — only for non-access */}
+            {!hasAccess && (
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a
+                  href="https://www.wavv.com/partner-program"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                  style={{ background: "linear-gradient(135deg, #0074F4, #0056b3)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+                >
+                  Apply Now
+                  <ArrowRight size={15} />
+                </a>
+                {reason === "unauthenticated" && (
+                  <a
+                    href="/api/oauth/login?return_path=/partners"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+                  >
+                    Already Approved? Sign In
+                    <ArrowRight size={14} />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
+
+        {/* ── Unlocked: Partner Hub ── */}
+        {hasAccess && <PartnerHub />}
+
+        {/* ── Marketing content (always visible) ── */}
 
         {/* ── Why Partner with WAVV ── */}
         <div className="space-y-6">
@@ -217,7 +381,6 @@ export default function Partners() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {HOW_IT_WORKS.map((step, i) => (
               <div key={step.step} className="relative flex flex-col gap-3">
-                {/* Connector line between steps */}
                 {i < HOW_IT_WORKS.length - 1 && (
                   <div
                     className="hidden md:block absolute top-5 left-full w-full h-px"
@@ -332,6 +495,27 @@ export default function Partners() {
             </a>
           </p>
         </div>
+
+        {/* ── Sticky CTA for non-access users ── */}
+        {!hasAccess && (
+          <div className="fixed bottom-0 left-0 right-0 z-50 py-3 px-4 flex items-center justify-center gap-4"
+            style={{ background: "linear-gradient(to top, rgba(8,12,20,0.98), rgba(8,12,20,0.92))", borderTop: "1px solid rgba(0,116,244,0.15)", backdropFilter: "blur(12px)" }}>
+            <span className="text-xs font-medium hidden sm:inline" style={{ color: "rgba(255,255,255,0.6)" }}>
+              Become a WAVV Partner — earn recurring revenue on every referral
+            </span>
+            <a
+              href="https://www.wavv.com/partner-program"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-xs font-semibold text-white transition-all duration-200"
+              style={{ background: "linear-gradient(135deg, #0074F4, #0056b3)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+            >
+              Apply Now <ArrowRight size={13} />
+            </a>
+          </div>
+        )}
 
       </div>
     </PortalLayout>

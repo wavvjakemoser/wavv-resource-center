@@ -1641,3 +1641,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Next Live Call: add WAVV favicon (W) to the left
 - [x] Pull POD logo from prospectingondemand.com and incorporate into Partnership section
 - [x] Add "Preview as Customer" toggle for owner/employees to see the locked/gated view
+
+## Visual Fixes + Partner Hub — Jul 7 2026
+- [x] Remove W mark from Next Live Call section
+- [x] Shrink clock icon and countdown boxes in Next Live Call
+- [x] Standardize hero section height across all pages (Academy, Webinars, Resource Hub, Accelerator)
+- [x] Build WAVV Partners page with same gating pattern as Accelerator
+- [x] Partners locked state: marketing page with "Apply Now" CTA or "Sign In"
+- [x] Partners unlocked state: partner hub (gated by role === partner_manager)
+- [x] Employees see Partner page unlocked + Preview as Customer toggle
+- [x] Add WAVV Partners to sidebar navigation (already existed)
