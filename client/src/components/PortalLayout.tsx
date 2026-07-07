@@ -49,15 +49,17 @@ function NavLink({
       className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
       style={{
         fontSize: "15px",
-        opacity: isHidden ? 0.55 : 1,
+        opacity: isHidden ? 0.4 : 1,
         ...(isActive ? {
           background: `${color}18`,
-          border: `1px solid ${color}35`,
+          border: "1px solid transparent",
+          borderLeft: `3px solid ${color}`,
           color: "#ffffff",
         } : isHidden ? {
-          background: "rgba(251,191,36,0.06)",
-          border: "1px solid #fbbf24",
-          color: "#ffffff",
+          background: "transparent",
+          border: "1px solid transparent",
+          borderLeft: "3px solid #fbbf24",
+          color: "#9ca3af",
         } : {
           background: "transparent",
           border: "1px solid transparent",
@@ -66,25 +68,23 @@ function NavLink({
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = isHidden ? "rgba(251,191,36,0.12)" : `${color}12`;
-          e.currentTarget.style.borderColor = isHidden ? "#fbbf24" : `${color}25`;
-          e.currentTarget.style.color = "#ffffff";
+          e.currentTarget.style.background = isHidden ? "rgba(255,255,255,0.04)" : `${color}12`;
+          if (!isHidden) e.currentTarget.style.borderColor = `${color}25`;
         }
       }}
       onMouseLeave={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = isHidden ? "rgba(251,191,36,0.06)" : "transparent";
-          e.currentTarget.style.borderColor = isHidden ? "#fbbf24" : "transparent";
-          e.currentTarget.style.color = "#ffffff";
+          e.currentTarget.style.background = "transparent";
+          if (!isHidden) e.currentTarget.style.borderColor = "transparent";
         }
       }}
       onClick={onClick}
     >
       <div
         className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: isActive ? `${color}28` : `${color}18` }}
+        style={{ background: isActive ? `${color}28` : `${color}18`, opacity: isHidden ? 0.5 : 1 }}
       >
-        <Icon size={17} style={{ color }} />
+        <Icon size={17} style={{ color: isHidden ? "#9ca3af" : color }} />
       </div>
       <span className="flex-1 min-w-0" style={{ whiteSpace: "nowrap", overflow: "visible" }}>{label}</span>
 

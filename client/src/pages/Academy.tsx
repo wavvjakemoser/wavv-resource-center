@@ -325,17 +325,10 @@ export default function Academy() {
             style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
           <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
-            {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
-              style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.25)" }}>
-              <GraduationCap size={12} style={{ color: "#0074F4" }} />
-              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#0074F4" }}>WAVV Academy</span>
-            </div>
-
             {/* Headline */}
-            <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
+            <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Learn WAVV, Your Way
+                WAVV Academy
               </span>
             </h1>
 

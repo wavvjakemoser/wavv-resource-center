@@ -320,13 +320,8 @@ export default function HandsOn() {
             style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
           <div className="relative z-10 px-6 lg:px-16 py-12 text-center">
-            {/* Eyebrow + Coming Soon */}
-            <div className="flex items-center justify-center gap-3 mb-5 flex-wrap">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full"
-                style={{ background: "rgba(0,116,244,0.10)", border: "1px solid rgba(0,116,244,0.25)" }}>
-                <FlaskConical size={12} style={{ color: "#4a9eff" }} />
-                <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#4a9eff" }}>WAVV Playground</span>
-              </div>
+            {/* Coming Soon badge */}
+            <div className="flex items-center justify-center mb-5">
               <span
                 className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest"
                 style={{ background: "rgba(0,116,244,0.18)", color: "#93c5fd", border: "1.5px solid rgba(0,116,244,0.45)", letterSpacing: "0.12em" }}
@@ -336,9 +331,9 @@ export default function HandsOn() {
             </div>
 
             {/* Headline */}
-            <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
+            <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Your WAVV Sandbox
+                WAVV Playground
               </span>
             </h1>
 

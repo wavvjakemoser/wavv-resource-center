@@ -266,19 +266,10 @@ export default function Partners() {
             style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
           <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
-            {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
-              style={{ background: "rgba(0,169,226,0.12)", border: "1px solid rgba(0,169,226,0.25)" }}>
-              <Users size={12} style={{ color: "#00A9E2" }} />
-              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#00A9E2" }}>
-                WAVV Partner Program
-              </span>
-            </div>
-
             {/* Headline */}
             <h1
               className="font-extrabold tracking-tight leading-[1.05] mb-4"
-              style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}
+              style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}
             >
               <span style={{
                 background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)",
@@ -286,7 +277,7 @@ export default function Partners() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}>
-                Grow Together with WAVV
+                WAVV Partners
               </span>
             </h1>
 

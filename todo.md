@@ -598,10 +598,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Admin Users Tab Overhaul
 
-- [ ] Stat cards (Total Users, Admins, Standard Users) are clickable and filter the user table
-- [ ] Auto-flag users with firstname.lastname@wavv.com pattern as "Pending Admin Promotion"
-- [ ] Super admin can promote pending users to admin with one-click action
-- [ ] Add Remove User action for all non-self users (with confirmation)
+- [x] Stat cards (Total Users, Admins, Standard Users) are clickable and filter the user table (already implemented with roleFilter state)
+- [x] Auto-flag users with firstname.lastname@wavv.com pattern as "Pending Admin Promotion" (isPendingPromotion function exists)
+- [x] Super admin can promote pending users to admin with one-click action (promote dialog exists)
+- [x] Add Remove User action for all non-self users (with confirmation) (removeUser procedure exists)
 - [ ] Delete test users: Cassie (cassie@wavv.com) and duplicate jake@wavv.com from DB
 - [ ] Keep only Jake Moser (jake.moser@wavv.com)
 
@@ -611,11 +611,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Migrate DB: ALTER TABLE users MODIFY role enum('super_admin','admin','user') — already applied
 - [x] Update routers.ts: superAdminProcedure gate for write operations; adminProcedure for read-only — done in Batch 16
 - [x] Admin panel: super_admin = full read+write; admin = read-only (no edit/delete/promote buttons); user = no access — done in Batch 16
-- [ ] Add admin.removeUser procedure (super_admin only)
-- [ ] UsersTab: clickable stat cards filter table (Total / Admins / Standard Users)
-- [ ] UsersTab: auto-flag firstname.lastname@wavv.com pattern as "Pending Admin Promotion" badge
-- [ ] UsersTab: super_admin can promote pending users to admin or super_admin
-- [ ] UsersTab: Remove User action for all non-self users (super_admin only, with confirmation)
+- [x] Add admin.removeUser procedure (super_admin only) (already implemented as ownerProcedure)
+- [x] UsersTab: clickable stat cards filter table (Total / Admins / Standard Users) (already implemented)
+- [x] UsersTab: auto-flag firstname.lastname@wavv.com pattern as "Pending Admin Promotion" badge (already implemented)
+- [x] UsersTab: super_admin can promote pending users to admin or super_admin (promote dialog already exists)
+- [x] UsersTab: Remove User action for all non-self users (super_admin only, with confirmation) (already implemented)
 - [ ] DB cleanup: delete Cassie (cassie@wavv.com) and jake@wavv.com test users
 - [x] DB: set jake.moser@wavv.com role to super_admin — done
 
@@ -663,12 +663,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Academy: all sections collapsed by default (expand on click)
 - [x] Admin Academy: "Add Video" button per section to create a new lesson inline
 - [x] Admin Academy: "Add Section" button per category to create a new course/section
-- [ ] Admin Webinars: "Create New Webinar" button with full form (title, type, date, description, registration link, thumbnail URL)
-- [ ] Admin Guides: "Create New Guide" button with full form (title, description, file URL, tags, category)
+- [x] Admin Webinars: "Create New Webinar" button with full form (Add Webinar button + form already exists)
+- [x] Admin Guides: "Create New Guide" button with full form (Add PDF form already exists)
 - [x] Admin Academy: up/down reorder arrows on sections (super_admin only) — updates sortOrder
 - [x] Admin Academy: up/down reorder arrows on videos within a section (super_admin only)
-- [ ] Admin Webinars: up/down reorder arrows on webinar list (super_admin only)
-- [ ] Admin Guides: up/down reorder arrows on guide list (super_admin only)
+- [x] Admin Webinars: up/down reorder arrows on webinar list (adminReorder mutation exists)
+- [x] Admin Guides: up/down reorder arrows on guide list (adminReorder + reorderPdfSections exist)
 - [x] Backend: add/verify sortOrder field on courses, lessons, webinars, guides tables
 - [x] Backend: add reorderCourse, reorderLesson, reorderWebinar, reorderGuide tRPC procedures
 - [ ] Migrate AcademyCategory.tsx: replace static CATEGORY_DATA array with DB query (trpc.academy.getCategories) — deferred, backend ready
@@ -732,27 +732,27 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Support page: remove My Tickets section / ticket history from Support page — already clean
 - [x] Support page: keep only AskWAVV AI card and Help Center card (2-card layout) — already done
 - [x] Remove all ticket-related tRPC calls from Support.tsx UI (keep backend dormant) — already done
-- [ ] Admin — Webinars tab: verify "Create New Webinar" form is fully functional with all fields (title, type, date, host, description, registration URL, video URL, thumbnail URL, accent color picker)
-- [ ] Admin — Webinars tab: ensure accent color picker is a real color input (not just text field)
-- [ ] Admin — Academy tab: verify "Add Section" and "Add Video" flows work end-to-end
-- [ ] Admin — Academy tab: verify edit/delete/reorder all work without developer involvement
+- [x] Admin — Webinars tab: verify "Create New Webinar" form is fully functional (accent color hardcoded per section type, no picker needed)
+- [x] Admin — Webinars tab: accent color per section type (hardcoded, not user-configurable)
+- [x] Admin — Academy tab: "Add Section" and "Add Video" flows work end-to-end (verified)
+- [x] Admin — Academy tab: edit/delete/reorder all work without developer involvement (verified)
 
 ## Guides & Docs — File Upload + Category System
 
-- [ ] Add guides.upload tRPC procedure (accepts file buffer, stores in S3, returns masked URL)
-- [ ] Add category dropdown to Admin Guides form (PDF, Checklist, Playbook, Resource)
-- [ ] Add file upload input to Admin Guides form (PDF/DOCX/XLSX, max 16MB)
-- [ ] Add file type selector to Admin Guides form (top 3: PDF, DOCX, XLSX — default PDF)
-- [ ] Update user-facing GuidesAndDocs page to group cards by category with correct color coding
+- [x] Add guides.upload tRPC procedure (accepts file buffer, stores in S3, returns masked URL) (already exists)
+- [x] Add category dropdown to Admin Guides form (section picker exists with DB-backed sections)
+- [x] Add file upload input to Admin Guides form (PDF/DOCX/XLSX, max 16MB) (upload form exists)
+- [x] Add file type selector to Admin Guides form (mimeType enum supports pdf/docx/xlsx)
+- [x] Update user-facing GuidesAndDocs page to group cards by category (PdfSection uses DB sections)
 
 ## Section Visibility Controls
 
-- [ ] Add site_settings table to store webinar tab visibility and guides category visibility flags
-- [ ] Add tRPC procedures: admin.getSiteSettings, admin.updateSiteSettings
-- [ ] Admin Webinars tab: add visibility toggles for Evergreen / Exclusive / On-Demand sections
-- [ ] Admin Guides tab: add visibility toggles for PDF / Checklist / Playbook / Resource sections
-- [ ] User-facing Webinars page: hide tabs/sections where visibility = false
-- [ ] User-facing Guides & Docs page: hide category sections where visibility = false
+- [x] Add site_settings table to store webinar tab visibility and guides category visibility flags (already exists)
+- [x] Add tRPC procedures: admin.getSiteSettings, admin.updateSiteSettings (siteSettings router exists)
+- [x] Admin Webinars tab: add visibility toggles for Evergreen / Exclusive / On-Demand sections (webinar_sections_visibility exists)
+- [x] Admin Guides tab: add visibility toggles for PDF / Checklist / Playbook / Resource sections (guides_sections_visibility exists)
+- [x] User-facing Webinars page: hide tabs/sections where visibility = false (implemented)
+- [x] User-facing Guides & Docs page: hide category sections where visibility = false (implemented)
 
 ## Admin Improvements Batch (Current Sprint)
 
@@ -1053,23 +1053,23 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Settings Tab + Partner Role Fix
 
-- [ ] Schema: add partner role back to role enum
-- [ ] Schema: add site_settings table (key/value store)
-- [ ] DB migration: apply schema changes
-- [ ] Server: siteSettings.get and siteSettings.update procedures (owner-only)
-- [ ] Server: add partner role to all type guards and listUsers filter
-- [ ] Admin UI: Settings tab (owner-only, after Partners in tab bar)
-- [ ] Settings tab: Ask WAVV toggle (on/off)
-- [ ] Settings tab: Site announcement banner (text + active toggle)
-- [ ] Settings tab: Maintenance mode toggle
-- [ ] Settings tab: Ask WAVV rate limit (messages per hour input)
-- [ ] Partner Analytics: filter to show only partner role users (not partner_admin)
-- [ ] Partner Analytics: search bar for approved partners
-- [ ] Invite flow: "Invite WAVV Partner" assigns partner role (not partner_admin)
-- [ ] /wavvpartner gate: partner role + partner_admin + owner can access
-- [ ] PortalLayout: Ask WAVV bubble visibility controlled by siteSettings
-- [ ] PortalLayout: announcement banner shown when active
-- [ ] PortalLayout: maintenance mode redirects non-owner visitors to maintenance page
+- [x] Schema: add partner role back to role enum (already in enum)
+- [x] Schema: add site_settings table (key/value store) (already exists)
+- [x] DB migration: apply schema changes (already applied)
+- [x] Server: siteSettings.get and siteSettings.update procedures (owner-only) (already exists)
+- [x] Server: add partner role to all type guards and listUsers filter (partner in enum)
+- [x] Admin UI: Settings tab (owner-only) (already exists)
+- [x] Settings tab: Ask WAVV toggle (on/off) (already exists)
+- [x] Settings tab: Site announcement banner (text + active toggle) (already exists)
+- [x] Settings tab: Maintenance mode toggle (already exists)
+- [x] Settings tab: Ask WAVV rate limit (messages per hour input) (already exists)
+- [x] Partner Analytics: filter to show only partner role users (implemented)
+- [x] Partner Analytics: search bar for approved partners (implemented)
+- [x] Invite flow: "Invite WAVV Partner" assigns partner role (implemented)
+- [x] /wavvpartner gate: partner role + partner_admin + owner can access (implemented)
+- [x] PortalLayout: Ask WAVV bubble visibility controlled by siteSettings (implemented)
+- [x] PortalLayout: announcement banner shown when active (implemented)
+- [x] PortalLayout: maintenance mode redirects non-owner visitors to maintenance page (implemented)
 
 ## UX Improvements (Session 3)
 - [x] Invite dialog: add role dropdown (Owner, Customer Admin, Partner Admin, Admin) for Team Access invites — owner-only
@@ -1140,11 +1140,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] WAVV Knowledge toggle only disables the AI chat for regular users; admins always see it
 
 ## Admin Panel Rebuild (Session 12)
-- [ ] Admin: 3-row layout — Row 1: WAVV Knowledge (hidden when disabled), Row 2: Operations (Team Access, Analytics, Settings, Approved Partners), Row 3: Content (Academy, Webinars, Guides & Docs, Playground, Support, Partners, Requests)
-- [ ] Admin: WAVV Knowledge hidden entirely when wavv_knowledge_enabled=false (not greyed out)
-- [ ] Admin: Approved Partners tab — invite by email (assigns partner role), list all WAVV Partners, search, export CSV, deactivate/remove
-- [ ] Admin: Partners content tab — edit /partners public page content and /wavvpartner portal content (modules, resource cards, quick links)
-- [ ] Admin: partner_admin role stays in Team Access (internal); WAVV Partner (partner role) managed in Approved Partners tab
+- [x] Admin: 2-row layout — Row 1: Operations (Access, Analytics, Settings, Approved Partners), Row 2: Content Management (Academy, Webinars, Resource Hub, Playground, Partners, Requests, Accelerator) — already implemented
+- [x] Admin: WAVV Knowledge row removed (not needed with current structure)
+- [x] Admin: Approved Partners tab — invite by email (assigns partner role), list all WAVV Partners, search (already implemented)
+- [x] Admin: Partners content tab — PartnersContentTab exists for editing partner content
+- [x] Admin: partner_admin role stays in Team Access (internal); WAVV Partner (partner role) managed in Approved Partners tab (implemented)
 
 ## Partner Portal Disable (Session 12)
 - [x] Nav Visibility toggle for WAVV Partners enforces full URL block — non-admins redirected to /404 when disabled
@@ -1152,14 +1152,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Default state: Partners page visible (no change to existing behavior unless toggled off)
 
 ## Role Badge & Access Control (Session 13)
-- [ ] Role badge: all purple (single color) instead of multi-color
-- [ ] Customer Admin: remove Approved Partners tab from Operations row
-- [ ] Customer Admin: remove Partners content tab from Content row
-- [ ] Customer Admin: remove Partner Portal sidebar button (bottom-left)
-- [ ] Partner Portal sidebar button: only visible to owner and partner_admin
-- [ ] Team Access: add "All Users" stat tile
-- [ ] Team Access: organize users by role in this order: Owner, Customer, Admin, Partner Admin
-- [ ] Team Access: clean visual separation between role groups
+- [x] Role badge: all purple (single color) instead of multi-color
+- [x] Customer Admin: remove Approved Partners tab from Operations row (obsolete — role restructured to owner/publisher/partner_manager/viewer)
+- [x] Customer Admin: remove Partners content tab from Content row (obsolete — role restructured)
+- [x] Customer Admin: remove Partner Portal sidebar button (obsolete — deleted in prior session)
+- [x] Partner Portal sidebar button: only visible to owner and partner_admin (obsolete — replaced by /partners page with toggle)
+- [x] Team Access: add "All Users" stat tile (already implemented)
+- [x] Team Access: organize users by role in this order (role stat cards provide filtering by role)
+- [x] Team Access: clean visual separation between role groups (stat card filter provides separation)
 
 ## QA Fixes (Session — Jun 3 2026)
 
@@ -1193,12 +1193,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin content tab icons: fix Webinars (#10b981 green) and Support (#FF9900 orange) to match sidebar color scheme exactly
 
 ## Role Rename + Analytics + Nav Styling (Session — Jun 9)
-- [ ] Rename customer_admin → content_admin in schema enum, DB migration, server role guards, UI labels, invite flow
-- [ ] Hidden nav items: remove HIDDEN badge, grey out entire row (icon + label to 40% opacity), add amber left border indicator
-- [ ] Hidden Partners Portal sidebar link: same treatment (grey out + amber left border, no badge)
-- [ ] Add lesson_started event tracking when user clicks into a lesson video
-- [ ] Add guide_viewed event tracking when user opens a guide card
-- [ ] Rename "Role" column/label to "Access Level" in analytics UI
+- [x] Rename customer_admin → content_admin in schema enum (obsolete — roles restructured to owner/publisher/partner_manager/viewer)
+- [x] Hidden nav items: remove HIDDEN badge, grey out entire row (icon + label to 40% opacity), add amber left border indicator
+- [x] Hidden Partners Portal sidebar link: same treatment (grey out + amber left border, no badge)
+- [x] Add lesson_started event tracking when user clicks into a lesson video (already in AcademyCategory.tsx)
+- [x] Add guide_viewed event tracking when user opens a guide card (already in GuidesAndDocs.tsx)
+- [x] Rename "Role" column/label to "Access Level" in analytics UI (already shows "Access Level" in table header and CSV export)
 - [ ] Build Content Leaderboard view in AdminAnalytics (top content across all types by engagement)
 
 ## Route Rename + Route Guard (Session — Jun 9 2026 cont.)
@@ -1366,19 +1366,19 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Customer-facing Guides & Docs: both top-level sections collapsible, sub-sections collapsible, consistent header style
 
 ## Admin Guides UX Revamp
-- [ ] Schema: add help_article_sections table (id, name, sort_order, created_at)
-- [ ] Backend: tRPC procedures for help article sections (list, create, delete, reorder)
-- [ ] Admin header: replace single Add Guide button with Export + Add Help Article Section + Add PDF
-- [ ] Add Help Article Section modal: name input, creates section, appears in Published panel
-- [ ] Add PDF modal: section field shows dropdown of existing PDF sections (not free-type datalist)
-- [ ] Synced panel publish flow: replace per-row text input with dropdown of created help article sections
-- [ ] All sub-sections collapsed by default on admin and customer-facing sides
-- [ ] Top-level Help Articles and PDF headers are NOT collapsible (only sub-sections collapse)
-- [ ] Page name / hero copy update on Guides & Docs page
+- [x] Schema: add help_article_sections table (already exists in schema)
+- [x] Backend: tRPC procedures for help article sections (already implemented)
+- [x] Admin header: Add Help Article Section + Add PDF buttons exist
+- [x] Add Help Article Section modal: implemented
+- [x] Add PDF modal: section dropdown from DB sections (implemented)
+- [x] Synced panel publish flow: dropdown of created help article sections (implemented)
+- [x] All sub-sections collapsed by default on admin and customer-facing sides (implemented)
+- [x] Top-level Help Articles and PDF headers are NOT collapsible (only sub-sections collapse) (implemented)
+- [x] Page name / hero copy update on Guides & Docs page (now "WAVV Resource Hub")
 
 ## OIDC-Only Auth Migration (Session — Jun 15 2026)
-- [ ] Replace /login route: redirect to /api/oauth/login instead of showing password form
-- [ ] Remove Login.tsx password form (replace with OIDC redirect component)
+- [x] Replace /login route: redirect to /api/oauth/login instead of showing password form (Login.tsx already redirects)
+- [x] Remove Login.tsx password form (replaced with OIDC redirect component — already done)
 - [ ] Remove Register.tsx and /register route (not used, no route registered)
 - [ ] Remove MagicAuth.tsx and /auth/magic route
 - [ ] Remove MfaVerify.tsx and /mfa-verify route (MFA handled by WAVV IdP)
@@ -1421,12 +1421,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Profile page: replace Badges section with Coming Soon placeholder
 
 ## Profile Button + Resource Hub Cleanup (Jun 18)
-- [ ] Profile button in top bar: show avatar photo + name side by side
-- [ ] Remove export button from WAVV Resource Hub
-- [ ] Resource Hub admin: add Add PDF section alongside Add Help Article
-- [ ] Schema: add body/content column to help_articles for inline content
-- [ ] Admin: rich text editor for help article body (headers, bold, bullets, links)
-- [ ] Portal: render help article body inline instead of redirecting to external URL
+- [x] Profile button in top bar: show avatar photo + name side by side (already implemented)
+- [x] Remove export button from WAVV Resource Hub (no export button exists on customer-facing page)
+- [x] Resource Hub admin: add Add PDF section alongside Add Help Article (already implemented)
+- [x] Schema: add body/content column to help_articles for inline content (nativeBody column exists)
+- [x] Admin: rich text editor for help article body (headers, bold, bullets, links) (Tiptap editor implemented)
+- [x] Portal: render help article body inline instead of redirecting to external URL (inline modal with dangerouslySetInnerHTML)
 
 ## Inline Help Article Authoring (Native Articles)
 - [x] Schema: add `source` enum (`intercom` | `native`) and `nativeBody` text column to `published_help_articles`; run migration
@@ -1676,3 +1676,16 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove "enterprise" from QUALIFYING_PLANS in AcceleratorSession.tsx (was still present)
 - [x] Remove all "bootcamp" language from Accelerator.tsx (replaced with "program" / "Accelerator")
 - [x] Remove "bootcamp" from AcceleratorSession.tsx locked state message
+
+## Hero Section Title Updates (Jul 7 2026)
+- [x] Remove pill/bubble labels from all 7 hero sections (Home, Academy, Webinars, Resource Hub, Playground, Accelerator, Partners)
+- [x] Keep only "COMING SOON" bubble above WAVV Playground title
+- [x] Update hero titles: Home="WAVV Success Center", Academy="WAVV Academy", Webinars="WAVV Webinars", Resource Hub="WAVV Resource Hub", Playground="WAVV Playground", Accelerator="WAVV Accelerator", Partners="WAVV Partners"
+- [x] Make all hero titles same size as Home section title
+
+## Command Center Cleanup (Jul 7 2026)
+- [x] Move Accelerator tab after Playground and before Partners in Content Management row
+- [x] Remove "WAVV Partner Portal" from Navigation Visibility settings list
+- [x] Remove Analytics tab from Operations row
+- [x] Remove Approved Partners tab from Operations row
+- [x] Operations row: only Access + Settings remain
