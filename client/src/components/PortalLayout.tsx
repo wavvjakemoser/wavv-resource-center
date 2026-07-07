@@ -287,7 +287,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     <circle cx="24" cy="24" r="5" fill="white"/>
                   </svg>
                 </div>
-                <span className="flex-1 min-w-0 truncate">Chrome Extension</span>
+                <span className="flex-1 min-w-0 text-[11px]">WAVV Chrome Extension</span>
                 <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
               </a>
             </div>

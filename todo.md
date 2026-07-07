@@ -1616,4 +1616,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Session detail pages (/accelerator/session/:id) now load from database
 - [x] Expose wavvPlan + subscriptionStatus in auth.me
 - [x] NavGuard bypass expanded to all approved employees
-- [ ] CMO/CRO/COO audit of Accelerator marketing page for launch readiness
+- [x] CMO/CRO/COO audit of Accelerator marketing page for launch readiness
+
+## Accelerator CMO/CRO Improvements — Jul 7 2026 (Round 4)
+- [x] Rename sidebar back to "WAVV Chrome Extension" (fix truncation via CSS, not shortening name)
+- [x] Remove "What Members Are Saying" placeholder section entirely
+- [x] Add "Next Live Call" countdown placeholder section (ready for real dates)
+- [x] Add floating/sticky upgrade CTA bar for non-access users
+- [x] Add second CTA after FAQ section for non-access users
+- [x] Add "What you're missing" quantification banner above upgrade CTA
+- [x] Remove "enterprise" from qualifying plans (keep quarterly + annual only)
+- [ ] Backlog: Stripe billing portal redirect for upgrade CTA (needs Stripe customer ID from OIDC)
+- [ ] Backlog: Add POD logo to The Partnership section (pending asset from Kaden)
