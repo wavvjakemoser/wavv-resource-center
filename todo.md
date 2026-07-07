@@ -1733,3 +1733,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Chrome Extension sidebar: neon-style Chrome logo with glow filter
 - [x] Partners page: all CTA buttons consistently say "Apply Now"
 - [x] Hero sections: standardize all pages to same height/padding (minHeight 280px, py-8 sm:py-12)
+
+## WAVV Playground Redesign (Jul 7 2026)
+- [x] Remove "COMING SOON" bubble from Playground hero section
+- [x] Rename "WAVV Settings Playground" to "WAVV Messenger Playground" with SMS bubble icon
+- [x] Make "Coming Soon" badges on cards bigger and bolder
+- [x] Restructure into 3 sections: WAVV Playgrounds, Go High Level, HubSpot
+- [x] Each section has 3 cards: WAVV Dialer Playground, WAVV Call Boards Playground, WAVV Messenger Playground

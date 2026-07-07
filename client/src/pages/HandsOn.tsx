@@ -6,7 +6,7 @@ import {
   FlaskConical,
   Phone,
   LayoutDashboard,
-  Settings,
+  MessageSquare,
   Construction,
   CheckCircle2,
   Send,
@@ -15,7 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-const PLAYGROUND_TOOLS = [
+const PLAYGROUND_CARDS = [
   {
     label: "WAVV Dialer Playground",
     desc: "Practice calling flows, power dialer settings, and call dispositions in a safe environment without affecting your live account.",
@@ -29,17 +29,37 @@ const PLAYGROUND_TOOLS = [
     color: "#00A9E2",
   },
   {
-    label: "WAVV Settings Playground",
-    desc: "Walk through WAVV account settings, integrations, and configuration options in a risk-free environment.",
-    icon: Settings,
+    label: "WAVV Messenger Playground",
+    desc: "Test SMS messaging workflows, templates, and conversation threads in a sandbox without sending real messages.",
+    icon: MessageSquare,
     color: "#67C728",
+  },
+];
+
+const PLAYGROUND_SECTIONS = [
+  { title: "WAVV Playgrounds", cards: PLAYGROUND_CARDS },
+  {
+    title: "Go High Level",
+    cards: [
+      { label: "WAVV Dialer Playground", desc: "Practice calling flows and power dialer settings inside Go High Level.", icon: Phone, color: "#0074F4" },
+      { label: "WAVV Call Boards Playground", desc: "Explore call board layouts and team queues within Go High Level.", icon: LayoutDashboard, color: "#00A9E2" },
+      { label: "WAVV Messenger Playground", desc: "Test SMS messaging workflows and templates inside Go High Level.", icon: MessageSquare, color: "#67C728" },
+    ],
+  },
+  {
+    title: "HubSpot",
+    cards: [
+      { label: "WAVV Dialer Playground", desc: "Practice calling flows and power dialer settings inside HubSpot.", icon: Phone, color: "#0074F4" },
+      { label: "WAVV Call Boards Playground", desc: "Explore call board layouts and team queues within HubSpot.", icon: LayoutDashboard, color: "#00A9E2" },
+      { label: "WAVV Messenger Playground", desc: "Test SMS messaging workflows and templates inside HubSpot.", icon: MessageSquare, color: "#67C728" },
+    ],
   },
 ];
 
 const PLAYGROUND_OPTIONS = [
   "WAVV Dialer Playground",
   "WAVV Call Boards Playground",
-  "WAVV Settings Playground",
+  "WAVV Messenger Playground",
   "Other / General Feedback",
 ];
 
@@ -274,13 +294,13 @@ export default function HandsOn() {
                 The WAVV Playground is being built out. Soon you'll be able to explore{" "}
                 <span className="text-white font-medium">hands-on sandbox environments</span> for the Dialer,{" "}
                 <span className="text-white font-medium">Call Boards</span>, and{" "}
-                <span className="text-white font-medium">Settings</span> — all in a risk-free environment.
+                <span className="text-white font-medium">Messenger</span> — all in a risk-free environment.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
                 {[
                   { icon: <Phone size={14} />, label: "Dialer Playground" },
                   { icon: <LayoutDashboard size={14} />, label: "Call Boards Playground" },
-                  { icon: <Settings size={14} />, label: "Settings Playground" },
+                  { icon: <MessageSquare size={14} />, label: "Messenger Playground" },
                 ].map(({ icon, label }) => (
                   <div key={label} className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium" style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.18)", color: "#a855f7" }}>
                     <span style={{ color: "#a855f7" }}>{icon}</span>
@@ -320,16 +340,6 @@ export default function HandsOn() {
             style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
           <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
-            {/* Coming Soon badge */}
-            <div className="flex items-center justify-center mb-5">
-              <span
-                className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest"
-                style={{ background: "rgba(0,116,244,0.18)", color: "#93c5fd", border: "1.5px solid rgba(0,116,244,0.45)", letterSpacing: "0.12em" }}
-              >
-                Coming Soon
-              </span>
-            </div>
-
             {/* Headline */}
             <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
@@ -349,59 +359,60 @@ export default function HandsOn() {
           </div>
         </div>
 
-        {/* ── Playground cards ── */}
-        <div>
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-            Planned WAVV Playgrounds
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {PLAYGROUND_TOOLS.map((tool) => {
-              const Icon = tool.icon;
-              const isMostRequested = mostRequested === tool.label;
-              return (
-                <div
-                  key={tool.label}
-                  className="relative flex flex-col gap-3 p-5 rounded-xl overflow-hidden"
-                  style={{
-                    background: "#1d2230",
-                    border: isMostRequested ? `1px solid ${tool.color}40` : "1px solid #2a2a2a",
-                    opacity: 0.85,
-                  }}
-                >
-
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: `${tool.color}20` }}
-                    >
-                      <Icon size={20} style={{ color: tool.color }} />
+        {/* ── Playground sections ── */}
+        {PLAYGROUND_SECTIONS.map((section) => (
+          <div key={section.title}>
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+              {section.title}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {section.cards.map((tool) => {
+                const Icon = tool.icon;
+                const isMostRequested = mostRequested === tool.label;
+                return (
+                  <div
+                    key={`${section.title}-${tool.label}`}
+                    className="relative flex flex-col gap-3 p-5 rounded-xl overflow-hidden"
+                    style={{
+                      background: "#1d2230",
+                      border: isMostRequested ? `1px solid ${tool.color}40` : "1px solid #2a2a2a",
+                      opacity: 0.85,
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: `${tool.color}20` }}
+                      >
+                        <Icon size={20} style={{ color: tool.color }} />
+                      </div>
+                      <span
+                        className="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide"
+                        style={{ background: "rgba(168,85,247,0.18)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.35)" }}
+                      >
+                        Coming Soon
+                      </span>
                     </div>
-                    <span
-                      className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-                      style={{ background: "rgba(168,85,247,0.15)", color: "#a855f7" }}
-                    >
-                      Coming Soon
-                    </span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-white font-semibold text-sm">{tool.label}</h3>
-                      {isMostRequested && (
-                        <span
-                          className="text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide"
-                          style={{ background: `${tool.color}20`, color: tool.color }}
-                        >
-                          Most Requested
-                        </span>
-                      )}
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-white font-semibold text-sm">{tool.label}</h3>
+                        {isMostRequested && (
+                          <span
+                            className="text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide"
+                            style={{ background: `${tool.color}20`, color: tool.color }}
+                          >
+                            Most Requested
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-gray-500 text-xs leading-relaxed">{tool.desc}</p>
                     </div>
-                    <p className="text-gray-500 text-xs leading-relaxed">{tool.desc}</p>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ))}
 
         {/* ── CTA banner ── */}
         <div

@@ -191,7 +191,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
-            width: "280px",
+            width: "300px",
             background: "#0f1318",
             borderRight: "1px solid #1e2030",
             flexShrink: 0,
@@ -296,7 +296,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                     </g>
                   </svg>
                 </div>
-                <span className="flex-1 min-w-0 text-sm">WAVV Chrome Extension</span>
+                <span className="flex-1 min-w-0 text-sm whitespace-nowrap">WAVV Chrome Extension</span>
                 <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
               </a>
             </div>
