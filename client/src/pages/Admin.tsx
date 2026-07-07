@@ -7857,8 +7857,9 @@ function SettingsTab() {
   const videoRequestsEnabled = settings["video_requests_enabled"] !== false;
   const webinarRequestsEnabled = settings["webinar_requests_enabled"] !== false;
   const guideRequestsEnabled = settings["guide_requests_enabled"] !== false;
-  const searchRequestsEnabled = settings["search_requests_enabled"] !== false;
-
+    const searchRequestsEnabled = settings["search_requests_enabled"] !== false;
+  // Quick Links toggles
+  const chromeExtensionEnabled = settings["chrome_extension_enabled"] !== false;
   // Nav items that can be toggled
   const NAV_ITEMS = [
     { href: "/home",        label: "Home",                   icon: Home },
@@ -8094,6 +8095,41 @@ function SettingsTab() {
                   <div key={key} className="flex items-center justify-between py-1">
                     <div className="flex items-center gap-2">
                       <ReqIcon size={14} style={{ color: enabled ? color : "#4b5563" }} />
+                      <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
+                    </div>
+                    <button
+                      onClick={() => toggle(key, enabled)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                      style={enabled
+                        ? { background: `${color}18`, color, border: `1px solid ${color}35` }
+                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                    >
+                      {enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
+                      {enabled ? "Visible" : "Hidden"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Quick Links ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(103,199,40,0.12)" }}>
+                  <ExternalLink size={15} style={{ color: "#67C728" }} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Quick Links</p>
+                  <p className="text-xs text-gray-500">Show or hide quick links in the sidebar</p>
+                </div>
+              </div>
+              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                {([
+                  { key: "chrome_extension_enabled", label: "Chrome Extension", icon: ExternalLink, enabled: chromeExtensionEnabled, color: "#67C728" },
+                ] as { key: string; label: string; icon: React.ElementType; enabled: boolean; color: string }[]).map(({ key, label, icon: QLIcon, enabled, color }) => (
+                  <div key={key} className="flex items-center justify-between py-1">
+                    <div className="flex items-center gap-2">
+                      <QLIcon size={14} style={{ color: enabled ? color : "#4b5563" }} />
                       <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
                     </div>
                     <button

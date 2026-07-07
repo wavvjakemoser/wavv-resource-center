@@ -106,7 +106,7 @@ export default function Partners() {
           style={{
             background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,169,226,0.28) 0%, rgba(0,116,244,0.14) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
             border: "1px solid rgba(0,169,226,0.2)",
-            minHeight: "300px",
+            minHeight: "280px",
           }}
         >
           {/* Subtle grid */}
@@ -123,7 +123,7 @@ export default function Partners() {
           <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
             style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
-          <div className="relative z-10 px-6 lg:px-16 py-14 text-center">
+          <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
             {/* Eyebrow */}
             <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
               style={{ background: "rgba(0,169,226,0.12)", border: "1px solid rgba(0,169,226,0.25)" }}>
@@ -136,7 +136,7 @@ export default function Partners() {
             {/* Headline */}
             <h1
               className="font-extrabold tracking-tight leading-[1.05] mb-4"
-              style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)" }}
+              style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}
             >
               <span style={{
                 background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)",
@@ -154,17 +154,8 @@ export default function Partners() {
             </div>
 
             {/* Subline */}
-            <p
-              className="mx-auto mb-3 leading-relaxed font-medium"
-              style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(0.95rem, 2vw, 1.15rem)", maxWidth: "600px" }}
-            >
-              Refer customers to WAVV and earn recurring revenue for every active account you bring in.
-            </p>
-            <p
-              className="mx-auto mb-8 leading-relaxed"
-              style={{ color: "rgba(255,255,255,0.45)", fontSize: "clamp(0.82rem, 1.4vw, 0.95rem)", maxWidth: "540px" }}
-            >
-              Built for sales leaders and agency owners who are ready to turn their network into a revenue stream.
+            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+              Refer customers to WAVV and earn recurring revenue for every active account you bring in. Built for sales leaders and agency owners ready to turn their network into a revenue stream.
             </p>
 
             {/* CTA */}

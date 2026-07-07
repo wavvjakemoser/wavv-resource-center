@@ -164,7 +164,7 @@ function MarketingView({ user }: { user: any }) {
         style={{
           background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,116,244,0.28) 0%, rgba(0,169,226,0.12) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
           border: "1px solid rgba(0,116,244,0.18)",
-          minHeight: "320px",
+          minHeight: "280px",
         }}
       >
         {/* Subtle grid */}
@@ -181,7 +181,7 @@ function MarketingView({ user }: { user: any }) {
         <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
           style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
-        <div className="relative z-10 px-6 lg:px-16 py-14 text-center">
+        <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
           {/* Eyebrow */}
           <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
             style={{ background: "rgba(0,116,244,0.10)", border: "1px solid rgba(0,116,244,0.25)" }}>
@@ -194,7 +194,7 @@ function MarketingView({ user }: { user: any }) {
           {/* Headline */}
           <h1
             className="font-extrabold tracking-tight leading-[1.05] mb-4"
-            style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)" }}
+            style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}
           >
             <span style={{
               background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)",
@@ -212,21 +212,11 @@ function MarketingView({ user }: { user: any }) {
           </div>
 
           {/* Subline */}
-          <p
-            className="mx-auto mb-2 leading-relaxed font-medium"
-            style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(0.95rem, 2vw, 1.15rem)", maxWidth: "620px" }}
-          >
-            A coaching bootcamp that combines live sales training with hands-on WAVV product mastery.
+          <p className="mx-auto mb-5 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            A coaching bootcamp that combines live sales training with hands-on WAVV product mastery. More dials. More conversations. More closes.
           </p>
-          <p
-            className="mx-auto mb-4 leading-relaxed"
-            style={{ color: "rgba(255,255,255,0.45)", fontSize: "clamp(0.82rem, 1.4vw, 0.95rem)", maxWidth: "540px" }}
-          >
-            More dials. More conversations. More closes. The equation is simple — we help you execute it.
-          </p>
-
           {/* Schedule line */}
-          <div className="flex items-center justify-center gap-2 mb-7">
+          <div className="flex items-center justify-center gap-2 mb-5">
             <Clock size={13} style={{ color: "rgba(0,169,226,0.7)" }} />
             <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
               Live coaching calls every Tuesday & Thursday

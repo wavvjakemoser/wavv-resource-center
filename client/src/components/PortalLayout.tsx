@@ -264,6 +264,28 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             )}
           </nav>
 
+          {/* ── Quick Links ── */}
+          {!settingsLoading && (allSettings as Record<string, unknown>)["chrome_extension_enabled"] !== false && (
+            <div className="px-3 pt-3 pb-1" style={{ borderTop: "1px solid #1e2030" }}>
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Quick Links</p>
+              <a
+                href="https://chromewebstore.google.com/detail/wavv/your-extension-id"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
+                style={{ fontSize: "14px", background: "transparent", border: "1px solid transparent", color: "#ffffff" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(103,199,40,0.10)"; e.currentTarget.style.borderColor = "rgba(103,199,40,0.25)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
+              >
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(103,199,40,0.15)" }}>
+                  <ExternalLink size={17} style={{ color: "#67C728" }} />
+                </div>
+                <span className="flex-1 min-w-0 truncate">Chrome Extension</span>
+                <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
+              </a>
+            </div>
+          )}
+
           {/* ── Admin Tools section — only for admins ── */}
           {isAdmin && (
             <div className="px-3 pt-3 pb-1" style={{ borderTop: "1px solid #1e2030" }}>

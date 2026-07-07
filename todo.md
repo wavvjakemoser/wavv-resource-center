@@ -1573,7 +1573,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Tests pass
 
 ## Backlog
-- [ ] Add WAVV Chrome Extension page/section to Success Center (placement TBD)
+- [x] Add WAVV Chrome Extension quick link to sidebar (with visibility toggle)
 
 ## Accelerator Marketing Page Enhancements (Jul 7 2026)
 - [x] Hero: rebuild as gradient box matching Academy/Partners pattern (orange accent)
@@ -1584,3 +1584,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add social proof placeholder section
 - [x] Add FAQ section (Can I join mid-cycle?, What if I miss a call?, etc.)
 - [x] Add "What you'll need" prereqs line
+
+## Chrome Extension + Visual Fixes — Jul 7 2026
+- [x] Add Chrome Extension enabled/disabled toggle in Command Center Settings
+- [x] Fix Playground hero gradient to match blue-primary scheme
+- [x] Fix Accelerator hero text to stretch/fill like other sections
+- [x] Fix Partners hero text to stretch/fill like other sections
