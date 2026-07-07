@@ -1590,3 +1590,18 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix Playground hero gradient to match blue-primary scheme
 - [x] Fix Accelerator hero text to stretch/fill like other sections
 - [x] Fix Partners hero text to stretch/fill like other sections
+
+## Accelerator Page Fixes — Jul 7 2026 (Round 2)
+- [x] Fix blank space in The Partnership section (gap between cards)
+- [x] Make all 6 "What's Included" tiles the same height
+- [x] Increase blur on 6-Week Curriculum cards (heavier frosted glass)
+- [x] Remove "What You'll Need" section — work requirement into CTA/hero
+- [x] Rename sidebar Chrome Extension to "WAVV Chrome Extension" with Chrome icon
+
+## Accelerator Member View Redesign — Jul 7 2026
+- [x] Redesign unlocked/member view: 6 session tiles are the PRIMARY content above the fold
+- [x] Member view: compact welcome header (no full marketing hero)
+- [x] Member view: large, prominent session tile grid as the main visual element
+- [x] Member view: upcoming live calls section below sessions
+- [x] Member view: hide marketing copy (partnership, FAQ, social proof) for members who already have access
+- [ ] Member view: progress indicators on session tiles (future — placeholder for now)

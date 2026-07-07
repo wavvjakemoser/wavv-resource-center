@@ -272,7 +272,7 @@ function MarketingView({ user }: { user: any }) {
           className="rounded-2xl p-6 lg:p-8"
           style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
         >
-          <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-stretch">
             {/* WAVV side */}
             <div className="flex-1 space-y-3">
               <div className="flex items-center gap-2">
@@ -328,7 +328,7 @@ function MarketingView({ user }: { user: any }) {
           {VALUE_PROPS.map((prop) => (
             <div
               key={prop.title}
-              className="rounded-2xl p-5 space-y-3 transition-all"
+              className="rounded-2xl p-5 space-y-3 transition-all h-full flex flex-col"
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = `${prop.color}08`;
@@ -344,7 +344,7 @@ function MarketingView({ user }: { user: any }) {
                 <prop.icon size={20} style={{ color: prop.color }} />
               </div>
               <h3 className="text-sm font-semibold text-white">{prop.title}</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">{prop.description}</p>
+              <p className="text-xs text-gray-400 leading-relaxed flex-1">{prop.description}</p>
             </div>
           ))}
         </div>
@@ -384,7 +384,7 @@ function MarketingView({ user }: { user: any }) {
               </div>
               {/* Lock overlay for non-members */}
               <div className="absolute inset-0 flex items-center justify-center rounded-2xl"
-                style={{ background: "rgba(15,19,24,0.4)", backdropFilter: "blur(1px)" }}>
+                style={{ background: "rgba(15,19,24,0.55)", backdropFilter: "blur(4px)" }}>
                 <Lock size={20} style={{ color: "rgba(255,255,255,0.3)" }} />
               </div>
             </div>
@@ -466,21 +466,6 @@ function MarketingView({ user }: { user: any }) {
         </div>
       </section>
 
-      {/* ── What You'll Need ── */}
-      <section className="rounded-2xl p-6"
-        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-        <h3 className="text-sm font-bold text-white mb-3">What You'll Need</h3>
-        <div className="flex flex-wrap gap-3">
-          {["An active WAVV account (Quarterly or Annual plan)", "A headset or microphone", "30 minutes twice a week for live calls"].map((item) => (
-            <div key={item} className="flex items-center gap-2 px-3 py-2 rounded-lg"
-              style={{ background: "rgba(249,115,22,0.06)", border: "1px solid rgba(249,115,22,0.12)" }}>
-              <CheckCircle2 size={13} style={{ color: "#f97316" }} />
-              <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>{item}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ── Final CTA ── */}
       <section className="text-center space-y-5 pb-8">
         <h2 className="text-xl font-bold text-white">Ready to accelerate?</h2>
@@ -520,83 +505,117 @@ function MarketingView({ user }: { user: any }) {
 // ─── Member View (authenticated + qualifying subscription) ───────────────────
 function MemberView() {
   return (
-    <div className="px-4 lg:px-8 py-8 max-w-6xl mx-auto space-y-8">
-      {/* Member Header */}
-      <section className="space-y-2">
+    <div className="px-4 lg:px-8 py-6 space-y-6">
+      {/* ── Compact Header ── */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: "rgba(249,115,22,0.15)" }}>
-            <Rocket size={20} style={{ color: "#f97316" }} />
+            style={{ background: "rgba(0,116,244,0.12)" }}>
+            <Rocket size={20} style={{ color: "#0074F4" }} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">WAVV Sales Accelerator</h1>
-            <p className="text-sm text-gray-400">Your 6-week coaching bootcamp — join any session, anytime.</p>
+            <h1 className="text-xl font-bold text-white">WAVV Sales Accelerator</h1>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>6-week coaching bootcamp — jump into any session below.</p>
           </div>
         </div>
-      </section>
-
-      {/* Quick Start Banner */}
-      <section className="rounded-2xl p-5 flex items-center gap-4"
-        style={{ background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)" }}>
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: "rgba(249,115,22,0.15)" }}>
-          <Zap size={24} style={{ color: "#f97316" }} />
+        {/* Schedule pill */}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full"
+          style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.18)" }}>
+          <Calendar size={12} style={{ color: "#4a9eff" }} />
+          <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>Live calls Tue & Thu</span>
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-white">First Dial in 10 Minutes</h3>
-          <p className="text-xs text-gray-400">New here? Start with our guided quick-start to place your first live dial.</p>
-        </div>
-        <button className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-          style={{ background: "#f97316", color: "#fff" }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "#ea580c"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "#f97316"; }}
-        >
-          <Play size={12} />
-          Start
-        </button>
-      </section>
+      </div>
 
-      {/* 6 Session Tiles */}
+      {/* ── 6 Session Tiles — THE PRIMARY CONTENT ── */}
       <section className="space-y-4">
-        <h2 className="text-lg font-bold text-white">Sessions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white">Your Sessions</h2>
+          <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>Evergreen — join any week</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {SESSIONS.map((session) => (
             <a
               key={session.id}
               href={`/accelerator/session/${session.id}`}
-              className="rounded-2xl p-5 space-y-3 transition-all group cursor-pointer"
+              className="rounded-2xl p-6 space-y-4 transition-all group cursor-pointer h-full flex flex-col"
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = `${session.color}08`;
-                e.currentTarget.style.borderColor = `${session.color}25`;
+                e.currentTarget.style.background = `${session.color}0a`;
+                e.currentTarget.style.borderColor = `${session.color}30`;
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = `0 8px 24px ${session.color}12`;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = "rgba(255,255,255,0.03)";
                 e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
               }}
             >
+              {/* Top row: week badge + arrow */}
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                  style={{ background: `${session.color}20`, color: session.color }}>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                  style={{ background: `${session.color}18`, color: session.color }}>
                   Week {session.week}
                 </span>
-                <ChevronRight size={14} className="text-gray-600 group-hover:text-gray-400 transition-colors" />
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+                  style={{ background: "rgba(255,255,255,0.04)" }}>
+                  <ChevronRight size={14} className="text-gray-600 group-hover:text-white transition-colors" />
+                </div>
               </div>
-              <h3 className="text-sm font-semibold text-white leading-snug">{session.title}</h3>
-              <p className="text-xs text-gray-500 leading-relaxed">{session.wavvFocus}</p>
+
+              {/* Title */}
+              <h3 className="text-[15px] font-semibold text-white leading-snug">{session.title}</h3>
+
+              {/* WAVV Focus */}
+              <p className="text-xs leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.45)" }}>
+                <span className="font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>WAVV Focus:</span> {session.wavvFocus}
+              </p>
+
+              {/* Outcome badge */}
+              <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: session.color }} />
+                  <span className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.5)" }}>{session.outcome}</span>
+                </div>
+              </div>
             </a>
           ))}
         </div>
       </section>
 
-      {/* Upcoming Calls */}
+      {/* ── Upcoming Live Calls ── */}
       <section className="rounded-2xl p-5 space-y-3"
         style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex items-center gap-2">
-          <Calendar size={16} style={{ color: "#f97316" }} />
-          <h3 className="text-sm font-semibold text-white">Upcoming Live Calls</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar size={16} style={{ color: "#0074F4" }} />
+            <h3 className="text-sm font-semibold text-white">Upcoming Live Calls</h3>
+          </div>
+          <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Tuesdays & Thursdays</span>
         </div>
-        <p className="text-xs text-gray-500">No upcoming calls scheduled yet. Check back soon.</p>
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>No upcoming calls scheduled yet. Check back soon.</p>
+      </section>
+
+      {/* ── Quick Start (secondary — below the fold) ── */}
+      <section className="rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+        style={{ background: "rgba(0,116,244,0.05)", border: "1px solid rgba(0,116,244,0.12)" }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: "rgba(0,116,244,0.12)" }}>
+          <Zap size={20} style={{ color: "#4a9eff" }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-white">New to WAVV? First Dial in 10 Minutes</h3>
+          <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>A guided quick-start to get you from setup to your first live dial.</p>
+        </div>
+        <button className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+          style={{ background: "#0074F4", color: "#fff" }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "#005cc5"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "#0074F4"; }}
+        >
+          <Play size={12} />
+          Start
+        </button>
       </section>
     </div>
   );
