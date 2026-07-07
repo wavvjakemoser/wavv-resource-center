@@ -517,10 +517,7 @@ export default function Accelerator() {
               {/* WAVV side */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)" }}>
-                    <Zap size={16} style={{ color: "#0074F4" }} />
-                  </div>
-                  <h3 className="text-sm font-bold text-white">WAVV</h3>
+                  <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-5 object-contain" />
                 </div>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
                   WAVV is a native multi-line power dialer that lives inside your CRM. We provide the product training layer — short how-to clips, cheat sheets, and guided walkthroughs — so you can immediately apply every sales skill inside the dialer.
@@ -540,7 +537,9 @@ export default function Accelerator() {
               {/* POD side */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <img src="/manus-storage/pod_logo_d9f904c3.webp" alt="Prospecting On Demand" className="w-8 h-8 rounded-lg object-contain" style={{ background: "rgba(255,255,255,0.08)" }} />
+                  <a href="https://prospectingondemand.com" target="_blank" rel="noopener noreferrer">
+                    <img src="/manus-storage/pod_logo_d9f904c3.webp" alt="Prospecting On Demand" className="w-8 h-8 rounded-lg object-contain hover:opacity-80 transition-opacity" style={{ background: "rgba(255,255,255,0.08)" }} />
+                  </a>
                   <h3 className="text-sm font-bold text-white">Prospecting On Demand</h3>
                 </div>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
