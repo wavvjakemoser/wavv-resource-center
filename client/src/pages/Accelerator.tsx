@@ -272,33 +272,62 @@ export default function Accelerator() {
         </div>
 
         {/* ── Next Live Call Countdown ── */}
-        <section className="rounded-xl p-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-4"
-          style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.15)" }}>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.15)" }}>
-              <Calendar size={16} style={{ color: "#4a9eff" }} />
+        <section className="relative overflow-hidden rounded-2xl p-6 sm:p-8"
+          style={{ background: "linear-gradient(135deg, #0a1628 0%, #0d2847 40%, #0a3a6b 100%)", border: "1px solid rgba(0,116,244,0.3)" }}>
+          {/* Animated glow effects */}
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #0074F4, transparent)" }} />
+          <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10 blur-3xl" style={{ background: "radial-gradient(circle, #00A9E2, transparent)" }} />
+          
+          <div className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            {/* Left: Live indicator + info */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", boxShadow: "0 4px 20px rgba(0,116,244,0.4)" }}>
+                  <Calendar size={22} className="text-white" />
+                </div>
+                {/* Pulsing live dot */}
+                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#0d2847]">
+                  <div className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white tracking-wide">NEXT LIVE CALL</p>
+                <p className="text-xs font-medium" style={{ color: "#4a9eff" }}>Tue & Thu • Coaching with POD</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-semibold text-white">Next Live Call</p>
-              <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.45)" }}>Schedule coming soon</p>
+
+            <div className="flex-1" />
+
+            {/* Right: Large countdown numbers */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
+                </div>
+                <p className="mt-1.5 text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Days</p>
+              </div>
+              <span className="text-2xl font-bold" style={{ color: "rgba(0,116,244,0.5)" }}>:</span>
+              <div className="text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
+                </div>
+                <p className="mt-1.5 text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Hours</p>
+              </div>
+              <span className="text-2xl font-bold" style={{ color: "rgba(0,116,244,0.5)" }}>:</span>
+              <div className="text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
+                </div>
+                <p className="mt-1.5 text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Min</p>
+              </div>
             </div>
           </div>
-          <div className="flex-1" />
-          <div className="flex items-center gap-3">
-            <div className="text-center px-3">
-              <p className="text-lg font-bold text-white">--</p>
-              <p className="text-[9px] uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.35)" }}>Days</p>
-            </div>
-            <span style={{ color: "rgba(255,255,255,0.2)" }}>:</span>
-            <div className="text-center px-3">
-              <p className="text-lg font-bold text-white">--</p>
-              <p className="text-[9px] uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.35)" }}>Hours</p>
-            </div>
-            <span style={{ color: "rgba(255,255,255,0.2)" }}>:</span>
-            <div className="text-center px-3">
-              <p className="text-lg font-bold text-white">--</p>
-              <p className="text-[9px] uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.35)" }}>Min</p>
-            </div>
+
+          {/* Bottom bar: Schedule status */}
+          <div className="relative mt-5 pt-4" style={{ borderTop: "1px solid rgba(0,116,244,0.15)" }}>
+            <p className="text-center text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Schedule drops soon — check back for the next session date
+            </p>
           </div>
         </section>
 

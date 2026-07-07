@@ -1996,7 +1996,7 @@ export async function getTopAnonPages(sinceDate: Date, limit = 10) {
 }
 
 // Pages we want to track — only these 7 customer-facing routes count
-const TRACKED_PAGES = ['/', '/academy', '/webinars', '/guides', '/playground', '/support', '/wavvpartner'];
+const TRACKED_PAGES = ['/', '/academy', '/webinars', '/resourcehub', '/playground', '/support', '/wavvpartner'];
 // Internal roles that should never be counted in analytics
 const INTERNAL_ROLES = ['owner', 'viewer', 'publisher', 'partner_manager'];
 

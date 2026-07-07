@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 
 // Only these customer-facing pages are tracked
-const TRACKED_PAGES = new Set(['/', '/academy', '/webinars', '/guides', '/playground']);
+const TRACKED_PAGES = new Set(['/', '/academy', '/webinars', '/resourcehub', '/playground']);
 // Internal roles are never tracked
 const INTERNAL_ROLES = new Set(['owner', 'admin', 'content_admin', 'partner_admin']);
 

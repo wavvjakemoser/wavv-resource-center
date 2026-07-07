@@ -21,7 +21,7 @@ const resourceNavItems = [
   { href: "/home", label: "Home",              icon: Home,          color: "#6366f1" },
   { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
   { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
-  { href: "/guides",    label: "WAVV Resource Hub",   icon: FileText,      color: "#67C728" },
+  { href: "/resourcehub",    label: "WAVV Resource Hub",   icon: FileText,      color: "#67C728" },
   { href: "/playground",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
 ];
 // ── Programs section nav items

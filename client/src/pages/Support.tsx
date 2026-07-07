@@ -60,7 +60,7 @@ export default function Support() {
             </p>
             <p className="mx-auto mt-3" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.82rem" }}>
               Looking for help articles or downloadable guides? Visit{" "}
-              <a href="/guides" className="text-blue-400 hover:underline">the Resource Hub</a>.
+              <a href="/resourcehub" className="text-blue-400 hover:underline">the Resource Hub</a>.
             </p>
           </div>
         </div>

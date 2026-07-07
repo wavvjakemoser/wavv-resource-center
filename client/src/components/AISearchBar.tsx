@@ -176,7 +176,7 @@ export default function AISearchBar() {
                   key={g.id}
                   label={g.title}
                   sub={g.category ?? ""}
-                  onClick={() => handleSelect("/guides")}
+                  onClick={() => handleSelect("/resourcehub")}
                 />
               ))}
             </ResultSection>
@@ -195,7 +195,7 @@ export default function AISearchBar() {
                     if (a.url) {
                       window.open(a.url, "_blank", "noopener,noreferrer");
                     } else {
-                      navigate("/guides");
+                      navigate("/resourcehub");
                     }
                   }}
                 />

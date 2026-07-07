@@ -93,13 +93,14 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/login" component={Login} />
       <Route path="/home">{() => <Redirect to="/" />}</Route>
-      <Route path="/resources">{() => <Redirect to="/guides" />}</Route>
+      <Route path="/resources">{() => <Redirect to="/resourcehub" />}</Route>
       <Route path="/academy" component={Academy} />
       <Route path="/academy/category/:categoryKey" component={AcademyCategory} />
       <Route path="/academy/:courseId" component={CourseDetail} />
       <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
       <Route path="/webinars" component={Webinars} />
-      <Route path="/guides" component={GuidesAndDocs} />
+      <Route path="/resourcehub" component={GuidesAndDocs} />
+      <Route path="/guides">{() => <Redirect to="/resourcehub" />}</Route>
       <Route path="/accelerator">{() => <NavGuard href="/accelerator"><Accelerator /></NavGuard>}</Route>
       <Route path="/accelerator/session/:id">{() => <NavGuard href="/accelerator"><AcceleratorSession /></NavGuard>}</Route>
       <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>

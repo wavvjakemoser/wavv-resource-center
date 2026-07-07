@@ -1628,3 +1628,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove "enterprise" from qualifying plans (keep quarterly + annual only)
 - [ ] Backlog: Stripe billing portal redirect for upgrade CTA (needs Stripe customer ID from OIDC)
 - [ ] Backlog: Add POD logo to The Partnership section (pending asset from Kaden)
+
+## Route Rename — Jul 7 2026
+- [x] Rename /guides route to /resourcehub (URL, sidebar nav, all internal links)
+
+## Next Live Call Section Redesign — Jul 7 2026
+- [x] Redesign "Next Live Call" section to be more eye-catching and visually commanding

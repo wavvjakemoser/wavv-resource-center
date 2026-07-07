@@ -1454,7 +1454,7 @@ export const appRouter = router({
           return { ok: true };
         }
         // Only track the 7 customer-facing pages
-        const TRACKED_PAGES = ['/', '/academy', '/webinars', '/guides', '/playground', '/support', '/wavvpartner'];
+        const TRACKED_PAGES = ['/', '/academy', '/webinars', '/resourcehub', '/playground', '/support', '/wavvpartner'];
         if (!TRACKED_PAGES.includes(input.path)) {
           return { ok: true };
         }

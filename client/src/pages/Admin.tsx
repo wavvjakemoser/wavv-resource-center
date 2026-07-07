@@ -768,7 +768,7 @@ function AnalyticsContent({ days }: { days: TimeRange }) {
 const PAGE_LABELS: Record<string, string> = {
   "/academy": "WAVV Academy",
   "/webinars": "WAVV Webinars",
-  "/guides": "Resource Hub",
+  "/resourcehub": "Resource Hub",
   "/playground": "WAVV Playground",
   "/wavvpartner": "WAVV Partners",
   "/wavvcommandcenter": "WAVV Command Center",
@@ -7868,7 +7868,7 @@ function SettingsTab() {
     { href: "/home",        label: "Home",                   icon: Home },
     { href: "/academy",    label: "WAVV Academy",            icon: GraduationCapIcon },
     { href: "/webinars",   label: "WAVV Webinars",           icon: VideoIcon },
-    { href: "/guides",     label: "WAVV Resource Hub",         icon: FileTextIcon },
+    { href: "/resourcehub",     label: "WAVV Resource Hub",         icon: FileTextIcon },
     { href: "/playground",   label: "WAVV Playground",         icon: FlaskConical },
     { href: "/accelerator", label: "WAVV Accelerator",        icon: Rocket },
     { href: "/partners",   label: "WAVV Partners",          icon: UsersIcon },
