@@ -1574,3 +1574,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Backlog
 - [ ] Add WAVV Chrome Extension page/section to Success Center (placement TBD)
+
+## Accelerator Marketing Page Enhancements (Jul 7 2026)
+- [x] Hero: rebuild as gradient box matching Academy/Partners pattern (orange accent)
+- [x] Hero: larger "Available on Quarterly & Annual plans" badge
+- [x] Hero: blended CTA button (gradient style, not flat orange)
+- [x] Hero: add schedule line ("Live coaching calls every Tuesday & Thursday")
+- [x] Add "The Partnership" section explaining WAVV × Prospecting On Demand relationship
+- [x] Add social proof placeholder section
+- [x] Add FAQ section (Can I join mid-cycle?, What if I miss a call?, etc.)
+- [x] Add "What you'll need" prereqs line

@@ -1,7 +1,7 @@
-import { useState } from "react";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useState } from "react";
 import {
   Rocket,
   CheckCircle2,
@@ -15,6 +15,11 @@ import {
   Calendar,
   Award,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Handshake,
+  MessageCircle,
+  Clock,
 } from "lucide-react";
 
 // ─── Session data (static for V1.0 — content populated later) ───────────────
@@ -108,6 +113,33 @@ const VALUE_PROPS = [
   },
 ];
 
+const FAQS = [
+  {
+    q: "Can I join mid-cycle?",
+    a: "Absolutely. The Accelerator is an evergreen 6-week loop — you can join at any session and get full value. Once you complete the cycle, you can repeat any module or keep attending live calls.",
+  },
+  {
+    q: "What if I miss a live call?",
+    a: "Every live coaching call is recorded and available on-demand within 24 hours. You'll also get the cheat sheet and action items for that session so you never fall behind.",
+  },
+  {
+    q: "What plan do I need?",
+    a: "The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost. Monthly subscribers can upgrade their plan to unlock access.",
+  },
+  {
+    q: "Is this live or self-paced?",
+    a: "Both. Live coaching calls happen twice a week (Tuesday and Thursday). Between calls, you have access to on-demand recordings, WAVV product training clips, and downloadable cheat sheets to work through at your own pace.",
+  },
+  {
+    q: "Who runs the coaching calls?",
+    a: "Live sales coaching is delivered by Prospecting On Demand (POD), a team of experienced outbound sales trainers. WAVV provides the product training layer so you can immediately apply what you learn inside the dialer.",
+  },
+  {
+    q: "Do I need any prior experience?",
+    a: "No. The Accelerator is designed for anyone making outbound calls — from brand-new reps to experienced dialers looking to sharpen their approach. All you need is an active WAVV account and a headset.",
+  },
+];
+
 export default function Accelerator() {
   const { user } = useAuth();
   // TODO: Replace with real Stripe SKU check once billing integration is confirmed
@@ -122,63 +154,186 @@ export default function Accelerator() {
 
 // ─── Marketing / Landing View (unauthenticated or non-qualifying plan) ───────
 function MarketingView({ user }: { user: any }) {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   return (
     <div className="px-4 lg:px-8 py-8 max-w-6xl mx-auto space-y-12">
-      {/* Hero */}
-      <section className="text-center space-y-6">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider"
-          style={{ background: "rgba(249,115,22,0.12)", color: "#f97316", border: "1px solid rgba(249,115,22,0.25)" }}>
-          <Rocket size={13} />
-          Powered by POD × WAVV
-        </div>
-        <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight">
-          WAVV Sales <span style={{ color: "#f97316" }}>Accelerator</span>
-        </h1>
-        <p className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-          A coaching bootcamp that combines live sales training with hands-on WAVV product mastery.
-          More dials. More conversations. More closes. The equation is simple — we help you execute it.
-        </p>
+      {/* ── Hero (gradient box matching site pattern) ── */}
+      <div
+        className="relative overflow-hidden rounded-2xl"
+        style={{
+          background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(249,115,22,0.24) 0%, rgba(234,88,12,0.12) 40%, rgba(251,191,36,0.05) 70%, transparent 90%), #080c14",
+          border: "1px solid rgba(249,115,22,0.2)",
+          minHeight: "320px",
+        }}
+      >
+        {/* Subtle grid */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.025]"
+          style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+        {/* Glow orbs */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(249,115,22,0.14), transparent 65%)", transform: "translate(25%, -30%)" }} />
+        <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(251,191,36,0.06), transparent 65%)", transform: "translate(-25%, 30%)" }} />
 
-        {/* CTA */}
-        <div className="flex items-center justify-center gap-4 pt-2">
+        <div className="relative z-10 px-6 lg:px-16 py-14 text-center">
+          {/* Eyebrow */}
+          <div className="inline-flex items-center gap-2 mb-5 px-3.5 py-1.5 rounded-full"
+            style={{ background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)" }}>
+            <Rocket size={12} style={{ color: "#f97316" }} />
+            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "#f97316" }}>
+              WAVV × Prospecting On Demand
+            </span>
+          </div>
+
+          {/* Headline */}
+          <h1
+            className="font-extrabold tracking-tight leading-[1.05] mb-4"
+            style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)" }}
+          >
+            <span style={{
+              background: "linear-gradient(135deg, #ffffff 0%, #fed7aa 30%, #fdba74 60%, #f97316 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}>
+              WAVV Sales Accelerator
+            </span>
+          </h1>
+
+          {/* Accent line */}
+          <div className="flex justify-center mb-6">
+            <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #f97316, #fb923c 50%, #fbbf24)" }} />
+          </div>
+
+          {/* Subline */}
+          <p
+            className="mx-auto mb-2 leading-relaxed font-medium"
+            style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(0.95rem, 2vw, 1.15rem)", maxWidth: "620px" }}
+          >
+            A coaching bootcamp that combines live sales training with hands-on WAVV product mastery.
+          </p>
+          <p
+            className="mx-auto mb-4 leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.45)", fontSize: "clamp(0.82rem, 1.4vw, 0.95rem)", maxWidth: "540px" }}
+          >
+            More dials. More conversations. More closes. The equation is simple — we help you execute it.
+          </p>
+
+          {/* Schedule line */}
+          <div className="flex items-center justify-center gap-2 mb-7">
+            <Clock size={13} style={{ color: "rgba(249,115,22,0.7)" }} />
+            <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Live coaching calls every Tuesday & Thursday
+            </span>
+          </div>
+
+          {/* CTA */}
           {!user ? (
             <a
               href="/api/oauth/login?return_path=/accelerator"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
-              style={{ background: "#f97316", color: "#fff" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#ea580c"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "#f97316"; }}
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+              style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
             >
               Sign In to Check Access
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </a>
           ) : (
-            <div className="flex flex-col items-center gap-3">
-              <div className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#9ca3af" }}>
-                <Lock size={14} />
-                Available on Quarterly & Annual plans
+            <div className="flex flex-col items-center gap-4">
+              {/* Plan badge — larger and more prominent */}
+              <div className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl"
+                style={{ background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)" }}>
+                <Lock size={16} style={{ color: "#f97316" }} />
+                <span className="text-base font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>
+                  Available on Quarterly & Annual Plans
+                </span>
               </div>
               <a
                 href="https://www.wavv.com/pricing"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-medium transition-colors"
-                style={{ color: "#f97316" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#fb923c"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "#f97316"; }}
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               >
-                Upgrade your plan to unlock
-                <ArrowRight size={14} />
+                Upgrade Your Plan to Unlock
+                <ArrowRight size={15} />
               </a>
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── The Partnership ── */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #fbbf24)" }} />
+          <h2 className="text-xl font-bold text-white">The Partnership</h2>
+        </div>
+        <div
+          className="rounded-2xl p-6 lg:p-8"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+            {/* WAVV side */}
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)" }}>
+                  <Zap size={16} style={{ color: "#0074F4" }} />
+                </div>
+                <h3 className="text-sm font-bold text-white">WAVV</h3>
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+                WAVV is a native multi-line power dialer that lives inside your CRM. We provide the product training layer — short how-to clips, cheat sheets, and guided walkthroughs — so you can immediately apply every sales skill inside the dialer.
+              </p>
+            </div>
+            {/* Divider */}
+            <div className="hidden md:flex flex-col items-center gap-2 py-4">
+              <div className="w-px h-full min-h-[80px]" style={{ background: "rgba(255,255,255,0.1)" }} />
+              <Handshake size={18} style={{ color: "rgba(249,115,22,0.6)" }} />
+              <div className="w-px h-full min-h-[80px]" style={{ background: "rgba(255,255,255,0.1)" }} />
+            </div>
+            <div className="md:hidden w-full flex items-center gap-3">
+              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
+              <Handshake size={16} style={{ color: "rgba(249,115,22,0.6)" }} />
+              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.1)" }} />
+            </div>
+            {/* POD side */}
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(249,115,22,0.12)" }}>
+                  <Target size={16} style={{ color: "#f97316" }} />
+                </div>
+                <h3 className="text-sm font-bold text-white">Prospecting On Demand</h3>
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+                POD is a team of experienced outbound sales trainers who specialize in turning reps into closers. They own the live coaching curriculum — objection handling, conversation frameworks, follow-up systems, and the mindset work that separates top performers from everyone else.
+              </p>
+            </div>
+          </div>
+          {/* Bottom summary */}
+          <div className="mt-6 pt-5" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.45)" }}>
+              Together, we combine <span className="font-medium" style={{ color: "#f97316" }}>live sales coaching</span> with <span className="font-medium" style={{ color: "#0074F4" }}>hands-on product training</span> — so every skill you learn gets applied inside the tool you're already using.
+            </p>
+          </div>
+        </div>
       </section>
 
-      {/* Value Props Grid */}
-      <section className="space-y-6">
-        <h2 className="text-2xl font-bold text-white text-center">What's Included</h2>
+      {/* ── What's Included ── */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #fbbf24)" }} />
+          <h2 className="text-xl font-bold text-white">What's Included</h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {VALUE_PROPS.map((prop) => (
             <div
@@ -205,14 +360,15 @@ function MarketingView({ user }: { user: any }) {
         </div>
       </section>
 
-      {/* The 6-Week Curriculum Preview */}
-      <section className="space-y-6">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-white">The 6-Week Curriculum</h2>
-          <p className="text-sm text-gray-400 max-w-lg mx-auto">
-            An evergreen loop — join at any week and get full value. Each session pairs live sales coaching with hands-on WAVV product training.
-          </p>
+      {/* ── The 6-Week Curriculum Preview ── */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #fbbf24)" }} />
+          <h2 className="text-xl font-bold text-white">The 6-Week Curriculum</h2>
         </div>
+        <p className="text-sm max-w-lg" style={{ color: "rgba(255,255,255,0.45)" }}>
+          An evergreen loop — join at any week and get full value. Each session pairs live sales coaching with hands-on WAVV product training.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {SESSIONS.map((session) => (
             <div
@@ -246,48 +402,124 @@ function MarketingView({ user }: { user: any }) {
         </div>
       </section>
 
-      {/* Money Math Section */}
+      {/* ── Money Math Section ── */}
       <section className="rounded-2xl p-8 text-center space-y-4"
         style={{ background: "rgba(249,115,22,0.06)", border: "1px solid rgba(249,115,22,0.15)" }}>
         <h2 className="text-xl font-bold text-white">The Money Math Equation</h2>
-        <p className="text-3xl font-bold" style={{ color: "#f97316" }}>
+        <p className="text-2xl lg:text-3xl font-bold" style={{ color: "#f97316" }}>
           Dials → Conversations → Appointments → Closes × Price = Revenue
         </p>
-        <p className="text-sm text-gray-400 max-w-lg mx-auto">
+        <p className="text-sm max-w-lg mx-auto" style={{ color: "rgba(255,255,255,0.45)" }}>
           Every module in the Accelerator is designed to improve one lever of this equation.
           WAVV is the engine that drives the volume. The bootcamp teaches you how to maximize every other lever.
         </p>
       </section>
 
-      {/* Final CTA */}
-      <section className="text-center space-y-4 pb-8">
+      {/* ── Social Proof (placeholder) ── */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #fbbf24)" }} />
+          <h2 className="text-xl font-bold text-white">What Members Are Saying</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Placeholder testimonial cards — replace with real quotes once pilot feedback is collected */}
+          <div className="rounded-2xl p-6 space-y-3"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <MessageCircle size={18} style={{ color: "rgba(249,115,22,0.5)" }} />
+            <p className="text-sm italic leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              "Testimonial coming soon — pilot members will share their experience here."
+            </p>
+            <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>— Accelerator Member</p>
+          </div>
+          <div className="rounded-2xl p-6 space-y-3"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <MessageCircle size={18} style={{ color: "rgba(249,115,22,0.5)" }} />
+            <p className="text-sm italic leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+              "Testimonial coming soon — pilot members will share their experience here."
+            </p>
+            <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.3)" }}>— Accelerator Member</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #fbbf24)" }} />
+          <h2 className="text-xl font-bold text-white">Frequently Asked Questions</h2>
+        </div>
+        <div className="space-y-2">
+          {FAQS.map((faq, idx) => (
+            <div
+              key={idx}
+              className="rounded-xl overflow-hidden transition-all"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+            >
+              <button
+                className="w-full flex items-center justify-between px-5 py-4 text-left"
+                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+              >
+                <span className="text-sm font-medium text-white pr-4">{faq.q}</span>
+                {openFaq === idx ? (
+                  <ChevronUp size={16} style={{ color: "#f97316", flexShrink: 0 }} />
+                ) : (
+                  <ChevronDown size={16} style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }} />
+                )}
+              </button>
+              {openFaq === idx && (
+                <div className="px-5 pb-4">
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{faq.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── What You'll Need ── */}
+      <section className="rounded-2xl p-6"
+        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+        <h3 className="text-sm font-bold text-white mb-3">What You'll Need</h3>
+        <div className="flex flex-wrap gap-3">
+          {["An active WAVV account (Quarterly or Annual plan)", "A headset or microphone", "30 minutes twice a week for live calls"].map((item) => (
+            <div key={item} className="flex items-center gap-2 px-3 py-2 rounded-lg"
+              style={{ background: "rgba(249,115,22,0.06)", border: "1px solid rgba(249,115,22,0.12)" }}>
+              <CheckCircle2 size={13} style={{ color: "#f97316" }} />
+              <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>{item}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section className="text-center space-y-5 pb-8">
         <h2 className="text-xl font-bold text-white">Ready to accelerate?</h2>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
           The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions.
         </p>
         {!user ? (
           <a
             href="/api/oauth/login?return_path=/accelerator"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
-            style={{ background: "#f97316", color: "#fff" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#ea580c"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "#f97316"; }}
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+            style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             Sign In
-            <ArrowRight size={16} />
+            <ArrowRight size={15} />
           </a>
         ) : (
           <a
             href="https://www.wavv.com/pricing"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all"
-            style={{ background: "#f97316", color: "#fff" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#ea580c"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "#f97316"; }}
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+            style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
           >
             Upgrade Your Plan
-            <ArrowRight size={16} />
+            <ArrowRight size={15} />
           </a>
         )}
       </section>
