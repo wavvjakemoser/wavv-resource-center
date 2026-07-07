@@ -245,6 +245,8 @@ export default function HandsOn() {
     return (
       <PortalLayout title="WAVV Playground">
         <div className="px-4 lg:px-8 py-6">
+          {/* Spacer for consistent vertical alignment */}
+          <div style={{ minHeight: "32px" }} />
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(168,85,247,0.15)" }}>
@@ -296,6 +298,8 @@ export default function HandsOn() {
   return (
     <PortalLayout title="WAVV Playground">
       <div className="px-4 lg:px-8 py-6 space-y-8">
+        {/* Spacer for consistent vertical alignment with pages that have toggle bars */}
+        <div style={{ minHeight: "32px" }} />
 
         {/* ── Header ── */}
         <div

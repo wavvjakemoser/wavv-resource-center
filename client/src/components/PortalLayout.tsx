@@ -303,40 +303,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
                 isActive={location.startsWith(adminItem.href)}
                 onClick={() => setSidebarOpen(false)}
               />
-              {/* Partner portal — owner/partner_admin only */}
-              {(user?.role === "owner" || user?.role === "partner_manager") && (() => {
-                const isPartnerPortalHidden = !settingsLoading && navVisibility["/wavvpartner"] === false;
-                return (
-                  <a
-                    href="/partners"
-                    onClick={(e) => { e.preventDefault(); setSidebarOpen(false); window.location.href = '/partners'; }}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
-                    style={{
-                      fontSize: "14px",
-                      opacity: isPartnerPortalHidden ? 0.55 : 1,
-                      background: isPartnerPortalHidden ? "rgba(251,191,36,0.06)" : "rgba(0,169,226,0.08)",
-                      border: isPartnerPortalHidden ? "1px solid #fbbf24" : "1px solid rgba(0,169,226,0.18)",
-                      color: "#00A9E2",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = isPartnerPortalHidden ? "rgba(251,191,36,0.12)" : "rgba(0,169,226,0.14)";
-                      e.currentTarget.style.borderColor = isPartnerPortalHidden ? "#fbbf24" : "rgba(0,169,226,0.3)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = isPartnerPortalHidden ? "rgba(251,191,36,0.06)" : "rgba(0,169,226,0.08)";
-                      e.currentTarget.style.borderColor = isPartnerPortalHidden ? "#fbbf24" : "rgba(0,169,226,0.18)";
-                    }}
-                  >
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: "rgba(0,169,226,0.15)" }}
-                    >
-                      <Users size={17} style={{ color: "#00A9E2" }} />
-                    </div>
-                    <span className="flex-1 min-w-0 truncate">WAVV Partners Portal</span>
-                  </a>
-                );
-              })()}
+
             </div>
           )}
 

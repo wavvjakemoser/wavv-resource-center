@@ -1660,3 +1660,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Customer-view CTA: "Unlock the Full Accelerator" + "Sign In" on Accelerator
 - [x] Customer-view CTA: "Become a WAVV Partner" + "Sign In" on Partners page
 - [x] Consistent top spacing across all pages so content doesn't shift when toggle is present/absent
+
+## Toggle Text Fix + Sidebar Cleanup — Jul 7 2026
+- [x] Toggle: remove "CUSTOMER" text on right side, only show role name that changes
+- [x] Accelerator toggle: "Viewing As: WAVV Accelerator Member" ↔ "Viewing As: Non WAVV Accelerator Member"
+- [x] Partners toggle: "Viewing As: WAVV Partner" ↔ "Viewing As: Non WAVV Partner"
+- [x] WAVV Playground: add 32px spacer for consistent hero positioning
+- [x] Delete WAVV Partners Portal sidebar link (redundant with toggle on Partners page)

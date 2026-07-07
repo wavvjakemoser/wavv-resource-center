@@ -226,7 +226,7 @@ export default function Partners() {
         {isApprovedEmployee && (
           <div className="flex items-center justify-end gap-3">
             <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Viewing as: {previewAsCustomer ? "Customer" : "WAVV Partner"}
+              Viewing As: {previewAsCustomer ? "Non WAVV Partner" : "WAVV Partner"}
             </span>
             <button
               onClick={() => setPreviewAsCustomer(!previewAsCustomer)}
@@ -238,9 +238,6 @@ export default function Partners() {
                 style={{ transform: previewAsCustomer ? "translateX(22px)" : "translateX(4px)" }}
               />
             </button>
-            <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: previewAsCustomer ? "#f97316" : "rgba(255,255,255,0.4)" }}>
-              {previewAsCustomer ? "Customer" : "Customer"}
-            </span>
           </div>
         )}
         </div>
