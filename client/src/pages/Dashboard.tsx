@@ -229,10 +229,11 @@ export default function Dashboard() {
   const { data: exclusiveWebinars } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const trackRegClick = trpc.webinars.trackRegistrationClick.useMutation();
   const [showPlaygroundModal, setShowPlaygroundModal] = useState(false);
-  const { data: allSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const navVisibility = ((allSettings as Record<string, unknown>)["nav_visibility"] ?? {}) as Record<string, boolean>;
+  const { data: allSettings, isLoading: settingsLoading } = trpc.siteSettings.getAll.useQuery();
+  const navVisibility = (((allSettings ?? {}) as Record<string, unknown>)["nav_visibility"] ?? {}) as Record<string, boolean>;
   // Filter out cards whose nav item has been explicitly hidden (false). Default (undefined) = visible.
-  const visibleCards = START_HERE_CARDS.filter((c) => navVisibility[c.navHref] !== false);
+  // While settings are loading, show NO cards to prevent hidden items from flashing.
+  const visibleCards = settingsLoading ? [] : START_HERE_CARDS.filter((c) => navVisibility[c.navHref] !== false);
 
   const exclusive = (exclusiveWebinars ?? [])
     .filter((w) => !w.scheduledAt || new Date(w.scheduledAt) >= new Date())

@@ -1667,3 +1667,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Partners toggle: "Viewing As: WAVV Partner" ↔ "Viewing As: Non WAVV Partner"
 - [x] WAVV Playground: add 32px spacer for consistent hero positioning
 - [x] Delete WAVV Partners Portal sidebar link (redundant with toggle on Partners page)
+
+## Bug Fix — Jul 7 2026
+- [x] Fix: WAVV Playground flashes briefly on Home page Explore section before nav_visibility hides it
