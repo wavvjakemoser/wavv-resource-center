@@ -279,23 +279,15 @@ export default function Accelerator() {
             </div>
 
             {/* Headline */}
-            <h1
-              className="font-extrabold tracking-tight leading-[1.05] mb-3"
-              style={{ fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}
-            >
-              <span style={{
-                background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>
+            <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
+              <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 WAVV Sales Accelerator
               </span>
             </h1>
 
             {/* Accent line */}
-            <div className="flex justify-center mb-4">
-              <div style={{ width: "180px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
+            <div className="flex justify-center mb-5">
+              <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
 
             {/* Subline */}
