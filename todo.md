@@ -1689,3 +1689,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove Analytics tab from Operations row
 - [x] Remove Approved Partners tab from Operations row
 - [x] Operations row: only Access + Settings remain
+
+## Accelerator & Partners Gating + Nav Revert (Jul 7 2026)
+- [x] Revert hidden nav styling to previous look (remove grey-out + amber border, restore original hidden badge)
+- [x] Accelerator non-member: add Sign In button in hero CTA (like Partners page)
+- [x] Accelerator non-member: fix floating bar so it doesn't block footer (changed fixed to sticky)
+- [x] Accelerator signed-in but not qualified: show pop-up "Whoops, please contact your account rep or upgrade your plan to gain access to WAVV Accelerator."
+- [x] Accelerator signed-in not qualified: after dismissing pop-up, show "Upgrade your plan" button (no re-pop)
+- [x] Partners signed-in but not approved: show pop-up "Whoops, looks like you're not an approved partner. Please apply, and our WAVV Partner team will be in contact with you."
+- [x] Partners: same CTA pattern as Accelerator (Sign In button for non-signed-in users already existed)

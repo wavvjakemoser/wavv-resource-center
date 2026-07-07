@@ -1,7 +1,7 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CheckCircle2,
   Lock,
@@ -204,7 +204,7 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
       onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
     >
-      Unlock the Full Accelerator
+      {reason === "no_access" ? "Upgrade Your Plan" : "Unlock the Full Accelerator"}
       <ArrowRight size={15} />
     </a>
   );
@@ -214,6 +214,14 @@ export default function Accelerator() {
   const { hasAccess: realAccess, reason: realReason, user } = useAcceleratorAccess();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [previewAsCustomer, setPreviewAsCustomer] = useState(false);
+  const [showAccessPopup, setShowAccessPopup] = useState(false);
+
+  // Show pop-up for signed-in users who don't qualify
+  useEffect(() => {
+    if (realReason === "no_access" && !previewAsCustomer) {
+      setShowAccessPopup(true);
+    }
+  }, [realReason, previewAsCustomer]);
 
   // Allow employees to preview the locked/customer view
   const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
@@ -285,12 +293,42 @@ export default function Accelerator() {
               A structured program that combines live sales training with hands-on WAVV product mastery. More dials. More conversations. More closes.
             </p>
             {/* Schedule line */}
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 mb-5">
               <Clock size={13} style={{ color: "rgba(0,169,226,0.7)" }} />
               <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
                 Live coaching calls every Tuesday & Thursday
               </span>
             </div>
+
+            {/* Hero CTA buttons */}
+            {!hasAccess && (
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a
+                  href="https://www.wavv.com/pricing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                  style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+                >
+                  Become a WAVV Accelerator Member
+                  <ArrowRight size={15} />
+                </a>
+                {reason === "unauthenticated" && (
+                  <a
+                    href="/api/oauth/login?return_path=/accelerator"
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+                    style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+                  >
+                    Sign In
+                    <ArrowRight size={14} />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -655,7 +693,7 @@ export default function Accelerator() {
       {/* ── Sticky floating upgrade bar (non-access users only) ── */}
       {!hasAccess && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center gap-4 px-4 py-3"
+          className="sticky bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-4 px-4 py-3"
           style={{
             background: "linear-gradient(180deg, rgba(8,12,20,0.85) 0%, rgba(8,12,20,0.98) 100%)",
             borderTop: "1px solid rgba(0,116,244,0.15)",
@@ -665,10 +703,48 @@ export default function Accelerator() {
           <div className="flex items-center gap-2">
             <Lock size={14} style={{ color: "#4a9eff" }} />
             <span className="text-xs sm:text-sm font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
-              Unlock the full Accelerator
+              {reason === "no_access" ? "Upgrade your plan" : "Unlock the full Accelerator"}
             </span>
           </div>
           <UpgradeCTA reason={reason} variant="sticky" />
+        </div>
+      )}
+
+      {/* ── Access Denied Pop-up (signed-in but not qualified) ── */}
+      {showAccessPopup && reason === "no_access" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+          <div className="relative w-full max-w-md rounded-2xl p-6 text-center" style={{ background: "linear-gradient(135deg, #0f1a2e 0%, #162240 100%)", border: "1px solid rgba(0,116,244,0.2)", boxShadow: "0 24px 48px rgba(0,0,0,0.5)" }}>
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: "rgba(249,115,22,0.15)" }}>
+              <Lock size={22} style={{ color: "#f97316" }} />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Access Restricted</h3>
+            <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
+              Whoops, please contact your account rep or upgrade your plan to gain access to WAVV Accelerator.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href="https://www.wavv.com/pricing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+              >
+                Upgrade Your Plan
+                <ArrowRight size={15} />
+              </a>
+              <button
+                onClick={() => setShowAccessPopup(false)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </PortalLayout>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, DollarSign, Megaphone, LifeBuoy, CheckCircle2, ChevronDown, ChevronUp, ArrowRight, Handshake, TrendingUp, Award, BarChart3, FileText, ExternalLink, ChevronRight, Star } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -212,6 +212,14 @@ function PartnerHub() {
 export default function Partners() {
   const { hasAccess: realAccess, reason: realReason, user } = usePartnerAccess();
   const [previewAsCustomer, setPreviewAsCustomer] = useState(false);
+  const [showAccessPopup, setShowAccessPopup] = useState(false);
+
+  // Show pop-up for signed-in users who aren't approved partners
+  useEffect(() => {
+    if (realReason === "no_access" && !previewAsCustomer) {
+      setShowAccessPopup(true);
+    }
+  }, [realReason, previewAsCustomer]);
 
   const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
   const hasAccess = previewAsCustomer ? false : realAccess;
@@ -506,6 +514,44 @@ export default function Partners() {
         )}
 
       </div>
+
+      {/* ── Access Denied Pop-up (signed-in but not approved partner) ── */}
+      {showAccessPopup && reason === "no_access" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+          <div className="relative w-full max-w-md rounded-2xl p-6 text-center" style={{ background: "linear-gradient(135deg, #0f1a2e 0%, #162240 100%)", border: "1px solid rgba(0,116,244,0.2)", boxShadow: "0 24px 48px rgba(0,0,0,0.5)" }}>
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: "rgba(0,116,244,0.15)" }}>
+              <Users size={22} style={{ color: "#0074F4" }} />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Not an Approved Partner</h3>
+            <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
+              Whoops, looks like you're not an approved partner. Please apply, and our WAVV Partner team will be in contact with you.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href="https://www.wavv.com/partners"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+              >
+                Apply Now
+                <ArrowRight size={15} />
+              </a>
+              <button
+                onClick={() => setShowAccessPopup(false)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </PortalLayout>
   );
 }
