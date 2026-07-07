@@ -198,12 +198,40 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
 }
 
 export default function Accelerator() {
-  const { hasAccess, reason, user } = useAcceleratorAccess();
+  const { hasAccess: realAccess, reason: realReason, user } = useAcceleratorAccess();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [previewAsCustomer, setPreviewAsCustomer] = useState(false);
+
+  // Allow employees to preview the locked/customer view
+  const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
+  const hasAccess = previewAsCustomer ? false : realAccess;
+  const reason = previewAsCustomer ? "no_access" : realReason;
 
   return (
     <PortalLayout title="WAVV Accelerator">
       <div className="px-4 lg:px-8 py-6 space-y-10 pb-24">
+        {/* ── Employee Preview Toggle ── */}
+        {isApprovedEmployee && (
+          <div className="flex items-center justify-end gap-3">
+            <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+              {previewAsCustomer ? "Viewing as: Customer (no access)" : "Viewing as: Team Member"}
+            </span>
+            <button
+              onClick={() => setPreviewAsCustomer(!previewAsCustomer)}
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200"
+              style={{ background: previewAsCustomer ? "#f97316" : "rgba(0,116,244,0.3)" }}
+            >
+              <span
+                className="inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200"
+                style={{ transform: previewAsCustomer ? "translateX(22px)" : "translateX(4px)" }}
+              />
+            </button>
+            <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: previewAsCustomer ? "#f97316" : "rgba(255,255,255,0.4)" }}>
+              Preview as Customer
+            </span>
+          </div>
+        )}
+
         {/* ── Hero (gradient box matching site pattern) ── */}
         <div
           className="relative overflow-hidden rounded-2xl"
@@ -272,60 +300,65 @@ export default function Accelerator() {
         </div>
 
         {/* ── Next Live Call Countdown ── */}
-        <section className="relative overflow-hidden rounded-2xl p-6 sm:p-8"
-          style={{ background: "linear-gradient(135deg, #0a1628 0%, #0d2847 40%, #0a3a6b 100%)", border: "1px solid rgba(0,116,244,0.3)" }}>
+        <section className="relative overflow-hidden rounded-2xl p-8 sm:p-10"
+          style={{ background: "linear-gradient(135deg, #0a1628 0%, #0d2847 40%, #0a3a6b 100%)", border: "1px solid rgba(0,116,244,0.3)", boxShadow: "0 8px 40px rgba(0,116,244,0.15)" }}>
           {/* Animated glow effects */}
-          <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #0074F4, transparent)" }} />
-          <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10 blur-3xl" style={{ background: "radial-gradient(circle, #00A9E2, transparent)" }} />
+          <div className="absolute top-0 right-1/4 w-80 h-80 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #0074F4, transparent)" }} />
+          <div className="absolute bottom-0 left-1/4 w-64 h-64 rounded-full opacity-10 blur-3xl" style={{ background: "radial-gradient(circle, #00A9E2, transparent)" }} />
           
-          <div className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            {/* Left: Live indicator + info */}
+          {/* Centered layout */}
+          <div className="relative flex flex-col items-center text-center gap-6">
+            {/* Top: WAVV W favicon + Clock icon + Title */}
             <div className="flex items-center gap-3">
+              {/* WAVV W mark */}
+              <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h3.5l3 14L10 0h3.5l3.5 14L20.5 0H24l-5.5 20h-3.5L11.5 6 8 20H4.5L0 0z" fill="white" opacity="0.7"/>
+              </svg>
               <div className="relative">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", boxShadow: "0 4px 20px rgba(0,116,244,0.4)" }}>
-                  <Calendar size={22} className="text-white" />
+                <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", boxShadow: "0 6px 24px rgba(0,116,244,0.5)" }}>
+                  <Clock size={26} className="text-white" />
                 </div>
                 {/* Pulsing live dot */}
-                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#0d2847]">
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-[#0d2847]">
                   <div className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
                 </div>
               </div>
-              <div>
-                <p className="text-sm font-bold text-white tracking-wide">NEXT LIVE CALL</p>
-                <p className="text-xs font-medium" style={{ color: "#4a9eff" }}>Tue & Thu • Coaching with POD</p>
-              </div>
             </div>
 
-            <div className="flex-1" />
+            {/* Title */}
+            <div>
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">NEXT LIVE CALL</h3>
+              <p className="mt-1 text-sm font-medium" style={{ color: "#4a9eff" }}>Tue & Thu • Live Coaching with Prospecting On Demand</p>
+            </div>
 
-            {/* Right: Large countdown numbers */}
-            <div className="flex items-center gap-2 sm:gap-4">
+            {/* Large countdown numbers — centered */}
+            <div className="flex items-center gap-3 sm:gap-5">
               <div className="text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.3)" }}>
+                  <p className="text-3xl sm:text-4xl font-black text-white tabular-nums">--</p>
                 </div>
-                <p className="mt-1.5 text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Days</p>
+                <p className="mt-2 text-[10px] uppercase tracking-widest font-bold" style={{ color: "rgba(255,255,255,0.6)" }}>Days</p>
               </div>
-              <span className="text-2xl font-bold" style={{ color: "rgba(0,116,244,0.5)" }}>:</span>
+              <span className="text-3xl font-black" style={{ color: "rgba(0,116,244,0.6)" }}>:</span>
               <div className="text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.3)" }}>
+                  <p className="text-3xl sm:text-4xl font-black text-white tabular-nums">--</p>
                 </div>
-                <p className="mt-1.5 text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Hours</p>
+                <p className="mt-2 text-[10px] uppercase tracking-widest font-bold" style={{ color: "rgba(255,255,255,0.6)" }}>Hours</p>
               </div>
-              <span className="text-2xl font-bold" style={{ color: "rgba(0,116,244,0.5)" }}>:</span>
+              <span className="text-3xl font-black" style={{ color: "rgba(0,116,244,0.6)" }}>:</span>
               <div className="text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.15)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.3)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.3)" }}>
+                  <p className="text-3xl sm:text-4xl font-black text-white tabular-nums">--</p>
                 </div>
-                <p className="mt-1.5 text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Min</p>
+                <p className="mt-2 text-[10px] uppercase tracking-widest font-bold" style={{ color: "rgba(255,255,255,0.6)" }}>Min</p>
               </div>
             </div>
           </div>
 
           {/* Bottom bar: Schedule status */}
-          <div className="relative mt-5 pt-4" style={{ borderTop: "1px solid rgba(0,116,244,0.15)" }}>
-            <p className="text-center text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+          <div className="relative mt-6 pt-4" style={{ borderTop: "1px solid rgba(0,116,244,0.15)" }}>
+            <p className="text-center text-sm font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
               Schedule drops soon — check back for the next session date
             </p>
           </div>
@@ -500,9 +533,7 @@ export default function Accelerator() {
               {/* POD side */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(249,115,22,0.12)" }}>
-                    <Target size={16} style={{ color: "#f97316" }} />
-                  </div>
+                  <img src="/manus-storage/pod_logo_d9f904c3.webp" alt="Prospecting On Demand" className="w-8 h-8 rounded-lg object-contain" style={{ background: "rgba(255,255,255,0.08)" }} />
                   <h3 className="text-sm font-bold text-white">Prospecting On Demand</h3>
                 </div>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>

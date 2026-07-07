@@ -269,7 +269,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             <div className="px-3 pt-3 pb-1" style={{ borderTop: "1px solid #1e2030" }}>
               <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Quick Links</p>
               <a
-                href="https://chromewebstore.google.com/detail/wavv/your-extension-id"
+                href="https://chromewebstore.google.com/detail/wavv-power-dialer/ldaokgmcclbfnhfmhmhpiekfpgdmcpfi"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"

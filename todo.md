@@ -1634,3 +1634,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Next Live Call Section Redesign — Jul 7 2026
 - [x] Redesign "Next Live Call" section to be more eye-catching and visually commanding
+
+## Accelerator UI Tweaks + POD Integration — Jul 7 2026
+- [x] Next Live Call: make section bigger and more centered
+- [x] Next Live Call: change Calendar icon to Clock icon
+- [x] Next Live Call: add WAVV favicon (W) to the left
+- [x] Pull POD logo from prospectingondemand.com and incorporate into Partnership section
+- [x] Add "Preview as Customer" toggle for owner/employees to see the locked/gated view
