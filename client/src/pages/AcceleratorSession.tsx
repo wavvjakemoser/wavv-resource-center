@@ -410,7 +410,8 @@ export default function AcceleratorSession() {
   // ─── Member view ─────────────────────────────────────────────────────────────
   return (
     <PortalLayout title={`Week ${session.week}: ${session.title}`}>
-      <div className="px-4 lg:px-8 py-8 space-y-8">
+      <div className="px-4 lg:px-8 py-8">
+      <div className="max-w-5xl space-y-8">
         {/* Back link */}
         <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
           <ArrowLeft size={14} />
@@ -441,6 +442,20 @@ export default function AcceleratorSession() {
             </div>
           </div>
         )}
+
+        {/* ── Mid-cycle late-joiner callout — always visible ── */}
+        <div
+          className="flex items-start gap-3 rounded-xl px-4 py-3"
+          style={{ background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.18)" }}
+        >
+          <span className="text-base flex-shrink-0 mt-0.5">ℹ️</span>
+          <div>
+            <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle or catching up?</p>
+            <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
+              Every previous session recording is available below. Click into any week in the Full Program Schedule to catch up at your own pace.
+            </p>
+          </div>
+        </div>
 
         {/* ── Live call cards for this week ── */}
         <section className="space-y-3">
@@ -544,6 +559,7 @@ export default function AcceleratorSession() {
 
         {/* ── Full 12-session schedule ── */}
         <FullScheduleTable currentWeek={weekId} now={now} />
+      </div>
       </div>
     </PortalLayout>
   );
