@@ -100,8 +100,8 @@ function SessionCallCard({
   const secsLeft   = Math.max(0, Math.floor((s.utcMs - now) / 1000));
   const cd         = fmtCountdown(secsLeft);
 
-  const bgColor = isLive ? "rgba(16,185,129,0.08)" : isPast ? "rgba(255,255,255,0.01)" : `${color}06`;
-  const border  = isLive ? "1px solid rgba(16,185,129,0.3)" : isPast ? "1px solid rgba(255,255,255,0.04)" : `1px solid ${color}20`;
+  const bgColor   = isLive ? "rgba(16,185,129,0.07)" : isPast ? "rgba(255,255,255,0.01)" : `${color}06`;
+  const border    = isLive ? "1px solid rgba(16,185,129,0.3)" : isPast ? "1px solid rgba(255,255,255,0.04)" : `1px solid ${color}20`;
   const glowColor = isLive ? "#10b981" : color;
 
   return (
@@ -123,22 +123,38 @@ function SessionCallCard({
         )}
       </div>
 
-      {/* Countdown digits — only for upcoming/live */}
+      {/* Countdown digits — segmented display style with colon separators */}
       {!isPast && (
-        <div className="flex items-center gap-3">
-          {[{ val: cd.d, label: "Days" }, { val: cd.h, label: "Hrs" }, { val: cd.m, label: "Min" }, { val: cd.s, label: "Sec" }].map(({ val, label }) => (
-            <div key={label} className="text-center">
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center"
-                style={{ background: `${glowColor}15`, border: `1px solid ${glowColor}25` }}
-              >
-                <p className="text-2xl font-black text-white tabular-nums">
-                  {String(val).padStart(2, "0")}
+        <div className="flex items-end gap-1">
+          {[{ val: cd.d, label: "Days" }, { val: cd.h, label: "Hrs" }, { val: cd.m, label: "Min" }, { val: cd.s, label: "Sec" }].map(({ val, label }, idx) => (
+            <div key={label} className="flex items-end gap-1">
+              <div className="text-center">
+                <div
+                  className="w-[60px] h-[60px] rounded-xl flex items-center justify-center relative overflow-hidden"
+                  style={{
+                    background: `linear-gradient(160deg, ${glowColor}22 0%, ${glowColor}0a 100%)`,
+                    border: `1.5px solid ${glowColor}40`,
+                    boxShadow: `0 0 14px ${glowColor}15, inset 0 1px 0 rgba(255,255,255,0.07)`,
+                  }}
+                >
+                  <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${glowColor}50, transparent)` }} />
+                  <p
+                    className="text-2xl font-black tabular-nums tracking-tight"
+                    style={{ color: "#fff", textShadow: `0 0 16px ${glowColor}70` }}
+                  >
+                    {String(val).padStart(2, "0")}
+                  </p>
+                </div>
+                <p className="mt-1 text-[8px] uppercase tracking-[0.15em] font-bold" style={{ color: `${glowColor}99` }}>
+                  {label}
                 </p>
               </div>
-              <p className="mt-1 text-[9px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>
-                {label}
-              </p>
+              {idx < 3 && (
+                <div className="flex flex-col gap-1.5 pb-6 flex-shrink-0">
+                  <div className="w-1 h-1 rounded-full" style={{ background: `${glowColor}55` }} />
+                  <div className="w-1 h-1 rounded-full" style={{ background: `${glowColor}55` }} />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -394,7 +410,7 @@ export default function AcceleratorSession() {
   // ─── Member view ─────────────────────────────────────────────────────────────
   return (
     <PortalLayout title={`Week ${session.week}: ${session.title}`}>
-      <div className="px-4 lg:px-8 py-8 max-w-4xl mx-auto space-y-8">
+      <div className="px-4 lg:px-8 py-8 space-y-8">
         {/* Back link */}
         <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
           <ArrowLeft size={14} />
@@ -430,7 +446,7 @@ export default function AcceleratorSession() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
             <Clock size={16} style={{ color }} />
-            Live Calls — Week {weekId}
+            Upcoming Live Calls — Week {weekId}
           </h2>
           <div className="space-y-3">
             {weekSessions.map(s => (

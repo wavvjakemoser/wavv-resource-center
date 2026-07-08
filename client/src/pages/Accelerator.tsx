@@ -375,26 +375,44 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
           )}
         </div>
 
-        {/* Countdown digits — larger */}
+        {/* Countdown digits — segmented display style with colon separators */}
         {!isDone && countdown && (
-          <div className="flex items-center gap-3 sm:gap-5">
-            {[{ val: countdown.d, label: "Days" }, { val: countdown.h, label: "Hours" }, { val: countdown.m, label: "Min" }, { val: countdown.s, label: "Sec" }].map(({ val, label }) => (
-              <div key={label} className="text-center">
-                <div
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: `${glowColor}18`,
-                    border: `1px solid ${glowColor}30`,
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <p className="text-3xl sm:text-4xl font-black text-white tabular-nums">
-                    {String(val).padStart(2, "0")}
+          <div className="flex items-end gap-1 sm:gap-2">
+            {[{ val: countdown.d, label: "Days" }, { val: countdown.h, label: "Hrs" }, { val: countdown.m, label: "Min" }, { val: countdown.s, label: "Sec" }].map(({ val, label }, idx) => (
+              <div key={label} className="flex items-end gap-1 sm:gap-2">
+                <div className="text-center">
+                  <div
+                    className="w-[72px] sm:w-[88px] h-[72px] sm:h-[88px] rounded-2xl flex items-center justify-center relative overflow-hidden"
+                    style={{
+                      background: `linear-gradient(160deg, ${glowColor}22 0%, ${glowColor}0a 100%)`,
+                      border: `1.5px solid ${glowColor}40`,
+                      boxShadow: `0 0 18px ${glowColor}18, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                    }}
+                  >
+                    {/* Subtle top highlight */}
+                    <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${glowColor}50, transparent)` }} />
+                    <p
+                      className="text-4xl sm:text-5xl font-black tabular-nums tracking-tight"
+                      style={{
+                        color: "#fff",
+                        textShadow: `0 0 20px ${glowColor}80, 0 0 40px ${glowColor}30`,
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      {String(val).padStart(2, "0")}
+                    </p>
+                  </div>
+                  <p className="mt-1.5 text-[9px] uppercase tracking-[0.15em] font-bold" style={{ color: `${glowColor}99` }}>
+                    {label}
                   </p>
                 </div>
-                <p className="mt-2 text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>
-                  {label}
-                </p>
+                {/* Colon separator between digits (not after last) */}
+                {idx < 3 && (
+                  <div className="flex flex-col gap-2 pb-7 flex-shrink-0">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${glowColor}60` }} />
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${glowColor}60` }} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -422,17 +440,20 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
         )}
       </div>
 
-      {/* Bottom bar */}
-      <div className="relative mt-5 pt-3" style={{ borderTop: `1px solid ${glowColor}18` }}>
+      {/* Bottom bar — late-joiner callout */}
+      <div className="relative mt-6 pt-4" style={{ borderTop: `1px solid ${glowColor}15` }}>
         {hasPast ? (
-          <div className="flex items-start justify-center gap-2 text-center">
-            <Info size={12} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }} />
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-              Joining mid-cycle?{" "}
-              <span className="font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>
-                Catch up on previous sessions by clicking into each week below.
-              </span>
-            </p>
+          <div
+            className="flex items-start gap-3 rounded-xl px-4 py-3"
+            style={{ background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.18)" }}
+          >
+            <Info size={14} className="flex-shrink-0 mt-0.5" style={{ color: "#fbbf24" }} />
+            <div>
+              <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle?</p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
+                No problem — every previous session recording is available. Click into any week below to catch up at your own pace.
+              </p>
+            </div>
           </div>
         ) : (
           <p className="text-center text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
