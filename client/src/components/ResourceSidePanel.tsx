@@ -169,15 +169,17 @@ function PdfContent({ title, url }: { title: string; url: string }) {
       <h2 className="text-lg font-bold text-white leading-snug mb-5 flex-shrink-0">{title}</h2>
       <div className="h-px mb-4 flex-shrink-0" style={{ background: `${PDF_COLOR}20` }} />
       {/*
-        sandbox: omit "allow-downloads" so the browser won't offer a Save dialog
-        from within the iframe context. #toolbar=0 hides Chrome's PDF toolbar.
+        #toolbar=0 suppresses Chrome's built-in PDF toolbar (download/print buttons).
+        We intentionally omit the sandbox attribute — sandboxing an iframe that loads
+        a cross-origin storage URL causes Chrome to block the PDF plugin entirely
+        ("This page has been blocked by Chrome"). The toolbar fragment is sufficient
+        friction for the vast majority of users.
       */}
       <iframe
         src={viewerUrl}
         title={title}
         className="flex-1 w-full rounded-xl"
         style={{ border: "none", background: "#fff", minHeight: 0 }}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       />
     </div>
   );
