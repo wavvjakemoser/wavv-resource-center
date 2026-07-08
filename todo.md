@@ -1726,3 +1726,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Enable native browser PiP on all video iframes (allowfullscreen + picture-in-picture policy attribute)
 - [x] Clean todo.md: removed all SCRAPPED and ALREADY DONE lines
 - [x] Update Evergreen Platform items: done — webinars are Loom embeds inside the Success Center, no external platform needed
+
+## Personalization Features (July 2026)
+
+- [ ] Add personalized greeting to all hero sections for signed-in users ("Welcome back, [First Name]." replaces hero subtitle)
+- [ ] Add "Continue Learning" section to Home page (Academy last incomplete lesson + last viewed webinar, hidden if no activity)
+- [ ] Make Exclusive Live Webinar tile on Home conditional (only show when scheduledAt is in the future or within live window)
+
+## Personalization Features (Jul 8, 2026)
+- [x] Personalized greeting "Welcome back, [First Name]." in all hero sections (Dashboard, Academy, Webinars, Resource Hub, Partners, Accelerator, Support)
+- [x] "Continue Learning" section on Home page — Academy in-progress course card + latest On-Demand webinar card (hidden when no activity)
+- [x] Exclusive Live Webinar tile — tightened to only show when event is within 7-day window (was showing all future events indefinitely)

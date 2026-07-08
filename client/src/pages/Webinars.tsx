@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Video, Calendar, Clock, ExternalLink, PlayCircle,
   Users, Star, RefreshCw, Timer, X, PictureInPicture2, Maximize2,
@@ -458,6 +459,8 @@ function SectionSkeleton() {
 }
 
 export default function Webinars() {
+  const { user } = useAuth();
+  const firstName = user?.name?.split(" ")[0] ?? null;
   const { data: visibilityRaw } = trpc.siteSettings.get.useQuery({ key: "webinar_sections_visibility" });
   const visibility: Record<string, boolean> = (visibilityRaw as Record<string, boolean> | null) ?? { evergreen: true, exclusive: true, recordings: true };
   const visibleSections = (SECTION_ORDER as WebinarSection[]).filter(key => {
@@ -548,8 +551,15 @@ export default function Webinars() {
               <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
 
+            {/* Personalized greeting for signed-in users */}
+            {firstName && (
+              <p className="mx-auto mb-2 font-semibold" style={{ color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 1.8vw, 1.1rem)", maxWidth: "560px" }}>
+                Welcome back, {firstName}.
+              </p>
+            )}
+
             {/* Subline */}
-            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            <p className="mx-auto leading-relaxed" style={{ color: firstName ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
               Join exclusive live sessions and on-demand content from the WAVV team. Learn best practices, see new features in action, and sharpen your outbound strategy.
             </p>
           </div>

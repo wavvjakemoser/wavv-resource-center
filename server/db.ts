@@ -3019,3 +3019,97 @@ export async function updateAcceleratorSession(id: number, data: Partial<{
   await db.update(acceleratorSessions).set(data).where(eq(acceleratorSessions.id, id));
   return getAcceleratorSession(id);
 }
+
+// ─── Continue Learning (Home page personalization) ────────────────────────────
+/**
+ * Returns the next incomplete lesson for the most recently active course,
+ * plus the most recent on-demand webinar. Used for the Home "Continue Learning" section.
+ */
+export async function getContinueLearningData(userId: number) {
+  const db = await getDb();
+  if (!db) return { academyCourse: null, webinar: null };
+
+  // ── Academy: find most recently touched in-progress course ──
+  const recentProgress = await db
+    .select()
+    .from(lessonProgress)
+    .where(eq(lessonProgress.userId, userId))
+    .orderBy(desc(lessonProgress.updatedAt))
+    .limit(50);
+
+  let academyCourse: {
+    courseId: number;
+    courseTitle: string;
+    category: string;
+    nextLessonId: number;
+    nextLessonTitle: string;
+    completedLessons: number;
+    totalLessons: number;
+    progressPct: number;
+  } | null = null;
+
+  if (recentProgress.length > 0) {
+    // Find the most recently active courseId
+    const seenCourseIds: number[] = [];
+    for (const row of recentProgress) {
+      if (!seenCourseIds.includes(row.courseId)) seenCourseIds.push(row.courseId);
+    }
+
+    for (const courseId of seenCourseIds) {
+      const [course] = await db
+        .select({ id: courses.id, title: courses.title, category: courses.category })
+        .from(courses)
+        .where(and(eq(courses.id, courseId), eq(courses.published, true)))
+        .limit(1);
+      if (!course) continue;
+
+      const allLessons = await db
+        .select({ id: lessons.id, title: lessons.title, sortOrder: lessons.sortOrder })
+        .from(lessons)
+        .where(and(eq(lessons.courseId, courseId), eq(lessons.published, true), eq(lessons.hidden, false)))
+        .orderBy(asc(lessons.sortOrder));
+
+      if (allLessons.length === 0) continue;
+
+      const completedLessonIds = recentProgress
+        .filter((p) => p.courseId === courseId && p.completed)
+        .map((p) => p.lessonId);
+
+      const totalLessons = allLessons.length;
+      const completedLessons = completedLessonIds.length;
+      const progressPct = Math.round((completedLessons / totalLessons) * 100);
+
+      // Skip fully completed courses
+      if (progressPct >= 100) continue;
+
+      // Find first incomplete lesson (in sort order)
+      const nextLesson = allLessons.find((l) => !completedLessonIds.includes(l.id));
+      if (!nextLesson) continue;
+
+      academyCourse = {
+        courseId: course.id,
+        courseTitle: course.title,
+        category: course.category,
+        nextLessonId: nextLesson.id,
+        nextLessonTitle: nextLesson.title,
+        completedLessons,
+        totalLessons,
+        progressPct,
+      };
+      break;
+    }
+  }
+
+  // ── Webinar: most recent published on-demand recording ──
+  const [latestWebinar] = await db
+    .select({ id: webinars.id, title: webinars.title, description: webinars.description, thumbnailUrl: webinars.thumbnailUrl, host: webinars.host })
+    .from(webinars)
+    .where(and(eq(webinars.type, "recording"), eq(webinars.published, true)))
+    .orderBy(desc(webinars.scheduledAt))
+    .limit(1);
+
+  return {
+    academyCourse,
+    webinar: latestWebinar ?? null,
+  };
+}

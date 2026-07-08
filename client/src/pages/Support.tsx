@@ -1,5 +1,6 @@
 import PortalLayout from "@/components/PortalLayout";
 import { Headphones, MessageCircle } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 const CHAT_CARD = {
   title: "Chat with Support",
@@ -10,6 +11,8 @@ const CHAT_CARD = {
 };
 
 export default function Support() {
+  const { user } = useAuth();
+  const firstName = user?.name?.split(" ")[0] ?? null;
   const Icon = CHAT_CARD.icon;
 
   return (
@@ -54,8 +57,15 @@ export default function Support() {
               <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
 
+            {/* Personalized greeting for signed-in users */}
+            {firstName && (
+              <p className="mx-auto mb-2 font-semibold" style={{ color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 1.8vw, 1.1rem)", maxWidth: "560px" }}>
+                Welcome back, {firstName}.
+              </p>
+            )}
+
             {/* Subline */}
-            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            <p className="mx-auto leading-relaxed" style={{ color: firstName ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
               Need help? Start a chat with our support team and we'll take it from there. If a ticket needs to be opened, your rep will handle it for you.
             </p>
             <p className="mx-auto mt-3" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.82rem" }}>

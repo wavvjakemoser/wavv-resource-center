@@ -227,7 +227,8 @@ function PlaygroundModal({ onClose }: { onClose: () => void }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const firstName = user?.name?.split(" ")[0] ?? null;
   const { data: exclusiveWebinars } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const trackRegClick = trpc.webinars.trackRegistrationClick.useMutation();
   const [showPlaygroundModal, setShowPlaygroundModal] = useState(false);
@@ -237,9 +238,18 @@ export default function Dashboard() {
   // While settings are loading, show NO cards to prevent hidden items from flashing.
   const visibleCards = settingsLoading ? [] : START_HERE_CARDS.filter((c) => navVisibility[c.navHref] !== false);
 
+  // Exclusive: only show if scheduled within next 7 days (or no date set = evergreen live)
+  const now = new Date();
+  const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const exclusive = (exclusiveWebinars ?? [])
-    .filter((w) => !w.scheduledAt || new Date(w.scheduledAt) >= new Date())
+    .filter((w) => !w.scheduledAt || (new Date(w.scheduledAt) >= now && new Date(w.scheduledAt) <= sevenDaysFromNow))
     .slice(0, 3);
+
+  // Continue Learning data
+  const { data: continueLearning } = trpc.academy.getContinueLearning.useQuery(
+    undefined,
+    { enabled: isAuthenticated }
+  );
 
   return (
     <PortalLayout title="Home">
@@ -300,10 +310,20 @@ export default function Dashboard() {
               }} />
             </div>
 
+            {/* Personalized greeting for signed-in users */}
+            {isAuthenticated && firstName && (
+              <p
+                className="mx-auto mb-2 font-semibold"
+                style={{ color: "rgba(255,255,255,0.9)", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
+              >
+                Welcome back, {firstName}.
+              </p>
+            )}
+
             {/* Subline */}
             <p
               className="mx-auto mb-3 leading-relaxed font-medium"
-              style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
+              style={{ color: isAuthenticated && firstName ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.75)", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
             >
               Everything you need to get the most out of WAVV — in one place.
             </p>
@@ -360,6 +380,88 @@ export default function Dashboard() {
             })}
           </div>
         </section>)}
+
+        {/* ── Continue Learning (shown only when user has activity) ── */}
+        {isAuthenticated && continueLearning && (continueLearning.academyCourse || continueLearning.webinar) && (
+          <section>
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
+              <BookOpen size={14} style={{ color: "#0074F4" }} />
+              <h2 className="text-sm font-bold text-white tracking-wide">Continue Learning</h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Academy card */}
+              {continueLearning.academyCourse && (
+                <Link
+                  href={`/academy/${continueLearning.academyCourse.courseId}/lesson/${continueLearning.academyCourse.nextLessonId}`}
+                  style={{ textDecoration: "none" }}
+                >
+                  <div
+                    className="rounded-xl p-5 transition-all duration-200 cursor-pointer"
+                    style={{ background: "linear-gradient(135deg, rgba(0,116,244,0.08) 0%, #0c1018 70%)", border: "1px solid rgba(0,116,244,0.18)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(0,116,244,0.45)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,116,244,0.12)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,116,244,0.18)"; e.currentTarget.style.boxShadow = "none"; }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+                        <GraduationCap size={16} style={{ color: "#0074F4" }} />
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(0,116,244,0.8)" }}>WAVV Academy</span>
+                    </div>
+                    <p className="text-white font-bold text-sm mb-1 leading-snug">{continueLearning.academyCourse.courseTitle}</p>
+                    <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>Up next: {continueLearning.academyCourse.nextLessonTitle}</p>
+                    {/* Progress bar */}
+                    <div className="mb-3">
+                      <div className="flex justify-between text-xs mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+                        <span>{continueLearning.academyCourse.completedLessons} of {continueLearning.academyCourse.totalLessons} lessons</span>
+                        <span>{continueLearning.academyCourse.progressPct}%</span>
+                      </div>
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${continueLearning.academyCourse.progressPct}%`, background: "linear-gradient(to right, #0074F4, #67C728)" }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs font-semibold" style={{ color: "#0074F4" }}>
+                      Resume lesson <ArrowRight size={11} />
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* Webinar card */}
+              {continueLearning.webinar && (
+                <Link href="/webinars" style={{ textDecoration: "none" }}>
+                  <div
+                    className="rounded-xl p-5 transition-all duration-200 cursor-pointer"
+                    style={{ background: "linear-gradient(135deg, rgba(0,169,226,0.08) 0%, #0c1018 70%)", border: "1px solid rgba(0,169,226,0.18)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(0,169,226,0.45)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,169,226,0.12)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,169,226,0.18)"; e.currentTarget.style.boxShadow = "none"; }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,169,226,0.15)" }}>
+                        <Video size={16} style={{ color: "#00A9E2" }} />
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(0,169,226,0.8)" }}>On-Demand Webinar</span>
+                    </div>
+                    <p className="text-white font-bold text-sm mb-1 leading-snug">{continueLearning.webinar.title}</p>
+                    {continueLearning.webinar.description && (
+                      <p className="text-xs mb-3 line-clamp-2" style={{ color: "rgba(255,255,255,0.5)" }}>{continueLearning.webinar.description}</p>
+                    )}
+                    {continueLearning.webinar.host && (
+                      <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.4)" }}>Host: <span style={{ color: "rgba(255,255,255,0.65)" }}>{continueLearning.webinar.host}</span></p>
+                    )}
+                    <div className="flex items-center gap-1 text-xs font-semibold" style={{ color: "#00A9E2" }}>
+                      Watch now <ArrowRight size={11} />
+                    </div>
+                  </div>
+                </Link>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* ── Exclusive Live Webinars (conditional) ── */}
         {exclusive.length > 0 && (
