@@ -1519,8 +1519,13 @@ function UsersTab() {
     return /^[a-z]+\.[a-z]+@wavv\.com$/.test(email.toLowerCase());
   };
 
-  const ROLE_ORDER: Record<string, number> = { owner: 0, content_admin: 1, partner_admin: 2, admin: 3 };
-    const filteredUsers = useMemo(() => {
+  const ROLE_ORDER: Record<string, number> = { owner: 0, publisher: 1, partner_manager: 2, viewer: 3 };
+  const getLastName = (name: string | null | undefined) => {
+    if (!name) return "";
+    const parts = name.trim().split(" ");
+    return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : parts[0].toLowerCase();
+  };
+  const filteredUsers = useMemo(() => {
     // WAVV Team tab: use employees list (account_type=employee, @wavv.com only)
     let list = [...approvedEmployees];
     if (roleFilter !== "all") list = list.filter((u) => u.role === roleFilter);
@@ -1528,8 +1533,13 @@ function UsersTab() {
       const q = search.trim().toLowerCase();
       list = list.filter((u) => (u.name ?? "").toLowerCase().includes(q) || (u.email ?? "").toLowerCase().includes(q));
     }
-    // Sort by role order: Owner → Publisher → Partner Manager → Viewer
-    list = [...list].sort((a, b) => (ROLE_ORDER[a.role ?? ""] ?? 99) - (ROLE_ORDER[b.role ?? ""] ?? 99));
+    // Sort by role order first (Owner → Publisher → Partner Manager → Viewer), then alphabetically by last name within each role
+    list = [...list].sort((a, b) => {
+      const roleA = ROLE_ORDER[a.role ?? ""] ?? 99;
+      const roleB = ROLE_ORDER[b.role ?? ""] ?? 99;
+      if (roleA !== roleB) return roleA - roleB;
+      return getLastName(a.name).localeCompare(getLastName(b.name));
+    });
     return list;
   }, [approvedEmployees, search, roleFilter]);
   const ownerCount = useMemo(() => approvedEmployees.filter((u) => u.role === "owner").length, [approvedEmployees]);
