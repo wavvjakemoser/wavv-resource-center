@@ -4,8 +4,14 @@
  * Unified right-side slide-in panel for the WAVV Resource Hub.
  * Handles three content types: Help Articles (native HTML), PDFs (iframe), FAQs (Q+A).
  *
- * Usage:
- *   <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} />
+ * Push mode (default):
+ *   Renders as a flex sibling inside PortalLayout's body row — the main content
+ *   shifts left when the panel opens. No backdrop, no overlay. Closes only via X.
+ *   Pass as rightPanel prop to PortalLayout:
+ *     <PortalLayout rightPanel={<ResourceSidePanel item={panelItem} onClose={...} />}>
+ *
+ * Overlay mode (pushMode={false}):
+ *   Fixed-position overlay with backdrop blur (legacy behavior).
  *
  * PanelItem types:
  *   { type: "article", title, nativeBody }          — native help article
@@ -96,26 +102,16 @@ function FaqPanelEntryRow({ entry }: { entry: FaqPanelEntry }) {
 function ArticleContent({ title, nativeBody }: { title: string; nativeBody: string }) {
   return (
     <div className="flex flex-col h-full">
-      {/* Type badge */}
       <div className="flex items-center gap-2 mb-4 flex-shrink-0">
-        <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: `${ARTICLE_COLOR}18` }}
-        >
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${ARTICLE_COLOR}18` }}>
           <BookOpen size={14} style={{ color: ARTICLE_COLOR }} />
         </div>
-        <span
-          className="text-xs font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: `${ARTICLE_COLOR}15`, color: ARTICLE_COLOR }}
-        >
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${ARTICLE_COLOR}15`, color: ARTICLE_COLOR }}>
           Help Article
         </span>
       </div>
-      {/* Title */}
       <h2 className="text-lg font-bold text-white leading-snug mb-5 flex-shrink-0">{title}</h2>
-      {/* Divider */}
       <div className="h-px mb-5 flex-shrink-0" style={{ background: `${ARTICLE_COLOR}20` }} />
-      {/* Body */}
       <div
         className="flex-1 overflow-y-auto pr-1 native-article-body"
         dangerouslySetInnerHTML={{ __html: nativeBody }}
@@ -127,19 +123,12 @@ function ArticleContent({ title, nativeBody }: { title: string; nativeBody: stri
 function PdfContent({ title, url }: { title: string; url: string }) {
   return (
     <div className="flex flex-col h-full">
-      {/* Type badge + open-in-tab */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: `${PDF_COLOR}18` }}
-          >
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${PDF_COLOR}18` }}>
             <FileText size={14} style={{ color: PDF_COLOR }} />
           </div>
-          <span
-            className="text-xs font-semibold px-2 py-0.5 rounded-full"
-            style={{ background: `${PDF_COLOR}15`, color: PDF_COLOR }}
-          >
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${PDF_COLOR}15`, color: PDF_COLOR }}>
             PDF
           </span>
         </div>
@@ -154,11 +143,8 @@ function PdfContent({ title, url }: { title: string; url: string }) {
           Open in tab
         </a>
       </div>
-      {/* Title */}
       <h2 className="text-lg font-bold text-white leading-snug mb-5 flex-shrink-0">{title}</h2>
-      {/* Divider */}
       <div className="h-px mb-4 flex-shrink-0" style={{ background: `${PDF_COLOR}20` }} />
-      {/* PDF iframe */}
       <iframe
         src={url}
         title={title}
@@ -172,29 +158,19 @@ function PdfContent({ title, url }: { title: string; url: string }) {
 function FaqContent({ sectionName, entries }: { sectionName: string; entries: FaqPanelEntry[] }) {
   return (
     <div className="flex flex-col h-full">
-      {/* Type badge */}
       <div className="flex items-center gap-2 mb-4 flex-shrink-0">
-        <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: `${FAQ_COLOR}18` }}
-        >
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${FAQ_COLOR}18` }}>
           <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
         </div>
-        <span
-          className="text-xs font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}
-        >
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
           FAQ
         </span>
       </div>
-      {/* Section title */}
       <h2 className="text-lg font-bold text-white leading-snug mb-2 flex-shrink-0">{sectionName}</h2>
       <p className="text-xs text-gray-500 mb-5 flex-shrink-0">
         {entries.length} question{entries.length !== 1 ? "s" : ""} in this section
       </p>
-      {/* Divider */}
       <div className="h-px mb-5 flex-shrink-0" style={{ background: `${FAQ_COLOR}20` }} />
-      {/* Entries */}
       <div className="flex-1 overflow-y-auto pr-1 space-y-2">
         {entries.length === 0 ? (
           <div
@@ -205,11 +181,52 @@ function FaqContent({ sectionName, entries }: { sectionName: string; entries: Fa
             <p className="text-xs text-gray-500">No FAQs in this section yet.</p>
           </div>
         ) : (
-          entries.map(entry => (
-            <FaqPanelEntryRow key={entry.id} entry={entry} />
-          ))
+          entries.map(entry => <FaqPanelEntryRow key={entry.id} entry={entry} />)
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Panel header (shared) ────────────────────────────────────────────────────
+
+function PanelHeader({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="flex items-center justify-between px-5 py-4 flex-shrink-0"
+      style={{ borderBottom: "1px solid #1e2030" }}
+    >
+      <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+        WAVV Resource Hub
+      </span>
+      <button
+        onClick={onClose}
+        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+        style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af" }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.1)";
+          (e.currentTarget as HTMLElement).style.color = "#fff";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
+          (e.currentTarget as HTMLElement).style.color = "#9ca3af";
+        }}
+      >
+        <X size={15} />
+      </button>
+    </div>
+  );
+}
+
+// ─── Panel body (shared) ──────────────────────────────────────────────────────
+
+function PanelBody({ item }: { item: PanelItem | null }) {
+  if (!item) return null;
+  return (
+    <div className="flex-1 overflow-hidden px-5 py-5">
+      {item.type === "article" && <ArticleContent title={item.title} nativeBody={item.nativeBody} />}
+      {item.type === "pdf"     && <PdfContent title={item.title} url={item.url} />}
+      {item.type === "faq"     && <FaqContent sectionName={item.sectionName} entries={item.entries} />}
     </div>
   );
 }
@@ -219,18 +236,57 @@ function FaqContent({ sectionName, entries }: { sectionName: string; entries: Fa
 export default function ResourceSidePanel({
   item,
   onClose,
+  pushMode = true,
 }: {
   item: PanelItem | null;
   onClose: () => void;
+  /**
+   * Push mode (default: true): panel is a flex sibling that shifts main content left.
+   * No backdrop, no overlay — closes only via X button.
+   * Overlay mode (false): fixed-position overlay with backdrop blur.
+   */
+  pushMode?: boolean;
 }) {
   const isOpen = !!item;
 
-  // Determine accent color for the panel border
   const accentColor =
     item?.type === "article" ? ARTICLE_COLOR :
     item?.type === "pdf"     ? PDF_COLOR :
     FAQ_COLOR;
 
+  // ── Push mode: flex sibling, no overlay ──────────────────────────────────────
+  if (pushMode) {
+    return (
+      <div
+        className="flex-shrink-0 flex flex-col overflow-hidden"
+        style={{
+          // Animate width from 0 → 520px; content stays at full width inside
+          width: isOpen ? "520px" : "0px",
+          minWidth: 0,
+          transition: "width 0.32s cubic-bezier(0.22, 1, 0.36, 1)",
+          background: "#0d1117",
+          borderLeft: isOpen ? `1px solid ${accentColor}30` : "none",
+        }}
+      >
+        {/* Inner wrapper: always 520px wide so content doesn't squash during animation */}
+        <div
+          className="flex flex-col h-full"
+          style={{
+            width: "520px",
+            minWidth: "520px",
+            opacity: isOpen ? 1 : 0,
+            transition: "opacity 0.18s ease",
+            pointerEvents: isOpen ? "auto" : "none",
+          }}
+        >
+          <PanelHeader onClose={onClose} />
+          <PanelBody item={item} />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Overlay mode (legacy): fixed position with backdrop ──────────────────────
   return (
     <>
       {/* Backdrop */}
@@ -243,7 +299,6 @@ export default function ResourceSidePanel({
         }}
         onClick={onClose}
       />
-
       {/* Panel */}
       <div
         className="fixed top-0 right-0 h-full z-50 flex flex-col"
@@ -256,43 +311,8 @@ export default function ResourceSidePanel({
           transition: "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.32s ease, box-shadow 0.32s ease",
         }}
       >
-        {/* Panel header */}
-        <div
-          className="flex items-center justify-between px-5 py-4 flex-shrink-0"
-          style={{ borderBottom: "1px solid #1e2030" }}
-        >
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-            WAVV Resource Hub
-          </span>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
-            style={{ background: "rgba(255,255,255,0.05)", color: "#9ca3af" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.1)";
-              (e.currentTarget as HTMLElement).style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)";
-              (e.currentTarget as HTMLElement).style.color = "#9ca3af";
-            }}
-          >
-            <X size={15} />
-          </button>
-        </div>
-
-        {/* Panel body */}
-        <div className="flex-1 overflow-hidden px-5 py-5">
-          {item?.type === "article" && (
-            <ArticleContent title={item.title} nativeBody={item.nativeBody} />
-          )}
-          {item?.type === "pdf" && (
-            <PdfContent title={item.title} url={item.url} />
-          )}
-          {item?.type === "faq" && (
-            <FaqContent sectionName={item.sectionName} entries={item.entries} />
-          )}
-        </div>
+        <PanelHeader onClose={onClose} />
+        <PanelBody item={item} />
       </div>
     </>
   );

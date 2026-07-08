@@ -1737,3 +1737,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Personalized greeting "Welcome back, [First Name]." in all hero sections (Dashboard, Academy, Webinars, Resource Hub, Partners, Accelerator, Support)
 - [x] "Continue Learning" section on Home page — Academy in-progress course card + latest On-Demand webinar card (hidden when no activity)
 - [x] Exclusive Live Webinar tile — tightened to only show when event is within 7-day window (was showing all future events indefinitely)
+
+## Resource Hub Push Layout (Jul 8, 2026)
+- [x] ResourceSidePanel: convert from fixed overlay to push layout (flex sibling in PortalLayout body row)
+- [x] Push layout: main content shifts left when panel opens, no backdrop/overlay, closes only via X
+- [x] PortalLayout: add optional rightPanel prop for persistent right panel slot
+- [x] Hero subline: updated from "Search help articles, PDFs, and FAQs organized by topic." to "Help articles, PDFs, and FAQs organized by topic."

@@ -38,6 +38,7 @@ const adminItem = { href: "/wavvcommandcenter", label: "WAVV Command Center", ic
 interface PortalLayoutProps {
   children: React.ReactNode;
   title?: string;
+  rightPanel?: React.ReactNode;
 }
 
 function NavLink({
@@ -102,7 +103,7 @@ function NavLink({
   );
 }
 
-export default function PortalLayout({ children, title }: PortalLayoutProps) {
+export default function PortalLayout({ children, title, rightPanel }: PortalLayoutProps) {
   const { data: user, isLoading: authLoading } = trpc.auth.me.useQuery();
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -175,7 +176,7 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
         </div>
       )}
 
-      {/* ── Body row: sidebar + main ── */}
+      {/* ── Body row: sidebar + main + optional right panel ── */}
       <div className="flex flex-1 min-h-0">
         {/* Mobile overlay */}
         {sidebarOpen && (
@@ -437,6 +438,9 @@ export default function PortalLayout({ children, title }: PortalLayoutProps) {
             </footer>
           </main>
         </div>
+
+        {/* ── Right panel slot (push layout) ── */}
+        {rightPanel}
       </div>
 
       {/* Intercom messenger is loaded via script tag — no JSX needed */}

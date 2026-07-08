@@ -354,8 +354,12 @@ export default function GuidesAndDocs() {
     );
   });
 
+  const sidePanel = (
+    <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} pushMode={true} />
+  );
+
   return (
-    <PortalLayout title="WAVV Resource Hub">
+    <PortalLayout title="WAVV Resource Hub" rightPanel={sidePanel}>
       <div className="px-4 lg:px-8 py-6 space-y-6">
         {/* Spacer for consistent vertical alignment */}
         <div style={{ minHeight: "32px" }} />
@@ -391,26 +395,13 @@ export default function GuidesAndDocs() {
               <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
 
-            {/* Subline — updated copy */}
+            {/* Subline */}
             <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
-              Search help articles, PDFs, and FAQs organized by topic.
+              Help articles, PDFs, and FAQs organized by topic.
             </p>
 
-            {/* Search bar */}
-            <div className="mt-6 mx-auto flex items-center gap-3 px-4 py-2.5 rounded-xl max-w-md"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
-              <Search size={15} className="text-gray-400 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Search articles, PDFs, FAQs…"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
-              />
-            </div>
-
             {/* Content type badges */}
-            <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
+            <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
               {[
                 { label: "Help Articles", color: ARTICLE_COLOR, icon: <BookOpen size={10} /> },
                 { label: "PDFs",          color: PDF_COLOR,     icon: <FileText size={10} /> },
@@ -476,8 +467,6 @@ export default function GuidesAndDocs() {
         <ContentRequestCTA requestType="guide" />
       </div>
 
-      {/* Unified side panel */}
-      <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} />
     </PortalLayout>
   );
 }
