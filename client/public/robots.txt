@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /academy
+Allow: /webinars
+Allow: /resourcehub
+
+Disallow: /accelerator
+Disallow: /partners
+Disallow: /playground
+Disallow: /profile
+Disallow: /wavvcommandcenter
+Disallow: /wavvadmin
+Disallow: /wavvpartner
+Disallow: /api/
+
+Sitemap: https://success.wavv.com/sitemap.xml

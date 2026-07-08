@@ -10,7 +10,7 @@ import {
   BookOpen, FileText, Lightbulb, Award, Trophy, Rocket,
   PhoneOutgoing, PhoneMissed, PhoneOff, ListChecks, ClipboardList,
   Crosshair, Megaphone, Repeat, RotateCcw, Shuffle,
-  Clapperboard, MonitorPlay,
+  Clapperboard, MonitorPlay, Eye,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -364,6 +364,12 @@ function WebinarCard({
         {webinar.host && (
           <p className="text-gray-500 text-xs mb-2">
             Host: <span className="text-gray-300">{webinar.host}</span>
+          </p>
+        )}
+        {typeof webinar.viewCount === "number" && webinar.viewCount > 0 && (
+          <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
+            <Eye size={11} className="text-gray-600" />
+            <span>{webinar.viewCount.toLocaleString()} {webinar.viewCount === 1 ? "view" : "views"}</span>
           </p>
         )}
         {variant === "exclusive" && webinar.scheduledAt && (

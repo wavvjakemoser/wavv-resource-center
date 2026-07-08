@@ -558,19 +558,6 @@ export default function GuidesAndDocs() {
           </div>
         </div>
 
-        {/* Search */}
-        <div
-          className="flex items-center gap-2 px-3 py-2 rounded-lg"
-          style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
-        >
-          <Search size={15} className="text-gray-500" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search Help Articles, PDFs and FAQs..."
-            className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
-          />
-        </div>
 
         {/* Loading skeleton */}
         {isLoading && (

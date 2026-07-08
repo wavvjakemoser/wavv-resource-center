@@ -1740,3 +1740,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Make "Coming Soon" badges on cards bigger and bolder
 - [x] Restructure into 3 sections: WAVV Playgrounds, Go High Level, HubSpot
 - [x] Each section has 3 cards: WAVV Dialer Playground, WAVV Call Boards Playground, WAVV Messenger Playground
+
+## Feedback Items (Jul 8 2026)
+- [x] Resource Hub: remove duplicate search bar (master search bar already covers this)
+- [x] SEO: add robots.txt as static file disallowing /accelerator, /partners, /playground, /profile, /wavvcommandcenter
+- [x] SEO: add dynamic sitemap.xml listing public indexable URLs (home, /academy + category pages, /webinars, /resourcehub)
+- [x] Webinars: implement view count tracking (increment on play, display on card)

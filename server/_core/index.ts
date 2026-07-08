@@ -107,6 +107,57 @@ async function startServer() {
     }
   });
 
+  // ── Dynamic sitemap.xml ─────────────────────────────────────────────────────
+  app.get("/sitemap.xml", async (_req, res) => {
+    try {
+      const baseUrl = "https://success.wavv.com";
+      const now = new Date().toISOString().split("T")[0];
+
+      // Static public URLs
+      const staticUrls = [
+        { loc: baseUrl, priority: "1.0", changefreq: "weekly" },
+        { loc: `${baseUrl}/academy`, priority: "0.9", changefreq: "weekly" },
+        { loc: `${baseUrl}/academy/category/onboarding`, priority: "0.8", changefreq: "weekly" },
+        { loc: `${baseUrl}/academy/category/how-to`, priority: "0.8", changefreq: "weekly" },
+        { loc: `${baseUrl}/academy/category/strategy`, priority: "0.8", changefreq: "weekly" },
+        { loc: `${baseUrl}/webinars`, priority: "0.8", changefreq: "weekly" },
+        { loc: `${baseUrl}/resourcehub`, priority: "0.8", changefreq: "weekly" },
+      ];
+
+      // Dynamic: published courses
+      let dynamicUrls: { loc: string; priority: string; changefreq: string }[] = [];
+      try {
+        const { getCourses } = await import("../db");
+        const courses = await getCourses(true);
+        dynamicUrls = courses.map((c: { id: number }) => ({
+          loc: `${baseUrl}/academy/${c.id}`,
+          priority: "0.7",
+          changefreq: "monthly",
+        }));
+      } catch {
+        // DB unavailable — serve static-only sitemap
+      }
+
+      const allUrls = [...staticUrls, ...dynamicUrls];
+      const xml = [
+        `<?xml version="1.0" encoding="UTF-8"?>`,
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+        ...allUrls.map(
+          (u) =>
+            `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>${u.changefreq}</changefreq>\n    <priority>${u.priority}</priority>\n  </url>`
+        ),
+        `</urlset>`,
+      ].join("\n");
+
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.send(xml);
+    } catch (err) {
+      console.error("[Sitemap] Error generating sitemap:", err);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
   // ── tRPC API (rate limited) ───────────────────────────────────────────────
   // Apply anonymous limit first (skips authenticated), then the global ceiling
   app.use("/api/trpc", anonymousRateLimit, apiRateLimit,
