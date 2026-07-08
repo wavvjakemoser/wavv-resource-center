@@ -25,26 +25,29 @@ import {
 // ─── Live call schedule ──────────────────────────────────────────────────────
 // 12 sessions: Tue + Thu, 6 weeks, starting Jul 21 2026
 // All times stored as UTC milliseconds. 12:00 MT = 18:00 UTC (MDT = UTC-6)
-const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string; utcMs: number }[] = [
+const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string; utcMs: number; joinUrl?: string }[] = [
   // Week 1
-  { id: 1,  week: 1, sessionInWeek: 1, label: "Tue Jul 22, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 6, 21, 18, 0, 0) },
-  { id: 2,  week: 1, sessionInWeek: 2, label: "Thu Jul 23, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 6, 23, 18, 0, 0) },
+  { id: 1,  week: 1, sessionInWeek: 1, label: "Tuesday, July 21st, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 6, 21, 18, 0, 0) },
+  { id: 2,  week: 1, sessionInWeek: 2, label: "Thursday, July 23rd, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 6, 23, 18, 0, 0) },
   // Week 2
-  { id: 3,  week: 2, sessionInWeek: 1, label: "Tue Jul 28, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 6, 28, 18, 0, 0) },
-  { id: 4,  week: 2, sessionInWeek: 2, label: "Thu Jul 30, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 6, 30, 18, 0, 0) },
+  { id: 3,  week: 2, sessionInWeek: 1, label: "Tuesday, July 28th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 6, 28, 18, 0, 0) },
+  { id: 4,  week: 2, sessionInWeek: 2, label: "Thursday, July 30th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 6, 30, 18, 0, 0) },
   // Week 3
-  { id: 5,  week: 3, sessionInWeek: 1, label: "Tue Aug 4, 12pm MT / 2pm ET",  utcMs: Date.UTC(2026, 7, 4,  18, 0, 0) },
-  { id: 6,  week: 3, sessionInWeek: 2, label: "Thu Aug 6, 12pm MT / 2pm ET",  utcMs: Date.UTC(2026, 7, 6,  18, 0, 0) },
+  { id: 5,  week: 3, sessionInWeek: 1, label: "Tuesday, August 4th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 4,  18, 0, 0) },
+  { id: 6,  week: 3, sessionInWeek: 2, label: "Thursday, August 6th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 6,  18, 0, 0) },
   // Week 4
-  { id: 7,  week: 4, sessionInWeek: 1, label: "Tue Aug 11, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 11, 18, 0, 0) },
-  { id: 8,  week: 4, sessionInWeek: 2, label: "Thu Aug 13, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 13, 18, 0, 0) },
+  { id: 7,  week: 4, sessionInWeek: 1, label: "Tuesday, August 11th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 11, 18, 0, 0) },
+  { id: 8,  week: 4, sessionInWeek: 2, label: "Thursday, August 13th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 13, 18, 0, 0) },
   // Week 5
-  { id: 9,  week: 5, sessionInWeek: 1, label: "Tue Aug 18, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 18, 18, 0, 0) },
-  { id: 10, week: 5, sessionInWeek: 2, label: "Thu Aug 20, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 20, 18, 0, 0) },
+  { id: 9,  week: 5, sessionInWeek: 1, label: "Tuesday, August 18th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 18, 18, 0, 0) },
+  { id: 10, week: 5, sessionInWeek: 2, label: "Thursday, August 20th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 20, 18, 0, 0) },
   // Week 6
-  { id: 11, week: 6, sessionInWeek: 1, label: "Tue Aug 25, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 25, 18, 0, 0) },
-  { id: 12, week: 6, sessionInWeek: 2, label: "Thu Aug 27, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 27, 18, 0, 0) },
+  { id: 11, week: 6, sessionInWeek: 1, label: "Tuesday, August 25th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 25, 18, 0, 0) },
+  { id: 12, week: 6, sessionInWeek: 2, label: "Thursday, August 27th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 27, 18, 0, 0) },
 ];
+
+// 30-minute pre-join window
+const JOIN_WINDOW_MS = 30 * 60 * 1000;
 
 // Duration of each live call in ms (90 minutes)
 const CALL_DURATION_MS = 90 * 60 * 1000;
@@ -372,24 +375,24 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
           )}
         </div>
 
-        {/* Countdown digits */}
+        {/* Countdown digits — larger */}
         {!isDone && countdown && (
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-5">
             {[{ val: countdown.d, label: "Days" }, { val: countdown.h, label: "Hours" }, { val: countdown.m, label: "Min" }, { val: countdown.s, label: "Sec" }].map(({ val, label }) => (
               <div key={label} className="text-center">
                 <div
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex items-center justify-center"
                   style={{
                     background: `${glowColor}18`,
                     border: `1px solid ${glowColor}30`,
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
                   }}
                 >
-                  <p className="text-xl sm:text-2xl font-black text-white tabular-nums">
+                  <p className="text-3xl sm:text-4xl font-black text-white tabular-nums">
                     {String(val).padStart(2, "0")}
                   </p>
                 </div>
-                <p className="mt-1.5 text-[9px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <p className="mt-2 text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>
                   {label}
                 </p>
               </div>
@@ -433,7 +436,7 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
           </div>
         ) : (
           <p className="text-center text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-            First session: Tuesday, July 21 · 12:00 PM MT / 2:00 PM ET
+            {sessionRef ? sessionRef.label : "Tuesday, July 21st, 2026 · 12:00 PM MT / 2:00 PM ET"}
           </p>
         )}
       </div>
@@ -443,7 +446,12 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
 
 // ─── Upcoming calls list (members only) ──────────────────────────────────────
 function UpcomingCallsList() {
-  const now = Date.now();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const upcoming = SCHEDULE.filter(s => s.utcMs + CALL_DURATION_MS > now).slice(0, 6);
   const past     = SCHEDULE.filter(s => s.utcMs + CALL_DURATION_MS <= now);
 
@@ -461,39 +469,81 @@ function UpcomingCallsList() {
       </div>
 
       {upcoming.length === 0 ? (
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>All sessions complete. Check recordings in each week.</p>
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>All sessions complete. Check recordings in each week below.</p>
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {upcoming.map((s) => {
-            const isLive = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
+            const isLive       = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
+            const isJoinable   = now >= s.utcMs - JOIN_WINDOW_MS && now < s.utcMs + CALL_DURATION_MS;
+            const secsToStart  = Math.max(0, Math.floor((s.utcMs - now) / 1000));
+            const { d, h, m, sec: _sec } = (() => {
+              const d = Math.floor(secsToStart / 86400);
+              const h = Math.floor((secsToStart % 86400) / 3600);
+              const m = Math.floor((secsToStart % 3600) / 60);
+              const sec = secsToStart % 60;
+              return { d, h, m, sec };
+            })();
+            const countdownStr = isLive
+              ? "🔴 LIVE NOW"
+              : d > 0 ? `${d}d ${h}h ${m}m`
+              : h > 0 ? `${h}h ${m}m`
+              : `${m}m ${_sec}s`;
+
             return (
-              <a
+              <div
                 key={s.id}
-                href={`/accelerator/session/${s.week}`}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all"
+                className="rounded-xl px-4 py-3 space-y-2"
                 style={{
                   background: isLive ? "rgba(16,185,129,0.08)" : "rgba(255,255,255,0.02)",
-                  border: isLive ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(255,255,255,0.04)",
-                  textDecoration: "none",
+                  border: isLive ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(255,255,255,0.05)",
                 }}
-                onMouseEnter={(e) => { if (!isLive) e.currentTarget.style.background = "rgba(0,116,244,0.06)"; }}
-                onMouseLeave={(e) => { if (!isLive) e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
               >
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-bold"
-                  style={{ background: isLive ? "rgba(16,185,129,0.15)" : "rgba(0,116,244,0.1)", color: isLive ? "#10b981" : "#4a9eff" }}
-                >
-                  W{s.week}
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-bold"
+                    style={{ background: isLive ? "rgba(16,185,129,0.15)" : "rgba(0,116,244,0.1)", color: isLive ? "#10b981" : "#4a9eff" }}
+                  >
+                    W{s.week}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-white">
+                      Week {s.week} · Session {s.sessionInWeek} of 2
+                    </p>
+                    <p className="text-[11px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>{s.label}</p>
+                  </div>
+                  <span
+                    className="text-[11px] font-bold tabular-nums flex-shrink-0"
+                    style={{ color: isLive ? "#10b981" : "rgba(255,255,255,0.5)" }}
+                  >
+                    {countdownStr}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-white">
-                    {isLive && <span className="mr-1.5 text-emerald-400">🔴 LIVE</span>}
-                    Week {s.week} · Session {s.sessionInWeek} of 2
-                  </p>
-                  <p className="text-[11px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>{s.label}</p>
+                {/* Join button — grayed until 30 min before */}
+                <div className="flex justify-end">
+                  {isJoinable ? (
+                    <a
+                      href={s.joinUrl ?? `/accelerator/session/${s.week}`}
+                      target={s.joinUrl ? "_blank" : undefined}
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all"
+                      style={{ background: isLive ? "#10b981" : "#0074F4" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+                    >
+                      <Play size={11} />
+                      {isLive ? "Join Live" : "Join Waiting Room"}
+                    </a>
+                  ) : (
+                    <span
+                      className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold cursor-not-allowed"
+                      style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.08)" }}
+                    >
+                      <Lock size={11} />
+                      Opens 30 min before
+                    </span>
+                  )}
                 </div>
-                <ChevronRight size={13} style={{ color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
-              </a>
+              </div>
             );
           })}
         </div>

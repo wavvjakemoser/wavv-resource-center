@@ -1756,3 +1756,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Link countdown section to the current session page (/accelerator/session/:id)
 - [x] Add late-joiner asterisk note: "Joining mid-cycle? Catch up on previous sessions by clicking into each week."
 - [x] "Upcoming Live Calls" section: replace placeholder with real schedule list for members
+
+## Accelerator UI Polish + Session Pages (Jul 8, 2026)
+- [x] Fix date labels in SCHEDULE array (Jul 21 is Tuesday, not Jul 22)
+- [x] Enlarge countdown clock digits (bigger numbers)
+- [x] Remove "First session: Tuesday, July 21" bottom bar text; replace with clean date label
+- [x] Fix date display labels to spell out full date (e.g. "Tuesday, July 21st, 2026 · 12:00 PM MT / 2:00 PM ET")
+- [x] Add per-session countdown + join button to UpcomingCallsList rows (grayed out until 30 min before)
+- [x] AcceleratorSession.tsx: add session-level countdown timer (D/H/M/S to that session)
+- [x] AcceleratorSession.tsx: add join button (grayed out until 30 min before, active during call window)
+- [x] AcceleratorSession.tsx: show upcoming schedule for all sessions in that week
+- [x] AcceleratorSession.tsx: add Loom recording slot (admin can paste URL, shows embedded player when set)
