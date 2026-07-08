@@ -5863,19 +5863,50 @@ function GuidesTab() {
       {/* ── Add FAQ Entry Inline Form ── */}
       {showAddFaqForm && (
         <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <h3 className="text-sm font-semibold text-white">New FAQ Entry</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Title *</label>
-              <input style={inputStyle} value={globalFaqEntry.question} onChange={e => setGlobalFaqEntry(v => ({ ...v, question: e.target.value }))} placeholder="e.g. How do I set up call boards?" autoFocus />
+          <h3 className="text-sm font-semibold text-white">New FAQ</h3>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Title *</label>
+            <input style={inputStyle} value={globalFaqEntry.question} onChange={e => setGlobalFaqEntry(v => ({ ...v, question: e.target.value }))} placeholder="e.g. How do I set up call boards?" autoFocus />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-2">Section *</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {faqSectionsAdmin.map(s => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setGlobalFaqEntry(v => ({ ...v, sectionId: s.id }))}
+                  className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+                  style={{
+                    background: globalFaqEntry.sectionId === s.id ? "rgba(234,179,8,0.18)" : "#252d3d",
+                    border: `1px solid ${globalFaqEntry.sectionId === s.id ? "#eab308" : "#2a2a2a"}`,
+                    color: globalFaqEntry.sectionId === s.id ? "#eab308" : "#9ca3af",
+                  }}
+                >
+                  {s.name}
+                </button>
+              ))}
             </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Section *</label>
-              <select style={{ ...inputStyle, cursor: "pointer" }} value={globalFaqEntry.sectionId} onChange={e => setGlobalFaqEntry(v => ({ ...v, sectionId: Number(e.target.value) }))}>
-                {faqSectionsAdmin.length === 0 && <option value={0}>No sections yet — create one first</option>}
-                {faqSectionsAdmin.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            </div>
+            <input
+              style={{ ...inputStyle, fontSize: "12px" }}
+              value={newFaqSectionName}
+              onChange={e => setNewFaqSectionName(e.target.value)}
+              placeholder="+ Type to create a new section…"
+              onKeyDown={e => {
+                if (e.key === "Enter" && newFaqSectionName.trim()) {
+                  e.preventDefault();
+                  createFaqSectionMutation.mutate({ name: newFaqSectionName.trim() }, {
+                    onSuccess: (data) => {
+                      setGlobalFaqEntry(v => ({ ...v, sectionId: (data as any)?.id ?? 0 }));
+                      setNewFaqSectionName("");
+                    }
+                  });
+                }
+              }}
+            />
+            {newFaqSectionName.trim() && (
+              <p className="text-xs text-gray-500 mt-1">Press Enter to create &ldquo;{newFaqSectionName.trim()}&rdquo; as a new section</p>
+            )}
           </div>
           <div>
             <label className="block text-xs text-gray-400 mb-1">Description <span className="text-gray-600">(optional)</span></label>
