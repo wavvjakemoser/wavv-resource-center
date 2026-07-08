@@ -158,22 +158,24 @@ function PdfSection({
   dbSections: DbSection[];
   onOpen: (guide: GuideItem) => void;
 }) {
-  if (items.length === 0 && dbSections.length === 0) return null;
+  // Only hide the entire PDF block if there are no visible sections AND no items
+  const visibleSections = dbSections.filter(s => s.isVisible);
+  if (items.length === 0 && visibleSections.length === 0) return null;
 
-  // Build sub-section map
+  // Build sub-section map — always include every visible section (even empty ones)
   const sectionMap: Record<string, GuideItem[]> = {};
   const unsectioned: GuideItem[] = [];
 
-  // Group guides by their category field matching a pdf_section name
-  const visibleSections = dbSections.filter(s => s.isVisible);
   if (visibleSections.length > 0) {
+    // Pre-populate every visible section so empty ones still render
+    for (const sec of visibleSections) {
+      sectionMap[sec.name] = [];
+    }
     const allSectionedIds = new Set<number>();
     for (const sec of visibleSections) {
       const secItems = items.filter(g => g.category === sec.name);
-      if (secItems.length > 0) {
-        sectionMap[sec.name] = secItems;
-        secItems.forEach(g => allSectionedIds.add(g.id));
-      }
+      sectionMap[sec.name] = secItems;
+      secItems.forEach(g => allSectionedIds.add(g.id));
     }
     items.forEach(g => { if (!allSectionedIds.has(g.id)) unsectioned.push(g); });
   } else {
@@ -185,7 +187,10 @@ function PdfSection({
     }
   }
 
-  const subSections = Object.entries(sectionMap);
+  // Preserve the sort order from dbSections
+  const subSections: [string, GuideItem[]][] = visibleSections.length > 0
+    ? visibleSections.map(sec => [sec.name, sectionMap[sec.name] ?? []])
+    : Object.entries(sectionMap);
 
   return (
     <section>
