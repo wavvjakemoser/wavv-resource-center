@@ -24,12 +24,7 @@ type DbSection = {
   id: number;
   name: string;
   sortOrder: number;
-  subsections: Array<{
-    id: number;
-    name: string;
-    sortOrder: number;
-    guides: GuideItem[];
-  }>;
+  isVisible: boolean;
 };
 
 // ─── Color constants ──────────────────────────────────────────────────────────
@@ -169,20 +164,20 @@ function PdfSection({
   const sectionMap: Record<string, GuideItem[]> = {};
   const unsectioned: GuideItem[] = [];
 
-  if (dbSections.length > 0) {
+  // Group guides by their category field matching a pdf_section name
+  const visibleSections = dbSections.filter(s => s.isVisible);
+  if (visibleSections.length > 0) {
     const allSectionedIds = new Set<number>();
-    for (const sec of dbSections) {
-      for (const sub of sec.subsections) {
-        const subItems = sub.guides.filter(g => items.some(i => i.id === g.id));
-        if (subItems.length > 0) {
-          sectionMap[sub.name] = subItems;
-          subItems.forEach(g => allSectionedIds.add(g.id));
-        }
+    for (const sec of visibleSections) {
+      const secItems = items.filter(g => g.category === sec.name);
+      if (secItems.length > 0) {
+        sectionMap[sec.name] = secItems;
+        secItems.forEach(g => allSectionedIds.add(g.id));
       }
     }
     items.forEach(g => { if (!allSectionedIds.has(g.id)) unsectioned.push(g); });
   } else {
-    // Fall back to category grouping
+    // Fall back to category grouping when no named sections exist
     for (const g of items) {
       const cat = g.category ?? "General";
       if (!sectionMap[cat]) sectionMap[cat] = [];
