@@ -287,15 +287,8 @@ export default function Accelerator() {
               <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
 
-            {/* Personalized greeting for signed-in users */}
-            {user && (
-              <p className="mx-auto mb-2 font-semibold" style={{ color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 1.8vw, 1.1rem)", maxWidth: "540px" }}>
-                Welcome back, {user.name?.split(" ")[0] ?? user.name}.
-              </p>
-            )}
-
             {/* Subline */}
-            <p className="mx-auto mb-4 leading-relaxed" style={{ color: user ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.55)", fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)", maxWidth: "540px" }}>
+            <p className="mx-auto mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)", maxWidth: "540px" }}>
               Complete the WAVV Accelerator and walk away with a fully configured dialer, a proven outreach cadence, and the skills to hit your connection rate targets — in 6 weeks or less.
             </p>
             {/* Schedule line */}

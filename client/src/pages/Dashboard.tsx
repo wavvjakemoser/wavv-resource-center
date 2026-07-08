@@ -310,20 +310,10 @@ export default function Dashboard() {
               }} />
             </div>
 
-            {/* Personalized greeting for signed-in users */}
-            {isAuthenticated && firstName && (
-              <p
-                className="mx-auto mb-2 font-semibold"
-                style={{ color: "rgba(255,255,255,0.9)", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
-              >
-                Welcome back, {firstName}.
-              </p>
-            )}
-
             {/* Subline */}
             <p
               className="mx-auto mb-3 leading-relaxed font-medium"
-              style={{ color: isAuthenticated && firstName ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.75)", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
+              style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
             >
               Everything you need to get the most out of WAVV — in one place.
             </p>
@@ -433,7 +423,7 @@ export default function Dashboard() {
 
               {/* Webinar card */}
               {continueLearning.webinar && (
-                <Link href="/webinars" style={{ textDecoration: "none" }}>
+                <Link href={`/webinars${continueLearning.webinar.id ? `?play=${continueLearning.webinar.id}` : ""}`} style={{ textDecoration: "none" }}>
                   <div
                     className="rounded-xl p-5 transition-all duration-200 cursor-pointer"
                     style={{ background: "linear-gradient(135deg, rgba(0,169,226,0.08) 0%, #0c1018 70%)", border: "1px solid rgba(0,169,226,0.18)" }}

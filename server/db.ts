@@ -3102,7 +3102,7 @@ export async function getContinueLearningData(userId: number) {
 
   // ── Webinar: most recent published on-demand recording ──
   const [latestWebinar] = await db
-    .select({ id: webinars.id, title: webinars.title, description: webinars.description, thumbnailUrl: webinars.thumbnailUrl, host: webinars.host })
+    .select({ id: webinars.id, title: webinars.title, description: webinars.description, thumbnailUrl: webinars.thumbnailUrl, host: webinars.host, videoUrl: webinars.videoUrl })
     .from(webinars)
     .where(and(eq(webinars.type, "recording"), eq(webinars.published, true)))
     .orderBy(desc(webinars.scheduledAt))

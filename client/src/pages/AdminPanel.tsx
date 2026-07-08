@@ -403,7 +403,7 @@ function AdminGuides() {
 
       {showForm && (
         <div className="p-5 rounded-xl space-y-3" style={{ background: "#1d2230", border: "1px solid #67C72840" }}>
-          <h3 className="text-white font-semibold text-sm">New Guide</h3>
+          <h3 className="text-white font-semibold text-sm">New PDF</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title *" className="px-3 py-2 rounded-lg text-sm text-white placeholder-gray-500 outline-none" style={{ background: "#111", border: "1px solid #333" }} />
             <select value={form.fileType} onChange={(e) => setForm({ ...form, fileType: e.target.value })} className="px-3 py-2 rounded-lg text-sm text-white outline-none" style={{ background: "#111", border: "1px solid #333" }}>
@@ -421,9 +421,9 @@ function AdminGuides() {
               onClick={() => createMutation.mutate({ title: form.title, description: form.description || undefined, category: form.category || undefined, fileType: form.fileType as "pdf" | "checklist" | "playbook" | "other", fileUrl: form.fileUrl })}
               disabled={createMutation.isPending}
               className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
-              style={{ background: "#67C728" }}
+              style={{ background: "#ef4444" }}
             >
-              {createMutation.isPending ? "Creating..." : "Create Guide"}
+              {createMutation.isPending ? "Creating..." : "Create PDF"}
             </button>
             <button onClick={() => setShowForm(false)} className="px-4 py-2 rounded-lg text-sm text-gray-400">Cancel</button>
           </div>

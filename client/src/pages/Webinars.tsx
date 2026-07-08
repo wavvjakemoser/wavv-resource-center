@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -478,6 +478,38 @@ export default function Webinars() {
 
   const [sharedNextSession] = useState(() => nextHalfHour());
 
+  // ── Deep-link: ?play=<webinarId> auto-opens the video modal ──────────────
+  const autoPlayId = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const v = params.get("play");
+    return v ? parseInt(v, 10) : null;
+  }, []);
+
+  const allWebinars = useMemo(() => [
+    ...(exclusiveWebinars ?? []),
+    ...(evergreenWebinars ?? []),
+    ...(recordingWebinars ?? []),
+  ], [exclusiveWebinars, evergreenWebinars, recordingWebinars]);
+
+  const [autoPlayFired, setAutoPlayFired] = useState(false);
+
+  useEffect(() => {
+    if (autoPlayFired || !autoPlayId || allWebinars.length === 0) return;
+    const target = allWebinars.find((w: { id: number; videoUrl?: string | null; title: string; type?: string }) => w.id === autoPlayId);
+    if (!target || !target.videoUrl) return;
+    const embedUrl = getEmbedUrl(target.videoUrl);
+    if (!embedUrl && !target.videoUrl.startsWith("/manus-storage")) return;
+    const playUrl = embedUrl ?? target.videoUrl;
+    // Switch to the correct section tab
+    const typeToSection: Record<string, WebinarSection> = { exclusive: "exclusive", evergreen: "evergreen", recording: "recording" };
+    const section = typeToSection[(target as any).type] ?? "recording";
+    setActiveSection(section);
+    setFloatingVideo(null);
+    const isHosted = playUrl.startsWith("/manus-storage");
+    setPlayingVideo({ embedUrl: playUrl, title: target.title, variant: section as WebinarType, isHosted });
+    setAutoPlayFired(true);
+  }, [autoPlayId, allWebinars, autoPlayFired]);
+
   // ── Video modal state ──────────────────────────────────────────────────────
   const [playingVideo, setPlayingVideo] = useState<{
     embedUrl: string;
@@ -551,15 +583,8 @@ export default function Webinars() {
               <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
 
-            {/* Personalized greeting for signed-in users */}
-            {firstName && (
-              <p className="mx-auto mb-2 font-semibold" style={{ color: "rgba(255,255,255,0.9)", fontSize: "clamp(0.95rem, 1.8vw, 1.1rem)", maxWidth: "560px" }}>
-                Welcome back, {firstName}.
-              </p>
-            )}
-
             {/* Subline */}
-            <p className="mx-auto leading-relaxed" style={{ color: firstName ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
               Join exclusive live sessions and on-demand content from the WAVV team. Learn best practices, see new features in action, and sharpen your outbound strategy.
             </p>
           </div>

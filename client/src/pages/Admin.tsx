@@ -6038,7 +6038,7 @@ function GuidesTab() {
 
       {showForm && (
         <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit Guide" : "New Guide"}</h3>
+          <h3 className="text-sm font-semibold text-white">{editId !== null ? "Edit PDF" : "New PDF"}</h3>
           <form onSubmit={handleSubmit} className="space-y-3">
             {/* Row 1: Title + Section */}
             <div className="grid grid-cols-2 gap-3">
@@ -6134,8 +6134,8 @@ function GuidesTab() {
             </div>
             <div className="flex gap-2 justify-end">
               <button type="button" onClick={() => { setShowForm(false); setEditId(null); resetForm(); }} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
-              <button type="submit" disabled={createMutation.isPending || updateMutation.isPending || uploadingFile} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#0074F4" }}>
-                {editId !== null ? "Save Changes" : "Create Guide"}
+              <button type="submit" disabled={createMutation.isPending || updateMutation.isPending || uploadingFile} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50" style={{ background: "#ef4444" }}>
+                {editId !== null ? "Save Changes" : "Create PDF"}
               </button>
             </div>
           </form>

@@ -1729,9 +1729,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Personalization Features (July 2026)
 
-- [ ] Add personalized greeting to all hero sections for signed-in users ("Welcome back, [First Name]." replaces hero subtitle)
-- [ ] Add "Continue Learning" section to Home page (Academy last incomplete lesson + last viewed webinar, hidden if no activity)
-- [ ] Make Exclusive Live Webinar tile on Home conditional (only show when scheduledAt is in the future or within live window)
+- [x] Add personalized greeting to all hero sections for signed-in users ("Welcome back, [First Name]." replaces hero subtitle)
+- [x] Add "Continue Learning" section to Home page (Academy last incomplete lesson + last viewed webinar, hidden if no activity)
+- [x] Make Exclusive Live Webinar tile on Home conditional (only show when scheduledAt is in the future or within live window)
 
 ## Personalization Features (Jul 8, 2026)
 - [x] Personalized greeting "Welcome back, [First Name]." in all hero sections (Dashboard, Academy, Webinars, Resource Hub, Partners, Accelerator, Support)
