@@ -1747,3 +1747,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Side Panel UX + PDF Security (Jul 8, 2026)
 - [x] ResourceSidePanel: add drag handle on left edge to resize panel width (push layout)
 - [x] ResourceSidePanel PDF viewer: block native browser download/print toolbar
+
+## Accelerator Live Call Schedule (Jul 8, 2026)
+- [x] Define 12-session schedule: Tue+Thu, 6 weeks starting Jul 21 2026, 12pm MT / 2pm ET
+- [x] Build useAcceleratorSchedule hook: computes next session, current week, session number, countdown target
+- [x] Replace static countdown placeholder with live ticking countdown (days/hours/min/sec)
+- [x] Show current week label and session number (e.g. "Week 1 · Session 1 of 2") next to countdown
+- [x] Link countdown section to the current session page (/accelerator/session/:id)
+- [x] Add late-joiner asterisk note: "Joining mid-cycle? Catch up on previous sessions by clicking into each week."
+- [x] "Upcoming Live Calls" section: replace placeholder with real schedule list for members

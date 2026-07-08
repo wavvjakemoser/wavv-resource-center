@@ -1,7 +1,7 @@
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   CheckCircle2,
   Lock,
@@ -19,7 +19,76 @@ import {
   Handshake,
   Clock,
   Gift,
+  Info,
 } from "lucide-react";
+
+// ─── Live call schedule ──────────────────────────────────────────────────────
+// 12 sessions: Tue + Thu, 6 weeks, starting Jul 21 2026
+// All times stored as UTC milliseconds. 12:00 MT = 18:00 UTC (MDT = UTC-6)
+const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string; utcMs: number }[] = [
+  // Week 1
+  { id: 1,  week: 1, sessionInWeek: 1, label: "Tue Jul 22, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 6, 21, 18, 0, 0) },
+  { id: 2,  week: 1, sessionInWeek: 2, label: "Thu Jul 23, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 6, 23, 18, 0, 0) },
+  // Week 2
+  { id: 3,  week: 2, sessionInWeek: 1, label: "Tue Jul 28, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 6, 28, 18, 0, 0) },
+  { id: 4,  week: 2, sessionInWeek: 2, label: "Thu Jul 30, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 6, 30, 18, 0, 0) },
+  // Week 3
+  { id: 5,  week: 3, sessionInWeek: 1, label: "Tue Aug 4, 12pm MT / 2pm ET",  utcMs: Date.UTC(2026, 7, 4,  18, 0, 0) },
+  { id: 6,  week: 3, sessionInWeek: 2, label: "Thu Aug 6, 12pm MT / 2pm ET",  utcMs: Date.UTC(2026, 7, 6,  18, 0, 0) },
+  // Week 4
+  { id: 7,  week: 4, sessionInWeek: 1, label: "Tue Aug 11, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 11, 18, 0, 0) },
+  { id: 8,  week: 4, sessionInWeek: 2, label: "Thu Aug 13, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 13, 18, 0, 0) },
+  // Week 5
+  { id: 9,  week: 5, sessionInWeek: 1, label: "Tue Aug 18, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 18, 18, 0, 0) },
+  { id: 10, week: 5, sessionInWeek: 2, label: "Thu Aug 20, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 20, 18, 0, 0) },
+  // Week 6
+  { id: 11, week: 6, sessionInWeek: 1, label: "Tue Aug 25, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 25, 18, 0, 0) },
+  { id: 12, week: 6, sessionInWeek: 2, label: "Thu Aug 27, 12pm MT / 2pm ET", utcMs: Date.UTC(2026, 7, 27, 18, 0, 0) },
+];
+
+// Duration of each live call in ms (90 minutes)
+const CALL_DURATION_MS = 90 * 60 * 1000;
+
+type ScheduleState =
+  | { status: "upcoming"; next: typeof SCHEDULE[0]; secondsLeft: number; hasPast: boolean }
+  | { status: "live";     current: typeof SCHEDULE[0]; secondsLeft: number; hasPast: boolean }
+  | { status: "done" };
+
+function useAcceleratorSchedule(): ScheduleState {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return useMemo((): ScheduleState => {
+    // Check if we're currently in a live call window
+    for (const s of SCHEDULE) {
+      if (now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS) {
+        const secondsLeft = Math.max(0, Math.floor((s.utcMs + CALL_DURATION_MS - now) / 1000));
+        const hasPast = SCHEDULE.some(x => x.utcMs < s.utcMs);
+        return { status: "live", current: s, secondsLeft, hasPast };
+      }
+    }
+    // Find next upcoming session
+    const next = SCHEDULE.find(s => s.utcMs > now);
+    if (next) {
+      const secondsLeft = Math.max(0, Math.floor((next.utcMs - now) / 1000));
+      const hasPast = SCHEDULE.some(s => s.utcMs + CALL_DURATION_MS < now);
+      return { status: "upcoming", next, secondsLeft, hasPast };
+    }
+    return { status: "done" };
+  }, [now]);
+}
+
+function formatCountdown(totalSeconds: number) {
+  const d = Math.floor(totalSeconds / 86400);
+  const h = Math.floor((totalSeconds % 86400) / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return { d, h, m, s };
+}
 
 // ─── Qualifying plans for Accelerator access ────────────────────────────────
 // TODO: Confirm exact plan strings with Steve once Stripe SKU is finalized
@@ -209,6 +278,236 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
   );
 }
 
+// ─── Live Call Countdown component ──────────────────────────────────────────
+function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
+  const schedule = useAcceleratorSchedule();
+
+  const isLive   = schedule.status === "live";
+  const isDone   = schedule.status === "done";
+  const accentBg = isLive
+    ? "linear-gradient(135deg, #052e16 0%, #064e3b 40%, #065f46 100%)"
+    : "linear-gradient(135deg, #0a1628 0%, #0d2847 40%, #0a3a6b 100%)";
+  const accentBorder = isLive ? "rgba(16,185,129,0.4)" : "rgba(0,116,244,0.3)";
+  const glowColor    = isLive ? "#10b981" : "#0074F4";
+
+  const countdown = schedule.status !== "done"
+    ? formatCountdown(
+        schedule.status === "live" ? schedule.secondsLeft : schedule.secondsLeft
+      )
+    : null;
+
+  const sessionRef = schedule.status === "live"
+    ? schedule.current
+    : schedule.status === "upcoming"
+    ? schedule.next
+    : null;
+
+  // Map schedule session id → SESSIONS week (1-indexed session id maps to week via SESSIONS array)
+  const weekNum   = sessionRef?.week ?? null;
+  const sessionInWeek = sessionRef?.sessionInWeek ?? null;
+  const sessionPageId = weekNum; // session page id = week number
+
+  const hasPast = schedule.status !== "done" && schedule.hasPast;
+
+  return (
+    <section
+      className="relative overflow-hidden rounded-2xl p-6 sm:p-8"
+      style={{
+        background: accentBg,
+        border: `1px solid ${accentBorder}`,
+        boxShadow: `0 4px 24px ${glowColor}1a`,
+      }}
+    >
+      {/* Glow orbs */}
+      <div className="absolute top-0 right-1/4 w-64 h-64 rounded-full opacity-15 blur-3xl"
+        style={{ background: `radial-gradient(circle, ${glowColor}, transparent)` }} />
+      <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full opacity-10 blur-3xl"
+        style={{ background: `radial-gradient(circle, ${glowColor}, transparent)` }} />
+
+      <div className="relative flex flex-col items-center text-center gap-4">
+        {/* Icon + live badge */}
+        <div className="relative">
+          <div
+            className="w-11 h-11 rounded-lg flex items-center justify-center"
+            style={{
+              background: isLive
+                ? "linear-gradient(135deg, #10b981, #059669)"
+                : "linear-gradient(135deg, #0074F4, #00A9E2)",
+              boxShadow: `0 4px 16px ${glowColor}40`,
+            }}
+          >
+            <Clock size={20} className="text-white" />
+          </div>
+          <div
+            className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2"
+            style={{
+              background: isLive ? "#10b981" : "#10b981",
+              borderColor: isLive ? "#064e3b" : "#0d2847",
+            }}
+          >
+            <div
+              className="absolute inset-0 rounded-full animate-ping opacity-75"
+              style={{ background: isLive ? "#10b981" : "#10b981" }}
+            />
+          </div>
+        </div>
+
+        {/* Title row */}
+        <div>
+          <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+            {isLive ? "🔴 LIVE NOW" : "NEXT LIVE CALL"}
+          </h3>
+          {sessionRef && (
+            <p className="mt-1 text-xs font-semibold" style={{ color: isLive ? "#6ee7b7" : "#4a9eff" }}>
+              Week {weekNum} · Session {sessionInWeek} of 2
+            </p>
+          )}
+          <p className="mt-0.5 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Tue & Thu · Live Coaching with Prospecting On Demand
+          </p>
+          {sessionRef && (
+            <p className="mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
+              {sessionRef.label}
+            </p>
+          )}
+        </div>
+
+        {/* Countdown digits */}
+        {!isDone && countdown && (
+          <div className="flex items-center gap-2 sm:gap-4">
+            {[{ val: countdown.d, label: "Days" }, { val: countdown.h, label: "Hours" }, { val: countdown.m, label: "Min" }, { val: countdown.s, label: "Sec" }].map(({ val, label }) => (
+              <div key={label} className="text-center">
+                <div
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center"
+                  style={{
+                    background: `${glowColor}18`,
+                    border: `1px solid ${glowColor}30`,
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <p className="text-xl sm:text-2xl font-black text-white tabular-nums">
+                    {String(val).padStart(2, "0")}
+                  </p>
+                </div>
+                <p className="mt-1.5 text-[9px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  {label}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {isDone && (
+          <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+            All 12 sessions complete. Recordings available in each week below.
+          </p>
+        )}
+
+        {/* CTA button to current session (members only) */}
+        {hasAccess && sessionRef && sessionPageId && (
+          <a
+            href={`/accelerator/session/${sessionPageId}`}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all"
+            style={{ background: isLive ? "#10b981" : "#0074F4" }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+          >
+            {isLive ? <Play size={14} /> : <Calendar size={14} />}
+            {isLive ? "Join Live Call" : `Go to Week ${weekNum}`}
+            <ChevronRight size={14} />
+          </a>
+        )}
+      </div>
+
+      {/* Bottom bar */}
+      <div className="relative mt-5 pt-3" style={{ borderTop: `1px solid ${glowColor}18` }}>
+        {hasPast ? (
+          <div className="flex items-start justify-center gap-2 text-center">
+            <Info size={12} className="flex-shrink-0 mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }} />
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+              Joining mid-cycle?{" "}
+              <span className="font-medium" style={{ color: "rgba(255,255,255,0.65)" }}>
+                Catch up on previous sessions by clicking into each week below.
+              </span>
+            </p>
+          </div>
+        ) : (
+          <p className="text-center text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+            First session: Tuesday, July 21 · 12:00 PM MT / 2:00 PM ET
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ─── Upcoming calls list (members only) ──────────────────────────────────────
+function UpcomingCallsList() {
+  const now = Date.now();
+  const upcoming = SCHEDULE.filter(s => s.utcMs + CALL_DURATION_MS > now).slice(0, 6);
+  const past     = SCHEDULE.filter(s => s.utcMs + CALL_DURATION_MS <= now);
+
+  return (
+    <section
+      className="rounded-2xl p-5 space-y-3"
+      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Calendar size={16} style={{ color: "#0074F4" }} />
+          <h3 className="text-sm font-semibold text-white">Upcoming Live Calls</h3>
+        </div>
+        <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Tuesdays & Thursdays</span>
+      </div>
+
+      {upcoming.length === 0 ? (
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>All sessions complete. Check recordings in each week.</p>
+      ) : (
+        <div className="space-y-1.5">
+          {upcoming.map((s) => {
+            const isLive = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
+            return (
+              <a
+                key={s.id}
+                href={`/accelerator/session/${s.week}`}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all"
+                style={{
+                  background: isLive ? "rgba(16,185,129,0.08)" : "rgba(255,255,255,0.02)",
+                  border: isLive ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(255,255,255,0.04)",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e) => { if (!isLive) e.currentTarget.style.background = "rgba(0,116,244,0.06)"; }}
+                onMouseLeave={(e) => { if (!isLive) e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+              >
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-bold"
+                  style={{ background: isLive ? "rgba(16,185,129,0.15)" : "rgba(0,116,244,0.1)", color: isLive ? "#10b981" : "#4a9eff" }}
+                >
+                  W{s.week}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-white">
+                    {isLive && <span className="mr-1.5 text-emerald-400">🔴 LIVE</span>}
+                    Week {s.week} · Session {s.sessionInWeek} of 2
+                  </p>
+                  <p className="text-[11px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>{s.label}</p>
+                </div>
+                <ChevronRight size={13} style={{ color: "rgba(255,255,255,0.25)", flexShrink: 0 }} />
+              </a>
+            );
+          })}
+        </div>
+      )}
+
+      {past.length > 0 && (
+        <p className="text-[11px] pt-1" style={{ color: "rgba(255,255,255,0.3)" }}>
+          ✱ {past.length} previous session{past.length > 1 ? "s" : ""} available — click any week below to catch up.
+        </p>
+      )}
+    </section>
+  );
+}
+
 export default function Accelerator() {
   const { hasAccess: realAccess, reason: realReason, user } = useAcceleratorAccess();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -345,63 +644,7 @@ export default function Accelerator() {
         </div>
 
         {/* ── Next Live Call Countdown ── */}
-        <section className="relative overflow-hidden rounded-2xl p-6 sm:p-8"
-          style={{ background: "linear-gradient(135deg, #0a1628 0%, #0d2847 40%, #0a3a6b 100%)", border: "1px solid rgba(0,116,244,0.3)", boxShadow: "0 4px 24px rgba(0,116,244,0.12)" }}>
-          {/* Animated glow effects */}
-          <div className="absolute top-0 right-1/4 w-64 h-64 rounded-full opacity-15 blur-3xl" style={{ background: "radial-gradient(circle, #0074F4, transparent)" }} />
-          <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full opacity-10 blur-3xl" style={{ background: "radial-gradient(circle, #00A9E2, transparent)" }} />
-          
-          {/* Centered layout */}
-          <div className="relative flex flex-col items-center text-center gap-4">
-            {/* Clock icon */}
-            <div className="relative">
-              <div className="w-11 h-11 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", boxShadow: "0 4px 16px rgba(0,116,244,0.4)" }}>
-                <Clock size={20} className="text-white" />
-              </div>
-              {/* Pulsing live dot */}
-              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0d2847]">
-                <div className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
-              </div>
-            </div>
-
-            {/* Title */}
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">NEXT LIVE CALL</h3>
-              <p className="mt-0.5 text-xs font-medium" style={{ color: "#4a9eff" }}>Tue & Thu • Live Coaching with Prospecting On Demand</p>
-            </div>
-
-            {/* Countdown numbers — centered, medium size */}
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="text-center">
-                <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
-                </div>
-                <p className="mt-1.5 text-[9px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Days</p>
-              </div>
-              <span className="text-2xl font-bold" style={{ color: "rgba(0,116,244,0.5)" }}>:</span>
-              <div className="text-center">
-                <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
-                </div>
-                <p className="mt-1.5 text-[9px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Hours</p>
-              </div>
-              <span className="text-2xl font-bold" style={{ color: "rgba(0,116,244,0.5)" }}>:</span>
-              <div className="text-center">
-                <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.25)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-                  <p className="text-2xl sm:text-3xl font-black text-white tabular-nums">--</p>
-                </div>
-                <p className="mt-1.5 text-[9px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.5)" }}>Min</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom bar: Schedule status */}
-          <div className="relative mt-4 pt-3" style={{ borderTop: "1px solid rgba(0,116,244,0.12)" }}>
-            <p className="text-center text-xs font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>
-              Schedule drops soon — check back for the next session date
-            </p>
-          </div>
-        </section>
+        <LiveCallCountdown hasAccess={hasAccess} />
 
         {/* ── 6-Week Curriculum (tiles — gated or unlocked) ── */}
         <section className="space-y-4">
@@ -523,19 +766,7 @@ export default function Accelerator() {
         </section>
 
         {/* ── Upcoming Live Calls (for members) ── */}
-        {hasAccess && (
-          <section className="rounded-2xl p-5 space-y-3"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar size={16} style={{ color: "#0074F4" }} />
-                <h3 className="text-sm font-semibold text-white">Upcoming Live Calls</h3>
-              </div>
-              <span className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Tuesdays & Thursdays</span>
-            </div>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>No upcoming calls scheduled yet. Check back soon.</p>
-          </section>
-        )}
+        {hasAccess && <UpcomingCallsList />}
 
         {/* ── The Partnership ── */}
         <section className="space-y-4">
