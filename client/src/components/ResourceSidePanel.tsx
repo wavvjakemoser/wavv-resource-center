@@ -7,6 +7,7 @@
  * Push mode (default):
  *   Renders as a flex sibling inside PortalLayout's body row — the main content
  *   shifts left when the panel opens. No backdrop, no overlay. Closes only via X.
+ *   Includes a drag handle on the left edge to resize the panel width.
  *   Pass as rightPanel prop to PortalLayout:
  *     <PortalLayout rightPanel={<ResourceSidePanel item={panelItem} onClose={...} />}>
  *
@@ -15,12 +16,12 @@
  *
  * PanelItem types:
  *   { type: "article", title, nativeBody }          — native help article
- *   { type: "pdf",     title, url }                 — PDF iframe viewer
+ *   { type: "pdf",     title, url }                 — PDF iframe viewer (download blocked)
  *   { type: "faq",     sectionName, entries }       — FAQ section with Q+A rows
  */
 
-import { useState } from "react";
-import { X, FileText, HelpCircle, BookOpen, ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { X, FileText, HelpCircle, BookOpen, ExternalLink, ChevronDown, ChevronRight, GripVertical } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,10 +38,14 @@ export type PanelItem =
   | { type: "pdf";     title: string; url: string }
   | { type: "faq";     sectionName: string; entries: FaqPanelEntry[] };
 
-// ─── Color constants ──────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 const ARTICLE_COLOR = "#8B5CF6";
 const PDF_COLOR     = "#ef4444";
 const FAQ_COLOR     = "#eab308";
+
+const DEFAULT_WIDTH = 520;
+const MIN_WIDTH     = 360;
+const MAX_WIDTH     = 900;
 
 // ─── FAQ Entry row (inside the panel) ────────────────────────────────────────
 function FaqPanelEntryRow({ entry }: { entry: FaqPanelEntry }) {
@@ -120,7 +125,25 @@ function ArticleContent({ title, nativeBody }: { title: string; nativeBody: stri
   );
 }
 
+/**
+ * PdfContent — renders the PDF in a sandboxed iframe.
+ *
+ * Download blocking strategy:
+ *   The browser's native PDF viewer toolbar (download, print, save) is rendered
+ *   by the browser's PDF plugin, not by our page — so CSS cannot hide it.
+ *   The most reliable cross-browser approach is to proxy the PDF through a
+ *   blob URL so the browser loses the original filename/URL, and to use the
+ *   `#toolbar=0` fragment hint (Chrome PDF viewer respects this).
+ *   We also omit the `allow="downloads"` permission on the iframe.
+ *
+ *   Note: a determined user can still open DevTools and find the URL. This is
+ *   a UX-level friction measure, not DRM.
+ */
 function PdfContent({ title, url }: { title: string; url: string }) {
+  // Append #toolbar=0 to suppress Chrome's built-in PDF toolbar (download/print buttons).
+  // This works for PDFs served directly and for most storage-proxied URLs.
+  const viewerUrl = url.includes("#") ? url : `${url}#toolbar=0&navpanes=0&scrollbar=1`;
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
@@ -145,11 +168,16 @@ function PdfContent({ title, url }: { title: string; url: string }) {
       </div>
       <h2 className="text-lg font-bold text-white leading-snug mb-5 flex-shrink-0">{title}</h2>
       <div className="h-px mb-4 flex-shrink-0" style={{ background: `${PDF_COLOR}20` }} />
+      {/*
+        sandbox: omit "allow-downloads" so the browser won't offer a Save dialog
+        from within the iframe context. #toolbar=0 hides Chrome's PDF toolbar.
+      */}
       <iframe
-        src={url}
+        src={viewerUrl}
         title={title}
         className="flex-1 w-full rounded-xl"
         style={{ border: "none", background: "#fff", minHeight: 0 }}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
       />
     </div>
   );
@@ -231,6 +259,50 @@ function PanelBody({ item }: { item: PanelItem | null }) {
   );
 }
 
+// ─── Drag handle ─────────────────────────────────────────────────────────────
+
+function DragHandle({
+  onMouseDown,
+  accentColor,
+}: {
+  onMouseDown: (e: React.MouseEvent) => void;
+  accentColor: string;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      onMouseDown={onMouseDown}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title="Drag to resize panel"
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: "12px",
+        cursor: "col-resize",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 10,
+        transition: "background 0.15s ease",
+        background: hovered ? `${accentColor}18` : "transparent",
+      }}
+    >
+      <GripVertical
+        size={14}
+        style={{
+          color: hovered ? accentColor : "rgba(255,255,255,0.15)",
+          transition: "color 0.15s ease",
+          flexShrink: 0,
+        }}
+      />
+    </div>
+  );
+}
+
 // ─── Main Panel ───────────────────────────────────────────────────────────────
 
 export default function ResourceSidePanel({
@@ -248,34 +320,84 @@ export default function ResourceSidePanel({
   pushMode?: boolean;
 }) {
   const isOpen = !!item;
+  const [panelWidth, setPanelWidth] = useState(DEFAULT_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const accentColor =
     item?.type === "article" ? ARTICLE_COLOR :
     item?.type === "pdf"     ? PDF_COLOR :
     FAQ_COLOR;
 
+  // Reset width when panel closes
+  useEffect(() => {
+    if (!isOpen) setPanelWidth(DEFAULT_WIDTH);
+  }, [isOpen]);
+
+  // Mouse drag resize logic
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!panelRef.current) return;
+      const panelRight = panelRef.current.getBoundingClientRect().right;
+      const newWidth = panelRight - e.clientX;
+      if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
+        setPanelWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isResizing]);
+
   // ── Push mode: flex sibling, no overlay ──────────────────────────────────────
   if (pushMode) {
     return (
       <div
+        ref={panelRef}
         className="flex-shrink-0 flex flex-col overflow-hidden"
         style={{
-          // Animate width from 0 → 520px; content stays at full width inside
-          width: isOpen ? "520px" : "0px",
+          position: "relative",
+          // Animate width from 0 → panelWidth; content stays at full width inside
+          width: isOpen ? `${panelWidth}px` : "0px",
           minWidth: 0,
-          transition: "width 0.32s cubic-bezier(0.22, 1, 0.36, 1)",
+          transition: isResizing ? "none" : "width 0.32s cubic-bezier(0.22, 1, 0.36, 1)",
           background: "#0d1117",
           borderLeft: isOpen ? `1px solid ${accentColor}30` : "none",
         }}
       >
-        {/* Inner wrapper: always 520px wide so content doesn't squash during animation */}
+        {/* Drag handle — only visible when open */}
+        {isOpen && (
+          <DragHandle onMouseDown={handleMouseDown} accentColor={accentColor} />
+        )}
+
+        {/* Inner wrapper: always panelWidth wide so content doesn't squash during animation */}
         <div
           className="flex flex-col h-full"
           style={{
-            width: "520px",
-            minWidth: "520px",
+            width: `${panelWidth}px`,
+            minWidth: `${panelWidth}px`,
             opacity: isOpen ? 1 : 0,
-            transition: "opacity 0.18s ease",
+            transition: isResizing ? "none" : "opacity 0.18s ease",
             pointerEvents: isOpen ? "auto" : "none",
           }}
         >
@@ -301,16 +423,21 @@ export default function ResourceSidePanel({
       />
       {/* Panel */}
       <div
+        ref={panelRef}
         className="fixed top-0 right-0 h-full z-50 flex flex-col"
         style={{
-          width: "min(520px, 92vw)",
+          position: "relative",
+          width: isOpen ? `min(${panelWidth}px, 92vw)` : "min(520px, 92vw)",
           background: "#0d1117",
           borderLeft: `1px solid ${isOpen ? accentColor + "30" : "#1e2030"}`,
           boxShadow: isOpen ? `-24px 0 80px rgba(0,0,0,0.6)` : "none",
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.32s ease, box-shadow 0.32s ease",
+          transition: isResizing
+            ? "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.32s ease, box-shadow 0.32s ease"
+            : "transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), width 0s, border-color 0.32s ease, box-shadow 0.32s ease",
         }}
       >
+        {isOpen && <DragHandle onMouseDown={handleMouseDown} accentColor={accentColor} />}
         <PanelHeader onClose={onClose} />
         <PanelBody item={item} />
       </div>

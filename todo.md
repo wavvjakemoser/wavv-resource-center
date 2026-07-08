@@ -1743,3 +1743,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Push layout: main content shifts left when panel opens, no backdrop/overlay, closes only via X
 - [x] PortalLayout: add optional rightPanel prop for persistent right panel slot
 - [x] Hero subline: updated from "Search help articles, PDFs, and FAQs organized by topic." to "Help articles, PDFs, and FAQs organized by topic."
+
+## Side Panel UX + PDF Security (Jul 8, 2026)
+- [x] ResourceSidePanel: add drag handle on left edge to resize panel width (push layout)
+- [x] ResourceSidePanel PDF viewer: block native browser download/print toolbar
