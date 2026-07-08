@@ -289,7 +289,7 @@ export default function Accelerator() {
 
             {/* Subline */}
             <p className="mx-auto mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)", maxWidth: "540px" }}>
-              A structured program that combines live sales training with hands-on WAVV product mastery. More dials. More conversations. More closes.
+              Complete the WAVV Accelerator and walk away with a fully configured dialer, a proven outreach cadence, and the skills to hit your connection rate targets — in 6 weeks or less.
             </p>
             {/* Schedule line */}
             <div className="flex items-center justify-center gap-2 mb-5">

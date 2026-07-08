@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 const ACCENT = "#D4AF37";
 const THUMB  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp";
@@ -226,6 +227,7 @@ function PlaygroundModal({ onClose }: { onClose: () => void }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function Dashboard() {
+  const { isAuthenticated } = useAuth();
   const { data: exclusiveWebinars } = trpc.webinars.list.useQuery({ type: "exclusive" });
   const trackRegClick = trpc.webinars.trackRegistrationClick.useMutation();
   const [showPlaygroundModal, setShowPlaygroundModal] = useState(false);
@@ -316,8 +318,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── What is WAVV ── */}
-        <section>
+        {/* ── What is WAVV ── only shown to unauthenticated visitors ── */}
+        {!isAuthenticated && (<section>
           <div className="flex items-center justify-between gap-4 mb-2">
             <div className="flex items-center gap-2.5">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
@@ -357,7 +359,7 @@ export default function Dashboard() {
               );
             })}
           </div>
-        </section>
+        </section>)}
 
         {/* ── Exclusive Live Webinars (conditional) ── */}
         {exclusive.length > 0 && (

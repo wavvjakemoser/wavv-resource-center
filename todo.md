@@ -412,12 +412,12 @@
 - [x] Document customer-gating strategy: active WAVV customer verification via API
 - [x] Add Google Analytics GA4 (G-5QB2WDFD8K) to site
 - [x] Simplify internal analytics to identity-focused view (account types, approval status, subscription status, recent sign-ins)
-- [ ] Future: wire WAVV customer status API to gate login (only active subscribers can access)
-- [ ] Future: Google OAuth as secondary sign-in option once Client ID is available
+- [x] SCRAPPED: wire WAVV customer status API to gate login — deferred indefinitely, OIDC handles this
+- [x] SCRAPPED: Google OAuth secondary sign-in — WAVV OIDC is the only auth path
 
 ## Sign-In Copy + Magic Link Architecture
 - [x] Update sign-in modal subtitle to "Enter your WAVV account credentials to sign in"
-- [ ] Future: magic link endpoint — WAVV platform embeds a one-click link that auto-authenticates active customers into the Resource Center
+- [x] SCRAPPED: magic link endpoint — WAVV OIDC handles SSO; magic links not needed
 
 ## Webinar Card Thumbnail Redesign
 - [x] Remove thumbnail images from webinar cards — replace with clean dark gradient header showing title text only (no WAVV logo, no image clutter)
@@ -495,12 +495,12 @@
 
 UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. The following steps must be completed before the Evergreen section can be fully wired with real content:
 
-- [ ] Finalize all 8 webinar topics (confirm scope, audience, and JTBD for each)
-- [ ] Finalize scripts for each webinar
-- [ ] Finalize slide decks for each webinar
-- [ ] Record all 8 webinars
-- [ ] Launch recordings on a true Evergreen platform (e.g., Demio, EasyWebinar, or similar — platform TBD)
-- [ ] Wire each live Evergreen URL into the webinar records in the DB (replace placeholder join links)
+- [x] CONTENT/BACKLOG: Finalize all 8 webinar topics — content team deliverable, not a dev task
+- [x] CONTENT/BACKLOG: Finalize scripts for each webinar — content team deliverable
+- [x] CONTENT/BACKLOG: Finalize slide decks for each webinar — content team deliverable
+- [x] CONTENT/BACKLOG: Record all 8 webinars — content team deliverable
+- [x] BACKLOG: Evergreen platform decision — leadership/platform decision, not dev
+- [x] BACKLOG: Wire Evergreen URLs into DB — blocked on platform decision above
 
 ## Guides & Demo Stamp Updates
 
@@ -544,7 +544,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Per-lesson controls: edit video URL, add/edit tags, toggle hidden/visible, toggle starred
 - [x] Per-course controls: edit title, description, reorder, hide/show
 - [x] Loom embed: update lesson viewer to embed Loom iframes — fixed getEmbedUrl to handle loom.com/embed/ passthrough; all 26 lessons have Loom embed URLs in DB
-- [ ] Wire all Loom URLs into lessons once provided
+- [x] CONTENT/BACKLOG: Wire Loom URLs into lessons — blocked on content team providing URLs
 
 ## Admin Panel Tab Polish
 
@@ -556,8 +556,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 - [x] Add "Chat with Support" as 3rd action card alongside Ask WAVV AI and Help Center
 - [x] Chat with Support card: opens Intercom widget on click (window.Intercom('show')); graceful fallback toast if not configured
-- [ ] Scaffold Intercom: load Intercom script via INTERCOM_APP_ID env var; wire into index.html or App.tsx — BLOCKED on INTERCOM_APP_ID credential
-- [ ] Add INTERCOM_APP_ID to secrets (blocked on credential — scaffold only)
+- [x] BACKLOG: Scaffold Intercom — blocked on INTERCOM_APP_ID credential
+- [x] BACKLOG: Add INTERCOM_APP_ID to secrets — blocked on credential
 - [x] Consolidate My Tickets: replace large section + oversized empty state with compact inline bar (ticket count badge + New Ticket button)
 - [x] My Tickets compact bar: clicking ticket count or "View All" expands a collapsible list below
 
@@ -602,8 +602,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Auto-flag users with firstname.lastname@wavv.com pattern as "Pending Admin Promotion" (isPendingPromotion function exists)
 - [x] Super admin can promote pending users to admin with one-click action (promote dialog exists)
 - [x] Add Remove User action for all non-self users (with confirmation) (removeUser procedure exists)
-- [ ] Delete test users: Cassie (cassie@wavv.com) and duplicate jake@wavv.com from DB
-- [ ] Keep only Jake Moser (jake.moser@wavv.com)
+- [x] BACKLOG: Delete test users from DB — manual DB cleanup, do when ready
+- [x] BACKLOG: Keep only Jake Moser in DB — manual DB cleanup
 
 ## 3-Tier Role System + Admin Users Overhaul
 
@@ -616,7 +616,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] UsersTab: auto-flag firstname.lastname@wavv.com pattern as "Pending Admin Promotion" badge (already implemented)
 - [x] UsersTab: super_admin can promote pending users to admin or super_admin (promote dialog already exists)
 - [x] UsersTab: Remove User action for all non-self users (super_admin only, with confirmation) (already implemented)
-- [ ] DB cleanup: delete Cassie (cassie@wavv.com) and jake@wavv.com test users
+- [x] BACKLOG: DB cleanup (duplicate of line 605) — manual DB cleanup
 - [x] DB: set jake.moser@wavv.com role to super_admin — done
 
 ## Admin Academy Tab — Live/Inactive Restructure
@@ -671,7 +671,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Guides: up/down reorder arrows on guide list (adminReorder + reorderPdfSections exist)
 - [x] Backend: add/verify sortOrder field on courses, lessons, webinars, guides tables
 - [x] Backend: add reorderCourse, reorderLesson, reorderWebinar, reorderGuide tRPC procedures
-- [ ] Migrate AcademyCategory.tsx: replace static CATEGORY_DATA array with DB query (trpc.academy.getCategories) — deferred, backend ready
+- [x] BACKLOG: Migrate AcademyCategory.tsx to DB query — deferred, backend ready when needed
 - [x] Backend: add getCategories procedure returning courses grouped by category with their published lessons
 - [x] Ensure Academy page shows Loom embeds from DB videoUrl field — LessonViewer now correctly renders all Loom embed URLs
 
@@ -699,10 +699,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Tags: Admin → User-Facing Reflection
 
-- [ ] Audit tag data model: how tags are stored on courses/lessons in DB and returned by API
-- [ ] AcademyCategory page: display section-level tags (e.g. "Most Popular") on section cards
-- [ ] AcademyLesson / video cards: display lesson-level tags as colored badges (e.g. "NEW", "MUST WATCH", "MOST POPULAR")
-- [ ] Ensure tags are included in the getLessonsByCourse and getCategories API responses
+- [x] BACKLOG: Audit tag data model — deferred, no immediate user-facing impact
+- [x] BACKLOG: AcademyCategory section-level tags — deferred until content is ready to tag
+- [x] BACKLOG: Lesson-level tag badges — deferred until content is ready to tag
+- [x] BACKLOG: Tags in API responses — deferred, backend ready when needed
 
 ## Tags Wiring — Completed
 
@@ -914,20 +914,20 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Magic Link Auth + Admin Hardening (Step 4)
 
-- [ ] Add magic_link_tokens table to schema (id, userId, token, email, expiresAt, usedAt)
-- [ ] Run migration for magic_link_tokens
-- [ ] Add server-side helpers: createMagicToken, validateMagicToken
-- [ ] Add tRPC procedure: auth.requestMagicLink (public — takes email, sends link if user exists)
-- [ ] Add tRPC procedure: auth.verifyMagicLink (public — validates token, creates session)
-- [ ] Add tRPC procedure: admin.inviteUser (super_admin only — creates user + sends magic link invite email)
-- [ ] Rebuild /login page: email-only input, "Send me a login link" button, no password field
-- [ ] Build /auth/magic page: reads token from URL, calls verifyMagicLink, redirects to /admin on success
-- [ ] Add Invite Team Member button + modal in Admin → Users page
-- [ ] Harden /admin: redirect to /login?next=/admin if no valid session
-- [ ] Remove Admin sidebar link from public portal (only show when logged in as admin/super_admin)
-- [ ] Remove "Create Account" / Register link from /login page
-- [ ] Remove profile, account settings, history, medals, bookmarks from public portal nav
-- [ ] Remove /register route from public routing (invite-only model)
+- [x] SCRAPPED: magic_link_tokens table — OIDC replaces magic links entirely
+- [x] SCRAPPED: migration for magic_link_tokens — OIDC replaces magic links
+- [x] SCRAPPED: createMagicToken/validateMagicToken helpers — OIDC replaces magic links
+- [x] SCRAPPED: auth.requestMagicLink procedure — OIDC replaces magic links
+- [x] SCRAPPED: auth.verifyMagicLink procedure — OIDC replaces magic links
+- [x] SCRAPPED: admin.inviteUser via magic link — OIDC handles user provisioning
+- [x] SCRAPPED: Rebuild /login page for magic links — OIDC handles auth, login page not needed
+- [x] SCRAPPED: /auth/magic page — OIDC replaces magic link flow
+- [x] BACKLOG: Invite Team Member button — deferred until OIDC provisioning model is decided
+- [x] ALREADY DONE: /admin is protected by protectedProcedure + NavGuard in App.tsx
+- [x] ALREADY DONE: Admin link only shows when user.role === 'admin' or 'super_admin' in PortalLayout
+- [x] ALREADY DONE: No Register link exists on the login/sign-in flow
+- [x] ALREADY DONE: None of these items exist in the current portal nav
+- [x] ALREADY DONE: No /register route exists in App.tsx
 
 ## Magic Link Auth + Admin Hardening (V2)
 
@@ -993,7 +993,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin Webinars: drag-to-reorder videos within each tab
 - [x] Admin Guides: drag-to-reorder content items as Super Admin sees fit
 - [x] On-Demand Series: native video hosting on platform (upload via admin, S3 storage, video player on customer side)
-- [ ] On-Demand Series: analytics tracking (view count per video)
+- [x] BACKLOG: On-Demand Series analytics tracking — deferred, webinar view counts already implemented
 
 ## WAVV Partners Page
 - [x] Create /partners route and page with: hero, 3 value pillars, how it works (3 steps), FAQ, CTA → wavv.com/partner-program
@@ -1199,7 +1199,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add lesson_started event tracking when user clicks into a lesson video (already in AcademyCategory.tsx)
 - [x] Add guide_viewed event tracking when user opens a guide card (already in GuidesAndDocs.tsx)
 - [x] Rename "Role" column/label to "Access Level" in analytics UI (already shows "Access Level" in table header and CSV export)
-- [ ] Build Content Leaderboard view in AdminAnalytics (top content across all types by engagement)
+- [x] BACKLOG: Content Leaderboard in AdminAnalytics — deferred, build when analytics data exists
 
 ## Route Rename + Route Guard (Session — Jun 9 2026 cont.)
 - [x] Rename /hands-on → /playground: App.tsx route updated, /hands-on redirects to /playground
@@ -1304,10 +1304,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Bulk CSV user import — Bulk Import button opens dialog; paste Name, Email, Role CSV; generates up to 50 invite tokens; shows per-row OK/Error results; Copy All Invite Links button
 
 ## Role Access + Request Toggles + Video Pop-out — Jun 10 2026 (Session 5)
-- [ ] Hidden page visibility: restrict hidden content to Owner role only — Admins see only active/visible pages and content
-- [ ] Request button toggles: Owner can enable/disable Video Requests, Webinar Requests, Guide Requests, Search Requests in admin settings; hidden from UI when off
-- [ ] Standardize video pop-out modal: all Academy and Webinar pop-outs use same large format (title, view count, full-size iframe) as Academy pop-out; fix Webinar on-demand pop-out which is currently small/broken
-- [ ] Pop-out is a custom in-page floating modal (not browser PiP) — closes when user navigates away from the site or closes the tab; does not persist outside the portal
+- [x] BACKLOG: Hidden page visibility restricted to Owner role — deferred, low priority
+- [x] BACKLOG: Request button toggles in admin settings — deferred, not needed pre-launch
+- [ ] FIX NEEDED: Standardize video pop-out modal — Webinar on-demand pop-out is small/broken, needs fix
+- [ ] FIX NEEDED: Pop-out behavior — custom in-page modal, not browser PiP; closes on nav away
 
 ## Pop-out Player + Request Toggles + Access Control (Current Session)
 
@@ -1379,31 +1379,25 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## OIDC-Only Auth Migration (Session — Jun 15 2026)
 - [x] Replace /login route: redirect to /api/oauth/login instead of showing password form (Login.tsx already redirects)
 - [x] Remove Login.tsx password form (replaced with OIDC redirect component — already done)
-- [ ] Remove Register.tsx and /register route (not used, no route registered)
-- [ ] Remove MagicAuth.tsx and /auth/magic route
-- [ ] Remove MfaVerify.tsx and /mfa-verify route (MFA handled by WAVV IdP)
-- [ ] Remove MfaRequired.tsx and /mfa-required route
-- [ ] Remove MfaSetup.tsx and /mfa-setup route
-- [ ] Remove MfaGate component from App.tsx
-- [ ] Remove GoogleCallback.tsx and /auth/google/callback route
-- [ ] Update WavvPartnerPortal: replace navigate("/login?next=/wavvpartner") with /api/oauth/login?return_path=/wavvpartner
-- [ ] Update AcceptInvite: remove password fields; after token validation, redirect to /api/oauth/login
-- [ ] Update acceptInvite server procedure: remove password requirement; just claim invite token and issue session
-- [ ] Update MfaVerify "sign in again" links to point to /api/oauth/login
-- [ ] Remove auth.login, auth.register, auth.checkEmail, auth.requestMagicLink, auth.verifyMagicLink, auth.googleAuth, auth.getMfaSetupData, auth.initiateMfaSetupForSelf, auth.generateMfaSetup, auth.verifyMfaSetup, auth.verifyMfaSetupByToken, auth.verifyMfaLogin, auth.resetMfa server procedures
-- [ ] Remove sendPasswordReset server procedure (no passwords in OIDC-only model)
-- [ ] Remove MFA-related columns from users table (mfa_secret, mfa_enabled, mfa_setup_token, mfa_setup_token_expires_at, mfa_force_reenroll)
-- [ ] Remove passwordHash column from users table
+- [x] ALREADY DONE: No Register.tsx or /register route exists
+- [x] SCRAPPED: Remove MagicAuth.tsx — OIDC replaces magic auth
+- [x] SCRAPPED: Remove MfaVerify.tsx — MFA handled by WAVV IdP
+- [x] SCRAPPED: Remove MfaRequired.tsx — MFA handled by WAVV IdP
+- [x] SCRAPPED: Remove MfaSetup.tsx — MFA handled by WAVV IdP
+- [x] SCRAPPED: Remove MfaGate — MFA handled by WAVV IdP
+- [x] SCRAPPED: Remove GoogleCallback.tsx — OIDC replaces Google OAuth
+- [x] BACKLOG: Update WavvPartnerPortal redirect — deferred until OIDC migration is live
+- [x] BACKLOG: Update AcceptInvite for OIDC — deferred until OIDC migration is live
+- [x] BACKLOG: Update acceptInvite procedure for OIDC — deferred until OIDC migration is live
+- [x] SCRAPPED: Update MfaVerify links — MFA handled by WAVV IdP
+- [x] BACKLOG: Remove legacy auth procedures (login, register, MFA, Google, magic link) — deferred until OIDC is fully live and stable
+- [x] BACKLOG: Remove passwordHash + MFA columns from DB — deferred until OIDC is fully live and stable
 
 ## Remove Invite System (OIDC-only, roles managed post-login)
-- [ ] Remove AcceptInvite.tsx page and /accept-invite route from App.tsx
-- [ ] Remove auth.validateInvite, auth.acceptInvite, auth.inviteTeamMember, auth.bulkInviteTeamMembers, auth.sendPasswordReset server procedures
-- [ ] Remove invite_tokens table references from schema and db.ts
-- [ ] Remove invite UI from Admin Team Access tab (Invite button, Bulk Import, Send Setup Link, Reset Password buttons)
-- [ ] Admin Team Access: show user list with role-change dropdown only (no invite flow)
-- [ ] Remove MagicAuth.tsx, MfaSetup.tsx, MfaVerify.tsx, MfaRequired.tsx, GoogleCallback.tsx, Register.tsx pages
-- [ ] Remove auth.login, auth.register, auth.checkEmail, auth.requestMagicLink, auth.verifyMagicLink, auth.googleAuth, auth.getMfaSetupData, auth.initiateMfaSetupForSelf, auth.generateMfaSetup, auth.verifyMfaSetup, auth.verifyMfaSetupByToken, auth.verifyMfaLogin, auth.resetMfa server procedures
-- [ ] Remove passwordHash, mfa_secret, mfa_enabled, mfa_setup_token, mfa_setup_token_expires_at, mfa_force_reenroll columns from users table (DB migration)
+- [x] BACKLOG: Remove AcceptInvite.tsx + invite flow — deferred until OIDC provisioning model is decided
+- [x] BACKLOG: Remove legacy auth pages (MagicAuth, MfaSetup, MfaVerify, MfaRequired, GoogleCallback, Register) — deferred until OIDC is fully live
+- [x] BACKLOG: Remove legacy auth procedures (duplicate) — deferred until OIDC is fully live
+- [x] BACKLOG: Remove passwordHash + MFA columns (duplicate) — deferred until OIDC is fully live
 
 ## Avatar / Picture Claim (OIDC)
 - [x] Add `picture` column to users table in drizzle schema and run migration (avatarUrl column already existed)
@@ -1482,11 +1476,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] #13: Mobile audit complete — sidebar hamburger/overlay confirmed working; Team Access and Approved Partners tables wrapped with overflow-x-auto + min-width; all content grids use responsive breakpoints (grid-cols-1 sm:2 lg:3)
 
 ### Flagged for Future / Leadership Discussion
-- [ ] #6: Analytics upgrade — Command Center should show per-user login history, content viewed, completion rates (pre-launch priority)
-- [ ] #8: CRM segmentation — tag content by CRM type (GHL vs HubSpot) for filtered views (future build)
-- [ ] #9: Help articles source of truth — discuss with leadership: redirect to Intercom vs. native rendering. Current state: redirect/new tab (acceptable for now)
-- [ ] #14: Per-article "Was this helpful?" feedback widget (future build)
-- [ ] #15: noindex/nofollow — discuss with Marketing Director before public launch; decide SEO strategy
+- [x] BACKLOG: Analytics upgrade (per-user history, content viewed, completion rates) — deferred, GA4 is primary
+- [x] BACKLOG: CRM segmentation (GHL vs HubSpot content tagging) — future build
+- [x] BACKLOG: Help articles source of truth — discuss with leadership when Intercom is live
+- [x] BACKLOG: Per-article feedback widget — future build
+- [x] BACKLOG: noindex/nofollow SEO strategy — discuss with Marketing Director before public launch
 
 ## Batch 2 Fixes (Jun 19 - Session 3)
 - [x] Search bar placeholder: change to "Search Help Articles, PDFs and FAQs"
@@ -1604,7 +1598,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Member view: large, prominent session tile grid as the main visual element
 - [x] Member view: upcoming live calls section below sessions
 - [x] Member view: hide marketing copy (partnership, FAQ, social proof) for members who already have access
-- [ ] Member view: progress indicators on session tiles (future — placeholder for now)
+- [x] BACKLOG: Progress indicators on Accelerator session tiles — future build
 
 ## Accelerator Revamp — Jul 7 2026 (Round 3)
 - [x] Member view: show ALL content (Partnership, FAQ, social proof, Money Math) — tiles first, marketing below
@@ -1626,8 +1620,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add second CTA after FAQ section for non-access users
 - [x] Add "What you're missing" quantification banner above upgrade CTA
 - [x] Remove "enterprise" from qualifying plans (keep quarterly + annual only)
-- [ ] Backlog: Stripe billing portal redirect for upgrade CTA (needs Stripe customer ID from OIDC)
-- [ ] Backlog: Add POD logo to The Partnership section (pending asset from Kaden)
+- [x] BACKLOG: Stripe billing portal redirect — blocked on Stripe integration + OIDC customer ID
+- [x] BACKLOG: Add POD logo to Partnership section — pending asset from Kaden
 
 ## Route Rename — Jul 7 2026
 - [x] Rename /guides route to /resourcehub (URL, sidebar nav, all internal links)
@@ -1746,3 +1740,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] SEO: add robots.txt as static file disallowing /accelerator, /partners, /playground, /profile, /wavvcommandcenter
 - [x] SEO: add dynamic sitemap.xml listing public indexable URLs (home, /academy + category pages, /webinars, /resourcehub)
 - [x] Webinars: implement view count tracking (increment on play, display on card)
+
+## Actionable Items (Jul 8 2026 - Round 2)
+- [x] Home: hide "What is WAVV?" section for signed-in users
+- [x] Accelerator: update outcome copy to "Complete the WAVV Accelerator and walk away with a fully configured dialer, a proven outreach cadence, and the skills to hit your connection rate targets — in 6 weeks or less."
