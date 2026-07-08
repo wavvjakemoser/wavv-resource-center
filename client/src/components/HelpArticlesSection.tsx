@@ -85,7 +85,7 @@ function ArticleRow({
 
   if (isNative) {
     return (
-      <button
+        <button
         type="button"
         onClick={() => onOpenNative({ title: article.title, nativeBody: article.nativeBody! })}
         className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-left group"
@@ -227,14 +227,18 @@ function SectionGroup({
 }
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
-export default function HelpArticlesSection({ search }: { search: string }) {
+export default function HelpArticlesSection({ search, onOpenArticle }: { search: string; onOpenArticle?: (article: { title: string; nativeBody: string }) => void }) {
   // Use visible sections as source of truth — show sections even if no articles yet
   const { data: sections = [], isLoading: sectionsLoading } = trpc.helpArticles.listSections.useQuery();
   const { data: published = [], isLoading: articlesLoading } = trpc.helpArticles.listPublished.useQuery();
   const isLoading = sectionsLoading || articlesLoading;
 
-  // Inline native article modal state
+  // Inline native article modal state — only used when onOpenArticle prop is not provided
   const [openArticle, setOpenArticle] = useState<{ title: string; nativeBody: string } | null>(null);
+  const handleOpenNative = (article: { title: string; nativeBody: string }) => {
+    if (onOpenArticle) onOpenArticle(article);
+    else setOpenArticle(article);
+  };
 
   if (isLoading) {
     return (
@@ -304,7 +308,7 @@ export default function HelpArticlesSection({ search }: { search: string }) {
             key={sec.id}
             name={sec.name}
             articles={bySection[sec.name] ?? []}
-            onOpenNative={setOpenArticle}
+            onOpenNative={handleOpenNative}
           />
         ))}
       </div>

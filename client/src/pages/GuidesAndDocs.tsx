@@ -2,62 +2,10 @@ import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { FileText, Download, ExternalLink, Search, ChevronDown, ChevronRight, X, HelpCircle } from "lucide-react";
-import { toast } from "sonner";
+import { FileText, ExternalLink, Search, ChevronDown, ChevronRight, HelpCircle, BookOpen } from "lucide-react";
 import { ContentRequestCTA } from "./Academy";
 import HelpArticlesSection from "@/components/HelpArticlesSection";
-
-// ─── PDF Viewer Modal ─────────────────────────────────────────────────────────
-function PdfViewerModal({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.85)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        className="relative flex flex-col rounded-2xl overflow-hidden"
-        style={{ width: "min(90vw, 1100px)", height: "min(90vh, 820px)", background: "#0f1318", border: "1px solid #252d3d", boxShadow: "0 24px 80px rgba(0,0,0,0.7)" }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ borderBottom: "1px solid #1e2030" }}>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(239,68,68,0.15)" }}>
-              <FileText size={14} style={{ color: "#ef4444" }} />
-            </div>
-            <span className="text-sm font-semibold text-white truncate max-w-[500px]">{title}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-              style={{ background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}
-            >
-              <ExternalLink size={11} />
-              Open in tab
-            </a>
-            <button
-              onClick={onClose}
-              className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-              style={{ background: "rgba(255,255,255,0.06)", color: "#9ca3af" }}
-            >
-              <X size={14} />
-            </button>
-          </div>
-        </div>
-        {/* PDF iframe */}
-        <iframe
-          src={url}
-          title={title}
-          className="flex-1 w-full"
-          style={{ border: "none", background: "#fff" }}
-        />
-      </div>
-    </div>
-  );
-}
+import ResourceSidePanel, { PanelItem, FaqPanelEntry } from "@/components/ResourceSidePanel";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type GuideItem = {
@@ -72,28 +20,39 @@ type GuideItem = {
   createdAt?: Date | null;
 };
 
-// ─── PDF Guide Row ────────────────────────────────────────────────────────────
-const PDF_COLOR = "#ef4444";
+type DbSection = {
+  id: number;
+  name: string;
+  sortOrder: number;
+  subsections: Array<{
+    id: number;
+    name: string;
+    sortOrder: number;
+    guides: GuideItem[];
+  }>;
+};
 
+// ─── Color constants ──────────────────────────────────────────────────────────
+const PDF_COLOR     = "#ef4444";
+const FAQ_COLOR     = "#eab308";
+const ARTICLE_COLOR = "#8B5CF6";
+
+// ─── PDF Guide Row ────────────────────────────────────────────────────────────
 function PdfRow({
   guide,
-  onDownload,
-  onView,
-  onOpenModal,
-  isPending,
+  onOpen,
 }: {
   guide: GuideItem;
-  onDownload: (guide: GuideItem) => void;
-  onView?: (guide: GuideItem) => void;
-  onOpenModal?: (guide: GuideItem) => void;
-  isPending: boolean;
+  onOpen: (guide: GuideItem) => void;
 }) {
   return (
-    <div
-      className="flex items-center gap-4 px-4 py-3 rounded-lg transition-all group"
+    <button
+      type="button"
+      className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all group text-left"
       style={{ background: "#1d2230", border: "1px solid #252d3d" }}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${PDF_COLOR}50`; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; }}
+      onClick={() => onOpen(guide)}
     >
       {/* Type icon */}
       <div
@@ -119,30 +78,15 @@ function PdfRow({
         )}
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <button
-          onClick={() => onDownload(guide)}
-          disabled={isPending}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-          style={{ background: `${PDF_COLOR}18`, color: PDF_COLOR, border: `1px solid ${PDF_COLOR}35` }}
-        >
-          <Download size={11} />
-          <span className="hidden sm:inline">Download</span>
-        </button>
-        {guide.fileUrl && (
-          <button
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all max-w-[180px] truncate"
-            style={{ background: "#252d3d", color: "#9ca3af" }}
-            onClick={() => { onView?.(guide); onOpenModal?.(guide); }}
-            title={guide.linkLabel ?? guide.fileUrl}
-          >
-            <ExternalLink size={11} className="flex-shrink-0" />
-            <span className="hidden sm:inline truncate">{guide.linkLabel ?? "View"}</span>
-          </button>
-        )}
-      </div>
-    </div>
+      {/* Open cue */}
+      <span
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0 transition-all opacity-0 group-hover:opacity-100"
+        style={{ background: `${PDF_COLOR}18`, color: PDF_COLOR, border: `1px solid ${PDF_COLOR}35` }}
+      >
+        <ExternalLink size={11} />
+        Open
+      </span>
+    </button>
   );
 }
 
@@ -150,17 +94,11 @@ function PdfRow({
 function PdfSubSection({
   sectionName,
   items,
-  onDownload,
-  onView,
-  onOpenModal,
-  isPending,
+  onOpen,
 }: {
   sectionName: string;
   items: GuideItem[];
-  onDownload: (guide: GuideItem) => void;
-  onView?: (guide: GuideItem) => void;
-  onOpenModal?: (guide: GuideItem) => void;
-  isPending: boolean;
+  onOpen: (guide: GuideItem) => void;
 }) {
   const [open, setOpen] = useState(false);
   const label = sectionName || "General";
@@ -205,15 +143,8 @@ function PdfSubSection({
           </div>
         ) : (
           <div className="space-y-2">
-            {items.map((guide) => (
-              <PdfRow
-                key={guide.id}
-                guide={guide}
-                onDownload={onDownload}
-                onView={onView}
-                onOpenModal={onOpenModal}
-                isPending={isPending}
-              />
+            {items.map((g) => (
+              <PdfRow key={g.id} guide={g} onOpen={onOpen} />
             ))}
           </div>
         )
@@ -223,208 +154,121 @@ function PdfSubSection({
 }
 
 // ─── PDF Section (top-level, wraps sub-sections) ──────────────────────────────
-type DbSection = { id: number; name: string; sortOrder: number; isVisible: boolean };
 function PdfSection({
   items,
   dbSections,
-  onDownload,
-  onView,
-  onOpenModal,
-  isPending,
+  onOpen,
 }: {
   items: GuideItem[];
   dbSections: DbSection[];
-  onDownload: (guide: GuideItem) => void;
-  onView?: (guide: GuideItem) => void;
-  onOpenModal?: (guide: GuideItem) => void;
-  isPending: boolean;
+  onOpen: (guide: GuideItem) => void;
 }) {
-  // Use DB sections (visible only, sorted by sortOrder) as the authoritative section list.
-  const visibleDbSections = dbSections.filter(s => s.isVisible);
-  const dbSectionNames = new Set(visibleDbSections.map(s => s.name));
-  // Any guide categories not in DB sections (orphaned) sorted alphabetically
-  const orphanCategories = Array.from(new Set(
-    items.map(g => g.category ?? "").filter(c => c !== "" && !dbSectionNames.has(c))
-  )).sort();
-  // Unsectioned guides go last
-  const hasUnsectioned = items.some(g => !g.category);
-  const sectionOrder: string[] = [
-    ...visibleDbSections.map(s => s.name),
-    ...orphanCategories,
-    ...(hasUnsectioned ? [""] : []),
-  ];
-  const bySection = sectionOrder.reduce((acc, sec) => {
-    acc[sec] = items.filter(g => (g.category ?? "") === sec);
-    return acc;
-  }, {} as Record<string, GuideItem[]>);
-  const hasSections = visibleDbSections.length > 0 || orphanCategories.length > 0;
+  if (items.length === 0 && dbSections.length === 0) return null;
+
+  // Build sub-section map
+  const sectionMap: Record<string, GuideItem[]> = {};
+  const unsectioned: GuideItem[] = [];
+
+  if (dbSections.length > 0) {
+    const allSectionedIds = new Set<number>();
+    for (const sec of dbSections) {
+      for (const sub of sec.subsections) {
+        const subItems = sub.guides.filter(g => items.some(i => i.id === g.id));
+        if (subItems.length > 0) {
+          sectionMap[sub.name] = subItems;
+          subItems.forEach(g => allSectionedIds.add(g.id));
+        }
+      }
+    }
+    items.forEach(g => { if (!allSectionedIds.has(g.id)) unsectioned.push(g); });
+  } else {
+    // Fall back to category grouping
+    for (const g of items) {
+      const cat = g.category ?? "General";
+      if (!sectionMap[cat]) sectionMap[cat] = [];
+      sectionMap[cat].push(g);
+    }
+  }
+
+  const subSections = Object.entries(sectionMap);
 
   return (
     <section>
-      {/* Section header — NOT collapsible, always visible */}
+      {/* Section header */}
       <div className="w-full flex items-center gap-3 mb-3">
-        <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: `${PDF_COLOR}18` }}
-        >
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${PDF_COLOR}18` }}>
           <FileText size={14} style={{ color: PDF_COLOR }} />
         </div>
         <div className="flex-1 text-left">
           <span className="text-sm font-bold text-white">PDFs</span>
-          <span className="ml-2 text-xs text-gray-500">Viewable and Downloadable PDF documents</span>
+          <span className="ml-2 text-xs text-gray-500">Reference guides and documents</span>
         </div>
-        <span
-          className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-          style={{ background: `${PDF_COLOR}15`, color: PDF_COLOR }}
-        >
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${PDF_COLOR}15`, color: PDF_COLOR }}>
           {items.length}
         </span>
       </div>
-
-      {/* Divider */}
       <div className="mb-4 h-px" style={{ background: `${PDF_COLOR}25` }} />
 
-      {hasSections ? (
-        // Always render DB sections — show empty state per-section if no items yet
+      {subSections.length > 0 ? (
         <div className="space-y-4 pl-2">
-          {sectionOrder.map((sec) => (
-            <PdfSubSection
-              key={sec || "__unsectioned"}
-              sectionName={sec}
-              items={bySection[sec]}
-              onDownload={onDownload}
-              onView={onView}
-              onOpenModal={onOpenModal}
-              isPending={isPending}
-            />
+          {subSections.map(([name, sItems]) => (
+            <PdfSubSection key={name} sectionName={name} items={sItems} onOpen={onOpen} />
           ))}
-        </div>
-      ) : items.length === 0 ? (
-        <div
-          className="flex items-center gap-3 px-4 py-3 rounded-lg"
-          style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
-        >
-          <FileText size={14} style={{ color: PDF_COLOR, opacity: 0.4 }} />
-          <p className="text-xs text-gray-500">No PDFs yet. Please check back soon!</p>
+          {unsectioned.length > 0 && (
+            <PdfSubSection sectionName="General" items={unsectioned} onOpen={onOpen} />
+          )}
         </div>
       ) : (
-        // No sections — flat list
         <div className="space-y-2">
-          {items.map((guide) => (
-            <PdfRow
-              key={guide.id}
-              guide={guide}
-              onDownload={onDownload}
-              onView={onView}
-              onOpenModal={onOpenModal}
-              isPending={isPending}
-            />
-          ))}
+          {items.length === 0 ? (
+            <div className="flex items-center gap-3 px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}>
+              <FileText size={14} style={{ color: PDF_COLOR, opacity: 0.4 }} />
+              <p className="text-xs text-gray-500">No PDFs yet. Please check back soon!</p>
+            </div>
+          ) : (
+            items.map(g => <PdfRow key={g.id} guide={g} onOpen={onOpen} />)
+          )}
         </div>
       )}
     </section>
   );
 }
 
-// ─── FAQ Section (customer-facing) ───────────────────────────────────────────
-const FAQ_COLOR = "#eab308";
+// ─── FAQ Entry row (inline accordion — kept for the list view) ────────────────
 type FaqEntry = { id: number; question: string; answer: string; isVisible: boolean; sortOrder: number; fileUrl?: string | null; fileName?: string | null };
 type FaqSectionType = { id: number; name: string; isVisible: boolean; sortOrder: number; entries: FaqEntry[] };
 
-function FaqEntryRow({ entry }: { entry: FaqEntry }) {
-  const [open, setOpen] = useState(false);
-  const hasFile = !!entry.fileUrl;
-  // No file: show Q+A inline, no expand/chevron
-  if (!hasFile) {
-    return (
-      <div className="rounded-lg px-4 py-3 space-y-1.5" style={{ background: "#161b27", border: "1px solid #2a2a2a" }}>
-        <p className="text-sm font-medium text-white">{entry.question}</p>
-        {entry.answer && entry.answer !== "See attached document" && (
-          <p className="text-sm text-gray-400 leading-relaxed whitespace-pre-wrap">{entry.answer}</p>
-        )}
-      </div>
-    );
-  }
-  // Has file: expandable row with chevron
-  return (
-    <div className="rounded-lg overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-      <button
-        type="button"
-        onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left transition-all"
-        style={{ background: open ? "#1d2230" : "#161b27" }}
-      >
-        <span className="flex-1 text-sm font-medium text-white">{entry.question}</span>
-        {open ? <ChevronDown size={14} className="text-gray-500 flex-shrink-0" /> : <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />}
-      </button>
-      {open && (
-        <div className="px-4 py-3 space-y-3" style={{ background: "#1d2230", borderTop: "1px solid #2a2a2a" }}>
-          {entry.answer && entry.answer !== "See attached document" && (
-            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{entry.answer}</p>
-          )}
-          <a
-            href={entry.fileUrl!}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition"
-            style={{ background: "rgba(234,179,8,0.12)", color: "#eab308", border: "1px solid rgba(234,179,8,0.25)" }}
-          >
-            <Download size={12} />
-            {entry.fileName ?? "Download Document"}
-          </a>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function FaqSubSection({ section, search }: { section: FaqSectionType; search: string }) {
-  const [open, setOpen] = useState(false);
+function FaqSubSection({ section, search, onOpenPanel }: { section: FaqSectionType; search: string; onOpenPanel: (s: FaqSectionType) => void }) {
   const filteredEntries = section.entries.filter(e =>
     !search ||
     e.question.toLowerCase().includes(search.toLowerCase()) ||
     e.answer.toLowerCase().includes(search.toLowerCase())
   );
+
   return (
     <section>
       <button
         type="button"
-        onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center gap-3 mb-3 group"
+        onClick={() => onOpenPanel(section)}
+        className="w-full flex items-center gap-3 mb-3 group transition-all"
       >
         <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${FAQ_COLOR}18` }}>
           <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
         </div>
         <div className="flex-1 text-left">
-          <span className="text-sm font-bold text-white">{section.name}</span>
+          <span className="text-sm font-bold text-white group-hover:text-yellow-300 transition-colors">{section.name}</span>
         </div>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
           {filteredEntries.length}
         </span>
-        {open
-          ? <ChevronDown size={14} className="text-gray-500 flex-shrink-0" />
-          : <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />}
+        <ChevronRight size={14} className="text-gray-500 flex-shrink-0 group-hover:text-yellow-400 transition-colors" />
       </button>
       <div className="mb-3 h-px" style={{ background: `${FAQ_COLOR}25` }} />
-      {open && (
-        filteredEntries.length === 0 ? (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}>
-            <HelpCircle size={14} style={{ color: FAQ_COLOR, opacity: 0.4 }} />
-            <p className="text-xs text-gray-500">No FAQs in this section yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {filteredEntries.map(entry => (
-              <FaqEntryRow key={entry.id} entry={entry} />
-            ))}
-          </div>
-        )
-      )}
     </section>
   );
 }
 
-function FaqSection({ sections, search }: { sections: FaqSectionType[]; search: string }) {
+function FaqSection({ sections, search, onOpenPanel }: { sections: FaqSectionType[]; search: string; onOpenPanel: (s: FaqSectionType) => void }) {
   const visibleSections = sections.filter(s => s.isVisible);
   const filteredSections = visibleSections.filter(s =>
     !search || s.entries.some(e =>
@@ -437,7 +281,6 @@ function FaqSection({ sections, search }: { sections: FaqSectionType[]; search: 
 
   return (
     <section>
-      {/* Section header — NOT collapsible, always visible */}
       <div className="w-full flex items-center gap-3 mb-3">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${FAQ_COLOR}18` }}>
           <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
@@ -450,12 +293,10 @@ function FaqSection({ sections, search }: { sections: FaqSectionType[]; search: 
           {filteredSections.reduce((acc, s) => acc + s.entries.filter(e => !search || e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())).length, 0)}
         </span>
       </div>
-      {/* Divider */}
       <div className="mb-4 h-px" style={{ background: `${FAQ_COLOR}25` }} />
-      {/* Sub-sections */}
-      <div className="space-y-4 pl-2">
+      <div className="space-y-1 pl-2">
         {filteredSections.map(section => (
-          <FaqSubSection key={section.id} section={section} search={search} />
+          <FaqSubSection key={section.id} section={section} search={search} onOpenPanel={onOpenPanel} />
         ))}
       </div>
     </section>
@@ -465,44 +306,45 @@ function FaqSection({ sections, search }: { sections: FaqSectionType[]; search: 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GuidesAndDocs() {
   const { user } = useAuth();
-  const firstName = user?.name?.split(" ")[0] ?? null;
+  const _firstName = user?.name?.split(" ")[0] ?? null;
   const [search, setSearch] = useState("");
-  const [selectedPdf, setSelectedPdf] = useState<{ url: string; title: string } | null>(null);
+  const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
 
-  const handleOpenModal = (guide: GuideItem) => {
-    if (guide.fileUrl) setSelectedPdf({ url: guide.fileUrl, title: guide.title });
-  };
   const { data: guides, isLoading } = trpc.guides.list.useQuery();
   const { data: pdfSectionsRaw } = trpc.guides.listPdfSectionsPublic.useQuery();
   const dbPdfSections: DbSection[] = (pdfSectionsRaw as DbSection[] | undefined) ?? [];
   const { data: faqSections = [] } = trpc.faq.listSectionsPublic.useQuery();
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
   const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true, faq: true };
-  const downloadMutation = trpc.guides.download.useMutation();
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
 
-  const handleView = (guide: GuideItem) => {
+  const handleOpenPdf = (guide: GuideItem) => {
+    if (!guide.fileUrl) return;
     trackAnon.mutate({
       eventType: "guide_viewed",
       resourceType: "guide",
       resourceId: guide.id,
       metadata: JSON.stringify({ title: guide.title, fileType: guide.fileType ?? "pdf" }),
     });
+    setPanelItem({ type: "pdf", title: guide.title, url: guide.fileUrl });
   };
 
-  const handleDownload = async (guide: GuideItem) => {
-    await downloadMutation.mutateAsync({ guideId: guide.id });
-    trackAnon.mutate({
-      eventType: "guide_download",
-      resourceType: "guide",
-      resourceId: guide.id,
-      metadata: JSON.stringify({ title: guide.title, fileType: guide.fileType ?? "pdf" }),
-    });
-    if (guide.fileUrl) {
-      window.open(guide.fileUrl, "_blank");
-    } else {
-      toast.info("File URL not available yet.");
-    }
+  const handleOpenFaqSection = (section: FaqSectionType) => {
+    const entries: FaqPanelEntry[] = section.entries
+      .filter(e => e.isVisible)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map(e => ({
+        id: e.id,
+        question: e.question,
+        answer: e.answer,
+        fileUrl: e.fileUrl,
+        fileName: e.fileName,
+      }));
+    setPanelItem({ type: "faq", sectionName: section.name, entries });
+  };
+
+  const handleOpenArticle = (article: { title: string; nativeBody: string }) => {
+    setPanelItem({ type: "article", title: article.title, nativeBody: article.nativeBody });
   };
 
   // Only PDFs — filter by search
@@ -520,10 +362,10 @@ export default function GuidesAndDocs() {
   return (
     <PortalLayout title="WAVV Resource Hub">
       <div className="px-4 lg:px-8 py-6 space-y-6">
-        {/* Spacer for consistent vertical alignment with pages that have toggle bars */}
+        {/* Spacer for consistent vertical alignment */}
         <div style={{ minHeight: "32px" }} />
 
-        {/* Header */}
+        {/* Hero */}
         <div
           className="relative overflow-hidden rounded-2xl"
           style={{
@@ -554,13 +396,39 @@ export default function GuidesAndDocs() {
               <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
 
-            {/* Subline */}
+            {/* Subline — updated copy */}
             <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
-              Not a course — a reference. Search help articles, FAQs, troubleshooting guides, and downloadable PDFs organized by topic. Get the answer and get back to selling.
+              Search help articles, PDFs, and FAQs organized by topic.
             </p>
+
+            {/* Search bar */}
+            <div className="mt-6 mx-auto flex items-center gap-3 px-4 py-2.5 rounded-xl max-w-md"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
+              <Search size={15} className="text-gray-400 flex-shrink-0" />
+              <input
+                type="text"
+                placeholder="Search articles, PDFs, FAQs…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
+              />
+            </div>
+
+            {/* Content type badges */}
+            <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
+              {[
+                { label: "Help Articles", color: ARTICLE_COLOR, icon: <BookOpen size={10} /> },
+                { label: "PDFs",          color: PDF_COLOR,     icon: <FileText size={10} /> },
+                { label: "FAQs",          color: FAQ_COLOR,     icon: <HelpCircle size={10} /> },
+              ].map(({ label, color, icon }) => (
+                <span key={label} className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
+                  style={{ background: `${color}15`, color, border: `1px solid ${color}25` }}>
+                  {icon}{label}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-
 
         {/* Loading skeleton */}
         {isLoading && (
@@ -577,31 +445,28 @@ export default function GuidesAndDocs() {
           </div>
         )}
 
-        {/* 1. Help Articles — synced from Intercom */}
+        {/* 1. Help Articles */}
         {guideVisibility["help_article"] !== false && (
           <div>
-            <HelpArticlesSection search={search} />
+            <HelpArticlesSection search={search} onOpenArticle={handleOpenArticle} />
           </div>
         )}
 
-        {/* 2. PDFs — grouped by section */}
+        {/* 2. PDFs */}
         {!isLoading && guideVisibility["pdf"] !== false && (
           <PdfSection
             items={pdfItems}
             dbSections={dbPdfSections}
-            onDownload={handleDownload}
-            onView={handleView}
-            onOpenModal={handleOpenModal}
-            isPending={downloadMutation.isPending}
+            onOpen={handleOpenPdf}
           />
         )}
 
-        {/* 3. FAQ — grouped by section */}
+        {/* 3. FAQs */}
         {guideVisibility["faq"] !== false && faqSections.length > 0 && (
-          <FaqSection sections={faqSections} search={search} />
+          <FaqSection sections={faqSections as FaqSectionType[]} search={search} onOpenPanel={handleOpenFaqSection} />
         )}
 
-        {/* Empty state — no content at all */}
+        {/* Empty state */}
         {!isLoading && pdfItems.length === 0 && search && (
           <div className="text-center py-16">
             <Search size={40} className="text-gray-700 mx-auto mb-4" />
@@ -615,14 +480,9 @@ export default function GuidesAndDocs() {
       <div className="px-4 lg:px-8 pb-10">
         <ContentRequestCTA requestType="guide" />
       </div>
-      {/* PDF Viewer Modal */}
-      {selectedPdf && (
-        <PdfViewerModal
-          url={selectedPdf.url}
-          title={selectedPdf.title}
-          onClose={() => setSelectedPdf(null)}
-        />
-      )}
+
+      {/* Unified side panel */}
+      <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} />
     </PortalLayout>
   );
 }
