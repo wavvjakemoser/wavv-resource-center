@@ -412,12 +412,9 @@
 - [x] Document customer-gating strategy: active WAVV customer verification via API
 - [x] Add Google Analytics GA4 (G-5QB2WDFD8K) to site
 - [x] Simplify internal analytics to identity-focused view (account types, approval status, subscription status, recent sign-ins)
-- [x] SCRAPPED: wire WAVV customer status API to gate login — deferred indefinitely, OIDC handles this
-- [x] SCRAPPED: Google OAuth secondary sign-in — WAVV OIDC is the only auth path
 
 ## Sign-In Copy + Magic Link Architecture
 - [x] Update sign-in modal subtitle to "Enter your WAVV account credentials to sign in"
-- [x] SCRAPPED: magic link endpoint — WAVV OIDC handles SSO; magic links not needed
 
 ## Webinar Card Thumbnail Redesign
 - [x] Remove thumbnail images from webinar cards — replace with clean dark gradient header showing title text only (no WAVV logo, no image clutter)
@@ -495,10 +492,10 @@
 
 UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. The following steps must be completed before the Evergreen section can be fully wired with real content:
 
-- [x] CONTENT/BACKLOG: Finalize all 8 webinar topics — content team deliverable, not a dev task
-- [x] CONTENT/BACKLOG: Finalize scripts for each webinar — content team deliverable
-- [x] CONTENT/BACKLOG: Finalize slide decks for each webinar — content team deliverable
-- [x] CONTENT/BACKLOG: Record all 8 webinars — content team deliverable
+- [ ] BACKLOG: Finalize all 8 webinar topics — content team deliverable, not a dev task
+- [ ] BACKLOG: Finalize scripts for each webinar — content team deliverable
+- [ ] BACKLOG: Finalize slide decks for each webinar — content team deliverable
+- [ ] BACKLOG: Record all 8 webinars — content team deliverable
 - [x] BACKLOG: Evergreen platform decision — leadership/platform decision, not dev
 - [x] BACKLOG: Wire Evergreen URLs into DB — blocked on platform decision above
 
@@ -544,7 +541,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Per-lesson controls: edit video URL, add/edit tags, toggle hidden/visible, toggle starred
 - [x] Per-course controls: edit title, description, reorder, hide/show
 - [x] Loom embed: update lesson viewer to embed Loom iframes — fixed getEmbedUrl to handle loom.com/embed/ passthrough; all 26 lessons have Loom embed URLs in DB
-- [x] CONTENT/BACKLOG: Wire Loom URLs into lessons — blocked on content team providing URLs
+- [ ] BACKLOG: Wire Loom URLs into lessons — blocked on content team providing URLs
 
 ## Admin Panel Tab Polish
 
@@ -914,20 +911,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Magic Link Auth + Admin Hardening (Step 4)
 
-- [x] SCRAPPED: magic_link_tokens table — OIDC replaces magic links entirely
-- [x] SCRAPPED: migration for magic_link_tokens — OIDC replaces magic links
-- [x] SCRAPPED: createMagicToken/validateMagicToken helpers — OIDC replaces magic links
-- [x] SCRAPPED: auth.requestMagicLink procedure — OIDC replaces magic links
-- [x] SCRAPPED: auth.verifyMagicLink procedure — OIDC replaces magic links
-- [x] SCRAPPED: admin.inviteUser via magic link — OIDC handles user provisioning
-- [x] SCRAPPED: Rebuild /login page for magic links — OIDC handles auth, login page not needed
-- [x] SCRAPPED: /auth/magic page — OIDC replaces magic link flow
 - [x] BACKLOG: Invite Team Member button — deferred until OIDC provisioning model is decided
-- [x] ALREADY DONE: /admin is protected by protectedProcedure + NavGuard in App.tsx
-- [x] ALREADY DONE: Admin link only shows when user.role === 'admin' or 'super_admin' in PortalLayout
-- [x] ALREADY DONE: No Register link exists on the login/sign-in flow
-- [x] ALREADY DONE: None of these items exist in the current portal nav
-- [x] ALREADY DONE: No /register route exists in App.tsx
 
 ## Magic Link Auth + Admin Hardening (V2)
 
@@ -1306,8 +1290,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Role Access + Request Toggles + Video Pop-out — Jun 10 2026 (Session 5)
 - [x] BACKLOG: Hidden page visibility restricted to Owner role — deferred, low priority
 - [x] BACKLOG: Request button toggles in admin settings — deferred, not needed pre-launch
-- [ ] FIX NEEDED: Standardize video pop-out modal — Webinar on-demand pop-out is small/broken, needs fix
-- [ ] FIX NEEDED: Pop-out behavior — custom in-page modal, not browser PiP; closes on nav away
+- [x] Standardize video pop-out modal — Webinar on-demand pop-out now uses same large-format modal as Academy
+- [x] Pop-out behavior — custom in-page modal + Document PiP button; FloatingVideoPlayer closes on nav away
 
 ## Pop-out Player + Request Toggles + Access Control (Current Session)
 
@@ -1379,17 +1363,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## OIDC-Only Auth Migration (Session — Jun 15 2026)
 - [x] Replace /login route: redirect to /api/oauth/login instead of showing password form (Login.tsx already redirects)
 - [x] Remove Login.tsx password form (replaced with OIDC redirect component — already done)
-- [x] ALREADY DONE: No Register.tsx or /register route exists
-- [x] SCRAPPED: Remove MagicAuth.tsx — OIDC replaces magic auth
-- [x] SCRAPPED: Remove MfaVerify.tsx — MFA handled by WAVV IdP
-- [x] SCRAPPED: Remove MfaRequired.tsx — MFA handled by WAVV IdP
-- [x] SCRAPPED: Remove MfaSetup.tsx — MFA handled by WAVV IdP
-- [x] SCRAPPED: Remove MfaGate — MFA handled by WAVV IdP
-- [x] SCRAPPED: Remove GoogleCallback.tsx — OIDC replaces Google OAuth
 - [x] BACKLOG: Update WavvPartnerPortal redirect — deferred until OIDC migration is live
 - [x] BACKLOG: Update AcceptInvite for OIDC — deferred until OIDC migration is live
 - [x] BACKLOG: Update acceptInvite procedure for OIDC — deferred until OIDC migration is live
-- [x] SCRAPPED: Update MfaVerify links — MFA handled by WAVV IdP
 - [x] BACKLOG: Remove legacy auth procedures (login, register, MFA, Google, magic link) — deferred until OIDC is fully live and stable
 - [x] BACKLOG: Remove passwordHash + MFA columns from DB — deferred until OIDC is fully live and stable
 
@@ -1744,3 +1720,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Actionable Items (Jul 8 2026 - Round 2)
 - [x] Home: hide "What is WAVV?" section for signed-in users
 - [x] Accelerator: update outcome copy to "Complete the WAVV Accelerator and walk away with a fully configured dialer, a proven outreach cadence, and the skills to hit your connection rate targets — in 6 weeks or less."
+
+## Video Pop-out + Todo Cleanup (Jul 8 2026)
+- [x] Standardize Webinar on-demand pop-out to match Academy large-format modal (title, view count, full-size iframe)
+- [x] Enable native browser PiP on all video iframes (allowfullscreen + picture-in-picture policy attribute)
+- [x] Clean todo.md: removed all SCRAPPED and ALREADY DONE lines
+- [x] Update Evergreen Platform items: done — webinars are Loom embeds inside the Success Center, no external platform needed

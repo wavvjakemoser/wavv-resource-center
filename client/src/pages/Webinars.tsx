@@ -268,8 +268,10 @@ function WebinarCard({
       resourceId: webinar.id,
       metadata: JSON.stringify({ title: webinar.title, type: variant }),
     });
-    if (embedUrl && onPlay) {
-      onPlay(embedUrl, webinar.title, variant);
+    // Open the full-size modal for both embed URLs and hosted videos
+    const playUrl = embedUrl ?? (isHostedVideo ? webinar.videoUrl! : null);
+    if (playUrl && onPlay) {
+      onPlay(playUrl, webinar.title, variant);
     }
   }
 
@@ -387,23 +389,8 @@ function WebinarCard({
         {/* Session details shown only when content is available */}
 
         <div className="mt-auto">
-          {/* Platform-hosted (manus-storage) video */}
-          {isHostedVideo && webinar.videoUrl && (
-            <div className="mt-2">
-              <video
-                controls
-                className="w-full rounded-lg"
-                style={{ maxHeight: "180px", background: "#000" }}
-                onPlay={() => watchMutation.mutate({ webinarId: webinar.id })}
-              >
-                <source src={webinar.videoUrl} />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          )}
-
-          {/* Embeddable video (Loom / YouTube / Vimeo) */}
-          {!isHostedVideo && embedUrl && (
+          {/* Embeddable video (Loom / YouTube / Vimeo) or hosted video — both open the full modal */}
+          {(embedUrl || isHostedVideo) && (
             <button
               type="button"
               onClick={handleWatchClick}
@@ -493,12 +480,21 @@ export default function Webinars() {
     embedUrl: string;
     title: string;
     variant: WebinarType;
+    isHosted?: boolean;
   } | null>(null);
 
   function handlePlay(embedUrl: string, title: string, variant: WebinarType) {
     setFloatingVideo(null); // close any existing floating player before opening a new video
-    setPlayingVideo({ embedUrl, title, variant });
+    const isHosted = embedUrl.startsWith("/manus-storage");
+    setPlayingVideo({ embedUrl, title, variant, isHosted });
   }
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setPlayingVideo(null); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   function handleCloseModal() {
     setPlayingVideo(null);
@@ -689,17 +685,28 @@ export default function Webinars() {
                 </button>
               </div>
             </div>
-            {/* 16:9 iframe */}
+            {/* 16:9 video area — native player for hosted files, iframe for embeds */}
             <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-              <iframe
-                src={playingVideo.embedUrl}
-                title={playingVideo.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
-                sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
-                className="absolute inset-0 w-full h-full"
-                style={{ border: "none" }}
-              />
+              {playingVideo.isHosted ? (
+                <video
+                  controls
+                  autoPlay
+                  className="absolute inset-0 w-full h-full"
+                  style={{ background: "#000", border: "none" }}
+                >
+                  <source src={playingVideo.embedUrl} />
+                </video>
+              ) : (
+                <iframe
+                  src={playingVideo.embedUrl}
+                  title={playingVideo.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
+                  sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+                  className="absolute inset-0 w-full h-full"
+                  style={{ border: "none" }}
+                />
+              )}
             </div>
             {/* Footer */}
             <div
