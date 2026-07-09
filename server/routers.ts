@@ -2164,6 +2164,79 @@ export const appRouter = router({
         const { updateAcceleratorSession } = await import("./db");
         return updateAcceleratorSession(id, data);
       }),
+
+    /**
+     * Live entitlement check — calls WAVV admin API server-side.
+     * Returns whether the current user is entitled to Accelerator content,
+     * plus their plan, billing_period, and subscription status.
+     * Safe to call on every page load.
+     */
+    getEntitlement: protectedProcedure.query(async ({ ctx }) => {
+      const wavvAccountId = (ctx.user as any).wavvAccountId as string | null;
+      // Employees always have access
+      if (ctx.user.accountType === "employee" && ctx.user.approvalStatus === "approved") {
+        return { entitled: true, plan: "employee", billingPeriod: null, status: "ACTIVE", isEmployee: true };
+      }
+      // Guests have no access
+      if (!wavvAccountId || ctx.user.accountType === "guest") {
+        return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee: false };
+      }
+      try {
+        const credentials = Buffer.from(`${ENV.wavvOidcClientId}:${ENV.wavvOidcClientSecret}`).toString("base64");
+        const resp = await fetch(`https://admin.wavv.com/oauth/customer/${wavvAccountId}`, {
+          headers: { Authorization: `Basic ${credentials}` },
+        });
+        if (!resp.ok) {
+          return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee: false };
+        }
+        const data = await resp.json() as {
+          plan?: string;
+          subscription_status?: string;
+          subscription?: { status?: string; billing_period?: string | null };
+        };
+        const status = data.subscription?.status ?? data.subscription_status ?? "NONE";
+        const billingPeriod = data.subscription?.billing_period ?? null;
+        const plan = data.plan ?? null;
+        const ENTITLED_STATUSES = ["ACTIVE", "TRIALING", "SCHEDULED_CANCEL"];
+        const QUALIFYING_BILLING = ["quarterly", "yearly"];
+        const entitled =
+          ENTITLED_STATUSES.includes(status) &&
+          (billingPeriod ? QUALIFYING_BILLING.includes(billingPeriod) : false);
+        // Persist fresh subscription data to DB for admin visibility
+        try {
+          const { upsertUser } = await import("./db");
+          await upsertUser({
+            openId: ctx.user.openId,
+            subscriptionStatus: status,
+            wavvPlan: plan,
+          });
+        } catch { /* non-critical */ }
+        return { entitled, plan, billingPeriod, status, isEmployee: false };
+      } catch {
+        return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee: false };
+      }
+    }),
+
+    /**
+     * Mint a short-lived Stripe billing portal URL for the current user.
+     * Fetch on click → redirect immediately. Never cache.
+     */
+    getManageSubscriptionUrl: protectedProcedure.mutation(async ({ ctx }) => {
+      const wavvAccountId = (ctx.user as any).wavvAccountId as string | null;
+      if (!wavvAccountId) {
+        throw new Error("No WAVV account ID on record for this user.");
+      }
+      const credentials = Buffer.from(`${ENV.wavvOidcClientId}:${ENV.wavvOidcClientSecret}`).toString("base64");
+      const resp = await fetch(
+        `https://admin.wavv.com/oauth/customer/${wavvAccountId}/manage-subscription-url`,
+        { headers: { Authorization: `Basic ${credentials}` } }
+      );
+      if (!resp.ok) {
+        throw new Error("Could not retrieve subscription management URL.");
+      }
+      const data = await resp.json() as { url: string };
+      return { url: data.url };
+    }),
   }),
 });
 

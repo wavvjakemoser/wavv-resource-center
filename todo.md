@@ -1767,3 +1767,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] AcceleratorSession.tsx: add join button (grayed out until 30 min before, active during call window)
 - [x] AcceleratorSession.tsx: show upcoming schedule for all sessions in that week
 - [x] AcceleratorSession.tsx: add Loom recording slot (admin can paste URL, shows embedded player when set)
+
+## OIDC Subscription Fix (Jul 2026)
+- [x] oauth.ts: after login, fetch live subscription data from GET /oauth/customer/{wavv_account_id} and persist subscriptionStatus + wavvPlan + billingPeriod to DB
+- [x] routers.ts: add accelerator.getEntitlement procedure (server-side live fetch, returns entitled/plan/billingPeriod/status)
+- [x] routers.ts: add accelerator.getManageSubscriptionUrl mutation (fetch Stripe portal URL on demand, return for immediate redirect)
+- [x] Accelerator.tsx: replace token reads (wavvPlan/subscriptionStatus) with trpc.accelerator.getEntitlement.useQuery()
+- [x] Accelerator.tsx: replace static pricing link with live Stripe portal redirect button
+- [x] AcceleratorSession.tsx: same entitlement fix as Accelerator.tsx
+- [x] wavvOidc.ts: remove stale subscription_status/plan from token type definition

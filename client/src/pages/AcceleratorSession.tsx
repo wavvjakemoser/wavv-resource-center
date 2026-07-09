@@ -56,14 +56,40 @@ const QUALIFYING_PLANS = ["quarterly", "annual"];
 
 function useAcceleratorAccess() {
   const { user } = useAuth();
-  if (!user) return { hasAccess: false, reason: "unauthenticated" as const };
-  const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
-  if (isApprovedEmployee) return { hasAccess: true, reason: "employee" as const };
-  const plan = ((user as any)?.wavvPlan ?? "").toLowerCase();
-  const subStatus = ((user as any)?.subscriptionStatus ?? "").toUpperCase();
-  const hasQualifyingPlan = QUALIFYING_PLANS.some((p) => plan.includes(p)) && subStatus === "ACTIVE";
-  if (hasQualifyingPlan) return { hasAccess: true, reason: "qualifying_plan" as const };
-  return { hasAccess: false, reason: "no_access" as const };
+  const entitlementQuery = trpc.accelerator.getEntitlement.useQuery(undefined, {
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, isLoading: false };
+  if (entitlementQuery.isLoading) return { hasAccess: false, reason: "loading" as const, isLoading: true };
+  const e = entitlementQuery.data;
+  if (!e) return { hasAccess: false, reason: "no_access" as const, isLoading: false };
+  if (e.isEmployee) return { hasAccess: true, reason: "employee" as const, isLoading: false };
+  if (e.entitled) return { hasAccess: true, reason: "qualifying_plan" as const, isLoading: false };
+  return { hasAccess: false, reason: "no_access" as const, isLoading: false };
+}
+
+// ─── Upgrade button (Stripe portal, falls back to pricing page) ──────────────
+function UpgradeButton() {
+  const manageUrl = trpc.accelerator.getManageSubscriptionUrl.useMutation();
+  const handleClick = async () => {
+    try {
+      const result = await manageUrl.mutateAsync();
+      window.location.href = result.url;
+    } catch {
+      window.open("https://www.wavv.com/pricing", "_blank");
+    }
+  };
+  return (
+    <button
+      onClick={handleClick}
+      disabled={manageUrl.isPending}
+      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold mt-2"
+      style={{ background: "#f97316", color: "#fff", opacity: manageUrl.isPending ? 0.7 : 1 }}
+    >
+      {manageUrl.isPending ? "Loading..." : "Upgrade to Unlock"}
+    </button>
+  );
 }
 
 // ─── Countdown hook ───────────────────────────────────────────────────────────
@@ -412,11 +438,7 @@ export default function AcceleratorSession() {
                 Sign In to Check Access
               </a>
             ) : (
-              <a href="https://www.wavv.com/pricing" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold mt-2"
-                style={{ background: "#f97316", color: "#fff" }}>
-                Upgrade to Unlock
-              </a>
+              <UpgradeButton />
             )}
           </div>
         </div>

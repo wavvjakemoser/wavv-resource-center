@@ -131,8 +131,9 @@ export interface WavvIdTokenClaims {
   has_admin_access?: boolean;
   // Customer-only
   wavv_account_id?: string;
-  plan?: string | null;
-  subscription_status?: string;  // NONE | INCOMPLETE | TRIALING | ACTIVE | SCHEDULED_CANCEL | CANCELED
+  // NOTE: plan and subscription_status were removed from the id_token (Jul 2026).
+  // Fetch live subscription data via GET /oauth/customer/{wavv_account_id} instead.
+  // See: trpc.accelerator.getEntitlement (server-side, uses Basic auth with client credentials)
 }
 
 export async function verifyIdToken(idToken: string, clientId: string): Promise<WavvIdTokenClaims> {

@@ -164,9 +164,12 @@ export function registerOAuthRoutes(app: Express) {
       const accountType = resolvedAccountType;
 
       // Customer-specific metadata
+      // NOTE: subscription_status and plan were removed from the id_token (Jul 2026).
+      // Subscription data is now fetched live via GET /oauth/customer/{wavv_account_id}.
+      // See: trpc.accelerator.getEntitlement — it persists fresh data to DB after each check.
       const wavvAccountId = userInfo.wavv_account_id ?? idClaims.wavv_account_id ?? null;
-      const subscriptionStatus = userInfo.subscription_status ?? idClaims.subscription_status ?? null;
-      const wavvPlan = userInfo.plan ?? idClaims.plan ?? null;
+      const subscriptionStatus = null; // no longer in token — fetched live on entitlement check
+      const wavvPlan = null;           // no longer in token — fetched live on entitlement check
 
       let user = await db.getUserByOpenId(externalId);
 

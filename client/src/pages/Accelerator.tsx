@@ -215,44 +215,50 @@ const FAQS = [
   },
 ];
 
-// ─── Access logic ────────────────────────────────────────────────────────────
+// ─── Access logic (live API — subscription data no longer in token) ──────────
 function useAcceleratorAccess() {
   const { user } = useAuth();
+  const entitlementQuery = trpc.accelerator.getEntitlement.useQuery(undefined, {
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // cache for 5 min, re-fetch on focus
+  });
 
-  // Not signed in
-  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, user: null };
+  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, user: null, isLoading: false };
+  if (entitlementQuery.isLoading) return { hasAccess: false, reason: "loading" as const, user, isLoading: true };
 
-  // All approved WAVV employees always have access
-  const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
-  if (isApprovedEmployee) return { hasAccess: true, reason: "employee" as const, user };
-
-  // Customers: check plan
-  const plan = ((user as any)?.wavvPlan ?? "").toLowerCase();
-  const subStatus = ((user as any)?.subscriptionStatus ?? "").toUpperCase();
-  const hasQualifyingPlan = QUALIFYING_PLANS.some((p) => plan.includes(p)) && subStatus === "ACTIVE";
-  if (hasQualifyingPlan) return { hasAccess: true, reason: "qualifying_plan" as const, user };
-
-  // Authenticated but no access
-  return { hasAccess: false, reason: "no_access" as const, user };
+  const e = entitlementQuery.data;
+  if (!e) return { hasAccess: false, reason: "no_access" as const, user, isLoading: false };
+  if (e.isEmployee) return { hasAccess: true, reason: "employee" as const, user, isLoading: false };
+  if (e.entitled) return { hasAccess: true, reason: "qualifying_plan" as const, user, isLoading: false };
+  return { hasAccess: false, reason: "no_access" as const, user, isLoading: false };
 }
 
 // ─── Upgrade CTA component (reused in multiple places) ──────────────────────
 function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: "inline" | "sticky" }) {
+  const manageUrl = trpc.accelerator.getManageSubscriptionUrl.useMutation();
+
+  const handleUpgradeClick = async () => {
+    try {
+      const result = await manageUrl.mutateAsync();
+      window.location.href = result.url;
+    } catch {
+      // Fallback: send to pricing page if portal URL unavailable (e.g. not a Stripe customer)
+      window.open("https://www.wavv.com/pricing", "_blank");
+    }
+  };
+
   if (reason === "unauthenticated") {
     return (
       <div className="flex flex-col sm:flex-row items-center gap-3">
-        <a
-          href="https://www.wavv.com/pricing"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={handleUpgradeClick}
+          disabled={manageUrl.isPending}
           className={`inline-flex items-center gap-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${variant === "sticky" ? "px-5 py-2" : "px-6 py-2.5"}`}
-          style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
-          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+          style={{ background: "linear-gradient(135deg, #f97316, #ea580c)", opacity: manageUrl.isPending ? 0.7 : 1 }}
         >
-          Unlock the Full Accelerator
-          <ArrowRight size={15} />
-        </a>
+          {manageUrl.isPending ? "Loading..." : "Unlock the Full Accelerator"}
+          {!manageUrl.isPending && <ArrowRight size={15} />}
+        </button>
         <a
           href="/api/oauth/login?return_path=/accelerator"
           className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
@@ -266,18 +272,17 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
     );
   }
   return (
-    <a
-      href="https://www.wavv.com/pricing"
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      onClick={handleUpgradeClick}
+      disabled={manageUrl.isPending}
       className={`inline-flex items-center gap-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${variant === "sticky" ? "px-5 py-2" : "px-6 py-2.5"}`}
-      style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
-      onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+      style={{ background: "linear-gradient(135deg, #f97316, #ea580c)", opacity: manageUrl.isPending ? 0.7 : 1 }}
+      onMouseEnter={(e) => { if (!manageUrl.isPending) { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
       onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
     >
-      {reason === "no_access" ? "Upgrade Your Plan" : "Unlock the Full Accelerator"}
-      <ArrowRight size={15} />
-    </a>
+      {manageUrl.isPending ? "Loading..." : reason === "no_access" ? "Upgrade Your Plan" : "Unlock the Full Accelerator"}
+      {!manageUrl.isPending && <ArrowRight size={15} />}
+    </button>
   );
 }
 
