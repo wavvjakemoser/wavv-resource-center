@@ -16,9 +16,11 @@ import {
   buildAuthorizationUrl,
   deriveCodeChallenge,
   exchangeCodeForTokens,
+  fetchEmployeeDetails,
   fetchUserInfo,
   generateCodeVerifier,
   generateState,
+  mapWavvEmployeeRoleToInternal,
   mapWavvRoleToInternal,
   verifyIdToken,
 } from "./wavvOidc";
@@ -144,16 +146,16 @@ export function registerOAuthRoutes(app: Express) {
       // A @wavv.com email always means employee, regardless of what the token claims.
       const isWavvEmail = email.toLowerCase().endsWith("@wavv.com");
       const tokenAccountType = userInfo.account_type ?? idClaims.account_type ?? null;
-      const tokenIsEmployee = userInfo.is_employee ?? idClaims.is_employee ?? null;
 
       // Resolve account_type:
       // - @wavv.com email = always employee (authoritative, regardless of token)
-      // - Non-@wavv.com email = NEVER employee, even if token claims employee/is_employee
+      // - Non-@wavv.com email = NEVER employee, even if token claims employee
       //   (personal/Gmail accounts cannot be WAVV employees in this system)
+      // NOTE: is_employee / is_customer removed from token Jul 2026 — derive from account_type only
       const resolvedAccountType: "employee" | "customer" | "guest" =
         isWavvEmail
           ? "employee"
-          : tokenAccountType === "customer" || (userInfo.is_customer ?? idClaims.is_customer ?? false)
+          : tokenAccountType === "customer"
           ? "customer"
           : "guest";
 
@@ -162,6 +164,20 @@ export function registerOAuthRoutes(app: Express) {
       // Determine initial approvalStatus: employees start as "pending", others as "approved"
       const initialApprovalStatus = isEmployee ? "pending" : "approved";
       const accountType = resolvedAccountType;
+
+      // Fetch live employee role from WAVV IdP (Jul 2026: role removed from token)
+      // Falls back to "viewer" if the endpoint is unreachable or returns 404.
+      let internalRoleLive = internalRole; // default: viewer (from stale mapWavvRoleToInternal)
+      if (isEmployee) {
+        const empDetails = await fetchEmployeeDetails(
+          externalId,
+          ENV.wavvOidcClientId,
+          ENV.wavvOidcClientSecret
+        );
+        if (empDetails) {
+          internalRoleLive = mapWavvEmployeeRoleToInternal(empDetails.role);
+        }
+      }
 
       // Customer-specific metadata
       // NOTE: subscription_status and plan were removed from the id_token (Jul 2026).
@@ -217,7 +233,7 @@ export function registerOAuthRoutes(app: Express) {
           name: userInfo.name || null,
           loginMethod: "wavv_oidc",
           lastSignedIn: new Date(),
-          role: internalRole,
+          role: internalRoleLive,
           avatarUrl: userInfo.picture || idClaims.picture || null,
           wavvSub: externalId,
           accountType,

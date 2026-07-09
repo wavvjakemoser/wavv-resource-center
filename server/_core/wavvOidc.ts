@@ -111,29 +111,27 @@ export async function exchangeCodeForTokens(
 
 // ─── ID token verification ────────────────────────────────────────────────────
 
+// ─── OIDC token field inventory (Jul 2026) ───────────────────────────────────
+//
+// STILL IN TOKEN: sub, account_type, email, name, picture (+ iss/aud/exp/iat/auth_time)
+// REMOVED — fetch live instead:
+//   plan, subscription_status, subscription  → GET /oauth/customer/{id}  (Basic auth)
+//   role, permissions, sections,
+//     is_super_admin, has_admin_access        → GET /oauth/employee/{id}  (Basic auth)
+//   wavv_account_id                           → still in sub as customer:<id>
+//   is_employee, is_customer                  → derive from account_type
+//   given_name, family_name                   → use name
+//   email_verified                            → always true, drop the check
+
 export interface WavvIdTokenClaims {
-  sub: string;                   // stable external ID, namespaced: employee:<id> / customer:<id> / guest:<id>
+  sub: string;           // stable external ID: employee:<id> / customer:<id> / guest:<id>
   email: string;
-  email_verified?: boolean;
   name?: string;
-  given_name?: string;
-  family_name?: string;
   picture?: string;
-  // Always present
+  // Always present — use this to determine which live endpoint to call
   account_type?: "employee" | "customer" | "guest";
-  is_employee?: boolean;
-  is_customer?: boolean;
-  // Employee-only
-  role?: string;                 // "user" | "admin" | "super_admin"
-  permissions?: string[];
-  sections?: string[];
-  is_super_admin?: boolean;
-  has_admin_access?: boolean;
-  // Customer-only
+  // Customer-only — still in token for convenience; also in sub and /oauth/customer/{id}
   wavv_account_id?: string;
-  // NOTE: plan and subscription_status were removed from the id_token (Jul 2026).
-  // Fetch live subscription data via GET /oauth/customer/{wavv_account_id} instead.
-  // See: trpc.accelerator.getEntitlement (server-side, uses Basic auth with client credentials)
 }
 
 export async function verifyIdToken(idToken: string, clientId: string): Promise<WavvIdTokenClaims> {
@@ -170,7 +168,48 @@ export async function fetchUserInfo(accessToken: string): Promise<WavvIdTokenCla
 export type SuccessCenterRole = "owner" | "publisher" | "partner_manager" | "viewer" | "user";
 
 export function mapWavvRoleToInternal(claims: WavvIdTokenClaims): SuccessCenterRole {
-  if (claims.is_super_admin || claims.role === "super_admin") return "owner";
-  if (claims.has_admin_access || claims.role === "admin") return "publisher";
+  // Fallback for any residual token reads — should not be hit post-Jul 2026 migration
   return "viewer";
+}
+
+/** Map a live WAVV employee role string to an internal SuccessCenterRole */
+export function mapWavvEmployeeRoleToInternal(role: string | null | undefined): SuccessCenterRole {
+  if (role === "super_admin") return "owner";
+  if (role === "admin") return "publisher";
+  return "viewer";
+}
+
+/** Live employee details from GET /oauth/employee/{id} (server-to-server, Basic auth) */
+export interface WavvEmployeeDetails {
+  employee_id: string;
+  email: string;
+  name: string;
+  role: string;        // user | admin | super_admin
+  permissions: string[];
+  sections: string[];
+}
+
+export async function fetchEmployeeDetails(
+  employeeId: string,
+  clientId: string,
+  clientSecret: string
+): Promise<WavvEmployeeDetails | null> {
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+  // employeeId may be the full sub (employee:<id>) or just the raw id — strip prefix
+  const rawId = employeeId.startsWith("employee:") ? employeeId.slice(9) : employeeId;
+  const url = `https://admin.wavv.com/oauth/employee/${encodeURIComponent(rawId)}`;
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Basic ${basicAuth}` },
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) {
+      console.error(`[WAVV OIDC] fetchEmployeeDetails failed ${res.status} for ${rawId}`);
+      return null;
+    }
+    return res.json() as Promise<WavvEmployeeDetails>;
+  } catch (err) {
+    console.error("[WAVV OIDC] fetchEmployeeDetails error:", err);
+    return null;
+  }
 }

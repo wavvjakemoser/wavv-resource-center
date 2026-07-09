@@ -1776,3 +1776,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Accelerator.tsx: replace static pricing link with live Stripe portal redirect button
 - [x] AcceleratorSession.tsx: same entitlement fix as Accelerator.tsx
 - [x] wavvOidc.ts: remove stale subscription_status/plan from token type definition
+
+## OIDC Employee Role Fix (Jul 2026)
+- [x] oauth.ts: add GET /oauth/employee/{id} live fetch for employees at login — use returned role to set internal role
+- [x] wavvOidc.ts: remove stale fields from WavvIdTokenClaims (role, permissions, sections, is_super_admin, has_admin_access, given_name, family_name, email_verified)
+- [x] Save OIDC reference doc to references/
