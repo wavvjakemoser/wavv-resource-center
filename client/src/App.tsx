@@ -23,6 +23,8 @@ import { usePageTracking } from "./hooks/usePageTracking";
 import { useIntercom } from "./hooks/useIntercom";
 import { trpc } from "./lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useVersionCheck } from "./hooks/useVersionCheck";
+import { UpdateBanner } from "./components/UpdateBanner";
 
 
 // Guard for pages that can be disabled via nav_visibility in site settings.
@@ -116,11 +118,18 @@ function Router() {
   );
 }
 
+function VersionWatcher() {
+  const { updateAvailable, deployedAt } = useVersionCheck();
+  if (!updateAvailable) return null;
+  return <UpdateBanner deployedAt={deployedAt} />;
+}
+
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
+          <VersionWatcher />
           <Toaster
             theme="dark"
             toastOptions={{

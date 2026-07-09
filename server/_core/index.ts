@@ -63,6 +63,11 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+// Build hash: generated once at server startup — changes on every deploy/restart.
+// Clients poll /api/version every 60s and auto-refresh when the hash changes.
+const BUILD_HASH = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const BUILD_TIME = new Date().toISOString();
+
 async function startServer() {
   const app = express();
   const server = createServer(app);
@@ -105,6 +110,14 @@ async function startServer() {
       console.error("[IntercomSync] Scheduled sync failed:", message);
       return res.status(500).json({ error: message, stack, timestamp: new Date().toISOString() });
     }
+  });
+
+  // ── Version endpoint (client polls for auto-refresh on deploy) ─────────────
+  // No auth required — returns the current build hash and deploy time.
+  // Cache-Control: no-store ensures clients always get a fresh response.
+  app.get("/api/version", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ version: BUILD_HASH, deployedAt: BUILD_TIME });
   });
 
   // ── Dynamic sitemap.xml ─────────────────────────────────────────────────────

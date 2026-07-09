@@ -1781,3 +1781,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] oauth.ts: add GET /oauth/employee/{id} live fetch for employees at login — use returned role to set internal role
 - [x] wavvOidc.ts: remove stale fields from WavvIdTokenClaims (role, permissions, sections, is_super_admin, has_admin_access, given_name, family_name, email_verified)
 - [x] Save OIDC reference doc to references/
+
+## Version Polling Auto-Refresh (Jul 2026)
+- [x] Add GET /api/version endpoint that returns current build hash
+- [x] Inject build hash at server startup (timestamp-based, no build step required)
+- [x] Build useVersionCheck hook: polls /api/version every 60s, detects change
+- [x] Build UpdateBanner component: 10s countdown auto-refresh, delayed 30s if user is active
+- [x] Wire UpdateBanner into App.tsx (global, always rendered)
