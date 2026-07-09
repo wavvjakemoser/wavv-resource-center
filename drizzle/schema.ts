@@ -41,8 +41,10 @@ export const users = mysqlTable("users", {
   approvalStatus: mysqlEnum("approval_status", ["pending", "approved", "denied"]).default("pending").notNull(),
   isEmployee: boolean("is_employee").default(false).notNull(),
   isCustomer: boolean("is_customer").default(false).notNull(),
-  // Customer-specific metadata (null for employees and guests)
-  wavvAccountId: varchar("wavv_account_id", { length: 128 }),
+  // OIDC identity facets — both can be non-null for employee+customer dual accounts
+  wavvUserId: varchar("wavv_user_id", { length: 128 }),    // product user id (was wavv_account_id)
+  employeeId: varchar("employee_id", { length: 128 }),     // wavv_admin employee id
+  // Subscription metadata (populated via live GET /oauth/customer/{wavvUserId})
   subscriptionStatus: varchar("subscription_status", { length: 64 }),  // NONE | INCOMPLETE | TRIALING | ACTIVE | SCHEDULED_CANCEL | CANCELED
   wavvPlan: varchar("wavv_plan", { length: 128 }),
 });

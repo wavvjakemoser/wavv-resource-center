@@ -1388,7 +1388,7 @@ export const appRouter = router({
             email: u.email,
             accountType: u.accountType,
             isCustomer: u.isCustomer,
-            wavvAccountId: u.wavvAccountId,
+            wavvUserId: u.wavvUserId,
             subscriptionStatus: u.subscriptionStatus,
             wavvPlan: u.wavvPlan,
             createdAt: u.createdAt,
@@ -2172,18 +2172,22 @@ export const appRouter = router({
      * Safe to call on every page load.
      */
     getEntitlement: protectedProcedure.query(async ({ ctx }) => {
-      const wavvAccountId = (ctx.user as any).wavvAccountId as string | null;
-      // Employees always have access
-      if (ctx.user.accountType === "employee" && ctx.user.approvalStatus === "approved") {
+      const wavvUserId = (ctx.user as any).wavvUserId as string | null;
+      const employeeId = (ctx.user as any).employeeId as string | null;
+      // Facet-based check (Jul 2026): employee if employeeId present, customer if wavvUserId present
+      const isEmployee = !!employeeId || ctx.user.accountType === "employee";
+      const isCustomer = !!wavvUserId;
+      // Approved employees always have access
+      if (isEmployee && ctx.user.approvalStatus === "approved") {
         return { entitled: true, plan: "employee", billingPeriod: null, status: "ACTIVE", isEmployee: true };
       }
-      // Guests have no access
-      if (!wavvAccountId || ctx.user.accountType === "guest") {
-        return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee: false };
+      // No wavvUserId = no customer subscription to check
+      if (!isCustomer) {
+        return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee };
       }
       try {
         const credentials = Buffer.from(`${ENV.wavvOidcClientId}:${ENV.wavvOidcClientSecret}`).toString("base64");
-        const resp = await fetch(`https://admin.wavv.com/oauth/customer/${wavvAccountId}`, {
+        const resp = await fetch(`https://admin.wavv.com/oauth/customer/${wavvUserId}`, {
           headers: { Authorization: `Basic ${credentials}` },
         });
         if (!resp.ok) {
@@ -2222,13 +2226,13 @@ export const appRouter = router({
      * Fetch on click → redirect immediately. Never cache.
      */
     getManageSubscriptionUrl: protectedProcedure.mutation(async ({ ctx }) => {
-      const wavvAccountId = (ctx.user as any).wavvAccountId as string | null;
-      if (!wavvAccountId) {
-        throw new Error("No WAVV account ID on record for this user.");
+      const wavvUserId = (ctx.user as any).wavvUserId as string | null;
+      if (!wavvUserId) {
+        throw new Error("No WAVV user ID on record for this user.");
       }
       const credentials = Buffer.from(`${ENV.wavvOidcClientId}:${ENV.wavvOidcClientSecret}`).toString("base64");
       const resp = await fetch(
-        `https://admin.wavv.com/oauth/customer/${wavvAccountId}/manage-subscription-url`,
+        `https://admin.wavv.com/oauth/customer/${wavvUserId}/manage-subscription-url`,
         { headers: { Authorization: `Basic ${credentials}` } }
       );
       if (!resp.ok) {

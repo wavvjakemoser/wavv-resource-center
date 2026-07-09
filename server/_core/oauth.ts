@@ -179,13 +179,12 @@ export function registerOAuthRoutes(app: Express) {
         }
       }
 
-      // Customer-specific metadata
-      // NOTE: subscription_status and plan were removed from the id_token (Jul 2026).
-      // Subscription data is now fetched live via GET /oauth/customer/{wavv_account_id}.
-      // See: trpc.accelerator.getEntitlement — it persists fresh data to DB after each check.
-      const wavvAccountId = userInfo.wavv_account_id ?? idClaims.wavv_account_id ?? null;
-      const subscriptionStatus = null; // no longer in token — fetched live on entitlement check
-      const wavvPlan = null;           // no longer in token — fetched live on entitlement check
+      // OIDC identity facets (Jul 2026: wavv_account_id renamed to wavv_user_id, employee_id added)
+      // Both can be non-null for dual employee+customer accounts.
+      const wavvUserId = (userInfo as any).wavv_user_id ?? (idClaims as any).wavv_user_id ?? null;
+      const employeeId = (userInfo as any).employee_id ?? (idClaims as any).employee_id ?? null;
+      const subscriptionStatus = null; // not in token — fetched live via getEntitlement
+      const wavvPlan = null;           // not in token — fetched live via getEntitlement
 
       let user = await db.getUserByOpenId(externalId);
 
@@ -218,7 +217,8 @@ export function registerOAuthRoutes(app: Express) {
             approvalStatus: mergedApprovalStatus,
             isEmployee: mergedIsEmployee,
             isCustomer: mergedIsCustomer,
-            wavvAccountId,
+            wavvUserId,
+            employeeId,
             subscriptionStatus,
             wavvPlan,
           });
@@ -240,7 +240,8 @@ export function registerOAuthRoutes(app: Express) {
           approvalStatus: initialApprovalStatus,
           isEmployee,
           isCustomer,
-          wavvAccountId,
+          wavvUserId,
+          employeeId,
           subscriptionStatus,
           wavvPlan,
         });
@@ -263,7 +264,8 @@ export function registerOAuthRoutes(app: Express) {
           accountType: safeAccountType,
           isEmployee: safeAccountType === "employee",
           isCustomer: safeAccountType === "customer",
-          wavvAccountId,
+          wavvUserId,
+          employeeId,
           subscriptionStatus,
           wavvPlan,
         });

@@ -1794,3 +1794,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Expose toggle in Command Center Settings tab
 - [x] /api/version endpoint returns auto_refresh_enabled flag
 - [x] useVersionCheck respects the flag — skips auto-refresh logic when disabled
+
+## OIDC Token Shape Change: wavv_account_id → wavv_user_id + employee_id (Jul 2026)
+- [x] drizzle/schema.ts: rename wavvAccountId → wavvUserId (wavv_account_id → wavv_user_id), add employeeId (employee_id)
+- [x] Run DB migration SQL via webdev_execute_sql
+- [x] wavvOidc.ts: update WavvIdTokenClaims type (wavv_user_id, employee_id; remove wavv_account_id)
+- [x] oauth.ts: map new token fields at login, update upsertUser calls
+- [x] routers.ts: switch getEntitlement/getManageSubscriptionUrl to use wavvUserId; switch employee fetch to use employeeId; update facet checks (wavvUserId non-null instead of accountType=customer)
+- [x] server/db.ts: update upsertUser to handle wavvUserId and employeeId columns
+- [x] Admin.tsx: update wavvAccountId display column to wavvUserId
+- [x] Update references/wavv-oidc-reference.md with new token shape

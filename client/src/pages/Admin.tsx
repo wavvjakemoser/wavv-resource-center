@@ -2248,7 +2248,7 @@ function PortalUsersPanel() {
       u.accountType ?? "",
       u.subscriptionStatus ?? "",
       u.wavvPlan ?? "",
-      u.wavvAccountId ?? "",
+      u.wavvUserId ?? "",
       u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
       u.lastSignedIn ? new Date(u.lastSignedIn).toLocaleDateString() : "",
     ]);
@@ -2388,8 +2388,8 @@ function PortalUsersPanel() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-xs font-mono" style={{ color: u.wavvAccountId ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.2)" }}>
-                        {u.wavvAccountId ?? "—"}
+                      <span className="text-xs font-mono" style={{ color: u.wavvUserId ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.2)" }}>
+                        {u.wavvUserId ?? "—"}
                       </span>
                     </TableCell>
                     <TableCell>
