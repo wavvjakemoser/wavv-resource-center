@@ -113,11 +113,24 @@ async function startServer() {
   });
 
   // ── Version endpoint (client polls for auto-refresh on deploy) ─────────────
-  // No auth required — returns the current build hash and deploy time.
+  // No auth required — returns the current build hash, deploy time, and the
+  // auto_refresh_enabled flag from site_settings (default: true).
   // Cache-Control: no-store ensures clients always get a fresh response.
-  app.get("/api/version", (_req, res) => {
+  app.get("/api/version", async (_req, res) => {
     res.setHeader("Cache-Control", "no-store");
-    res.json({ version: BUILD_HASH, deployedAt: BUILD_TIME });
+    let autoRefreshEnabled = true;
+    try {
+      const { getSiteSetting } = await import("../db");
+      const val = await getSiteSetting("auto_refresh_enabled");
+      // val is null when key doesn't exist yet (default: enabled)
+      // val is false (boolean) or "false" (string) when explicitly disabled
+      if (val !== null && val !== undefined && (val === false || val === "false")) {
+        autoRefreshEnabled = false;
+      }
+    } catch {
+      // DB unavailable — default to enabled
+    }
+    res.json({ version: BUILD_HASH, deployedAt: BUILD_TIME, autoRefreshEnabled });
   });
 
   // ── Dynamic sitemap.xml ─────────────────────────────────────────────────────

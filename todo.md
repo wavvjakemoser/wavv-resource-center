@@ -1788,3 +1788,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Build useVersionCheck hook: polls /api/version every 60s, detects change
 - [x] Build UpdateBanner component: 10s countdown auto-refresh, delayed 30s if user is active
 - [x] Wire UpdateBanner into App.tsx (global, always rendered)
+
+## Auto-Refresh Toggle in Command Center (Jul 2026)
+- [x] Add auto_refresh_enabled key to site_settings (default: true)
+- [x] Expose toggle in Command Center Settings tab
+- [x] /api/version endpoint returns auto_refresh_enabled flag
+- [x] useVersionCheck respects the flag — skips auto-refresh logic when disabled

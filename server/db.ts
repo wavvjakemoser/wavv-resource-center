@@ -1518,12 +1518,12 @@ export async function getRecentLessons(limit = 4) {
 }
 
 // ─── Site Settings ────────────────────────────────────────────────────────────
-export async function getSiteSetting(key: string): Promise<Record<string, boolean> | null> {
+export async function getSiteSetting(key: string): Promise<Record<string, boolean> | boolean | string | number | null> {
   const db = await getDb();
   if (!db) return null;
   const rows = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1);
   if (!rows[0]) return null;
-  try { return JSON.parse(rows[0].value) as Record<string, boolean>; } catch { return null; }
+  try { return JSON.parse(rows[0].value) as Record<string, boolean> | boolean | string | number; } catch { return rows[0].value ?? null; }
 }
 
 export async function upsertSiteSetting(key: string, value: boolean | string | number | Record<string, boolean>): Promise<void> {

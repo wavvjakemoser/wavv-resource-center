@@ -7902,6 +7902,8 @@ function SettingsTab() {
     const searchRequestsEnabled = settings["search_requests_enabled"] !== false;
   // Quick Links toggles
   const chromeExtensionEnabled = settings["chrome_extension_enabled"] !== false;
+  // Auto-refresh: default true (enabled). Disable during stable production periods.
+  const autoRefreshEnabled = settings["auto_refresh_enabled"] !== false;
   // Nav items that can be toggled
   const NAV_ITEMS = [
     { href: "/home",        label: "Home",                   icon: Home },
@@ -7992,6 +7994,31 @@ function SettingsTab() {
                   style={{ background: "#0074F4", color: "#fff" }}
                 >
                   Save
+                </button>
+              </div>
+            </div>
+
+            {/* ── Auto-Refresh on Deploy ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(99,102,241,0.12)" }}>
+                    <RefreshCw size={15} style={{ color: "#818cf8" }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">Auto-Refresh on Deploy</p>
+                    <p className="text-xs text-gray-500">When enabled, logged-in users are automatically refreshed within ~90s of a new deployment. Turn off during stable production periods so users refresh on their own schedule.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toggle("auto_refresh_enabled", autoRefreshEnabled)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0 ml-4"
+                  style={autoRefreshEnabled
+                    ? { background: "rgba(99,102,241,0.15)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.3)" }
+                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
+                >
+                  {autoRefreshEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                  {autoRefreshEnabled ? "Enabled" : "Disabled"}
                 </button>
               </div>
             </div>

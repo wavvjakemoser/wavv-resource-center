@@ -13,6 +13,7 @@ const POLL_INTERVAL_MS = 60_000; // 60 seconds
 interface VersionResponse {
   version: string;
   deployedAt: string;
+  autoRefreshEnabled?: boolean;
 }
 
 export function useVersionCheck() {
@@ -45,13 +46,16 @@ export function useVersionCheck() {
       }
 
       if (version !== baselineVersion.current) {
-        // Server has been redeployed since this client loaded
+        // Server has been redeployed since this client loaded.
+        // Re-fetch to get autoRefreshEnabled and deployedAt.
         try {
-          const res = await fetch("/api/version", { cache: "no-store" });
-          const data: VersionResponse = await res.json();
+          const res2 = await fetch("/api/version", { cache: "no-store" });
+          const data: VersionResponse = await res2.json();
           setDeployedAt(data.deployedAt);
+          // If auto-refresh is disabled in Command Center, do nothing.
+          if (data.autoRefreshEnabled === false) return;
         } catch {
-          // ignore
+          // ignore — proceed with update notification
         }
         if (!cancelled) setUpdateAvailable(true);
       }
