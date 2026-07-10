@@ -215,6 +215,16 @@ const FAQS = [
   },
 ];
 
+// ─── Week 1 free window constants ────────────────────────────────────────────
+// July 20 00:00 MT (MDT = UTC-6) → July 27 00:00 MT
+const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 20, 6, 0, 0);  // Jul 20 00:00 MDT
+const WEEK1_FREE_END_UTC   = Date.UTC(2026, 6, 27, 6, 0, 0);  // Jul 27 00:00 MDT
+
+function isWeek1FreeNow() {
+  const now = Date.now();
+  return now >= WEEK1_FREE_START_UTC && now < WEEK1_FREE_END_UTC;
+}
+
 // ─── Access logic (live API — subscription data no longer in token) ──────────
 function useAcceleratorAccess() {
   const { user } = useAuth();
@@ -223,14 +233,17 @@ function useAcceleratorAccess() {
     staleTime: 5 * 60 * 1000, // cache for 5 min, re-fetch on focus
   });
 
-  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, user: null, isLoading: false };
-  if (entitlementQuery.isLoading) return { hasAccess: false, reason: "loading" as const, user, isLoading: true };
+  const week1FreeActive = isWeek1FreeNow();
+  const week1FreeEndsAt = WEEK1_FREE_END_UTC;
+
+  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, user: null, isLoading: false, week1FreeActive, week1FreeEndsAt };
+  if (entitlementQuery.isLoading) return { hasAccess: false, reason: "loading" as const, user, isLoading: true, week1FreeActive, week1FreeEndsAt };
 
   const e = entitlementQuery.data;
-  if (!e) return { hasAccess: false, reason: "no_access" as const, user, isLoading: false };
-  if (e.isEmployee) return { hasAccess: true, reason: "employee" as const, user, isLoading: false };
-  if (e.entitled) return { hasAccess: true, reason: "qualifying_plan" as const, user, isLoading: false };
-  return { hasAccess: false, reason: "no_access" as const, user, isLoading: false };
+  if (!e) return { hasAccess: false, reason: "no_access" as const, user, isLoading: false, week1FreeActive, week1FreeEndsAt };
+  if (e.isEmployee) return { hasAccess: true, reason: "employee" as const, user, isLoading: false, week1FreeActive, week1FreeEndsAt };
+  if (e.entitled) return { hasAccess: true, reason: "qualifying_plan" as const, user, isLoading: false, week1FreeActive, week1FreeEndsAt };
+  return { hasAccess: false, reason: "no_access" as const, user, isLoading: false, week1FreeActive, week1FreeEndsAt };
 }
 
 // ─── Upgrade CTA component (reused in multiple places) ──────────────────────
@@ -283,6 +296,68 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
       {manageUrl.isPending ? "Loading..." : reason === "no_access" ? "Upgrade Your Plan" : "Unlock the Full Accelerator"}
       {!manageUrl.isPending && <ArrowRight size={15} />}
     </button>
+  );
+}
+
+// ─── Week 1 Free Banner with countdown ─────────────────────────────────────
+function Week1FreeBanner({ endsAt }: { endsAt: number }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const secsLeft = Math.max(0, Math.floor((endsAt - now) / 1000));
+  const d = Math.floor(secsLeft / 86400);
+  const h = Math.floor((secsLeft % 86400) / 3600);
+  const m = Math.floor((secsLeft % 3600) / 60);
+  const s = secsLeft % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  const countdownStr = d > 0
+    ? `${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`
+    : `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+
+  return (
+    <div
+      className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-5"
+      style={{
+        background: "linear-gradient(135deg, rgba(103,199,40,0.12) 0%, rgba(0,116,244,0.10) 100%)",
+        border: "1px solid rgba(103,199,40,0.3)",
+        boxShadow: "0 0 24px rgba(103,199,40,0.08)",
+      }}
+    >
+      {/* Gift icon */}
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+        style={{ background: "rgba(103,199,40,0.15)" }}>
+        <Gift size={20} style={{ color: "#67C728" }} />
+      </div>
+
+      {/* Text */}
+      <div className="flex-1 text-center sm:text-left">
+        <p className="text-sm font-bold text-white">
+          Week 1 is free through July 26
+        </p>
+        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
+          Free access ends in{" "}
+          <span className="font-semibold tabular-nums" style={{ color: "#67C728" }}>{countdownStr}</span>
+          {" "}· Upgrade to unlock all 6 weeks
+        </p>
+      </div>
+
+      {/* CTA */}
+      <a
+        href="https://www.wavv.com/pricing"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all"
+        style={{ background: "linear-gradient(135deg, #67C728, #4ea81e)" }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+      >
+        Upgrade Your Plan <ArrowRight size={13} />
+      </a>
+    </div>
   );
 }
 
@@ -585,22 +660,24 @@ function UpcomingCallsList() {
 }
 
 export default function Accelerator() {
-  const { hasAccess: realAccess, reason: realReason, user } = useAcceleratorAccess();
+  const { hasAccess: realAccess, reason: realReason, user, week1FreeActive, week1FreeEndsAt } = useAcceleratorAccess();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [previewAsCustomer, setPreviewAsCustomer] = useState(false);
   const [showAccessPopup, setShowAccessPopup] = useState(false);
 
-  // Show pop-up for signed-in users who don't qualify
+  // Show pop-up for signed-in users who don't qualify (suppress during Week 1 free window)
   useEffect(() => {
-    if (realReason === "no_access" && !previewAsCustomer) {
+    if (realReason === "no_access" && !previewAsCustomer && !week1FreeActive) {
       setShowAccessPopup(true);
     }
-  }, [realReason, previewAsCustomer]);
+  }, [realReason, previewAsCustomer, week1FreeActive]);
 
   // Allow employees to preview the locked/customer view
   const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
   const hasAccess = previewAsCustomer ? false : realAccess;
   const reason = previewAsCustomer ? "no_access" : realReason;
+  // Week 1 is accessible to everyone during the free window (unless previewing as customer)
+  const week1Open = !previewAsCustomer && week1FreeActive;
 
   return (
     <PortalLayout title="WAVV Accelerator">
@@ -625,6 +702,11 @@ export default function Accelerator() {
           </div>
         )}
         </div>
+
+        {/* ── Week 1 Free Banner (shown to non-members during the free window) ── */}
+        {!hasAccess && week1FreeActive && (
+          <Week1FreeBanner endsAt={week1FreeEndsAt} />
+        )}
 
         {/* ── Hero (gradient box matching site pattern) ── */}
         <div
@@ -740,7 +822,9 @@ export default function Accelerator() {
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {SESSIONS.map((session) => {
-              if (hasAccess) {
+              // Week 1 is open to all during the free window
+              const sessionOpen = hasAccess || (week1Open && session.week === 1);
+              if (sessionOpen) {
                 return (
                   <a
                     key={session.id}
@@ -783,12 +867,12 @@ export default function Accelerator() {
                   </a>
                 );
               }
-              // Locked — grayed out, visible but not clickable
+              // Locked — grayed out with Week 1 free badge if applicable
               return (
                 <div
                   key={session.id}
                   className="rounded-2xl p-6 h-full flex flex-col relative overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", opacity: 0.55 }}
+                  style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", opacity: session.week === 1 && week1FreeActive ? 0.75 : 0.55 }}
                 >
                   <div className="space-y-4 h-full flex flex-col pointer-events-none select-none" style={{ filter: "blur(4px)" }}>
                     <div className="flex items-center justify-between">
@@ -835,6 +919,9 @@ export default function Accelerator() {
                     Available on Quarterly & Annual Plans
                   </span>
                 </div>
+                <p className="text-sm text-center max-w-md leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+                  To unlock future live coaching sessions and our full video library, simply upgrade to a quarterly or annual plan today. Not only will you save money on your subscription, but you’ll also unlock ongoing, free access to the accelerator.
+                </p>
                 <UpgradeCTA reason={reason} />
               </div>
             </div>

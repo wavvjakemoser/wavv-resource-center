@@ -2199,13 +2199,22 @@ export const appRouter = router({
       // Facet-based check (Jul 2026): employee if employeeId present, customer if wavvUserId present
       const isEmployee = !!employeeId || ctx.user.accountType === "employee";
       const isCustomer = !!wavvUserId;
+
+      // ── Week 1 Free window: July 20 – July 26 (Mountain Time) ──────────────
+      // July 27 00:00 MDT = July 27 06:00 UTC
+      const WEEK1_FREE_START = new Date("2026-07-20T06:00:00Z").getTime(); // July 20 00:00 MDT
+      const WEEK1_FREE_END   = new Date("2026-07-27T06:00:00Z").getTime(); // July 27 00:00 MDT
+      const now = Date.now();
+      const week1FreeActive = now >= WEEK1_FREE_START && now < WEEK1_FREE_END;
+      const week1FreeEndsAt = WEEK1_FREE_END;
+
       // Approved employees always have access
       if (isEmployee && ctx.user.approvalStatus === "approved") {
-        return { entitled: true, plan: "employee", billingPeriod: null, status: "ACTIVE", isEmployee: true };
+        return { entitled: true, plan: "employee", billingPeriod: null, status: "ACTIVE", isEmployee: true, week1FreeActive, week1FreeEndsAt };
       }
       // No wavvUserId = no customer subscription to check
       if (!isCustomer) {
-        return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee };
+        return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee, week1FreeActive, week1FreeEndsAt };
       }
       try {
         const credentials = Buffer.from(`${ENV.wavvOidcClientId}:${ENV.wavvOidcClientSecret}`).toString("base64");
@@ -2237,10 +2246,23 @@ export const appRouter = router({
             wavvPlan: plan,
           });
         } catch { /* non-critical */ }
-        return { entitled, plan, billingPeriod, status, isEmployee: false };
+        return { entitled, plan, billingPeriod, status, isEmployee: false, week1FreeActive, week1FreeEndsAt };
       } catch {
-        return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee: false };
+        return { entitled: false, plan: null, billingPeriod: null, status: null, isEmployee: false, week1FreeActive, week1FreeEndsAt };
       }
+    }),
+
+    /**
+     * Public endpoint — returns Week 1 free window status for unauthenticated visitors.
+     */
+    getWeek1FreeStatus: publicProcedure.query(() => {
+      const WEEK1_FREE_START = new Date("2026-07-20T06:00:00Z").getTime();
+      const WEEK1_FREE_END   = new Date("2026-07-27T06:00:00Z").getTime();
+      const now = Date.now();
+      return {
+        week1FreeActive: now >= WEEK1_FREE_START && now < WEEK1_FREE_END,
+        week1FreeEndsAt: WEEK1_FREE_END,
+      };
     }),
 
     /**
