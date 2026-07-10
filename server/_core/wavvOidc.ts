@@ -189,6 +189,51 @@ export interface WavvEmployeeDetails {
   sections: string[];
 }
 
+/** Live customer subscription details from GET /oauth/customer/{id} (server-to-server, Basic auth) */
+export interface WavvCustomerDetails {
+  customer_id: string;
+  email: string;
+  name?: string;
+  plan?: string;
+  subscription_status?: string;
+  subscription?: {
+    status?: string;
+    billing_period?: string | null;
+  };
+}
+
+export async function fetchCustomerDetails(
+  wavvUserId: string,
+  clientId: string,
+  clientSecret: string
+): Promise<WavvCustomerDetails | null> {
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+  const rawId = wavvUserId.startsWith("customer:") ? wavvUserId.slice(9) : wavvUserId;
+  const url = `https://admin.wavv.com/oauth/customer/${encodeURIComponent(rawId)}`;
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Basic ${basicAuth}` },
+    });
+    if (res.status === 404) return null;
+    if (!res.ok) {
+      console.error(`[WAVV OIDC] fetchCustomerDetails failed ${res.status} for ${rawId}`);
+      return null;
+    }
+    return res.json() as Promise<WavvCustomerDetails>;
+  } catch (err) {
+    console.error("[WAVV OIDC] fetchCustomerDetails error:", err);
+    return null;
+  }
+}
+
+/** Returns true if the customer subscription is active (ACTIVE, TRIALING, or SCHEDULED_CANCEL) */
+export function isActiveSubscription(details: WavvCustomerDetails | null): boolean {
+  if (!details) return false;
+  const ACTIVE_STATUSES = ["ACTIVE", "TRIALING", "SCHEDULED_CANCEL"];
+  const status = details.subscription?.status ?? details.subscription_status ?? "NONE";
+  return ACTIVE_STATUSES.includes(status.toUpperCase());
+}
+
 export async function fetchEmployeeDetails(
   employeeId: string,
   clientId: string,

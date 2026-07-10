@@ -16,10 +16,12 @@ import {
   buildAuthorizationUrl,
   deriveCodeChallenge,
   exchangeCodeForTokens,
+  fetchCustomerDetails,
   fetchEmployeeDetails,
   fetchUserInfo,
   generateCodeVerifier,
   generateState,
+  isActiveSubscription,
   mapWavvEmployeeRoleToInternal,
   mapWavvRoleToInternal,
   verifyIdToken,
@@ -142,18 +144,54 @@ export function registerOAuthRoutes(app: Express) {
 
       const internalRole = mapWavvRoleToInternal(userInfo);
 
-      // Email domain is the authoritative employee check until Steve's token sends account_type reliably.
-      // A @wavv.com email always means employee, regardless of what the token claims.
       const isWavvEmail = email.toLowerCase().endsWith("@wavv.com");
       const tokenAccountType = userInfo.account_type ?? idClaims.account_type ?? null;
 
-      // Resolve account_type:
-      // - @wavv.com email = always employee (authoritative, regardless of token)
-      // - Non-@wavv.com email = NEVER employee, even if token claims employee
-      //   (personal/Gmail accounts cannot be WAVV employees in this system)
-      // NOTE: is_employee / is_customer removed from token Jul 2026 — derive from account_type only
+      // OIDC identity facets (Jul 2026: wavv_account_id renamed to wavv_user_id, employee_id added)
+      // Both can be non-null for dual employee+customer accounts (e.g. @wavv.com test accounts).
+      const wavvUserId = (userInfo as any).wavv_user_id ?? (idClaims as any).wavv_user_id
+        ?? userInfo.wavv_account_id ?? idClaims.wavv_account_id ?? null;
+      const employeeId = (userInfo as any).employee_id ?? (idClaims as any).employee_id ?? null;
+
+      // ── Subscription check ────────────────────────────────────────────────────
+      // Fetch live subscription at login time when a wavvUserId is present.
+      // This is the authoritative signal for WAVV Team vs WAVV Users:
+      //   - Active subscription (ACTIVE / TRIALING / SCHEDULED_CANCEL) → customer → WAVV Users
+      //   - No subscription or inactive → fall through to email-domain check
+      let customerDetails = null;
+      let subscriptionStatus: string | null = null;
+      let wavvPlan: string | null = null;
+      let hasActiveSubscription = false;
+
+      if (wavvUserId) {
+        customerDetails = await fetchCustomerDetails(
+          wavvUserId,
+          ENV.wavvOidcClientId,
+          ENV.wavvOidcClientSecret
+        );
+        if (customerDetails) {
+          subscriptionStatus = customerDetails.subscription?.status
+            ?? customerDetails.subscription_status
+            ?? null;
+          wavvPlan = customerDetails.plan ?? null;
+          hasActiveSubscription = isActiveSubscription(customerDetails);
+        }
+      }
+
+      // ── Account type resolution ───────────────────────────────────────────────
+      //
+      // Priority order (highest to lowest):
+      //   1. Has active subscription → customer (WAVV Users), regardless of email domain
+      //      This correctly routes @wavv.com test accounts with subscriptions to WAVV Users.
+      //   2. @wavv.com email AND no active subscription → employee (WAVV Team, pending approval)
+      //   3. Token says customer (non-@wavv.com) → customer
+      //   4. Everything else → guest
+      //
+      // Note: a @wavv.com user with an inactive/expired subscription still goes to WAVV Team.
       const resolvedAccountType: "employee" | "customer" | "guest" =
-        isWavvEmail
+        hasActiveSubscription
+          ? "customer"
+          : isWavvEmail
           ? "employee"
           : tokenAccountType === "customer"
           ? "customer"
@@ -161,13 +199,12 @@ export function registerOAuthRoutes(app: Express) {
 
       const isEmployee = resolvedAccountType === "employee";
       const isCustomer = resolvedAccountType === "customer";
-      // Determine initial approvalStatus: employees start as "pending", others as "approved"
+      // Employees start as "pending" (require owner approval). Customers auto-approved.
       const initialApprovalStatus = isEmployee ? "pending" : "approved";
       const accountType = resolvedAccountType;
 
-      // Fetch live employee role from WAVV IdP (Jul 2026: role removed from token)
-      // Falls back to "viewer" if the endpoint is unreachable or returns 404.
-      let internalRoleLive = internalRole; // default: viewer (from stale mapWavvRoleToInternal)
+      // Fetch live employee role from WAVV IdP (only for true employees, not customer accounts)
+      let internalRoleLive = internalRole;
       if (isEmployee) {
         const empDetails = await fetchEmployeeDetails(
           externalId,
@@ -179,25 +216,25 @@ export function registerOAuthRoutes(app: Express) {
         }
       }
 
-      // OIDC identity facets (Jul 2026: wavv_account_id renamed to wavv_user_id, employee_id added)
-      // Both can be non-null for dual employee+customer accounts.
-      const wavvUserId = (userInfo as any).wavv_user_id ?? (idClaims as any).wavv_user_id ?? null;
-      const employeeId = (userInfo as any).employee_id ?? (idClaims as any).employee_id ?? null;
-      const subscriptionStatus = null; // not in token — fetched live via getEntitlement
-      const wavvPlan = null;           // not in token — fetched live via getEntitlement
-
       let user = await db.getUserByOpenId(externalId);
 
       if (!user && email) {
         const existingByEmail = await db.getUserByEmail(email);
         if (existingByEmail) {
-          // Never downgrade an existing @wavv.com employee to guest — preserve their accountType if already elevated.
-          // However, non-@wavv.com emails can NEVER be employee, even if the DB previously had them as one.
-          const mergedAccountType =
-            !isWavvEmail && existingByEmail.accountType === "employee" ? accountType :
-            existingByEmail.accountType === "employee" ? "employee" :
-            existingByEmail.accountType === "customer" && accountType === "guest" ? "customer" :
-            accountType;
+          // Subscription is the authoritative signal — if they have an active subscription,
+          // they are always a customer regardless of email domain or previous DB state.
+          // If no active subscription, preserve existing elevated accountType (never downgrade
+          // an approved employee to guest, but a customer with no subscription stays customer).
+          const mergedAccountType: "employee" | "customer" | "guest" =
+            hasActiveSubscription
+              ? "customer"
+              : existingByEmail.accountType === "employee" && !isWavvEmail
+              ? accountType  // non-@wavv.com can never be employee
+              : existingByEmail.accountType === "employee"
+              ? "employee"
+              : existingByEmail.accountType === "customer" && accountType === "guest"
+              ? "customer"
+              : accountType;
           const mergedIsEmployee = mergedAccountType === "employee";
           const mergedIsCustomer = mergedAccountType === "customer";
           const mergedApprovalStatus =
@@ -247,14 +284,32 @@ export function registerOAuthRoutes(app: Express) {
         });
         user = await db.getUserByOpenId(externalId);
       } else {
-        // Update live metadata on every login (but never overwrite approvalStatus or downgrade accountType)
-        // Exception: non-@wavv.com emails can NEVER be employee, even if DB has them as one
+        // Re-evaluate accountType on every login using the live subscription check.
+        // Subscription is authoritative: active subscription always wins and routes to WAVV Users.
+        // This handles the case where a @wavv.com test account gains or loses a subscription
+        // between logins — their routing updates automatically.
         const existingAccountType = user.accountType;
-        const safeAccountType =
-          !isWavvEmail && existingAccountType === "employee" ? accountType :
-          existingAccountType === "employee" ? "employee" :
-          existingAccountType === "customer" && accountType === "guest" ? "customer" :
-          accountType;
+        const safeAccountType: "employee" | "customer" | "guest" =
+          hasActiveSubscription
+            ? "customer"
+            : !isWavvEmail && existingAccountType === "employee"
+            ? accountType  // non-@wavv.com can never be employee
+            : existingAccountType === "employee"
+            ? "employee"
+            : existingAccountType === "customer" && accountType === "guest"
+            ? "customer"
+            : accountType;
+        // Re-evaluate approvalStatus: if account type changed from employee to customer
+        // (subscription acquired), auto-approve them. Never downgrade an approved employee.
+        const existingApproval = user.approvalStatus;
+        const safeApproval =
+          safeAccountType === "customer" && existingAccountType === "employee"
+            ? "approved"   // gained a subscription — move out of pending queue
+            : existingApproval === "denied"
+            ? "denied"     // denied stays denied
+            : safeAccountType === "employee" && existingApproval === "pending"
+            ? "pending"    // still employee, still pending
+            : existingApproval ?? (safeAccountType === "employee" ? "pending" : "approved");
         await db.upsertUser({
           openId: externalId,
           lastSignedIn: new Date(),
@@ -268,6 +323,7 @@ export function registerOAuthRoutes(app: Express) {
           employeeId,
           subscriptionStatus,
           wavvPlan,
+          approvalStatus: safeApproval,
         });
       }
 

@@ -4,7 +4,9 @@ import {
   deriveCodeChallenge,
   generateState,
   buildAuthorizationUrl,
+  isActiveSubscription,
   WAVV_ISSUER,
+  type WavvCustomerDetails,
 } from "./_core/wavvOidc";
 
 describe("WAVV OIDC helpers", () => {
@@ -53,5 +55,47 @@ describe("WAVV OIDC helpers", () => {
     expect(process.env.WAVV_OIDC_CLIENT_ID).toBe("manus-success-center");
     expect(process.env.WAVV_OIDC_CLIENT_SECRET).toBeTruthy();
     expect(process.env.WAVV_OIDC_REDIRECT_URI).toContain("/api/oauth/callback");
+  });
+});
+
+describe("isActiveSubscription — account type routing", () => {
+  const base: WavvCustomerDetails = { customer_id: "123", email: "test@wavv.com" };
+
+  it("returns true for ACTIVE subscription", () => {
+    expect(isActiveSubscription({ ...base, subscription: { status: "ACTIVE" } })).toBe(true);
+  });
+
+  it("returns true for TRIALING subscription", () => {
+    expect(isActiveSubscription({ ...base, subscription: { status: "TRIALING" } })).toBe(true);
+  });
+
+  it("returns true for SCHEDULED_CANCEL subscription", () => {
+    expect(isActiveSubscription({ ...base, subscription: { status: "SCHEDULED_CANCEL" } })).toBe(true);
+  });
+
+  it("returns false for CANCELED subscription", () => {
+    expect(isActiveSubscription({ ...base, subscription: { status: "CANCELED" } })).toBe(false);
+  });
+
+  it("returns false for PAST_DUE subscription", () => {
+    expect(isActiveSubscription({ ...base, subscription: { status: "PAST_DUE" } })).toBe(false);
+  });
+
+  it("returns false when subscription is missing", () => {
+    expect(isActiveSubscription({ ...base })).toBe(false);
+  });
+
+  it("returns false for null input (no wavvUserId)", () => {
+    expect(isActiveSubscription(null)).toBe(false);
+  });
+
+  it("falls back to top-level subscription_status field", () => {
+    expect(isActiveSubscription({ ...base, subscription_status: "ACTIVE" })).toBe(true);
+    expect(isActiveSubscription({ ...base, subscription_status: "CANCELED" })).toBe(false);
+  });
+
+  it("is case-insensitive for status values", () => {
+    expect(isActiveSubscription({ ...base, subscription: { status: "active" } })).toBe(true);
+    expect(isActiveSubscription({ ...base, subscription: { status: "trialing" } })).toBe(true);
   });
 });
