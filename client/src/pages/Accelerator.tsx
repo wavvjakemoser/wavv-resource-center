@@ -804,8 +804,7 @@ export default function Accelerator() {
           </div>
         </div>
 
-        {/* ── Next Live Call Countdown ── */}
-        <LiveCallCountdown hasAccess={hasAccess} />
+
 
         {/* ── Curriculum (tiles — gated or unlocked) ── */}
         <section className="space-y-4">
@@ -815,12 +814,12 @@ export default function Accelerator() {
               <h2 className="text-xl font-bold text-white">The Curriculum</h2>
             </div>
             {hasAccess && (
-              <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>Evergreen — join any week</span>
+              <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>On-demand — start any session, any time</span>
             )}
           </div>
           {!hasAccess && (
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
-              An evergreen loop — join at any week and get full value. Each session pairs live sales coaching with hands-on WAVV product training.
+              On-demand access — start any session, any time. Each session pairs live sales coaching with hands-on WAVV product training.
             </p>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -850,7 +849,7 @@ export default function Accelerator() {
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
                         style={{ background: `${session.color}18`, color: session.color }}>
-                        Week {session.week}
+                        Session {session.id}
                       </span>
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
                         style={{ background: "rgba(255,255,255,0.04)" }}>
@@ -881,7 +880,7 @@ export default function Accelerator() {
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
                         style={{ background: `${session.color}12`, color: `${session.color}99` }}>
-                        Week {session.week}
+                        Session {session.id}
                       </span>
                       <Lock size={14} style={{ color: "rgba(255,255,255,0.25)" }} />
                     </div>
@@ -931,8 +930,7 @@ export default function Accelerator() {
           )}
         </section>
 
-        {/* ── Upcoming Live Calls (for members) ── */}
-        {hasAccess && <UpcomingCallsList />}
+
 
         {/* ── The Partnership ── */}
         <section className="space-y-4">
@@ -946,11 +944,8 @@ export default function Accelerator() {
           >
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 items-start">
               {/* WAVV side */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-5 object-contain" />
-                  <h3 className="text-sm font-bold text-white">WAVV</h3>
-                </div>
+              <div className="space-y-3 flex flex-col items-center text-center">
+                <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-8 object-contain" />
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
                   WAVV is a native multi-line power dialer that lives inside your CRM. We provide the product training layer — short how-to clips, cheat sheets, and guided walkthroughs — so you can immediately apply every sales skill inside the dialer.
                 </p>
@@ -967,13 +962,10 @@ export default function Accelerator() {
                 <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
               </div>
               {/* POD side */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <a href="https://prospectingondemand.com" target="_blank" rel="noopener noreferrer">
-                    <img src="/manus-storage/pod_logo_d9f904c3.webp" alt="Prospecting On Demand" className="w-8 h-8 rounded-lg object-contain hover:opacity-80 transition-opacity" style={{ background: "rgba(255,255,255,0.08)" }} />
-                  </a>
-                  <h3 className="text-sm font-bold text-white">Prospecting On Demand</h3>
-                </div>
+              <div className="space-y-3 flex flex-col items-center text-center">
+                <a href="https://prospectingondemand.com" target="_blank" rel="noopener noreferrer">
+                  <img src="/manus-storage/pod_logo_d9f904c3.webp" alt="Prospecting On Demand" className="h-8 rounded-lg object-contain hover:opacity-80 transition-opacity" style={{ background: "rgba(255,255,255,0.08)", padding: "4px 8px" }} />
+                </a>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
                   POD is a team of experienced outbound sales trainers who specialize in turning reps into closers. They own the live coaching curriculum — objection handling, conversation frameworks, follow-up systems, and the mindset work that separates top performers.
                 </p>
@@ -1037,7 +1029,7 @@ export default function Accelerator() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #00A9E2)" }} />
-            <h2 className="text-xl font-bold text-white">Frequently Asked Questions</h2>
+            <h2 className="text-xl font-bold text-white">FAQs</h2>
           </div>
           <div className="space-y-2">
             {FAQS.map((faq, idx) => (
