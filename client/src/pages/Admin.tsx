@@ -8076,33 +8076,7 @@ function SettingsTab() {
               </div>
             </div>
 
-            {/* ── Approved Partners ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,169,226,0.12)" }}>
-                    <UserPlus size={15} style={{ color: "#00A9E2" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Approved Partners</p>
-                    <p className="text-xs text-gray-500">Controls whether the Approved Partners tab is active. Disable to prevent accidental partner invitations while the Partner Portal is under construction.</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    if (approvedPartnersEnabled && !window.confirm("Disable Approved Partners? The tab will remain visible but locked to prevent accidental invitations.")) return;
-                    toggle("approved_partners_enabled", approvedPartnersEnabled);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0"
-                  style={approvedPartnersEnabled
-                    ? { background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }
-                    : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
-                >
-                  {approvedPartnersEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                  {approvedPartnersEnabled ? "Enabled" : "Disabled"}
-                </button>
-              </div>
-            </div>
+
 
 
 

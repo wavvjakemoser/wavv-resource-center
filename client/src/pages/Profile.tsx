@@ -158,9 +158,9 @@ export default function Profile() {
   });
 
   // Site settings — control Bookmarks and Badges visibility for all users
-  const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const bookmarksEnabled = (siteSettings as Record<string, unknown>)["bookmarks_enabled"] !== false;
-  const badgesEnabled = (siteSettings as Record<string, unknown>)["badges_enabled"] !== false;
+  const { data: siteSettings, isLoading: settingsLoading } = trpc.siteSettings.getAll.useQuery();
+  const bookmarksEnabled = !settingsLoading && (siteSettings as Record<string, unknown> | undefined)?.["bookmarks_enabled"] !== false;
+  const badgesEnabled = !settingsLoading && (siteSettings as Record<string, unknown> | undefined)?.["badges_enabled"] !== false;
 
   const uploadAvatar = trpc.profile.uploadAvatar.useMutation({
     onSuccess: () => {
