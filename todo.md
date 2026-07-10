@@ -1804,3 +1804,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] server/db.ts: update upsertUser to handle wavvUserId and employeeId columns
 - [x] Admin.tsx: update wavvAccountId display column to wavvUserId
 - [x] Update references/wavv-oidc-reference.md with new token shape
+
+## Section Row UI Standardization + Spacebar Fix
+- [ ] Fix spacebar bug: add e.stopPropagation() to all inline section name edit inputs (PDF, FAQ, Help Articles)
+- [ ] Standardize section row UI: all three content types (Help Articles, PDFs, FAQs) use identical row layout — grip icon, chevron, name, edit pencil, count badge, visibility toggle, delete button

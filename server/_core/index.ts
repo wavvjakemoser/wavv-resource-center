@@ -77,6 +77,12 @@ async function startServer() {
   // from X-Forwarded-For instead of the proxy's IP
   app.set("trust proxy", 1);
 
+  // Disable Express's automatic ETag generation globally.
+  // ETags on /api/version would allow browsers to serve 304 Not Modified
+  // from their own cache, defeating the no-store intent and causing clients
+  // to miss deploy notifications.
+  app.set("etag", false);
+
   // Security headers
   app.use((_req, res, next) => {
     res.setHeader("X-Frame-Options", "DENY");
@@ -117,14 +123,18 @@ async function startServer() {
   // auto_refresh_enabled flag from site_settings (default: true).
   // Cache-Control: no-store ensures clients always get a fresh response.
   app.get("/api/version", async (_req, res) => {
-    res.setHeader("Cache-Control", "no-store");
+    // Disable all caching — clients must always get a fresh hash.
+    // ETag is disabled at the app level via app.set("etag", false) below;
+    // these headers are belt-and-suspenders for CDN/proxy layers.
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
     let autoRefreshEnabled = true;
     try {
       const { getSiteSetting } = await import("../db");
       const val = await getSiteSetting("auto_refresh_enabled");
-      // val is null when key doesn't exist yet (default: enabled)
-      // val is false (boolean) or "false" (string) when explicitly disabled
-      if (val !== null && val !== undefined && (val === false || val === "false")) {
+      // getSiteSetting JSON.parses the stored value, so `false` arrives as boolean false.
+      // Guard: null = key not yet set (default enabled); false = explicitly disabled.
+      if (val === false) {
         autoRefreshEnabled = false;
       }
     } catch {
