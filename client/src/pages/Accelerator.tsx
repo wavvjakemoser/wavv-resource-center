@@ -680,7 +680,7 @@ export default function Accelerator() {
   const week1Open = !previewAsCustomer && week1FreeActive;
 
   return (
-    <PortalLayout title="Accelerator">
+    <PortalLayout title="WAVV Accelerator">
       <div className="px-4 lg:px-8 py-6 space-y-10 pb-24">
         {/* ── Employee Preview Toggle (fixed height to prevent layout shift) ── */}
         <div style={{ minHeight: "32px" }}>
@@ -735,7 +735,7 @@ export default function Accelerator() {
             {/* Headline */}
             <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Accelerator
+                WAVV Accelerator
               </span>
             </h1>
 

@@ -26,7 +26,7 @@ const resourceNavItems = [
 ];
 // ── Programs section nav items
 const programNavItems = [
-  { href: "/accelerator", label: "Accelerator", icon: Rocket, color: "#f97316" },
+  { href: "/accelerator", label: "WAVV Accelerator", icon: Rocket, color: "#f97316" },
   { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" },
 ];
 // Combined for backward compat with visibility logic
