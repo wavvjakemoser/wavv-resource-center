@@ -63,10 +63,17 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
-// Build hash: generated once at server startup — changes on every deploy/restart.
-// Clients poll /api/version every 60s and auto-refresh when the hash changes.
-const BUILD_HASH = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-const BUILD_TIME = new Date().toISOString();
+// Build hash: baked into the compiled bundle at build time by Vite's `define`.
+// This value is frozen when `pnpm build` runs (i.e. when you hit Publish).
+// Cold-starts and container restarts reuse the same compiled binary — same hash.
+// Only a new publish produces a new hash, which is exactly when the banner should fire.
+//
+// In dev mode (vite serve), __BUILD_HASH__ is also defined by vite.config.ts
+// but regenerated each time the dev server starts — acceptable for local testing.
+declare const __BUILD_HASH__: string;
+declare const __BUILD_TIME__: string;
+const BUILD_HASH: string = typeof __BUILD_HASH__ !== "undefined" ? __BUILD_HASH__ : `dev-${Date.now()}`;
+const BUILD_TIME: string = typeof __BUILD_TIME__ !== "undefined" ? __BUILD_TIME__ : new Date().toISOString();
 
 async function startServer() {
   const app = express();

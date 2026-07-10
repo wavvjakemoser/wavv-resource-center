@@ -152,8 +152,19 @@ function vitePluginManusDebugCollector(): Plugin {
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
+// Build-time hash: set by scripts/build.mjs via VITE_BUILD_HASH env var.
+// In production builds, this is frozen at `pnpm build` time (Publish).
+// In dev mode (vite serve), falls back to a fresh value each dev server start.
+const BUILD_HASH_VALUE = process.env.VITE_BUILD_HASH ?? `dev-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const BUILD_TIME_VALUE = process.env.VITE_BUILD_TIME ?? new Date().toISOString();
+
 export default defineConfig({
   plugins,
+  define: {
+    // Injected into the client bundle — same value as the server bundle in production.
+    __BUILD_HASH__: JSON.stringify(BUILD_HASH_VALUE),
+    __BUILD_TIME__: JSON.stringify(BUILD_TIME_VALUE),
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
