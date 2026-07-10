@@ -945,7 +945,7 @@ export default function Accelerator() {
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 items-start">
               {/* WAVV side */}
               <div className="space-y-3 flex flex-col items-center text-center">
-                <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="w-40 object-contain" />
+                <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-7 object-contain" />
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
                   WAVV is a native multi-line power dialer that lives inside your CRM. We provide the product training layer — short how-to clips, cheat sheets, and guided walkthroughs — so you can immediately apply every sales skill inside the dialer.
                 </p>
@@ -964,7 +964,7 @@ export default function Accelerator() {
               {/* POD side */}
               <div className="space-y-3 flex flex-col items-center text-center">
                 <a href="https://prospectingondemand.com" target="_blank" rel="noopener noreferrer">
-                  <img src="/manus-storage/pod_icon_417b718b.webp" alt="Prospecting On Demand" className="h-8 object-contain hover:opacity-80 transition-opacity" />
+                  <img src="/manus-storage/pod_icon_417b718b.webp" alt="Prospecting On Demand" className="h-12 object-contain hover:opacity-80 transition-opacity" />
                 </a>
                 <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
                   POD is a team of experienced outbound sales trainers who specialize in turning reps into closers. They own the live coaching curriculum — objection handling, conversation frameworks, follow-up systems, and the mindset work that separates top performers.
