@@ -216,8 +216,8 @@ const FAQS = [
 ];
 
 // ─── Week 1 free window constants ────────────────────────────────────────────
-// July 20 00:00 MT (MDT = UTC-6) → July 27 00:00 MT
-const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 20, 6, 0, 0);  // Jul 20 00:00 MDT
+// Starts now (Jul 10) → locks Jul 27 00:00 MDT
+const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 10, 0, 0, 0);  // Jul 10 00:00 UTC (live now)
 const WEEK1_FREE_END_UTC   = Date.UTC(2026, 6, 27, 6, 0, 0);  // Jul 27 00:00 MDT
 
 function isWeek1FreeNow() {
