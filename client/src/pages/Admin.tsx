@@ -5732,7 +5732,7 @@ function GuidesTab() {
     onSuccess: () => {
       utils.helpArticles.listPublished.invalidate();
       utils.helpArticles.listSectionsAdmin.invalidate();
-      toast.success("Article published");
+      toast.success("Help Article created");
       setShowNativeArticleForm(false);
       resetNativeForm();
     },
@@ -5741,7 +5741,7 @@ function GuidesTab() {
   const updateNativeMutation = trpc.helpArticles.updateNativeArticle.useMutation({
     onSuccess: () => {
       utils.helpArticles.listPublished.invalidate();
-      toast.success("Article updated");
+      toast.success("Help Article updated");
       setShowNativeArticleForm(false);
       resetNativeForm();
     },
@@ -6066,9 +6066,8 @@ function GuidesTab() {
                 const fileUrl = (nativeForm as any).fileUrl ?? "";
                 const linkLabel = (nativeForm as any).linkLabel ?? "";
                 if (!nativeForm.title.trim() || !nativeForm.sectionName.trim()) { toast.error("Title and section are required"); return; }
-                createMutation.mutate({ title: nativeForm.title, description: nativeForm.nativeBody || undefined, fileUrl: fileUrl || undefined, linkLabel: linkLabel || undefined, category: nativeForm.sectionName, fileType: "help_article" });
-                setShowNativeArticleForm(false);
-                resetNativeForm();
+                createNativeMutation.mutate({ title: nativeForm.title, nativeBody: nativeForm.nativeBody || " ", sectionName: nativeForm.sectionName });
+                // form close + reset handled in createNativeMutation.onSuccess
               }}
               className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
               style={{ background: "#8B5CF6" }}
