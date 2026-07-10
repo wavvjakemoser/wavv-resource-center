@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 // ─── Live call schedule ──────────────────────────────────────────────────────
-// 12 sessions: Tue + Thu, 6 weeks, starting Jul 21 2026
+// 12 sessions: Tue + Thu, starting Jul 21 2026
 // All times stored as UTC milliseconds. 12:00 MT = 18:00 UTC (MDT = UTC-6)
 const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string; utcMs: number; joinUrl?: string }[] = [
   // Week 1
@@ -158,7 +158,7 @@ const VALUE_PROPS = [
   },
   {
     icon: Target,
-    title: "6-Week Sales Program",
+    title: "Sales Accelerator Program",
     description: "Live coaching calls twice a week, built around the Money Math equation: more dials → more conversations → more closes.",
     color: "#0074F4",
   },
@@ -191,7 +191,7 @@ const VALUE_PROPS = [
 const FAQS = [
   {
     q: "Can I join mid-cycle?",
-    a: "Absolutely. The Accelerator is an evergreen 6-week loop — you can join at any session and get full value. Once you complete the cycle, you can repeat any module or keep attending live calls.",
+    a: "Absolutely. The Accelerator is an evergreen loop — you can join at any session and get full value. Once you complete the cycle, you can repeat any module or keep attending live calls.",
   },
   {
     q: "What if I miss a live call?",
@@ -341,7 +341,7 @@ function Week1FreeBanner({ endsAt }: { endsAt: number }) {
         <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
           Free access ends in{" "}
           <span className="font-semibold tabular-nums" style={{ color: "#67C728" }}>{countdownStr}</span>
-          {" "}· Upgrade to unlock all 6 weeks
+          {" "}· Upgrade to unlock the full program
         </p>
       </div>
 
@@ -680,7 +680,7 @@ export default function Accelerator() {
   const week1Open = !previewAsCustomer && week1FreeActive;
 
   return (
-    <PortalLayout title="WAVV Accelerator">
+    <PortalLayout title="Accelerator">
       <div className="px-4 lg:px-8 py-6 space-y-10 pb-24">
         {/* ── Employee Preview Toggle (fixed height to prevent layout shift) ── */}
         <div style={{ minHeight: "32px" }}>
@@ -735,7 +735,7 @@ export default function Accelerator() {
             {/* Headline */}
             <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                WAVV Accelerator
+                Accelerator
               </span>
             </h1>
 
@@ -746,7 +746,7 @@ export default function Accelerator() {
 
             {/* Subline */}
             <p className="mx-auto mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)", maxWidth: "540px" }}>
-              Complete the WAVV Accelerator and walk away with a fully configured dialer, a proven outreach cadence, and the skills to hit your connection rate targets — in 6 weeks or less.
+              Complete the WAVV Accelerator and walk away with a fully configured dialer, a proven outreach cadence, and the skills to hit your connection rate targets.
             </p>
             {/* Schedule line */}
             <div className="flex items-center justify-center gap-2 mb-5">
@@ -783,7 +783,10 @@ export default function Accelerator() {
               </div>
             )}
             {reason === "no_access" && (
-              <div className="flex justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "480px" }}>
+                  The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost. Monthly subscribers can upgrade their plan to unlock access.
+                </p>
                 <a
                   href="https://www.wavv.com/pricing"
                   target="_blank"
@@ -804,12 +807,12 @@ export default function Accelerator() {
         {/* ── Next Live Call Countdown ── */}
         <LiveCallCountdown hasAccess={hasAccess} />
 
-        {/* ── 6-Week Curriculum (tiles — gated or unlocked) ── */}
+        {/* ── Curriculum (tiles — gated or unlocked) ── */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #00A9E2)" }} />
-              <h2 className="text-xl font-bold text-white">The 6-Week Curriculum</h2>
+              <h2 className="text-xl font-bold text-white">The Curriculum</h2>
             </div>
             {hasAccess && (
               <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>Evergreen — join any week</span>
