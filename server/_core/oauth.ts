@@ -163,12 +163,15 @@ export function registerOAuthRoutes(app: Express) {
       let wavvPlan: string | null = null;
       let hasActiveSubscription = false;
 
+      console.log(`[WAVV OAuth] login email=${email} wavvUserId=${wavvUserId} tokenAccountType=${tokenAccountType}`);
+
       if (wavvUserId) {
         customerDetails = await fetchCustomerDetails(
           wavvUserId,
           ENV.wavvOidcClientId,
           ENV.wavvOidcClientSecret
         );
+        console.log(`[WAVV OAuth] customerDetails for ${email}:`, JSON.stringify(customerDetails));
         if (customerDetails) {
           subscriptionStatus = customerDetails.subscription?.status
             ?? customerDetails.subscription_status
@@ -177,6 +180,8 @@ export function registerOAuthRoutes(app: Express) {
           hasActiveSubscription = isActiveSubscription(customerDetails);
         }
       }
+
+      console.log(`[WAVV OAuth] resolved email=${email} hasActiveSubscription=${hasActiveSubscription} resolvedType=pending...`);
 
       // ── Account type resolution ───────────────────────────────────────────────
       //
