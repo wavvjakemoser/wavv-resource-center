@@ -6007,8 +6007,8 @@ function GuidesTab() {
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Description</label>
-            <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={nativeForm.nativeBody} onChange={e => setNativeForm(f => ({ ...f, nativeBody: e.target.value }))} placeholder="Brief description" />
+            <label className="block text-xs text-gray-400 mb-1">Article Body <span className="text-gray-600 ml-1">(shown in the side panel when users click this article)</span></label>
+            <textarea rows={5} style={{ ...inputStyle, resize: "vertical" as const }} value={nativeForm.nativeBody} onChange={e => setNativeForm(f => ({ ...f, nativeBody: e.target.value }))} placeholder="Write the article content here. Supports plain text or HTML." />
           </div>
           <div>
             <label className="block text-xs text-gray-400 mb-1">Link Display Name <span className="text-gray-600 ml-1">(optional — shown to users instead of the raw URL)</span></label>

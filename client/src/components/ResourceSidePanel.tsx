@@ -105,6 +105,17 @@ function FaqPanelEntryRow({ entry }: { entry: FaqPanelEntry }) {
 // ─── Panel content renderers ──────────────────────────────────────────────────
 
 function ArticleContent({ title, nativeBody }: { title: string; nativeBody: string }) {
+  // If nativeBody contains no HTML tags (plain text from the textarea), wrap each
+  // non-empty line in a <p> so the native-article-body CSS can style it correctly.
+  const isHtml = /<[a-z][\s\S]*>/i.test(nativeBody);
+  const renderedBody = isHtml
+    ? nativeBody
+    : nativeBody
+        .split(/\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => `<p>${line}</p>`)
+        .join("") || `<p>${nativeBody}</p>`;
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-4 flex-shrink-0">
@@ -119,7 +130,7 @@ function ArticleContent({ title, nativeBody }: { title: string; nativeBody: stri
       <div className="h-px mb-5 flex-shrink-0" style={{ background: `${ARTICLE_COLOR}20` }} />
       <div
         className="flex-1 overflow-y-auto pr-1 native-article-body"
-        dangerouslySetInnerHTML={{ __html: nativeBody }}
+        dangerouslySetInnerHTML={{ __html: renderedBody }}
       />
     </div>
   );
