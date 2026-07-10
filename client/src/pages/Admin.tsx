@@ -6866,36 +6866,51 @@ function FaqSectionsPanel() {
         <SortableFaqSectionRow key={section.id} id={section.id}>
         <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
           {/* Section row */}
-          <div className="flex items-center gap-3 px-4 py-3" style={{ background: "#1d2230" }}>
-            <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
-            <button onClick={() => toggleExpand(section.id)} className="text-gray-400 hover:text-white transition">
-              {expandedSections.has(section.id) ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
-            </button>
-            {renamingSection?.id === section.id ? (
-              <input
-                className="flex-1 bg-transparent border-b border-yellow-500 text-white text-sm outline-none"
-                value={renamingSection.name}
-                onChange={e => setRenamingSection(s => s ? { ...s, name: e.target.value } : null)}
-                onKeyDown={e => {
-                  if (e.key === "Enter" && renamingSection.name.trim()) { renameMutation.mutate({ id: section.id, name: renamingSection.name.trim() }); setRenamingSection(null); }
-                  if (e.key === "Escape") setRenamingSection(null);
-                }}
-                autoFocus
-              />
-            ) : (
-              <span className="flex-1 text-sm font-semibold text-white">{section.name}</span>
-            )}
-            <span className="text-xs text-gray-500">{section.entries?.length ?? 0} entries</span>
-            <button
-              onClick={() => toggleVisibilityMutation.mutate({ id: section.id, isVisible: !section.isVisible })}
-              className="text-xs px-2 py-0.5 rounded-full font-semibold transition"
-              style={section.isVisible
-                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-                : { background: "rgba(107,114,128,0.15)", color: "#6b7280", border: "1px solid rgba(107,114,128,0.3)" }
-              }
-            >{section.isVisible ? "Visible" : "Hidden"}</button>
-            <button onClick={() => setRenamingSection({ id: section.id, name: section.name })} className="text-gray-500 hover:text-white transition"><Pencil size={13} /></button>
-            <button onClick={() => { if (confirm(`Delete "${section.name}" and all its entries?`)) deleteSectionMutation.mutate({ id: section.id }); }} className="text-gray-500 hover:text-red-400 transition"><Trash2 size={13} /></button>
+          <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
+              <button onClick={() => toggleExpand(section.id)} className="text-gray-400 hover:text-white transition flex-shrink-0">
+                {expandedSections.has(section.id) ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
+              </button>
+              {renamingSection?.id === section.id ? (
+                <input
+                  className="text-sm font-semibold text-white bg-transparent border-b border-yellow-500 outline-none flex-1 min-w-0"
+                  value={renamingSection.name}
+                  onChange={e => setRenamingSection(s => s ? { ...s, name: e.target.value } : null)}
+                  onKeyDown={e => {
+                    e.stopPropagation();
+                    if (e.key === "Enter" && renamingSection.name.trim()) { renameMutation.mutate({ id: section.id, name: renamingSection.name.trim() }); setRenamingSection(null); }
+                    if (e.key === "Escape") setRenamingSection(null);
+                  }}
+                  autoFocus
+                />
+              ) : (
+                <span className="text-sm font-semibold text-white truncate">{section.name}</span>
+              )}
+              <button
+                onClick={() => setRenamingSection({ id: section.id, name: section.name })}
+                className="text-gray-600 hover:text-gray-300 transition flex-shrink-0"
+                title="Rename section"
+              ><Pencil size={12} /></button>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(234,179,8,0.15)", color: "#eab308" }}>{section.entries?.length ?? 0}</span>
+              <button
+                onClick={() => toggleVisibilityMutation.mutate({ id: section.id, isVisible: !section.isVisible })}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                style={section.isVisible
+                  ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                }
+              >
+                {section.isVisible ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+              </button>
+              <button
+                onClick={() => { if (confirm(`Delete "${section.name}" and all its entries?`)) deleteSectionMutation.mutate({ id: section.id }); }}
+                className="text-gray-600 hover:text-red-400 transition"
+                title="Delete section"
+              ><Trash2 size={13} /></button>
+            </div>
           </div>
           {/* Entries */}
           {expandedSections.has(section.id) && (
