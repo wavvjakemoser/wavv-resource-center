@@ -219,12 +219,6 @@ export default function NativeArticleEditor({
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
             {mode === "edit" ? "Edit Article" : "New Help Article"}
-            <span
-              className="text-xs px-2 py-0.5 rounded-full font-semibold"
-              style={{ background: `${ACCENT}20`, color: ACCENT }}
-            >
-              Admin Only
-            </span>
           </DialogTitle>
         </DialogHeader>
 
