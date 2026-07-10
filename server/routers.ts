@@ -2007,12 +2007,31 @@ export const appRouter = router({
       })
       .mutation(({ input }) => reorderHelpArticleSections(input)),
     // Admin: create a native (portal-authored) article
+    // Admin: upload a file attachment for a native help article
+    uploadFile: protectedProcedure
+      .input(z.object({
+        base64: z.string(),
+        mimeType: z.enum(["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]),
+        fileName: z.string(),
+      }))
+      .use(({ ctx, next }) => {
+        if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
+        return next({ ctx });
+      })
+      .mutation(async ({ input }) => {
+        const { storagePut } = await import("./storage");
+        const buffer = Buffer.from(input.base64, "base64");
+        const key = `help-articles/${Date.now()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        return { url };
+      }),
     createNativeArticle: protectedProcedure
       .input(z.object({
         title: z.string().min(1),
-        nativeBody: z.string().min(1),
+        nativeBody: z.string().optional().default(" "),
         sectionName: z.string().min(1),
         nativeAuthorName: z.string().optional().nullable(),
+        fileUrl: z.string().optional().nullable(),
       }))
       .use(({ ctx, next }) => {
         if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });
@@ -2020,16 +2039,19 @@ export const appRouter = router({
       })
       .mutation(({ input, ctx }) => createNativeHelpArticle({
         ...input,
+        nativeBody: input.nativeBody || " ",
         nativeAuthorName: input.nativeAuthorName ?? ctx.user.name ?? null,
+        fileUrl: input.fileUrl ?? null,
       })),
     // Admin: update a native article
     updateNativeArticle: protectedProcedure
       .input(z.object({
         id: z.number(),
         title: z.string().min(1).optional(),
-        nativeBody: z.string().min(1).optional(),
+        nativeBody: z.string().optional(),
         sectionName: z.string().min(1).optional(),
         nativeAuthorName: z.string().optional().nullable(),
+        fileUrl: z.string().optional().nullable(),
       }))
       .use(({ ctx, next }) => {
         if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN" });

@@ -25,9 +25,13 @@ function NativeArticleModal({
   article,
   onClose,
 }: {
-  article: { title: string; nativeBody: string };
+  article: { title: string; nativeBody: string; fileUrl?: string | null };
   onClose: () => void;
 }) {
+  const isHtml = /<[a-z][\s\S]*>/i.test(article.nativeBody);
+  const renderedBody = isHtml
+    ? article.nativeBody
+    : article.nativeBody.split(/\n/).map(l => l.trim()).filter(l => l.length > 0).map(l => `<p>${l}</p>`).join("") || `<p>${article.nativeBody}</p>`;
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -35,12 +39,12 @@ function NativeArticleModal({
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="relative w-full max-w-2xl max-h-[85vh] overflow-auto rounded-2xl"
-        style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+        className="relative w-full max-w-2xl rounded-2xl flex flex-col"
+        style={{ background: "#1d2230", border: "1px solid #2a2a2a", maxHeight: "85vh" }}
       >
         {/* Header */}
         <div
-          className="sticky top-0 flex items-center gap-3 px-6 py-4"
+          className="sticky top-0 flex items-center gap-3 px-6 py-4 flex-shrink-0"
           style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a", zIndex: 1 }}
         >
           <button
@@ -61,12 +65,21 @@ function NativeArticleModal({
         </div>
 
         {/* Content */}
-        <div className="px-6 py-5">
-          <div
-            className="native-article-body"
-            dangerouslySetInnerHTML={{ __html: article.nativeBody }}
+        {article.fileUrl ? (
+          <iframe
+            src={`${article.fileUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+            className="flex-1 w-full rounded-b-2xl"
+            style={{ minHeight: "60vh", border: "none" }}
+            title={article.title}
           />
-        </div>
+        ) : (
+          <div className="px-6 py-5 overflow-auto flex-1">
+            <div
+              className="native-article-body"
+              dangerouslySetInnerHTML={{ __html: renderedBody }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -79,15 +92,18 @@ function ArticleRow({
   onOpenNative,
 }: {
   article: { id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null };
-  onOpenNative: (article: { title: string; nativeBody: string }) => void;
+  onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null }) => void;
 }) {
-  const isNative = !!(article.nativeBody && article.nativeBody.trim() && article.nativeBody !== "<p></p>");
+  // A file-backed article has a url but the body is blank/whitespace — open as PDF in side panel
+  const hasFile = !!(article.url && article.url.trim());
+  const hasBody = !!(article.nativeBody && article.nativeBody.trim() && article.nativeBody !== "<p></p>");
+  const isNative = hasFile || hasBody;
 
   if (isNative) {
     return (
         <button
         type="button"
-        onClick={() => onOpenNative({ title: article.title, nativeBody: article.nativeBody! })}
+        onClick={() => onOpenNative({ title: article.title, nativeBody: article.nativeBody ?? " ", fileUrl: article.url ?? null })}
         className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-left group"
         style={{ background: "transparent", border: "1px solid transparent" }}
         onMouseEnter={(e) => {
@@ -172,7 +188,7 @@ function SectionGroup({
 }: {
   name: string;
   articles: Array<{ id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null }>;
-  onOpenNative: (article: { title: string; nativeBody: string }) => void;
+  onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null }) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -227,15 +243,15 @@ function SectionGroup({
 }
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
-export default function HelpArticlesSection({ search, onOpenArticle }: { search: string; onOpenArticle?: (article: { title: string; nativeBody: string }) => void }) {
+export default function HelpArticlesSection({ search, onOpenArticle }: { search: string; onOpenArticle?: (article: { title: string; nativeBody: string; fileUrl?: string | null }) => void }) {
   // Use visible sections as source of truth — show sections even if no articles yet
   const { data: sections = [], isLoading: sectionsLoading } = trpc.helpArticles.listSections.useQuery();
   const { data: published = [], isLoading: articlesLoading } = trpc.helpArticles.listPublished.useQuery();
   const isLoading = sectionsLoading || articlesLoading;
 
   // Inline native article modal state — only used when onOpenArticle prop is not provided
-  const [openArticle, setOpenArticle] = useState<{ title: string; nativeBody: string } | null>(null);
-  const handleOpenNative = (article: { title: string; nativeBody: string }) => {
+  const [openArticle, setOpenArticle] = useState<{ title: string; nativeBody: string; fileUrl?: string | null } | null>(null);
+  const handleOpenNative = (article: { title: string; nativeBody: string; fileUrl?: string | null }) => {
     if (onOpenArticle) onOpenArticle(article);
     else setOpenArticle(article);
   };

@@ -2519,6 +2519,7 @@ export async function createNativeHelpArticle(data: {
   nativeAuthorName?: string | null;
   sortOrder?: number;
   sectionOrder?: number;
+  fileUrl?: string | null;
 }): Promise<{ id: number }> {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
@@ -2534,7 +2535,7 @@ export async function createNativeHelpArticle(data: {
       source: "native",
       intercomArticleId: null,
       title: data.title,
-      url: null,
+      url: data.fileUrl ?? null,
       nativeBody: data.nativeBody,
       nativeAuthorName: data.nativeAuthorName ?? null,
       sectionName: data.sectionName,
@@ -2552,6 +2553,7 @@ export async function updateNativeHelpArticle(
     nativeBody?: string;
     sectionName?: string;
     nativeAuthorName?: string | null;
+    fileUrl?: string | null;
   }
 ): Promise<void> {
   const db = await getDb();
@@ -2561,6 +2563,7 @@ export async function updateNativeHelpArticle(
   if (data.nativeBody !== undefined) set.nativeBody = data.nativeBody;
   if (data.sectionName !== undefined) set.sectionName = data.sectionName;
   if (data.nativeAuthorName !== undefined) set.nativeAuthorName = data.nativeAuthorName;
+  if (data.fileUrl !== undefined) set.url = data.fileUrl;
   if (Object.keys(set).length === 0) return;
   await db.update(publishedHelpArticles).set(set).where(eq(publishedHelpArticles.id, id));
 }

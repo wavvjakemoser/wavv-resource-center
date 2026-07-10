@@ -5756,6 +5756,9 @@ function GuidesTab() {
     // fileType is always pdf now — Checklist/Playbook/Resource removed
     fileType: "pdf" as "pdf",
   });
+  const uploadHelpArticleFileMutation = trpc.helpArticles.uploadFile.useMutation({
+    onError: (e) => toast.error("Upload failed: " + e.message),
+  });
   const uploadFileMutation = trpc.guides.uploadFile.useMutation({
     onError: (e) => toast.error("Upload failed: " + e.message),
   });
@@ -6040,7 +6043,7 @@ function GuidesTab() {
                   try {
                     const reader = new FileReader();
                     const base64 = await new Promise<string>((resolve, reject) => { reader.onload = () => resolve((reader.result as string).split(",")[1]); reader.onerror = reject; reader.readAsDataURL(file); });
-                    const result = await uploadFileMutation.mutateAsync({ base64, mimeType, fileName: file.name });
+                    const result = await uploadHelpArticleFileMutation.mutateAsync({ base64, mimeType, fileName: file.name });
                     setNativeForm(f => ({ ...f, fileUrl: result.url, linkLabel: file.name } as any));
                   } catch { toast.error("Upload failed"); } finally { setUploadingFile(false); }
                 }} disabled={uploadingFile} />
@@ -6066,7 +6069,7 @@ function GuidesTab() {
                 const fileUrl = (nativeForm as any).fileUrl ?? "";
                 const linkLabel = (nativeForm as any).linkLabel ?? "";
                 if (!nativeForm.title.trim() || !nativeForm.sectionName.trim()) { toast.error("Title and section are required"); return; }
-                createNativeMutation.mutate({ title: nativeForm.title, nativeBody: nativeForm.nativeBody || " ", sectionName: nativeForm.sectionName });
+                createNativeMutation.mutate({ title: nativeForm.title, nativeBody: nativeForm.nativeBody || " ", sectionName: nativeForm.sectionName, fileUrl: (nativeForm as any).fileUrl || null });
                 // form close + reset handled in createNativeMutation.onSuccess
               }}
               className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
@@ -8891,7 +8894,7 @@ function PublishedHelpArticlesPanel() {
                                 unpublishMutation.mutate({ intercomArticleId: a.intercomArticleId ?? a.id.toString() });
                               }
                             }}
-                            onEdit={a.source === "native" ? () => setEditingNativeArticle({ id: a.id, title: a.title, nativeBody: a.nativeBody ?? "", sectionName: a.sectionName }) : undefined}
+                            onEdit={a.source === "native" ? () => setEditingNativeArticle({ id: a.id, title: a.title, nativeBody: a.nativeBody ?? "", sectionName: a.sectionName, fileUrl: a.url ?? null } as any) : undefined}
                           />
                         ))}
                       </div>
@@ -8913,7 +8916,7 @@ function PublishedHelpArticlesPanel() {
         sections={adminSections.map(s => s.name)}
         mode={editingNativeArticle ? "edit" : "create"}
         initial={editingNativeArticle
-          ? { title: editingNativeArticle.title, nativeBody: editingNativeArticle.nativeBody, sectionName: editingNativeArticle.sectionName }
+          ? { title: editingNativeArticle.title, nativeBody: editingNativeArticle.nativeBody, sectionName: editingNativeArticle.sectionName, fileUrl: (editingNativeArticle as any).fileUrl ?? null }
           : nativeEditorSection ? { title: "", nativeBody: "", sectionName: nativeEditorSection } : undefined
         }
         isSaving={createNativeMutation.isPending || updateNativeMutation.isPending}

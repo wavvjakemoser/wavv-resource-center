@@ -343,8 +343,8 @@ export default function GuidesAndDocs() {
     setPanelItem({ type: "faq", sectionName: section.name, entries });
   };
 
-  const handleOpenArticle = (article: { title: string; nativeBody: string }) => {
-    setPanelItem({ type: "article", title: article.title, nativeBody: article.nativeBody });
+  const handleOpenArticle = (article: { title: string; nativeBody: string; fileUrl?: string | null }) => {
+    setPanelItem({ type: "article", title: article.title, nativeBody: article.nativeBody, fileUrl: article.fileUrl ?? null });
   };
 
   // Only PDFs — filter by search
