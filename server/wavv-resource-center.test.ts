@@ -20,8 +20,10 @@ function makeUser(overrides: Partial<AuthUser> = {}): AuthUser {
     name: "Test User",
     loginMethod: "manus",
     role: "user",
-    // publisherProcedure requires accountType=employee + approvalStatus=approved
+    // publisherProcedure requires isEmployee=true + approvalStatus=approved
     accountType: "employee",
+    isEmployee: true,
+    isCustomer: false,
     approvalStatus: "approved",
     createdAt: new Date(),
     updatedAt: new Date(),

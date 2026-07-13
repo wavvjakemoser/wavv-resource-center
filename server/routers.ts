@@ -185,7 +185,7 @@ import { runIntercomSync } from "./intercomSync";
 
 // Owner only — full platform control (must be approved employee)
 const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.accountType !== "employee" || ctx.user.approvalStatus !== "approved") {
+  if (!ctx.user.isEmployee || ctx.user.approvalStatus !== "approved") {
     throw new TRPCError({ code: "FORBIDDEN", message: "WAVV employees only" });
   }
   if (ctx.user.role !== "owner") {
@@ -195,7 +195,7 @@ const ownerProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 // Publisher (content_admin) or Owner — manage all content in Academy, Webinars, Guides; view analytics
 const publisherProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.accountType !== "employee" || ctx.user.approvalStatus !== "approved") {
+  if (!ctx.user.isEmployee || ctx.user.approvalStatus !== "approved") {
     throw new TRPCError({ code: "FORBIDDEN", message: "WAVV employees only" });
   }
   if (ctx.user.role !== "publisher" && ctx.user.role !== "owner") {
@@ -207,7 +207,7 @@ const publisherProcedure = protectedProcedure.use(({ ctx, next }) => {
 const superAdminProcedure = publisherProcedure;
 // Any WAVV employee with approved status — Command Center access
 const commandCenterProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.accountType !== "employee") {
+  if (!ctx.user.isEmployee) {
     throw new TRPCError({ code: "FORBIDDEN", message: "WAVV employees only" });
   }
   if (ctx.user.approvalStatus !== "approved") {
@@ -1328,7 +1328,7 @@ export const appRouter = router({
       const rows = await db
         .select()
         .from(users)
-        .where(and(eq(users.accountType, "employee"), like(users.email, "%@wavv.com")))
+        .where(eq(users.isEmployee, true))
         .orderBy(desc(users.createdAt));
       return rows.map(u => ({
         id: u.id,
@@ -1357,10 +1357,9 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const db = await getDb();
         if (!db) return { users: [], total: 0 };
-        // Exclude employees AND anyone with a @wavv.com email (they belong in WAVV Team)
+        // Exclude employees (they belong in WAVV Team tab)
         const conditions = [
-          ne(users.accountType, "employee"),
-          sql`(${users.email} IS NULL OR ${users.email} NOT LIKE '%@wavv.com')`,
+          eq(users.isEmployee, false),
         ];
         if (input.accountType !== "all") {
           conditions.push(eq(users.accountType, input.accountType));
@@ -2196,9 +2195,9 @@ export const appRouter = router({
     getEntitlement: protectedProcedure.query(async ({ ctx }) => {
       const wavvUserId = (ctx.user as any).wavvUserId as string | null;
       const employeeId = (ctx.user as any).employeeId as string | null;
-      // Facet-based check (Jul 2026): employee if employeeId present, customer if wavvUserId present
-      const isEmployee = !!employeeId || ctx.user.accountType === "employee";
-      const isCustomer = !!wavvUserId;
+      // Facet-based check (Jul 2026): use stored boolean facets from login
+      const isEmployee = ctx.user.isEmployee || !!employeeId;
+      const isCustomer = ctx.user.isCustomer || !!wavvUserId;
 
       // ── Week 1 Free window: July 20 – July 26 (Mountain Time) ──────────────
       // July 27 00:00 MDT = July 27 06:00 UTC

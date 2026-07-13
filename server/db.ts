@@ -2742,7 +2742,7 @@ export async function getTotalSignedInUsers() {
   const [result] = await db
     .select({ count: sql<number>`COUNT(*)` })
     .from(users)
-    .where(sql`${users.accountType} IN ('customer', 'guest')`);
+    .where(eq(users.isEmployee, false));
   return result?.count ?? 0;
 }
 
@@ -2953,7 +2953,7 @@ export async function getUserIdentityStats() {
   const subRows = await db
     .select({ status: users.subscriptionStatus, count: sql<number>`COUNT(*)` })
     .from(users)
-    .where(eq(users.accountType, "customer"))
+    .where(eq(users.isCustomer, true))
     .groupBy(users.subscriptionStatus);
   const bySubscriptionStatus: Record<string, number> = {};
   for (const r of subRows) {

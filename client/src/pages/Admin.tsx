@@ -1463,7 +1463,7 @@ function UsersTab() {
 
   // WAVV employee list (account_type=employee, @wavv.com) with approval status
   const { data: employees = [], isLoading: employeesLoading, refetch: refetchEmployees } = trpc.admin.listEmployees.useQuery(undefined, {
-    enabled: !!(currentUser?.accountType === "employee" && currentUser?.approvalStatus === "approved"),
+    enabled: !!((currentUser as any)?.isEmployee && currentUser?.approvalStatus === "approved"),
   });
   const updateApproval = trpc.admin.updateApproval.useMutation({
     onSuccess: (_, vars) => {

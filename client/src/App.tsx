@@ -50,8 +50,8 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
     window.location.href = "/api/oauth/login?return_path=/wavvcommandcenter";
     return null;
   }
-  // Must be a WAVV employee
-  if ((user as any).accountType !== "employee") return <Redirect to="/" />;
+  // Must be a WAVV employee (facet-based: isEmployee can be true even if accountType is "customer")
+  if (!(user as any).isEmployee) return <Redirect to="/" />;
   // Must be approved — pending employees see a holding screen
   if ((user as any).approvalStatus === "pending") {
     return (

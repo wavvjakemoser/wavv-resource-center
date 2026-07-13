@@ -202,17 +202,25 @@ export function registerOAuthRoutes(app: Express) {
           ? "customer"
           : "guest";
 
-      const isEmployee = resolvedAccountType === "employee";
-      const isCustomer = resolvedAccountType === "customer";
-      // Employees start as "pending" (require owner approval). Customers auto-approved.
-      const initialApprovalStatus = isEmployee ? "pending" : "approved";
+      // ── Facet-based identity (Jul 2026) ──────────────────────────────────────
+      // A user can be BOTH an employee AND a customer simultaneously.
+      // isEmployee/isCustomer are independent facets derived from token fields,
+      // NOT mutually exclusive. accountType is kept for backward compat but
+      // downstream code should prefer the boolean facets.
+      const isEmployee = !!employeeId || isWavvEmail;
+      const isCustomer = !!wavvUserId || hasActiveSubscription;
+      // accountType is the "primary" routing for UI sections (Command Center vs WAVV Users tab)
+      // but does NOT gate isEmployee/isCustomer booleans.
       const accountType = resolvedAccountType;
+      // Employees start as "pending" (require owner approval). Customers auto-approved.
+      // If someone is both, they get employee approval flow for Command Center access.
+      const initialApprovalStatus = isEmployee ? "pending" : "approved";
 
-      // Fetch live employee role from WAVV IdP (only for true employees, not customer accounts)
+      // Fetch live employee role from WAVV IdP for anyone with an employeeId
       let internalRoleLive = internalRole;
       if (isEmployee) {
         const empDetails = await fetchEmployeeDetails(
-          externalId,
+          employeeId || externalId,
           ENV.wavvOidcClientId,
           ENV.wavvOidcClientSecret
         );
@@ -240,8 +248,10 @@ export function registerOAuthRoutes(app: Express) {
               : existingByEmail.accountType === "customer" && accountType === "guest"
               ? "customer"
               : accountType;
-          const mergedIsEmployee = mergedAccountType === "employee";
-          const mergedIsCustomer = mergedAccountType === "customer";
+          // Facet-based: employee if they have an employeeId or @wavv.com email
+          // customer if they have a wavvUserId or active subscription
+          const mergedIsEmployee = !!employeeId || isWavvEmail;
+          const mergedIsCustomer = !!wavvUserId || hasActiveSubscription;
           const mergedApprovalStatus =
             existingByEmail.approvalStatus === "approved" ? "approved" :
             existingByEmail.approvalStatus === "denied" ? "denied" :
@@ -322,8 +332,9 @@ export function registerOAuthRoutes(app: Express) {
           avatarUrl: userInfo.picture || idClaims.picture || user.avatarUrl || null,
           wavvSub: externalId,
           accountType: safeAccountType,
-          isEmployee: safeAccountType === "employee",
-          isCustomer: safeAccountType === "customer",
+          // Facet-based: independent of accountType routing
+          isEmployee: !!employeeId || isWavvEmail,
+          isCustomer: !!wavvUserId || hasActiveSubscription,
           wavvUserId,
           employeeId,
           subscriptionStatus,
@@ -345,8 +356,8 @@ export function registerOAuthRoutes(app: Express) {
       // and are now signing in via WAVV OIDC for the first time as an employee.
       // We avoid re-notifying on every login by checking whether they were already
       // an employee+pending before this login (i.e. user existed and was already pending).
-      const wasAlreadyPending = user && user.accountType === "employee" && user.approvalStatus === "pending";
-      const isNewPendingEmployee = !wasAlreadyPending && finalUser.accountType === "employee" && finalUser.approvalStatus === "pending";
+      const wasAlreadyPending = user && user.isEmployee && user.approvalStatus === "pending";
+      const isNewPendingEmployee = !wasAlreadyPending && finalUser.isEmployee && finalUser.approvalStatus === "pending";
       if (isNewPendingEmployee) {
         try {
           const { notifyOwner } = await import("./notification");

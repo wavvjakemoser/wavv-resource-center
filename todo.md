@@ -1821,3 +1821,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Update Accelerator access gating to use live subscription data instead of login-time snapshot (already implemented)
 - [x] Fix status string: add PENDING_CANCELLATION to entitled statuses (WAVV IdP uses this instead of SCHEDULED_CANCEL)
 - [x] Write tests for the subscription check logic (15 tests in wavvOidc.test.ts already cover this)
+
+## Facet-Based Identity Fix (Jul 13, 2026)
+- [x] Fix is_employee to be based on !!employeeId || isWavvEmail (not exclusive account_type routing)
+- [x] Fix is_customer to be based on !!wavvUserId || hasActiveSubscription (not exclusive account_type routing)
+- [x] Audit and fix all account_type usage — dual employee+customer accounts must work
+- [x] Ensure Command Center access works for users who are both employee AND customer

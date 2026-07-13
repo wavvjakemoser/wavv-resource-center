@@ -132,7 +132,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
 
   // Command Center link is only visible to approved WAVV employees.
   // Pending employees see the approval-pending screen but NOT the nav link.
-  const isApprovedEmployee = user?.accountType === "employee" && user?.approvalStatus === "approved";
+  const isApprovedEmployee = !!(user as any)?.isEmployee && user?.approvalStatus === "approved";
   const isAdmin = isApprovedEmployee && (
     user?.role === "viewer" || user?.role === "publisher" || user?.role === "partner_manager" || user?.role === "owner"
   );
