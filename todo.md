@@ -1814,3 +1814,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Move upgrade copy paragraph above "Upgrade Your Plan" button in no_access hero block
 - [x] Confirm Week 1 sessions are unblurred and clickable during free window (logic was already correct)
 - [x] Remove all "6 weeks" language: subline, banner, curriculum heading, FAQ answer, feature card title, and comment
+
+## Live Subscription Check via OIDC (Jul 13, 2026)
+- [x] Implement server-side GET /oauth/customer/{wavv_user_id} call for live subscription status (already implemented)
+- [x] Key Accelerator access off wavv_user_id presence (not account_type) (already implemented)
+- [x] Update Accelerator access gating to use live subscription data instead of login-time snapshot (already implemented)
+- [x] Fix status string: add PENDING_CANCELLATION to entitled statuses (WAVV IdP uses this instead of SCHEDULED_CANCEL)
+- [x] Write tests for the subscription check logic (15 tests in wavvOidc.test.ts already cover this)

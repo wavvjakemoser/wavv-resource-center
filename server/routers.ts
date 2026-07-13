@@ -2232,7 +2232,7 @@ export const appRouter = router({
         const status = data.subscription?.status ?? data.subscription_status ?? "NONE";
         const billingPeriod = data.subscription?.billing_period ?? null;
         const plan = data.plan ?? null;
-        const ENTITLED_STATUSES = ["ACTIVE", "TRIALING", "SCHEDULED_CANCEL"];
+        const ENTITLED_STATUSES = ["ACTIVE", "TRIALING", "PENDING_CANCELLATION", "SCHEDULED_CANCEL"];
         const QUALIFYING_BILLING = ["quarterly", "yearly"];
         const entitled =
           ENTITLED_STATUSES.includes(status) &&

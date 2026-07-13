@@ -226,10 +226,10 @@ export async function fetchCustomerDetails(
   }
 }
 
-/** Returns true if the customer subscription is active (ACTIVE, TRIALING, or SCHEDULED_CANCEL) */
+/** Returns true if the customer subscription is active (ACTIVE, TRIALING, PENDING_CANCELLATION, or SCHEDULED_CANCEL) */
 export function isActiveSubscription(details: WavvCustomerDetails | null): boolean {
   if (!details) return false;
-  const ACTIVE_STATUSES = ["ACTIVE", "TRIALING", "SCHEDULED_CANCEL"];
+  const ACTIVE_STATUSES = ["ACTIVE", "TRIALING", "PENDING_CANCELLATION", "SCHEDULED_CANCEL"];
   const status = details.subscription?.status ?? details.subscription_status ?? "NONE";
   return ACTIVE_STATUSES.includes(status.toUpperCase());
 }
