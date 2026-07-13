@@ -346,17 +346,7 @@ function Week1FreeBanner({ endsAt }: { endsAt: number }) {
       </div>
 
       {/* CTA */}
-      <a
-        href="https://www.wavv.com/pricing"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all"
-        style={{ background: "linear-gradient(135deg, #67C728, #4ea81e)" }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-      >
-        Upgrade Your Plan <ArrowRight size={13} />
-      </a>
+      <UpgradeCTA reason="no_access" variant="inline" />
     </div>
   );
 }
@@ -758,47 +748,14 @@ export default function Accelerator() {
 
             {/* Hero CTA buttons */}
             {reason === "unauthenticated" && (
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a
-                  href="https://www.wavv.com/pricing"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-                  style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-                >
-                  Become a WAVV Accelerator Member
-                  <ArrowRight size={15} />
-                </a>
-                <a
-                  href="/api/oauth/login?return_path=/accelerator"
-                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
-                  style={{ background: "#0074F4", color: "#fff", textDecoration: "none", whiteSpace: "nowrap" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#0060d4"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#0074F4"; }}
-                >
-                  Sign In
-                </a>
-              </div>
+              <UpgradeCTA reason="unauthenticated" variant="inline" />
             )}
             {reason === "no_access" && (
               <div className="flex flex-col items-center gap-3">
                 <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "480px" }}>
                   The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost. Monthly subscribers can upgrade their plan to unlock access.
                 </p>
-                <a
-                  href="https://www.wavv.com/pricing"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-                  style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-                >
-                  Upgrade Your Plan
-                  <ArrowRight size={15} />
-                </a>
+                <UpgradeCTA reason="no_access" variant="inline" />
               </div>
             )}
           </div>
@@ -1125,18 +1082,7 @@ export default function Accelerator() {
               Whoops, please contact your account rep or upgrade your plan to gain access to WAVV Accelerator.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a
-                href="https://www.wavv.com/pricing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-                style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-              >
-                Upgrade Your Plan
-                <ArrowRight size={15} />
-              </a>
+              <UpgradeCTA reason="no_access" variant="inline" />
               <button
                 onClick={() => setShowAccessPopup(false)}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
