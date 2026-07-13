@@ -186,18 +186,17 @@ export function registerOAuthRoutes(app: Express) {
       // ── Account type resolution ───────────────────────────────────────────────
       //
       // Priority order (highest to lowest):
-      //   1. Has active subscription → customer (WAVV Users), regardless of email domain
-      //      This correctly routes @wavv.com test accounts with subscriptions to WAVV Users.
-      //   2. @wavv.com email AND no active subscription → employee (WAVV Team, pending approval)
+      //   1. Has employeeId OR @wavv.com email → employee (WAVV Team)
+      //      Employee identity always wins, even if they also have a subscription.
+      //   2. Has active subscription or wavvUserId → customer (WAVV Users)
       //   3. Token says customer (non-@wavv.com) → customer
       //   4. Everything else → guest
       //
-      // Note: a @wavv.com user with an inactive/expired subscription still goes to WAVV Team.
       const resolvedAccountType: "employee" | "customer" | "guest" =
-        hasActiveSubscription
-          ? "customer"
-          : isWavvEmail
+        (!!employeeId || isWavvEmail)
           ? "employee"
+          : (hasActiveSubscription || !!wavvUserId)
+          ? "customer"
           : tokenAccountType === "customer"
           ? "customer"
           : "guest";
@@ -234,19 +233,14 @@ export function registerOAuthRoutes(app: Express) {
       if (!user && email) {
         const existingByEmail = await db.getUserByEmail(email);
         if (existingByEmail) {
-          // Subscription is the authoritative signal — if they have an active subscription,
-          // they are always a customer regardless of email domain or previous DB state.
-          // If no active subscription, preserve existing elevated accountType (never downgrade
-          // an approved employee to guest, but a customer with no subscription stays customer).
+          // Employee always wins. Then customer. Never downgrade.
           const mergedAccountType: "employee" | "customer" | "guest" =
-            hasActiveSubscription
-              ? "customer"
-              : existingByEmail.accountType === "employee" && !isWavvEmail
-              ? accountType  // non-@wavv.com can never be employee
-              : existingByEmail.accountType === "employee"
+            (!!employeeId || isWavvEmail)
               ? "employee"
-              : existingByEmail.accountType === "customer" && accountType === "guest"
+              : (hasActiveSubscription || !!wavvUserId)
               ? "customer"
+              : existingByEmail.accountType === "customer" && accountType === "guest"
+              ? "customer"  // never downgrade customer to guest
               : accountType;
           // Facet-based: employee if they have an employeeId or @wavv.com email
           // customer if they have a wavvUserId or active subscription
@@ -299,20 +293,15 @@ export function registerOAuthRoutes(app: Express) {
         });
         user = await db.getUserByOpenId(externalId);
       } else {
-        // Re-evaluate accountType on every login using the live subscription check.
-        // Subscription is authoritative: active subscription always wins and routes to WAVV Users.
-        // This handles the case where a @wavv.com test account gains or loses a subscription
-        // between logins — their routing updates automatically.
+        // Re-evaluate accountType on every login. Employee always wins.
         const existingAccountType = user.accountType;
         const safeAccountType: "employee" | "customer" | "guest" =
-          hasActiveSubscription
-            ? "customer"
-            : !isWavvEmail && existingAccountType === "employee"
-            ? accountType  // non-@wavv.com can never be employee
-            : existingAccountType === "employee"
+          (!!employeeId || isWavvEmail)
             ? "employee"
-            : existingAccountType === "customer" && accountType === "guest"
+            : (hasActiveSubscription || !!wavvUserId)
             ? "customer"
+            : existingAccountType === "customer" && accountType === "guest"
+            ? "customer"  // never downgrade customer to guest
             : accountType;
         // Re-evaluate approvalStatus: if account type changed from employee to customer
         // (subscription acquired), auto-approve them. Never downgrade an approved employee.
