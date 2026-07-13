@@ -1204,6 +1204,7 @@ export const appRouter = router({
         isEmployee: u.isEmployee,
         isCustomer: u.isCustomer,
         wavvPlan: u.wavvPlan,
+        billingPeriod: u.billingPeriod,
         subscriptionStatus: u.subscriptionStatus,
       };
     }),
@@ -1390,6 +1391,7 @@ export const appRouter = router({
             wavvUserId: u.wavvUserId,
             subscriptionStatus: u.subscriptionStatus,
             wavvPlan: u.wavvPlan,
+            billingPeriod: u.billingPeriod,
             createdAt: u.createdAt,
             lastSignedIn: u.lastSignedIn,
             avatarUrl: u.avatarUrl,
@@ -2244,6 +2246,7 @@ export const appRouter = router({
             openId: ctx.user.openId,
             subscriptionStatus: status,
             wavvPlan: plan,
+            billingPeriod,
           });
         } catch { /* non-critical */ }
         return { entitled, plan, billingPeriod, status, isEmployee: false, week1FreeActive, week1FreeEndsAt };

@@ -2241,13 +2241,14 @@ function PortalUsersPanel() {
 
   function exportPortalCSV() {
     if (!portalUsers.length) return;
-    const headers = ["Name", "Email", "Account Type", "Subscription Status", "Plan", "WAVV Account ID", "First Seen", "Last Login"];
+    const headers = ["Name", "Email", "Account Type", "Subscription Status", "Plan", "Billing Period", "WAVV Account ID", "First Seen", "Last Login"];
     const rows = portalUsers.map(u => [
       u.name ?? "",
       u.email ?? "",
       u.accountType ?? "",
       u.subscriptionStatus ?? "",
       u.wavvPlan ?? "",
+      u.billingPeriod ?? "",
       u.wavvUserId ?? "",
       u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
       u.lastSignedIn ? new Date(u.lastSignedIn).toLocaleDateString() : "",
@@ -2347,6 +2348,7 @@ function PortalUsersPanel() {
                 <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Type</TableHead>
                 <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Subscription</TableHead>
                 <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Plan</TableHead>
+                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Billing</TableHead>
                 <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>WAVV Account ID</TableHead>
                 <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>First Seen</TableHead>
                 <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Last Login</TableHead>
@@ -2385,6 +2387,11 @@ function PortalUsersPanel() {
                     <TableCell>
                       <span className="text-xs" style={{ color: u.wavvPlan ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)" }}>
                         {u.wavvPlan ?? "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs capitalize" style={{ color: u.billingPeriod ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)" }}>
+                        {u.billingPeriod ?? "—"}
                       </span>
                     </TableCell>
                     <TableCell>

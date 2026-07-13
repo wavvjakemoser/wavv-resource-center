@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `billing_period` varchar(32);

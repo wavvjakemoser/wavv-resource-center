@@ -344,6 +344,13 @@
       "when": 1783640754566,
       "tag": "0047_strong_spyke",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "5",
+      "when": 1783979300706,
+      "tag": "0048_fair_mercury",
+      "breakpoints": true
     }
   ]
 }

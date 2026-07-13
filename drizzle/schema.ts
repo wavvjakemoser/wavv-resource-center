@@ -47,6 +47,7 @@ export const users = mysqlTable("users", {
   // Subscription metadata (populated via live GET /oauth/customer/{wavvUserId})
   subscriptionStatus: varchar("subscription_status", { length: 64 }),  // NONE | INCOMPLETE | TRIALING | ACTIVE | SCHEDULED_CANCEL | CANCELED
   wavvPlan: varchar("wavv_plan", { length: 128 }),
+  billingPeriod: varchar("billing_period", { length: 32 }),  // monthly | quarterly | yearly | null
 });
 
 export type User = typeof users.$inferSelect;
