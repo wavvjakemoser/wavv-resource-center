@@ -2226,11 +2226,12 @@ export const appRouter = router({
         const data = await resp.json() as {
           plan?: string;
           subscription_status?: string;
-          subscription?: { status?: string; billing_period?: string | null };
+          subscription?: { status?: string; plan?: string; billing_period?: string | null; seats?: number; amount_cents?: number };
         };
         const status = data.subscription?.status ?? data.subscription_status ?? "NONE";
         const billingPeriod = data.subscription?.billing_period ?? null;
-        const plan = data.plan ?? null;
+        // Plan name lives under subscription.plan (nested), not top-level
+        const plan = data.subscription?.plan ?? data.plan ?? null;
         const ENTITLED_STATUSES = ["ACTIVE", "TRIALING", "PENDING_CANCELLATION", "SCHEDULED_CANCEL"];
         const QUALIFYING_BILLING = ["quarterly", "yearly"];
         const entitled =

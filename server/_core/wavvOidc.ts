@@ -194,11 +194,14 @@ export interface WavvCustomerDetails {
   customer_id: string;
   email: string;
   name?: string;
-  plan?: string;
+  plan?: string;  // top-level (legacy/fallback)
   subscription_status?: string;
   subscription?: {
     status?: string;
+    plan?: string;  // the actual plan name (e.g. "Multi Monthly Tiered 3")
     billing_period?: string | null;
+    seats?: number;
+    amount_cents?: number;
   };
 }
 

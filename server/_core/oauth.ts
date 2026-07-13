@@ -176,7 +176,8 @@ export function registerOAuthRoutes(app: Express) {
           subscriptionStatus = customerDetails.subscription?.status
             ?? customerDetails.subscription_status
             ?? null;
-          wavvPlan = customerDetails.plan ?? null;
+          // Plan name lives under subscription.plan (nested), fallback to top-level
+          wavvPlan = customerDetails.subscription?.plan ?? customerDetails.plan ?? null;
           hasActiveSubscription = isActiveSubscription(customerDetails);
         }
       }
