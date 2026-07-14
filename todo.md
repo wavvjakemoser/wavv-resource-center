@@ -1806,8 +1806,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Update references/wavv-oidc-reference.md with new token shape
 
 ## Section Row UI Standardization + Spacebar Fix
-- [ ] Fix spacebar bug: add e.stopPropagation() to all inline section name edit inputs (PDF, FAQ, Help Articles)
-- [ ] Standardize section row UI: all three content types (Help Articles, PDFs, FAQs) use identical row layout — grip icon, chevron, name, edit pencil, count badge, visibility toggle, delete button
+- [x] Fix spacebar bug: add e.stopPropagation() to all inline section name edit inputs (PDF, FAQ, Help Articles)
+- [x] Standardize section row UI: all three content types (Help Articles, PDFs, FAQs) use identical row layout — grip icon, chevron, name, edit pencil, count badge, visibility toggle, delete button
 
 ## Accelerator UI Fixes (Jul 10, 2026)
 - [x] Remove "WAVV" prefix from Accelerator h1 heading, sidebar nav label, and page title

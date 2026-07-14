@@ -666,8 +666,8 @@ export default function Accelerator() {
   const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
   const hasAccess = previewAsCustomer ? false : realAccess;
   const reason = previewAsCustomer ? "no_access" : realReason;
-  // Week 1 is accessible to everyone during the free window (unless previewing as customer)
-  const week1Open = !previewAsCustomer && week1FreeActive;
+  // Session 1 is accessible to everyone during the free window (including employee preview-as-customer)
+  const week1Open = week1FreeActive;
 
   return (
     <PortalLayout title="WAVV Accelerator">
