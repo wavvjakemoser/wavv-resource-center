@@ -262,26 +262,16 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
 
   if (reason === "unauthenticated") {
     return (
-      <div className="flex flex-col sm:flex-row items-center gap-3">
-        <button
-          onClick={handleUpgradeClick}
-          disabled={manageUrl.isPending}
-          className={`inline-flex items-center gap-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${variant === "sticky" ? "px-5 py-2" : "px-6 py-2.5"}`}
-          style={{ background: "linear-gradient(135deg, #f97316, #ea580c)", opacity: manageUrl.isPending ? 0.7 : 1 }}
-        >
-          {manageUrl.isPending ? "Loading..." : "Unlock the Full Accelerator"}
-          {!manageUrl.isPending && <ArrowRight size={15} />}
-        </button>
-        <a
-          href="/api/oauth/login?return_path=/accelerator"
-          className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
-          style={{ background: "#0074F4", color: "#fff", textDecoration: "none", whiteSpace: "nowrap" }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "#0060d4"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "#0074F4"; }}
-        >
-          Sign In
-        </a>
-      </div>
+      <a
+        href="/api/oauth/login?return_path=/accelerator"
+        className={`inline-flex items-center gap-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${variant === "sticky" ? "px-5 py-2" : "px-6 py-2.5"}`}
+        style={{ background: "linear-gradient(135deg, #f97316, #ea580c)", textDecoration: "none" }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+      >
+        Sign In to Upgrade
+        <ArrowRight size={15} />
+      </a>
     );
   }
   return (
@@ -300,7 +290,7 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
 }
 
 // ─── Week 1 Free Banner with countdown ─────────────────────────────────────
-function Week1FreeBanner({ endsAt }: { endsAt: number }) {
+function Week1FreeBanner({ endsAt, reason }: { endsAt: number; reason: string }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -346,7 +336,7 @@ function Week1FreeBanner({ endsAt }: { endsAt: number }) {
       </div>
 
       {/* CTA */}
-      <UpgradeCTA reason="no_access" variant="inline" />
+      <UpgradeCTA reason={reason} variant="inline" />
     </div>
   );
 }
@@ -695,7 +685,7 @@ export default function Accelerator() {
 
         {/* ── Week 1 Free Banner (shown to non-members during the free window) ── */}
         {!hasAccess && week1FreeActive && (
-          <Week1FreeBanner endsAt={week1FreeEndsAt} />
+          <Week1FreeBanner endsAt={week1FreeEndsAt} reason={reason} />
         )}
 
         {/* ── Hero (gradient box matching site pattern) ── */}
