@@ -2205,9 +2205,9 @@ export const appRouter = router({
       const isEmployee = ctx.user.isEmployee || !!employeeId;
       const isCustomer = ctx.user.isCustomer || !!wavvUserId;
 
-      // ── Week 1 Free window: July 20 – July 26 (Mountain Time) ──────────────
+      // ── Week 1 Free window: July 10 – July 27 (Mountain Time) ──────────────
       // July 27 00:00 MDT = July 27 06:00 UTC
-      const WEEK1_FREE_START = new Date("2026-07-20T06:00:00Z").getTime(); // July 20 00:00 MDT
+      const WEEK1_FREE_START = new Date("2026-07-10T00:00:00Z").getTime(); // July 10 00:00 UTC
       const WEEK1_FREE_END   = new Date("2026-07-27T06:00:00Z").getTime(); // July 27 00:00 MDT
       const now = Date.now();
       const week1FreeActive = now >= WEEK1_FREE_START && now < WEEK1_FREE_END;

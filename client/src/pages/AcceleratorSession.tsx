@@ -51,6 +51,15 @@ const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string;
 const CALL_DURATION_MS = 90 * 60 * 1000;
 const JOIN_WINDOW_MS   = 30 * 60 * 1000;
 
+// ─── Week 1 Free Window (must stay in sync with Accelerator.tsx) ─────────────
+const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 10, 0, 0, 0);  // Jul 10 00:00 UTC
+const WEEK1_FREE_END_UTC   = Date.UTC(2026, 6, 27, 6, 0, 0);  // Jul 27 00:00 MDT
+
+function isWeek1FreeNow() {
+  const now = Date.now();
+  return now >= WEEK1_FREE_START_UTC && now < WEEK1_FREE_END_UTC;
+}
+
 // ─── Qualifying plans ─────────────────────────────────────────────────────────
 const QUALIFYING_PLANS = ["quarterly", "annual"];
 
@@ -60,13 +69,14 @@ function useAcceleratorAccess() {
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
   });
-  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, isLoading: false };
-  if (entitlementQuery.isLoading) return { hasAccess: false, reason: "loading" as const, isLoading: true };
+  const week1FreeActive = isWeek1FreeNow();
+  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, isLoading: false, week1FreeActive };
+  if (entitlementQuery.isLoading) return { hasAccess: false, reason: "loading" as const, isLoading: true, week1FreeActive };
   const e = entitlementQuery.data;
-  if (!e) return { hasAccess: false, reason: "no_access" as const, isLoading: false };
-  if (e.isEmployee) return { hasAccess: true, reason: "employee" as const, isLoading: false };
-  if (e.entitled) return { hasAccess: true, reason: "qualifying_plan" as const, isLoading: false };
-  return { hasAccess: false, reason: "no_access" as const, isLoading: false };
+  if (!e) return { hasAccess: false, reason: "no_access" as const, isLoading: false, week1FreeActive };
+  if (e.isEmployee) return { hasAccess: true, reason: "employee" as const, isLoading: false, week1FreeActive };
+  if (e.entitled) return { hasAccess: true, reason: "qualifying_plan" as const, isLoading: false, week1FreeActive };
+  return { hasAccess: false, reason: "no_access" as const, isLoading: false, week1FreeActive };
 }
 
 // ─── Upgrade button (Stripe portal, falls back to pricing page) ──────────────
@@ -307,7 +317,7 @@ function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: num
                       Current
                     </span>
                   )}
-                  <span className="text-sm font-semibold text-white">Week {w}</span>
+                  <span className="text-sm font-semibold text-white">Session {w}</span>
                 </div>
                 <span className="text-xs" style={{ color: "rgba(0,116,244,0.7)" }}>View →</span>
               </a>
@@ -381,7 +391,7 @@ function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: num
 export default function AcceleratorSession() {
   const params = useParams<{ id: string }>();
   const weekId = parseInt(params.id ?? "1", 10);
-  const { hasAccess, reason } = useAcceleratorAccess();
+  const { hasAccess, reason, week1FreeActive } = useAcceleratorAccess();
   const now = useNow();
 
   const { data: session, isLoading } = trpc.accelerator.get.useQuery({ id: weekId });
@@ -413,10 +423,11 @@ export default function AcceleratorSession() {
 
   const color = session.color ?? "#0074F4";
 
-  // ─── No-access view ───────────────────────────────────────────────────────
-  if (!hasAccess) {
+  // ─── No-access view (bypass for Session 1 during free window) ─────────────
+  const sessionFree = week1FreeActive && weekId === 1;
+  if (!hasAccess && !sessionFree) {
     return (
-      <PortalLayout title={`Week ${session.week}: ${session.title}`}>
+      <PortalLayout title={`Session ${session.week}: ${session.title}`}>
         <div className="px-4 lg:px-8 py-8 max-w-3xl space-y-6">
           <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
             <ArrowLeft size={14} />
@@ -427,7 +438,7 @@ export default function AcceleratorSession() {
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: `${color}15` }}>
               <Lock size={28} style={{ color }} />
             </div>
-            <h2 className="text-xl font-bold text-white">Week {session.week}: {session.title}</h2>
+            <h2 className="text-xl font-bold text-white">Session {session.week}: {session.title}</h2>
             <p className="text-sm text-gray-400 max-w-md mx-auto">
               This session is available to WAVV Quarterly and Annual subscribers.
             </p>
@@ -457,7 +468,7 @@ export default function AcceleratorSession() {
 
   // ─── Member view ─────────────────────────────────────────────────────────
   return (
-    <PortalLayout title={`Week ${session.week}: ${session.title}`}>
+    <PortalLayout title={`Session ${session.week}: ${session.title}`}>
 
       {/* ── Hero header band ── */}
       <div
@@ -492,7 +503,7 @@ export default function AcceleratorSession() {
               className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
               style={{ background: `${color}25`, color, border: `1px solid ${color}35` }}
             >
-              Week {session.week} of 6
+              Session {session.week}
             </span>
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-3">
@@ -513,7 +524,7 @@ export default function AcceleratorSession() {
               <CheckCircle2 size={15} style={{ color }} className="flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: `${color}cc` }}>
-                  By the end of this week
+                  By the end of this session
                 </p>
                 <p className="text-sm text-white">{session.outcome}</p>
               </div>
@@ -534,14 +545,14 @@ export default function AcceleratorSession() {
           <div>
             <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle or catching up?</p>
             <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Every previous session recording is available below. Click into any week in the Full Program Schedule to catch up at your own pace.
+              Every previous session recording is available below. Click into any session in the Full Program Schedule to catch up at your own pace.
             </p>
           </div>
         </div>
 
         {/* ── Live call cards — dominant section ── */}
         <section>
-          <SectionHeader icon={Clock} label={`Upcoming Live Calls — Week ${weekId}`} color={color} />
+          <SectionHeader icon={Clock} label={`Upcoming Live Calls — Session ${weekId}`} color={color} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {weekSessions.map(s => (
               <SessionCallCard key={s.id} session={s} now={now} color={color} />

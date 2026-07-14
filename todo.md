@@ -1830,3 +1830,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Bugs (Jul 14, 2026)
 - [x] Fix "No Subscription" filter in WAVV Users table — should show Steve Keiser and Jacob Moser (guests with no subscription)
 - [x] Fix spacing between sections in the WAVV Users Command Center table
+
+## Session 1 Free Window + Language Updates (Jul 14, 2026)
+- [x] Add free-window constants (Jul 10–Jul 27) to AcceleratorSession.tsx (client-side)
+- [x] Add isWeek1FreeNow() helper and week1FreeActive to useAcceleratorAccess() in AcceleratorSession.tsx
+- [x] Bypass no-access gate for Session 1 during free window (sessionFree = week1FreeActive && weekId === 1)
+- [x] Align server-side free window start date to Jul 10 00:00 UTC (was Jul 20)
+- [x] Update all "Week" → "Session" language in AcceleratorSession.tsx (title, breadcrumb, hero tag, schedule nav, catch-up text)
+- [x] Remove "of 6" from session number display
+- [x] Change "By the end of this week" → "By the end of this session"
+- [x] Unauthenticated users can view Session 1 without signing in during free window (confirmed: hasAccess=false + sessionFree=true bypasses lock)
