@@ -584,32 +584,6 @@ export default function AcceleratorSession() {
           </div>
         </section>
 
-        {/* ── Session Recordings (webinar-style cards) ── */}
-        <section>
-          <SectionHeader icon={Video} label="Session Recordings" color={color} />
-          {cmsRecordings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {cmsRecordings.map((item: any) => (
-                <ContentCard
-                  key={item.id}
-                  item={item}
-                  accentColor={color}
-                  badgeLabel="Recording"
-                  onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
-                />
-              ))}
-            </div>
-          ) : (
-            <div
-              className="rounded-xl p-8 text-center"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}
-            >
-              <Video size={28} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
-              <p className="text-xs text-gray-500">No recordings yet — check back after the live call.</p>
-            </div>
-          )}
-        </section>
-
         {/* ── WAVV Product Training (webinar-style cards) ── */}
         <section>
           <SectionHeader icon={Play} label="WAVV Product Training" color={color} />
@@ -632,6 +606,32 @@ export default function AcceleratorSession() {
             >
               <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
               <p className="text-xs text-gray-500">Product training video coming soon</p>
+            </div>
+          )}
+        </section>
+
+        {/* ── Previous Session Recordings (webinar-style cards) ── */}
+        <section>
+          <SectionHeader icon={Video} label="Previous Session Recordings" color={color} />
+          {cmsRecordings.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {cmsRecordings.map((item: any) => (
+                <ContentCard
+                  key={item.id}
+                  item={item}
+                  accentColor={color}
+                  badgeLabel="Recording"
+                  onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                />
+              ))}
+            </div>
+          ) : (
+            <div
+              className="rounded-xl p-8 text-center"
+              style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}
+            >
+              <Video size={28} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
+              <p className="text-xs text-gray-500">No recordings yet — check back after the live call.</p>
             </div>
           )}
         </section>
@@ -687,7 +687,7 @@ export default function AcceleratorSession() {
 }
 
 // ─── Default background for content cards ────────────────────────────────────
-const DEFAULT_RECORDING_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-ondemand-clapperboard-XGLnb93SFV6vDUAxePhB3u.webp";
+const DEFAULT_RECORDING_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-recording-thumb-5k42eDDvtp8Hh42zyzTshn.webp";
 const DEFAULT_TRAINING_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
 
 // ─── Webinar-style content card ──────────────────────────────────────────────

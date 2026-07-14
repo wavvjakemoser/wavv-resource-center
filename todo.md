@@ -1867,3 +1867,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Redesign WAVV Product Training section: smaller card-based layout (not giant video embed), same thumbnail card style
 - [x] Shrink product training video area (currently way too large)
 - [x] Ensure Zoom join link field in admin feeds into the "Join" button (opens 30 min before)
+
+## Previous Session Recordings Rename + Admin Form Update (Jul 14)
+- [ ] Rename "Session Recordings" → "Previous Session Recordings" on all 6 session detail pages
+- [ ] Move "Previous Session Recordings" section below WAVV Product Training and above Full Program Schedule
+- [ ] Update admin CMS form for adding recordings to match webinar "New Webinar" form (Title, Host, Description, Video URL/upload or paste external URL, Thumbnail with default play circle, custom thumbnail upload/URL, enable pop-out checkbox)
