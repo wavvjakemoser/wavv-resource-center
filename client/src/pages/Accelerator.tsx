@@ -336,7 +336,7 @@ function Week1FreeBanner({ endsAt }: { endsAt: number }) {
       {/* Text */}
       <div className="flex-1 text-center sm:text-left">
         <p className="text-sm font-bold text-white">
-          Week 1 is free through July 26
+          Session 1 is free through July 26
         </p>
         <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
           Free access ends in{" "}
@@ -432,7 +432,7 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
           </h3>
           {sessionRef && (
             <p className="mt-1 text-xs font-semibold" style={{ color: isLive ? "#6ee7b7" : "#4a9eff" }}>
-              Week {weekNum} · Session {sessionInWeek} of 2
+               Session {weekNum} · Call {sessionInWeek} of 2
             </p>
           )}
           <p className="mt-0.5 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
@@ -490,7 +490,7 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
 
         {isDone && (
           <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
-            All 12 sessions complete. Recordings available in each week below.
+            All 12 sessions complete. Recordings available in each session below.
           </p>
         )}
 
@@ -504,7 +504,7 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
             onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
           >
             {isLive ? <Play size={14} /> : <Calendar size={14} />}
-            {isLive ? "Join Live Call" : `Go to Week ${weekNum}`}
+            {isLive ? "Join Live Call" : `Go to Session ${weekNum}`}
             <ChevronRight size={14} />
           </a>
         )}
@@ -521,7 +521,7 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
             <div>
               <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle?</p>
               <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
-                No problem — every previous session recording is available. Click into any week below to catch up at your own pace.
+                No problem — every previous session recording is available. Click into any session below to catch up at your own pace.
               </p>
             </div>
           </div>
@@ -560,7 +560,7 @@ function UpcomingCallsList() {
       </div>
 
       {upcoming.length === 0 ? (
-        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>All sessions complete. Check recordings in each week below.</p>
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>All sessions complete. Check recordings in each session below.</p>
       ) : (
         <div className="space-y-2">
           {upcoming.map((s) => {
@@ -598,7 +598,7 @@ function UpcomingCallsList() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-white">
-                      Week {s.week} · Session {s.sessionInWeek} of 2
+                      Session {s.week} · Call {s.sessionInWeek} of 2
                     </p>
                     <p className="text-[11px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>{s.label}</p>
                   </div>
@@ -642,7 +642,7 @@ function UpcomingCallsList() {
 
       {past.length > 0 && (
         <p className="text-[11px] pt-1" style={{ color: "rgba(255,255,255,0.3)" }}>
-          ✱ {past.length} previous session{past.length > 1 ? "s" : ""} available — click any week below to catch up.
+          ✱ {past.length} previous session{past.length > 1 ? "s" : ""} available — click any session below to catch up.
         </p>
       )}
     </section>

@@ -1840,3 +1840,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove "of 6" from session number display
 - [x] Change "By the end of this week" → "By the end of this session"
 - [x] Unauthenticated users can view Session 1 without signing in during free window (confirmed: hasAccess=false + sessionFree=true bypasses lock)
+
+## Accelerator Soft Launch Fixes (Jul 14, 2026)
+- [x] Session 1 tile must be visually unlocked (no blur, clickable) for non-members during free window
+- [x] Sessions 2-6 tiles remain locked/blurred for non-members
+- [x] Banner text: "Week 1" → "Session 1"
+- [x] Verify the tile click navigates to /accelerator/session/1 for non-members during free window

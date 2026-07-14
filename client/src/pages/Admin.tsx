@@ -6619,6 +6619,7 @@ function PdfSectionsPanel({
                               setEditingSectionId(null);
                             }}
                             onKeyDown={e => {
+                              e.stopPropagation();
                               if (e.key === "Enter") (e.target as HTMLInputElement).blur();
                               if (e.key === "Escape") { setEditingSectionId(null); }
                             }}
@@ -8847,7 +8848,7 @@ function PublishedHelpArticlesPanel() {
                       }
                       setEditingSection(null);
                     }}
-                    onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") setEditingSection(null); }}
+                    onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") setEditingSection(null); }}
                     autoFocus
                   />
                 ) : (
