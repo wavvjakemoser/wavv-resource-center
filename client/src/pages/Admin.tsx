@@ -9671,6 +9671,8 @@ function AcceleratorContentManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [addType, setAddType] = useState<"recording" | "product_training">("recording");
   const [editingContentId, setEditingContentId] = useState<number | null>(null);
+  const [uploadingThumb, setUploadingThumb] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [contentForm, setContentForm] = useState({
     title: "",
     loomUrl: "",
@@ -9678,6 +9680,16 @@ function AcceleratorContentManager() {
     hostName: "",
     duration: "",
     description: "",
+  });
+
+  const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
+
+  const DEFAULT_RECORDING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
+  const DEFAULT_TRAINING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
+
+  const uploadThumbMutation = trpc.accelerator.uploadThumbnail.useMutation();
+  const uploadVideoMutation = trpc.accelerator.uploadVideo.useMutation({
+    onError: (e: any) => toast.error("Video upload failed: " + e.message),
   });
 
   const createMutation = trpc.accelerator.createContent.useMutation({
@@ -9694,6 +9706,7 @@ function AcceleratorContentManager() {
       utils.accelerator.allContent.invalidate();
       toast.success("Content updated");
       setEditingContentId(null);
+      resetForm();
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -9714,7 +9727,8 @@ function AcceleratorContentManager() {
 
   function startEditContent(item: any) {
     setEditingContentId(item.id);
-    setShowAddForm(false);
+    setShowAddForm(true);
+    setAddType(item.contentType);
     setContentForm({
       title: item.title ?? "",
       loomUrl: item.loomUrl ?? "",
@@ -9723,6 +9737,48 @@ function AcceleratorContentManager() {
       duration: item.duration ?? "",
       description: item.description ?? "",
     });
+  }
+
+  async function handleThumbUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image too large — max 10 MB"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    setUploadingThumb(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const result = await uploadThumbMutation.mutateAsync({ base64, mimeType: file.type });
+      setContentForm(f => ({ ...f, thumbnailUrl: result.url }));
+      toast.success("Thumbnail uploaded");
+    } catch { toast.error("Thumbnail upload failed"); } finally { setUploadingThumb(false); }
+  }
+
+  async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500 * 1024 * 1024) { toast.error("Video too large — max 500 MB"); return; }
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "mp4";
+    type AllowedMime = "video/mp4" | "video/webm" | "video/ogg" | "video/quicktime";
+    const mimeMap: Record<string, AllowedMime> = { mp4: "video/mp4", webm: "video/webm", ogg: "video/ogg", mov: "video/quicktime" };
+    const mimeType = mimeMap[ext];
+    if (!mimeType) { toast.error("Unsupported format — use MP4, WebM, OGG, or MOV"); return; }
+    setUploadingVideo(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const result = await uploadVideoMutation.mutateAsync({ base64, mimeType, fileName: file.name });
+      setContentForm(f => ({ ...f, loomUrl: result.url }));
+      toast.success("Video uploaded to platform storage");
+    } catch { /* handled by onError */ } finally { setUploadingVideo(false); }
   }
 
   function saveContent() {
@@ -9755,6 +9811,9 @@ function AcceleratorContentManager() {
   const productTraining = filteredContent.filter((c: any) => c.contentType === "product_training");
 
   if (isLoading) return null;
+
+  const defaultThumb = addType === "recording" ? DEFAULT_RECORDING_THUMB : DEFAULT_TRAINING_THUMB;
+  const accentColor = addType === "recording" ? "#0074F4" : "#10b981";
 
   return (
     <div className="mt-8 space-y-4">
@@ -9833,80 +9892,150 @@ function AcceleratorContentManager() {
         </div>
       </div>
 
-      {/* Add/Edit Form */}
+      {/* Add/Edit Form — matches webinar "New Webinar" pattern */}
       {(showAddForm || editingContentId) && (
-        <div className="rounded-xl p-4" style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.25)" }}>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-white">
-              {editingContentId ? "Edit Content" : `Add ${addType === "recording" ? "Recording" : "Product Training Video"}`}
-            </h3>
-            <button onClick={resetForm} className="text-xs text-gray-400 hover:text-white">Cancel</button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Title *</label>
-              <Input
-                value={contentForm.title}
-                onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })}
-                className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                placeholder="e.g. Session 1 Recording - July 21"
-              />
+        <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+          <h3 className="text-sm font-semibold text-white">
+            {editingContentId ? "Edit Content" : `New ${addType === "recording" ? "Session Recording" : "Product Training Video"}`}
+          </h3>
+          <div className="space-y-3">
+            {/* Row 1: Title + Host */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Title *</label>
+                <input style={inputStyle} value={contentForm.title} onChange={e => setContentForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Session 1 Recording - July 21" />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Host</label>
+                <input style={inputStyle} value={contentForm.hostName} onChange={e => setContentForm(f => ({ ...f, hostName: e.target.value }))} placeholder="e.g. Jake Moser" />
+              </div>
             </div>
+
+            {/* Row 2: Description */}
             <div>
-              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Loom/Video URL</label>
-              <Input
-                value={contentForm.loomUrl}
-                onChange={(e) => setContentForm({ ...contentForm, loomUrl: e.target.value })}
-                className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                placeholder="https://www.loom.com/share/..."
-              />
+              <label className="block text-xs text-gray-400 mb-1">Description</label>
+              <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={contentForm.description} onChange={e => setContentForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description" />
             </div>
-            <div>
-              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Thumbnail URL</label>
-              <Input
-                value={contentForm.thumbnailUrl}
-                onChange={(e) => setContentForm({ ...contentForm, thumbnailUrl: e.target.value })}
-                className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                placeholder="https://... or /manus-storage/..."
-              />
+
+            {/* Row 3: Duration + Video */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Duration</label>
+                <input style={inputStyle} value={contentForm.duration} onChange={e => setContentForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45 min" />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Video <span className="text-gray-600">(upload or paste URL)</span></label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                      style={{ background: uploadingVideo ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingVideo ? "#9ca3af" : "#fff" }}
+                    >
+                      {uploadingVideo ? (
+                        <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                      ) : (
+                        <><FileDown size={13} /> Upload Video</>
+                      )}
+                      <input type="file" accept=".mp4,.webm,.ogg,.mov" className="hidden" onChange={handleVideoUpload} disabled={uploadingVideo} />
+                    </label>
+                    {contentForm.loomUrl && contentForm.loomUrl.startsWith("/manus-storage") && (
+                      <span className="text-xs text-green-400 flex items-center gap-1">
+                        <CheckCircle2 size={12} /> Hosted on platform
+                      </span>
+                    )}
+                  </div>
+                  <input style={inputStyle} value={contentForm.loomUrl} onChange={e => setContentForm(f => ({ ...f, loomUrl: e.target.value }))} placeholder="Or paste external URL (YouTube, Loom, Vimeo, etc.)" />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Host Name</label>
-              <Input
-                value={contentForm.hostName}
-                onChange={(e) => setContentForm({ ...contentForm, hostName: e.target.value })}
-                className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                placeholder="e.g. Jake Moser"
-              />
+
+            {/* Row 4: Thumbnail Image — default preview + custom upload */}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(section default shown — upload a custom image to override)</span></label>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: contentForm.thumbnailUrl ? "2px solid #1a1a1a" : `2px solid ${accentColor}`, boxShadow: contentForm.thumbnailUrl ? "none" : `0 0 8px ${accentColor}44` }}>
+                    <img
+                      src={contentForm.thumbnailUrl || defaultThumb}
+                      alt="Default"
+                      className="w-full h-full object-cover"
+                    />
+                    {!contentForm.thumbnailUrl && (
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: `${accentColor}33` }}>
+                        <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: accentColor }}>
+                          <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {contentForm.thumbnailUrl ? (
+                      <span style={{ color: accentColor }}>Custom image set</span>
+                    ) : (
+                      <span>Default {addType === "recording" ? "rocket" : "play circle"} thumbnail (active)</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-2">Custom Thumbnail <span className="text-gray-600">(optional — replaces the default background)</span></label>
+                <div className="flex items-center gap-2">
+                  <label
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                    style={{ background: uploadingThumb ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingThumb ? "#9ca3af" : "#fff" }}
+                  >
+                    {uploadingThumb ? (
+                      <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                    ) : (
+                      <><ImageIcon size={13} /> Upload Image</>
+                    )}
+                    <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleThumbUpload} disabled={uploadingThumb} />
+                  </label>
+                  {contentForm.thumbnailUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setContentForm(f => ({ ...f, thumbnailUrl: "" }))}
+                      className="text-xs text-gray-500 hover:text-red-400 transition"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <input
+                  style={{ ...inputStyle, marginTop: "8px" }}
+                  value={contentForm.thumbnailUrl}
+                  onChange={e => setContentForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
+                  placeholder="Or paste a custom thumbnail URL..."
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Duration</label>
-              <Input
-                value={contentForm.duration}
-                onChange={(e) => setContentForm({ ...contentForm, duration: e.target.value })}
-                className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                placeholder="e.g. 45 min"
-              />
+
+            {/* Row 5: PiP toggle */}
+            <div className="flex flex-col gap-2 mt-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={true}
+                  readOnly
+                  className="w-3.5 h-3.5 rounded accent-blue-500"
+                />
+                <span className="text-xs text-gray-400">Enable Pop-out (Picture-in-Picture) for this video</span>
+              </label>
             </div>
-            <div>
-              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Description</label>
-              <Input
-                value={contentForm.description}
-                onChange={(e) => setContentForm({ ...contentForm, description: e.target.value })}
-                className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                placeholder="Brief description of the content"
-              />
+
+            {/* Actions */}
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={resetForm} className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition" style={{ background: "#252d3d" }}>Cancel</button>
+              <button
+                type="button"
+                onClick={saveContent}
+                disabled={!contentForm.title || createMutation.isPending || updateContentMut.isPending}
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+                style={{ background: "#0074F4" }}
+              >
+                {(createMutation.isPending || updateContentMut.isPending) ? "Saving..." : editingContentId ? "Save Changes" : "Create Content"}
+              </button>
             </div>
-          </div>
-          <div className="flex justify-end mt-3">
-            <button
-              onClick={saveContent}
-              disabled={!contentForm.title || createMutation.isPending || updateContentMut.isPending}
-              className="text-xs px-4 py-2 rounded-lg font-medium disabled:opacity-50"
-              style={{ background: "#0074F4", color: "#fff" }}
-            >
-              {(createMutation.isPending || updateContentMut.isPending) ? "Saving..." : editingContentId ? "Update" : "Add"}
-            </button>
           </div>
         </div>
       )}
@@ -9915,16 +10044,13 @@ function AcceleratorContentManager() {
 }
 
 function AccContentRow({ item, onEdit, onDelete }: { item: any; onEdit: () => void; onDelete: () => void }) {
+  const DEFAULT_REC = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
+  const DEFAULT_TRAIN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
+  const thumb = item.thumbnailUrl || (item.contentType === "recording" ? DEFAULT_REC : DEFAULT_TRAIN);
   return (
     <div className="flex items-center justify-between py-2 px-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
       <div className="flex items-center gap-3">
-        {item.thumbnailUrl ? (
-          <img src={item.thumbnailUrl} alt="" className="w-16 h-10 rounded object-cover" />
-        ) : (
-          <div className="w-16 h-10 rounded flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)" }}>
-            <Video size={14} className="text-gray-500" />
-          </div>
-        )}
+        <img src={thumb} alt="" className="w-16 h-10 rounded object-cover" />
         <div>
           <p className="text-sm text-white font-medium">{item.title}</p>
           <p className="text-[11px] text-gray-400">

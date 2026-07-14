@@ -2257,6 +2257,27 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    uploadThumbnail: publisherProcedure
+      .input(z.object({ base64: z.string(), mimeType: z.string() }))
+      .mutation(async ({ input }) => {
+        const { storagePut } = await import("./storage");
+        const buffer = Buffer.from(input.base64, "base64");
+        const ext = input.mimeType.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
+        const key = `accelerator/thumbnails/${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        return { url };
+      }),
+
+    uploadVideo: publisherProcedure
+      .input(z.object({ base64: z.string(), mimeType: z.enum(["video/mp4", "video/webm", "video/ogg", "video/quicktime"]), fileName: z.string() }))
+      .mutation(async ({ input }) => {
+        const { storagePut } = await import("./storage");
+        const buffer = Buffer.from(input.base64, "base64");
+        const key = `accelerator/videos/${Date.now()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        return { url };
+      }),
+
     /**
      * Live entitlement check — calls WAVV admin API server-side.
      * Returns whether the current user is entitled to Accelerator content,
