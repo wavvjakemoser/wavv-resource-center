@@ -857,17 +857,25 @@ export default function Accelerator() {
             })}
           </div>
 
-          {/* "What you're missing" banner + CTA (only for non-access users) */}
+          {/* "What You're Missing" banner + CTA (only for non-access users) */}
           {!hasAccess && (
-            <div className="space-y-3 pt-2">
-              {/* What you're missing quantification */}
-              <div className="rounded-xl p-4 flex flex-col sm:flex-row items-center gap-3"
-                style={{ background: "rgba(249,115,22,0.05)", border: "1px solid rgba(249,115,22,0.12)" }}>
-                <Gift size={18} style={{ color: "#f97316" }} className="flex-shrink-0" />
-                <p className="text-sm text-center sm:text-left" style={{ color: "rgba(255,255,255,0.6)" }}>
-                  <span className="font-semibold text-white">You're missing:</span>{" "}
-                  6 live coaching calls/week, 12+ WAVV training clips, downloadable cheat sheets, community leaderboards, and milestone badges — all included with your upgrade.
-                </p>
+            <div className="space-y-5 pt-4">
+              {/* What You're Missing — prominent banner */}
+              <div className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+                style={{ background: "linear-gradient(135deg, rgba(249,115,22,0.08) 0%, rgba(249,115,22,0.03) 100%)", border: "1px solid rgba(249,115,22,0.18)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(249,115,22,0.15)" }}>
+                  <Gift size={20} style={{ color: "#f97316" }} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-white mb-1">What You're Missing</p>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    {week1FreeActive
+                      ? "Session 1 is on us — but the full program includes 6 live coaching calls/week, 12+ WAVV training clips, downloadable cheat sheets, community leaderboards, and milestone badges."
+                      : "6 live coaching calls/week, 12+ WAVV training clips, downloadable cheat sheets, community leaderboards, and milestone badges — all included with your upgrade."
+                    }
+                  </p>
+                </div>
               </div>
               {/* CTA */}
               <div className="flex flex-col items-center gap-3">
@@ -879,7 +887,10 @@ export default function Accelerator() {
                   </span>
                 </div>
                 <p className="text-sm text-center max-w-md leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-                  To unlock future live coaching sessions and our full video library, simply upgrade to a quarterly or annual plan today. Not only will you save money on your subscription, but you’ll also unlock ongoing, free access to the accelerator.
+                  {week1FreeActive
+                    ? "Upgrade to a quarterly or annual plan to unlock Sessions 2–6, all future live coaching calls, and the full video library."
+                    : "Upgrade to a quarterly or annual plan to unlock all live coaching sessions, the full video library, and save money on your subscription."
+                  }
                 </p>
                 <UpgradeCTA reason={reason} />
               </div>
@@ -1021,7 +1032,10 @@ export default function Accelerator() {
           <section className="text-center space-y-4 pb-6">
             <h2 className="text-xl font-bold text-white">Ready to accelerate?</h2>
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
-              The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost.
+              {week1FreeActive
+                ? "Session 1 is on us. Upgrade to a Quarterly or Annual plan to unlock the full program."
+                : "The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost."
+              }
             </p>
             <UpgradeCTA reason={reason} />
           </section>

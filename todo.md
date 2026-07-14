@@ -1846,3 +1846,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Sessions 2-6 tiles remain locked/blurred for non-members
 - [x] Banner text: "Week 1" → "Session 1"
 - [x] Verify the tile click navigates to /accelerator/session/1 for non-members during free window
+
+## Accelerator Non-Member UX Polish (Jul 14, 2026)
+- [x] "You're Missing" → "What You're Missing" in banner section
+- [x] Make the "What You're Missing" banner section bigger/more prominent
+- [x] Remove duplicate "Available on Quarterly & Annual Plans" text (not needed — bigger banner pushes content down naturally)
+- [x] During free window: messaging should be "Session 1 is on us — upgrade for the full program"
+- [x] After free window: standard "Upgrade Your Plan" messaging
+- [x] Verify upgrade CTA routes unauthenticated users through sign-in first (shows both "Unlock" + "Sign In" buttons for unauth users)
