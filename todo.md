@@ -1855,3 +1855,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] After free window: standard "Upgrade Your Plan" messaging
 - [x] Verify upgrade CTA routes unauthenticated users through sign-in first (shows both "Unlock" + "Sign In" buttons for unauth users)
 - [x] Unauthenticated users: upgrade CTA routes to sign-in first (OAuth login with return_path=/accelerator), not directly to Stripe/pricing
+- [x] Employee accounts: upgrade button shows toast ("Employee preview mode — this button is for subscribers only") instead of redirecting to wavv.com/pricing

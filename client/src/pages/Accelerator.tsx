@@ -21,6 +21,7 @@ import {
   Gift,
   Info,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // ─── Live call schedule ──────────────────────────────────────────────────────
 // 12 sessions: Tue + Thu, starting Jul 21 2026
@@ -255,8 +256,10 @@ function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: 
       const result = await manageUrl.mutateAsync();
       window.location.href = result.url;
     } catch {
-      // Fallback: send to pricing page if portal URL unavailable (e.g. not a Stripe customer)
-      window.open("https://www.wavv.com/pricing", "_blank");
+      // Employee accounts don't have Stripe subscriptions — show a toast instead of redirecting
+      toast.info("Employee preview mode", {
+        description: "This button is for subscribers only. Real customers will be directed to their Stripe billing portal.",
+      });
     }
   };
 
