@@ -414,6 +414,12 @@ export default function AcceleratorSession() {
 
   const { data: session, isLoading } = trpc.accelerator.get.useQuery({ id: weekId });
 
+  // Fetch dynamic content from CMS (must be before any conditional returns to avoid hook-order issues)
+  const { data: sessionContent = [] } = trpc.accelerator.listContent.useQuery({ sessionNumber: weekId });
+
+  // Video player state (must be before any conditional returns)
+  const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
+
   if (isLoading) {
     return (
       <PortalLayout title="Loading...">
@@ -481,13 +487,8 @@ export default function AcceleratorSession() {
 
   const weekSessions = SCHEDULE.filter(s => s.week === weekId);
 
-  // Fetch dynamic content from CMS
-  const { data: sessionContent = [] } = trpc.accelerator.listContent.useQuery({ sessionNumber: weekId });
   const cmsRecordings = sessionContent.filter((c: any) => c.contentType === "recording" && c.isVisible);
   const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
-
-  // Video player state
-  const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
 
   // ─── Member view ─────────────────────────────────────────────────────────
   return (
