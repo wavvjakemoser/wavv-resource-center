@@ -1827,3 +1827,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix is_customer to be based on !!wavvUserId || hasActiveSubscription (not exclusive account_type routing)
 - [x] Audit and fix all account_type usage — dual employee+customer accounts must work
 - [x] Ensure Command Center access works for users who are both employee AND customer
+## Bugs (Jul 14, 2026)
+- [x] Fix "No Subscription" filter in WAVV Users table — should show Steve Keiser and Jacob Moser (guests with no subscription)
+- [x] Fix spacing between sections in the WAVV Users Command Center table

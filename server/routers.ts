@@ -1366,7 +1366,11 @@ export const appRouter = router({
           conditions.push(eq(users.accountType, input.accountType));
         }
         if (input.subscriptionStatus) {
-          conditions.push(eq(users.subscriptionStatus, input.subscriptionStatus));
+          if (input.subscriptionStatus === "NONE") {
+            conditions.push(sql`${users.subscriptionStatus} IS NULL`);
+          } else {
+            conditions.push(eq(users.subscriptionStatus, input.subscriptionStatus));
+          }
         }
         if (input.search) {
           const s = `%${input.search}%`;
