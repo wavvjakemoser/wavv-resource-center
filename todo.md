@@ -1856,3 +1856,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Verify upgrade CTA routes unauthenticated users through sign-in first (shows both "Unlock" + "Sign In" buttons for unauth users)
 - [x] Unauthenticated users: upgrade CTA routes to sign-in first (OAuth login with return_path=/accelerator), not directly to Stripe/pricing
 - [x] Employee accounts: upgrade button shows toast ("Employee preview mode — this button is for subscribers only") instead of redirecting to wavv.com/pricing
+
+## Accelerator Session Pages Redesign + CMS (Jul 14, 2026)
+- [x] Rename "Accelerator" → "WAVV Accelerator" in Content Management nav tab
+- [x] Add accelerator_content DB table (type: recording | product_training, fields: session_number, title, loom_url, thumbnail_url, host_name, duration, sort_order)
+- [x] Add Zoom link field to accelerator_sessions table (join_url per session)
+- [x] Build tRPC CRUD procedures for accelerator content (list by session+type, create, update, delete, reorder)
+- [x] Build admin CMS panel for per-session content management (add/edit/remove recordings and product training videos with Loom URL, title, host, thumbnail)
+- [x] Redesign Session Recordings section: webinar-style thumbnail cards (same as WAVV Webinars on-demand)
+- [x] Redesign WAVV Product Training section: smaller card-based layout (not giant video embed), same thumbnail card style
+- [x] Shrink product training video area (currently way too large)
+- [x] Ensure Zoom join link field in admin feeds into the "Join" button (opens 30 min before)

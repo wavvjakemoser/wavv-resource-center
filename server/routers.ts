@@ -2183,6 +2183,7 @@ export const appRouter = router({
         bodyContent: z.string().nullable().optional(),
         videoUrl: z.string().nullable().optional(),
         resourceLinks: z.string().nullable().optional(),
+        joinUrl: z.string().nullable().optional(),
         isPublished: z.boolean().optional(),
         sortOrder: z.number().optional(),
       }))
@@ -2190,6 +2191,70 @@ export const appRouter = router({
         const { id, ...data } = input;
         const { updateAcceleratorSession } = await import("./db");
         return updateAcceleratorSession(id, data);
+      }),
+
+    // ─── Accelerator Content CRUD ──────────────────────────────────────────────
+    listContent: publicProcedure
+      .input(z.object({ sessionNumber: z.number(), contentType: z.enum(["recording", "product_training"]).optional() }))
+      .query(async ({ input }) => {
+        const { listAcceleratorContent } = await import("./db");
+        return listAcceleratorContent(input.sessionNumber, input.contentType);
+      }),
+
+    allContent: publisherProcedure.query(async () => {
+      const { getAllAcceleratorContent } = await import("./db");
+      return getAllAcceleratorContent();
+    }),
+
+    createContent: publisherProcedure
+      .input(z.object({
+        sessionNumber: z.number().min(1).max(6),
+        contentType: z.enum(["recording", "product_training"]),
+        title: z.string().min(1),
+        loomUrl: z.string().nullable().optional(),
+        thumbnailUrl: z.string().nullable().optional(),
+        hostName: z.string().nullable().optional(),
+        duration: z.string().nullable().optional(),
+        description: z.string().nullable().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createAcceleratorContent } = await import("./db");
+        return createAcceleratorContent(input);
+      }),
+
+    updateContent: publisherProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        loomUrl: z.string().nullable().optional(),
+        thumbnailUrl: z.string().nullable().optional(),
+        hostName: z.string().nullable().optional(),
+        duration: z.string().nullable().optional(),
+        description: z.string().nullable().optional(),
+        isVisible: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const { updateAcceleratorContent } = await import("./db");
+        return updateAcceleratorContent(id, data);
+      }),
+
+    deleteContent: publisherProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteAcceleratorContent } = await import("./db");
+        await deleteAcceleratorContent(input.id);
+        return { success: true };
+      }),
+
+    reorderContent: publisherProcedure
+      .input(z.object({ items: z.array(z.object({ id: z.number(), sortOrder: z.number() })) }))
+      .mutation(async ({ input }) => {
+        const { reorderAcceleratorContent } = await import("./db");
+        await reorderAcceleratorContent(input.items);
+        return { success: true };
       }),
 
     /**

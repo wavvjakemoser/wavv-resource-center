@@ -27,6 +27,7 @@ import {
   faqSections,
   faqEntries,
   acceleratorSessions,
+  acceleratorContent,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3014,6 +3015,7 @@ export async function updateAcceleratorSession(id: number, data: Partial<{
   bodyContent: string | null;
   videoUrl: string | null;
   resourceLinks: string | null;
+  joinUrl: string | null;
   isPublished: boolean;
   sortOrder: number;
 }>) {
@@ -3115,4 +3117,70 @@ export async function getContinueLearningData(userId: number) {
     academyCourse,
     webinar: latestWebinar ?? null,
   };
+}
+
+// ─── Accelerator Content (recordings & product training) ─────────────────────
+
+export async function listAcceleratorContent(sessionNumber: number, contentType?: "recording" | "product_training") {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = [eq(acceleratorContent.sessionNumber, sessionNumber)];
+  if (contentType) conditions.push(eq(acceleratorContent.contentType, contentType));
+  return db.select().from(acceleratorContent).where(and(...conditions)).orderBy(asc(acceleratorContent.sortOrder));
+}
+
+export async function getAllAcceleratorContent() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(acceleratorContent).orderBy(asc(acceleratorContent.sessionNumber), asc(acceleratorContent.sortOrder));
+}
+
+export async function createAcceleratorContent(data: {
+  sessionNumber: number;
+  contentType: "recording" | "product_training";
+  title: string;
+  loomUrl?: string | null;
+  thumbnailUrl?: string | null;
+  hostName?: string | null;
+  duration?: string | null;
+  description?: string | null;
+  sortOrder?: number;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(acceleratorContent).values(data);
+  const id = result[0].insertId;
+  const rows = await db.select().from(acceleratorContent).where(eq(acceleratorContent.id, id));
+  return rows[0] ?? null;
+}
+
+export async function updateAcceleratorContent(id: number, data: Partial<{
+  title: string;
+  loomUrl: string | null;
+  thumbnailUrl: string | null;
+  hostName: string | null;
+  duration: string | null;
+  description: string | null;
+  isVisible: boolean;
+  sortOrder: number;
+}>) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(acceleratorContent).set(data).where(eq(acceleratorContent.id, id));
+  const rows = await db.select().from(acceleratorContent).where(eq(acceleratorContent.id, id));
+  return rows[0] ?? null;
+}
+
+export async function deleteAcceleratorContent(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(acceleratorContent).where(eq(acceleratorContent.id, id));
+}
+
+export async function reorderAcceleratorContent(items: { id: number; sortOrder: number }[]) {
+  const db = await getDb();
+  if (!db) return;
+  for (const item of items) {
+    await db.update(acceleratorContent).set({ sortOrder: item.sortOrder }).where(eq(acceleratorContent.id, item.id));
+  }
 }

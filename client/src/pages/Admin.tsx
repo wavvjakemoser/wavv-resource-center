@@ -276,7 +276,7 @@ export default function Admin() {
     { id: "webinars",         label: "WAVV Webinars",     icon: <Video size={13} />,         show: isSuperAdmin },
     { id: "guides",           label: "WAVV Resource Hub", icon: <FileText size={13} />,      show: isSuperAdmin },
     { id: "playground",       label: "WAVV Playground",   icon: <FlaskConical size={13} />,  show: isSuperAdmin },
-    { id: "accelerator",      label: "Accelerator",       icon: <Rocket size={13} />,        show: isSuperAdmin },
+    { id: "accelerator",      label: "WAVV Accelerator", icon: <Rocket size={13} />,        show: isSuperAdmin },
     { id: "partners_content", label: "WAVV Partners",     icon: <Users size={13} />,         show: isOwner || (isPartnerAdmin && !isSuperAdmin) },
     { id: "content_requests", label: "Requests",          icon: <MessageSquare size={13} />, show: isSuperAdmin },
   ];
@@ -9407,6 +9407,7 @@ function AcceleratorTab() {
     bodyContent: "",
     videoUrl: "",
     resourceLinks: "",
+    joinUrl: "",
     isPublished: false,
   });
 
@@ -9431,6 +9432,7 @@ function AcceleratorTab() {
       bodyContent: session.bodyContent ?? "",
       videoUrl: session.videoUrl ?? "",
       resourceLinks: session.resourceLinks ?? "",
+      joinUrl: session.joinUrl ?? "",
       isPublished: session.isPublished ?? false,
     });
   }
@@ -9448,6 +9450,7 @@ function AcceleratorTab() {
       bodyContent: form.bodyContent || null,
       videoUrl: form.videoUrl || null,
       resourceLinks: form.resourceLinks || null,
+      joinUrl: form.joinUrl || null,
       isPublished: form.isPublished,
     });
   }
@@ -9583,6 +9586,17 @@ function AcceleratorTab() {
                   />
                 </div>
 
+                {/* Zoom Join URL */}
+                <div>
+                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Zoom Join URL (opens 30 min before live call)</label>
+                  <Input
+                    value={form.joinUrl}
+                    onChange={(e) => setForm({ ...form, joinUrl: e.target.value })}
+                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                    placeholder="https://us02web.zoom.us/j/..."
+                  />
+                </div>
+
                 {/* Color + Published toggle */}
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
@@ -9641,6 +9655,292 @@ function AcceleratorTab() {
             )}
           </div>
         ))}
+      </div>
+
+      {/* ─── Content Management Section ─── */}
+      <AcceleratorContentManager />
+    </div>
+  );
+}
+
+// ─── Accelerator Content Manager (recordings + product training) ─────────────
+function AcceleratorContentManager() {
+  const utils = trpc.useUtils();
+  const { data: allContent = [], isLoading } = trpc.accelerator.allContent.useQuery();
+  const [selectedSession, setSelectedSession] = useState<number>(1);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addType, setAddType] = useState<"recording" | "product_training">("recording");
+  const [editingContentId, setEditingContentId] = useState<number | null>(null);
+  const [contentForm, setContentForm] = useState({
+    title: "",
+    loomUrl: "",
+    thumbnailUrl: "",
+    hostName: "",
+    duration: "",
+    description: "",
+  });
+
+  const createMutation = trpc.accelerator.createContent.useMutation({
+    onSuccess: () => {
+      utils.accelerator.allContent.invalidate();
+      toast.success("Content added");
+      resetForm();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const updateContentMut = trpc.accelerator.updateContent.useMutation({
+    onSuccess: () => {
+      utils.accelerator.allContent.invalidate();
+      toast.success("Content updated");
+      setEditingContentId(null);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteMutation = trpc.accelerator.deleteContent.useMutation({
+    onSuccess: () => {
+      utils.accelerator.allContent.invalidate();
+      toast.success("Content deleted");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  function resetForm() {
+    setShowAddForm(false);
+    setEditingContentId(null);
+    setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "" });
+  }
+
+  function startEditContent(item: any) {
+    setEditingContentId(item.id);
+    setShowAddForm(false);
+    setContentForm({
+      title: item.title ?? "",
+      loomUrl: item.loomUrl ?? "",
+      thumbnailUrl: item.thumbnailUrl ?? "",
+      hostName: item.hostName ?? "",
+      duration: item.duration ?? "",
+      description: item.description ?? "",
+    });
+  }
+
+  function saveContent() {
+    if (editingContentId) {
+      updateContentMut.mutate({
+        id: editingContentId,
+        title: contentForm.title,
+        loomUrl: contentForm.loomUrl || null,
+        thumbnailUrl: contentForm.thumbnailUrl || null,
+        hostName: contentForm.hostName || null,
+        duration: contentForm.duration || null,
+        description: contentForm.description || null,
+      });
+    } else {
+      createMutation.mutate({
+        sessionNumber: selectedSession,
+        contentType: addType,
+        title: contentForm.title,
+        loomUrl: contentForm.loomUrl || null,
+        thumbnailUrl: contentForm.thumbnailUrl || null,
+        hostName: contentForm.hostName || null,
+        duration: contentForm.duration || null,
+        description: contentForm.description || null,
+      });
+    }
+  }
+
+  const filteredContent = allContent.filter((c: any) => c.sessionNumber === selectedSession);
+  const recordings = filteredContent.filter((c: any) => c.contentType === "recording");
+  const productTraining = filteredContent.filter((c: any) => c.contentType === "product_training");
+
+  if (isLoading) return null;
+
+  return (
+    <div className="mt-8 space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-white">Session Content</h2>
+          <p className="text-xs text-gray-400">Manage recordings and product training videos per session.</p>
+        </div>
+      </div>
+
+      {/* Session selector */}
+      <div className="flex items-center gap-2">
+        {[1, 2, 3, 4, 5, 6].map((num) => (
+          <button
+            key={num}
+            onClick={() => { setSelectedSession(num); resetForm(); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={
+              selectedSession === num
+                ? { background: "#0074F4", color: "#fff" }
+                : { background: "rgba(255,255,255,0.05)", color: "#9ca3af" }
+            }
+          >
+            Session {num}
+          </button>
+        ))}
+      </div>
+
+      {/* Recordings section */}
+      <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <Video size={14} className="text-blue-400" />
+            Session Recordings
+          </h3>
+          <button
+            onClick={() => { setShowAddForm(true); setAddType("recording"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "" }); }}
+            className="text-xs px-3 py-1.5 rounded-lg font-medium"
+            style={{ background: "rgba(0,116,244,0.12)", color: "#0074F4" }}
+          >
+            + Add Recording
+          </button>
+        </div>
+        {recordings.length === 0 && !(showAddForm && addType === "recording") && (
+          <p className="text-xs text-gray-500 py-4 text-center">No recordings yet for Session {selectedSession}.</p>
+        )}
+        <div className="space-y-2">
+          {recordings.map((item: any) => (
+            <AccContentRow key={item.id} item={item} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
+          ))}
+        </div>
+      </div>
+
+      {/* Product Training section */}
+      <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <Play size={14} className="text-green-400" />
+            WAVV Product Training
+          </h3>
+          <button
+            onClick={() => { setShowAddForm(true); setAddType("product_training"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "" }); }}
+            className="text-xs px-3 py-1.5 rounded-lg font-medium"
+            style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}
+          >
+            + Add Training Video
+          </button>
+        </div>
+        {productTraining.length === 0 && !(showAddForm && addType === "product_training") && (
+          <p className="text-xs text-gray-500 py-4 text-center">No product training videos yet for Session {selectedSession}.</p>
+        )}
+        <div className="space-y-2">
+          {productTraining.map((item: any) => (
+            <AccContentRow key={item.id} item={item} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
+          ))}
+        </div>
+      </div>
+
+      {/* Add/Edit Form */}
+      {(showAddForm || editingContentId) && (
+        <div className="rounded-xl p-4" style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.25)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-white">
+              {editingContentId ? "Edit Content" : `Add ${addType === "recording" ? "Recording" : "Product Training Video"}`}
+            </h3>
+            <button onClick={resetForm} className="text-xs text-gray-400 hover:text-white">Cancel</button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Title *</label>
+              <Input
+                value={contentForm.title}
+                onChange={(e) => setContentForm({ ...contentForm, title: e.target.value })}
+                className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                placeholder="e.g. Session 1 Recording - July 21"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Loom/Video URL</label>
+              <Input
+                value={contentForm.loomUrl}
+                onChange={(e) => setContentForm({ ...contentForm, loomUrl: e.target.value })}
+                className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                placeholder="https://www.loom.com/share/..."
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Thumbnail URL</label>
+              <Input
+                value={contentForm.thumbnailUrl}
+                onChange={(e) => setContentForm({ ...contentForm, thumbnailUrl: e.target.value })}
+                className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                placeholder="https://... or /manus-storage/..."
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Host Name</label>
+              <Input
+                value={contentForm.hostName}
+                onChange={(e) => setContentForm({ ...contentForm, hostName: e.target.value })}
+                className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                placeholder="e.g. Jake Moser"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Duration</label>
+              <Input
+                value={contentForm.duration}
+                onChange={(e) => setContentForm({ ...contentForm, duration: e.target.value })}
+                className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                placeholder="e.g. 45 min"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Description</label>
+              <Input
+                value={contentForm.description}
+                onChange={(e) => setContentForm({ ...contentForm, description: e.target.value })}
+                className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                placeholder="Brief description of the content"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end mt-3">
+            <button
+              onClick={saveContent}
+              disabled={!contentForm.title || createMutation.isPending || updateContentMut.isPending}
+              className="text-xs px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+              style={{ background: "#0074F4", color: "#fff" }}
+            >
+              {(createMutation.isPending || updateContentMut.isPending) ? "Saving..." : editingContentId ? "Update" : "Add"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AccContentRow({ item, onEdit, onDelete }: { item: any; onEdit: () => void; onDelete: () => void }) {
+  return (
+    <div className="flex items-center justify-between py-2 px-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
+      <div className="flex items-center gap-3">
+        {item.thumbnailUrl ? (
+          <img src={item.thumbnailUrl} alt="" className="w-16 h-10 rounded object-cover" />
+        ) : (
+          <div className="w-16 h-10 rounded flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <Video size={14} className="text-gray-500" />
+          </div>
+        )}
+        <div>
+          <p className="text-sm text-white font-medium">{item.title}</p>
+          <p className="text-[11px] text-gray-400">
+            {item.hostName && <span>{item.hostName}</span>}
+            {item.hostName && item.duration && <span> · </span>}
+            {item.duration && <span>{item.duration}</span>}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <button onClick={onEdit} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all">
+          <Pencil size={12} />
+        </button>
+        <button onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-all">
+          <Trash2 size={12} />
+        </button>
       </div>
     </div>
   );

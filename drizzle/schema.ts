@@ -520,6 +520,7 @@ export const acceleratorSessions = mysqlTable("accelerator_sessions", {
   bodyContent: mediumtext("body_content"), // markdown or HTML for the session landing page
   videoUrl: text("video_url"), // optional embedded video
   resourceLinks: text("resource_links"), // JSON array of { label, url }
+  joinUrl: text("join_url"), // Zoom link for live calls
   isPublished: boolean("is_published").default(false).notNull(),
   sortOrder: int("sort_order").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -527,3 +528,22 @@ export const acceleratorSessions = mysqlTable("accelerator_sessions", {
 });
 export type AcceleratorSession = typeof acceleratorSessions.$inferSelect;
 export type InsertAcceleratorSession = typeof acceleratorSessions.$inferInsert;
+
+// ─── Accelerator Content (recordings & product training per session) ──────────
+export const acceleratorContent = mysqlTable("accelerator_content", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionNumber: int("session_number").notNull(), // 1-6, maps to accelerator_sessions.week
+  contentType: mysqlEnum("content_type", ["recording", "product_training"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  loomUrl: text("loom_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  hostName: varchar("host_name", { length: 128 }),
+  duration: varchar("duration", { length: 32 }), // e.g. "12:34"
+  description: text("description"),
+  isVisible: boolean("is_visible").default(true).notNull(),
+  sortOrder: int("sort_order").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AcceleratorContent = typeof acceleratorContent.$inferSelect;
+export type InsertAcceleratorContent = typeof acceleratorContent.$inferInsert;

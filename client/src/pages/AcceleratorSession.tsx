@@ -30,7 +30,25 @@ import {
   Clock,
   Video,
   AlertCircle,
+  PlayCircle,
+  X,
+  User,
 } from "lucide-react";
+import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
+
+// ─── Embed URL helper (Loom, YouTube, Vimeo) ────────────────────────────────
+function getEmbedUrl(url: string): string | null {
+  if (!url) return null;
+  const loomShare = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
+  if (loomShare) return `https://www.loom.com/embed/${loomShare[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true&hideEmbedTopBar=true`;
+  const loomEmbed = url.match(/loom\.com\/embed\/([a-zA-Z0-9]+)/);
+  if (loomEmbed) return `https://www.loom.com/embed/${loomEmbed[1]}?hide_share=true&hide_owner=true&hideEmojiReactions=true&hideEmbedTopBar=true`;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`;
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return null;
+}
 
 // ─── Shared schedule (must stay in sync with Accelerator.tsx) ─────────────────
 const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string; utcMs: number; joinUrl?: string }[] = [
@@ -457,14 +475,19 @@ export default function AcceleratorSession() {
     );
   }
 
-  // Parse resource links and recordings
+  // Parse resource links
   let resourceLinks: { label: string; url: string }[] = [];
   try { if (session.resourceLinks) resourceLinks = JSON.parse(session.resourceLinks); } catch { /* ignore */ }
 
-  let recordings: { label: string; url: string }[] = [];
-  try { if ((session as any).recordingUrls) recordings = JSON.parse((session as any).recordingUrls); } catch { /* ignore */ }
-
   const weekSessions = SCHEDULE.filter(s => s.week === weekId);
+
+  // Fetch dynamic content from CMS
+  const { data: sessionContent = [] } = trpc.accelerator.listContent.useQuery({ sessionNumber: weekId });
+  const cmsRecordings = sessionContent.filter((c: any) => c.contentType === "recording" && c.isVisible);
+  const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
+
+  // Video player state
+  const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
 
   // ─── Member view ─────────────────────────────────────────────────────────
   return (
@@ -560,16 +583,19 @@ export default function AcceleratorSession() {
           </div>
         </section>
 
-        {/* ── Recordings ── */}
+        {/* ── Session Recordings (webinar-style cards) ── */}
         <section>
           <SectionHeader icon={Video} label="Session Recordings" color={color} />
-          {recordings.length > 0 ? (
-            <div className="space-y-5">
-              {recordings.map((rec, i) => (
-                <div key={i} className="space-y-2">
-                  <p className="text-sm font-medium text-white">{rec.label}</p>
-                  <LoomEmbed url={rec.url} title={rec.label} />
-                </div>
+          {cmsRecordings.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {cmsRecordings.map((item: any) => (
+                <ContentCard
+                  key={item.id}
+                  item={item}
+                  accentColor={color}
+                  badgeLabel="Recording"
+                  onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                />
               ))}
             </div>
           ) : (
@@ -583,28 +609,28 @@ export default function AcceleratorSession() {
           )}
         </section>
 
-        {/* ── WAVV Product Training ── */}
+        {/* ── WAVV Product Training (webinar-style cards) ── */}
         <section>
           <SectionHeader icon={Play} label="WAVV Product Training" color={color} />
-          {session.videoUrl ? (
-            <div className="rounded-2xl overflow-hidden aspect-video">
-              <iframe
-                src={session.videoUrl}
-                className="w-full h-full"
-                allowFullScreen
-                allow="autoplay; fullscreen; picture-in-picture"
-                style={{ border: "none" }}
-              />
+          {cmsProductTraining.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {cmsProductTraining.map((item: any) => (
+                <ContentCard
+                  key={item.id}
+                  item={item}
+                  accentColor="#10b981"
+                  badgeLabel="Training"
+                  onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                />
+              ))}
             </div>
           ) : (
             <div
-              className="rounded-2xl overflow-hidden aspect-video flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}
+              className="rounded-xl p-6 text-center"
+              style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}
             >
-              <div className="text-center space-y-2">
-                <Play size={40} style={{ color: "rgba(255,255,255,0.1)" }} />
-                <p className="text-xs text-gray-500">Product training video coming soon</p>
-              </div>
+              <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
+              <p className="text-xs text-gray-500">Product training video coming soon</p>
             </div>
           )}
         </section>
@@ -646,6 +672,131 @@ export default function AcceleratorSession() {
         <FullScheduleTable currentWeek={weekId} now={now} />
 
       </div>
+
+      {/* Floating video player */}
+      {activeVideo && (
+        <FloatingVideoPlayer
+          title={activeVideo.title}
+          embedUrl={activeVideo.url}
+          onClose={() => setActiveVideo(null)}
+        />
+      )}
     </PortalLayout>
+  );
+}
+
+// ─── Default background for content cards ────────────────────────────────────
+const DEFAULT_RECORDING_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-ondemand-clapperboard-XGLnb93SFV6vDUAxePhB3u.webp";
+const DEFAULT_TRAINING_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
+
+// ─── Webinar-style content card ──────────────────────────────────────────────
+function ContentCard({
+  item,
+  accentColor,
+  badgeLabel,
+  onPlay,
+}: {
+  item: { id: number; title: string; loomUrl?: string | null; thumbnailUrl?: string | null; hostName?: string | null; duration?: string | null; description?: string | null; contentType: string };
+  accentColor: string;
+  badgeLabel: string;
+  onPlay: (url: string, title: string) => void;
+}) {
+  const embedUrl = item.loomUrl ? getEmbedUrl(item.loomUrl) : null;
+  const isHostedVideo = item.loomUrl?.startsWith("/manus-storage");
+  const defaultBg = item.contentType === "recording" ? DEFAULT_RECORDING_BG : DEFAULT_TRAINING_BG;
+
+  function handleWatch() {
+    const playUrl = embedUrl ?? (isHostedVideo ? item.loomUrl! : null);
+    if (playUrl) onPlay(playUrl, item.title);
+  }
+
+  return (
+    <div
+      className="flex flex-col rounded-xl overflow-hidden transition-all duration-200"
+      style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = accentColor;
+        e.currentTarget.style.boxShadow = `0 4px 20px ${accentColor}22`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "#252d3d";
+        e.currentTarget.style.boxShadow = "none";
+      }}
+    >
+      {/* Thumbnail */}
+      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "140px" }}>
+        <img
+          src={defaultBg}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.9 }}
+        />
+        {item.thumbnailUrl && (
+          <img
+            src={item.thumbnailUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ opacity: 0.92 }}
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+        )}
+        {/* Bottom gradient */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
+        {/* Badge */}
+        <div className="absolute top-3 right-3">
+          <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
+            style={{ background: accentColor, color: "#fff" }}>
+            {badgeLabel}
+          </span>
+        </div>
+        {/* Play overlay */}
+        {(embedUrl || isHostedVideo) && (
+          <div
+            className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+            style={{ background: "rgba(0,0,0,0.45)" }}
+            onClick={handleWatch}
+          >
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center"
+              style={{ background: `${accentColor}cc`, boxShadow: `0 0 20px ${accentColor}66` }}
+            >
+              <PlayCircle size={24} className="text-white" />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="p-4 flex flex-col flex-1">
+        <h3 className="text-white font-bold text-sm leading-snug mb-2">{item.title}</h3>
+        {item.description && (
+          <p className="text-gray-500 text-xs leading-relaxed mb-2">{item.description}</p>
+        )}
+        {item.hostName && (
+          <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
+            <User size={11} className="text-gray-600" />
+            <span className="text-gray-300">{item.hostName}</span>
+          </p>
+        )}
+        {item.duration && (
+          <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
+            <Clock size={11} className="text-gray-600" />
+            <span>{item.duration}</span>
+          </p>
+        )}
+        <div className="mt-auto">
+          {(embedUrl || isHostedVideo) && (
+            <button
+              type="button"
+              onClick={handleWatch}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
+            >
+              <PlayCircle size={12} /> Watch Now
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
