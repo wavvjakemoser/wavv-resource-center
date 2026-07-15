@@ -1877,3 +1877,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Move add/edit form to appear directly under the relevant section (recordings or training) instead of at the bottom
 - [x] Remove Duration field from Accelerator content form
 - [x] Match default thumbnail preview border/glow color to section accent color (blue for recordings, green for training)
+- [x] Fix: Homepage "Continue Learning" and "Explore the Center" sections should not render when all modules are hidden

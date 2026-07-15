@@ -372,7 +372,10 @@ export default function Dashboard() {
         </section>)}
 
         {/* ── Continue Learning (shown only when user has activity) ── */}
-        {isAuthenticated && continueLearning && (continueLearning.academyCourse || continueLearning.webinar) && (
+        {isAuthenticated && continueLearning && (
+          (continueLearning.academyCourse && navVisibility["/academy"] !== false) ||
+          (continueLearning.webinar && navVisibility["/webinars"] !== false)
+        ) && (
           <section>
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
@@ -382,7 +385,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Academy card */}
-              {continueLearning.academyCourse && (
+              {continueLearning.academyCourse && navVisibility["/academy"] !== false && (
                 <Link
                   href={`/academy/${continueLearning.academyCourse.courseId}/lesson/${continueLearning.academyCourse.nextLessonId}`}
                   style={{ textDecoration: "none" }}
@@ -422,7 +425,7 @@ export default function Dashboard() {
               )}
 
               {/* Webinar card */}
-              {continueLearning.webinar && (
+              {continueLearning.webinar && navVisibility["/webinars"] !== false && (
                 <Link href={`/webinars${continueLearning.webinar.id ? `?play=${continueLearning.webinar.id}` : ""}`} style={{ textDecoration: "none" }}>
                   <div
                     className="rounded-xl p-5 transition-all duration-200 cursor-pointer"
@@ -545,7 +548,7 @@ export default function Dashboard() {
         )}
 
         {/* ── Start Here ── */}
-        <section>
+        {visibleCards.length > 0 && <section>
           <div className="flex items-center gap-2.5 mb-6">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
             <Sparkles size={14} style={{ color: "#0074F4" }} />
@@ -641,7 +644,7 @@ export default function Dashboard() {
               );
             })}
           </div>
-        </section>
+        </section>}
 
 
 
