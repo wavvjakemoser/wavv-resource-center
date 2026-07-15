@@ -3144,6 +3144,7 @@ export async function createAcceleratorContent(data: {
   hostName?: string | null;
   duration?: string | null;
   description?: string | null;
+  comingSoon?: boolean;
   sortOrder?: number;
 }) {
   const db = await getDb();
@@ -3162,6 +3163,7 @@ export async function updateAcceleratorContent(id: number, data: Partial<{
   duration: string | null;
   description: string | null;
   isVisible: boolean;
+  comingSoon: boolean;
   sortOrder: number;
 }>) {
   const db = await getDb();

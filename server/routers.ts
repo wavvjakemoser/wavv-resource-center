@@ -2216,6 +2216,7 @@ export const appRouter = router({
         hostName: z.string().nullable().optional(),
         duration: z.string().nullable().optional(),
         description: z.string().nullable().optional(),
+        comingSoon: z.boolean().optional(),
         sortOrder: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -2233,6 +2234,7 @@ export const appRouter = router({
         duration: z.string().nullable().optional(),
         description: z.string().nullable().optional(),
         isVisible: z.boolean().optional(),
+        comingSoon: z.boolean().optional(),
         sortOrder: z.number().optional(),
       }))
       .mutation(async ({ input }) => {

@@ -33,6 +33,7 @@ import {
   PlayCircle,
   X,
   User,
+  Timer,
 } from "lucide-react";
 import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
 
@@ -697,7 +698,7 @@ function ContentCard({
   badgeLabel,
   onPlay,
 }: {
-  item: { id: number; title: string; loomUrl?: string | null; thumbnailUrl?: string | null; hostName?: string | null; duration?: string | null; description?: string | null; contentType: string };
+  item: { id: number; title: string; loomUrl?: string | null; thumbnailUrl?: string | null; hostName?: string | null; duration?: string | null; description?: string | null; contentType: string; comingSoon?: boolean };
   accentColor: string;
   badgeLabel: string;
   onPlay: (url: string, title: string) => void;
@@ -705,6 +706,7 @@ function ContentCard({
   const embedUrl = item.loomUrl ? getEmbedUrl(item.loomUrl) : null;
   const isHostedVideo = item.loomUrl?.startsWith("/manus-storage");
   const defaultBg = item.contentType === "recording" ? DEFAULT_RECORDING_BG : DEFAULT_TRAINING_BG;
+  const isComingSoon = item.comingSoon === true;
 
   function handleWatch() {
     const playUrl = embedUrl ?? (isHostedVideo ? item.loomUrl! : null);
@@ -750,8 +752,8 @@ function ContentCard({
             {badgeLabel}
           </span>
         </div>
-        {/* Play overlay */}
-        {(embedUrl || isHostedVideo) && (
+        {/* Play overlay — hidden when Coming Soon */}
+        {!isComingSoon && (embedUrl || isHostedVideo) && (
           <div
             className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
             style={{ background: "rgba(0,0,0,0.45)" }}
@@ -766,6 +768,17 @@ function ContentCard({
           </div>
         )}
       </div>
+
+      {/* Coming Soon banner */}
+      {isComingSoon && (
+        <div
+          className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
+          style={{ background: "#FF990022", color: "#FF9900", borderBottom: "1px solid #FF990040" }}
+        >
+          <Timer size={11} />
+          Coming Soon
+        </div>
+      )}
 
       {/* Body */}
       <div className="p-4 flex flex-col flex-1">
@@ -786,7 +799,11 @@ function ContentCard({
           </p>
         )}
         <div className="mt-auto">
-          {(embedUrl || isHostedVideo) && (
+          {isComingSoon ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "#FF990015", color: "#FF9900", border: "1px solid #FF990030" }}>
+              <Timer size={12} /> Coming Soon
+            </span>
+          ) : (embedUrl || isHostedVideo) ? (
             <button
               type="button"
               onClick={handleWatch}
@@ -795,7 +812,7 @@ function ContentCard({
             >
               <PlayCircle size={12} /> Watch Now
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

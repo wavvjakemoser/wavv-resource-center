@@ -1873,3 +1873,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Move "Previous Session Recordings" section below WAVV Product Training and above Full Program Schedule
 - [ ] Update admin CMS form for adding recordings to match webinar "New Webinar" form (Title, Host, Description, Video URL/upload or paste external URL, Thumbnail with default play circle, custom thumbnail upload/URL, enable pop-out checkbox)
 - [x] Create branded default thumbnail for "Previous Session Recordings" (WAVV Accelerator play button + dark navy gradient)
+- [x] Add "Coming Soon" toggle to Accelerator content form (same as webinars)
+- [x] Move add/edit form to appear directly under the relevant section (recordings or training) instead of at the bottom

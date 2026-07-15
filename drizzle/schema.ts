@@ -541,6 +541,7 @@ export const acceleratorContent = mysqlTable("accelerator_content", {
   duration: varchar("duration", { length: 32 }), // e.g. "12:34"
   description: text("description"),
   isVisible: boolean("is_visible").default(true).notNull(),
+  comingSoon: boolean("coming_soon").default(false).notNull(),
   sortOrder: int("sort_order").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
