@@ -9928,35 +9928,29 @@ function AcceleratorContentManager() {
             <textarea rows={2} style={{ ...inputStyle, resize: "vertical" as const }} value={contentForm.description} onChange={e => setContentForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description" />
           </div>
 
-          {/* Row 3: Duration + Video */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Duration</label>
-              <input style={inputStyle} value={contentForm.duration} onChange={e => setContentForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45 min" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Video <span className="text-gray-600">(upload or paste URL)</span></label>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <label
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
-                    style={{ background: uploadingVideo ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingVideo ? "#9ca3af" : "#fff" }}
-                  >
-                    {uploadingVideo ? (
-                      <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
-                    ) : (
-                      <><FileDown size={13} /> Upload Video</>
-                    )}
-                    <input type="file" accept=".mp4,.webm,.ogg,.mov" className="hidden" onChange={handleVideoUpload} disabled={uploadingVideo} />
-                  </label>
-                  {contentForm.loomUrl && contentForm.loomUrl.startsWith("/manus-storage") && (
-                    <span className="text-xs text-green-400 flex items-center gap-1">
-                      <CheckCircle2 size={12} /> Hosted on platform
-                    </span>
+          {/* Row 3: Video */}
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Video <span className="text-gray-600">(upload or paste URL)</span></label>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <label
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                  style={{ background: uploadingVideo ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingVideo ? "#9ca3af" : "#fff" }}
+                >
+                  {uploadingVideo ? (
+                    <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                  ) : (
+                    <><FileDown size={13} /> Upload Video</>
                   )}
-                </div>
-                <input style={inputStyle} value={contentForm.loomUrl} onChange={e => setContentForm(f => ({ ...f, loomUrl: e.target.value }))} placeholder="Or paste external URL (YouTube, Loom, Vimeo, etc.)" />
+                  <input type="file" accept=".mp4,.webm,.ogg,.mov" className="hidden" onChange={handleVideoUpload} disabled={uploadingVideo} />
+                </label>
+                {contentForm.loomUrl && contentForm.loomUrl.startsWith("/manus-storage") && (
+                  <span className="text-xs text-green-400 flex items-center gap-1">
+                    <CheckCircle2 size={12} /> Hosted on platform
+                  </span>
+                )}
               </div>
+              <input style={inputStyle} value={contentForm.loomUrl} onChange={e => setContentForm(f => ({ ...f, loomUrl: e.target.value }))} placeholder="Or paste external URL (YouTube, Loom, Vimeo, etc.)" />
             </div>
           </div>
 

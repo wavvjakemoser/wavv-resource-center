@@ -792,12 +792,7 @@ function ContentCard({
             <span className="text-gray-300">{item.hostName}</span>
           </p>
         )}
-        {item.duration && (
-          <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
-            <Clock size={11} className="text-gray-600" />
-            <span>{item.duration}</span>
-          </p>
-        )}
+
         <div className="mt-auto">
           {isComingSoon ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "#FF990015", color: "#FF9900", border: "1px solid #FF990030" }}>
