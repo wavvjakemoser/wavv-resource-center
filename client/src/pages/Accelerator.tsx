@@ -47,8 +47,8 @@ const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string;
   { id: 12, week: 6, sessionInWeek: 2, label: "Thursday, August 27th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 27, 18, 0, 0) },
 ];
 
-// 30-minute pre-join window
-const JOIN_WINDOW_MS = 30 * 60 * 1000;
+// 15-minute pre-join window
+const JOIN_WINDOW_MS = 15 * 60 * 1000;
 
 // Duration of each live call in ms (90 minutes)
 const CALL_DURATION_MS = 90 * 60 * 1000;
@@ -623,7 +623,7 @@ function UpcomingCallsList() {
                       style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.08)" }}
                     >
                       <Lock size={11} />
-                      Opens 30 min before
+                      Opens 15 min before
                     </span>
                   )}
                 </div>
@@ -647,6 +647,10 @@ export default function Accelerator() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [previewAsCustomer, setPreviewAsCustomer] = useState(false);
   const [showAccessPopup, setShowAccessPopup] = useState(false);
+
+  // Fetch DB-backed session data for countdown, registration, and coming soon
+  const sessionsQuery = trpc.accelerator.list.useQuery();
+  const dbSessions = sessionsQuery.data ?? [];
 
   // Show pop-up for signed-in users who don't qualify (suppress during Week 1 free window)
   useEffect(() => {
@@ -690,6 +694,49 @@ export default function Accelerator() {
         {!hasAccess && week1FreeActive && (
           <Week1FreeBanner endsAt={week1FreeEndsAt} reason={reason} />
         )}
+
+        {/* ── Live Call Countdown (DB-driven) ── */}
+        {(() => {
+          // Find the next session with a sessionDateTime set
+          const now = Date.now();
+          const nextSession = dbSessions.find(s => s.sessionDateTime && new Date(s.sessionDateTime).getTime() > now);
+          const currentLive = dbSessions.find(s => s.sessionDateTime && now >= new Date(s.sessionDateTime).getTime() && now < new Date(s.sessionDateTime).getTime() + CALL_DURATION_MS);
+          const activeSession = currentLive || nextSession;
+          if (activeSession && activeSession.sessionDateTime) {
+            return <LiveCallCountdown hasAccess={hasAccess} />;
+          }
+          return null;
+        })()}
+
+        {/* ── "Not registered?" callout ── */}
+        {(() => {
+          const now = Date.now();
+          const nextSession = dbSessions.find(s => s.sessionDateTime && new Date(s.sessionDateTime).getTime() > now);
+          if (nextSession && hasAccess) {
+            return (
+              <div
+                className="rounded-xl px-5 py-3 flex items-center gap-3"
+                style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.15)" }}
+              >
+                <Info size={16} style={{ color: "#4a9eff" }} />
+                <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
+                  Not registered?{" "}
+                  <a
+                    href={`/accelerator/session/${nextSession.id}`}
+                    className="font-semibold underline underline-offset-2 transition-colors"
+                    style={{ color: "#4a9eff" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#7dd3fc"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "#4a9eff"; }}
+                  >
+                    Click here to view the next session
+                  </a>{" "}
+                  where you can register.
+                </p>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         {/* ── Hero (gradient box matching site pattern) ── */}
         <div
@@ -774,6 +821,42 @@ export default function Accelerator() {
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {SESSIONS.map((session) => {
+              // Check if this session is marked Coming Soon in the DB
+              const dbSession = dbSessions.find(s => s.id === session.id);
+              const isComingSoon = dbSession?.comingSoon ?? false;
+
+              // Coming Soon — show card with badge, not clickable
+              if (isComingSoon && hasAccess) {
+                return (
+                  <div
+                    key={session.id}
+                    className="rounded-2xl p-6 space-y-4 h-full flex flex-col relative"
+                    style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", opacity: 0.7 }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                        style={{ background: `${session.color}12`, color: `${session.color}99` }}>
+                        Session {session.id}
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                        style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}>
+                        Coming Soon
+                      </span>
+                    </div>
+                    <h3 className="text-[15px] font-semibold leading-snug" style={{ color: "rgba(255,255,255,0.7)" }}>{session.title}</h3>
+                    <p className="text-xs leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+                      <span className="font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>WAVV Focus:</span> {session.wavvFocus}
+                    </p>
+                    <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                      <div className="flex items-start gap-2">
+                        <Clock size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#f59e0b" }} />
+                        <span className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.4)" }}>Content will be available soon</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               // Week 1 is open to all during the free window
               const sessionOpen = hasAccess || (week1Open && session.week === 1);
               if (sessionOpen) {

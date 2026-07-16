@@ -68,7 +68,7 @@ const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string;
 ];
 
 const CALL_DURATION_MS = 90 * 60 * 1000;
-const JOIN_WINDOW_MS   = 30 * 60 * 1000;
+const JOIN_WINDOW_MS   = 15 * 60 * 1000;
 
 // ─── Week 1 Free Window (must stay in sync with Accelerator.tsx) ─────────────
 const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 10, 0, 0, 0);  // Jul 10 00:00 UTC
@@ -269,7 +269,7 @@ function SessionCallCard({ session: s, now, color }: { session: typeof SCHEDULE[
             style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.22)", border: "1px solid rgba(255,255,255,0.07)" }}
           >
             <Lock size={13} />
-            Join link opens 30 min before
+            Join link opens 15 min before
           </span>
         )}
       </div>
@@ -574,6 +574,62 @@ export default function AcceleratorSession() {
             </p>
           </div>
         </div>
+
+        {/* ── Registration + Join buttons (DB-driven) ── */}
+        {(session.registrationUrl || session.joinUrl) && (
+          <section
+            className="rounded-2xl p-5 space-y-3"
+            style={{ background: `${color}08`, border: `1px solid ${color}18` }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar size={15} style={{ color }} />
+              <h3 className="text-sm font-semibold text-white">Session Access</h3>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {session.registrationUrl && (
+                <a
+                  href={session.registrationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
+                  style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+                >
+                  <FileText size={14} />
+                  Register for This Session
+                </a>
+              )}
+              {session.joinUrl && (() => {
+                // Show Join button only within 15 min of session start
+                const sessionTime = session.sessionDateTime ? new Date(session.sessionDateTime).getTime() : null;
+                const isJoinable = sessionTime && now >= sessionTime - JOIN_WINDOW_MS && now < sessionTime + CALL_DURATION_MS;
+                const isLive = sessionTime && now >= sessionTime && now < sessionTime + CALL_DURATION_MS;
+                if (isJoinable) {
+                  return (
+                    <a
+                      href={session.joinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
+                      style={{ background: isLive ? "#10b981" : "#0074F4" }}
+                    >
+                      <Play size={14} />
+                      {isLive ? "Join Live Call" : "Join Waiting Room"}
+                    </a>
+                  );
+                }
+                return (
+                  <span
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
+                    style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.07)" }}
+                  >
+                    <Lock size={13} />
+                    Join link opens 15 min before session
+                  </span>
+                );
+              })()}
+            </div>
+          </section>
+        )}
 
         {/* ── Live call cards — dominant section ── */}
         <section>

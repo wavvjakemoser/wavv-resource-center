@@ -521,6 +521,9 @@ export const acceleratorSessions = mysqlTable("accelerator_sessions", {
   videoUrl: text("video_url"), // optional embedded video
   resourceLinks: text("resource_links"), // JSON array of { label, url }
   joinUrl: text("join_url"), // Zoom link for live calls
+  registrationUrl: text("registration_url"), // Zoom registration link
+  sessionDateTime: timestamp("session_date_time"), // When the live session starts (UTC)
+  comingSoon: boolean("coming_soon").default(false).notNull(), // Hides session from public access
   isPublished: boolean("is_published").default(false).notNull(),
   sortOrder: int("sort_order").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

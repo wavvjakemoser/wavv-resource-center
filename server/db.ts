@@ -3016,12 +3016,20 @@ export async function updateAcceleratorSession(id: number, data: Partial<{
   videoUrl: string | null;
   resourceLinks: string | null;
   joinUrl: string | null;
+  registrationUrl: string | null;
+  sessionDateTime: string | null;
+  comingSoon: boolean;
   isPublished: boolean;
   sortOrder: number;
 }>) {
   const db = await getDb();
   if (!db) return null;
-  await db.update(acceleratorSessions).set(data).where(eq(acceleratorSessions.id, id));
+  const { sessionDateTime, ...rest } = data;
+  const setData: Record<string, unknown> = { ...rest };
+  if (sessionDateTime !== undefined) {
+    setData.sessionDateTime = sessionDateTime ? new Date(sessionDateTime) : null;
+  }
+  await db.update(acceleratorSessions).set(setData).where(eq(acceleratorSessions.id, id));
   return getAcceleratorSession(id);
 }
 

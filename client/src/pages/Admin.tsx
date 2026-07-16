@@ -9408,6 +9408,9 @@ function AcceleratorTab() {
     videoUrl: "",
     resourceLinks: "",
     joinUrl: "",
+    registrationUrl: "",
+    sessionDateTime: "",
+    comingSoon: false,
     isPublished: false,
   });
 
@@ -9433,6 +9436,9 @@ function AcceleratorTab() {
       videoUrl: session.videoUrl ?? "",
       resourceLinks: session.resourceLinks ?? "",
       joinUrl: session.joinUrl ?? "",
+      registrationUrl: session.registrationUrl ?? "",
+      sessionDateTime: session.sessionDateTime ? new Date(session.sessionDateTime).toISOString().slice(0, 16) : "",
+      comingSoon: session.comingSoon ?? false,
       isPublished: session.isPublished ?? false,
     });
   }
@@ -9451,6 +9457,9 @@ function AcceleratorTab() {
       videoUrl: form.videoUrl || null,
       resourceLinks: form.resourceLinks || null,
       joinUrl: form.joinUrl || null,
+      registrationUrl: form.registrationUrl || null,
+      sessionDateTime: form.sessionDateTime ? new Date(form.sessionDateTime).toISOString() : null,
+      comingSoon: form.comingSoon,
       isPublished: form.isPublished,
     });
   }
@@ -9586,14 +9595,36 @@ function AcceleratorTab() {
                   />
                 </div>
 
-                {/* Zoom Join URL */}
+                {/* Live Session Links */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Registration URL</label>
+                    <Input
+                      value={form.registrationUrl}
+                      onChange={(e) => setForm({ ...form, registrationUrl: e.target.value })}
+                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                      placeholder="https://us06web.zoom.us/webinar/register/..."
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Zoom Join URL (appears 15 min before session)</label>
+                    <Input
+                      value={form.joinUrl}
+                      onChange={(e) => setForm({ ...form, joinUrl: e.target.value })}
+                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                      placeholder="https://us06web.zoom.us/w/..."
+                    />
+                  </div>
+                </div>
+
+                {/* Session Date/Time */}
                 <div>
-                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Zoom Join URL (opens 30 min before live call)</label>
-                  <Input
-                    value={form.joinUrl}
-                    onChange={(e) => setForm({ ...form, joinUrl: e.target.value })}
-                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                    placeholder="https://us02web.zoom.us/j/..."
+                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Session Date & Time (used for countdown + Join button timing)</label>
+                  <input
+                    type="datetime-local"
+                    value={form.sessionDateTime}
+                    onChange={(e) => setForm({ ...form, sessionDateTime: e.target.value })}
+                    className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2"
                   />
                 </div>
 
@@ -9624,6 +9655,22 @@ function AcceleratorTab() {
                       {form.isPublished ? "Live" : "Draft"}
                     </span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] font-medium text-gray-400">Coming Soon</label>
+                    <button
+                      onClick={() => setForm({ ...form, comingSoon: !form.comingSoon })}
+                      className="flex items-center"
+                    >
+                      {form.comingSoon ? (
+                        <ToggleRight size={20} style={{ color: "#f59e0b" }} />
+                      ) : (
+                        <ToggleLeft size={20} style={{ color: "#6b7280" }} />
+                      )}
+                    </button>
+                    <span className="text-[11px]" style={{ color: form.comingSoon ? "#f59e0b" : "#6b7280" }}>
+                      {form.comingSoon ? "Hidden" : "Accessible"}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -9639,6 +9686,9 @@ function AcceleratorTab() {
                     <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>Live</span>
                   ) : (
                     <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(107,114,128,0.12)", color: "#6b7280" }}>Draft</span>
+                  )}
+                  {session.comingSoon && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}>Coming Soon</span>
                   )}
                 </div>
                 <button

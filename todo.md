@@ -1878,3 +1878,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove Duration field from Accelerator content form
 - [x] Match default thumbnail preview border/glow color to section accent color (blue for recordings, green for training)
 - [x] Fix: Homepage "Continue Learning" and "Explore the Center" sections should not render when all modules are hidden
+- [x] Add per-session fields: registrationUrl, joinUrl, sessionDateTime to accelerator schema
+- [x] Add session-level "Coming Soon" flag (comingSoon) to accelerator_sessions table
+- [x] Add "Current/Next Session" admin setting for the Accelerator landing page
+- [x] Build admin CMS UI for per-session registration URL, join URL, date/time, and coming soon toggle
+- [x] Restore countdown timer on Accelerator landing page pointing to next session
+- [x] Add "Not registered? Click here to view the next session" CTA below countdown
+- [x] Session cards on landing page: Coming Soon sessions show badge and are not clickable
+- [x] Per-session detail page: Register button (visible when registrationUrl is set)
+- [x] Per-session detail page: Join Live button (visible only 15 min before sessionDateTime)

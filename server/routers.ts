@@ -2184,6 +2184,9 @@ export const appRouter = router({
         videoUrl: z.string().nullable().optional(),
         resourceLinks: z.string().nullable().optional(),
         joinUrl: z.string().nullable().optional(),
+        registrationUrl: z.string().nullable().optional(),
+        sessionDateTime: z.string().nullable().optional(), // ISO string
+        comingSoon: z.boolean().optional(),
         isPublished: z.boolean().optional(),
         sortOrder: z.number().optional(),
       }))
