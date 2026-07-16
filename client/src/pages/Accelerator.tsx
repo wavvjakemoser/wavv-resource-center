@@ -376,67 +376,23 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
   const hasPast = schedule.status !== "done" && schedule.hasPast;
 
   return (
-    <section
-      className="relative overflow-hidden rounded-2xl p-6 sm:p-8"
-      style={{
-        background: accentBg,
-        border: `1px solid ${accentBorder}`,
-        boxShadow: `0 4px 24px ${glowColor}1a`,
-      }}
-    >
-      {/* Glow orbs */}
-      <div className="absolute top-0 right-1/4 w-64 h-64 rounded-full opacity-15 blur-3xl"
-        style={{ background: `radial-gradient(circle, ${glowColor}, transparent)` }} />
-      <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full opacity-10 blur-3xl"
-        style={{ background: `radial-gradient(circle, ${glowColor}, transparent)` }} />
-
-      <div className="relative flex flex-col items-center text-center gap-4">
-        {/* Icon + live badge */}
-        <div className="relative">
-          <div
-            className="w-11 h-11 rounded-lg flex items-center justify-center"
-            style={{
-              background: isLive
-                ? "linear-gradient(135deg, #10b981, #059669)"
-                : "linear-gradient(135deg, #0074F4, #00A9E2)",
-              boxShadow: `0 4px 16px ${glowColor}40`,
-            }}
-          >
-            <Clock size={20} className="text-white" />
-          </div>
-          <div
-            className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2"
-            style={{
-              background: isLive ? "#10b981" : "#10b981",
-              borderColor: isLive ? "#064e3b" : "#0d2847",
-            }}
-          >
-            <div
-              className="absolute inset-0 rounded-full animate-ping opacity-75"
-              style={{ background: isLive ? "#10b981" : "#10b981" }}
-            />
-          </div>
-        </div>
-
-        {/* Title row */}
-        <div>
-          <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-            {isLive ? "🔴 LIVE NOW" : "NEXT LIVE CALL"}
-          </h3>
-          {sessionRef && (
-            <p className="mt-1 text-xs font-semibold" style={{ color: isLive ? "#6ee7b7" : "#4a9eff" }}>
-               Session {weekNum} · Call {sessionInWeek} of 2
-            </p>
-          )}
-          <p className="mt-0.5 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
-            Tue & Thu · Live Coaching with Prospecting On Demand
+    <div className="flex flex-col items-center text-center gap-4 mt-2">
+      {/* Title row */}
+      <div>
+        <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+          {isLive ? "🔴 LIVE NOW" : "NEXT LIVE CALL"}
+        </h3>
+        {sessionRef && (
+          <p className="mt-1 text-xs font-semibold" style={{ color: isLive ? "#6ee7b7" : "#4a9eff" }}>
+             Session {weekNum} · Call {sessionInWeek} of 2
           </p>
-          {sessionRef && (
-            <p className="mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
-              {sessionRef.label}
-            </p>
-          )}
-        </div>
+        )}
+        {sessionRef && (
+          <p className="mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
+            {sessionRef.label}
+          </p>
+        )}
+      </div>
 
         {/* Countdown digits — segmented display style with colon separators */}
         {!isDone && countdown && (
@@ -491,7 +447,7 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
         {hasAccess && sessionRef && sessionPageId && (
           <a
             href={`/accelerator/session/${sessionPageId}`}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
             style={{ background: isLive ? "#10b981" : "#0074F4" }}
             onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
             onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
@@ -501,30 +457,7 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
             <ChevronRight size={14} />
           </a>
         )}
-      </div>
-
-      {/* Bottom bar — late-joiner callout */}
-      <div className="relative mt-6 pt-4" style={{ borderTop: `1px solid ${glowColor}15` }}>
-        {hasPast ? (
-          <div
-            className="flex items-start gap-3 rounded-xl px-4 py-3"
-            style={{ background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.18)" }}
-          >
-            <Info size={14} className="flex-shrink-0 mt-0.5" style={{ color: "#fbbf24" }} />
-            <div>
-              <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle?</p>
-              <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
-                No problem — every previous session recording is available. Click into any session below to catch up at your own pace.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <p className="text-center text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-            {sessionRef ? sessionRef.label : "Tuesday, July 21st, 2026 · 12:00 PM MT / 2:00 PM ET"}
-          </p>
-        )}
-      </div>
-    </section>
+    </div>
   );
 }
 
@@ -695,48 +628,7 @@ export default function Accelerator() {
           <Week1FreeBanner endsAt={week1FreeEndsAt} reason={reason} />
         )}
 
-        {/* ── Live Call Countdown (DB-driven) ── */}
-        {(() => {
-          // Find the next session with a sessionDateTime set
-          const now = Date.now();
-          const nextSession = dbSessions.find(s => s.sessionDateTime && new Date(s.sessionDateTime).getTime() > now);
-          const currentLive = dbSessions.find(s => s.sessionDateTime && now >= new Date(s.sessionDateTime).getTime() && now < new Date(s.sessionDateTime).getTime() + CALL_DURATION_MS);
-          const activeSession = currentLive || nextSession;
-          if (activeSession && activeSession.sessionDateTime) {
-            return <LiveCallCountdown hasAccess={hasAccess} />;
-          }
-          return null;
-        })()}
 
-        {/* ── "Not registered?" callout ── */}
-        {(() => {
-          const now = Date.now();
-          const nextSession = dbSessions.find(s => s.sessionDateTime && new Date(s.sessionDateTime).getTime() > now);
-          if (nextSession && hasAccess) {
-            return (
-              <div
-                className="rounded-xl px-5 py-3 flex items-center gap-3"
-                style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.15)" }}
-              >
-                <Info size={16} style={{ color: "#4a9eff" }} />
-                <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
-                  Not registered?{" "}
-                  <a
-                    href={`/accelerator/session/${nextSession.id}`}
-                    className="font-semibold underline underline-offset-2 transition-colors"
-                    style={{ color: "#4a9eff" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#7dd3fc"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "#4a9eff"; }}
-                  >
-                    Click here to view the next session
-                  </a>{" "}
-                  where you can register.
-                </p>
-              </div>
-            );
-          }
-          return null;
-        })()}
 
         {/* ── Hero (gradient box matching site pattern) ── */}
         <div
@@ -779,12 +671,39 @@ export default function Accelerator() {
               Complete the WAVV Accelerator and walk away with a fully configured dialer, a proven outreach cadence, and the skills to hit your connection rate targets.
             </p>
             {/* Schedule line */}
-            <div className="flex items-center justify-center gap-2 mb-5">
+            <div className="flex items-center justify-center gap-2 mb-6">
               <Clock size={13} style={{ color: "rgba(0,169,226,0.7)" }} />
               <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
                 Live coaching calls every Tuesday & Thursday
               </span>
             </div>
+
+            {/* ── Large Countdown Timer (inline in hero) ── */}
+            <LiveCallCountdown hasAccess={hasAccess} />
+
+            {/* ── "Not registered?" CTA ── */}
+            {(() => {
+              const now = Date.now();
+              const nextSession = dbSessions.find(s => s.sessionDateTime && new Date(s.sessionDateTime).getTime() > now);
+              if (nextSession && hasAccess) {
+                return (
+                  <p className="text-sm mt-4 mb-4" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    Not registered?{" "}
+                    <a
+                      href={`/accelerator/session/${nextSession.id}`}
+                      className="font-semibold underline underline-offset-2 transition-colors"
+                      style={{ color: "#4a9eff" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "#7dd3fc"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "#4a9eff"; }}
+                    >
+                      Click here to view the next session
+                    </a>{" "}
+                    where you can register.
+                  </p>
+                );
+              }
+              return null;
+            })()}
 
             {/* Hero CTA buttons */}
             {reason === "unauthenticated" && (

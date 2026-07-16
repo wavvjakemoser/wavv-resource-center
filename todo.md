@@ -1871,7 +1871,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Previous Session Recordings Rename + Admin Form Update (Jul 14)
 - [x] Rename "Session Recordings" → "Previous Session Recordings" on all 6 session detail pages
 - [x] Move "Previous Session Recordings" section below WAVV Product Training and above Full Program Schedule
-- [ ] Update admin CMS form for adding recordings to match webinar "New Webinar" form (Title, Host, Description, Video URL/upload or paste external URL, Thumbnail with default play circle, custom thumbnail upload/URL, enable pop-out checkbox)
+- [x] Update admin CMS form for adding recordings to match webinar "New Webinar" form (Title, Host, Description, Video URL/upload or paste external URL, Thumbnail with default play circle, custom thumbnail upload/URL, enable pop-out checkbox)
 - [x] Create branded default thumbnail for "Previous Session Recordings" (WAVV Accelerator play button + dark navy gradient)
 - [x] Add "Coming Soon" toggle to Accelerator content form (same as webinars)
 - [x] Move add/edit form to appear directly under the relevant section (recordings or training) instead of at the bottom
@@ -1887,3 +1887,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Session cards on landing page: Coming Soon sessions show badge and are not clickable
 - [x] Per-session detail page: Register button (visible when registrationUrl is set)
 - [x] Per-session detail page: Join Live button (visible only 15 min before sessionDateTime)
+- [x] Add large countdown timer to Accelerator landing page hero (both no-access and member views)
+- [x] Add "Not registered?" CTA below countdown linking to next session detail page
