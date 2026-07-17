@@ -1931,3 +1931,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Consolidate CMS: move Live Call Events into each session's edit view (not a standalone section)
 - [x] Remove standalone AcceleratorLiveCallManager section from AcceleratorTab
 - [x] Session visibility: replace Published/Draft/ComingSoon/Accessible toggles with 3-state selector (Visible / Hidden / Coming Soon)
+- [x] Show 6 session tiles for both members and non-members (Session 1 free/clickable for non-members, 2-6 locked with upgrade indicator)
+- [x] After July 26, Session 1 also becomes gated for non-members
+- [x] Remove Full Program Schedule section from Accelerator landing page
+- [x] Session detail page: only show live calls for THAT specific session (not all sessions combined)
+- [x] CMS: fold Session Content (Recordings + Product Training) into each session's edit view

@@ -770,10 +770,7 @@ export default function Accelerator() {
           </div>
         </div>
 
-        {/* ── Upcoming Live Calls (members only) ── */}
-        {hasAccess && visibleLiveCalls.length > 0 && (
-          <UpcomingCallsList liveCalls={visibleLiveCalls} />
-        )}
+
 
         {/* ── Curriculum (tiles — gated or unlocked) ── */}
         <section className="space-y-4">

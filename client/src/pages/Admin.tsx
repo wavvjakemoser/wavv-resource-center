@@ -9498,6 +9498,9 @@ function AcceleratorTab() {
 
                 {/* ── Inline Live Calls for this session ── */}
                 <SessionLiveCallsInline sessionNumber={session.week} sessionColor={session.color} />
+
+                {/* ── Inline Content (Recordings + Product Training) for this session ── */}
+                <SessionContentInline sessionNumber={session.week} sessionColor={session.color} />
               </div>
             ) : (
               /* ── View mode ── */
@@ -9532,8 +9535,7 @@ function AcceleratorTab() {
         ))}
       </div>
 
-      {/* ─── Content Management Section ─── */}
-      <AcceleratorContentManager />
+
 
 
     </div>
@@ -9781,16 +9783,10 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
   );
 }
 
-// ─── Cheat Sheet Field (controlled input for Product Training section) ────────
-
-// ─── Accelerator Content Manager (recordings + product training) ─────────────
-function AcceleratorContentManager() {
+// ─── Inline Content Manager (Recordings + Product Training, embedded in session edit form) ─────────────
+function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: number; sessionColor: string }) {
   const utils = trpc.useUtils();
-  const { data: allContent = [], isLoading } = trpc.accelerator.allContent.useQuery();
-  const { data: sessions = [] } = trpc.accelerator.list.useQuery();
-  const [selectedSession, setSelectedSession] = useState<number>(1);
-  // Get the color for the currently selected session from DB
-  const sessionColor = (sessions.find((s: any) => s.weekId === selectedSession) as any)?.color ?? "#0074F4";
+  const { data: content = [], isLoading } = trpc.accelerator.listContent.useQuery({ sessionNumber });
   const [showAddForm, setShowAddForm] = useState(false);
   const [addType, setAddType] = useState<"recording" | "product_training">("recording");
   const [editingContentId, setEditingContentId] = useState<number | null>(null);
@@ -9813,8 +9809,6 @@ function AcceleratorContentManager() {
   const DEFAULT_RECORDING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
   const DEFAULT_TRAINING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
 
-
-  // Thumbnail upload removed — stock thumbnails used automatically
   const uploadVideoMutation = trpc.accelerator.uploadVideo.useMutation({
     onError: (e: any) => toast.error("Video upload failed: " + e.message),
   });
@@ -9825,7 +9819,7 @@ function AcceleratorContentManager() {
 
   const createMutation = trpc.accelerator.createContent.useMutation({
     onSuccess: () => {
-      utils.accelerator.allContent.invalidate();
+      utils.accelerator.listContent.invalidate({ sessionNumber });
       toast.success("Content added");
       resetForm();
     },
@@ -9834,7 +9828,7 @@ function AcceleratorContentManager() {
 
   const updateContentMut = trpc.accelerator.updateContent.useMutation({
     onSuccess: () => {
-      utils.accelerator.allContent.invalidate();
+      utils.accelerator.listContent.invalidate({ sessionNumber });
       toast.success("Content updated");
       setEditingContentId(null);
       resetForm();
@@ -9844,7 +9838,7 @@ function AcceleratorContentManager() {
 
   const deleteMutation = trpc.accelerator.deleteContent.useMutation({
     onSuccess: () => {
-      utils.accelerator.allContent.invalidate();
+      utils.accelerator.listContent.invalidate({ sessionNumber });
       toast.success("Content deleted");
     },
     onError: (e: any) => toast.error(e.message),
@@ -9871,8 +9865,6 @@ function AcceleratorContentManager() {
       cheatSheetUrl: item.cheatSheetUrl ?? "",
     });
   }
-
-  // handleThumbUpload removed — stock thumbnails used automatically
 
   async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -9912,7 +9904,7 @@ function AcceleratorContentManager() {
       });
     } else {
       createMutation.mutate({
-        sessionNumber: selectedSession,
+        sessionNumber,
         contentType: addType,
         title: contentForm.title,
         loomUrl: contentForm.loomUrl || null,
@@ -9926,40 +9918,20 @@ function AcceleratorContentManager() {
     }
   }
 
-  const filteredContent = allContent.filter((c: any) => c.sessionNumber === selectedSession);
-  const recordings = filteredContent.filter((c: any) => c.contentType === "recording");
-  const productTraining = filteredContent.filter((c: any) => c.contentType === "product_training");
+  const recordings = content.filter((c: any) => c.contentType === "recording");
+  const productTraining = content.filter((c: any) => c.contentType === "product_training");
 
   if (isLoading) return null;
 
   const defaultThumb = addType === "recording" ? DEFAULT_RECORDING_THUMB : DEFAULT_TRAINING_THUMB;
-  const accentColor = sessionColor;
 
   return (
-    <div className="mt-8 space-y-4">
+    <div className="mt-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-white">Session Content</h2>
-          <p className="text-xs text-gray-400">Manage recordings and product training videos per session.</p>
+          <h3 className="text-sm font-bold text-white">Session Content</h3>
+          <p className="text-[11px] text-gray-400">Recordings and product training videos for this session.</p>
         </div>
-      </div>
-
-      {/* Session selector */}
-      <div className="flex items-center gap-2">
-        {[1, 2, 3, 4, 5, 6].map((num) => (
-          <button
-            key={num}
-            onClick={() => { setSelectedSession(num); resetForm(); }}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-            style={
-              selectedSession === num
-                ? { background: sessionColor, color: "#fff" }
-                : { background: "rgba(255,255,255,0.05)", color: "#9ca3af" }
-            }
-          >
-            Session {num}
-          </button>
-        ))}
       </div>
 
       {/* Recordings section */}
@@ -9978,14 +9950,13 @@ function AcceleratorContentManager() {
           </button>
         </div>
         {recordings.length === 0 && !(showAddForm && addType === "recording") && (
-          <p className="text-xs text-gray-500 py-4 text-center">No recordings yet for Session {selectedSession}.</p>
+          <p className="text-xs text-gray-500 py-4 text-center">No recordings yet for Session {sessionNumber}.</p>
         )}
         <div className="space-y-2">
           {recordings.map((item: any) => (
             <AccContentRow key={item.id} item={item} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
           ))}
         </div>
-        {/* Inline form for recordings */}
         {(showAddForm && addType === "recording") && renderContentForm()}
       </div>
 
@@ -10006,17 +9977,15 @@ function AcceleratorContentManager() {
         </div>
 
         {productTraining.length === 0 && !(showAddForm && addType === "product_training") && (
-          <p className="text-xs text-gray-500 py-4 text-center">No product training videos yet for Session {selectedSession}.</p>
+          <p className="text-xs text-gray-500 py-4 text-center">No product training videos yet for Session {sessionNumber}.</p>
         )}
         <div className="space-y-2">
           {productTraining.map((item: any) => (
             <AccContentRow key={item.id} item={item} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
           ))}
         </div>
-        {/* Inline form for product training */}
         {(showAddForm && addType === "product_training") && renderContentForm()}
       </div>
-
     </div>
   );
 
@@ -10075,7 +10044,7 @@ function AcceleratorContentManager() {
           <div className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
             <label className="block text-xs text-gray-400 mb-2">Thumbnail</label>
             <div className="flex items-center gap-3">
-              <div className="rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: `2px solid ${accentColor}` }}>
+              <div className="rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: `2px solid ${sessionColor}` }}>
                 <img src={defaultThumb} alt="Default" className="w-full h-full object-cover" />
               </div>
               <span className="text-xs text-gray-500">Stock thumbnail (auto-assigned by type, color-coded to session)</span>
