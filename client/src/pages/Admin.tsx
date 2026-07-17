@@ -10045,9 +10045,16 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
             <label className="block text-xs text-gray-400 mb-2">Thumbnail</label>
             <div className="flex items-center gap-3">
               <div className="rounded-lg overflow-hidden flex-shrink-0 relative" style={{ width: 80, height: 45, border: `2px solid ${sessionColor}` }}>
-                <img src={defaultThumb} alt="Default" className="w-full h-full object-cover" />
-                {addType === "product_training" && (
-                  <div className="absolute inset-0" style={{ background: `${sessionColor}55`, mixBlendMode: "color" }} />
+                {addType === "product_training" ? (
+                  <>
+                    <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${sessionColor}cc 0%, ${sessionColor}66 100%)`, zIndex: 1 }} />
+                    <img src={defaultThumb} alt="Default" className="w-full h-full object-cover" style={{ opacity: 0.35 }} />
+                    <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 2 }}>
+                      <PlayCircle size={22} style={{ color: "#fff", opacity: 0.9 }} />
+                    </div>
+                  </>
+                ) : (
+                  <img src={defaultThumb} alt="Default" className="w-full h-full object-cover" />
                 )}
               </div>
               <span className="text-xs text-gray-500">Stock thumbnail (auto-assigned by type, color-coded to session)</span>
@@ -10154,13 +10161,21 @@ function AccContentRow({ item, onEdit, onDelete, sessionColor }: { item: any; on
   const DEFAULT_TRAIN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
   const thumb = item.thumbnailUrl || (item.contentType === "recording" ? DEFAULT_REC : DEFAULT_TRAIN);
   const isTraining = item.contentType === "product_training";
+  const tintColor = isTraining && sessionColor ? sessionColor : null;
   return (
     <div className="flex items-center justify-between py-2 px-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
       <div className="flex items-center gap-3">
-        <div className="relative rounded overflow-hidden flex-shrink-0" style={{ width: 64, height: 40, border: isTraining && sessionColor ? `2px solid ${sessionColor}` : undefined }}>
-          <img src={thumb} alt="" className="w-full h-full object-cover" />
-          {isTraining && sessionColor && (
-            <div className="absolute inset-0" style={{ background: `${sessionColor}55`, mixBlendMode: "color" }} />
+        <div className="relative rounded overflow-hidden flex-shrink-0" style={{ width: 64, height: 40, border: tintColor ? `2px solid ${tintColor}` : undefined }}>
+          {/* Tinted background for product_training — session color shows through the dark image */}
+          {tintColor && (
+            <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${tintColor}cc 0%, ${tintColor}66 100%)`, zIndex: 1 }} />
+          )}
+          <img src={thumb} alt="" className="w-full h-full object-cover" style={{ opacity: tintColor ? 0.35 : 1 }} />
+          {/* Play icon overlay */}
+          {tintColor && (
+            <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 2 }}>
+              <PlayCircle size={20} style={{ color: "#fff", opacity: 0.9 }} />
+            </div>
           )}
         </div>
         <div>

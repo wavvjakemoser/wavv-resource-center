@@ -1955,3 +1955,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] CMS session edit panel: Remove Visibility section (it's now on the row-level toggle)
 - [x] CMS session content: Fix thumbnail to use session color (not purple) for product_training items
 - [x] Accelerator member hero: add "Go to Session N →" button (same blue style as non-member) pointing to current active session
+- [ ] Member hero: remove duplicate "Go to Session" button (LiveCallCountdown already renders one)
+- [ ] Non-member page: add Slack Community banner (same style as member page)
+- [ ] Non-member Slack tile: "Members Only" button → triggers upgrade flow (same as Upgrade Your Plan)
+- [ ] Non-member page: remove "What You're Missing" section entirely
+- [ ] Both pages: restore missing 6th tile in "What's Included" section
