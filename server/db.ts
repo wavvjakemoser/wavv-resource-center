@@ -2396,13 +2396,24 @@ export async function publishHelpArticle(data: {
 }): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  // Upsert: if already published, update section/order
+  // Look up the article body from the synced helpArticles table so we can
+  // copy it into nativeBody for in-panel rendering.
+  const sourceRows = await db
+    .select({ body: helpArticles.body, authorName: helpArticles.authorName })
+    .from(helpArticles)
+    .where(eq(helpArticles.intercomId, data.intercomArticleId))
+    .limit(1);
+  const body = sourceRows[0]?.body ?? null;
+  const authorName = sourceRows[0]?.authorName ?? null;
+  // Upsert: if already published, update section/order and refresh body
   await db
     .insert(publishedHelpArticles)
     .values({
       intercomArticleId: data.intercomArticleId,
       title: data.title,
       url: data.url ?? null,
+      nativeBody: body,
+      nativeAuthorName: authorName,
       sectionName: data.sectionName,
       sortOrder: data.sortOrder ?? 0,
       sectionOrder: data.sectionOrder ?? 0,
@@ -2411,6 +2422,8 @@ export async function publishHelpArticle(data: {
       set: {
         title: data.title,
         url: data.url ?? null,
+        nativeBody: body,
+        nativeAuthorName: authorName,
         sectionName: data.sectionName,
         sortOrder: data.sortOrder ?? 0,
         sectionOrder: data.sectionOrder ?? 0,

@@ -94,16 +94,25 @@ function ArticleRow({
   article: { id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null; intercomUrl?: string | null };
   onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) => void;
 }) {
-  // A file-backed article has a url but the body is blank/whitespace — open as PDF in side panel
-  const hasFile = !!(article.url && article.url.trim());
+  // Distinguish file-backed (storage/PDF) URLs from Intercom Help Center URLs.
+  // Intercom article URLs contain 'intercom' in the domain — treat them as
+  // articleUrl ("Open in tab" link) rather than fileUrl (PDF iframe).
+  const isIntercomUrl = !!(article.url && article.url.includes('intercom'));
+  const hasFile = !!(article.url && article.url.trim() && !isIntercomUrl);
   const hasBody = !!(article.nativeBody && article.nativeBody.trim() && article.nativeBody !== "<p></p>");
-  const isNative = hasFile || hasBody;
+  // Open in panel when: has a rendered body, is a file, or is an Intercom article with a URL
+  const isNative = hasFile || hasBody || isIntercomUrl;
 
   if (isNative) {
     return (
         <button
         type="button"
-        onClick={() => onOpenNative({ title: article.title, nativeBody: article.nativeBody ?? " ", fileUrl: null, articleUrl: article.url ?? null })}
+        onClick={() => onOpenNative({
+          title: article.title,
+          nativeBody: article.nativeBody ?? " ",
+          fileUrl: hasFile ? (article.url ?? null) : null,
+          articleUrl: isIntercomUrl ? (article.url ?? null) : (article.intercomUrl ?? null),
+        })}
         className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-left group"
         style={{ background: "transparent", border: "1px solid transparent" }}
         onMouseEnter={(e) => {

@@ -1978,3 +1978,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Resource Hub: add "Open in new tab" button to Help Articles side panel (matching PDF section)
 - [x] Resource Hub: add "Open in new tab" button to FAQs side panel (matching PDF section)
 - [x] Content cards: increase thumbnail height for better image visibility
+- [ ] Resource Hub: debug help article side panel not populating body content
+- [ ] Accelerator page: suppress non-member orange banner flash on load before auth resolves
+- [ ] Settings Slack banners: rename labels to "Non-WAVV Accelerator Member Page" and "WAVV Accelerator Member Page"
+- [ ] Session page: move Slack Community section below Previous Session Recordings
+- [ ] Session CMS: clicking a session row opens the edit panel (not just the Edit button)
+- [ ] Accelerator page: redesign "Next Live Call" block to look cleaner
+- [ ] Session page: fix Call 1 of 2 / Call 2 of 2 badge — should not appear clickable
+- [ ] Default thumbnails: fix webinar section default thumbnails
+- [ ] Default thumbnails: fix accelerator session default thumbnails
+- [ ] Session page: add more visual spacing/separation between sections
+- [ ] Live call countdown tiles: reduce dead space around countdown timer

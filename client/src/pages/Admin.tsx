@@ -8113,8 +8113,8 @@ function SettingsTab() {
               </div>
               <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 {([
-                  { key: "slack_banner_wavv_enabled", label: "WAVV Member Page", enabled: slackBannerWavvEnabled },
-                  { key: "slack_banner_accelerator_enabled", label: "Accelerator Member Page", enabled: slackBannerAcceleratorEnabled },
+                  { key: "slack_banner_wavv_enabled", label: "Non-WAVV Accelerator Member Page", enabled: slackBannerWavvEnabled },
+                  { key: "slack_banner_accelerator_enabled", label: "WAVV Accelerator Member Page", enabled: slackBannerAcceleratorEnabled },
                 ] as { key: string; label: string; enabled: boolean }[]).map(({ key, label, enabled }) => (
                   <div key={key} className="flex items-center justify-between py-1">
                     <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>

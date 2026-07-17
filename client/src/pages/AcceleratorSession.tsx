@@ -715,18 +715,7 @@ export default function AcceleratorSession() {
           )}
         </section>
 
-        {/* ── Body content ── */}
-        {session.bodyContent && (
-          <section>
-            <div
-              className="prose prose-invert prose-sm max-w-none rounded-xl p-5"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}
-              dangerouslySetInnerHTML={{ __html: session.bodyContent }}
-            />
-          </section>
-        )}
-
-        {/* ── Slack Community ── */}
+        {/* ── Slack Community ── (immediately after recordings) */}
         {session.slackUrl && (
           <section>
             <div

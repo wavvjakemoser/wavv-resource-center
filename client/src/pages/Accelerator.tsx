@@ -601,7 +601,7 @@ function UpcomingCallsList({ liveCalls }: { liveCalls: LiveCallItem[] }) {
 }
 
 export default function Accelerator() {
-  const { hasAccess: realAccess, reason: realReason, user, week1FreeActive, week1FreeEndsAt } = useAcceleratorAccess();
+  const { hasAccess: realAccess, reason: realReason, user, isLoading: accessLoading, week1FreeActive, week1FreeEndsAt } = useAcceleratorAccess();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [previewAsCustomer, setPreviewAsCustomer] = useState(false);
   const [showAccessPopup, setShowAccessPopup] = useState(false);
@@ -625,6 +625,8 @@ export default function Accelerator() {
   const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
   const hasAccess = previewAsCustomer ? false : realAccess;
   const reason = previewAsCustomer ? "no_access" : realReason;
+  // Suppress non-member-specific UI until entitlement resolves to prevent flash
+  const accessResolved = !accessLoading;
   // Session 1 is accessible to everyone during the free window (including employee preview-as-customer)
   const week1Open = week1FreeActive;
 
@@ -1004,8 +1006,8 @@ export default function Accelerator() {
             ))}
           </div>
           {/* ── Slack Community banners — immediately after the 6 tiles ── */}
-          {/* Non-member locked version */}
-          {!hasAccess && (
+          {/* Non-member locked version — only render after entitlement resolves to prevent flash */}
+          {accessResolved && !hasAccess && (
             <div
               className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
               style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.18) 0%, rgba(74,21,75,0.06) 100%)", border: "1px solid rgba(74,21,75,0.35)", boxShadow: "0 0 32px rgba(74,21,75,0.12)" }}
