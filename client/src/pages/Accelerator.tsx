@@ -302,8 +302,8 @@ function Week1FreeBanner({ endsAt, reason }: { endsAt: number; reason: string })
     <div
       className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-5"
       style={{
-        background: "linear-gradient(135deg, rgba(249,115,22,0.08) 0%, rgba(249,115,22,0.03) 100%)",
-        border: "1px solid rgba(249,115,22,0.18)",
+        background: "linear-gradient(135deg, rgba(249,115,22,0.10) 0%, rgba(249,115,22,0.04) 100%), #0d1117",
+        border: "1px solid rgba(249,115,22,0.22)",
         boxShadow: "0 0 24px rgba(249,115,22,0.06)",
       }}
     >
