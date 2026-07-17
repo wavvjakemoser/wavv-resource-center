@@ -3020,6 +3020,7 @@ export async function updateAcceleratorSession(id: number, data: Partial<{
   registrationUrl: string | null;
   sessionDateTime: string | null;
   cheatSheetUrl: string | null;
+  slackUrl: string | null;
   comingSoon: boolean;
   isPublished: boolean;
   sortOrder: number;

@@ -34,6 +34,8 @@ import {
   X,
   User,
   Timer,
+  MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
 import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
@@ -719,6 +721,34 @@ export default function AcceleratorSession() {
               style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}
               dangerouslySetInnerHTML={{ __html: session.bodyContent }}
             />
+          </section>
+        )}
+
+        {/* ── Slack Community ── */}
+        {session.slackUrl && (
+          <section>
+            <div
+              className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+              style={{ background: `linear-gradient(135deg, ${color}10 0%, rgba(255,255,255,0.02) 100%)`, border: `1px solid ${color}25` }}
+            >
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}20` }}>
+                <MessageSquare size={22} style={{ color }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: `${color}cc` }}>Community</p>
+                <p className="text-base font-bold text-white">Join the WAVV Accelerator Slack</p>
+                <p className="text-sm text-gray-400 mt-0.5">Connect with your cohort, share wins, and get support between sessions.</p>
+              </div>
+              <a
+                href={session.slackUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
+                style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+              >
+                <ExternalLink size={14} /> Join Slack
+              </a>
+            </div>
           </section>
         )}
 

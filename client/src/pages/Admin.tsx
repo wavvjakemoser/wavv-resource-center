@@ -9292,6 +9292,7 @@ function AcceleratorTab() {
     heroSubline: "",
     bodyContent: "",
     resourceLinks: "",
+    slackUrl: "",
     comingSoon: false,
     isPublished: false,
   });
@@ -9315,6 +9316,7 @@ function AcceleratorTab() {
       heroSubline: session.heroSubline ?? "",
       bodyContent: session.bodyContent ?? "",
       resourceLinks: session.resourceLinks ?? "",
+      slackUrl: session.slackUrl ?? "",
       comingSoon: session.comingSoon ?? false,
       isPublished: session.isPublished ?? false,
     });
@@ -9331,6 +9333,7 @@ function AcceleratorTab() {
       heroSubline: form.heroSubline || null,
       bodyContent: form.bodyContent || null,
       resourceLinks: form.resourceLinks || null,
+      slackUrl: form.slackUrl || null,
       comingSoon: form.comingSoon,
       isPublished: form.isPublished,
     });
@@ -9456,6 +9459,17 @@ function AcceleratorTab() {
                   />
                 </div>
 
+                {/* Slack Community URL */}
+                <div>
+                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Slack Community URL <span className="text-gray-600">(optional — invite link for this session)</span></label>
+                  <Input
+                    value={form.slackUrl}
+                    onChange={(e) => setForm({ ...form, slackUrl: e.target.value })}
+                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                    placeholder="https://join.slack.com/t/wavv-community/..."
+                  />
+                </div>
+
                 {/* Visibility 3-state selector */}
                 <div className="flex items-center gap-3">
                   <label className="text-[11px] font-medium text-gray-400">Visibility</label>
@@ -9504,34 +9518,22 @@ function AcceleratorTab() {
               </div>
             ) : (
               /* ── View mode ── */
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                      style={{ background: `${session.color}18`, color: session.color }}>
-                      Week {session.week}
-                    </span>
-                    <h3 className="text-sm font-medium text-white">{session.title}</h3>
-                  </div>
-                  <button
-                    onClick={() => startEdit(session)}
-                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
-                    style={{ color: "#9ca3af" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#fff"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9ca3af"; }}
-                  >
-                    <Pencil size={12} />
-                    Edit
-                  </button>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0"
+                    style={{ background: `${session.color}18`, color: session.color }}>
+                    Session {session.week}
+                  </span>
+                  <h3 className="text-sm font-medium text-white truncate">{session.title}</h3>
                 </div>
-                {/* Visibility toggle row */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Visibility toggles */}
                   <button
                     onClick={() => updateMutation.mutate({ id: session.id, isPublished: true, comingSoon: false })}
                     className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
                     style={{
                       background: session.isPublished && !session.comingSoon ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
-                      color: session.isPublished && !session.comingSoon ? "#10b981" : "rgba(255,255,255,0.4)",
+                      color: session.isPublished && !session.comingSoon ? "#10b981" : "rgba(255,255,255,0.25)",
                       border: session.isPublished && !session.comingSoon ? "1px solid rgba(16,185,129,0.3)" : "1px solid rgba(255,255,255,0.08)",
                     }}
                   >
@@ -9541,9 +9543,9 @@ function AcceleratorTab() {
                     onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: false })}
                     className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
                     style={{
-                      background: !session.isPublished && !session.comingSoon ? "rgba(107,114,128,0.2)" : "rgba(255,255,255,0.04)",
-                      color: !session.isPublished && !session.comingSoon ? "#9ca3af" : "rgba(255,255,255,0.4)",
-                      border: !session.isPublished && !session.comingSoon ? "1px solid rgba(107,114,128,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                      background: !session.isPublished && !session.comingSoon ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.04)",
+                      color: !session.isPublished && !session.comingSoon ? "#ef4444" : "rgba(255,255,255,0.25)",
+                      border: !session.isPublished && !session.comingSoon ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(255,255,255,0.08)",
                     }}
                   >
                     Hidden
@@ -9553,11 +9555,22 @@ function AcceleratorTab() {
                     className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
                     style={{
                       background: session.comingSoon ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.04)",
-                      color: session.comingSoon ? "#f59e0b" : "rgba(255,255,255,0.4)",
+                      color: session.comingSoon ? "#f59e0b" : "rgba(255,255,255,0.25)",
                       border: session.comingSoon ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(255,255,255,0.08)",
                     }}
                   >
                     Coming Soon
+                  </button>
+                  {/* Edit button */}
+                  <button
+                    onClick={() => startEdit(session)}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all ml-1"
+                    style={{ color: "#9ca3af" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9ca3af"; }}
+                  >
+                    <Pencil size={12} />
+                    Edit
                   </button>
                 </div>
               </div>
@@ -9727,10 +9740,6 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
                 <option value={1}>Call 1 of 2</option>
                 <option value={2}>Call 2 of 2</option>
               </select>
-            </div>
-            <div>
-              <label className="text-[11px] text-gray-400 mb-1 block">Duration (minutes)</label>
-              <input type="number" style={inputStyle} value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} />
             </div>
             <div>
               <label className="text-[11px] text-gray-400 mb-1 block">Date & Time *</label>
@@ -10075,8 +10084,11 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
           <div className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
             <label className="block text-xs text-gray-400 mb-2">Thumbnail</label>
             <div className="flex items-center gap-3">
-              <div className="rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: `2px solid ${sessionColor}` }}>
+              <div className="rounded-lg overflow-hidden flex-shrink-0 relative" style={{ width: 80, height: 45, border: `2px solid ${sessionColor}` }}>
                 <img src={defaultThumb} alt="Default" className="w-full h-full object-cover" />
+                {addType === "product_training" && (
+                  <div className="absolute inset-0" style={{ background: `${sessionColor}55`, mixBlendMode: "color" }} />
+                )}
               </div>
               <span className="text-xs text-gray-500">Stock thumbnail (auto-assigned by type, color-coded to session)</span>
             </div>
@@ -10112,10 +10124,14 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
               <label className="text-[11px] font-medium text-gray-400 mb-1 block">Cheat Sheet PDF (optional)</label>
               <div className="flex items-center gap-2">
                 <label
-                  className="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={{ background: "rgba(0,116,244,0.12)", color: "#4a9eff", border: "1px solid rgba(0,116,244,0.25)" }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                  style={{ background: uploadingCheatSheet ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingCheatSheet ? "#9ca3af" : "#fff" }}
                 >
-                  {uploadingCheatSheet ? "Uploading..." : (contentForm.cheatSheetUrl ? "Replace PDF" : "Upload PDF")}
+                  {uploadingCheatSheet ? (
+                    <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
+                  ) : (
+                    <>📄 {contentForm.cheatSheetUrl ? "Replace PDF" : "Upload PDF"}</>
+                  )}
                   <input
                     type="file"
                     accept=".pdf"

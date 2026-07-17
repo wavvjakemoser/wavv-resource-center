@@ -19,6 +19,8 @@ import {
   Clock,
   Gift,
   Info,
+  MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -920,10 +922,29 @@ export default function Accelerator() {
                   <p className="text-sm font-bold text-white mb-1">What You're Missing</p>
                   <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
                     {week1FreeActive
-                      ? "Session 1 is on us — but the full program includes 6 live coaching calls/week, 12+ WAVV training clips, downloadable cheat sheets, community leaderboards, and milestone badges."
-                      : "6 live coaching calls/week, 12+ WAVV training clips, downloadable cheat sheets, community leaderboards, and milestone badges — all included with your upgrade."
+                      ? "Session 1 is on us — but the full program includes 6 live coaching calls, 12+ WAVV training clips, downloadable cheat sheets, a private Slack community, and milestone badges."
+                      : "6 live coaching calls, 12+ WAVV training clips, downloadable cheat sheets, a private Slack community, and milestone badges — all included with your upgrade."
                     }
                   </p>
+                </div>
+              </div>
+
+              {/* Slack Community CTA — non-member teaser */}
+              <div className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+                style={{ background: "linear-gradient(135deg, rgba(0,116,244,0.08) 0%, rgba(0,116,244,0.03) 100%)", border: "1px solid rgba(0,116,244,0.18)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(0,116,244,0.15)" }}>
+                  <MessageSquare size={20} style={{ color: "#0074F4" }} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-white mb-1">Private Slack Community</p>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    Members get access to a dedicated Slack workspace to connect with their cohort, share wins, and get support between sessions.
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold flex-shrink-0"
+                  style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.2)", color: "rgba(255,255,255,0.35)" }}>
+                  <Lock size={13} /> Members Only
                 </div>
               </div>
               {/* CTA */}

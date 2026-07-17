@@ -1940,3 +1940,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Ensure session detail page only shows: Title, Hero CTA, Upcoming Live Calls, WAVV Product Training + Cheat Sheets, Session Recordings
 - [x] Fix /accelerator landing page 404 (nav_visibility setting blocking access) so 6 clickable session tiles render
 - [x] CMS session list: add Visible/Hidden/Coming Soon toggle on each session row (next to Edit button) for quick visibility management
+- [x] CMS session list: Hidden toggle color = red when active (not grey)
+- [x] CMS session list: move Visible/Hidden/Coming Soon toggles to right side of row (inline with title)
+- [x] CMS session list: change "Week N" labels to "Session N"
+- [x] Product Training: default thumbnail color = session color (not purple)
+- [x] Upload PDF button: styled like Upload Video button (document emoji)
+- [x] Live Call Events form: remove duration calculator field
+- [x] Add Slack Community section per session (DB field + CMS editable + clickable on member page)
+- [x] Non-member Accelerator landing page: add CTA callout for what's included in the program

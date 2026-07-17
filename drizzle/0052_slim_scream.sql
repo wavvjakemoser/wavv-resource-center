@@ -1,0 +1,1 @@
+ALTER TABLE `accelerator_sessions` ADD `slack_url` text;

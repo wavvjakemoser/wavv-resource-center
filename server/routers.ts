@@ -2187,6 +2187,7 @@ export const appRouter = router({
         registrationUrl: z.string().nullable().optional(),
         sessionDateTime: z.string().nullable().optional(), // ISO string
         cheatSheetUrl: z.string().nullable().optional(),
+        slackUrl: z.string().nullable().optional(),
         comingSoon: z.boolean().optional(),
         isPublished: z.boolean().optional(),
         sortOrder: z.number().optional(),
