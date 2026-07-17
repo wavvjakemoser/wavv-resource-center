@@ -595,7 +595,7 @@ export default function AcceleratorSession() {
                   style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
                 >
                   <FileText size={14} />
-                  Register for This Session
+                  Register
                 </a>
               )}
               {session.joinUrl && (() => {
@@ -617,13 +617,23 @@ export default function AcceleratorSession() {
                     </a>
                   );
                 }
+                // Show mini countdown to when join becomes available
+                const msUntilJoin = sessionTime ? (sessionTime - JOIN_WINDOW_MS) - now : 0;
+                const secsUntilJoin = Math.max(0, Math.floor(msUntilJoin / 1000));
+                const jH = Math.floor(secsUntilJoin / 3600);
+                const jM = Math.floor((secsUntilJoin % 3600) / 60);
+                const jS = secsUntilJoin % 60;
+                const pad = (n: number) => String(n).padStart(2, "0");
                 return (
                   <span
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
-                    style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.3)", border: "1px solid rgba(255,255,255,0.07)" }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-default select-none"
+                    style={{ background: "rgba(0,116,244,0.08)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(0,116,244,0.15)" }}
                   >
-                    <Lock size={13} />
-                    Join link opens 15 min before session
+                    <Clock size={13} />
+                    Join opens in{" "}
+                    <span className="tabular-nums font-bold" style={{ color: "#4a9eff" }}>
+                      {jH > 0 ? `${pad(jH)}h ${pad(jM)}m ${pad(jS)}s` : `${pad(jM)}m ${pad(jS)}s`}
+                    </span>
                   </span>
                 );
               })()}

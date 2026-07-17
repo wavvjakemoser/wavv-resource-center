@@ -1889,3 +1889,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Per-session detail page: Join Live button (visible only 15 min before sessionDateTime)
 - [x] Add large countdown timer to Accelerator landing page hero (both no-access and member views)
 - [x] Add "Not registered?" CTA below countdown linking to next session detail page
+- [x] Rename session registration button to just "Register" (clean label)
+- [x] Replace disabled "Join link opens 15 min before" with a mini countdown that ticks down, then transforms into active "Join Live" button at T-15 min
+- [x] Week 1 free (through July 26): Add "Go to Session 1" button + "Upgrade Your Plan" button side by side on the no-access Accelerator hero
+- [x] Week 1 free callout copy: "Session 1 is free through July 26 — upgrade to unlock the full program."

@@ -710,11 +710,32 @@ export default function Accelerator() {
               <UpgradeCTA reason="unauthenticated" variant="inline" />
             )}
             {reason === "no_access" && (
-              <div className="flex flex-col items-center gap-3">
-                <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "480px" }}>
-                  The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost. Monthly subscribers can upgrade their plan to unlock access.
-                </p>
-                <UpgradeCTA reason="no_access" variant="inline" />
+              <div className="flex flex-col items-center gap-4">
+                {week1FreeActive ? (
+                  <>
+                    <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.7)", maxWidth: "480px" }}>
+                      Session 1 is free through July 26 — upgrade to unlock the full program.
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                      <a
+                        href="/accelerator/session/1"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+                        style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
+                      >
+                        Go to Session 1
+                        <span style={{ fontSize: "16px" }}>→</span>
+                      </a>
+                      <UpgradeCTA reason="no_access" variant="inline" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "480px" }}>
+                      The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost. Monthly subscribers can upgrade their plan to unlock access.
+                    </p>
+                    <UpgradeCTA reason="no_access" variant="inline" />
+                  </>
+                )}
               </div>
             )}
           </div>
