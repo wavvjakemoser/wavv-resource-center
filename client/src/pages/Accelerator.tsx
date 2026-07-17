@@ -19,7 +19,6 @@ import {
   Clock,
   Gift,
   Info,
-  MessageSquare,
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -729,6 +728,27 @@ export default function Accelerator() {
             })()}
 
             {/* Hero CTA buttons */}
+            {hasAccess && (() => {
+              // Find the current/next active session to link to
+              const currentSession = dbSessions.find((s: any) => s.isPublished && !s.comingSoon) ?? dbSessions[0];
+              if (!currentSession) return null;
+              const sessionColor = SESSIONS.find(s => s.id === currentSession.id)?.color ?? "#0074F4";
+              return (
+                <div className="flex justify-center mt-2 mb-2">
+                  <a
+                    href={`/accelerator/session/${currentSession.id}`}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
+                    style={{ background: `linear-gradient(135deg, ${sessionColor}, ${sessionColor}cc)` }}
+                    onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+                  >
+                    <Calendar size={14} />
+                    Go to Session {currentSession.id}
+                    <ArrowRight size={15} />
+                  </a>
+                </div>
+              );
+            })()}
             {reason === "unauthenticated" && (
               <UpgradeCTA reason="unauthenticated" variant="inline" />
             )}
@@ -908,43 +928,49 @@ export default function Accelerator() {
             })}
           </div>
 
-          {/* "What You're Missing" banner + CTA (only for non-access users) */}
+          {/* "What You're Missing" + Slack Community — combined orange banner (non-access users only) */}
           {!hasAccess && (
             <div className="space-y-5 pt-4">
-              {/* What You're Missing — prominent banner */}
-              <div className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
-                style={{ background: "linear-gradient(135deg, rgba(249,115,22,0.08) 0%, rgba(249,115,22,0.03) 100%)", border: "1px solid rgba(249,115,22,0.18)" }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(249,115,22,0.15)" }}>
-                  <Gift size={20} style={{ color: "#f97316" }} />
+              {/* Combined What You're Missing + Private Slack Community banner */}
+              <div className="rounded-2xl px-6 py-6 space-y-4"
+                style={{ background: "linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(249,115,22,0.05) 100%)", border: "1px solid rgba(249,115,22,0.25)", boxShadow: "0 0 32px rgba(249,115,22,0.08)" }}>
+                {/* Header row */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(249,115,22,0.18)" }}>
+                    <Gift size={20} style={{ color: "#f97316" }} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-white mb-1">What You're Missing</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+                      {week1FreeActive
+                        ? "Session 1 is on us — but the full program includes 6 live coaching calls, 12+ WAVV training clips, downloadable cheat sheets, and milestone badges."
+                        : "6 live coaching calls, 12+ WAVV training clips, downloadable cheat sheets, and milestone badges — all included with your upgrade."
+                      }
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-white mb-1">What You're Missing</p>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
-                    {week1FreeActive
-                      ? "Session 1 is on us — but the full program includes 6 live coaching calls, 12+ WAVV training clips, downloadable cheat sheets, a private Slack community, and milestone badges."
-                      : "6 live coaching calls, 12+ WAVV training clips, downloadable cheat sheets, a private Slack community, and milestone badges — all included with your upgrade."
-                    }
-                  </p>
-                </div>
-              </div>
-
-              {/* Slack Community CTA — non-member teaser */}
-              <div className="rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
-                style={{ background: "linear-gradient(135deg, rgba(0,116,244,0.08) 0%, rgba(0,116,244,0.03) 100%)", border: "1px solid rgba(0,116,244,0.18)" }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(0,116,244,0.15)" }}>
-                  <MessageSquare size={20} style={{ color: "#0074F4" }} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-white mb-1">Private Slack Community</p>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
-                    Members get access to a dedicated Slack workspace to connect with their cohort, share wins, and get support between sessions.
-                  </p>
-                </div>
-                <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold flex-shrink-0"
-                  style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.2)", color: "rgba(255,255,255,0.35)" }}>
-                  <Lock size={13} /> Members Only
+                {/* Slack Community row */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-3"
+                  style={{ borderTop: "1px solid rgba(249,115,22,0.15)" }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(249,115,22,0.18)" }}>
+                    {/* Slack neon icon */}
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                      style={{ filter: "drop-shadow(0 0 6px #f97316)" }}>
+                      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#f97316"/>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-white mb-0.5">Private Slack Community — Members Only</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>
+                      You get the private Slack community when you become a member. Connect with your cohort, share wins, and get support between sessions.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold flex-shrink-0"
+                    style={{ background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.25)", color: "rgba(255,255,255,0.4)" }}>
+                    <Lock size={13} /> Members Only
+                  </div>
                 </div>
               </div>
               {/* CTA */}
@@ -969,6 +995,46 @@ export default function Accelerator() {
         </section>
 
 
+
+        {/* ── Slack Community (member-facing, shown when any session has a slackUrl) ── */}
+        {hasAccess && (() => {
+          const slackSession = dbSessions.find((s: any) => s.slackUrl);
+          if (!slackSession) return null;
+          const slackColor = "#4A154B"; // Slack brand purple, but we neon it
+          return (
+            <section>
+              <div
+                className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
+                style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.18) 0%, rgba(74,21,75,0.06) 100%)", border: "1px solid rgba(74,21,75,0.35)", boxShadow: "0 0 32px rgba(74,21,75,0.12)" }}
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(74,21,75,0.25)" }}>
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    style={{ filter: "drop-shadow(0 0 8px #e01e5a) drop-shadow(0 0 16px #36c5f0)" }}>
+                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-0.5" style={{ color: "rgba(236,178,46,0.8)" }}>Community</p>
+                  <p className="text-base font-bold text-white">Join the WAVV Accelerator Slack</p>
+                  <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, and get support between sessions.</p>
+                </div>
+                <a
+                  href={slackSession.slackUrl ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
+                  style={{ background: "linear-gradient(135deg, #4A154B, #611f69)" }}
+                >
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="white"/>
+                  </svg>
+                  Join Slack
+                </a>
+              </div>
+            </section>
+          );
+        })()}
 
         {/* ── The Partnership ── */}
         <section className="space-y-4">

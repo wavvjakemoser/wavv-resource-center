@@ -9470,46 +9470,6 @@ function AcceleratorTab() {
                   />
                 </div>
 
-                {/* Visibility 3-state selector */}
-                <div className="flex items-center gap-3">
-                  <label className="text-[11px] font-medium text-gray-400">Visibility</label>
-                  <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: "#111" }}>
-                    <button
-                      onClick={() => setForm({ ...form, isPublished: true, comingSoon: false })}
-                      className="text-[11px] px-3 py-1.5 rounded-md font-medium transition-all"
-                      style={{
-                        background: form.isPublished && !form.comingSoon ? "rgba(16,185,129,0.15)" : "transparent",
-                        color: form.isPublished && !form.comingSoon ? "#10b981" : "#6b7280",
-                        border: form.isPublished && !form.comingSoon ? "1px solid rgba(16,185,129,0.3)" : "1px solid transparent",
-                      }}
-                    >
-                      Visible
-                    </button>
-                    <button
-                      onClick={() => setForm({ ...form, isPublished: false, comingSoon: false })}
-                      className="text-[11px] px-3 py-1.5 rounded-md font-medium transition-all"
-                      style={{
-                        background: !form.isPublished && !form.comingSoon ? "rgba(107,114,128,0.15)" : "transparent",
-                        color: !form.isPublished && !form.comingSoon ? "#9ca3af" : "#6b7280",
-                        border: !form.isPublished && !form.comingSoon ? "1px solid rgba(107,114,128,0.3)" : "1px solid transparent",
-                      }}
-                    >
-                      Hidden
-                    </button>
-                    <button
-                      onClick={() => setForm({ ...form, isPublished: true, comingSoon: true })}
-                      className="text-[11px] px-3 py-1.5 rounded-md font-medium transition-all"
-                      style={{
-                        background: form.comingSoon ? "rgba(245,158,11,0.15)" : "transparent",
-                        color: form.comingSoon ? "#f59e0b" : "#6b7280",
-                        border: form.comingSoon ? "1px solid rgba(245,158,11,0.3)" : "1px solid transparent",
-                      }}
-                    >
-                      Coming Soon
-                    </button>
-                  </div>
-                </div>
-
                 {/* ── Inline Live Calls for this session ── */}
                 <SessionLiveCallsInline sessionNumber={session.week} sessionColor={session.color} />
 
@@ -9994,7 +9954,7 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
         )}
         <div className="space-y-2">
           {recordings.map((item: any) => (
-            <AccContentRow key={item.id} item={item} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
+            <AccContentRow key={item.id} item={item} sessionColor={sessionColor} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
           ))}
         </div>
         {(showAddForm && addType === "recording") && renderContentForm()}
@@ -10021,7 +9981,7 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
         )}
         <div className="space-y-2">
           {productTraining.map((item: any) => (
-            <AccContentRow key={item.id} item={item} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
+            <AccContentRow key={item.id} item={item} sessionColor={sessionColor} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
           ))}
         </div>
         {(showAddForm && addType === "product_training") && renderContentForm()}
@@ -10189,14 +10149,20 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
   }
 }
 
-function AccContentRow({ item, onEdit, onDelete }: { item: any; onEdit: () => void; onDelete: () => void }) {
+function AccContentRow({ item, onEdit, onDelete, sessionColor }: { item: any; onEdit: () => void; onDelete: () => void; sessionColor?: string }) {
   const DEFAULT_REC = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
   const DEFAULT_TRAIN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
   const thumb = item.thumbnailUrl || (item.contentType === "recording" ? DEFAULT_REC : DEFAULT_TRAIN);
+  const isTraining = item.contentType === "product_training";
   return (
     <div className="flex items-center justify-between py-2 px-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
       <div className="flex items-center gap-3">
-        <img src={thumb} alt="" className="w-16 h-10 rounded object-cover" />
+        <div className="relative rounded overflow-hidden flex-shrink-0" style={{ width: 64, height: 40, border: isTraining && sessionColor ? `2px solid ${sessionColor}` : undefined }}>
+          <img src={thumb} alt="" className="w-full h-full object-cover" />
+          {isTraining && sessionColor && (
+            <div className="absolute inset-0" style={{ background: `${sessionColor}55`, mixBlendMode: "color" }} />
+          )}
+        </div>
         <div>
           <p className="text-sm text-white font-medium">{item.title}</p>
           <p className="text-[11px] text-gray-400">

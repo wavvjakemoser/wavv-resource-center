@@ -1948,3 +1948,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Live Call Events form: remove duration calculator field
 - [x] Add Slack Community section per session (DB field + CMS editable + clickable on member page)
 - [x] Non-member Accelerator landing page: add CTA callout for what's included in the program
+- [x] Accelerator landing: Session 1 free banner orange = same shade as What You're Missing banner (#f97316)
+- [x] Accelerator landing: Combine What You're Missing + Private Slack Community into one unified banner
+- [x] Accelerator landing + session pages: Replace MessageSquare icon with Slack SVG logo (neon style)
+- [x] Accelerator member home page: Add Slack Community section (visible when slackUrl is set on any session)
+- [x] CMS session edit panel: Remove Visibility section (it's now on the row-level toggle)
+- [x] CMS session content: Fix thumbnail to use session color (not purple) for product_training items
+- [x] Accelerator member hero: add "Go to Session N →" button (same blue style as non-member) pointing to current active session
