@@ -1928,3 +1928,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Simplify session editor: remove Video URL, Registration URL, Join URL, Session Date/Time, Color picker fields
 - [x] Add timezone selector to Live Call Events form (Eastern, Central, Mountain, Pacific — default Mountain)
 - [x] Replace Cheat Sheet URL input with PDF file upload
+- [x] Consolidate CMS: move Live Call Events into each session's edit view (not a standalone section)
+- [x] Remove standalone AcceleratorLiveCallManager section from AcceleratorTab
+- [x] Session visibility: replace Published/Draft/ComingSoon/Accessible toggles with 3-state selector (Visible / Hidden / Coming Soon)

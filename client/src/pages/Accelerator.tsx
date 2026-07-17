@@ -793,9 +793,13 @@ export default function Accelerator() {
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {SESSIONS.map((session) => {
-              // Check if this session is marked Coming Soon in the DB
+              // Check visibility state from DB
               const dbSession = dbSessions.find(s => s.id === session.id);
               const isComingSoon = dbSession?.comingSoon ?? false;
+              const isPublished = dbSession?.isPublished ?? true;
+
+              // Hidden — don't render at all
+              if (!isPublished && !isComingSoon) return null;
 
               // Coming Soon — show card with badge, not clickable
               if (isComingSoon && hasAccess) {

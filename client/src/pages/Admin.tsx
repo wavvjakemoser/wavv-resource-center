@@ -9456,41 +9456,48 @@ function AcceleratorTab() {
                   />
                 </div>
 
-                {/* Published toggle */}
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <label className="text-[11px] font-medium text-gray-400">Published</label>
+                {/* Visibility 3-state selector */}
+                <div className="flex items-center gap-3">
+                  <label className="text-[11px] font-medium text-gray-400">Visibility</label>
+                  <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: "#111" }}>
                     <button
-                      onClick={() => setForm({ ...form, isPublished: !form.isPublished })}
-                      className="flex items-center"
+                      onClick={() => setForm({ ...form, isPublished: true, comingSoon: false })}
+                      className="text-[11px] px-3 py-1.5 rounded-md font-medium transition-all"
+                      style={{
+                        background: form.isPublished && !form.comingSoon ? "rgba(16,185,129,0.15)" : "transparent",
+                        color: form.isPublished && !form.comingSoon ? "#10b981" : "#6b7280",
+                        border: form.isPublished && !form.comingSoon ? "1px solid rgba(16,185,129,0.3)" : "1px solid transparent",
+                      }}
                     >
-                      {form.isPublished ? (
-                        <ToggleRight size={20} style={{ color: "#10b981" }} />
-                      ) : (
-                        <ToggleLeft size={20} style={{ color: "#6b7280" }} />
-                      )}
+                      Visible
                     </button>
-                    <span className="text-[11px]" style={{ color: form.isPublished ? "#10b981" : "#6b7280" }}>
-                      {form.isPublished ? "Live" : "Draft"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-[11px] font-medium text-gray-400">Coming Soon</label>
                     <button
-                      onClick={() => setForm({ ...form, comingSoon: !form.comingSoon })}
-                      className="flex items-center"
+                      onClick={() => setForm({ ...form, isPublished: false, comingSoon: false })}
+                      className="text-[11px] px-3 py-1.5 rounded-md font-medium transition-all"
+                      style={{
+                        background: !form.isPublished && !form.comingSoon ? "rgba(107,114,128,0.15)" : "transparent",
+                        color: !form.isPublished && !form.comingSoon ? "#9ca3af" : "#6b7280",
+                        border: !form.isPublished && !form.comingSoon ? "1px solid rgba(107,114,128,0.3)" : "1px solid transparent",
+                      }}
                     >
-                      {form.comingSoon ? (
-                        <ToggleRight size={20} style={{ color: "#f59e0b" }} />
-                      ) : (
-                        <ToggleLeft size={20} style={{ color: "#6b7280" }} />
-                      )}
+                      Hidden
                     </button>
-                    <span className="text-[11px]" style={{ color: form.comingSoon ? "#f59e0b" : "#6b7280" }}>
-                      {form.comingSoon ? "Hidden" : "Accessible"}
-                    </span>
+                    <button
+                      onClick={() => setForm({ ...form, isPublished: true, comingSoon: true })}
+                      className="text-[11px] px-3 py-1.5 rounded-md font-medium transition-all"
+                      style={{
+                        background: form.comingSoon ? "rgba(245,158,11,0.15)" : "transparent",
+                        color: form.comingSoon ? "#f59e0b" : "#6b7280",
+                        border: form.comingSoon ? "1px solid rgba(245,158,11,0.3)" : "1px solid transparent",
+                      }}
+                    >
+                      Coming Soon
+                    </button>
                   </div>
                 </div>
+
+                {/* ── Inline Live Calls for this session ── */}
+                <SessionLiveCallsInline sessionNumber={session.week} sessionColor={session.color} />
               </div>
             ) : (
               /* ── View mode ── */
@@ -9501,13 +9508,12 @@ function AcceleratorTab() {
                     Week {session.week}
                   </span>
                   <h3 className="text-sm font-medium text-white">{session.title}</h3>
-                  {session.isPublished ? (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>Live</span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(107,114,128,0.12)", color: "#6b7280" }}>Draft</span>
-                  )}
-                  {session.comingSoon && (
+                  {session.comingSoon ? (
                     <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}>Coming Soon</span>
+                  ) : session.isPublished ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>Visible</span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(107,114,128,0.12)", color: "#6b7280" }}>Hidden</span>
                   )}
                 </div>
                 <button
@@ -9529,19 +9535,16 @@ function AcceleratorTab() {
       {/* ─── Content Management Section ─── */}
       <AcceleratorContentManager />
 
-      {/* ─── Live Call Events Section ─── */}
-      <AcceleratorLiveCallManager />
+
     </div>
   );
 }
 
-// ─── Accelerator Live Call Manager (CMS-managed per-call events) ─────────────
-function AcceleratorLiveCallManager() {
+// ─── Inline Live Call Manager (embedded in session edit form) ─────────────
+function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber: number; sessionColor: string }) {
   const utils = trpc.useUtils();
-  const { data: liveCalls = [], isLoading } = trpc.accelerator.listLiveCalls.useQuery({});
-  const { data: sessions = [] } = trpc.accelerator.list.useQuery();
-  const [selectedSession, setSelectedSession] = useState<number>(1);
-  const sessionColor = (sessions.find((s: any) => s.week === selectedSession) as any)?.color ?? "#0074F4";
+  const { data: liveCalls = [], isLoading } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber });
+  const selectedSession = sessionNumber;
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({
@@ -9667,27 +9670,7 @@ function AcceleratorLiveCallManager() {
         </button>
       </div>
 
-      {/* Session Tabs */}
-      <div className="flex gap-1 mb-4 p-1 rounded-lg" style={{ background: "#111" }}>
-        {[1, 2, 3, 4, 5, 6].map((n) => {
-          const sColor = (sessions.find((s: any) => s.week === n) as any)?.color ?? "#0074F4";
-          const count = liveCalls.filter((c: any) => c.sessionNumber === n).length;
-          return (
-            <button
-              key={n}
-              onClick={() => { setSelectedSession(n); resetForm(); }}
-              className="flex-1 text-xs py-2 rounded-md font-medium transition-all"
-              style={{
-                background: selectedSession === n ? `${sColor}18` : "transparent",
-                color: selectedSession === n ? sColor : "#6b7280",
-                borderBottom: selectedSession === n ? `2px solid ${sColor}` : "2px solid transparent",
-              }}
-            >
-              S{n} {count > 0 && <span className="ml-1 text-[10px] opacity-60">({count})</span>}
-            </button>
-          );
-        })}
-      </div>
+
 
       {/* Add/Edit Form */}
       {showAddForm && (
