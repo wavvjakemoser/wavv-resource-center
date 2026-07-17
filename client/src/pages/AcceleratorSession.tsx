@@ -432,6 +432,10 @@ export default function AcceleratorSession() {
   // Fetch dynamic content from CMS (must be before any conditional returns to avoid hook-order issues)
   const { data: sessionContent = [] } = trpc.accelerator.listContent.useQuery({ sessionNumber: weekId });
 
+  // DB-driven live calls (must be before any conditional returns to avoid hook-order issues)
+  const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: weekId });
+  const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
+
   // Video player state (must be before any conditional returns)
   const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
 
@@ -502,10 +506,6 @@ export default function AcceleratorSession() {
   // Parse resource links
   let resourceLinks: { label: string; url: string }[] = [];
   try { if (session.resourceLinks) resourceLinks = JSON.parse(session.resourceLinks); } catch { /* ignore */ }
-
-  // DB-driven live calls for this session
-  const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: weekId });
-  const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
   // Determine if this page's week is the "current" active week
   // Current week = the week containing the next upcoming call (or live call)

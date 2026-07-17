@@ -1923,3 +1923,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] CMS-managed live call events: rewrite SessionCallCard to render from DB (webinar-style cards with thumbnail, description, Register + Join buttons)
 - [x] CMS-managed live call events: update hero countdown to use DB events instead of hardcoded SCHEDULE
 - [x] CMS-managed live call events: remove hardcoded SCHEDULE array from AcceleratorSession.tsx and Accelerator.tsx
+- [x] Fix: Error when clicking into a Session detail page (React hooks ordering violation — moved listLiveCalls queries above conditional returns)
+- [x] Fix: Countdown clock missing on Accelerator landing page (added dbSessions fallback when no CMS live call events exist)

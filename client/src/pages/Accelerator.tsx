@@ -332,8 +332,26 @@ function Week1FreeBanner({ endsAt, reason }: { endsAt: number; reason: string })
 }
 
 // ─── Live Call Countdown component ──────────────────────────────────────────
-function LiveCallCountdown({ hasAccess, liveCalls }: { hasAccess: boolean; liveCalls: LiveCallItem[] }) {
-  const schedule = useAcceleratorSchedule(liveCalls);
+function LiveCallCountdown({ hasAccess, liveCalls, dbSessions = [] }: { hasAccess: boolean; liveCalls: LiveCallItem[]; dbSessions?: { id: number; sessionDateTime?: string | Date | null; registrationUrl?: string | null; joinUrl?: string | null }[] }) {
+  // Fallback: if no live call events in CMS, synthesize from accelerator_sessions.sessionDateTime
+  const effectiveCalls = useMemo(() => {
+    if (liveCalls.length > 0) return liveCalls;
+    // Build synthetic LiveCallItem[] from dbSessions that have a sessionDateTime
+    return dbSessions
+      .filter(s => s.sessionDateTime)
+      .map(s => ({
+        id: s.id * 1000,
+        sessionNumber: s.id,
+        callNumber: 1,
+        title: `Session ${s.id}`,
+        scheduledAt: s.sessionDateTime instanceof Date ? s.sessionDateTime.toISOString() : s.sessionDateTime!,
+        durationMinutes: 90,
+        registrationUrl: s.registrationUrl ?? null,
+        joinUrl: s.joinUrl ?? null,
+      } as LiveCallItem));
+  }, [liveCalls, dbSessions]);
+
+  const schedule = useAcceleratorSchedule(effectiveCalls);
 
   const isLive   = schedule.status === "live";
   const isDone   = schedule.status === "done";
@@ -359,6 +377,9 @@ function LiveCallCountdown({ hasAccess, liveCalls }: { hasAccess: boolean; liveC
     hour: "numeric", minute: "2-digit", timeZoneName: "short",
   }) : null;
 
+  // If using fallback (no live calls in CMS), don't show call number
+  const usingFallback = liveCalls.length === 0 && effectiveCalls.length > 0;
+
   return (
     <div className="flex flex-col items-center text-center gap-4 mt-2">
       {/* Title row */}
@@ -368,7 +389,7 @@ function LiveCallCountdown({ hasAccess, liveCalls }: { hasAccess: boolean; liveC
         </h3>
         {sessionRef && (
           <p className="mt-1 text-xs font-semibold" style={{ color: isLive ? "#6ee7b7" : "#4a9eff" }}>
-             Session {weekNum} · Call {callNum} of 2
+             Session {weekNum}{!usingFallback && callNum ? ` · Call ${callNum} of 2` : ""}
           </p>
         )}
         {dateLabel && (
@@ -679,7 +700,7 @@ export default function Accelerator() {
             </div>
 
             {/* ── Large Countdown Timer (inline in hero) ── */}
-            <LiveCallCountdown hasAccess={hasAccess} liveCalls={visibleLiveCalls} />
+            <LiveCallCountdown hasAccess={hasAccess} liveCalls={visibleLiveCalls} dbSessions={dbSessions} />
 
             {/* ── "Not registered?" CTA ── */}
             {(() => {
