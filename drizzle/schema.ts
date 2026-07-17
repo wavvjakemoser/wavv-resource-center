@@ -525,6 +525,7 @@ export const acceleratorSessions = mysqlTable("accelerator_sessions", {
   sessionDateTime: timestamp("session_date_time"), // When the live session starts (UTC)
   cheatSheetUrl: text("cheat_sheet_url"), // PDF URL for the session cheat sheet
   slackUrl: text("slack_url"), // Slack community invite URL for this session
+  showSlack: boolean("show_slack").default(true).notNull(), // Whether to show the Slack section on this session page
   comingSoon: boolean("coming_soon").default(false).notNull(), // Hides session from public access
   isPublished: boolean("is_published").default(false).notNull(),
   sortOrder: int("sort_order").default(0).notNull(),

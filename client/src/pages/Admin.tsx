@@ -7814,6 +7814,9 @@ function SettingsTab() {
     const searchRequestsEnabled = settings["search_requests_enabled"] !== false;
   // Quick Links toggles
   const chromeExtensionEnabled = settings["chrome_extension_enabled"] !== false;
+  // Slack banner visibility toggles (default true = shown)
+  const slackBannerWavvEnabled = settings["slack_banner_wavv_enabled"] !== false;
+  const slackBannerAcceleratorEnabled = settings["slack_banner_accelerator_enabled"] !== false;
   // Auto-refresh: default true (enabled). Disable during stable production periods.
   const autoRefreshEnabled = settings["auto_refresh_enabled"] !== false;
   // Nav items that can be toggled
@@ -8056,6 +8059,41 @@ function SettingsTab() {
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                       style={enabled
                         ? { background: `${color}18`, color, border: `1px solid ${color}35` }
+                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                    >
+                      {enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
+                      {enabled ? "Visible" : "Hidden"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Slack Banners ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(74,21,75,0.18)" }}>
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 0 4px #e01e5a)" }}>
+                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Slack Banners</p>
+                  <p className="text-xs text-gray-500">Show or hide the "Join the WAVV Accelerator Slack" banner on each page</p>
+                </div>
+              </div>
+              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                {([
+                  { key: "slack_banner_wavv_enabled", label: "WAVV Member Page", enabled: slackBannerWavvEnabled },
+                  { key: "slack_banner_accelerator_enabled", label: "Accelerator Member Page", enabled: slackBannerAcceleratorEnabled },
+                ] as { key: string; label: string; enabled: boolean }[]).map(({ key, label, enabled }) => (
+                  <div key={key} className="flex items-center justify-between py-1">
+                    <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
+                    <button
+                      onClick={() => toggle(key, enabled)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                      style={enabled
+                        ? { background: "rgba(74,21,75,0.25)", color: "#ECB22E", border: "1px solid rgba(74,21,75,0.5)" }
                         : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
                     >
                       {enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
@@ -9293,6 +9331,7 @@ function AcceleratorTab() {
     bodyContent: "",
     resourceLinks: "",
     slackUrl: "",
+    showSlack: true,
     comingSoon: false,
     isPublished: false,
   });
@@ -9317,6 +9356,7 @@ function AcceleratorTab() {
       bodyContent: session.bodyContent ?? "",
       resourceLinks: session.resourceLinks ?? "",
       slackUrl: session.slackUrl ?? "",
+      showSlack: session.showSlack !== false,
       comingSoon: session.comingSoon ?? false,
       isPublished: session.isPublished ?? false,
     });
@@ -9334,6 +9374,7 @@ function AcceleratorTab() {
       bodyContent: form.bodyContent || null,
       resourceLinks: form.resourceLinks || null,
       slackUrl: form.slackUrl || null,
+      showSlack: form.showSlack,
       comingSoon: form.comingSoon,
       isPublished: form.isPublished,
     });
@@ -9459,15 +9500,36 @@ function AcceleratorTab() {
                   />
                 </div>
 
-                {/* Slack Community URL */}
-                <div>
-                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Slack Community URL <span className="text-gray-600">(optional — invite link for this session)</span></label>
-                  <Input
-                    value={form.slackUrl}
-                    onChange={(e) => setForm({ ...form, slackUrl: e.target.value })}
-                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                    placeholder="https://join.slack.com/t/wavv-community/..."
-                  />
+                {/* ── Slack Community Section ── */}
+                <div className="rounded-lg p-3 space-y-2" style={{ background: "rgba(74,21,75,0.12)", border: "1px solid rgba(74,21,75,0.3)" }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
+                      </svg>
+                      <span className="text-[11px] font-semibold text-gray-300">Slack Community Section</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, showSlack: !form.showSlack })}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                      style={form.showSlack
+                        ? { background: "rgba(74,21,75,0.35)", color: "#ECB22E", border: "1px solid rgba(74,21,75,0.6)" }
+                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                    >
+                      {form.showSlack ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
+                      {form.showSlack ? "Visible" : "Hidden"}
+                    </button>
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-gray-500 mb-1 block">Slack Invite URL <span className="text-gray-600">(optional)</span></label>
+                    <Input
+                      value={form.slackUrl}
+                      onChange={(e) => setForm({ ...form, slackUrl: e.target.value })}
+                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                      placeholder="https://join.slack.com/t/wavv-community/..."
+                    />
+                  </div>
                 </div>
 
                 {/* ── Inline Live Calls for this session ── */}

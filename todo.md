@@ -1971,3 +1971,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Both Accelerator pages: move "Money Math" section to below FAQs
 - [x] Session page: Previous Session Recordings grid — 2 tiles per row (matching Product Training layout)
 - [x] Live call cards: increase thumbnail area height so image takes up more of the card than text/buttons
+- [x] Admin settings: add Slack banner visibility toggles (WAVV member page + Accelerator member page) — stored in DB, read by frontend
+- [x] Session CMS: move Slack URL into its own standalone section with show/hide toggle per session
+- [x] Live call cards: fix visual blending/overlap on Session 1 Upcoming Live Calls section
+- [x] Live call cards: reduce dead space in the bottom body of the tile

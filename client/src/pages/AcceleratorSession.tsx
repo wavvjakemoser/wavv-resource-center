@@ -182,9 +182,9 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
       </div>
 
       {/* Body */}
-      <div className="p-4 flex flex-col flex-1 space-y-2">
+      <div className="p-4 flex flex-col gap-2">
         <h3 className="text-white font-bold text-sm leading-snug">{call.title}</h3>
-        {call.description && <p className="text-gray-500 text-xs leading-relaxed">{call.description}</p>}
+        {call.description && <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{call.description}</p>}
         <p className="text-gray-500 text-xs flex items-center gap-1.5">
           <Calendar size={11} className="text-gray-600" />
           <span className="text-gray-300">{dateLabel}</span>
@@ -242,7 +242,7 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
         })()}
 
         {/* CTA buttons — centered, larger */}
-        <div className="mt-auto pt-4 flex flex-col items-center gap-2">
+        <div className="pt-3 flex flex-col items-center gap-2" style={{ borderTop: `1px solid ${glowColor}18` }}>
           <div className="flex items-center justify-center gap-3 w-full">
             {/* Register button */}
             {!isPast && call.registrationUrl && (

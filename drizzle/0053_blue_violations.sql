@@ -1,0 +1,1 @@
+ALTER TABLE `accelerator_sessions` ADD `show_slack` boolean DEFAULT true NOT NULL;

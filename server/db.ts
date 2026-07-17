@@ -3021,6 +3021,7 @@ export async function updateAcceleratorSession(id: number, data: Partial<{
   sessionDateTime: string | null;
   cheatSheetUrl: string | null;
   slackUrl: string | null;
+  showSlack: boolean;
   comingSoon: boolean;
   isPublished: boolean;
   sortOrder: number;
