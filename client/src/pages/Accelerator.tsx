@@ -389,19 +389,35 @@ function LiveCallCountdown({ hasAccess, liveCalls, dbSessions = [] }: { hasAcces
   const usingFallback = liveCalls.length === 0 && effectiveCalls.length > 0;
 
   return (
-    <div className="flex flex-col items-center text-center gap-4 mt-2">
+    <div className="flex flex-col items-center text-center gap-3 mt-2">
       {/* Title row */}
-      <div>
-        <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-          {isLive ? "🔴 LIVE NOW" : "NEXT LIVE CALL"}
-        </h3>
-        {sessionRef && (
-          <p className="mt-1 text-xs font-semibold" style={{ color: isLive ? "#6ee7b7" : "#4a9eff" }}>
-             Session {weekNum}{!usingFallback && callNum ? ` · Call ${callNum} of 2` : ""}
-          </p>
-        )}
+      <div className="space-y-1">
+        {/* Status pill */}
+        <div className="flex items-center justify-center gap-2">
+          {isLive ? (
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider" style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              LIVE NOW
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider" style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.25)" }}>
+              <Calendar size={10} />
+              NEXT LIVE CALL
+            </span>
+          )}
+          {sessionRef && !usingFallback && callNum && (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)" }}>
+              Session {weekNum} · Call {callNum} of 2
+            </span>
+          )}
+          {sessionRef && (usingFallback || !callNum) && (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.45)" }}>
+              Session {weekNum}
+            </span>
+          )}
+        </div>
         {dateLabel && (
-          <p className="mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
             {dateLabel}
           </p>
         )}
@@ -414,7 +430,7 @@ function LiveCallCountdown({ hasAccess, liveCalls, dbSessions = [] }: { hasAcces
               <div key={label} className="flex items-end gap-1 sm:gap-2">
                 <div className="text-center">
                   <div
-                    className="w-[72px] sm:w-[88px] h-[72px] sm:h-[88px] rounded-2xl flex items-center justify-center relative overflow-hidden"
+                    className="w-[60px] sm:w-[72px] h-[60px] sm:h-[72px] rounded-2xl flex items-center justify-center relative overflow-hidden"
                     style={{
                       background: `linear-gradient(160deg, ${glowColor}22 0%, ${glowColor}0a 100%)`,
                       border: `1.5px solid ${glowColor}40`,
@@ -423,7 +439,7 @@ function LiveCallCountdown({ hasAccess, liveCalls, dbSessions = [] }: { hasAcces
                   >
                     <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${glowColor}50, transparent)` }} />
                     <p
-                      className="text-4xl sm:text-5xl font-black tabular-nums tracking-tight"
+                      className="text-3xl sm:text-4xl font-black tabular-nums tracking-tight"
                       style={{
                         color: "#fff",
                         textShadow: `0 0 20px ${glowColor}80, 0 0 40px ${glowColor}30`,
@@ -438,9 +454,9 @@ function LiveCallCountdown({ hasAccess, liveCalls, dbSessions = [] }: { hasAcces
                   </p>
                 </div>
                 {idx < 3 && (
-                  <div className="flex flex-col gap-2 pb-7 flex-shrink-0">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${glowColor}60` }} />
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${glowColor}60` }} />
+                  <div className="flex flex-col gap-1.5 pb-6 flex-shrink-0">
+                    <div className="w-1 h-1 rounded-full" style={{ background: `${glowColor}60` }} />
+                    <div className="w-1 h-1 rounded-full" style={{ background: `${glowColor}60` }} />
                   </div>
                 )}
               </div>

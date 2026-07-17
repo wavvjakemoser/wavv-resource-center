@@ -9570,12 +9570,17 @@ function AcceleratorTab() {
             ) : (
               /* ── View mode ── */
               <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className="flex items-center gap-3 min-w-0 cursor-pointer group"
+                  onClick={() => startEdit(session)}
+                  title="Click to edit session"
+                >
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0"
                     style={{ background: `${session.color}18`, color: session.color }}>
                     Session {session.week}
                   </span>
-                  <h3 className="text-sm font-medium text-white truncate">{session.title}</h3>
+                  <h3 className="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">{session.title}</h3>
+                  <Pencil size={11} className="text-gray-600 group-hover:text-blue-400 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100" />
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {/* Visibility toggles */}

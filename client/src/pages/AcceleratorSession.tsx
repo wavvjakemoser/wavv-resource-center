@@ -176,7 +176,7 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
           ) : isPast ? (
             <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase" style={{ background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)" }}>Completed</span>
           ) : (
-            <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase" style={{ background: glowColor, color: "#fff" }}>Call {call.callNumber} of 2</span>
+            <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase select-none pointer-events-none" style={{ background: glowColor, color: "#fff" }}>Call {call.callNumber} of 2</span>
           )}
         </div>
       </div>
@@ -204,7 +204,7 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
             { val: sec, label: "Sec" },
           ];
           return (
-            <div className="flex flex-col items-center gap-2 py-2">
+            <div className="flex flex-col items-center gap-1.5 py-1">
               <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>Starts in</span>
               <div className="flex items-end gap-1">
                 {digits.map(({ val, label }, idx) => (
@@ -592,7 +592,7 @@ export default function AcceleratorSession() {
       </div>
 
       {/* ── Page body ── */}
-      <div className="px-4 lg:px-8 py-8 space-y-10">
+      <div className="px-4 lg:px-8 py-8 space-y-14">
 
         {/* ── Late-joiner callout ── */}
         <div
@@ -827,34 +827,42 @@ function ContentCard({
     >
       {/* Thumbnail */}
       <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "140px" }}>
-        {/* Solid session-color background as base */}
-        <div
-          className="absolute inset-0"
-          style={{ background: `linear-gradient(135deg, ${accentColor}40 0%, ${accentColor}15 100%)` }}
-        />
-        {/* Default thumbnail rendered in grayscale so session color dominates */}
-        <img
-          src={defaultBg}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.35, filter: "grayscale(100%)" }}
-        />
-        {/* Strong session color overlay */}
-        <div
-          className="absolute inset-0"
-          style={{ background: `${accentColor}55`, mixBlendMode: "multiply" }}
-        />
-        {item.thumbnailUrl && (
-          <img
-            src={item.thumbnailUrl}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ opacity: 0.92 }}
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-          />
+        {item.thumbnailUrl ? (
+          /* Custom thumbnail */
+          <>
+            <img
+              src={item.thumbnailUrl}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ opacity: 0.92 }}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+            />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
+          </>
+        ) : item.contentType === "product_training" ? (
+          /* Neon glow default for product training */
+          <>
+            <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 50% 40%, ${accentColor}28 0%, #0d1117 70%)` }} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center"
+                style={{ background: `${accentColor}18`, border: `1.5px solid ${accentColor}40`, boxShadow: `0 0 24px ${accentColor}55, 0 0 48px ${accentColor}22` }}
+              >
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+                  <polygon points="8,5 19,12 8,19" fill={accentColor} style={{ filter: `drop-shadow(0 0 8px ${accentColor}) drop-shadow(0 0 16px ${accentColor}88)` }} />
+                </svg>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Default tinted bg for recordings */
+          <>
+            <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${accentColor}40 0%, ${accentColor}15 100%)` }} />
+            <img src={defaultBg} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.35, filter: "grayscale(100%)" }} />
+            <div className="absolute inset-0" style={{ background: `${accentColor}55`, mixBlendMode: "multiply" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
+          </>
         )}
-        {/* Bottom gradient */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
         {/* Badge */}
         <div className="absolute top-3 right-3">
           <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
