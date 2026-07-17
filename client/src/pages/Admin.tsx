@@ -10158,24 +10158,29 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
 
 function AccContentRow({ item, onEdit, onDelete, sessionColor }: { item: any; onEdit: () => void; onDelete: () => void; sessionColor?: string }) {
   const DEFAULT_REC = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
-  const DEFAULT_TRAIN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
-  const thumb = item.thumbnailUrl || (item.contentType === "recording" ? DEFAULT_REC : DEFAULT_TRAIN);
   const isTraining = item.contentType === "product_training";
   const tintColor = isTraining && sessionColor ? sessionColor : null;
+  // For product_training: use neon glow thumbnail (dark bg + glowing play icon, no base image)
+  // For recordings: use the default recording thumbnail image
+  const thumb = item.thumbnailUrl || (!isTraining ? DEFAULT_REC : null);
   return (
     <div className="flex items-center justify-between py-2 px-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
       <div className="flex items-center gap-3">
-        <div className="relative rounded overflow-hidden flex-shrink-0" style={{ width: 64, height: 40, border: tintColor ? `2px solid ${tintColor}` : undefined }}>
-          {/* Tinted background for product_training — session color shows through the dark image */}
-          {tintColor && (
-            <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${tintColor}cc 0%, ${tintColor}66 100%)`, zIndex: 1 }} />
-          )}
-          <img src={thumb} alt="" className="w-full h-full object-cover" style={{ opacity: tintColor ? 0.35 : 1 }} />
-          {/* Play icon overlay */}
-          {tintColor && (
-            <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 2 }}>
-              <PlayCircle size={20} style={{ color: "#fff", opacity: 0.9 }} />
+        <div className="relative rounded overflow-hidden flex-shrink-0" style={{ width: 64, height: 40, border: tintColor ? `1px solid ${tintColor}40` : undefined }}>
+          {isTraining && !item.thumbnailUrl ? (
+            /* Neon glow thumbnail for product_training — dark bg with glowing play icon */
+            <div className="w-full h-full flex items-center justify-center" style={{
+              background: `radial-gradient(ellipse at center, ${tintColor || "#0074F4"}22 0%, #0a0e1a 70%)`,
+            }}>
+              {/* Neon play triangle */}
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg"
+                style={{ filter: `drop-shadow(0 0 6px ${tintColor || "#0074F4"}) drop-shadow(0 0 12px ${tintColor || "#0074F4"}88)` }}>
+                <circle cx="12" cy="12" r="10" stroke={tintColor || "#0074F4"} strokeWidth="1.5" strokeOpacity="0.6" />
+                <path d="M10 8.5l6 3.5-6 3.5V8.5z" fill={tintColor || "#0074F4"} fillOpacity="0.9" />
+              </svg>
             </div>
+          ) : (
+            <img src={thumb!} alt="" className="w-full h-full object-cover" />
           )}
         </div>
         <div>
