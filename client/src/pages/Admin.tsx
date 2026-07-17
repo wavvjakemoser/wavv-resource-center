@@ -9442,7 +9442,7 @@ function AcceleratorTab() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
                     style={{ background: `${session.color}18`, color: session.color }}>
-                    Week {session.week}
+                    Session {session.week}
                   </span>
                   <div className="flex items-center gap-2">
                     <button
@@ -9529,8 +9529,14 @@ function AcceleratorTab() {
                   />
                 </div>
 
-                {/* ── Slack Community Section ── */}
-                <div className="rounded-lg p-3 space-y-2" style={{ background: "rgba(74,21,75,0.12)", border: "1px solid rgba(74,21,75,0.3)" }}>
+                {/* ── Inline Live Calls for this session ── */}
+                <SessionLiveCallsInline sessionNumber={session.week} sessionColor={session.color} />
+
+                {/* ── Inline Content (Recordings + Product Training) for this session ── */}
+                <SessionContentInline sessionNumber={session.week} sessionColor={session.color} />
+
+                {/* ── Slack Community Section (below all session content) ── */}
+                <div className="rounded-lg p-3 space-y-2 mt-2" style={{ background: "rgba(74,21,75,0.12)", border: "1px solid rgba(74,21,75,0.3)" }}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -9560,20 +9566,16 @@ function AcceleratorTab() {
                     />
                   </div>
                 </div>
-
-                {/* ── Inline Live Calls for this session ── */}
-                <SessionLiveCallsInline sessionNumber={session.week} sessionColor={session.color} />
-
-                {/* ── Inline Content (Recordings + Product Training) for this session ── */}
-                <SessionContentInline sessionNumber={session.week} sessionColor={session.color} />
               </div>
             ) : (
               /* ── View mode ── */
-              <div className="flex items-center justify-between gap-4">
+              <div
+                className="flex items-center justify-between gap-4 cursor-pointer group"
+                onClick={() => startEdit(session)}
+                title="Click anywhere to edit session"
+              >
                 <div
-                  className="flex items-center gap-3 min-w-0 cursor-pointer group"
-                  onClick={() => startEdit(session)}
-                  title="Click to edit session"
+                  className="flex items-center gap-3 min-w-0"
                 >
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0"
                     style={{ background: `${session.color}18`, color: session.color }}>
@@ -9582,7 +9584,7 @@ function AcceleratorTab() {
                   <h3 className="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">{session.title}</h3>
                   <Pencil size={11} className="text-gray-600 group-hover:text-blue-400 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100" />
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                   {/* Visibility toggles */}
                   <button
                     onClick={() => updateMutation.mutate({ id: session.id, isPublished: true, comingSoon: false })}
@@ -9617,17 +9619,7 @@ function AcceleratorTab() {
                   >
                     Coming Soon
                   </button>
-                  {/* Edit button */}
-                  <button
-                    onClick={() => startEdit(session)}
-                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all ml-1"
-                    style={{ color: "#9ca3af" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#fff"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9ca3af"; }}
-                  >
-                    <Pencil size={12} />
-                    Edit
-                  </button>
+
                 </div>
               </div>
             )}

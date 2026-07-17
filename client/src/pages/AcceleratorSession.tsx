@@ -158,9 +158,9 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLive ? "rgba(16,185,129,0.4)" : isPast ? "#252d3d" : `${color}30`; e.currentTarget.style.boxShadow = "none"; }}
     >
       {/* Thumbnail header */}
-      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "200px" }}>
+      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "220px" }}>
         <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${glowColor}40 0%, ${glowColor}15 100%)` }} />
-        <img src={DEFAULT_LIVE_CALL_BG} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.3, filter: "grayscale(100%)" }} />
+        <img src={DEFAULT_LIVE_CALL_BG} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.3, filter: "grayscale(100%)", objectPosition: "center 30%" }} />
         <div className="absolute inset-0" style={{ background: `${glowColor}55`, mixBlendMode: "multiply" }} />
         {call.thumbnailUrl && (
           <img src={call.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.92 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
@@ -182,7 +182,7 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
       </div>
 
       {/* Body */}
-      <div className="p-4 flex flex-col gap-2">
+      <div className="p-4 flex flex-col gap-2 flex-1">
         <h3 className="text-white font-bold text-sm leading-snug">{call.title}</h3>
         {call.description && <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{call.description}</p>}
         <p className="text-gray-500 text-xs flex items-center gap-1.5">
@@ -838,21 +838,6 @@ function ContentCard({
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
             />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
-          </>
-        ) : item.contentType === "product_training" ? (
-          /* Neon glow default for product training */
-          <>
-            <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 50% 40%, ${accentColor}28 0%, #0d1117 70%)` }} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center"
-                style={{ background: `${accentColor}18`, border: `1.5px solid ${accentColor}40`, boxShadow: `0 0 24px ${accentColor}55, 0 0 48px ${accentColor}22` }}
-              >
-                <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
-                  <polygon points="8,5 19,12 8,19" fill={accentColor} style={{ filter: `drop-shadow(0 0 8px ${accentColor}) drop-shadow(0 0 16px ${accentColor}88)` }} />
-                </svg>
-              </div>
-            </div>
           </>
         ) : (
           /* Default tinted bg for recordings */

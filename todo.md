@@ -1989,3 +1989,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Default thumbnails: fix accelerator session default thumbnails (neon glow style for product_training, tinted bg for recordings)
 - [x] Session page: add more visual spacing/separation between sections (space-y-14)
 - [x] Live call countdown tiles: reduce dead space around countdown timer (py-1, gap-1.5, smaller digit boxes)
+
+## Session 3 Fixes (Jul 17 2026)
+- [x] Revert product_training ContentCard thumbnail to match live call/recording neon style (tinted bg + image overlay, not the plain radial gradient)
+- [x] Live call tiles: increase thumbnail height so rocket image is not cut off; reduce dead space left/right of countdown timer
+- [x] Admin CMS session rows: remove standalone Edit button — entire row should be clickable to open edit panel
+- [x] Admin CMS edit panel: fix "Week 1" label to say "Session 1" (matches collapsed row label)
+- [x] Admin CMS edit panel: move Slack Community section below Session Content (Live Calls + Recordings + Product Training); make all sections visually consistent
