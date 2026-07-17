@@ -1904,3 +1904,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Replace mini countdown on Session Access Join button with static disabled Join + asterisk note
 - [x] Remove per-row countdowns from Full Program Schedule table on session detail pages
 - [x] Add italicized asterisk note below Register/Join buttons: "* Join button opens 15 minutes before session"
+- [x] Remove "Session Access" section from session detail page entirely
+- [x] Add countdown timer to each Upcoming Live Calls card (time until that session starts)

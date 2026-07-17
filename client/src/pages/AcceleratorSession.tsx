@@ -132,8 +132,8 @@ function useNow() {
   return now;
 }
 
-// ─── Per-session call card (simplified — no countdown) ─────────────────────
-function SessionCallCard({ session: s, now, color }: { session: typeof SCHEDULE[0]; now: number; color: string }) {
+// ─── Per-session call card ───────────────────────────────────────────────────────────────
+function SessionCallCard({ session: s, now, color, isCurrentWeek }: { session: typeof SCHEDULE[0]; now: number; color: string; isCurrentWeek: boolean }) {
   const isLive     = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
   const isPast     = now >= s.utcMs + CALL_DURATION_MS;
   const isJoinable = now >= s.utcMs - JOIN_WINDOW_MS && now < s.utcMs + CALL_DURATION_MS;
@@ -190,6 +190,24 @@ function SessionCallCard({ session: s, now, color }: { session: typeof SCHEDULE[
       {/* Card body */}
       <div className="px-5 py-5 space-y-3">
         <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</p>
+
+        {/* Countdown for upcoming sessions — only shown for current week */}
+        {isCurrentWeek && !isPast && !isLive && (() => {
+          const secsLeft = Math.max(0, Math.floor((s.utcMs - now) / 1000));
+          const d = Math.floor(secsLeft / 86400);
+          const h = Math.floor((secsLeft % 86400) / 3600);
+          const m = Math.floor((secsLeft % 3600) / 60);
+          const s2 = secsLeft % 60;
+          const pad = (n: number) => String(n).padStart(2, "0");
+          return (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Starts in</span>
+              <span className="text-sm font-bold tabular-nums" style={{ color: glowColor }}>
+                {d > 0 ? `${d}d ${pad(h)}h ${pad(m)}m` : `${pad(h)}h ${pad(m)}m ${pad(s2)}s`}
+              </span>
+            </div>
+          );
+        })()}
 
         {/* Join button — active only within 15 min window */}
         {isJoinable ? (
@@ -441,6 +459,11 @@ export default function AcceleratorSession() {
 
   const weekSessions = SCHEDULE.filter(s => s.week === weekId);
 
+  // Determine if this page's week is the "current" active week
+  // Current week = the week containing the next upcoming session (or live session)
+  const nextSession = SCHEDULE.find(s => s.utcMs + CALL_DURATION_MS > now);
+  const isCurrentWeek = nextSession ? nextSession.week === weekId : false;
+
   const cmsRecordings = sessionContent.filter((c: any) => c.contentType === "recording" && c.isVisible);
   const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
 
@@ -533,74 +556,6 @@ export default function AcceleratorSession() {
           </div>
         </div>
 
-        {/* ── Registration + Join buttons (DB-driven) ── */}
-        <section
-          className="rounded-2xl p-5 space-y-3"
-          style={{ background: `${color}08`, border: `1px solid ${color}18` }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar size={15} style={{ color }} />
-            <h3 className="text-sm font-semibold text-white">Session Access</h3>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Register button — always visible, greyed when no URL */}
-            {session.registrationUrl ? (
-              <a
-                href={session.registrationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
-                style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
-              >
-                <FileText size={14} />
-                Register
-              </a>
-            ) : (
-              <span
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
-                style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
-              >
-                <FileText size={14} />
-                Register
-              </span>
-            )}
-
-            {/* Join button — always visible, active only within 15 min window */}
-            {(() => {
-              const sessionTime = session.sessionDateTime ? new Date(session.sessionDateTime).getTime() : null;
-              const isJoinable = sessionTime && now >= sessionTime - JOIN_WINDOW_MS && now < sessionTime + CALL_DURATION_MS;
-              const isLive = sessionTime && now >= sessionTime && now < sessionTime + CALL_DURATION_MS;
-              if (isJoinable && session.joinUrl) {
-                return (
-                  <a
-                    href={session.joinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
-                    style={{ background: isLive ? "#10b981" : `linear-gradient(135deg, ${color}, ${color}cc)` }}
-                  >
-                    <Play size={14} />
-                    Join
-                  </a>
-                );
-              }
-              return (
-                <span
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
-                  style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
-                >
-                  <Play size={14} />
-                  Join
-                </span>
-              );
-            })()}
-            </div>
-
-            {/* Asterisk note */}
-            <p className="text-[11px] italic mt-2" style={{ color: "rgba(255,255,255,0.35)" }}>
-              * Join button opens 15 minutes before session
-            </p>
-          </section>
 
         {/* ── Cheat Sheet callout (pinned resource card) ── */}
         {session.cheatSheetUrl && (
@@ -643,7 +598,7 @@ export default function AcceleratorSession() {
           <SectionHeader icon={Clock} label={`Upcoming Live Calls — Session ${weekId}`} color={color} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {weekSessions.map(s => (
-              <SessionCallCard key={s.id} session={s} now={now} color={color} />
+              <SessionCallCard key={s.id} session={s} now={now} color={color} isCurrentWeek={isCurrentWeek} />
             ))}
           </div>
         </section>
