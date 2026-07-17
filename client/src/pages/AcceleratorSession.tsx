@@ -745,21 +745,22 @@ function ContentCard({
     >
       {/* Thumbnail */}
       <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "140px" }}>
-        {/* Color-coded gradient fallback using session accent color */}
+        {/* Solid session-color background as base */}
         <div
           className="absolute inset-0"
-          style={{ background: `linear-gradient(135deg, ${accentColor}30 0%, ${accentColor}08 100%)` }}
+          style={{ background: `linear-gradient(135deg, ${accentColor}40 0%, ${accentColor}15 100%)` }}
         />
+        {/* Default thumbnail rendered in grayscale so session color dominates */}
         <img
           src={defaultBg}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.7, mixBlendMode: "luminosity" }}
+          style={{ opacity: 0.35, filter: "grayscale(100%)" }}
         />
-        {/* Session color overlay on default thumbnail */}
+        {/* Strong session color overlay */}
         <div
           className="absolute inset-0"
-          style={{ background: `${accentColor}20`, mixBlendMode: "color" }}
+          style={{ background: `${accentColor}55`, mixBlendMode: "multiply" }}
         />
         {item.thumbnailUrl && (
           <img
