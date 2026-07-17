@@ -2350,6 +2350,16 @@ export const appRouter = router({
         return { url };
       }),
 
+    uploadCheatSheet: publisherProcedure
+      .input(z.object({ base64: z.string(), fileName: z.string() }))
+      .mutation(async ({ input }) => {
+        const { storagePut } = await import("./storage");
+        const buffer = Buffer.from(input.base64, "base64");
+        const key = `accelerator/cheatsheets/${Date.now()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+        const { url } = await storagePut(key, buffer, "application/pdf");
+        return { url, fileName: input.fileName };
+      }),
+
     /**
      * Live entitlement check — calls WAVV admin API server-side.
      * Returns whether the current user is entitled to Accelerator content,

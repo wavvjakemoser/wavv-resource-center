@@ -1925,3 +1925,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] CMS-managed live call events: remove hardcoded SCHEDULE array from AcceleratorSession.tsx and Accelerator.tsx
 - [x] Fix: Error when clicking into a Session detail page (React hooks ordering violation — moved listLiveCalls queries above conditional returns)
 - [x] Fix: Countdown clock missing on Accelerator landing page (added dbSessions fallback when no CMS live call events exist)
+- [x] Simplify session editor: remove Video URL, Registration URL, Join URL, Session Date/Time, Color picker fields
+- [x] Add timezone selector to Live Call Events form (Eastern, Central, Mountain, Pacific — default Mountain)
+- [x] Replace Cheat Sheet URL input with PDF file upload

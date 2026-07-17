@@ -9288,16 +9288,10 @@ function AcceleratorTab() {
     title: "",
     wavvFocus: "",
     outcome: "",
-    color: "#0074F4",
     heroHeadline: "",
     heroSubline: "",
     bodyContent: "",
-    videoUrl: "",
     resourceLinks: "",
-    joinUrl: "",
-    registrationUrl: "",
-    sessionDateTime: "",
-    cheatSheetUrl: "",
     comingSoon: false,
     isPublished: false,
   });
@@ -9317,16 +9311,10 @@ function AcceleratorTab() {
       title: session.title ?? "",
       wavvFocus: session.wavvFocus ?? "",
       outcome: session.outcome ?? "",
-      color: session.color ?? "#0074F4",
       heroHeadline: session.heroHeadline ?? "",
       heroSubline: session.heroSubline ?? "",
       bodyContent: session.bodyContent ?? "",
-      videoUrl: session.videoUrl ?? "",
       resourceLinks: session.resourceLinks ?? "",
-      joinUrl: session.joinUrl ?? "",
-      registrationUrl: session.registrationUrl ?? "",
-      sessionDateTime: session.sessionDateTime ? new Date(session.sessionDateTime).toISOString().slice(0, 16) : "",
-      cheatSheetUrl: session.cheatSheetUrl ?? "",
       comingSoon: session.comingSoon ?? false,
       isPublished: session.isPublished ?? false,
     });
@@ -9339,16 +9327,10 @@ function AcceleratorTab() {
       title: form.title,
       wavvFocus: form.wavvFocus || null,
       outcome: form.outcome || null,
-      color: form.color,
       heroHeadline: form.heroHeadline || null,
       heroSubline: form.heroSubline || null,
       bodyContent: form.bodyContent || null,
-      videoUrl: form.videoUrl || null,
       resourceLinks: form.resourceLinks || null,
-      joinUrl: form.joinUrl || null,
-      registrationUrl: form.registrationUrl || null,
-      sessionDateTime: form.sessionDateTime ? new Date(form.sessionDateTime).toISOString() : null,
-      cheatSheetUrl: form.cheatSheetUrl || null,
       comingSoon: form.comingSoon,
       isPublished: form.isPublished,
     });
@@ -9386,7 +9368,7 @@ function AcceleratorTab() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                    style={{ background: `${form.color}18`, color: form.color }}>
+                    style={{ background: `${session.color}18`, color: session.color }}>
                     Week {session.week}
                   </span>
                   <div className="flex items-center gap-2">
@@ -9474,62 +9456,8 @@ function AcceleratorTab() {
                   />
                 </div>
 
-                {/* Video URL */}
-                <div>
-                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Video URL (optional)</label>
-                  <Input
-                    value={form.videoUrl}
-                    onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
-                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                    placeholder="https://www.loom.com/share/..."
-                  />
-                </div>
-
-                {/* Live Session Links */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Registration URL</label>
-                    <Input
-                      value={form.registrationUrl}
-                      onChange={(e) => setForm({ ...form, registrationUrl: e.target.value })}
-                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                      placeholder="https://us06web.zoom.us/webinar/register/..."
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Zoom Join URL (appears 15 min before session)</label>
-                    <Input
-                      value={form.joinUrl}
-                      onChange={(e) => setForm({ ...form, joinUrl: e.target.value })}
-                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                      placeholder="https://us06web.zoom.us/w/..."
-                    />
-                  </div>
-                </div>
-
-                {/* Session Date/Time */}
-                <div>
-                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Session Date & Time (used for countdown + Join button timing)</label>
-                  <input
-                    type="datetime-local"
-                    value={form.sessionDateTime}
-                    onChange={(e) => setForm({ ...form, sessionDateTime: e.target.value })}
-                    className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2"
-                  />
-                </div>
-
-
-                {/* Color + Published toggle */}
+                {/* Published toggle */}
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <label className="text-[11px] font-medium text-gray-400">Color</label>
-                    <input
-                      type="color"
-                      value={form.color}
-                      onChange={(e) => setForm({ ...form, color: e.target.value })}
-                      className="w-7 h-7 rounded border-0 cursor-pointer"
-                    />
-                  </div>
                   <div className="flex items-center gap-2">
                     <label className="text-[11px] font-medium text-gray-400">Published</label>
                     <button
@@ -9621,6 +9549,7 @@ function AcceleratorLiveCallManager() {
     title: "",
     description: "",
     scheduledAt: "",
+    timezone: "America/Denver" as string,
     durationMinutes: 90,
     registrationUrl: "",
     joinUrl: "",
@@ -9645,17 +9574,40 @@ function AcceleratorLiveCallManager() {
   function resetForm() {
     setShowAddForm(false);
     setEditingId(null);
-    setForm({ callNumber: 1, title: "", description: "", scheduledAt: "", durationMinutes: 90, registrationUrl: "", joinUrl: "", thumbnailUrl: "" });
+    setForm({ callNumber: 1, title: "", description: "", scheduledAt: "", timezone: "America/Denver", durationMinutes: 90, registrationUrl: "", joinUrl: "", thumbnailUrl: "" });
+  }
+
+  // Convert a UTC ISO string to a local datetime-local value in the given timezone
+  function utcToTzLocal(utcIso: string, tz: string): string {
+    const d = new Date(utcIso);
+    const parts = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(d);
+    const get = (t: string) => parts.find(p => p.type === t)?.value ?? "";
+    return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+  }
+
+  // Convert a datetime-local value in the given timezone to a UTC ISO string
+  function tzLocalToUtc(localStr: string, tz: string): string {
+    // Create a date string that we can parse in the target timezone
+    const [datePart, timePart] = localStr.split("T");
+    if (!datePart || !timePart) return new Date(localStr).toISOString();
+    // Use a trick: format as if it's in the target TZ by computing offset
+    const fakeUtc = new Date(`${datePart}T${timePart}:00.000Z`);
+    const utcStr = fakeUtc.toLocaleString("en-US", { timeZone: tz });
+    const inTz = new Date(utcStr);
+    const offset = fakeUtc.getTime() - inTz.getTime();
+    return new Date(fakeUtc.getTime() + offset).toISOString();
   }
 
   function startEdit(call: any) {
     setEditingId(call.id);
     setShowAddForm(true);
+    const tz = call.timezone || "America/Denver";
     setForm({
       callNumber: call.callNumber ?? 1,
       title: call.title ?? "",
       description: call.description ?? "",
-      scheduledAt: call.scheduledAt ? new Date(call.scheduledAt).toISOString().slice(0, 16) : "",
+      scheduledAt: call.scheduledAt ? utcToTzLocal(call.scheduledAt, tz) : "",
+      timezone: tz,
       durationMinutes: call.durationMinutes ?? 90,
       registrationUrl: call.registrationUrl ?? "",
       joinUrl: call.joinUrl ?? "",
@@ -9665,13 +9617,14 @@ function AcceleratorLiveCallManager() {
 
   function handleSave() {
     if (!form.title || !form.scheduledAt) { toast.error("Title and date/time are required"); return; }
+    const utcScheduledAt = tzLocalToUtc(form.scheduledAt, form.timezone);
     if (editingId) {
       updateMut.mutate({
         id: editingId,
         callNumber: form.callNumber,
         title: form.title,
         description: form.description || null,
-        scheduledAt: new Date(form.scheduledAt).toISOString(),
+        scheduledAt: utcScheduledAt,
         durationMinutes: form.durationMinutes,
         registrationUrl: form.registrationUrl || null,
         joinUrl: form.joinUrl || null,
@@ -9683,7 +9636,7 @@ function AcceleratorLiveCallManager() {
         callNumber: form.callNumber,
         title: form.title,
         description: form.description || null,
-        scheduledAt: new Date(form.scheduledAt).toISOString(),
+        scheduledAt: utcScheduledAt,
         durationMinutes: form.durationMinutes,
         registrationUrl: form.registrationUrl || null,
         joinUrl: form.joinUrl || null,
@@ -9763,9 +9716,18 @@ function AcceleratorLiveCallManager() {
               <label className="text-[11px] text-gray-400 mb-1 block">Duration (minutes)</label>
               <input type="number" style={inputStyle} value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} />
             </div>
-            <div className="col-span-2">
-              <label className="text-[11px] text-gray-400 mb-1 block">Date & Time (MT) *</label>
+            <div>
+              <label className="text-[11px] text-gray-400 mb-1 block">Date & Time *</label>
               <input type="datetime-local" style={inputStyle} value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-400 mb-1 block">Timezone</label>
+              <select style={inputStyle} value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })}>
+                <option value="America/New_York">Eastern Time (ET)</option>
+                <option value="America/Chicago">Central Time (CT)</option>
+                <option value="America/Denver">Mountain Time (MT)</option>
+                <option value="America/Los_Angeles">Pacific Time (PT)</option>
+              </select>
             </div>
             <div>
               <label className="text-[11px] text-gray-400 mb-1 block">Registration URL</label>
@@ -9851,6 +9813,7 @@ function AcceleratorContentManager() {
   const [editingContentId, setEditingContentId] = useState<number | null>(null);
 
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingCheatSheet, setUploadingCheatSheet] = useState(false);
   const [contentForm, setContentForm] = useState({
     title: "",
     loomUrl: "",
@@ -9871,6 +9834,10 @@ function AcceleratorContentManager() {
   // Thumbnail upload removed — stock thumbnails used automatically
   const uploadVideoMutation = trpc.accelerator.uploadVideo.useMutation({
     onError: (e: any) => toast.error("Video upload failed: " + e.message),
+  });
+
+  const uploadCheatSheetMut = trpc.accelerator.uploadCheatSheet.useMutation({
+    onError: (e: any) => toast.error("Cheat sheet upload failed: " + e.message),
   });
 
   const createMutation = trpc.accelerator.createContent.useMutation({
@@ -10156,11 +10123,50 @@ function AcceleratorContentManager() {
             </label>
           </div>
 
-          {/* Cheat Sheet URL (product training only) */}
+          {/* Cheat Sheet PDF Upload (product training only) */}
           {addType === "product_training" && (
             <div>
-              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Cheat Sheet PDF URL (optional)</label>
-              <input style={inputStyle} value={contentForm.cheatSheetUrl} onChange={e => setContentForm(f => ({ ...f, cheatSheetUrl: e.target.value }))} placeholder="https://... or /manus-storage/..." />
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Cheat Sheet PDF (optional)</label>
+              <div className="flex items-center gap-2">
+                <label
+                  className="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{ background: "rgba(0,116,244,0.12)", color: "#4a9eff", border: "1px solid rgba(0,116,244,0.25)" }}
+                >
+                  {uploadingCheatSheet ? "Uploading..." : (contentForm.cheatSheetUrl ? "Replace PDF" : "Upload PDF")}
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    className="hidden"
+                    disabled={uploadingCheatSheet}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 16 * 1024 * 1024) { toast.error("PDF must be under 16MB"); return; }
+                      setUploadingCheatSheet(true);
+                      try {
+                        const reader = new FileReader();
+                        reader.onload = async () => {
+                          const base64 = (reader.result as string).split(",")[1];
+                          const result = await uploadCheatSheetMut.mutateAsync({ base64, fileName: file.name });
+                          setContentForm(f => ({ ...f, cheatSheetUrl: result.url }));
+                          setUploadingCheatSheet(false);
+                          toast.success("PDF uploaded");
+                        };
+                        reader.readAsDataURL(file);
+                      } catch {
+                        setUploadingCheatSheet(false);
+                        toast.error("Upload failed");
+                      }
+                    }}
+                  />
+                </label>
+                {contentForm.cheatSheetUrl && (
+                  <span className="text-[11px] text-green-400 flex items-center gap-1">
+                    ✓ PDF attached
+                    <button onClick={() => setContentForm(f => ({ ...f, cheatSheetUrl: "" }))} className="text-red-400 hover:text-red-300 ml-1" title="Remove">✕</button>
+                  </span>
+                )}
+              </div>
               <p className="text-[10px] text-gray-500 mt-1">PDF opens in side panel for users viewing this training video</p>
             </div>
           )}
