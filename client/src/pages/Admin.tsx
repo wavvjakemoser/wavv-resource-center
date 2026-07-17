@@ -4951,7 +4951,7 @@ function WebinarsTab() {
     onSuccess: () => { utils.webinars.adminList.invalidate(); setShowForm(false); setEditId(null); resetForm(); toast.success("Webinar updated"); },
     onError: (e) => toast.error(e.message),
   });
-  const uploadWebinarThumbnail = trpc.webinars.uploadThumbnail.useMutation();
+  // Thumbnail upload removed — stock thumbnails used automatically
   const deleteMutation = trpc.webinars.adminDelete.useMutation({
     onSuccess: () => { utils.webinars.adminList.invalidate(); toast.success("Webinar deleted"); },
     onError: (e) => toast.error(e.message),
@@ -4960,27 +4960,7 @@ function WebinarsTab() {
     onError: (e) => toast.error("Video upload failed: " + e.message),
   });
   const [uploadingVideo, setUploadingVideo] = useState(false);
-  const [uploadingThumb, setUploadingThumb] = useState(false);
 
-  async function handleThumbUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const maxMb = 10;
-    if (file.size > maxMb * 1024 * 1024) { toast.error(`Image too large — max ${maxMb} MB`); return; }
-    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
-    setUploadingThumb(true);
-    try {
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const result = await uploadWebinarThumbnail.mutateAsync({ base64, mimeType: file.type });
-      setForm(f => ({ ...f, thumbnailUrl: result.url }));
-      toast.success("Thumbnail uploaded");
-    } catch { toast.error("Thumbnail upload failed"); } finally { setUploadingThumb(false); }
-  }
 
   async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -9795,10 +9775,7 @@ function AcceleratorLiveCallManager() {
               <label className="text-[11px] text-gray-400 mb-1 block">Join URL</label>
               <input style={inputStyle} value={form.joinUrl} onChange={(e) => setForm({ ...form, joinUrl: e.target.value })} placeholder="https://zoom.us/j/..." />
             </div>
-            <div className="col-span-2">
-              <label className="text-[11px] text-gray-400 mb-1 block">Thumbnail URL (optional)</label>
-              <input style={inputStyle} value={form.thumbnailUrl} onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })} placeholder="Custom thumbnail URL (leave blank for default)" />
-            </div>
+            {/* Thumbnail: stock color-coded thumbnails used automatically — no custom upload needed */}
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={resetForm} className="text-xs px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all">Cancel</button>
@@ -9872,7 +9849,7 @@ function AcceleratorContentManager() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [addType, setAddType] = useState<"recording" | "product_training">("recording");
   const [editingContentId, setEditingContentId] = useState<number | null>(null);
-  const [uploadingThumb, setUploadingThumb] = useState(false);
+
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [contentForm, setContentForm] = useState({
     title: "",
@@ -9891,7 +9868,7 @@ function AcceleratorContentManager() {
   const DEFAULT_TRAINING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
 
 
-  const uploadThumbMutation = trpc.accelerator.uploadThumbnail.useMutation();
+  // Thumbnail upload removed — stock thumbnails used automatically
   const uploadVideoMutation = trpc.accelerator.uploadVideo.useMutation({
     onError: (e: any) => toast.error("Video upload failed: " + e.message),
   });
@@ -9945,24 +9922,7 @@ function AcceleratorContentManager() {
     });
   }
 
-  async function handleThumbUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("Image too large — max 10 MB"); return; }
-    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
-    setUploadingThumb(true);
-    try {
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const result = await uploadThumbMutation.mutateAsync({ base64, mimeType: file.type });
-      setContentForm(f => ({ ...f, thumbnailUrl: result.url }));
-      toast.success("Thumbnail uploaded");
-    } catch { toast.error("Thumbnail upload failed"); } finally { setUploadingThumb(false); }
-  }
+  // handleThumbUpload removed — stock thumbnails used automatically
 
   async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

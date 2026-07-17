@@ -669,6 +669,7 @@ export default function AcceleratorSession() {
                   accentColor={color}
                   badgeLabel="Training"
                   onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                  onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} — Cheat Sheet`, url })}
                 />
               ))}
             </div>
@@ -695,6 +696,7 @@ export default function AcceleratorSession() {
                   accentColor={color}
                   badgeLabel="Recording"
                   onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                  onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} — Cheat Sheet`, url })}
                 />
               ))}
             </div>
@@ -769,11 +771,13 @@ function ContentCard({
   accentColor,
   badgeLabel,
   onPlay,
+  onCheatSheet,
 }: {
-  item: { id: number; title: string; loomUrl?: string | null; thumbnailUrl?: string | null; hostName?: string | null; duration?: string | null; description?: string | null; contentType: string; comingSoon?: boolean };
+  item: { id: number; title: string; loomUrl?: string | null; thumbnailUrl?: string | null; hostName?: string | null; duration?: string | null; description?: string | null; contentType: string; comingSoon?: boolean; cheatSheetUrl?: string | null };
   accentColor: string;
   badgeLabel: string;
   onPlay: (url: string, title: string) => void;
+  onCheatSheet?: (url: string, title: string) => void;
 }) {
   const embedUrl = item.loomUrl ? getEmbedUrl(item.loomUrl) : null;
   const isHostedVideo = item.loomUrl?.startsWith("/manus-storage");
@@ -876,7 +880,7 @@ function ContentCard({
           </p>
         )}
 
-        <div className="mt-auto">
+        <div className="mt-auto flex items-center gap-2 flex-wrap">
           {isComingSoon ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "#FF990015", color: "#FF9900", border: "1px solid #FF990030" }}>
               <Timer size={12} /> Coming Soon
@@ -891,6 +895,16 @@ function ContentCard({
               <PlayCircle size={12} /> Watch Now
             </button>
           ) : null}
+          {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
+            <button
+              type="button"
+              onClick={() => onCheatSheet(item.cheatSheetUrl!, item.title)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
+            >
+              <FileText size={12} /> Cheat Sheet
+            </button>
+          )}
         </div>
       </div>
     </div>
