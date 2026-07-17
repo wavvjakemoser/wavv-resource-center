@@ -1913,3 +1913,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Update CMS admin session content page to use session-colored accents (matching member-facing side)
 - [x] Fix: Page refresh forces re-sign-in (session/cookie not persisting across reloads)
 - [x] Remove Cheat Sheet URL field from session-level CMS (per-week settings) and tie it to the Product Training section instead
+- [ ] Remove custom thumbnail upload fields from CMS forms (Resource Hub + Accelerator) — use stock color-coded thumbnails only
+- [ ] Add cheatSheetUrl field to individual training videos (schema + CMS form) — tie cheat sheet to specific video, not session
+- [x] Redesign Live Call countdown on session detail to use digit boxes (DAYS/HRS/MIN/SEC) matching the hero countdown style
+- [x] Redesign Live Call cards to match Exclusive Live Webinar style — CMS-managed events with custom thumbnails, descriptions, registration buttons
+- [x] CMS-managed live call events: new accelerator_live_calls DB table (per-call records with session, call number, title, description, date/time, registration URL, join URL, thumbnail)
+- [x] CMS-managed live call events: tRPC CRUD procedures (create, update, delete, list by session)
+- [x] CMS-managed live call events: admin CMS form to manage per-session live calls
+- [x] CMS-managed live call events: rewrite SessionCallCard to render from DB (webinar-style cards with thumbnail, description, Register + Join buttons)
+- [x] CMS-managed live call events: update hero countdown to use DB events instead of hardcoded SCHEDULE
+- [x] CMS-managed live call events: remove hardcoded SCHEDULE array from AcceleratorSession.tsx and Accelerator.tsx

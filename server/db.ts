@@ -28,6 +28,7 @@ import {
   faqEntries,
   acceleratorSessions,
   acceleratorContent,
+  acceleratorLiveCalls,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3193,5 +3194,83 @@ export async function reorderAcceleratorContent(items: { id: number; sortOrder: 
   if (!db) return;
   for (const item of items) {
     await db.update(acceleratorContent).set({ sortOrder: item.sortOrder }).where(eq(acceleratorContent.id, item.id));
+  }
+}
+
+// ─── Accelerator Live Calls ─────────────────────────────────────────────────
+
+export async function listAcceleratorLiveCalls(sessionNumber?: number) {
+  const db = await getDb();
+  if (!db) return [];
+  if (sessionNumber) {
+    return db.select().from(acceleratorLiveCalls)
+      .where(eq(acceleratorLiveCalls.sessionNumber, sessionNumber))
+      .orderBy(asc(acceleratorLiveCalls.sortOrder), asc(acceleratorLiveCalls.scheduledAt));
+  }
+  return db.select().from(acceleratorLiveCalls)
+    .orderBy(asc(acceleratorLiveCalls.sessionNumber), asc(acceleratorLiveCalls.sortOrder), asc(acceleratorLiveCalls.scheduledAt));
+}
+
+export async function createAcceleratorLiveCall(data: {
+  sessionNumber: number;
+  callNumber: number;
+  title: string;
+  description?: string | null;
+  scheduledAt: string; // ISO string
+  durationMinutes?: number;
+  registrationUrl?: string | null;
+  joinUrl?: string | null;
+  thumbnailUrl?: string | null;
+  isVisible?: boolean;
+  sortOrder?: number;
+}) {
+  const db = await getDb();
+  if (!db) return null;
+  const { scheduledAt, ...rest } = data;
+  const result = await db.insert(acceleratorLiveCalls).values({
+    ...rest,
+    scheduledAt: new Date(scheduledAt),
+  });
+  const id = result[0].insertId;
+  const rows = await db.select().from(acceleratorLiveCalls).where(eq(acceleratorLiveCalls.id, id));
+  return rows[0] ?? null;
+}
+
+export async function updateAcceleratorLiveCall(id: number, data: Partial<{
+  sessionNumber: number;
+  callNumber: number;
+  title: string;
+  description: string | null;
+  scheduledAt: string | null;
+  durationMinutes: number;
+  registrationUrl: string | null;
+  joinUrl: string | null;
+  thumbnailUrl: string | null;
+  isVisible: boolean;
+  sortOrder: number;
+}>) {
+  const db = await getDb();
+  if (!db) return null;
+  const { scheduledAt, ...rest } = data;
+  const setData: Record<string, unknown> = { ...rest };
+  if (scheduledAt !== undefined) {
+    setData.scheduledAt = scheduledAt ? new Date(scheduledAt) : null;
+  }
+  await db.update(acceleratorLiveCalls).set(setData).where(eq(acceleratorLiveCalls.id, id));
+  const rows = await db.select().from(acceleratorLiveCalls).where(eq(acceleratorLiveCalls.id, id));
+  return rows[0] ?? null;
+}
+
+export async function deleteAcceleratorLiveCall(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(acceleratorLiveCalls).where(eq(acceleratorLiveCalls.id, id));
+}
+
+export async function reorderAcceleratorLiveCalls(items: { id: number; sortOrder: number }[]) {
+  const db = await getDb();
+  if (!db) return;
+  for (const item of items) {
+    await db.update(acceleratorLiveCalls).set({ sortOrder: item.sortOrder }).where(eq(acceleratorLiveCalls.id, item.id));
   }
 }

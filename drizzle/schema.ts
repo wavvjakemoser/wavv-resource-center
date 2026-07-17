@@ -546,9 +546,30 @@ export const acceleratorContent = mysqlTable("accelerator_content", {
   description: text("description"),
   isVisible: boolean("is_visible").default(true).notNull(),
   comingSoon: boolean("coming_soon").default(false).notNull(),
+  cheatSheetUrl: text("cheat_sheet_url"),
   sortOrder: int("sort_order").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type AcceleratorContent = typeof acceleratorContent.$inferSelect;
 export type InsertAcceleratorContent = typeof acceleratorContent.$inferInsert;
+
+// ─── Accelerator Live Calls (CMS-managed per-call events) ──────────────────────
+export const acceleratorLiveCalls = mysqlTable("accelerator_live_calls", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionNumber: int("session_number").notNull(), // 1-6 (maps to week)
+  callNumber: int("call_number").notNull().default(1), // 1 or 2 (which call in the week)
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  scheduledAt: timestamp("scheduled_at").notNull(), // UTC datetime of the call
+  durationMinutes: int("duration_minutes").notNull().default(90),
+  registrationUrl: text("registration_url"),
+  joinUrl: text("join_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  isVisible: boolean("is_visible").default(true).notNull(),
+  sortOrder: int("sort_order").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AcceleratorLiveCall = typeof acceleratorLiveCalls.$inferSelect;
+export type InsertAcceleratorLiveCall = typeof acceleratorLiveCalls.$inferInsert;

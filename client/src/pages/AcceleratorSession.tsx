@@ -52,21 +52,7 @@ function getEmbedUrl(url: string): string | null {
   return null;
 }
 
-// ─── Shared schedule (must stay in sync with Accelerator.tsx) ─────────────────
-const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string; utcMs: number; joinUrl?: string }[] = [
-  { id: 1,  week: 1, sessionInWeek: 1, label: "Tuesday, July 21st, 2026 · 12:00 PM MT / 2:00 PM ET",    utcMs: Date.UTC(2026, 6, 21, 18, 0, 0) },
-  { id: 2,  week: 1, sessionInWeek: 2, label: "Thursday, July 23rd, 2026 · 12:00 PM MT / 2:00 PM ET",   utcMs: Date.UTC(2026, 6, 23, 18, 0, 0) },
-  { id: 3,  week: 2, sessionInWeek: 1, label: "Tuesday, July 28th, 2026 · 12:00 PM MT / 2:00 PM ET",    utcMs: Date.UTC(2026, 6, 28, 18, 0, 0) },
-  { id: 4,  week: 2, sessionInWeek: 2, label: "Thursday, July 30th, 2026 · 12:00 PM MT / 2:00 PM ET",   utcMs: Date.UTC(2026, 6, 30, 18, 0, 0) },
-  { id: 5,  week: 3, sessionInWeek: 1, label: "Tuesday, August 4th, 2026 · 12:00 PM MT / 2:00 PM ET",   utcMs: Date.UTC(2026, 7, 4,  18, 0, 0) },
-  { id: 6,  week: 3, sessionInWeek: 2, label: "Thursday, August 6th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 6,  18, 0, 0) },
-  { id: 7,  week: 4, sessionInWeek: 1, label: "Tuesday, August 11th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 11, 18, 0, 0) },
-  { id: 8,  week: 4, sessionInWeek: 2, label: "Thursday, August 13th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 13, 18, 0, 0) },
-  { id: 9,  week: 5, sessionInWeek: 1, label: "Tuesday, August 18th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 18, 18, 0, 0) },
-  { id: 10, week: 5, sessionInWeek: 2, label: "Thursday, August 20th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 20, 18, 0, 0) },
-  { id: 11, week: 6, sessionInWeek: 1, label: "Tuesday, August 25th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 25, 18, 0, 0) },
-  { id: 12, week: 6, sessionInWeek: 2, label: "Thursday, August 27th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 27, 18, 0, 0) },
-];
+// ─── Live call schedule is now CMS-driven via accelerator_live_calls table ───
 
 const CALL_DURATION_MS = 90 * 60 * 1000;
 const JOIN_WINDOW_MS   = 15 * 60 * 1000;
@@ -132,114 +118,166 @@ function useNow() {
   return now;
 }
 
-// ─── Per-session call card ───────────────────────────────────────────────────────────────
-function SessionCallCard({ session: s, now, color, isCurrentWeek }: { session: typeof SCHEDULE[0]; now: number; color: string; isCurrentWeek: boolean }) {
-  const isLive     = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
-  const isPast     = now >= s.utcMs + CALL_DURATION_MS;
-  const isJoinable = now >= s.utcMs - JOIN_WINDOW_MS && now < s.utcMs + CALL_DURATION_MS;
+// ─── Per-session call card (DB-driven, webinar-style) ───────────────────────
+interface LiveCallRecord {
+  id: number;
+  sessionNumber: number;
+  callNumber: number;
+  title: string;
+  description?: string | null;
+  scheduledAt: string | Date;
+  durationMinutes: number;
+  registrationUrl?: string | null;
+  joinUrl?: string | null;
+  thumbnailUrl?: string | null;
+}
+
+const DEFAULT_LIVE_CALL_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
+
+function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRecord; now: number; color: string; isCurrentWeek: boolean }) {
+  const utcMs = new Date(call.scheduledAt).getTime();
+  const durationMs = (call.durationMinutes ?? 90) * 60 * 1000;
+  const isLive     = now >= utcMs && now < utcMs + durationMs;
+  const isPast     = now >= utcMs + durationMs;
+  const isJoinable = now >= utcMs - JOIN_WINDOW_MS && now < utcMs + durationMs;
   const glowColor  = isLive ? "#10b981" : color;
+
+  // Format date label from scheduledAt
+  const dateLabel = new Date(call.scheduledAt).toLocaleString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit", timeZoneName: "short",
+  });
 
   return (
     <div
-      className="rounded-2xl overflow-hidden"
-      style={{
-        background: isLive
-          ? "linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(16,185,129,0.04) 100%)"
-          : isPast
-          ? "rgba(255,255,255,0.02)"
-          : `linear-gradient(135deg, ${color}10 0%, ${color}04 100%)`,
-        border: isLive
-          ? "1px solid rgba(16,185,129,0.35)"
-          : isPast
-          ? "1px solid rgba(255,255,255,0.05)"
-          : `1px solid ${color}25`,
-      }}
+      className="flex flex-col rounded-xl overflow-hidden transition-all duration-200"
+      style={{ background: "#1d2230", border: isLive ? "1px solid rgba(16,185,129,0.4)" : isPast ? "1px solid #252d3d" : `1px solid ${color}30` }}
+      onMouseEnter={(e) => { if (!isPast) { e.currentTarget.style.borderColor = glowColor; e.currentTarget.style.boxShadow = `0 4px 20px ${glowColor}22`; } }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLive ? "rgba(16,185,129,0.4)" : isPast ? "#252d3d" : `${color}30`; e.currentTarget.style.boxShadow = "none"; }}
     >
-      {/* Card header bar */}
-      <div
-        className="px-5 py-3 flex items-center justify-between"
-        style={{
-          borderBottom: isPast
-            ? "1px solid rgba(255,255,255,0.04)"
-            : `1px solid ${glowColor}15`,
-          background: isLive
-            ? "rgba(16,185,129,0.06)"
-            : `${glowColor}06`,
-        }}
-      >
-        <div className="flex items-center gap-2.5">
-          {isLive && (
-            <span className="flex items-center gap-1.5 text-xs font-bold" style={{ color: "#10b981" }}>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+      {/* Thumbnail header */}
+      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "140px" }}>
+        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${glowColor}40 0%, ${glowColor}15 100%)` }} />
+        <img src={DEFAULT_LIVE_CALL_BG} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.3, filter: "grayscale(100%)" }} />
+        <div className="absolute inset-0" style={{ background: `${glowColor}55`, mixBlendMode: "multiply" }} />
+        {call.thumbnailUrl && (
+          <img src={call.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.92 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+        )}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
+        {/* Badge */}
+        <div className="absolute top-3 right-3">
+          {isLive ? (
+            <span className="flex items-center gap-1.5 text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase" style={{ background: "#10b981", color: "#fff" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               LIVE NOW
             </span>
-          )}
-          {!isLive && (
-            <Calendar size={13} style={{ color: glowColor, opacity: 0.7 }} />
-          )}
-          <span className="text-sm font-bold text-white">Session {s.sessionInWeek} of 2</span>
-          {isPast && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
-              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.3)" }}>
-              Completed
-            </span>
+          ) : isPast ? (
+            <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase" style={{ background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)" }}>Completed</span>
+          ) : (
+            <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase" style={{ background: glowColor, color: "#fff" }}>Call {call.callNumber} of 2</span>
           )}
         </div>
       </div>
 
-      {/* Card body */}
-      <div className="px-5 py-5 space-y-3">
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</p>
+      {/* Body */}
+      <div className="p-4 flex flex-col flex-1 space-y-2">
+        <h3 className="text-white font-bold text-sm leading-snug">{call.title}</h3>
+        {call.description && <p className="text-gray-500 text-xs leading-relaxed">{call.description}</p>}
+        <p className="text-gray-500 text-xs flex items-center gap-1.5">
+          <Calendar size={11} className="text-gray-600" />
+          <span className="text-gray-300">{dateLabel}</span>
+        </p>
 
-        {/* Countdown for upcoming sessions — only shown for current week */}
+        {/* Countdown digit boxes — only shown for current week, upcoming calls */}
         {isCurrentWeek && !isPast && !isLive && (() => {
-          const secsLeft = Math.max(0, Math.floor((s.utcMs - now) / 1000));
+          const secsLeft = Math.max(0, Math.floor((utcMs - now) / 1000));
           const d = Math.floor(secsLeft / 86400);
           const h = Math.floor((secsLeft % 86400) / 3600);
           const m = Math.floor((secsLeft % 3600) / 60);
-          const s2 = secsLeft % 60;
-          const pad = (n: number) => String(n).padStart(2, "0");
+          const sec = secsLeft % 60;
+          const digits = [
+            { val: d, label: "Days" },
+            { val: h, label: "Hrs" },
+            { val: m, label: "Min" },
+            { val: sec, label: "Sec" },
+          ];
           return (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Starts in</span>
-              <span className="text-sm font-bold tabular-nums" style={{ color: glowColor }}>
-                {d > 0 ? `${d}d ${pad(h)}h ${pad(m)}m` : `${pad(h)}h ${pad(m)}m ${pad(s2)}s`}
-              </span>
+            <div className="flex flex-col items-center gap-2 py-2">
+              <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>Starts in</span>
+              <div className="flex items-end gap-1">
+                {digits.map(({ val, label }, idx) => (
+                  <div key={label} className="flex items-end gap-1">
+                    <div className="text-center">
+                      <div
+                        className="w-[48px] h-[48px] sm:w-[56px] sm:h-[56px] rounded-xl flex items-center justify-center relative overflow-hidden"
+                        style={{
+                          background: `linear-gradient(160deg, ${glowColor}22 0%, ${glowColor}0a 100%)`,
+                          border: `1.5px solid ${glowColor}40`,
+                          boxShadow: `0 0 12px ${glowColor}15, inset 0 1px 0 rgba(255,255,255,0.06)`,
+                        }}
+                      >
+                        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${glowColor}50, transparent)` }} />
+                        <p
+                          className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight"
+                          style={{ color: "#fff", textShadow: `0 0 16px ${glowColor}70, 0 0 32px ${glowColor}25`, fontVariantNumeric: "tabular-nums" }}
+                        >
+                          {String(val).padStart(2, "0")}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-[8px] uppercase tracking-[0.12em] font-bold" style={{ color: `${glowColor}90` }}>{label}</p>
+                    </div>
+                    {idx < 3 && (
+                      <div className="flex flex-col gap-1.5 pb-5 flex-shrink-0">
+                        <div className="w-1 h-1 rounded-full" style={{ background: `${glowColor}55` }} />
+                        <div className="w-1 h-1 rounded-full" style={{ background: `${glowColor}55` }} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           );
         })()}
 
-        {/* Join button — active only within 15 min window */}
-        {isJoinable ? (
-          <a
-            href={s.joinUrl ?? "#"}
-            target={s.joinUrl ? "_blank" : undefined}
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
-            style={{ background: isLive ? "#10b981" : `linear-gradient(135deg, ${glowColor}, ${glowColor}cc)` }}
-          >
-            <Play size={14} />
-            Join
-          </a>
-        ) : isPast ? (
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
-            Recording available below if posted.
-          </p>
-        ) : (
-          <span
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
-            style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            <Play size={14} />
-            Join
-          </span>
-        )}
-
-        {/* Asterisk note */}
+        {/* CTA buttons */}
+        <div className="mt-auto pt-2 flex flex-wrap items-center gap-2">
+          {/* Register button */}
+          {!isPast && call.registrationUrl && (
+            <a
+              href={call.registrationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+              style={{ background: `${glowColor}22`, color: glowColor, border: `1px solid ${glowColor}40` }}
+            >
+              Register
+            </a>
+          )}
+          {/* Join button */}
+          {isJoinable ? (
+            <a
+              href={call.joinUrl ?? "#"}
+              target={call.joinUrl ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-85"
+              style={{ background: isLive ? "#10b981" : `linear-gradient(135deg, ${glowColor}, ${glowColor}cc)` }}
+            >
+              <Play size={12} />
+              {isLive ? "Join Live" : "Join"}
+            </a>
+          ) : isPast ? (
+            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Recording available below if posted.</p>
+          ) : (
+            <span
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold cursor-not-allowed select-none"
+              style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
+            >
+              <Play size={12} /> Join
+            </span>
+          )}
+        </div>
         {!isPast && !isJoinable && (
-          <p className="text-[11px] italic" style={{ color: "rgba(255,255,255,0.35)" }}>
-            * Join button opens 15 minutes before session
-          </p>
+          <p className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.35)" }}>* Join button opens 15 minutes before session</p>
         )}
       </div>
     </div>
@@ -273,15 +311,16 @@ function SectionHeader({ icon: Icon, label, color }: { icon: React.ElementType; 
   );
 }
 
-// ─── Full schedule table (all 12 sessions) ────────────────────────────────────
+// ─── Full schedule table (DB-driven) ────────────────────────────────────────
 function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: number }) {
+  const { data: allCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
   const weeks = [1, 2, 3, 4, 5, 6];
   return (
     <section>
       <SectionHeader icon={Calendar} label="Full Program Schedule" color="#0074F4" />
       <div className="space-y-2">
         {weeks.map(w => {
-          const wSessions = SCHEDULE.filter(s => s.week === w);
+          const wCalls = allCalls.filter((c: any) => c.sessionNumber === w && c.isVisible !== false);
           const isCurrentWeek = w === currentWeek;
           return (
             <div
@@ -309,20 +348,27 @@ function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: num
                 </div>
                 <span className="text-xs" style={{ color: "rgba(0,116,244,0.7)" }}>View →</span>
               </a>
-              {/* Sessions */}
-              {wSessions.map(s => {
-                const isLive = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
-                const isPast = now >= s.utcMs + CALL_DURATION_MS;
-                const isJoinable = now >= s.utcMs - JOIN_WINDOW_MS && now < s.utcMs + CALL_DURATION_MS;
+              {/* Calls */}
+              {wCalls.length === 0 ? (
+                <div className="px-4 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                  <p className="text-[11px] text-gray-500">No events scheduled yet</p>
+                </div>
+              ) : wCalls.map((c: any) => {
+                const utcMs = new Date(c.scheduledAt).getTime();
+                const durationMs = (c.durationMinutes ?? 90) * 60 * 1000;
+                const isLive = now >= utcMs && now < utcMs + durationMs;
+                const isPast = now >= utcMs + durationMs;
+                const isJoinable = now >= utcMs - JOIN_WINDOW_MS && now < utcMs + durationMs;
+                const dateLabel = new Date(c.scheduledAt).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
                 return (
                   <div
-                    key={s.id}
+                    key={c.id}
                     className="px-4 py-3 flex items-center justify-between gap-4 flex-wrap"
                     style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-white">Session {s.sessionInWeek} of 2</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{s.label}</p>
+                      <p className="text-xs font-medium text-white">Call {c.callNumber} of 2</p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{dateLabel}</p>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       {isLive && (
@@ -345,8 +391,8 @@ function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: num
                       )}
                       {isJoinable ? (
                         <a
-                          href={s.joinUrl ?? "#"}
-                          target={s.joinUrl ? "_blank" : undefined}
+                          href={c.joinUrl ?? "#"}
+                          target={c.joinUrl ? "_blank" : undefined}
                           rel="noopener noreferrer"
                           className="text-[11px] font-semibold px-3 py-1 rounded-lg text-white"
                           style={{ background: isLive ? "#10b981" : "#0074F4" }}
@@ -355,7 +401,7 @@ function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: num
                         </a>
                       ) : isPast ? (
                         <a
-                          href={`/accelerator/session/${s.week}`}
+                          href={`/accelerator/session/${w}`}
                           className="text-[11px] font-semibold px-3 py-1 rounded-lg"
                           style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}
                         >
@@ -457,12 +503,14 @@ export default function AcceleratorSession() {
   let resourceLinks: { label: string; url: string }[] = [];
   try { if (session.resourceLinks) resourceLinks = JSON.parse(session.resourceLinks); } catch { /* ignore */ }
 
-  const weekSessions = SCHEDULE.filter(s => s.week === weekId);
+  // DB-driven live calls for this session
+  const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: weekId });
+  const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
   // Determine if this page's week is the "current" active week
-  // Current week = the week containing the next upcoming session (or live session)
-  const nextSession = SCHEDULE.find(s => s.utcMs + CALL_DURATION_MS > now);
-  const isCurrentWeek = nextSession ? nextSession.week === weekId : false;
+  // Current week = the week containing the next upcoming call (or live call)
+  const nextCall = allLiveCalls.find((c: any) => new Date(c.scheduledAt).getTime() + (c.durationMinutes ?? 90) * 60 * 1000 > now);
+  const isCurrentWeek = nextCall ? nextCall.sessionNumber === weekId : false;
 
   const cmsRecordings = sessionContent.filter((c: any) => c.contentType === "recording" && c.isVisible);
   const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
@@ -560,11 +608,18 @@ export default function AcceleratorSession() {
         {/* ── Live call cards — dominant section ── */}
         <section>
           <SectionHeader icon={Clock} label={`Upcoming Live Calls — Session ${weekId}`} color={color} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {weekSessions.map(s => (
-              <SessionCallCard key={s.id} session={s} now={now} color={color} isCurrentWeek={isCurrentWeek} />
-            ))}
-          </div>
+          {liveCalls.length === 0 ? (
+            <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <p className="text-sm text-gray-400">No live call events scheduled for this session yet.</p>
+              <p className="text-xs text-gray-500 mt-1">Check back soon or contact your success manager.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {liveCalls.filter((c: any) => c.isVisible !== false).map((c: any) => (
+                <SessionCallCard key={c.id} call={c} now={now} color={color} isCurrentWeek={isCurrentWeek} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ── WAVV Product Training (webinar-style cards) ── */}

@@ -2221,6 +2221,7 @@ export const appRouter = router({
         duration: z.string().nullable().optional(),
         description: z.string().nullable().optional(),
         comingSoon: z.boolean().optional(),
+        cheatSheetUrl: z.string().nullable().optional(),
         sortOrder: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -2239,6 +2240,7 @@ export const appRouter = router({
         description: z.string().nullable().optional(),
         isVisible: z.boolean().optional(),
         comingSoon: z.boolean().optional(),
+        cheatSheetUrl: z.string().nullable().optional(),
         sortOrder: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -2260,6 +2262,70 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const { reorderAcceleratorContent } = await import("./db");
         await reorderAcceleratorContent(input.items);
+        return { success: true };
+      }),
+
+    // ─── Accelerator Live Calls CRUD ──────────────────────────────────────────
+    listLiveCalls: publicProcedure
+      .input(z.object({ sessionNumber: z.number().optional() }))
+      .query(async ({ input }) => {
+        const { listAcceleratorLiveCalls } = await import("./db");
+        return listAcceleratorLiveCalls(input.sessionNumber);
+      }),
+
+    createLiveCall: publisherProcedure
+      .input(z.object({
+        sessionNumber: z.number().min(1).max(6),
+        callNumber: z.number().min(1).max(2),
+        title: z.string().min(1),
+        description: z.string().nullable().optional(),
+        scheduledAt: z.string(), // ISO string
+        durationMinutes: z.number().optional(),
+        registrationUrl: z.string().nullable().optional(),
+        joinUrl: z.string().nullable().optional(),
+        thumbnailUrl: z.string().nullable().optional(),
+        isVisible: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { createAcceleratorLiveCall } = await import("./db");
+        return createAcceleratorLiveCall(input);
+      }),
+
+    updateLiveCall: publisherProcedure
+      .input(z.object({
+        id: z.number(),
+        sessionNumber: z.number().min(1).max(6).optional(),
+        callNumber: z.number().min(1).max(2).optional(),
+        title: z.string().min(1).optional(),
+        description: z.string().nullable().optional(),
+        scheduledAt: z.string().nullable().optional(),
+        durationMinutes: z.number().optional(),
+        registrationUrl: z.string().nullable().optional(),
+        joinUrl: z.string().nullable().optional(),
+        thumbnailUrl: z.string().nullable().optional(),
+        isVisible: z.boolean().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const { updateAcceleratorLiveCall } = await import("./db");
+        return updateAcceleratorLiveCall(id, data);
+      }),
+
+    deleteLiveCall: publisherProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const { deleteAcceleratorLiveCall } = await import("./db");
+        await deleteAcceleratorLiveCall(input.id);
+        return { success: true };
+      }),
+
+    reorderLiveCalls: publisherProcedure
+      .input(z.object({ items: z.array(z.object({ id: z.number(), sortOrder: z.number() })) }))
+      .mutation(async ({ input }) => {
+        const { reorderAcceleratorLiveCalls } = await import("./db");
+        await reorderAcceleratorLiveCalls(input.items);
         return { success: true };
       }),
 

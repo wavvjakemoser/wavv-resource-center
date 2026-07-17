@@ -22,42 +22,30 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// ─── Live call schedule ──────────────────────────────────────────────────────
-// 12 sessions: Tue + Thu, starting Jul 21 2026
-// All times stored as UTC milliseconds. 12:00 MT = 18:00 UTC (MDT = UTC-6)
-const SCHEDULE: { id: number; week: number; sessionInWeek: 1 | 2; label: string; utcMs: number; joinUrl?: string }[] = [
-  // Week 1
-  { id: 1,  week: 1, sessionInWeek: 1, label: "Tuesday, July 21st, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 6, 21, 18, 0, 0) },
-  { id: 2,  week: 1, sessionInWeek: 2, label: "Thursday, July 23rd, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 6, 23, 18, 0, 0) },
-  // Week 2
-  { id: 3,  week: 2, sessionInWeek: 1, label: "Tuesday, July 28th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 6, 28, 18, 0, 0) },
-  { id: 4,  week: 2, sessionInWeek: 2, label: "Thursday, July 30th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 6, 30, 18, 0, 0) },
-  // Week 3
-  { id: 5,  week: 3, sessionInWeek: 1, label: "Tuesday, August 4th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 4,  18, 0, 0) },
-  { id: 6,  week: 3, sessionInWeek: 2, label: "Thursday, August 6th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 6,  18, 0, 0) },
-  // Week 4
-  { id: 7,  week: 4, sessionInWeek: 1, label: "Tuesday, August 11th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 11, 18, 0, 0) },
-  { id: 8,  week: 4, sessionInWeek: 2, label: "Thursday, August 13th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 13, 18, 0, 0) },
-  // Week 5
-  { id: 9,  week: 5, sessionInWeek: 1, label: "Tuesday, August 18th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 18, 18, 0, 0) },
-  { id: 10, week: 5, sessionInWeek: 2, label: "Thursday, August 20th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 20, 18, 0, 0) },
-  // Week 6
-  { id: 11, week: 6, sessionInWeek: 1, label: "Tuesday, August 25th, 2026 · 12:00 PM MT / 2:00 PM ET",  utcMs: Date.UTC(2026, 7, 25, 18, 0, 0) },
-  { id: 12, week: 6, sessionInWeek: 2, label: "Thursday, August 27th, 2026 · 12:00 PM MT / 2:00 PM ET", utcMs: Date.UTC(2026, 7, 27, 18, 0, 0) },
-];
-
+// ─── Live call schedule (now CMS-driven via accelerator_live_calls table) ────
 // 15-minute pre-join window
 const JOIN_WINDOW_MS = 15 * 60 * 1000;
 
-// Duration of each live call in ms (90 minutes)
-const CALL_DURATION_MS = 90 * 60 * 1000;
+interface LiveCallItem {
+  id: number;
+  sessionNumber: number;
+  callNumber: number;
+  title: string;
+  description?: string | null;
+  scheduledAt: string | Date;
+  durationMinutes: number;
+  registrationUrl?: string | null;
+  joinUrl?: string | null;
+  thumbnailUrl?: string | null;
+  isVisible?: boolean;
+}
 
 type ScheduleState =
-  | { status: "upcoming"; next: typeof SCHEDULE[0]; secondsLeft: number; hasPast: boolean }
-  | { status: "live";     current: typeof SCHEDULE[0]; secondsLeft: number; hasPast: boolean }
+  | { status: "upcoming"; next: LiveCallItem; secondsLeft: number; hasPast: boolean }
+  | { status: "live";     current: LiveCallItem; secondsLeft: number; hasPast: boolean }
   | { status: "done" };
 
-function useAcceleratorSchedule(): ScheduleState {
+function useAcceleratorSchedule(liveCalls: LiveCallItem[]): ScheduleState {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -66,23 +54,29 @@ function useAcceleratorSchedule(): ScheduleState {
   }, []);
 
   return useMemo((): ScheduleState => {
+    const sorted = [...liveCalls].sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
     // Check if we're currently in a live call window
-    for (const s of SCHEDULE) {
-      if (now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS) {
-        const secondsLeft = Math.max(0, Math.floor((s.utcMs + CALL_DURATION_MS - now) / 1000));
-        const hasPast = SCHEDULE.some(x => x.utcMs < s.utcMs);
-        return { status: "live", current: s, secondsLeft, hasPast };
+    for (const c of sorted) {
+      const utcMs = new Date(c.scheduledAt).getTime();
+      const durationMs = (c.durationMinutes ?? 90) * 60 * 1000;
+      if (now >= utcMs && now < utcMs + durationMs) {
+        const secondsLeft = Math.max(0, Math.floor((utcMs + durationMs - now) / 1000));
+        const hasPast = sorted.some(x => new Date(x.scheduledAt).getTime() < utcMs);
+        return { status: "live", current: c, secondsLeft, hasPast };
       }
     }
-    // Find next upcoming session
-    const next = SCHEDULE.find(s => s.utcMs > now);
+    // Find next upcoming call
+    const next = sorted.find(c => new Date(c.scheduledAt).getTime() > now);
     if (next) {
-      const secondsLeft = Math.max(0, Math.floor((next.utcMs - now) / 1000));
-      const hasPast = SCHEDULE.some(s => s.utcMs + CALL_DURATION_MS < now);
+      const secondsLeft = Math.max(0, Math.floor((new Date(next.scheduledAt).getTime() - now) / 1000));
+      const hasPast = sorted.some(c => {
+        const utcMs = new Date(c.scheduledAt).getTime();
+        return utcMs + (c.durationMinutes ?? 90) * 60 * 1000 < now;
+      });
       return { status: "upcoming", next, secondsLeft, hasPast };
     }
     return { status: "done" };
-  }, [now]);
+  }, [now, liveCalls]);
 }
 
 function formatCountdown(totalSeconds: number) {
@@ -338,21 +332,15 @@ function Week1FreeBanner({ endsAt, reason }: { endsAt: number; reason: string })
 }
 
 // ─── Live Call Countdown component ──────────────────────────────────────────
-function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
-  const schedule = useAcceleratorSchedule();
+function LiveCallCountdown({ hasAccess, liveCalls }: { hasAccess: boolean; liveCalls: LiveCallItem[] }) {
+  const schedule = useAcceleratorSchedule(liveCalls);
 
   const isLive   = schedule.status === "live";
   const isDone   = schedule.status === "done";
-  const accentBg = isLive
-    ? "linear-gradient(135deg, #052e16 0%, #064e3b 40%, #065f46 100%)"
-    : "linear-gradient(135deg, #0a1628 0%, #0d2847 40%, #0a3a6b 100%)";
-  const accentBorder = isLive ? "rgba(16,185,129,0.4)" : "rgba(0,116,244,0.3)";
   const glowColor    = isLive ? "#10b981" : "#0074F4";
 
   const countdown = schedule.status !== "done"
-    ? formatCountdown(
-        schedule.status === "live" ? schedule.secondsLeft : schedule.secondsLeft
-      )
+    ? formatCountdown(schedule.secondsLeft)
     : null;
 
   const sessionRef = schedule.status === "live"
@@ -361,12 +349,15 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
     ? schedule.next
     : null;
 
-  // Map schedule session id → SESSIONS week (1-indexed session id maps to week via SESSIONS array)
-  const weekNum   = sessionRef?.week ?? null;
-  const sessionInWeek = sessionRef?.sessionInWeek ?? null;
-  const sessionPageId = weekNum; // session page id = week number
+  const weekNum   = sessionRef?.sessionNumber ?? null;
+  const callNum   = sessionRef?.callNumber ?? null;
+  const sessionPageId = weekNum;
 
-  const hasPast = schedule.status !== "done" && schedule.hasPast;
+  // Format date label for display
+  const dateLabel = sessionRef ? new Date(sessionRef.scheduledAt).toLocaleString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit", timeZoneName: "short",
+  }) : null;
 
   return (
     <div className="flex flex-col items-center text-center gap-4 mt-2">
@@ -377,12 +368,12 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
         </h3>
         {sessionRef && (
           <p className="mt-1 text-xs font-semibold" style={{ color: isLive ? "#6ee7b7" : "#4a9eff" }}>
-             Session {weekNum} · Call {sessionInWeek} of 2
+             Session {weekNum} · Call {callNum} of 2
           </p>
         )}
-        {sessionRef && (
+        {dateLabel && (
           <p className="mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.55)" }}>
-            {sessionRef.label}
+            {dateLabel}
           </p>
         )}
       </div>
@@ -401,7 +392,6 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
                       boxShadow: `0 0 18px ${glowColor}18, inset 0 1px 0 rgba(255,255,255,0.08)`,
                     }}
                   >
-                    {/* Subtle top highlight */}
                     <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${glowColor}50, transparent)` }} />
                     <p
                       className="text-4xl sm:text-5xl font-black tabular-nums tracking-tight"
@@ -418,7 +408,6 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
                     {label}
                   </p>
                 </div>
-                {/* Colon separator between digits (not after last) */}
                 {idx < 3 && (
                   <div className="flex flex-col gap-2 pb-7 flex-shrink-0">
                     <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${glowColor}60` }} />
@@ -432,7 +421,7 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
 
         {isDone && (
           <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
-            All 12 sessions complete. Recordings available in each session below.
+            All sessions complete. Recordings available in each session below.
           </p>
         )}
 
@@ -458,16 +447,25 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
   );
 }
 
-// ─── Upcoming calls list (members only) ──────────────────────────────────────
-function UpcomingCallsList() {
+// ─── Upcoming calls list (members only, DB-driven) ─────────────────────────
+function UpcomingCallsList({ liveCalls }: { liveCalls: LiveCallItem[] }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const upcoming = SCHEDULE.filter(s => s.utcMs + CALL_DURATION_MS > now).slice(0, 6);
-  const past     = SCHEDULE.filter(s => s.utcMs + CALL_DURATION_MS <= now);
+  const sorted = [...liveCalls].sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+  const upcoming = sorted.filter(c => {
+    const utcMs = new Date(c.scheduledAt).getTime();
+    const durationMs = (c.durationMinutes ?? 90) * 60 * 1000;
+    return utcMs + durationMs > now;
+  }).slice(0, 6);
+  const pastCount = sorted.filter(c => {
+    const utcMs = new Date(c.scheduledAt).getTime();
+    const durationMs = (c.durationMinutes ?? 90) * 60 * 1000;
+    return utcMs + durationMs <= now;
+  }).length;
 
   return (
     <section
@@ -486,26 +484,27 @@ function UpcomingCallsList() {
         <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>All sessions complete. Check recordings in each session below.</p>
       ) : (
         <div className="space-y-2">
-          {upcoming.map((s) => {
-            const isLive       = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
-            const isJoinable   = now >= s.utcMs - JOIN_WINDOW_MS && now < s.utcMs + CALL_DURATION_MS;
-            const secsToStart  = Math.max(0, Math.floor((s.utcMs - now) / 1000));
-            const { d, h, m, sec: _sec } = (() => {
-              const d = Math.floor(secsToStart / 86400);
-              const h = Math.floor((secsToStart % 86400) / 3600);
-              const m = Math.floor((secsToStart % 3600) / 60);
-              const sec = secsToStart % 60;
-              return { d, h, m, sec };
-            })();
+          {upcoming.map((c) => {
+            const utcMs = new Date(c.scheduledAt).getTime();
+            const durationMs = (c.durationMinutes ?? 90) * 60 * 1000;
+            const isLive       = now >= utcMs && now < utcMs + durationMs;
+            const isJoinable   = now >= utcMs - JOIN_WINDOW_MS && now < utcMs + durationMs;
+            const secsToStart  = Math.max(0, Math.floor((utcMs - now) / 1000));
+            const d = Math.floor(secsToStart / 86400);
+            const h = Math.floor((secsToStart % 86400) / 3600);
+            const m = Math.floor((secsToStart % 3600) / 60);
+            const sec = secsToStart % 60;
             const countdownStr = isLive
               ? "🔴 LIVE NOW"
               : d > 0 ? `${d}d ${h}h ${m}m`
               : h > 0 ? `${h}h ${m}m`
-              : `${m}m ${_sec}s`;
+              : `${m}m ${sec}s`;
+
+            const dateLabel = new Date(c.scheduledAt).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
 
             return (
               <div
-                key={s.id}
+                key={c.id}
                 className="rounded-xl px-4 py-3 space-y-2"
                 style={{
                   background: isLive ? "rgba(16,185,129,0.08)" : "rgba(255,255,255,0.02)",
@@ -517,13 +516,13 @@ function UpcomingCallsList() {
                     className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-[10px] font-bold"
                     style={{ background: isLive ? "rgba(16,185,129,0.15)" : "rgba(0,116,244,0.1)", color: isLive ? "#10b981" : "#4a9eff" }}
                   >
-                    W{s.week}
+                    W{c.sessionNumber}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-white">
-                      Session {s.week} · Call {s.sessionInWeek} of 2
+                      Session {c.sessionNumber} · Call {c.callNumber} of 2
                     </p>
-                    <p className="text-[11px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>{s.label}</p>
+                    <p className="text-[11px] truncate" style={{ color: "rgba(255,255,255,0.4)" }}>{dateLabel}</p>
                   </div>
                   <span
                     className="text-[11px] font-bold tabular-nums flex-shrink-0"
@@ -532,12 +531,12 @@ function UpcomingCallsList() {
                     {countdownStr}
                   </span>
                 </div>
-                {/* Join button — grayed until 30 min before */}
+                {/* Join button — grayed until 15 min before */}
                 <div className="flex justify-end">
                   {isJoinable ? (
                     <a
-                      href={s.joinUrl ?? `/accelerator/session/${s.week}`}
-                      target={s.joinUrl ? "_blank" : undefined}
+                      href={c.joinUrl ?? `/accelerator/session/${c.sessionNumber}`}
+                      target={c.joinUrl ? "_blank" : undefined}
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all"
                       style={{ background: isLive ? "#10b981" : "#0074F4" }}
@@ -563,9 +562,9 @@ function UpcomingCallsList() {
         </div>
       )}
 
-      {past.length > 0 && (
+      {pastCount > 0 && (
         <p className="text-[11px] pt-1" style={{ color: "rgba(255,255,255,0.3)" }}>
-          ✱ {past.length} previous session{past.length > 1 ? "s" : ""} available — click any session below to catch up.
+          ✱ {pastCount} previous session{pastCount > 1 ? "s" : ""} available — click any session below to catch up.
         </p>
       )}
     </section>
@@ -581,6 +580,10 @@ export default function Accelerator() {
   // Fetch DB-backed session data for countdown, registration, and coming soon
   const sessionsQuery = trpc.accelerator.list.useQuery();
   const dbSessions = sessionsQuery.data ?? [];
+
+  // Fetch all live call events for countdown and upcoming list
+  const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
+  const visibleLiveCalls = allLiveCalls.filter((c: any) => c.isVisible !== false) as LiveCallItem[];
 
   // Show pop-up for signed-in users who don't qualify (suppress during Week 1 free window)
   useEffect(() => {
@@ -676,7 +679,7 @@ export default function Accelerator() {
             </div>
 
             {/* ── Large Countdown Timer (inline in hero) ── */}
-            <LiveCallCountdown hasAccess={hasAccess} />
+            <LiveCallCountdown hasAccess={hasAccess} liveCalls={visibleLiveCalls} />
 
             {/* ── "Not registered?" CTA ── */}
             {(() => {
@@ -746,7 +749,10 @@ export default function Accelerator() {
           </div>
         </div>
 
-
+        {/* ── Upcoming Live Calls (members only) ── */}
+        {hasAccess && visibleLiveCalls.length > 0 && (
+          <UpcomingCallsList liveCalls={visibleLiveCalls} />
+        )}
 
         {/* ── Curriculum (tiles — gated or unlocked) ── */}
         <section className="space-y-4">

@@ -168,6 +168,7 @@ import {
   GripVertical,
   RefreshCw,
   Bookmark,
+  CalendarDays,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -5169,118 +5170,24 @@ function WebinarsTab() {
                 />
               </div>
             )}
-            {form.type === "exclusive" ? (
-              /* Exclusive Live Webinar: star circuit board is the locked default */
-              <div>
-                <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(star circuit board is the default — upload a custom image to override)</span></label>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: form.thumbnailUrl ? "2px solid #1a1a1a" : "2px solid #D4AF37", boxShadow: form.thumbnailUrl ? "none" : "0 0 8px #D4AF3766" }}>
-                    <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp" alt="Default" className="w-full h-full object-contain" style={{ padding: "4px", background: "#0a0c12" }} />
-                    {!form.thumbnailUrl && (
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(212,175,55,0.2)" }}>
-                        <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: "#D4AF37" }}>
-                          <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {form.thumbnailUrl ? (
-                      <span className="text-amber-400">Custom image set</span>
-                    ) : (
-                      <span>Default star thumbnail (active)</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
-                    style={{ background: uploadingThumb ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingThumb ? "#9ca3af" : "#fff" }}
-                  >
-                    {uploadingThumb ? (
-                      <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
-                    ) : (
-                      <><ImageIcon size={13} /> Upload Custom Image</>
-                    )}
-                    <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleThumbUpload} disabled={uploadingThumb} />
-                  </label>
-                  {form.thumbnailUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setForm(f => ({ ...f, thumbnailUrl: "" }))}
-                      className="text-xs text-gray-500 hover:text-red-400 transition"
-                    >
-                      Reset to default
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              /* Non-exclusive: default bg preview + optional custom thumbnail upload */
-              <div className="space-y-3">
-                {/* Default background preview */}
-                <div>
-                  <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(section default shown — upload a custom image to override)</span></label>
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: form.thumbnailUrl ? "2px solid #1a1a1a" : `2px solid ${form.type === "recording" ? "#00A9E2" : "#7C3AED"}`, boxShadow: form.thumbnailUrl ? "none" : `0 0 8px ${form.type === "recording" ? "#00A9E244" : "#7C3AED44"}` }}>
-                      <img
-                        src={form.type === "recording"
-                          ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-ondemand-clapperboard-XGLnb93SFV6vDUAxePhB3u.webp"
-                          : "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp"}
-                        alt="Default"
-                        className="w-full h-full object-cover"
-                      />
-                      {!form.thumbnailUrl && (
-                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: `rgba(${form.type === "recording" ? "0,169,226" : "124,58,237"},0.2)` }}>
-                          <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: form.type === "recording" ? "#00A9E2" : "#7C3AED" }}>
-                            <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {form.thumbnailUrl ? (
-                        <span style={{ color: form.type === "recording" ? "#00A9E2" : "#7C3AED" }}>Custom image set</span>
-                      ) : (
-                        <span>Default {form.type === "recording" ? "clapperboard" : "play circle"} thumbnail (active)</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {/* Optional custom thumbnail — replaces the background entirely when set */}
-                <div>
-                  <label className="block text-xs text-gray-400 mb-2">Custom Thumbnail <span className="text-gray-600">(optional — replaces the default background)</span></label>
-                  <div className="flex items-center gap-2">
-                    <label
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
-                      style={{ background: uploadingThumb ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingThumb ? "#9ca3af" : "#fff" }}
-                    >
-                      {uploadingThumb ? (
-                        <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
-                      ) : (
-                        <><ImageIcon size={13} /> Upload Image</>
-                      )}
-                      <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleThumbUpload} disabled={uploadingThumb} />
-                    </label>
-                    {form.thumbnailUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setForm(f => ({ ...f, thumbnailUrl: "" }))}
-                        className="text-xs text-gray-500 hover:text-red-400 transition"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    style={{ ...inputStyle, marginTop: "8px" }}
-                    value={form.thumbnailUrl}
-                    onChange={e => setForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
-                    placeholder="Or paste a custom thumbnail URL..."
+            {/* Thumbnail — stock defaults used automatically based on type, no upload needed */}
+            <div className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <label className="block text-xs text-gray-400 mb-2">Thumbnail</label>
+              <div className="flex items-center gap-3">
+                <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: `2px solid ${form.type === "exclusive" ? "#D4AF37" : form.type === "recording" ? "#00A9E2" : "#7C3AED"}` }}>
+                  <img
+                    src={form.type === "exclusive"
+                      ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp"
+                      : form.type === "recording"
+                        ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-ondemand-clapperboard-XGLnb93SFV6vDUAxePhB3u.webp"
+                        : "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp"}
+                    alt="Default"
+                    className="w-full h-full object-cover"
                   />
                 </div>
+                <span className="text-xs text-gray-500">Stock thumbnail (auto-assigned by type)</span>
               </div>
-            )}
+            </div>
             {/* Accent color is now hardcoded per section type — no picker needed */}
             {/* PiP toggle — hidden for exclusive live webinars (they link to registration, not video) */}
             <div className="flex flex-col gap-2 mt-1">
@@ -9713,43 +9620,246 @@ function AcceleratorTab() {
 
       {/* ─── Content Management Section ─── */}
       <AcceleratorContentManager />
+
+      {/* ─── Live Call Events Section ─── */}
+      <AcceleratorLiveCallManager />
+    </div>
+  );
+}
+
+// ─── Accelerator Live Call Manager (CMS-managed per-call events) ─────────────
+function AcceleratorLiveCallManager() {
+  const utils = trpc.useUtils();
+  const { data: liveCalls = [], isLoading } = trpc.accelerator.listLiveCalls.useQuery({});
+  const { data: sessions = [] } = trpc.accelerator.list.useQuery();
+  const [selectedSession, setSelectedSession] = useState<number>(1);
+  const sessionColor = (sessions.find((s: any) => s.week === selectedSession) as any)?.color ?? "#0074F4";
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState({
+    callNumber: 1,
+    title: "",
+    description: "",
+    scheduledAt: "",
+    durationMinutes: 90,
+    registrationUrl: "",
+    joinUrl: "",
+    thumbnailUrl: "",
+  });
+
+  const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
+
+  const createMut = trpc.accelerator.createLiveCall.useMutation({
+    onSuccess: () => { utils.accelerator.listLiveCalls.invalidate(); toast.success("Live call created"); resetForm(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const updateMut = trpc.accelerator.updateLiveCall.useMutation({
+    onSuccess: () => { utils.accelerator.listLiveCalls.invalidate(); toast.success("Live call updated"); resetForm(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const deleteMut = trpc.accelerator.deleteLiveCall.useMutation({
+    onSuccess: () => { utils.accelerator.listLiveCalls.invalidate(); toast.success("Live call deleted"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  function resetForm() {
+    setShowAddForm(false);
+    setEditingId(null);
+    setForm({ callNumber: 1, title: "", description: "", scheduledAt: "", durationMinutes: 90, registrationUrl: "", joinUrl: "", thumbnailUrl: "" });
+  }
+
+  function startEdit(call: any) {
+    setEditingId(call.id);
+    setShowAddForm(true);
+    setForm({
+      callNumber: call.callNumber ?? 1,
+      title: call.title ?? "",
+      description: call.description ?? "",
+      scheduledAt: call.scheduledAt ? new Date(call.scheduledAt).toISOString().slice(0, 16) : "",
+      durationMinutes: call.durationMinutes ?? 90,
+      registrationUrl: call.registrationUrl ?? "",
+      joinUrl: call.joinUrl ?? "",
+      thumbnailUrl: call.thumbnailUrl ?? "",
+    });
+  }
+
+  function handleSave() {
+    if (!form.title || !form.scheduledAt) { toast.error("Title and date/time are required"); return; }
+    if (editingId) {
+      updateMut.mutate({
+        id: editingId,
+        callNumber: form.callNumber,
+        title: form.title,
+        description: form.description || null,
+        scheduledAt: new Date(form.scheduledAt).toISOString(),
+        durationMinutes: form.durationMinutes,
+        registrationUrl: form.registrationUrl || null,
+        joinUrl: form.joinUrl || null,
+        thumbnailUrl: form.thumbnailUrl || null,
+      });
+    } else {
+      createMut.mutate({
+        sessionNumber: selectedSession,
+        callNumber: form.callNumber,
+        title: form.title,
+        description: form.description || null,
+        scheduledAt: new Date(form.scheduledAt).toISOString(),
+        durationMinutes: form.durationMinutes,
+        registrationUrl: form.registrationUrl || null,
+        joinUrl: form.joinUrl || null,
+        thumbnailUrl: form.thumbnailUrl || null,
+      });
+    }
+  }
+
+  const sessionCalls = liveCalls.filter((c: any) => c.sessionNumber === selectedSession);
+
+  return (
+    <div className="mt-8 rounded-xl p-5" style={{ background: "#161a22", border: "1px solid #232830" }}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <CalendarDays size={18} style={{ color: sessionColor }} />
+          <h3 className="text-base font-semibold text-white">Live Call Events</h3>
+          <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${sessionColor}18`, color: sessionColor }}>
+            {sessionCalls.length} event{sessionCalls.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <button
+          onClick={() => { resetForm(); setShowAddForm(true); }}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-all"
+          style={{ background: `${sessionColor}18`, color: sessionColor }}
+        >
+          <Plus size={14} /> Add Live Call
+        </button>
+      </div>
+
+      {/* Session Tabs */}
+      <div className="flex gap-1 mb-4 p-1 rounded-lg" style={{ background: "#111" }}>
+        {[1, 2, 3, 4, 5, 6].map((n) => {
+          const sColor = (sessions.find((s: any) => s.week === n) as any)?.color ?? "#0074F4";
+          const count = liveCalls.filter((c: any) => c.sessionNumber === n).length;
+          return (
+            <button
+              key={n}
+              onClick={() => { setSelectedSession(n); resetForm(); }}
+              className="flex-1 text-xs py-2 rounded-md font-medium transition-all"
+              style={{
+                background: selectedSession === n ? `${sColor}18` : "transparent",
+                color: selectedSession === n ? sColor : "#6b7280",
+                borderBottom: selectedSession === n ? `2px solid ${sColor}` : "2px solid transparent",
+              }}
+            >
+              S{n} {count > 0 && <span className="ml-1 text-[10px] opacity-60">({count})</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Add/Edit Form */}
+      {showAddForm && (
+        <div className="mb-4 p-4 rounded-lg" style={{ background: "#111", border: `1px solid ${sessionColor}33` }}>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-medium text-white">{editingId ? "Edit Live Call" : "New Live Call"}</h4>
+            <button onClick={resetForm} className="text-gray-400 hover:text-white"><X size={16} /></button>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <label className="text-[11px] text-gray-400 mb-1 block">Title *</label>
+              <input style={inputStyle} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Session 1 · Call 1 of 2" />
+            </div>
+            <div className="col-span-2">
+              <label className="text-[11px] text-gray-400 mb-1 block">Description</label>
+              <textarea style={{ ...inputStyle, minHeight: "60px", resize: "vertical" }} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Brief description for the card" />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-400 mb-1 block">Call Number *</label>
+              <select style={inputStyle} value={form.callNumber} onChange={(e) => setForm({ ...form, callNumber: Number(e.target.value) })}>
+                <option value={1}>Call 1 of 2</option>
+                <option value={2}>Call 2 of 2</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-400 mb-1 block">Duration (minutes)</label>
+              <input type="number" style={inputStyle} value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} />
+            </div>
+            <div className="col-span-2">
+              <label className="text-[11px] text-gray-400 mb-1 block">Date & Time (MT) *</label>
+              <input type="datetime-local" style={inputStyle} value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-400 mb-1 block">Registration URL</label>
+              <input style={inputStyle} value={form.registrationUrl} onChange={(e) => setForm({ ...form, registrationUrl: e.target.value })} placeholder="https://zoom.us/meeting/register/..." />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-400 mb-1 block">Join URL</label>
+              <input style={inputStyle} value={form.joinUrl} onChange={(e) => setForm({ ...form, joinUrl: e.target.value })} placeholder="https://zoom.us/j/..." />
+            </div>
+            <div className="col-span-2">
+              <label className="text-[11px] text-gray-400 mb-1 block">Thumbnail URL (optional)</label>
+              <input style={inputStyle} value={form.thumbnailUrl} onChange={(e) => setForm({ ...form, thumbnailUrl: e.target.value })} placeholder="Custom thumbnail URL (leave blank for default)" />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <button onClick={resetForm} className="text-xs px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all">Cancel</button>
+            <button
+              onClick={handleSave}
+              disabled={createMut.isPending || updateMut.isPending}
+              className="text-xs px-4 py-1.5 rounded-lg font-medium text-white transition-all"
+              style={{ background: sessionColor }}
+            >
+              {(createMut.isPending || updateMut.isPending) ? "Saving..." : editingId ? "Update" : "Create"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Live Calls List */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${sessionColor} transparent ${sessionColor} ${sessionColor}` }} />
+        </div>
+      ) : sessionCalls.length === 0 ? (
+        <div className="text-center py-8">
+          <CalendarDays size={24} className="mx-auto mb-2 opacity-30" style={{ color: sessionColor }} />
+          <p className="text-sm text-gray-400">No live call events for Session {selectedSession}</p>
+          <p className="text-[11px] text-gray-500 mt-1">Click "Add Live Call" to create one</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {sessionCalls.map((call: any) => (
+            <div key={call.id} className="flex items-center justify-between py-2.5 px-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `${sessionColor}18` }}>
+                  <CalendarDays size={16} style={{ color: sessionColor }} />
+                </div>
+                <div>
+                  <p className="text-sm text-white font-medium">{call.title}</p>
+                  <p className="text-[11px] text-gray-400">
+                    {call.scheduledAt ? new Date(call.scheduledAt).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }) : "No date set"}
+                    {call.durationMinutes && <span> · {call.durationMinutes} min</span>}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {call.registrationUrl && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>Reg</span>}
+                {call.joinUrl && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(59,130,246,0.12)", color: "#3b82f6" }}>Join</span>}
+                <button onClick={() => startEdit(call)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-all">
+                  <Pencil size={12} />
+                </button>
+                <button onClick={() => { if (confirm("Delete this live call event?")) deleteMut.mutate({ id: call.id }); }} className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-all">
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── Cheat Sheet Field (controlled input for Product Training section) ────────
-function CheatSheetField({ sessions, selectedSession, sessionColor, onSave }: {
-  sessions: any[];
-  selectedSession: number;
-  sessionColor: string;
-  onSave: (data: { id: number; cheatSheetUrl: string | null }) => void;
-}) {
-  const currentSession = sessions.find((s: any) => s.weekId === selectedSession) as any;
-  const [localUrl, setLocalUrl] = useState(currentSession?.cheatSheetUrl ?? "");
-  // Sync local state when session changes
-  useEffect(() => {
-    setLocalUrl(currentSession?.cheatSheetUrl ?? "");
-  }, [currentSession?.id, currentSession?.cheatSheetUrl]);
-  return (
-    <div className="mb-3 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-      <label className="text-[11px] font-medium text-gray-400 mb-1 block">Session Cheat Sheet PDF (opens in side panel for users)</label>
-      <div className="flex gap-2">
-        <input
-          value={localUrl}
-          onChange={(e) => setLocalUrl(e.target.value)}
-          onBlur={() => {
-            if (currentSession) {
-              onSave({ id: currentSession.id, cheatSheetUrl: localUrl || null });
-            }
-          }}
-          className="flex-1 rounded-md text-sm px-3 py-2"
-          style={{ background: "#0d1117", border: "1px solid #2a2a2a", color: "#fff", outline: "none" }}
-          placeholder="https://... or /manus-storage/..."
-        />
-      </div>
-    </div>
-  );
-}
 
 // ─── Accelerator Content Manager (recordings + product training) ─────────────
 function AcceleratorContentManager() {
@@ -9772,6 +9882,7 @@ function AcceleratorContentManager() {
     duration: "",
     description: "",
     comingSoon: false,
+    cheatSheetUrl: "",
   });
 
   const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
@@ -9779,13 +9890,6 @@ function AcceleratorContentManager() {
   const DEFAULT_RECORDING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
   const DEFAULT_TRAINING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
 
-  const updateCheatSheetMut = trpc.accelerator.update.useMutation({
-    onSuccess: () => { utils.accelerator.list.invalidate(); toast.success("Cheat sheet updated"); },
-    onError: (e: any) => toast.error(e.message),
-  });
-  const updateSessionCheatSheet = (data: { id: number; cheatSheetUrl: string | null }) => {
-    updateCheatSheetMut.mutate(data);
-  };
 
   const uploadThumbMutation = trpc.accelerator.uploadThumbnail.useMutation();
   const uploadVideoMutation = trpc.accelerator.uploadVideo.useMutation({
@@ -9822,7 +9926,7 @@ function AcceleratorContentManager() {
   function resetForm() {
     setShowAddForm(false);
     setEditingContentId(null);
-    setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false });
+    setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false, cheatSheetUrl: "" });
   }
 
   function startEditContent(item: any) {
@@ -9837,6 +9941,7 @@ function AcceleratorContentManager() {
       duration: item.duration ?? "",
       description: item.description ?? "",
       comingSoon: item.comingSoon ?? false,
+      cheatSheetUrl: item.cheatSheetUrl ?? "",
     });
   }
 
@@ -9893,6 +9998,7 @@ function AcceleratorContentManager() {
         duration: contentForm.duration || null,
         description: contentForm.description || null,
         comingSoon: contentForm.comingSoon,
+        cheatSheetUrl: contentForm.cheatSheetUrl || null,
       });
     } else {
       createMutation.mutate({
@@ -9905,6 +10011,7 @@ function AcceleratorContentManager() {
         duration: contentForm.duration || null,
         description: contentForm.description || null,
         comingSoon: contentForm.comingSoon,
+        cheatSheetUrl: contentForm.cheatSheetUrl || null,
       });
     }
   }
@@ -9953,7 +10060,7 @@ function AcceleratorContentManager() {
             Session Recordings
           </h3>
           <button
-            onClick={() => { setShowAddForm(true); setAddType("recording"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false }); }}
+            onClick={() => { setShowAddForm(true); setAddType("recording"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false, cheatSheetUrl: "" }); }}
             className="text-xs px-3 py-1.5 rounded-lg font-medium"
             style={{ background: `${sessionColor}18`, color: sessionColor }}
           >
@@ -9980,20 +10087,14 @@ function AcceleratorContentManager() {
             WAVV Product Training
           </h3>
           <button
-            onClick={() => { setShowAddForm(true); setAddType("product_training"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false }); }}
+            onClick={() => { setShowAddForm(true); setAddType("product_training"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false, cheatSheetUrl: "" }); }}
             className="text-xs px-3 py-1.5 rounded-lg font-medium"
             style={{ background: `${sessionColor}18`, color: sessionColor }}
           >
             + Add Training Video
           </button>
         </div>
-        {/* Cheat Sheet URL — tied to this session's Product Training section */}
-        <CheatSheetField
-          sessions={sessions}
-          selectedSession={selectedSession}
-          sessionColor={sessionColor}
-          onSave={updateSessionCheatSheet}
-        />
+
         {productTraining.length === 0 && !(showAddForm && addType === "product_training") && (
           <p className="text-xs text-gray-500 py-4 text-center">No product training videos yet for Session {selectedSession}.</p>
         )}
@@ -10060,64 +10161,14 @@ function AcceleratorContentManager() {
             </div>
           </div>
 
-          {/* Row 4: Thumbnail Image — default preview + custom upload */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-2">Thumbnail Image <span className="text-gray-600">(section default shown — upload a custom image to override)</span></label>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: contentForm.thumbnailUrl ? "2px solid #1a1a1a" : `2px solid ${accentColor}`, boxShadow: contentForm.thumbnailUrl ? "none" : `0 0 8px ${accentColor}44` }}>
-                  <img
-                    src={contentForm.thumbnailUrl || defaultThumb}
-                    alt="Default"
-                    className="w-full h-full object-cover"
-                  />
-                  {!contentForm.thumbnailUrl && (
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ background: `${accentColor}33` }}>
-                      <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: accentColor }}>
-                        <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {contentForm.thumbnailUrl ? (
-                    <span style={{ color: accentColor }}>Custom image set</span>
-                  ) : (
-                    <span>Default {addType === "recording" ? "rocket" : "play circle"} thumbnail (active)</span>
-                  )}
-                </div>
+          {/* Row 4: Thumbnail — stock defaults used, no upload needed */}
+          <div className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <label className="block text-xs text-gray-400 mb-2">Thumbnail</label>
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: `2px solid ${accentColor}` }}>
+                <img src={defaultThumb} alt="Default" className="w-full h-full object-cover" />
               </div>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-2">Custom Thumbnail <span className="text-gray-600">(optional — replaces the default background)</span></label>
-              <div className="flex items-center gap-2">
-                <label
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
-                  style={{ background: uploadingThumb ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingThumb ? "#9ca3af" : "#fff" }}
-                >
-                  {uploadingThumb ? (
-                    <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</>
-                  ) : (
-                    <><ImageIcon size={13} /> Upload Image</>
-                  )}
-                  <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleThumbUpload} disabled={uploadingThumb} />
-                </label>
-                {contentForm.thumbnailUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setContentForm(f => ({ ...f, thumbnailUrl: "" }))}
-                    className="text-xs text-gray-500 hover:text-red-400 transition"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-              <input
-                style={{ ...inputStyle, marginTop: "8px" }}
-                value={contentForm.thumbnailUrl}
-                onChange={e => setContentForm(f => ({ ...f, thumbnailUrl: e.target.value }))}
-                placeholder="Or paste a custom thumbnail URL..."
-              />
+              <span className="text-xs text-gray-500">Stock thumbnail (auto-assigned by type, color-coded to session)</span>
             </div>
           </div>
 
@@ -10144,6 +10195,15 @@ function AcceleratorContentManager() {
               </span>
             </label>
           </div>
+
+          {/* Cheat Sheet URL (product training only) */}
+          {addType === "product_training" && (
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Cheat Sheet PDF URL (optional)</label>
+              <input style={inputStyle} value={contentForm.cheatSheetUrl} onChange={e => setContentForm(f => ({ ...f, cheatSheetUrl: e.target.value }))} placeholder="https://... or /manus-storage/..." />
+              <p className="text-[10px] text-gray-500 mt-1">PDF opens in side panel for users viewing this training video</p>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-2 justify-end">
