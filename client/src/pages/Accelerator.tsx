@@ -302,15 +302,15 @@ function Week1FreeBanner({ endsAt, reason }: { endsAt: number; reason: string })
     <div
       className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-5"
       style={{
-        background: "linear-gradient(135deg, rgba(103,199,40,0.12) 0%, rgba(0,116,244,0.10) 100%)",
-        border: "1px solid rgba(103,199,40,0.3)",
-        boxShadow: "0 0 24px rgba(103,199,40,0.08)",
+        background: "linear-gradient(135deg, rgba(249,115,22,0.08) 0%, rgba(249,115,22,0.03) 100%)",
+        border: "1px solid rgba(249,115,22,0.18)",
+        boxShadow: "0 0 24px rgba(249,115,22,0.06)",
       }}
     >
       {/* Gift icon */}
       <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: "rgba(103,199,40,0.15)" }}>
-        <Gift size={20} style={{ color: "#67C728" }} />
+        style={{ background: "rgba(249,115,22,0.15)" }}>
+        <Gift size={20} style={{ color: "#f97316" }} />
       </div>
 
       {/* Text */}
@@ -320,7 +320,7 @@ function Week1FreeBanner({ endsAt, reason }: { endsAt: number; reason: string })
         </p>
         <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
           Free access ends in{" "}
-          <span className="font-semibold tabular-nums" style={{ color: "#67C728" }}>{countdownStr}</span>
+          <span className="font-semibold tabular-nums" style={{ color: "#f97316" }}>{countdownStr}</span>
           {" "}· Upgrade to unlock the full program
         </p>
       </div>
