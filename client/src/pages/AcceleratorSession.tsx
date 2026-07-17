@@ -557,19 +557,32 @@ export default function AcceleratorSession() {
         </div>
 
 
-        {/* ── Cheat Sheet callout (pinned resource card) ── */}
-        {session.cheatSheetUrl && (
-          <section
-            className="rounded-2xl p-5"
-            style={{ background: `${color}08`, border: `1px solid ${color}18` }}
-          >
-            <div className="flex items-center justify-between">
+        {/* ── Live call cards — dominant section ── */}
+        <section>
+          <SectionHeader icon={Clock} label={`Upcoming Live Calls — Session ${weekId}`} color={color} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {weekSessions.map(s => (
+              <SessionCallCard key={s.id} session={s} now={now} color={color} isCurrentWeek={isCurrentWeek} />
+            ))}
+          </div>
+        </section>
+
+        {/* ── WAVV Product Training (webinar-style cards) ── */}
+        <section>
+          <SectionHeader icon={Play} label="WAVV Product Training" color={color} />
+
+          {/* Cheat Sheet callout — pinned at top of Product Training */}
+          {session.cheatSheetUrl && (
+            <div
+              className="rounded-xl p-4 mb-4 flex items-center justify-between"
+              style={{ background: `${color}08`, border: `1px solid ${color}18` }}
+            >
               <div className="flex items-center gap-3">
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center"
                   style={{ background: `${color}15` }}
                 >
-                  <FileText size={18} style={{ color }} />
+                  <FileText size={16} style={{ color }} />
                 </div>
                 <div>
                   <p className="text-xs text-gray-400">Session {weekId} Resource</p>
@@ -590,29 +603,15 @@ export default function AcceleratorSession() {
                 <FileText size={14} /> View Cheat Sheet
               </button>
             </div>
-          </section>
-        )}
+          )}
 
-        {/* ── Live call cards — dominant section ── */}
-        <section>
-          <SectionHeader icon={Clock} label={`Upcoming Live Calls — Session ${weekId}`} color={color} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {weekSessions.map(s => (
-              <SessionCallCard key={s.id} session={s} now={now} color={color} isCurrentWeek={isCurrentWeek} />
-            ))}
-          </div>
-        </section>
-
-        {/* ── WAVV Product Training (webinar-style cards) ── */}
-        <section>
-          <SectionHeader icon={Play} label="WAVV Product Training" color={color} />
           {cmsProductTraining.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {cmsProductTraining.map((item: any) => (
                 <ContentCard
                   key={item.id}
                   item={item}
-                  accentColor="#10b981"
+                  accentColor={color}
                   badgeLabel="Training"
                   onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
                 />
@@ -746,11 +745,21 @@ function ContentCard({
     >
       {/* Thumbnail */}
       <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "140px" }}>
+        {/* Color-coded gradient fallback using session accent color */}
+        <div
+          className="absolute inset-0"
+          style={{ background: `linear-gradient(135deg, ${accentColor}30 0%, ${accentColor}08 100%)` }}
+        />
         <img
           src={defaultBg}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.9 }}
+          style={{ opacity: 0.7, mixBlendMode: "luminosity" }}
+        />
+        {/* Session color overlay on default thumbnail */}
+        <div
+          className="absolute inset-0"
+          style={{ background: `${accentColor}20`, mixBlendMode: "color" }}
         />
         {item.thumbnailUrl && (
           <img

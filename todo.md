@@ -1906,3 +1906,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add italicized asterisk note below Register/Join buttons: "* Join button opens 15 minutes before session"
 - [x] Remove "Session Access" section from session detail page entirely
 - [x] Add countdown timer to each Upcoming Live Calls card (time until that session starts)
+- [x] Match "Go to Session 1" button size and arrow style to the "Upgrade Your Plan" button (non-member hero)
+- [x] Move Cheat Sheet callout card into the WAVV Product Training section (not standalone above it)
+- [x] Color WAVV Product Training section cards and default thumbnails to match the session's color

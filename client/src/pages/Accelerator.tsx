@@ -443,12 +443,14 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
           return (
             <a
               href={`/accelerator/session/${sessionPageId}`}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
               style={{ background: `linear-gradient(135deg, ${btnBg}, ${btnBg}cc)` }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
             >
               {isLive ? <Play size={14} /> : <Calendar size={14} />}
               {isLive ? "Join Live Call" : `Go to Session ${weekNum}`}
-              <span style={{ fontSize: "16px" }}>→</span>
+              <ArrowRight size={15} />
             </a>
           );
         })()}
@@ -717,12 +719,14 @@ export default function Accelerator() {
                         return (
                           <a
                             href="/accelerator/session/1"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
                             style={{ background: `linear-gradient(135deg, ${sessionColor}, ${sessionColor}cc)` }}
+                            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
                           >
                             <Calendar size={14} />
                             Go to Session 1
-                            <span style={{ fontSize: "16px" }}>→</span>
+                            <ArrowRight size={15} />
                           </a>
                         );
                       })()}
