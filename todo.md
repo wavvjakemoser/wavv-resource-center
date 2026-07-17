@@ -1909,3 +1909,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Match "Go to Session 1" button size and arrow style to the "Upgrade Your Plan" button (non-member hero)
 - [x] Move Cheat Sheet callout card into the WAVV Product Training section (not standalone above it)
 - [x] Color WAVV Product Training section cards and default thumbnails to match the session's color
+- [x] Change Product Training video grid to 2 columns (not 3) so cards fill the width
+- [x] Update CMS admin session content page to use session-colored accents (matching member-facing side)

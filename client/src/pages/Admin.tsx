@@ -9731,7 +9731,10 @@ function AcceleratorTab() {
 function AcceleratorContentManager() {
   const utils = trpc.useUtils();
   const { data: allContent = [], isLoading } = trpc.accelerator.allContent.useQuery();
+  const { data: sessions = [] } = trpc.accelerator.list.useQuery();
   const [selectedSession, setSelectedSession] = useState<number>(1);
+  // Get the color for the currently selected session from DB
+  const sessionColor = (sessions.find((s: any) => s.weekId === selectedSession) as any)?.color ?? "#0074F4";
   const [showAddForm, setShowAddForm] = useState(false);
   const [addType, setAddType] = useState<"recording" | "product_training">("recording");
   const [editingContentId, setEditingContentId] = useState<number | null>(null);
@@ -9881,7 +9884,7 @@ function AcceleratorContentManager() {
   if (isLoading) return null;
 
   const defaultThumb = addType === "recording" ? DEFAULT_RECORDING_THUMB : DEFAULT_TRAINING_THUMB;
-  const accentColor = addType === "recording" ? "#0074F4" : "#10b981";
+  const accentColor = sessionColor;
 
   return (
     <div className="mt-8 space-y-4">
@@ -9901,7 +9904,7 @@ function AcceleratorContentManager() {
             className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
             style={
               selectedSession === num
-                ? { background: "#0074F4", color: "#fff" }
+                ? { background: sessionColor, color: "#fff" }
                 : { background: "rgba(255,255,255,0.05)", color: "#9ca3af" }
             }
           >
@@ -9914,13 +9917,13 @@ function AcceleratorContentManager() {
       <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Video size={14} className="text-blue-400" />
+            <Video size={14} style={{ color: sessionColor }} />
             Session Recordings
           </h3>
           <button
             onClick={() => { setShowAddForm(true); setAddType("recording"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false }); }}
             className="text-xs px-3 py-1.5 rounded-lg font-medium"
-            style={{ background: "rgba(0,116,244,0.12)", color: "#0074F4" }}
+            style={{ background: `${sessionColor}18`, color: sessionColor }}
           >
             + Add Recording
           </button>
@@ -9941,13 +9944,13 @@ function AcceleratorContentManager() {
       <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Play size={14} className="text-green-400" />
+            <Play size={14} style={{ color: sessionColor }} />
             WAVV Product Training
           </h3>
           <button
             onClick={() => { setShowAddForm(true); setAddType("product_training"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false }); }}
             className="text-xs px-3 py-1.5 rounded-lg font-medium"
-            style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}
+            style={{ background: `${sessionColor}18`, color: sessionColor }}
           >
             + Add Training Video
           </button>
