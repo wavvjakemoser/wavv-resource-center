@@ -9557,13 +9557,16 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
     callNumber: 1,
     title: "",
     description: "",
-    scheduledAt: "",
+    scheduledDate: "",  // YYYY-MM-DD
+    scheduledTime: "12:00",  // HH:MM (24h), default noon
     timezone: "America/Denver" as string,
     durationMinutes: 90,
     registrationUrl: "",
     joinUrl: "",
     thumbnailUrl: "",
   });
+  // Derived scheduledAt for save logic
+  const scheduledAt = form.scheduledDate ? `${form.scheduledDate}T${form.scheduledTime}` : "";
 
   const inputStyle: React.CSSProperties = { background: "#111", border: "1px solid #2a2a2a", color: "#fff", borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none" };
 
@@ -9583,7 +9586,7 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
   function resetForm() {
     setShowAddForm(false);
     setEditingId(null);
-    setForm({ callNumber: 1, title: "", description: "", scheduledAt: "", timezone: "America/Denver", durationMinutes: 90, registrationUrl: "", joinUrl: "", thumbnailUrl: "" });
+    setForm({ callNumber: 1, title: "", description: "", scheduledDate: "", scheduledTime: "12:00", timezone: "America/Denver", durationMinutes: 90, registrationUrl: "", joinUrl: "", thumbnailUrl: "" });
   }
 
   // Convert a UTC ISO string to a local datetime-local value in the given timezone
@@ -9611,11 +9614,14 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
     setEditingId(call.id);
     setShowAddForm(true);
     const tz = call.timezone || "America/Denver";
+    const localStr = call.scheduledAt ? utcToTzLocal(call.scheduledAt, tz) : "";
+    const [datePart, timePart] = localStr ? localStr.split("T") : ["", "12:00"];
     setForm({
       callNumber: call.callNumber ?? 1,
       title: call.title ?? "",
       description: call.description ?? "",
-      scheduledAt: call.scheduledAt ? utcToTzLocal(call.scheduledAt, tz) : "",
+      scheduledDate: datePart ?? "",
+      scheduledTime: timePart ?? "12:00",
       timezone: tz,
       durationMinutes: call.durationMinutes ?? 90,
       registrationUrl: call.registrationUrl ?? "",
@@ -9625,8 +9631,8 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
   }
 
   function handleSave() {
-    if (!form.title || !form.scheduledAt) { toast.error("Title and date/time are required"); return; }
-    const utcScheduledAt = tzLocalToUtc(form.scheduledAt, form.timezone);
+    if (!form.title || !scheduledAt) { toast.error("Title and date/time are required"); return; }
+    const utcScheduledAt = tzLocalToUtc(scheduledAt, form.timezone);
     if (editingId) {
       updateMut.mutate({
         id: editingId,
@@ -9702,8 +9708,29 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
               </select>
             </div>
             <div>
-              <label className="text-[11px] text-gray-400 mb-1 block">Date & Time *</label>
-              <input type="datetime-local" style={inputStyle} value={form.scheduledAt} onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })} />
+              <label className="text-[11px] text-gray-400 mb-1 block">Date *</label>
+              <input
+                type="date"
+                style={inputStyle}
+                value={form.scheduledDate}
+                onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-[11px] text-gray-400 mb-1 block">Time *</label>
+              <select
+                style={inputStyle}
+                value={form.scheduledTime}
+                onChange={(e) => setForm({ ...form, scheduledTime: e.target.value })}
+              >
+                {Array.from({ length: 48 }, (_, i) => {
+                  const h = Math.floor(i / 2);
+                  const m = i % 2 === 0 ? "00" : "30";
+                  const val = `${String(h).padStart(2, "0")}:${m}`;
+                  const label = new Date(`2000-01-01T${val}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+                  return <option key={val} value={val}>{label}</option>;
+                })}
+              </select>
             </div>
             <div>
               <label className="text-[11px] text-gray-400 mb-1 block">Timezone</label>
@@ -9934,12 +9961,38 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
         </div>
       </div>
 
-      {/* Recordings section */}
+      {/* Product Training section — shown first */}
+      <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+            <Play size={14} style={{ color: sessionColor }} />
+            WAVV Product Training
+          </h3>
+          <button
+            onClick={() => { setShowAddForm(true); setAddType("product_training"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false, cheatSheetUrl: "" }); }}
+            className="text-xs px-3 py-1.5 rounded-lg font-medium"
+            style={{ background: `${sessionColor}18`, color: sessionColor }}
+          >
+            + Add Training Video
+          </button>
+        </div>
+        {productTraining.length === 0 && !(showAddForm && addType === "product_training") && (
+          <p className="text-xs text-gray-500 py-4 text-center">No product training videos yet for Session {sessionNumber}.</p>
+        )}
+        <div className="space-y-2">
+          {productTraining.map((item: any) => (
+            <AccContentRow key={item.id} item={item} sessionColor={sessionColor} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
+          ))}
+        </div>
+        {(showAddForm && addType === "product_training") && renderContentForm()}
+      </div>
+
+      {/* Previous Session Recordings — shown second */}
       <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             <Video size={14} style={{ color: sessionColor }} />
-            Session Recordings
+            Previous Session Recordings
           </h3>
           <button
             onClick={() => { setShowAddForm(true); setAddType("recording"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false, cheatSheetUrl: "" }); }}
@@ -9958,33 +10011,6 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
           ))}
         </div>
         {(showAddForm && addType === "recording") && renderContentForm()}
-      </div>
-
-      {/* Product Training section */}
-      <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Play size={14} style={{ color: sessionColor }} />
-            WAVV Product Training
-          </h3>
-          <button
-            onClick={() => { setShowAddForm(true); setAddType("product_training"); setEditingContentId(null); setContentForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false, cheatSheetUrl: "" }); }}
-            className="text-xs px-3 py-1.5 rounded-lg font-medium"
-            style={{ background: `${sessionColor}18`, color: sessionColor }}
-          >
-            + Add Training Video
-          </button>
-        </div>
-
-        {productTraining.length === 0 && !(showAddForm && addType === "product_training") && (
-          <p className="text-xs text-gray-500 py-4 text-center">No product training videos yet for Session {sessionNumber}.</p>
-        )}
-        <div className="space-y-2">
-          {productTraining.map((item: any) => (
-            <AccContentRow key={item.id} item={item} sessionColor={sessionColor} onEdit={() => startEditContent(item)} onDelete={() => deleteMutation.mutate({ id: item.id })} />
-          ))}
-        </div>
-        {(showAddForm && addType === "product_training") && renderContentForm()}
       </div>
     </div>
   );
@@ -10044,15 +10070,18 @@ function SessionContentInline({ sessionNumber, sessionColor }: { sessionNumber: 
           <div className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
             <label className="block text-xs text-gray-400 mb-2">Thumbnail</label>
             <div className="flex items-center gap-3">
-              <div className="rounded-lg overflow-hidden flex-shrink-0 relative" style={{ width: 80, height: 45, border: `2px solid ${sessionColor}` }}>
+              <div className="rounded-lg overflow-hidden flex-shrink-0 relative" style={{ width: 80, height: 45, border: `1px solid ${sessionColor}40` }}>
                 {addType === "product_training" ? (
-                  <>
-                    <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${sessionColor}cc 0%, ${sessionColor}66 100%)`, zIndex: 1 }} />
-                    <img src={defaultThumb} alt="Default" className="w-full h-full object-cover" style={{ opacity: 0.35 }} />
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 2 }}>
-                      <PlayCircle size={22} style={{ color: "#fff", opacity: 0.9 }} />
-                    </div>
-                  </>
+                  /* Neon glow style — dark radial bg + session-colored glowing play icon */
+                  <div className="w-full h-full flex items-center justify-center" style={{
+                    background: `radial-gradient(ellipse at center, ${sessionColor}22 0%, #0a0e1a 70%)`,
+                  }}>
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg"
+                      style={{ filter: `drop-shadow(0 0 6px ${sessionColor}) drop-shadow(0 0 14px ${sessionColor}88)` }}>
+                      <circle cx="12" cy="12" r="10" stroke={sessionColor} strokeWidth="1.5" strokeOpacity="0.6" />
+                      <path d="M10 8.5l6 3.5-6 3.5V8.5z" fill={sessionColor} fillOpacity="0.9" />
+                    </svg>
+                  </div>
                 ) : (
                   <img src={defaultThumb} alt="Default" className="w-full h-full object-cover" />
                 )}

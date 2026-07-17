@@ -1962,3 +1962,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Both pages: restore missing 6th tile in "What's Included" section
 - [x] What's Included tile: replace MessageSquare icon with neon Slack SVG for Private Slack Community tile
 - [x] CMS product training thumbnail: replace solid color tint + base image with neon glow style (dark radial bg + glowing play icon, no base image) matching screenshot 4
+- [x] CMS edit panel: fix thumbnail preview to use neon glow style (dark bg + session-colored glowing play icon), matching the row thumbnail
+- [x] Live call form: replace date/time text input with calendar date picker + time selector; fix timezone defaulting to 6am
+- [x] Live call cards: center Register/Join buttons on tile and make them larger
+- [x] CMS session content: rename sections — "WAVV Product Training" above "Previous Session Recordings"
+- [x] Non-member Slack banner: match exact color scheme of member page "Join the WAVV Accelerator Slack" section, but locked (no clickable buttons)

@@ -241,46 +241,48 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
           );
         })()}
 
-        {/* CTA buttons */}
-        <div className="mt-auto pt-2 flex flex-wrap items-center gap-2">
-          {/* Register button */}
-          {!isPast && call.registrationUrl && (
-            <a
-              href={call.registrationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-              style={{ background: `${glowColor}22`, color: glowColor, border: `1px solid ${glowColor}40` }}
-            >
-              Register
-            </a>
-          )}
-          {/* Join button */}
-          {isJoinable ? (
-            <a
-              href={call.joinUrl ?? "#"}
-              target={call.joinUrl ? "_blank" : undefined}
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-85"
-              style={{ background: isLive ? "#10b981" : `linear-gradient(135deg, ${glowColor}, ${glowColor}cc)` }}
-            >
-              <Play size={12} />
-              {isLive ? "Join Live" : "Join"}
-            </a>
-          ) : isPast ? (
-            <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.3)" }}>Recording available below if posted.</p>
-          ) : (
-            <span
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold cursor-not-allowed select-none"
-              style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
-            >
-              <Play size={12} /> Join
-            </span>
+        {/* CTA buttons — centered, larger */}
+        <div className="mt-auto pt-4 flex flex-col items-center gap-2">
+          <div className="flex items-center justify-center gap-3 w-full">
+            {/* Register button */}
+            {!isPast && call.registrationUrl && (
+              <a
+                href={call.registrationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-80"
+                style={{ background: `${glowColor}22`, color: glowColor, border: `1px solid ${glowColor}40` }}
+              >
+                Register
+              </a>
+            )}
+            {/* Join button */}
+            {isJoinable ? (
+              <a
+                href={call.joinUrl ?? "#"}
+                target={call.joinUrl ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
+                style={{ background: isLive ? "#10b981" : `linear-gradient(135deg, ${glowColor}, ${glowColor}cc)` }}
+              >
+                <Play size={14} />
+                {isLive ? "Join Live" : "Join"}
+              </a>
+            ) : isPast ? (
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>Recording available below if posted.</p>
+            ) : (
+              <span
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
+                style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
+              >
+                <Play size={14} /> Join
+              </span>
+            )}
+          </div>
+          {!isPast && !isJoinable && (
+            <p className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.35)" }}>* Join button opens 15 minutes before session</p>
           )}
         </div>
-        {!isPast && !isJoinable && (
-          <p className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.35)" }}>* Join button opens 15 minutes before session</p>
-        )}
       </div>
     </div>
   );
