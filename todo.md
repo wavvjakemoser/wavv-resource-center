@@ -1912,3 +1912,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Change Product Training video grid to 2 columns (not 3) so cards fill the width
 - [x] Update CMS admin session content page to use session-colored accents (matching member-facing side)
 - [x] Fix: Page refresh forces re-sign-in (session/cookie not persisting across reloads)
+- [x] Remove Cheat Sheet URL field from session-level CMS (per-week settings) and tie it to the Product Training section instead

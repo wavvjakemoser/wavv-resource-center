@@ -9631,16 +9631,6 @@ function AcceleratorTab() {
                   />
                 </div>
 
-                {/* Cheat Sheet URL */}
-                <div>
-                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Cheat Sheet URL (PDF — opens in side panel for users)</label>
-                  <Input
-                    value={form.cheatSheetUrl}
-                    onChange={(e) => setForm({ ...form, cheatSheetUrl: e.target.value })}
-                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                    placeholder="https://... or /manus-storage/..."
-                  />
-                </div>
 
                 {/* Color + Published toggle */}
                 <div className="flex items-center gap-4">
@@ -9727,6 +9717,40 @@ function AcceleratorTab() {
   );
 }
 
+// ─── Cheat Sheet Field (controlled input for Product Training section) ────────
+function CheatSheetField({ sessions, selectedSession, sessionColor, onSave }: {
+  sessions: any[];
+  selectedSession: number;
+  sessionColor: string;
+  onSave: (data: { id: number; cheatSheetUrl: string | null }) => void;
+}) {
+  const currentSession = sessions.find((s: any) => s.weekId === selectedSession) as any;
+  const [localUrl, setLocalUrl] = useState(currentSession?.cheatSheetUrl ?? "");
+  // Sync local state when session changes
+  useEffect(() => {
+    setLocalUrl(currentSession?.cheatSheetUrl ?? "");
+  }, [currentSession?.id, currentSession?.cheatSheetUrl]);
+  return (
+    <div className="mb-3 p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+      <label className="text-[11px] font-medium text-gray-400 mb-1 block">Session Cheat Sheet PDF (opens in side panel for users)</label>
+      <div className="flex gap-2">
+        <input
+          value={localUrl}
+          onChange={(e) => setLocalUrl(e.target.value)}
+          onBlur={() => {
+            if (currentSession) {
+              onSave({ id: currentSession.id, cheatSheetUrl: localUrl || null });
+            }
+          }}
+          className="flex-1 rounded-md text-sm px-3 py-2"
+          style={{ background: "#0d1117", border: "1px solid #2a2a2a", color: "#fff", outline: "none" }}
+          placeholder="https://... or /manus-storage/..."
+        />
+      </div>
+    </div>
+  );
+}
+
 // ─── Accelerator Content Manager (recordings + product training) ─────────────
 function AcceleratorContentManager() {
   const utils = trpc.useUtils();
@@ -9754,6 +9778,14 @@ function AcceleratorContentManager() {
 
   const DEFAULT_RECORDING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
   const DEFAULT_TRAINING_THUMB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
+
+  const updateCheatSheetMut = trpc.accelerator.update.useMutation({
+    onSuccess: () => { utils.accelerator.list.invalidate(); toast.success("Cheat sheet updated"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const updateSessionCheatSheet = (data: { id: number; cheatSheetUrl: string | null }) => {
+    updateCheatSheetMut.mutate(data);
+  };
 
   const uploadThumbMutation = trpc.accelerator.uploadThumbnail.useMutation();
   const uploadVideoMutation = trpc.accelerator.uploadVideo.useMutation({
@@ -9955,6 +9987,13 @@ function AcceleratorContentManager() {
             + Add Training Video
           </button>
         </div>
+        {/* Cheat Sheet URL — tied to this session's Product Training section */}
+        <CheatSheetField
+          sessions={sessions}
+          selectedSession={selectedSession}
+          sessionColor={sessionColor}
+          onSave={updateSessionCheatSheet}
+        />
         {productTraining.length === 0 && !(showAddForm && addType === "product_training") && (
           <p className="text-xs text-gray-500 py-4 text-center">No product training videos yet for Session {selectedSession}.</p>
         )}
