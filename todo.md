@@ -1967,3 +1967,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Live call cards: center Register/Join buttons on tile and make them larger
 - [x] CMS session content: rename sections — "WAVV Product Training" above "Previous Session Recordings"
 - [x] Non-member Slack banner: match exact color scheme of member page "Join the WAVV Accelerator Slack" section, but locked (no clickable buttons)
+- [x] Both Accelerator pages: move "Join the WAVV Accelerator Slack" section to below "What's Included" (after the 6 tiles)
+- [x] Both Accelerator pages: move "Money Math" section to below FAQs
+- [x] Session page: Previous Session Recordings grid — 2 tiles per row (matching Product Training layout)
+- [x] Live call cards: increase thumbnail area height so image takes up more of the card than text/buttons

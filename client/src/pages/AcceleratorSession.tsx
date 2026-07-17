@@ -158,7 +158,7 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLive ? "rgba(16,185,129,0.4)" : isPast ? "#252d3d" : `${color}30`; e.currentTarget.style.boxShadow = "none"; }}
     >
       {/* Thumbnail header */}
-      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "140px" }}>
+      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "200px" }}>
         <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${glowColor}40 0%, ${glowColor}15 100%)` }} />
         <img src={DEFAULT_LIVE_CALL_BG} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.3, filter: "grayscale(100%)" }} />
         <div className="absolute inset-0" style={{ background: `${glowColor}55`, mixBlendMode: "multiply" }} />
@@ -692,7 +692,7 @@ export default function AcceleratorSession() {
         <section>
           <SectionHeader icon={Video} label="Previous Session Recordings" color={color} />
           {cmsRecordings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {cmsRecordings.map((item: any) => (
                 <ContentCard
                   key={item.id}
