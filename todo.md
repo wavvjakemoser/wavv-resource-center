@@ -1897,3 +1897,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Register button always visible on session detail pages — active when URL is set, disabled/greyed when not
 - [x] Add per-session "Cheat Sheet URL" field to schema, DB, and admin CMS
 - [x] Add pinned Cheat Sheet callout card on session detail page with side panel PDF viewer
+- [x] Unify "Go to Session 1" button styling across member and non-member Accelerator landing pages
+- [x] Color-code the "Go to Session" button to match the current active session's color
+- [x] Remove "To WAVV First Dial In 10 Minutes" section from Accelerator page
+- [x] Remove countdown digits from SessionCallCard (Live Call Cards on session detail pages) — replace with static Join button
+- [x] Replace mini countdown on Session Access Join button with static disabled Join + asterisk note
+- [x] Remove per-row countdowns from Full Program Schedule table on session detail pages
+- [x] Add italicized asterisk note below Register/Join buttons: "* Join button opens 15 minutes before session"

@@ -132,55 +132,11 @@ function useNow() {
   return now;
 }
 
-function fmtCountdown(totalSeconds: number) {
-  const d = Math.floor(totalSeconds / 86400);
-  const h = Math.floor((totalSeconds % 86400) / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-  return { d, h, m, s };
-}
-
-// ─── Digit cell ───────────────────────────────────────────────────────────────
-function DigitCell({ val, label, glowColor, size = "md" }: { val: number; label: string; glowColor: string; size?: "sm" | "md" | "lg" }) {
-  const dim = size === "lg" ? 80 : size === "sm" ? 52 : 64;
-  const fontSize = size === "lg" ? "2rem" : size === "sm" ? "1.25rem" : "1.6rem";
-  return (
-    <div className="text-center">
-      <div
-        className="rounded-xl flex items-center justify-center relative overflow-hidden"
-        style={{
-          width: dim, height: dim,
-          background: `linear-gradient(160deg, ${glowColor}22 0%, ${glowColor}0a 100%)`,
-          border: `1.5px solid ${glowColor}40`,
-          boxShadow: `0 0 18px ${glowColor}18, inset 0 1px 0 rgba(255,255,255,0.07)`,
-        }}
-      >
-        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${glowColor}50, transparent)` }} />
-        <p className="font-black tabular-nums tracking-tight" style={{ color: "#fff", fontSize, textShadow: `0 0 20px ${glowColor}80` }}>
-          {String(val).padStart(2, "0")}
-        </p>
-      </div>
-      <p className="mt-1.5 text-[9px] uppercase tracking-[0.15em] font-bold" style={{ color: `${glowColor}90` }}>{label}</p>
-    </div>
-  );
-}
-
-function ColonSep({ glowColor }: { glowColor: string }) {
-  return (
-    <div className="flex flex-col gap-1.5 pb-5 flex-shrink-0">
-      <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${glowColor}55` }} />
-      <div className="w-1.5 h-1.5 rounded-full" style={{ background: `${glowColor}55` }} />
-    </div>
-  );
-}
-
-// ─── Per-session countdown + join card ───────────────────────────────────────
+// ─── Per-session call card (simplified — no countdown) ─────────────────────
 function SessionCallCard({ session: s, now, color }: { session: typeof SCHEDULE[0]; now: number; color: string }) {
   const isLive     = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
   const isPast     = now >= s.utcMs + CALL_DURATION_MS;
   const isJoinable = now >= s.utcMs - JOIN_WINDOW_MS && now < s.utcMs + CALL_DURATION_MS;
-  const secsLeft   = Math.max(0, Math.floor((s.utcMs - now) / 1000));
-  const cd         = fmtCountdown(secsLeft);
   const glowColor  = isLive ? "#10b981" : color;
 
   return (
@@ -219,7 +175,7 @@ function SessionCallCard({ session: s, now, color }: { session: typeof SCHEDULE[
             </span>
           )}
           {!isLive && (
-            <Clock size={13} style={{ color: glowColor, opacity: 0.7 }} />
+            <Calendar size={13} style={{ color: glowColor, opacity: 0.7 }} />
           )}
           <span className="text-sm font-bold text-white">Session {s.sessionInWeek} of 2</span>
           {isPast && (
@@ -232,23 +188,10 @@ function SessionCallCard({ session: s, now, color }: { session: typeof SCHEDULE[
       </div>
 
       {/* Card body */}
-      <div className="px-5 py-5 space-y-4">
+      <div className="px-5 py-5 space-y-3">
         <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>{s.label}</p>
 
-        {/* Countdown */}
-        {!isPast && (
-          <div className="flex items-end gap-2">
-            <DigitCell val={cd.d} label="Days" glowColor={glowColor} size="md" />
-            <ColonSep glowColor={glowColor} />
-            <DigitCell val={cd.h} label="Hrs" glowColor={glowColor} size="md" />
-            <ColonSep glowColor={glowColor} />
-            <DigitCell val={cd.m} label="Min" glowColor={glowColor} size="md" />
-            <ColonSep glowColor={glowColor} />
-            <DigitCell val={cd.s} label="Sec" glowColor={glowColor} size="md" />
-          </div>
-        )}
-
-        {/* Join button */}
+        {/* Join button — active only within 15 min window */}
         {isJoinable ? (
           <a
             href={s.joinUrl ?? "#"}
@@ -258,33 +201,28 @@ function SessionCallCard({ session: s, now, color }: { session: typeof SCHEDULE[
             style={{ background: isLive ? "#10b981" : `linear-gradient(135deg, ${glowColor}, ${glowColor}cc)` }}
           >
             <Play size={14} />
-            {isLive ? "Join Live Call" : "Join Waiting Room"}
+            Join
           </a>
         ) : isPast ? (
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
             Recording available below if posted.
           </p>
-        ) : (() => {
-          // Mini countdown to when join becomes available
-          const msUntilJoin = (s.utcMs - JOIN_WINDOW_MS) - now;
-          const secsUntilJoin = Math.max(0, Math.floor(msUntilJoin / 1000));
-          const jH = Math.floor(secsUntilJoin / 3600);
-          const jM = Math.floor((secsUntilJoin % 3600) / 60);
-          const jS = secsUntilJoin % 60;
-          const pad = (n: number) => String(n).padStart(2, "0");
-          return (
-            <span
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-default select-none"
-              style={{ background: `${glowColor}08`, color: "rgba(255,255,255,0.5)", border: `1px solid ${glowColor}15` }}
-            >
-              <Clock size={13} />
-              Join opens in{" "}
-              <span className="tabular-nums font-bold" style={{ color: glowColor }}>
-                {jH > 0 ? `${pad(jH)}h ${pad(jM)}m ${pad(jS)}s` : `${pad(jM)}m ${pad(jS)}s`}
-              </span>
-            </span>
-          );
-        })()}
+        ) : (
+          <span
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
+            style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
+          >
+            <Play size={14} />
+            Join
+          </span>
+        )}
+
+        {/* Asterisk note */}
+        {!isPast && !isJoinable && (
+          <p className="text-[11px] italic" style={{ color: "rgba(255,255,255,0.35)" }}>
+            * Join button opens 15 minutes before session
+          </p>
+        )}
       </div>
     </div>
   );
@@ -358,8 +296,6 @@ function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: num
                 const isLive = now >= s.utcMs && now < s.utcMs + CALL_DURATION_MS;
                 const isPast = now >= s.utcMs + CALL_DURATION_MS;
                 const isJoinable = now >= s.utcMs - JOIN_WINDOW_MS && now < s.utcMs + CALL_DURATION_MS;
-                const secsLeft = Math.max(0, Math.floor((s.utcMs - now) / 1000));
-                const cd = fmtCountdown(secsLeft);
                 return (
                   <div
                     key={s.id}
@@ -378,8 +314,9 @@ function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: num
                         </span>
                       )}
                       {!isPast && !isLive && (
-                        <span className="text-[11px] tabular-nums" style={{ color: "rgba(255,255,255,0.35)" }}>
-                          {cd.d}d {String(cd.h).padStart(2,"0")}h {String(cd.m).padStart(2,"0")}m
+                        <span className="text-[10px] px-2 py-0.5 rounded-full"
+                          style={{ background: "rgba(0,116,244,0.1)", color: "rgba(0,116,244,0.7)" }}>
+                          Upcoming
                         </span>
                       )}
                       {isPast && (
@@ -396,7 +333,7 @@ function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: num
                           className="text-[11px] font-semibold px-3 py-1 rounded-lg text-white"
                           style={{ background: isLive ? "#10b981" : "#0074F4" }}
                         >
-                          {isLive ? "Join" : "Waiting Room"}
+                          Join
                         </a>
                       ) : isPast ? (
                         <a
@@ -606,7 +543,7 @@ export default function AcceleratorSession() {
             <h3 className="text-sm font-semibold text-white">Session Access</h3>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {/* Register button — always visible, disabled when no URL */}
+            {/* Register button — always visible, greyed when no URL */}
             {session.registrationUrl ? (
               <a
                 href={session.registrationUrl}
@@ -627,46 +564,42 @@ export default function AcceleratorSession() {
                 Register
               </span>
             )}
-              {session.joinUrl && (() => {
-                // Show Join button only within 15 min of session start
-                const sessionTime = session.sessionDateTime ? new Date(session.sessionDateTime).getTime() : null;
-                const isJoinable = sessionTime && now >= sessionTime - JOIN_WINDOW_MS && now < sessionTime + CALL_DURATION_MS;
-                const isLive = sessionTime && now >= sessionTime && now < sessionTime + CALL_DURATION_MS;
-                if (isJoinable) {
-                  return (
-                    <a
-                      href={session.joinUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
-                      style={{ background: isLive ? "#10b981" : "#0074F4" }}
-                    >
-                      <Play size={14} />
-                      {isLive ? "Join Live Call" : "Join Waiting Room"}
-                    </a>
-                  );
-                }
-                // Show mini countdown to when join becomes available
-                const msUntilJoin = sessionTime ? (sessionTime - JOIN_WINDOW_MS) - now : 0;
-                const secsUntilJoin = Math.max(0, Math.floor(msUntilJoin / 1000));
-                const jH = Math.floor(secsUntilJoin / 3600);
-                const jM = Math.floor((secsUntilJoin % 3600) / 60);
-                const jS = secsUntilJoin % 60;
-                const pad = (n: number) => String(n).padStart(2, "0");
+
+            {/* Join button — always visible, active only within 15 min window */}
+            {(() => {
+              const sessionTime = session.sessionDateTime ? new Date(session.sessionDateTime).getTime() : null;
+              const isJoinable = sessionTime && now >= sessionTime - JOIN_WINDOW_MS && now < sessionTime + CALL_DURATION_MS;
+              const isLive = sessionTime && now >= sessionTime && now < sessionTime + CALL_DURATION_MS;
+              if (isJoinable && session.joinUrl) {
                 return (
-                  <span
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-default select-none"
-                    style={{ background: "rgba(0,116,244,0.08)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(0,116,244,0.15)" }}
+                  <a
+                    href={session.joinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
+                    style={{ background: isLive ? "#10b981" : `linear-gradient(135deg, ${color}, ${color}cc)` }}
                   >
-                    <Clock size={13} />
-                    Join opens in{" "}
-                    <span className="tabular-nums font-bold" style={{ color: "#4a9eff" }}>
-                      {jH > 0 ? `${pad(jH)}h ${pad(jM)}m ${pad(jS)}s` : `${pad(jM)}m ${pad(jS)}s`}
-                    </span>
-                  </span>
+                    <Play size={14} />
+                    Join
+                  </a>
                 );
-              })()}
+              }
+              return (
+                <span
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
+                  style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
+                >
+                  <Play size={14} />
+                  Join
+                </span>
+              );
+            })()}
             </div>
+
+            {/* Asterisk note */}
+            <p className="text-[11px] italic mt-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+              * Join button opens 15 minutes before session
+            </p>
           </section>
 
         {/* ── Cheat Sheet callout (pinned resource card) ── */}

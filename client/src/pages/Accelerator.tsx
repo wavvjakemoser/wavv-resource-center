@@ -7,7 +7,6 @@ import {
   Lock,
   Play,
   ArrowRight,
-  Zap,
   Target,
   TrendingUp,
   Users,
@@ -151,12 +150,6 @@ const SESSIONS = [
 ];
 
 const VALUE_PROPS = [
-  {
-    icon: Zap,
-    title: "First Dial in 10 Minutes",
-    description: "A guided quick-start that gets you from sign-up to your first live dial — fast.",
-    color: "#f97316",
-  },
   {
     icon: Target,
     title: "Sales Accelerator Program",
@@ -444,19 +437,21 @@ function LiveCallCountdown({ hasAccess }: { hasAccess: boolean }) {
         )}
 
         {/* CTA button to current session (members only) */}
-        {hasAccess && sessionRef && sessionPageId && (
-          <a
-            href={`/accelerator/session/${sessionPageId}`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
-            style={{ background: isLive ? "#10b981" : "#0074F4" }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-          >
-            {isLive ? <Play size={14} /> : <Calendar size={14} />}
-            {isLive ? "Join Live Call" : `Go to Session ${weekNum}`}
-            <ChevronRight size={14} />
-          </a>
-        )}
+        {hasAccess && sessionRef && sessionPageId && (() => {
+          const sessionColor = SESSIONS.find(s => s.id === sessionPageId)?.color ?? "#0074F4";
+          const btnBg = isLive ? "#10b981" : sessionColor;
+          return (
+            <a
+              href={`/accelerator/session/${sessionPageId}`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: `linear-gradient(135deg, ${btnBg}, ${btnBg}cc)` }}
+            >
+              {isLive ? <Play size={14} /> : <Calendar size={14} />}
+              {isLive ? "Join Live Call" : `Go to Session ${weekNum}`}
+              <span style={{ fontSize: "16px" }}>→</span>
+            </a>
+          );
+        })()}
     </div>
   );
 }
@@ -717,14 +712,20 @@ export default function Accelerator() {
                       Session 1 is free through July 26 — upgrade to unlock the full program.
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-3">
-                      <a
-                        href="/accelerator/session/1"
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
-                        style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
-                      >
-                        Go to Session 1
-                        <span style={{ fontSize: "16px" }}>→</span>
-                      </a>
+                      {(() => {
+                        const sessionColor = SESSIONS[0]?.color ?? "#0074F4";
+                        return (
+                          <a
+                            href="/accelerator/session/1"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-90"
+                            style={{ background: `linear-gradient(135deg, ${sessionColor}, ${sessionColor}cc)` }}
+                          >
+                            <Calendar size={14} />
+                            Go to Session 1
+                            <span style={{ fontSize: "16px" }}>→</span>
+                          </a>
+                        );
+                      })()}
                       <UpgradeCTA reason="no_access" variant="inline" />
                     </div>
                   </>
@@ -1057,28 +1058,7 @@ export default function Accelerator() {
           </section>
         )}
 
-        {/* ── Quick Start (for members — below the fold) ── */}
-        {hasAccess && (
-          <section className="rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4"
-            style={{ background: "rgba(0,116,244,0.05)", border: "1px solid rgba(0,116,244,0.12)" }}>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(0,116,244,0.12)" }}>
-              <Zap size={20} style={{ color: "#4a9eff" }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-semibold text-white">New to WAVV? First Dial in 10 Minutes</h3>
-              <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>A guided quick-start to get you from setup to your first live dial.</p>
-            </div>
-            <button className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-              style={{ background: "#0074F4", color: "#fff" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#005cc5"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "#0074F4"; }}
-            >
-              <Play size={12} />
-              Start
-            </button>
-          </section>
-        )}
+
       </div>
 
       {/* ── Sticky availability bar (non-access users only) ── */}
