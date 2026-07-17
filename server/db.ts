@@ -3018,6 +3018,7 @@ export async function updateAcceleratorSession(id: number, data: Partial<{
   joinUrl: string | null;
   registrationUrl: string | null;
   sessionDateTime: string | null;
+  cheatSheetUrl: string | null;
   comingSoon: boolean;
   isPublished: boolean;
   sortOrder: number;

@@ -9410,6 +9410,7 @@ function AcceleratorTab() {
     joinUrl: "",
     registrationUrl: "",
     sessionDateTime: "",
+    cheatSheetUrl: "",
     comingSoon: false,
     isPublished: false,
   });
@@ -9438,6 +9439,7 @@ function AcceleratorTab() {
       joinUrl: session.joinUrl ?? "",
       registrationUrl: session.registrationUrl ?? "",
       sessionDateTime: session.sessionDateTime ? new Date(session.sessionDateTime).toISOString().slice(0, 16) : "",
+      cheatSheetUrl: session.cheatSheetUrl ?? "",
       comingSoon: session.comingSoon ?? false,
       isPublished: session.isPublished ?? false,
     });
@@ -9459,6 +9461,7 @@ function AcceleratorTab() {
       joinUrl: form.joinUrl || null,
       registrationUrl: form.registrationUrl || null,
       sessionDateTime: form.sessionDateTime ? new Date(form.sessionDateTime).toISOString() : null,
+      cheatSheetUrl: form.cheatSheetUrl || null,
       comingSoon: form.comingSoon,
       isPublished: form.isPublished,
     });
@@ -9625,6 +9628,17 @@ function AcceleratorTab() {
                     value={form.sessionDateTime}
                     onChange={(e) => setForm({ ...form, sessionDateTime: e.target.value })}
                     className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2"
+                  />
+                </div>
+
+                {/* Cheat Sheet URL */}
+                <div>
+                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Cheat Sheet URL (PDF — opens in side panel for users)</label>
+                  <Input
+                    value={form.cheatSheetUrl}
+                    onChange={(e) => setForm({ ...form, cheatSheetUrl: e.target.value })}
+                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
+                    placeholder="https://... or /manus-storage/..."
                   />
                 </div>
 

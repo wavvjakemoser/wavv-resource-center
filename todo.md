@@ -1893,3 +1893,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Replace disabled "Join link opens 15 min before" with a mini countdown that ticks down, then transforms into active "Join Live" button at T-15 min
 - [x] Week 1 free (through July 26): Add "Go to Session 1" button + "Upgrade Your Plan" button side by side on the no-access Accelerator hero
 - [x] Week 1 free callout copy: "Session 1 is free through July 26 — upgrade to unlock the full program."
+- [x] Fix: Update SessionCallCard join button to use mini countdown (same as Session Access section)
+- [x] Register button always visible on session detail pages — active when URL is set, disabled/greyed when not
+- [x] Add per-session "Cheat Sheet URL" field to schema, DB, and admin CMS
+- [x] Add pinned Cheat Sheet callout card on session detail page with side panel PDF viewer

@@ -36,6 +36,7 @@ import {
   Timer,
 } from "lucide-react";
 import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
+import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
 
 // ─── Embed URL helper (Loom, YouTube, Vimeo) ────────────────────────────────
 function getEmbedUrl(url: string): string | null {
@@ -263,15 +264,27 @@ function SessionCallCard({ session: s, now, color }: { session: typeof SCHEDULE[
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>
             Recording available below if posted.
           </p>
-        ) : (
-          <span
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
-            style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.22)", border: "1px solid rgba(255,255,255,0.07)" }}
-          >
-            <Lock size={13} />
-            Join link opens 15 min before
-          </span>
-        )}
+        ) : (() => {
+          // Mini countdown to when join becomes available
+          const msUntilJoin = (s.utcMs - JOIN_WINDOW_MS) - now;
+          const secsUntilJoin = Math.max(0, Math.floor(msUntilJoin / 1000));
+          const jH = Math.floor(secsUntilJoin / 3600);
+          const jM = Math.floor((secsUntilJoin % 3600) / 60);
+          const jS = secsUntilJoin % 60;
+          const pad = (n: number) => String(n).padStart(2, "0");
+          return (
+            <span
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-default select-none"
+              style={{ background: `${glowColor}08`, color: "rgba(255,255,255,0.5)", border: `1px solid ${glowColor}15` }}
+            >
+              <Clock size={13} />
+              Join opens in{" "}
+              <span className="tabular-nums font-bold" style={{ color: glowColor }}>
+                {jH > 0 ? `${pad(jH)}h ${pad(jM)}m ${pad(jS)}s` : `${pad(jM)}m ${pad(jS)}s`}
+              </span>
+            </span>
+          );
+        })()}
       </div>
     </div>
   );
@@ -421,6 +434,9 @@ export default function AcceleratorSession() {
   // Video player state (must be before any conditional returns)
   const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
 
+  // Cheat sheet side panel state (must be before any conditional returns)
+  const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
+
   if (isLoading) {
     return (
       <PortalLayout title="Loading...">
@@ -491,9 +507,14 @@ export default function AcceleratorSession() {
   const cmsRecordings = sessionContent.filter((c: any) => c.contentType === "recording" && c.isVisible);
   const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
 
+  // Side panel for cheat sheet PDF viewer
+  const sidePanel = (
+    <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} pushMode={true} />
+  );
+
   // ─── Member view ─────────────────────────────────────────────────────────
   return (
-    <PortalLayout title={`Session ${session.week}: ${session.title}`}>
+    <PortalLayout title={`Session ${session.week}: ${session.title}`} rightPanel={sidePanel}>
 
       {/* ── Hero header band ── */}
       <div
@@ -576,28 +597,36 @@ export default function AcceleratorSession() {
         </div>
 
         {/* ── Registration + Join buttons (DB-driven) ── */}
-        {(session.registrationUrl || session.joinUrl) && (
-          <section
-            className="rounded-2xl p-5 space-y-3"
-            style={{ background: `${color}08`, border: `1px solid ${color}18` }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar size={15} style={{ color }} />
-              <h3 className="text-sm font-semibold text-white">Session Access</h3>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              {session.registrationUrl && (
-                <a
-                  href={session.registrationUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
-                  style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
-                >
-                  <FileText size={14} />
-                  Register
-                </a>
-              )}
+        <section
+          className="rounded-2xl p-5 space-y-3"
+          style={{ background: `${color}08`, border: `1px solid ${color}18` }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Calendar size={15} style={{ color }} />
+            <h3 className="text-sm font-semibold text-white">Session Access</h3>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Register button — always visible, disabled when no URL */}
+            {session.registrationUrl ? (
+              <a
+                href={session.registrationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
+                style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+              >
+                <FileText size={14} />
+                Register
+              </a>
+            ) : (
+              <span
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed select-none"
+                style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
+              >
+                <FileText size={14} />
+                Register
+              </span>
+            )}
               {session.joinUrl && (() => {
                 // Show Join button only within 15 min of session start
                 const sessionTime = session.sessionDateTime ? new Date(session.sessionDateTime).getTime() : null;
@@ -637,6 +666,41 @@ export default function AcceleratorSession() {
                   </span>
                 );
               })()}
+            </div>
+          </section>
+
+        {/* ── Cheat Sheet callout (pinned resource card) ── */}
+        {session.cheatSheetUrl && (
+          <section
+            className="rounded-2xl p-5"
+            style={{ background: `${color}08`, border: `1px solid ${color}18` }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center"
+                  style={{ background: `${color}15` }}
+                >
+                  <FileText size={18} style={{ color }} />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400">Session {weekId} Resource</p>
+                  <p className="text-sm font-semibold text-white">Session Cheat Sheet</p>
+                </div>
+              </div>
+              <button
+                onClick={() =>
+                  setPanelItem({
+                    type: "pdf",
+                    title: `Session ${weekId} Cheat Sheet`,
+                    url: session.cheatSheetUrl!,
+                  })
+                }
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
+                style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+              >
+                <FileText size={14} /> View Cheat Sheet
+              </button>
             </div>
           </section>
         )}
