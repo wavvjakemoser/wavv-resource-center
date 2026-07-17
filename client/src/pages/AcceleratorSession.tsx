@@ -599,7 +599,7 @@ export default function AcceleratorSession() {
           <div>
             <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle or catching up?</p>
             <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Every previous session recording is available below. Click into any session in the Full Program Schedule to catch up at your own pace.
+              Every previous session recording is available below. You can catch up at your own pace.
             </p>
           </div>
         </div>
@@ -744,8 +744,7 @@ export default function AcceleratorSession() {
           </section>
         )}
 
-        {/* ── Full 12-session schedule ── */}
-        <FullScheduleTable currentWeek={weekId} now={now} />
+
 
       </div>
 

@@ -1936,3 +1936,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove Full Program Schedule section from Accelerator landing page
 - [x] Session detail page: only show live calls for THAT specific session (not all sessions combined)
 - [x] CMS: fold Session Content (Recordings + Product Training) into each session's edit view
+- [x] Remove "Full Program Schedule" section from session detail pages (AcceleratorSession.tsx)
+- [x] Ensure session detail page only shows: Title, Hero CTA, Upcoming Live Calls, WAVV Product Training + Cheat Sheets, Session Recordings
+- [x] Fix /accelerator landing page 404 (nav_visibility setting blocking access) so 6 clickable session tiles render
+- [x] CMS session list: add Visible/Hidden/Coming Soon toggle on each session row (next to Edit button) for quick visibility management

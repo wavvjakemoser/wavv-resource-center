@@ -9504,31 +9504,62 @@ function AcceleratorTab() {
               </div>
             ) : (
               /* ── View mode ── */
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                    style={{ background: `${session.color}18`, color: session.color }}>
-                    Week {session.week}
-                  </span>
-                  <h3 className="text-sm font-medium text-white">{session.title}</h3>
-                  {session.comingSoon ? (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}>Coming Soon</span>
-                  ) : session.isPublished ? (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(16,185,129,0.12)", color: "#10b981" }}>Visible</span>
-                  ) : (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(107,114,128,0.12)", color: "#6b7280" }}>Hidden</span>
-                  )}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                      style={{ background: `${session.color}18`, color: session.color }}>
+                      Week {session.week}
+                    </span>
+                    <h3 className="text-sm font-medium text-white">{session.title}</h3>
+                  </div>
+                  <button
+                    onClick={() => startEdit(session)}
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
+                    style={{ color: "#9ca3af" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9ca3af"; }}
+                  >
+                    <Pencil size={12} />
+                    Edit
+                  </button>
                 </div>
-                <button
-                  onClick={() => startEdit(session)}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all"
-                  style={{ color: "#9ca3af" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#fff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#9ca3af"; }}
-                >
-                  <Pencil size={12} />
-                  Edit
-                </button>
+                {/* Visibility toggle row */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => updateMutation.mutate({ id: session.id, isPublished: true, comingSoon: false })}
+                    className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
+                    style={{
+                      background: session.isPublished && !session.comingSoon ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
+                      color: session.isPublished && !session.comingSoon ? "#10b981" : "rgba(255,255,255,0.4)",
+                      border: session.isPublished && !session.comingSoon ? "1px solid rgba(16,185,129,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    Visible
+                  </button>
+                  <button
+                    onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: false })}
+                    className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
+                    style={{
+                      background: !session.isPublished && !session.comingSoon ? "rgba(107,114,128,0.2)" : "rgba(255,255,255,0.04)",
+                      color: !session.isPublished && !session.comingSoon ? "#9ca3af" : "rgba(255,255,255,0.4)",
+                      border: !session.isPublished && !session.comingSoon ? "1px solid rgba(107,114,128,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    Hidden
+                  </button>
+                  <button
+                    onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: true })}
+                    className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
+                    style={{
+                      background: session.comingSoon ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.04)",
+                      color: session.comingSoon ? "#f59e0b" : "rgba(255,255,255,0.4)",
+                      border: session.comingSoon ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    Coming Soon
+                  </button>
+                </div>
               </div>
             )}
           </div>
