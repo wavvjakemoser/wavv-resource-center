@@ -2666,6 +2666,12 @@ export async function reorderFaqSections(items: { id: number; sortOrder: number 
   ));
 }
 
+export async function updateFaqSectionUrl(id: number, sectionUrl: string | null) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(faqSections).set({ sectionUrl }).where(eq(faqSections.id, id));
+}
+
 // ─── FAQ Entries ──────────────────────────────────────────────────────────────
 export async function getFaqEntriesBySection(sectionId: number, visibleOnly = false) {
   const db = await getDb();

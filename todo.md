@@ -1975,3 +1975,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Session CMS: move Slack URL into its own standalone section with show/hide toggle per session
 - [x] Live call cards: fix visual blending/overlap on Session 1 Upcoming Live Calls section
 - [x] Live call cards: reduce dead space in the bottom body of the tile
+- [x] Resource Hub: add "Open in new tab" button to Help Articles side panel (matching PDF section)
+- [x] Resource Hub: add "Open in new tab" button to FAQs side panel (matching PDF section)
+- [x] Content cards: increase thumbnail height for better image visibility

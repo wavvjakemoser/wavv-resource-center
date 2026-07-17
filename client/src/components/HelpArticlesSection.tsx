@@ -91,8 +91,8 @@ function ArticleRow({
   article,
   onOpenNative,
 }: {
-  article: { id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null };
-  onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null }) => void;
+  article: { id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null; intercomUrl?: string | null };
+  onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) => void;
 }) {
   // A file-backed article has a url but the body is blank/whitespace — open as PDF in side panel
   const hasFile = !!(article.url && article.url.trim());
@@ -103,7 +103,7 @@ function ArticleRow({
     return (
         <button
         type="button"
-        onClick={() => onOpenNative({ title: article.title, nativeBody: article.nativeBody ?? " ", fileUrl: article.url ?? null })}
+        onClick={() => onOpenNative({ title: article.title, nativeBody: article.nativeBody ?? " ", fileUrl: null, articleUrl: article.url ?? null })}
         className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-left group"
         style={{ background: "transparent", border: "1px solid transparent" }}
         onMouseEnter={(e) => {
@@ -187,8 +187,8 @@ function SectionGroup({
   onOpenNative,
 }: {
   name: string;
-  articles: Array<{ id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null }>;
-  onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null }) => void;
+  articles: Array<{ id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null; intercomUrl?: string | null }>;
+  onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -243,15 +243,15 @@ function SectionGroup({
 }
 
 // ─── Main Export ──────────────────────────────────────────────────────────────
-export default function HelpArticlesSection({ search, onOpenArticle }: { search: string; onOpenArticle?: (article: { title: string; nativeBody: string; fileUrl?: string | null }) => void }) {
+export default function HelpArticlesSection({ search, onOpenArticle }: { search: string; onOpenArticle?: (article: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) => void }) {
   // Use visible sections as source of truth — show sections even if no articles yet
   const { data: sections = [], isLoading: sectionsLoading } = trpc.helpArticles.listSections.useQuery();
   const { data: published = [], isLoading: articlesLoading } = trpc.helpArticles.listPublished.useQuery();
   const isLoading = sectionsLoading || articlesLoading;
 
   // Inline native article modal state — only used when onOpenArticle prop is not provided
-  const [openArticle, setOpenArticle] = useState<{ title: string; nativeBody: string; fileUrl?: string | null } | null>(null);
-  const handleOpenNative = (article: { title: string; nativeBody: string; fileUrl?: string | null }) => {
+  const [openArticle, setOpenArticle] = useState<{ title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null } | null>(null);
+  const handleOpenNative = (article: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) => {
     if (onOpenArticle) onOpenArticle(article);
     else setOpenArticle(article);
   };

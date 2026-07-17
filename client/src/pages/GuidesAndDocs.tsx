@@ -236,7 +236,7 @@ function PdfSection({
 
 // ─── FAQ Entry row (inline accordion — kept for the list view) ────────────────
 type FaqEntry = { id: number; question: string; answer: string; isVisible: boolean; sortOrder: number; fileUrl?: string | null; fileName?: string | null };
-type FaqSectionType = { id: number; name: string; isVisible: boolean; sortOrder: number; entries: FaqEntry[] };
+type FaqSectionType = { id: number; name: string; isVisible: boolean; sortOrder: number; sectionUrl?: string | null; entries: FaqEntry[] };
 
 function FaqSubSection({ section, search, onOpenPanel }: { section: FaqSectionType; search: string; onOpenPanel: (s: FaqSectionType) => void }) {
   const filteredEntries = section.entries.filter(e =>
@@ -340,11 +340,11 @@ export default function GuidesAndDocs() {
         fileUrl: e.fileUrl,
         fileName: e.fileName,
       }));
-    setPanelItem({ type: "faq", sectionName: section.name, entries });
+    setPanelItem({ type: "faq", sectionName: section.name, entries, sectionUrl: section.sectionUrl ?? null });
   };
 
-  const handleOpenArticle = (article: { title: string; nativeBody: string; fileUrl?: string | null }) => {
-    setPanelItem({ type: "article", title: article.title, nativeBody: article.nativeBody, fileUrl: article.fileUrl ?? null });
+  const handleOpenArticle = (article: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) => {
+    setPanelItem({ type: "article", title: article.title, nativeBody: article.nativeBody, fileUrl: article.fileUrl ?? null, articleUrl: article.articleUrl ?? null });
   };
 
   // Only PDFs — filter by search

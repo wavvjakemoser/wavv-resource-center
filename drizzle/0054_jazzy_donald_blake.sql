@@ -1,0 +1,1 @@
+ALTER TABLE `faq_sections` ADD `section_url` text;

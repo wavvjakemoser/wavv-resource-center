@@ -169,6 +169,7 @@ import {
   toggleFaqEntryVisibility,
   deleteFaqEntry,
   reorderFaqEntries,
+  updateFaqSectionUrl,
   getTopSearchTerms,
   getTotalSignedInUsers,
   getTotalLessonsCompleted,
@@ -2137,6 +2138,9 @@ export const appRouter = router({
     reorderEntries: publisherProcedure
       .input(z.object({ items: z.array(z.object({ id: z.number(), sortOrder: z.number() })) }))
       .mutation(({ input }) => reorderFaqEntries(input.items)),
+    updateSectionUrl: publisherProcedure
+      .input(z.object({ id: z.number(), sectionUrl: z.string().nullable() }))
+      .mutation(({ input }) => updateFaqSectionUrl(input.id, input.sectionUrl)),
   }),
 
   readiness: router({

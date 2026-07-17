@@ -484,6 +484,8 @@ export const faqSections = mysqlTable("faq_sections", {
   name: varchar("name", { length: 255 }).notNull().unique(),
   sortOrder: int("sort_order").default(0).notNull(),
   isVisible: boolean("is_visible").default(true).notNull(),
+  // Optional URL to open the full FAQ section in a new tab (e.g. Intercom collection URL)
+  sectionUrl: text("section_url"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

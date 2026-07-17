@@ -34,9 +34,9 @@ export type FaqPanelEntry = {
 };
 
 export type PanelItem =
-  | { type: "article"; title: string; nativeBody: string; fileUrl?: string | null }
+  | { type: "article"; title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }
   | { type: "pdf";     title: string; url: string }
-  | { type: "faq";     sectionName: string; entries: FaqPanelEntry[] };
+  | { type: "faq";     sectionName: string; entries: FaqPanelEntry[]; sectionUrl?: string | null };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ARTICLE_COLOR = "#8B5CF6";
@@ -104,7 +104,7 @@ function FaqPanelEntryRow({ entry }: { entry: FaqPanelEntry }) {
 
 // ─── Panel content renderers ──────────────────────────────────────────────────
 
-function ArticleContent({ title, nativeBody, fileUrl }: { title: string; nativeBody: string; fileUrl?: string | null }) {
+function ArticleContent({ title, nativeBody, fileUrl, articleUrl }: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) {
   // If nativeBody contains no HTML tags (plain text from the textarea), wrap each
   // non-empty line in a <p> so the native-article-body CSS can style it correctly.
   const isHtml = /<[a-z][\s\S]*>/i.test(nativeBody);
@@ -116,15 +116,30 @@ function ArticleContent({ title, nativeBody, fileUrl }: { title: string; nativeB
         .filter(line => line.length > 0)
         .map(line => `<p>${line}</p>`)
         .join("") || `<p>${nativeBody}</p>`;
+  const openUrl = fileUrl ?? articleUrl ?? null;
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 mb-4 flex-shrink-0">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${ARTICLE_COLOR}18` }}>
-          <BookOpen size={14} style={{ color: ARTICLE_COLOR }} />
+      <div className="flex items-center justify-between mb-4 flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${ARTICLE_COLOR}18` }}>
+            <BookOpen size={14} style={{ color: ARTICLE_COLOR }} />
+          </div>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${ARTICLE_COLOR}15`, color: ARTICLE_COLOR }}>
+            Help Article
+          </span>
         </div>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${ARTICLE_COLOR}15`, color: ARTICLE_COLOR }}>
-          Help Article
-        </span>
+        {openUrl && (
+          <a
+            href={openUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={{ background: `${ARTICLE_COLOR}12`, color: ARTICLE_COLOR, border: `1px solid ${ARTICLE_COLOR}25` }}
+          >
+            <ExternalLink size={11} />
+            Open in tab
+          </a>
+        )}
       </div>
       <h2 className="text-lg font-bold text-white leading-snug mb-5 flex-shrink-0">{title}</h2>
       <div className="h-px mb-5 flex-shrink-0" style={{ background: `${ARTICLE_COLOR}20` }} />
@@ -205,16 +220,30 @@ function PdfContent({ title, url }: { title: string; url: string }) {
   );
 }
 
-function FaqContent({ sectionName, entries }: { sectionName: string; entries: FaqPanelEntry[] }) {
+function FaqContent({ sectionName, entries, sectionUrl }: { sectionName: string; entries: FaqPanelEntry[]; sectionUrl?: string | null }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 mb-4 flex-shrink-0">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${FAQ_COLOR}18` }}>
-          <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
+      <div className="flex items-center justify-between mb-4 flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${FAQ_COLOR}18` }}>
+            <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
+          </div>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
+            FAQ
+          </span>
         </div>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
-          FAQ
-        </span>
+        {sectionUrl && (
+          <a
+            href={sectionUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+            style={{ background: `${FAQ_COLOR}12`, color: FAQ_COLOR, border: `1px solid ${FAQ_COLOR}25` }}
+          >
+            <ExternalLink size={11} />
+            Open in tab
+          </a>
+        )}
       </div>
       <h2 className="text-lg font-bold text-white leading-snug mb-2 flex-shrink-0">{sectionName}</h2>
       <p className="text-xs text-gray-500 mb-5 flex-shrink-0">
@@ -274,9 +303,9 @@ function PanelBody({ item }: { item: PanelItem | null }) {
   if (!item) return null;
   return (
     <div className="flex-1 overflow-hidden px-5 py-5">
-      {item.type === "article" && <ArticleContent title={item.title} nativeBody={item.nativeBody} fileUrl={item.fileUrl} />}
+      {item.type === "article" && <ArticleContent title={item.title} nativeBody={item.nativeBody} fileUrl={item.fileUrl} articleUrl={item.articleUrl} />}
       {item.type === "pdf"     && <PdfContent title={item.title} url={item.url} />}
-      {item.type === "faq"     && <FaqContent sectionName={item.sectionName} entries={item.entries} />}
+      {item.type === "faq"     && <FaqContent sectionName={item.sectionName} entries={item.entries} sectionUrl={item.sectionUrl} />}
     </div>
   );
 }

@@ -6720,6 +6720,11 @@ function FaqSectionsPanel() {
   const reorderFaqMutation = trpc.faq.reorderSections.useMutation({
     onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); },
   });
+  const updateSectionUrlMutation = trpc.faq.updateSectionUrl.useMutation({
+    onSuccess: () => { utils.faq.listSectionsAdmin.invalidate(); utils.faq.listSectionsPublic.invalidate(); toast.success("Section URL updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  const [editingSectionUrl, setEditingSectionUrl] = useState<{ id: number; url: string } | null>(null);
   function handleFaqSectionDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -6804,12 +6809,36 @@ function FaqSectionsPanel() {
                 {section.isVisible ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
               </button>
               <button
+                onClick={() => setEditingSectionUrl({ id: section.id, url: section.sectionUrl ?? "" })}
+                className="text-gray-600 hover:text-blue-400 transition"
+                title="Set section URL (shown as Open in tab in the side panel)"
+              ><ExternalLink size={13} /></button>
+              <button
                 onClick={() => { if (confirm(`Delete "${section.name}" and all its entries?`)) deleteSectionMutation.mutate({ id: section.id }); }}
                 className="text-gray-600 hover:text-red-400 transition"
                 title="Delete section"
               ><Trash2 size={13} /></button>
             </div>
           </div>
+          {/* Section URL editor */}
+          {editingSectionUrl?.id === section.id && (
+            <div className="px-4 py-2 flex items-center gap-2" style={{ background: "#131824", borderTop: "1px solid #2a2a2a" }}>
+              <span className="text-xs text-gray-500 flex-shrink-0">Section URL (opens in tab):</span>
+              <input
+                className="flex-1 text-xs text-white bg-transparent border-b border-blue-500 outline-none px-1"
+                value={editingSectionUrl.url}
+                onChange={e => setEditingSectionUrl(v => v ? { ...v, url: e.target.value } : null)}
+                placeholder="https://... (leave blank to hide button)"
+                onKeyDown={e => {
+                  if (e.key === "Enter") { updateSectionUrlMutation.mutate({ id: section.id, sectionUrl: editingSectionUrl.url.trim() || null }); setEditingSectionUrl(null); }
+                  if (e.key === "Escape") setEditingSectionUrl(null);
+                }}
+                autoFocus
+              />
+              <button onClick={() => { updateSectionUrlMutation.mutate({ id: section.id, sectionUrl: editingSectionUrl.url.trim() || null }); setEditingSectionUrl(null); }} className="text-xs px-2 py-0.5 rounded font-semibold text-white" style={{ background: "#3b82f6" }}>Save</button>
+              <button onClick={() => setEditingSectionUrl(null)} className="text-xs text-gray-500 hover:text-white">Cancel</button>
+            </div>
+          )}
           {/* Entries */}
           {expandedSections.has(section.id) && (
             <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#161b27" }}>
