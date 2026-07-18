@@ -10,7 +10,6 @@ import {
   GraduationCap,
   Play,
   Lock,
-  Rocket,
   Wrench,
   Lightbulb,
   Video,
@@ -34,8 +33,8 @@ const CATEGORIES = [
     label: "Onboarding",
     subtitle: "Everything you need to hit the ground running — from day one to fully dialing.",
     color: "#0074F4",
-    icon: Rocket,
-    thumbnail: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663417013740/JHIRajYPPlnohilQ.png",
+    icon: GraduationCap,
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-banner-TmVyQ8is7oGEnLY2EWdwPQ.webp",
     placeholders: [
       {
         id: "p-onb-1",
@@ -69,7 +68,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step walkthroughs for the features you use most.",
     color: "#00A9E2",
     icon: Wrench,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v6-K3TYV9Xeg5ZaWLpmZiJwHh.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-banner-VfckEZXCoBSM5mgbMe7eP5.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -103,7 +102,7 @@ const CATEGORIES = [
     subtitle: "Dial smarter, not harder. Frameworks and tactics to get more out of every session.",
     color: "#67C728",
     icon: Lightbulb,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v7-h4rfU3p4xkyGFotsGxeuPW.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-banner-TYUrEvUSdZ4nQiZC2YJrtp.webp",
     placeholders: [
       {
         id: "p-str-1",
@@ -367,22 +366,22 @@ export default function Academy() {
                   className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
                   style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "160px" }}
                 >
-                  {/* Background gradient — no image, clean dark card with color accent */}
+                  {/* Photo background */}
+                  <img
+                    src={cat.thumbnail}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ opacity: 0.85 }}
+                  />
+                  {/* Dark gradient overlay — left side for text legibility */}
                   <div
                     className="absolute inset-0"
-                    style={{ background: `linear-gradient(135deg, rgba(8,10,16,1) 0%, rgba(8,10,16,0.95) 60%, ${cat.color}18 100%)` }}
+                    style={{ background: "linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.15) 100%)" }}
                   />
-                  {/* Large icon watermark — right side */}
-                  <div
-                    className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none"
-                    style={{ opacity: 0.35, color: cat.color }}
-                  >
-                    <cat.icon size={100} strokeWidth={1.2} />
-                  </div>
-                  {/* Colour accent glow — subtle, centre-right */}
+                  {/* Subtle color tint at bottom */}
                   <div
                     className="absolute inset-0 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse at 80% 50%, ${cat.color}14 0%, transparent 55%)` }}
+                    style={{ background: `linear-gradient(to top, ${cat.color}18 0%, transparent 60%)` }}
                   />
                   {/* Content overlay — category label, subtitle, and count badges */}
                   <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
@@ -423,7 +422,7 @@ export default function Academy() {
 
       {/* ── Request a Video CTA ── */}
       <div className="px-4 lg:px-8 pb-10">
-        <ContentRequestCTA requestType="video" />
+        <ContentRequestCTA requestType="video" accentColor="#0074F4" />
       </div>
     </PortalLayout>
   );
@@ -458,24 +457,36 @@ export function ContentRequestCTA({
 
   return (
     <>
+      {/* Divider */}
+      <div className="mb-6" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} />
       <div
-        className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-5"
-        style={{ background: `linear-gradient(135deg, ${accent}10 0%, #0a0f1a 100%)`, border: `1px solid ${accent}25` }}
+        className="flex flex-col sm:flex-row items-center gap-5 rounded-2xl px-6 py-5"
+        style={{
+          background: `linear-gradient(135deg, ${accent}08 0%, rgba(0,0,0,0) 100%)`,
+          border: `1px solid ${accent}20`,
+        }}
       >
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl flex-shrink-0" style={{ background: `${accent}18` }}>
-            <CtaIcon size={18} style={{ color: accent }} />
-          </div>
-          <div>
-            <p className="text-white font-semibold text-sm">Request a {typeLabel}</p>
-            <p className="text-gray-300 text-xs mt-0.5">{tagline}</p>
-          </div>
+        {/* Icon badge */}
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: `${accent}15`, border: `1px solid ${accent}30` }}
+        >
+          <CtaIcon size={22} style={{ color: accent }} />
         </div>
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-bold text-sm mb-0.5">Request a {typeLabel}</p>
+          <p className="text-white text-xs leading-relaxed">{tagline}</p>
+        </div>
+        {/* CTA button */}
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all hover:opacity-90 flex-shrink-0"
-          style={{ background: accent, color: "#000" }}
+          className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all"
+          style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}40` }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = `${accent}35`; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = `${accent}20`; }}
         >
+          <Sparkles size={13} />
           Request a {typeLabel}
         </button>
       </div>
