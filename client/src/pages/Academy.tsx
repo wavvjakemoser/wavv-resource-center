@@ -365,14 +365,19 @@ export default function Academy() {
                 <Link
                   href={`/academy/category/${encodeURIComponent(cat.key)}`}
                   className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
-                  style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "160px" }}
+                  style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "200px" }}
                 >
                   {/* Photo background */}
-                  <img
-                    src={cat.thumbnail}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{ opacity: 0.85, objectPosition: "75% center", transform: "scale(0.85)", transformOrigin: "right center" }}
+                  {/* Background image — positioned right, sized to show full icon without cropping */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: `url(${cat.thumbnail})`,
+                      backgroundSize: "55% auto",
+                      backgroundPosition: "right center",
+                      backgroundRepeat: "no-repeat",
+                      opacity: 0.85,
+                    }}
                   />
                   {/* Dark gradient overlay — left side for text legibility */}
                   <div
