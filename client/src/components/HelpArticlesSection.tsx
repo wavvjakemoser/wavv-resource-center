@@ -15,7 +15,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { HelpCircle, ExternalLink, ChevronDown, ChevronRight, Search, X, ArrowLeft } from "lucide-react";
+import { HelpCircle, ExternalLink, ChevronDown, ChevronRight, Search, X, ArrowLeft, BookOpen } from "lucide-react";
 
 const ACCENT = "#8B5CF6";
 
@@ -94,10 +94,16 @@ function ArticleRow({
   article: { id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null; intercomUrl?: string | null };
   onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) => void;
 }) {
-  const isIntercomUrl = !!(article.url && article.url.includes('intercom'));
-  const hasFile = !!(article.url && article.url.trim() && !isIntercomUrl);
+  // Use intercomArticleId presence (not URL domain) to classify Intercom articles.
+  // WAVV's Intercom help center uses a custom domain (help.wavv.com), not intercom.com,
+  // so URL substring matching is unreliable. Intercom articles should open in a new tab
+  // (their pages block iframing via X-Frame-Options), while native articles open in panel.
+  const isIntercomArticle = !!article.intercomArticleId;
+  // A file URL is only valid for native (non-Intercom) articles that have a storage URL
+  const hasFile = !!(article.url && article.url.trim() && !isIntercomArticle);
   const hasBody = !!(article.nativeBody && article.nativeBody.trim() && article.nativeBody !== "<p></p>");
-  const isNative = hasFile || hasBody || isIntercomUrl;
+  // Open in panel only for native articles (has body or storage file)
+  const isNative = !isIntercomArticle && (hasFile || hasBody);
 
   const sharedStyle = {
     background: "#1d2230",
@@ -141,7 +147,7 @@ function ArticleRow({
           title: article.title,
           nativeBody: article.nativeBody ?? " ",
           fileUrl: hasFile ? (article.url ?? null) : null,
-          articleUrl: isIntercomUrl ? (article.url ?? null) : (article.intercomUrl ?? null),
+          articleUrl: article.intercomUrl ?? null,
         })}
         className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all group text-left"
         style={sharedStyle}
