@@ -299,7 +299,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                   </svg>
                 </div>
                 <span className="flex-1 min-w-0 text-sm whitespace-nowrap">WAVV Chrome Extension</span>
-                <ExternalLink size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
+                <ExternalLink size={12} className="flex-shrink-0 ml-2" style={{ color: "rgba(255,255,255,0.3)" }} />
               </a>
             </div>
           )}
