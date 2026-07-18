@@ -390,26 +390,34 @@ export default function Academy() {
                     <rect width="100%" height="100%" fill={`url(#circuit-${cat.key})`}/>
                   </svg>
 
-                  {/* Radial color glow — right side */}
-                  <div
-                    className="absolute pointer-events-none"
-                    style={{
-                      right: "-60px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      width: "420px",
-                      height: "420px",
-                      borderRadius: "50%",
-                      background: `radial-gradient(circle, ${cat.color}30 0%, ${cat.color}10 40%, transparent 70%)`,
-                    }}
-                  />
-
-                  {/* Neon scan line */}
+                  {/* Full-width radial color glow — centered across entire tile */}
                   <div
                     className="absolute inset-0 pointer-events-none"
                     style={{
-                      background: `linear-gradient(180deg, transparent 0%, ${cat.color}08 50%, transparent 100%)`,
+                      background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${cat.color}28 0%, ${cat.color}10 45%, transparent 75%)`,
                     }}
+                  />
+
+                  {/* Secondary glow — left edge so effects bleed across full width */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: `radial-gradient(ellipse 60% 80% at 15% 50%, ${cat.color}12 0%, transparent 60%)`,
+                    }}
+                  />
+
+                  {/* Neon scan line — full width */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: `linear-gradient(180deg, ${cat.color}06 0%, ${cat.color}12 50%, ${cat.color}06 100%)`,
+                    }}
+                  />
+
+                  {/* Top edge neon line */}
+                  <div
+                    className="absolute top-0 left-0 right-0 pointer-events-none"
+                    style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${cat.color}60 30%, ${cat.color}90 60%, transparent 100%)` }}
                   />
 
                   {/* Thumbnail image — large, right-aligned, key part visible */}
@@ -442,13 +450,13 @@ export default function Academy() {
 
                   {/* Content overlay — category label, subtitle, and count badges */}
                   <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
-                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: cat.color }}>
+                    <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: cat.color }}>
                       WAVV Academy
                     </p>
-                    <h2 className="text-2xl font-extrabold text-white leading-tight">
+                    <h2 className="text-4xl font-extrabold text-white leading-tight mb-1">
                       {cat.label}
                     </h2>
-                    <p className="text-sm text-white mb-2">{cat.subtitle}</p>
+                    <p className="text-base text-white mb-3">{cat.subtitle}</p>
                     {(() => {
                       const counts = dbCounts[cat.key];
                       if (!counts) return null;
