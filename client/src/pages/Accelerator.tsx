@@ -802,7 +802,7 @@ export default function Accelerator() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #00A9E2)" }} />
+              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
               <h2 className="text-xl font-bold text-white">The Curriculum</h2>
             </div>
             {hasAccess && (
@@ -939,7 +939,7 @@ export default function Accelerator() {
         {/* ── The Partnership ── */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #00A9E2)" }} />
+            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
             <h2 className="text-xl font-bold text-white">The Partnership</h2>
           </div>
           <div
@@ -985,7 +985,7 @@ export default function Accelerator() {
               </div>
             </div>
             {/* Bottom summary */}
-            <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+            <div className="mt-3 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
               <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.45)" }}>
                 Together, we combine <span className="font-medium" style={{ color: "#0074F4" }}>hands-on product training</span> with <span className="font-medium" style={{ color: "#f97316" }}>live sales coaching</span> — so every skill you learn gets applied inside the tool you're already using.
               </p>
@@ -996,7 +996,7 @@ export default function Accelerator() {
         {/* ── What's Included ── */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #00A9E2)" }} />
+            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
             <h2 className="text-xl font-bold text-white">What's Included</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1100,7 +1100,7 @@ export default function Accelerator() {
         {/* ── FAQ ── */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #00A9E2)" }} />
+            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
             <h2 className="text-xl font-bold text-white">FAQs</h2>
           </div>
           <div className="space-y-2">

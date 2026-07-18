@@ -2002,3 +2002,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Non-WAVV member page: fix section spacing (sections too close together)
 - [x] Partnership section: fix text alignment and logo positioning on both non-member and member pages
 - [x] Both member pages: add "Join the Slack Community" section with Slack banner below existing content
+
+## Session 5 Fixes (Jul 17 2026)
+- [x] Live call tiles: remove dead space below countdown — tighten tile body so it doesn't have excess empty area
+- [x] ContentCard thumbnails: match style/size to Webinars On-Demand thumbnails (taller, consistent aspect ratio)
+- [x] Accelerator page: WAVV member and non-member section headers — change blue accent to orange
+- [x] Accelerator page: normalize hero section height; move countdown timer to a separate section below the hero so it doesn't distort hero proportions
+- [x] Accelerator page: fix partnership section empty space below text
+- [x] Session pages: confirm "Join the Slack Community" section is at the very bottom; apply gradient section headers consistently across all subsections (matching Home page "What is WAVV" gradient style)
