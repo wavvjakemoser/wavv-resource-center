@@ -47,7 +47,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="flex items-start gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer"
       style={{
         fontSize: "15px",
         ...(isActive ? {
@@ -81,25 +81,24 @@ function NavLink({
       >
         <Icon size={17} style={{ color }} />
       </div>
-      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-        <span style={{ whiteSpace: "normal", lineHeight: "1.3" }}>{label}</span>
-        {comingSoon && (
-          <span
-            className="self-start text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-            style={{ background: "rgba(168,85,247,0.18)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }}
-          >
-            Soon
-          </span>
-        )}
-        {isHidden && (
-          <span
-            className="self-start text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-            style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
-          >
-            Hidden
-          </span>
-        )}
-      </div>
+      <span className="flex-1 min-w-0" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "clip" }}>{label}</span>
+
+      {comingSoon && (
+        <span
+          className="flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ml-auto"
+          style={{ background: "rgba(168,85,247,0.18)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.3)" }}
+        >
+          Soon
+        </span>
+      )}
+      {isHidden && (
+        <span
+          className="flex-shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ml-auto"
+          style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.3)" }}
+        >
+          Hidden
+        </span>
+      )}
     </Link>
   );
 }
@@ -193,8 +192,8 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
-            width: "260px",
-            minWidth: "260px",
+            width: "280px",
+            minWidth: "280px",
             background: "#0f1318",
             borderRight: "1px solid #1e2030",
             flexShrink: 0,
