@@ -155,7 +155,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
   // Maintenance mode — show a holding page for non-owners on non-admin pages
   if (maintenanceMode && !isOwner && !isAdminPage) {
     return (
-      <div className="h-screen flex items-center justify-center flex-col gap-4" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
+      <div className="h-screen flex items-center justify-center flex-col gap-4" style={{ background: "#000000", fontFamily: "'Inter', sans-serif" }}>
         <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" style={{ height: "28px", marginBottom: "8px" }} />
         <h1 className="text-2xl font-bold text-white">We'll be right back</h1>
         <p className="text-sm text-gray-400 max-w-sm text-center">The WAVV Success Center is undergoing scheduled maintenance. Check back shortly.</p>
@@ -164,7 +164,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#161b22", fontFamily: "'Inter', sans-serif" }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: "#000000", fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── Announcement Banner ── */}
       {announcementEnabled && announcementText && (
@@ -335,7 +335,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
           {/* ── Top bar ── */}
           <header
             className="flex items-center gap-3 px-4 lg:px-6 py-3 sticky top-0 z-30"
-            style={{ background: "#161b22", borderBottom: "1px solid #1e2030" }}
+            style={{ background: "#000000", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
           >
             {/* Mobile hamburger */}
             <button

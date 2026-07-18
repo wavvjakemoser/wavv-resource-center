@@ -2018,3 +2018,14 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Playground: add gradient bar separator to GO HIGH LEVEL and HUBSPOT section headers (keep logos, add the "|" bar)
 - [x] Site-wide: turn grey body/description text to white on Home, Academy, Webinars, Resource Hub, Playground
 - [x] Left nav panel: ensure all text fits without overflow; fix hidden banners not covering content
+
+## Session 8 Fixes (Jul 18 2026)
+- [x] Resource Hub: align Help Article and FAQ rows to match PDF row style (same card bg, icon badge, white title, hover "Open" pill)
+- [x] Resource Hub: fix Intercom article open crash (use intercomArticleId for classification, not URL domain matching)
+- [x] Resource Hub: fix FAQ section to use collapsible subsection headers matching PDF/Help Articles pattern
+- [x] Site-wide: grey-to-white text sweep on Partners, Accelerator, Playground, Webinars, Resource Hub, Dashboard
+- [x] Title size/weight bumps on Accelerator, Partners, Dashboard section headers
+- [x] Sidebar: jet-black background, WAVV gradient right border, larger logo, Quick Links moved below Programs
+- [x] All hero sections: remove tile/card background — keep text only
+- [x] Accelerator timer: update existing live call DB records to 12:00 PM MDT (18:00 UTC)
+- [x] Accelerator timer: fix form default so new calls default to noon MT (not noon UTC)
