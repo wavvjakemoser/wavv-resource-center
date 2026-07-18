@@ -368,14 +368,17 @@ export default function Academy() {
                   style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "200px" }}
                 >
                   {/* Photo background */}
-                  {/* Background image — positioned right, sized to show full icon without cropping */}
-                  <div
-                    className="absolute inset-0"
+                  {/* Thumbnail image — fixed height, right-aligned, fully visible inside tile */}
+                  <img
+                    src={cat.thumbnail}
+                    alt=""
+                    className="absolute pointer-events-none"
                     style={{
-                      backgroundImage: `url(${cat.thumbnail})`,
-                      backgroundSize: "55% auto",
-                      backgroundPosition: "right center",
-                      backgroundRepeat: "no-repeat",
+                      right: 0,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      height: "170px",
+                      width: "auto",
                       opacity: 0.85,
                     }}
                   />

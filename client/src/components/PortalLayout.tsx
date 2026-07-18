@@ -220,7 +220,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                 <img
                 src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
                 alt="WAVV"
-                style={{ height: "48px", width: "auto" }}
+                style={{ height: "36px", width: "auto" }}
               />
             </a>
             <button
