@@ -35,6 +35,7 @@ const CATEGORIES = [
     subtitle: "Everything you need to hit the ground running — from day one to fully dialing.",
     color: "#0074F4",
     icon: Compass,
+    bgPosition: "center 35%",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-compass-banner-YbicPXD3ys442NgmseuCgq.webp",
     placeholders: [
       {
@@ -69,6 +70,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step walkthroughs for the features you use most.",
     color: "#00A9E2",
     icon: Wrench,
+    bgPosition: "center 20%",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-banner-VfckEZXCoBSM5mgbMe7eP5.webp",
     placeholders: [
       {
@@ -103,6 +105,7 @@ const CATEGORIES = [
     subtitle: "Dial smarter, not harder. Frameworks and tactics to get more out of every session.",
     color: "#67C728",
     icon: Lightbulb,
+    bgPosition: "center 15%",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-banner-TYUrEvUSdZ4nQiZC2YJrtp.webp",
     placeholders: [
       {
@@ -426,7 +429,7 @@ export default function Academy() {
                     style={{
                       backgroundImage: `url(${cat.thumbnail})`,
                       backgroundSize: "cover",
-                      backgroundPosition: "center center",
+                      backgroundPosition: cat.bgPosition ?? "center center",
                       opacity: 0.55,
                     }}
                   />
