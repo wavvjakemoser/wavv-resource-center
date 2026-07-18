@@ -8,6 +8,7 @@ import {
   Clock,
   ChevronRight,
   GraduationCap,
+  Compass,
   Play,
   Lock,
   Wrench,
@@ -33,8 +34,8 @@ const CATEGORIES = [
     label: "Onboarding",
     subtitle: "Everything you need to hit the ground running — from day one to fully dialing.",
     color: "#0074F4",
-    icon: GraduationCap,
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-banner-TmVyQ8is7oGEnLY2EWdwPQ.webp",
+    icon: Compass,
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-compass-banner-YbicPXD3ys442NgmseuCgq.webp",
     placeholders: [
       {
         id: "p-onb-1",
@@ -371,7 +372,7 @@ export default function Academy() {
                     src={cat.thumbnail}
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover"
-                    style={{ opacity: 0.85 }}
+                    style={{ opacity: 0.85, objectPosition: "75% center", transform: "scale(0.85)", transformOrigin: "right center" }}
                   />
                   {/* Dark gradient overlay — left side for text legibility */}
                   <div
