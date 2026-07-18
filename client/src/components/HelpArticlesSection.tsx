@@ -94,18 +94,48 @@ function ArticleRow({
   article: { id: number; intercomArticleId: string | null; title: string; url: string | null; nativeBody?: string | null; intercomUrl?: string | null };
   onOpenNative: (article: { title: string; nativeBody: string; fileUrl?: string | null; articleUrl?: string | null }) => void;
 }) {
-  // Distinguish file-backed (storage/PDF) URLs from Intercom Help Center URLs.
-  // Intercom article URLs contain 'intercom' in the domain — treat them as
-  // articleUrl ("Open in tab" link) rather than fileUrl (PDF iframe).
   const isIntercomUrl = !!(article.url && article.url.includes('intercom'));
   const hasFile = !!(article.url && article.url.trim() && !isIntercomUrl);
   const hasBody = !!(article.nativeBody && article.nativeBody.trim() && article.nativeBody !== "<p></p>");
-  // Open in panel when: has a rendered body, is a file, or is an Intercom article with a URL
   const isNative = hasFile || hasBody || isIntercomUrl;
+
+  const sharedStyle = {
+    background: "#1d2230",
+    border: "1px solid #252d3d",
+  };
+  const hoverBorderColor = `${ACCENT}50`;
+
+  const inner = (
+    <>
+      {/* Icon badge */}
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{ background: `${ACCENT}18` }}
+      >
+        <BookOpen size={15} style={{ color: ACCENT }} />
+      </div>
+
+      {/* Title */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-white leading-snug truncate">
+          {article.title}
+        </p>
+      </div>
+
+      {/* Open cue — appears on hover */}
+      <span
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0 transition-all opacity-0 group-hover:opacity-100"
+        style={{ background: `${ACCENT}18`, color: ACCENT, border: `1px solid ${ACCENT}35` }}
+      >
+        <ExternalLink size={11} />
+        Open
+      </span>
+    </>
+  );
 
   if (isNative) {
     return (
-        <button
+      <button
         type="button"
         onClick={() => onOpenNative({
           title: article.title,
@@ -113,37 +143,12 @@ function ArticleRow({
           fileUrl: hasFile ? (article.url ?? null) : null,
           articleUrl: isIntercomUrl ? (article.url ?? null) : (article.intercomUrl ?? null),
         })}
-        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-left group"
-        style={{ background: "transparent", border: "1px solid transparent" }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.background = "#1d2230";
-          (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT}30`;
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.background = "transparent";
-          (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-        }}
+        className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all group text-left"
+        style={sharedStyle}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = hoverBorderColor; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; }}
       >
-        {/* Dot indicator */}
-        <div
-          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-          style={{ background: `${ACCENT}60` }}
-        />
-
-        {/* Title */}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-200 leading-snug truncate group-hover:text-white transition-colors">
-            {article.title}
-          </p>
-        </div>
-
-        {/* Read cue — appears on hover */}
-        <span
-          className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ color: ACCENT }}
-        >
-          Read
-        </span>
+        {inner}
       </button>
     );
   }
@@ -153,37 +158,12 @@ function ArticleRow({
       href={article.url ?? "#"}
       target="_blank"
       rel="noopener noreferrer"
-      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all text-left group"
-      style={{ background: "transparent", border: "1px solid transparent", textDecoration: "none" }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "#1d2230";
-        (e.currentTarget as HTMLElement).style.borderColor = `${ACCENT}30`;
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "transparent";
-        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-      }}
+      className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all group text-left"
+      style={{ ...sharedStyle, textDecoration: "none" }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = hoverBorderColor; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#252d3d"; }}
     >
-      {/* Dot indicator */}
-      <div
-        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-        style={{ background: `${ACCENT}60` }}
-      />
-
-      {/* Title */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-200 leading-snug truncate group-hover:text-white transition-colors">
-          {article.title}
-        </p>
-      </div>
-
-      {/* Read link — appears on hover */}
-      <span
-        className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ color: ACCENT }}
-      >
-        <ExternalLink size={10} /> Read
-      </span>
+      {inner}
     </a>
   );
 }

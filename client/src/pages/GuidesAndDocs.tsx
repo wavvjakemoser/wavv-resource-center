@@ -247,25 +247,42 @@ function FaqSubSection({ section, search, onOpenPanel }: { section: FaqSectionTy
   );
 
   return (
-    <section>
-      <button
-        type="button"
-        onClick={() => onOpenPanel(section)}
-        className="w-full flex items-center gap-3 mb-3 group transition-all"
+    <button
+      type="button"
+      onClick={() => onOpenPanel(section)}
+      className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all group text-left"
+      style={{ background: "#1d2230", border: "1px solid #252d3d" }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${FAQ_COLOR}50`; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; }}
+    >
+      {/* Icon badge */}
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{ background: `${FAQ_COLOR}18` }}
       >
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${FAQ_COLOR}18` }}>
-          <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
-        </div>
-        <div className="flex-1 text-left">
-          <span className="text-sm font-bold text-white group-hover:text-yellow-300 transition-colors">{section.name}</span>
-        </div>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
+        <HelpCircle size={15} style={{ color: FAQ_COLOR }} />
+      </div>
+
+      {/* Title + count */}
+      <div className="flex-1 min-w-0 flex items-center gap-2">
+        <p className="text-sm font-semibold text-white leading-snug truncate">{section.name}</p>
+        <span
+          className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+          style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}
+        >
           {filteredEntries.length}
         </span>
-        <ChevronRight size={14} className="text-gray-500 flex-shrink-0 group-hover:text-yellow-400 transition-colors" />
-      </button>
-      <div className="mb-3 h-px" style={{ background: `${FAQ_COLOR}25` }} />
-    </section>
+      </div>
+
+      {/* Open cue — appears on hover */}
+      <span
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0 transition-all opacity-0 group-hover:opacity-100"
+        style={{ background: `${FAQ_COLOR}18`, color: FAQ_COLOR, border: `1px solid ${FAQ_COLOR}35` }}
+      >
+        <ExternalLink size={11} />
+        Open
+      </span>
+    </button>
   );
 }
 
@@ -297,7 +314,7 @@ function FaqSection({ sections, search, onOpenPanel }: { sections: FaqSectionTyp
           {filteredSections.reduce((acc, s) => acc + s.entries.filter(e => !search || e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())).length, 0)}
         </span>
       </div>
-      <div className="space-y-1 pl-2">
+      <div className="space-y-2">
         {filteredSections.map(section => (
           <FaqSubSection key={section.id} section={section} search={search} onOpenPanel={onOpenPanel} />
         ))}
