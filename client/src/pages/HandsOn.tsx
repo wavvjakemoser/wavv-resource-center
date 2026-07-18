@@ -323,41 +323,21 @@ export default function HandsOn() {
         <div style={{ minHeight: "32px" }} />
 
         {/* ── Header ── */}
-        <div
-          className="relative overflow-hidden rounded-2xl"
-          style={{
-            background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,116,244,0.28) 0%, rgba(0,169,226,0.12) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
-            border: "1px solid rgba(0,116,244,0.18)",
-            minHeight: "280px",
-          }}
-        >
-          {/* Subtle grid */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
-            style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
-          {/* Glow orbs */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(0,116,244,0.14), transparent 65%)", transform: "translate(25%, -30%)" }} />
-          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
-
-          <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
+        <div className="px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
             {/* Headline */}
             <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
               <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 WAVV Playground
               </span>
             </h1>
-
             {/* Accent line */}
             <div className="flex justify-center mb-5">
               <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
-
             {/* Subline */}
             <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
               A safe, isolated environment to explore WAVV features without affecting your live account. Practice the dialer, explore call boards, and get comfortable with the platform before going live.
             </p>
-          </div>
         </div>
 
         {/* ── Playground sections ── */}

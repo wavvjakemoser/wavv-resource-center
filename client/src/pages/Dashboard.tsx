@@ -262,29 +262,7 @@ export default function Dashboard() {
         <div style={{ minHeight: "32px" }} />
 
         {/* ── Hero ── */}
-        <div
-          className="relative overflow-hidden rounded-2xl"
-          style={{
-            background: "radial-gradient(ellipse 100% 90% at 50% 0%, rgba(0,116,244,0.28) 0%, rgba(0,169,226,0.12) 40%, rgba(103,199,40,0.06) 70%, transparent 90%), #080c14",
-            border: "1px solid rgba(0,116,244,0.18)",
-            minHeight: "280px",
-          }}
-        >
-          {/* Subtle grid */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-[0.025]"
-            style={{
-              backgroundImage: "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
-            }}
-          />
-          {/* Glow orbs */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(0,116,244,0.14), transparent 65%)", transform: "translate(25%, -30%)" }} />
-          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(103,199,40,0.08), transparent 65%)", transform: "translate(-25%, 30%)" }} />
-
-          <div className="relative z-10 px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
+        <div className="px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
             {/* Headline */}
             <h1
               className="font-extrabold tracking-tight leading-[1.05] mb-4"
@@ -324,9 +302,7 @@ export default function Dashboard() {
               Whether you're just getting started or looking to sharpen your edge, the WAVV Success Center gives you the training, tools, and resources to dial smarter, connect more, and close faster.
             </p>
 
-        
-          </div>
-        </div>
+        </div>{/* end hero */}
 
         {/* ── What is WAVV ── only shown to unauthenticated visitors ── */}
         {!isAuthenticated && (<section>

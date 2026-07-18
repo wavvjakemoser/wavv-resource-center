@@ -186,23 +186,30 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
           />
         )}
 
-        {/* ── Sidebar ── */}
-        <aside
-          className={`fixed top-0 left-0 h-full z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto lg:h-full ${
+        {/* ── Sidebar wrapper — provides the WAVV gradient right border ── */}
+        <div
+          className={`fixed top-0 left-0 h-full z-50 transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto lg:h-full ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
             width: "320px",
             minWidth: "320px",
-            background: "#0f1318",
-            borderRight: "1px solid #1e2030",
             flexShrink: 0,
+            background: "linear-gradient(to bottom, #0074F4, #00A9E2 50%, #67C728)",
+            padding: "0 2px 0 0", // 2px right padding = gradient border width
+          }}
+        >
+        <aside
+          className="h-full flex flex-col"
+          style={{
+            width: "100%",
+            background: "#000000",
           }}
         >
           {/* Logo */}
           <div
             className="flex items-center gap-2 px-4 py-4"
-            style={{ borderBottom: "1px solid #1e2030", minHeight: "60px" }}
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", minHeight: "64px" }}
           >
             <a
               href="https://www.wavv.com"
@@ -210,10 +217,10 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
               rel="noopener noreferrer"
               style={{ display: "flex", alignItems: "center", flexShrink: 0 }}
             >
-              <img
+                <img
                 src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
                 alt="WAVV"
-                style={{ height: "22px", width: "auto" }}
+                style={{ height: "32px", width: "auto" }}
               />
             </a>
             <button
@@ -266,43 +273,44 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                 </div>
               </>
             )}
-          </nav>
 
-          {/* ── Quick Links ── */}
-          {!settingsLoading && (allSettings as Record<string, unknown>)["chrome_extension_enabled"] !== false && (
-            <div className="px-3 pt-3 pb-1" style={{ borderTop: "1px solid #1e2030" }}>
-              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Quick Links</p>
-              <a
-                href="https://chromewebstore.google.com/detail/wavv/ioopokcefgfbajhpcmkkbmipeenohhpe"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
-                style={{ fontSize: "14px", background: "transparent", border: "1px solid transparent", color: "#ffffff" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(66,133,244,0.10)"; e.currentTarget.style.borderColor = "rgba(66,133,244,0.25)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
-              >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(66,133,244,0.12)" }}>
-                  <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <filter id="chromeGlow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="1.5" result="blur"/>
-                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                      </filter>
-                    </defs>
-                    <g filter="url(#chromeGlow)">
-                      <path d="M24 8a16 16 0 0 1 13.86 8H24a8 8 0 0 0-6.93 4L12.14 11.5A16 16 0 0 1 24 8z" fill="#ff6b6b"/>
-                      <path d="M37.86 16a16 16 0 0 1-1.86 17.5l-4.93-8.5A8 8 0 0 0 32 20H24l-4.93-8.5z" fill="#ffd43b"/>
-                      <path d="M36 33.5A16 16 0 0 1 8.14 28l4.93-8.5A8 8 0 0 0 24 32h0l4.93 8.5z" fill="#51cf66"/>
-                      <path d="M8.14 28A16 16 0 0 1 12.14 11.5L17.07 20A8 8 0 0 0 16 24a8 8 0 0 0 1.07 4z" fill="#74b9ff"/>
-                      <circle cx="24" cy="24" r="5" fill="#e8eaed"/>
-                    </g>
-                  </svg>
-                </div>
-                <span className="flex-1 min-w-0 text-sm whitespace-nowrap">WAVV Chrome Extension</span>
-                <ExternalLink size={12} className="flex-shrink-0 ml-2" style={{ color: "rgba(255,255,255,0.3)" }} />
-              </a>
-            </div>
-          )}
+            {/* ── Quick Links ── */}
+            {!settingsLoading && (allSettings as Record<string, unknown>)["chrome_extension_enabled"] !== false && (
+              <>
+                <div className="mx-3 my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Quick Links</p>
+                <a
+                  href="https://chromewebstore.google.com/detail/wavv/ioopokcefgfbajhpcmkkbmipeenohhpe"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
+                  style={{ fontSize: "14px", background: "transparent", border: "1px solid transparent", color: "#ffffff" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(66,133,244,0.10)"; e.currentTarget.style.borderColor = "rgba(66,133,244,0.25)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
+                >
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(66,133,244,0.12)" }}>
+                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <filter id="chromeGlow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                      </defs>
+                      <g filter="url(#chromeGlow)">
+                        <path d="M24 8a16 16 0 0 1 13.86 8H24a8 8 0 0 0-6.93 4L12.14 11.5A16 16 0 0 1 24 8z" fill="#ff6b6b"/>
+                        <path d="M37.86 16a16 16 0 0 1-1.86 17.5l-4.93-8.5A8 8 0 0 0 32 20H24l-4.93-8.5z" fill="#ffd43b"/>
+                        <path d="M36 33.5A16 16 0 0 1 8.14 28l4.93-8.5A8 8 0 0 0 24 32h0l4.93 8.5z" fill="#51cf66"/>
+                        <path d="M8.14 28A16 16 0 0 1 12.14 11.5L17.07 20A8 8 0 0 0 16 24a8 8 0 0 0 1.07 4z" fill="#74b9ff"/>
+                        <circle cx="24" cy="24" r="5" fill="#e8eaed"/>
+                      </g>
+                    </svg>
+                  </div>
+                  <span className="flex-1 min-w-0 text-sm whitespace-nowrap">WAVV Chrome Extension</span>
+                  <ExternalLink size={12} className="flex-shrink-0 ml-2" style={{ color: "rgba(255,255,255,0.3)" }} />
+                </a>
+              </>
+            )}
+          </nav>
 
           {/* ── Admin Tools section — only for admins ── */}
           {isAdmin && (
@@ -320,6 +328,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
 
 
         </aside>
+        </div>{/* end gradient border wrapper */}
 
         {/* ── Main column ── */}
         <div className="flex-1 flex flex-col min-w-0">

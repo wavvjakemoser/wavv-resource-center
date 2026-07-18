@@ -9646,7 +9646,7 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
     title: "",
     description: "",
     scheduledDate: "",  // YYYY-MM-DD
-    scheduledTime: "12:00",  // HH:MM (24h), default noon
+    scheduledTime: "12:00",  // HH:MM (24h) in the selected timezone — default noon MT = 18:00 UTC
     timezone: "America/Denver" as string,
     durationMinutes: 90,
     registrationUrl: "",
@@ -9676,6 +9676,9 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
     setEditingId(null);
     setForm({ callNumber: 1, title: "", description: "", scheduledDate: "", scheduledTime: "12:00", timezone: "America/Denver", durationMinutes: 90, registrationUrl: "", joinUrl: "", thumbnailUrl: "" });
   }
+
+  // NOTE: scheduledTime is always in the selected timezone (not UTC).
+  // tzLocalToUtc converts it to UTC before saving. The default '12:00' = noon MT = 18:00 UTC.
 
   // Convert a UTC ISO string to a local datetime-local value in the given timezone
   function utcToTzLocal(utcIso: string, tz: string): string {
