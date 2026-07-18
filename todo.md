@@ -2010,3 +2010,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Accelerator page: normalize hero section height; move countdown timer to a separate section below the hero so it doesn't distort hero proportions
 - [x] Accelerator page: fix partnership section empty space below text
 - [x] Session pages: confirm "Join the Slack Community" section is at the very bottom; apply gradient section headers consistently across all subsections (matching Home page "What is WAVV" gradient style)
+
+## Session 6 Fixes (Jul 17 2026)
+- [x] Resource Hub: replace plain section dividers for Help Articles, PDFs, and FAQs with gradient section headers (matching "What is WAVV?" style — accent bar + bold label + muted subtitle)

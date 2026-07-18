@@ -306,17 +306,19 @@ export default function HelpArticlesSection({ search, onOpenArticle }: { search:
 
   return (
     <>
-      {/* Section header */}
-      <div className="flex items-center gap-3 mb-1">
+      {/* Section header — gradient bar style matching "What is WAVV?" */}
+      <div className="flex items-center gap-3 mb-4">
         <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: `${ACCENT}18` }}
-        >
-          <HelpCircle size={14} style={{ color: ACCENT }} />
-        </div>
-        <div className="flex-1 text-left">
-          <span className="text-sm font-bold text-white">Help Articles</span>
-          <span className="ml-2 text-xs text-gray-500">Answers, how-tos, and troubleshooting for WAVV</span>
+          className="w-1 rounded-full flex-shrink-0"
+          style={{
+            height: "28px",
+            background: `linear-gradient(to bottom, ${ACCENT}, #6366f1)`,
+            boxShadow: `0 0 8px ${ACCENT}60`,
+          }}
+        />
+        <div className="flex-1">
+          <span className="text-base font-bold text-white">Help Articles</span>
+          <p className="text-xs text-gray-500 mt-0.5">Answers, how-tos, and troubleshooting for WAVV</p>
         </div>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
@@ -325,7 +327,6 @@ export default function HelpArticlesSection({ search, onOpenArticle }: { search:
           {totalFiltered}
         </span>
       </div>
-      <div className="mb-4 h-px" style={{ background: `${ACCENT}25` }} />
       {/* Sections — always shown, even if empty */}
       <div className="space-y-6 pl-2">
         {sections.map((sec) => (

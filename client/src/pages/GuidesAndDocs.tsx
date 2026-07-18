@@ -194,20 +194,24 @@ function PdfSection({
 
   return (
     <section>
-      {/* Section header */}
-      <div className="w-full flex items-center gap-3 mb-3">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${PDF_COLOR}18` }}>
-          <FileText size={14} style={{ color: PDF_COLOR }} />
-        </div>
-        <div className="flex-1 text-left">
-          <span className="text-sm font-bold text-white">PDFs</span>
-          <span className="ml-2 text-xs text-gray-500">Reference guides and documents</span>
+      {/* Section header — gradient bar style */}
+      <div className="flex items-center gap-3 mb-4">
+        <div
+          className="w-1 rounded-full flex-shrink-0"
+          style={{
+            height: "28px",
+            background: `linear-gradient(to bottom, ${PDF_COLOR}, #b91c1c)`,
+            boxShadow: `0 0 8px ${PDF_COLOR}60`,
+          }}
+        />
+        <div className="flex-1">
+          <span className="text-base font-bold text-white">PDFs</span>
+          <p className="text-xs text-gray-500 mt-0.5">Reference guides and documents</p>
         </div>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${PDF_COLOR}15`, color: PDF_COLOR }}>
           {items.length}
         </span>
       </div>
-      <div className="mb-4 h-px" style={{ background: `${PDF_COLOR}25` }} />
 
       {subSections.length > 0 ? (
         <div className="space-y-4 pl-2">
@@ -281,19 +285,24 @@ function FaqSection({ sections, search, onOpenPanel }: { sections: FaqSectionTyp
 
   return (
     <section>
-      <div className="w-full flex items-center gap-3 mb-3">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${FAQ_COLOR}18` }}>
-          <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
-        </div>
-        <div className="flex-1 text-left">
-          <span className="text-sm font-bold text-white">FAQs</span>
-          <span className="ml-2 text-xs text-gray-500">Frequently asked questions</span>
+      {/* Section header — gradient bar style */}
+      <div className="flex items-center gap-3 mb-4">
+        <div
+          className="w-1 rounded-full flex-shrink-0"
+          style={{
+            height: "28px",
+            background: `linear-gradient(to bottom, ${FAQ_COLOR}, #a16207)`,
+            boxShadow: `0 0 8px ${FAQ_COLOR}60`,
+          }}
+        />
+        <div className="flex-1">
+          <span className="text-base font-bold text-white">FAQs</span>
+          <p className="text-xs text-gray-500 mt-0.5">Frequently asked questions</p>
         </div>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
           {filteredSections.reduce((acc, s) => acc + s.entries.filter(e => !search || e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())).length, 0)}
         </span>
       </div>
-      <div className="mb-4 h-px" style={{ background: `${FAQ_COLOR}25` }} />
       <div className="space-y-1 pl-2">
         {filteredSections.map(section => (
           <FaqSubSection key={section.id} section={section} search={search} onOpenPanel={onOpenPanel} />
