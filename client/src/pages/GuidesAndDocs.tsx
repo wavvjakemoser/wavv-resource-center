@@ -240,6 +240,7 @@ type FaqEntry = { id: number; question: string; answer: string; isVisible: boole
 type FaqSectionType = { id: number; name: string; isVisible: boolean; sortOrder: number; sectionUrl?: string | null; entries: FaqEntry[] };
 
 function FaqSubSection({ section, search, onOpenPanel }: { section: FaqSectionType; search: string; onOpenPanel: (s: FaqSectionType) => void }) {
+  const [open, setOpen] = useState(false);
   const filteredEntries = section.entries.filter(e =>
     !search ||
     e.question.toLowerCase().includes(search.toLowerCase()) ||
@@ -247,42 +248,78 @@ function FaqSubSection({ section, search, onOpenPanel }: { section: FaqSectionTy
   );
 
   return (
-    <button
-      type="button"
-      onClick={() => onOpenPanel(section)}
-      className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all group text-left"
-      style={{ background: "#1d2230", border: "1px solid #252d3d" }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${FAQ_COLOR}50`; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; }}
-    >
-      {/* Icon badge */}
-      <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{ background: `${FAQ_COLOR}18` }}
+    <section>
+      {/* Collapsible header — matches PdfSubSection / SectionGroup pattern */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-3 mb-3 group"
       >
-        <HelpCircle size={15} style={{ color: FAQ_COLOR }} />
-      </div>
-
-      {/* Title + count */}
-      <div className="flex-1 min-w-0 flex items-center gap-2">
-        <p className="text-sm font-semibold text-white leading-snug truncate">{section.name}</p>
+        <div
+          className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: `${FAQ_COLOR}18` }}
+        >
+          <HelpCircle size={14} style={{ color: FAQ_COLOR }} />
+        </div>
+        <div className="flex-1 text-left min-w-0">
+          <span className="text-sm font-bold text-white">{section.name}</span>
+        </div>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
           style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}
         >
           {filteredEntries.length}
         </span>
-      </div>
+        {open
+          ? <ChevronDown size={14} className="text-gray-500 flex-shrink-0" />
+          : <ChevronRight size={14} className="text-gray-500 flex-shrink-0" />}
+      </button>
 
-      {/* Open cue — appears on hover */}
-      <span
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0 transition-all opacity-0 group-hover:opacity-100"
-        style={{ background: `${FAQ_COLOR}18`, color: FAQ_COLOR, border: `1px solid ${FAQ_COLOR}35` }}
-      >
-        <ExternalLink size={11} />
-        Open
-      </span>
-    </button>
+      <div className="mb-3 h-px" style={{ background: `${FAQ_COLOR}25` }} />
+
+      {open && (
+        filteredEntries.length === 0 ? (
+          <div
+            className="flex items-center gap-3 px-4 py-3 rounded-lg"
+            style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
+          >
+            <HelpCircle size={14} style={{ color: FAQ_COLOR, opacity: 0.4 }} />
+            <p className="text-xs text-white">No FAQs in this section yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-2 mb-2">
+            {filteredEntries.map(entry => (
+              <button
+                key={entry.id}
+                type="button"
+                onClick={() => onOpenPanel(section)}
+                className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all group text-left"
+                style={{ background: "#1d2230", border: "1px solid #252d3d" }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${FAQ_COLOR}50`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#252d3d"; }}
+              >
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${FAQ_COLOR}18` }}
+                >
+                  <HelpCircle size={15} style={{ color: FAQ_COLOR }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-white leading-snug truncate">{entry.question}</p>
+                </div>
+                <span
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold flex-shrink-0 transition-all opacity-0 group-hover:opacity-100"
+                  style={{ background: `${FAQ_COLOR}18`, color: FAQ_COLOR, border: `1px solid ${FAQ_COLOR}35` }}
+                >
+                  <ExternalLink size={11} />
+                  Open
+                </span>
+              </button>
+            ))}
+          </div>
+        )
+      )}
+    </section>
   );
 }
 
@@ -314,7 +351,7 @@ function FaqSection({ sections, search, onOpenPanel }: { sections: FaqSectionTyp
           {filteredSections.reduce((acc, s) => acc + s.entries.filter(e => !search || e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())).length, 0)}
         </span>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-6 pl-2">
         {filteredSections.map(section => (
           <FaqSubSection key={section.id} section={section} search={search} onOpenPanel={onOpenPanel} />
         ))}
