@@ -220,7 +220,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                 <img
                 src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png"
                 alt="WAVV"
-                style={{ height: "32px", width: "auto" }}
+                style={{ height: "48px", width: "auto" }}
               />
             </a>
             <button
@@ -234,7 +234,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
           {/* Main navigation — scrollable */}
           <nav className="flex-1 px-3 py-4 overflow-y-auto">
             {/* ── Resources ── */}
-            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Resources</p>
+            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#ffffff" }}>Resources</p>
             <div className="space-y-0.5 mb-3">
               {visibleResourceItems.map((item) => {
                 const isActive = location === item.href || location.startsWith(item.href + "/") || (item.href === "/home" && location === "/");
@@ -255,7 +255,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             {visibleProgramItems.length > 0 && (
               <>
                 <div className="mx-3 my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Programs</p>
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#ffffff" }}>Programs</p>
                 <div className="space-y-0.5">
                   {visibleProgramItems.map((item) => {
                     const isActive = location === item.href || location.startsWith(item.href + "/");
@@ -278,7 +278,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             {!settingsLoading && (allSettings as Record<string, unknown>)["chrome_extension_enabled"] !== false && (
               <>
                 <div className="mx-3 my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Quick Links</p>
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#ffffff" }}>Quick Links</p>
                 <a
                   href="https://chromewebstore.google.com/detail/wavv/ioopokcefgfbajhpcmkkbmipeenohhpe"
                   target="_blank"
@@ -316,7 +316,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
           {isAdmin && (
             <div className="px-3 pt-3 pb-1" style={{ borderTop: "1px solid #1e2030" }}>
               {/* Section label */}
-              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.25)" }}>Admin Tools</p>
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#ffffff" }}>Admin Tools</p>
               <NavLink
                 {...adminItem}
                 isActive={location.startsWith(adminItem.href)}
@@ -417,7 +417,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             <div className="flex-1">{children}</div>
             {/* Footer */}
             <footer className="mt-auto px-6 py-8 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-              <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>
+              <p className="text-xs mb-2" style={{ color: "#ffffff" }}>
                 &copy; 2026 WAVV. All rights reserved.
               </p>
               <div className="flex items-center justify-center gap-4">
@@ -426,9 +426,9 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs transition-colors duration-150"
-                  style={{ color: "rgba(255,255,255,0.35)" }}
+                  style={{ color: "#ffffff" }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.35)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#ffffff"; }}
                 >
                   Privacy Policy
                 </a>
@@ -438,9 +438,9 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs transition-colors duration-150"
-                  style={{ color: "rgba(255,255,255,0.35)" }}
+                  style={{ color: "#ffffff" }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.35)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#ffffff"; }}
                 >
                   Terms &amp; Conditions
                 </a>
