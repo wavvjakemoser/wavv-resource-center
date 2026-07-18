@@ -35,7 +35,7 @@ const CATEGORIES = [
     subtitle: "Everything you need to hit the ground running — from day one to fully dialing.",
     color: "#0074F4",
     icon: Compass,
-    bgPosition: "center 35%",
+    bgPosition: "center 30%",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-compass-banner-YbicPXD3ys442NgmseuCgq.webp",
     placeholders: [
       {
@@ -70,7 +70,7 @@ const CATEGORIES = [
     subtitle: "Step-by-step walkthroughs for the features you use most.",
     color: "#00A9E2",
     icon: Wrench,
-    bgPosition: "center 20%",
+    bgPosition: "center 15%",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-banner-VfckEZXCoBSM5mgbMe7eP5.webp",
     placeholders: [
       {
@@ -105,7 +105,7 @@ const CATEGORIES = [
     subtitle: "Dial smarter, not harder. Frameworks and tactics to get more out of every session.",
     color: "#67C728",
     icon: Lightbulb,
-    bgPosition: "center 15%",
+    bgPosition: "center 10%",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-banner-TYUrEvUSdZ4nQiZC2YJrtp.webp",
     placeholders: [
       {
@@ -428,8 +428,8 @@ export default function Academy() {
                     className="absolute inset-0 pointer-events-none"
                     style={{
                       backgroundImage: `url(${cat.thumbnail})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: cat.bgPosition ?? "center center",
+                      backgroundSize: "100% auto",
+                      backgroundPosition: cat.bgPosition ?? "center 20%",
                       opacity: 0.55,
                     }}
                   />
