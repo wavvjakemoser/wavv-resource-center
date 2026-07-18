@@ -368,7 +368,7 @@ export default function Academy() {
                   style={{
                     textDecoration: "none",
                     border: `1px solid ${cat.color}60`,
-                    height: "200px",
+                    height: "260px",
                     boxShadow: `0 0 0 1px ${cat.color}20, 0 4px 32px ${cat.color}18`,
                   }}
                 >
@@ -421,7 +421,7 @@ export default function Academy() {
                       right: "-20px",
                       top: "50%",
                       transform: "translateY(-50%)",
-                      height: "240px",
+                      height: "300px",
                       width: "auto",
                       opacity: 0.9,
                       filter: `drop-shadow(0 0 16px ${cat.color}80)`,
