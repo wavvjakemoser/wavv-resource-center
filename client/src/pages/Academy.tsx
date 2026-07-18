@@ -339,7 +339,7 @@ export default function Academy() {
             </div>
 
             {/* Subline */}
-            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
               Every lesson is built around a specific outcome — faster onboarding, sharper skills, better team performance. Start anywhere, go at your own pace.
             </p>
           </div>
@@ -412,7 +412,7 @@ export default function Academy() {
                     <h2 className="text-2xl font-extrabold text-white leading-tight">
                       {cat.label}
                     </h2>
-                    <p className="text-sm text-gray-300 mb-2">{cat.subtitle}</p>
+                    <p className="text-sm text-white mb-2">{cat.subtitle}</p>
                     {(() => {
                       const counts = dbCounts[cat.key];
                       if (!counts) return null;
