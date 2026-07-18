@@ -192,8 +192,8 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
-            width: "280px",
-            minWidth: "280px",
+            width: "320px",
+            minWidth: "320px",
             background: "#0f1318",
             borderRight: "1px solid #1e2030",
             flexShrink: 0,
