@@ -316,10 +316,7 @@ export default function HelpArticlesSection({ search, onOpenArticle }: { search:
             boxShadow: `0 0 8px ${ACCENT}60`,
           }}
         />
-        <div className="flex-1">
-          <span className="text-base font-bold text-white">Help Articles</span>
-          <p className="text-xs text-gray-500 mt-0.5">Answers, how-tos, and troubleshooting for WAVV</p>
-        </div>
+        <span className="text-base font-bold text-white">Help Articles</span>
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
           style={{ background: `${ACCENT}15`, color: ACCENT }}

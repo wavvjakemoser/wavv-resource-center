@@ -204,10 +204,7 @@ function PdfSection({
             boxShadow: `0 0 8px ${PDF_COLOR}60`,
           }}
         />
-        <div className="flex-1">
-          <span className="text-base font-bold text-white">PDFs</span>
-          <p className="text-xs text-gray-500 mt-0.5">Reference guides and documents</p>
-        </div>
+        <span className="text-base font-bold text-white">PDFs</span>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${PDF_COLOR}15`, color: PDF_COLOR }}>
           {items.length}
         </span>
@@ -295,10 +292,7 @@ function FaqSection({ sections, search, onOpenPanel }: { sections: FaqSectionTyp
             boxShadow: `0 0 8px ${FAQ_COLOR}60`,
           }}
         />
-        <div className="flex-1">
-          <span className="text-base font-bold text-white">FAQs</span>
-          <p className="text-xs text-gray-500 mt-0.5">Frequently asked questions</p>
-        </div>
+        <span className="text-base font-bold text-white">FAQs</span>
         <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
           {filteredSections.reduce((acc, s) => acc + s.entries.filter(e => !search || e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())).length, 0)}
         </span>
