@@ -1996,3 +1996,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Admin CMS session rows: remove standalone Edit button — entire row should be clickable to open edit panel
 - [x] Admin CMS edit panel: fix "Week 1" label to say "Session 1" (matches collapsed row label)
 - [x] Admin CMS edit panel: move Slack Community section below Session Content (Live Calls + Recordings + Product Training); make all sections visually consistent
+
+## Session 4 Fixes (Jul 17 2026 - round 2)
+- [x] Session 1 page: clean up thumbnails and tiles (ContentCard + SessionCallCard) — consistent neon style, no clunky layouts
+- [x] Non-WAVV member page: fix section spacing (sections too close together)
+- [x] Partnership section: fix text alignment and logo positioning on both non-member and member pages
+- [x] Both member pages: add "Join the Slack Community" section with Slack banner below existing content

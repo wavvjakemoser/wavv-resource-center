@@ -826,7 +826,7 @@ function ContentCard({
       }}
     >
       {/* Thumbnail */}
-      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "140px" }}>
+      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "160px" }}>
         {item.thumbnailUrl ? (
           /* Custom thumbnail */
           <>
@@ -840,12 +840,23 @@ function ContentCard({
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
           </>
         ) : (
-          /* Default tinted bg for recordings */
+          /* Default tinted bg for recordings/training */
           <>
             <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${accentColor}40 0%, ${accentColor}15 100%)` }} />
-            <img src={defaultBg} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.35, filter: "grayscale(100%)" }} />
+            <img src={defaultBg} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.35, filter: "grayscale(100%)", objectPosition: "center 30%" }} />
             <div className="absolute inset-0" style={{ background: `${accentColor}55`, mixBlendMode: "multiply" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
+            {/* Centered play icon for default thumbnails */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ background: `${accentColor}25`, border: `1.5px solid ${accentColor}50`, boxShadow: `0 0 20px ${accentColor}35` }}
+              >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+                  <polygon points="8,5 19,12 8,19" fill={accentColor} style={{ filter: `drop-shadow(0 0 6px ${accentColor})` }} />
+                </svg>
+              </div>
+            </div>
           </>
         )}
         {/* Badge */}
