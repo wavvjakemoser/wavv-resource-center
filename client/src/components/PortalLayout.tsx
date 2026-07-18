@@ -81,7 +81,7 @@ function NavLink({
       >
         <Icon size={17} style={{ color }} />
       </div>
-      <span className="flex-1 min-w-0" style={{ whiteSpace: "nowrap", overflow: "visible" }}>{label}</span>
+      <span className="flex-1 min-w-0" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
 
       {comingSoon && (
         <span
@@ -192,7 +192,8 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           style={{
-            width: "300px",
+            width: "240px",
+            minWidth: "240px",
             background: "#0f1318",
             borderRight: "1px solid #1e2030",
             flexShrink: 0,

@@ -69,7 +69,7 @@ function PdfRow({
           )}
         </div>
         {guide.description && (
-          <p className="text-xs text-gray-500 truncate mt-0.5">{guide.description}</p>
+          <p className="text-xs text-gray-300 truncate mt-0.5">{guide.description}</p>
         )}
       </div>
 
@@ -134,7 +134,7 @@ function PdfSubSection({
             style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
           >
             <FileText size={14} style={{ color: PDF_COLOR, opacity: 0.4 }} />
-            <p className="text-xs text-gray-500">No PDFs in this section yet.</p>
+            <p className="text-xs text-gray-300">No PDFs in this section yet.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -224,7 +224,7 @@ function PdfSection({
           {items.length === 0 ? (
             <div className="flex items-center gap-3 px-4 py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}>
               <FileText size={14} style={{ color: PDF_COLOR, opacity: 0.4 }} />
-              <p className="text-xs text-gray-500">No PDFs yet. Please check back soon!</p>
+              <p className="text-xs text-gray-300">No PDFs yet. Please check back soon!</p>
             </div>
           ) : (
             items.map(g => <PdfRow key={g.id} guide={g} onOpen={onOpen} />)
@@ -465,7 +465,7 @@ export default function GuidesAndDocs() {
           <div className="text-center py-16">
             <Search size={40} className="text-gray-700 mx-auto mb-4" />
             <h3 className="text-white font-semibold mb-2">No results for "{search}"</h3>
-            <p className="text-gray-500 text-sm">Try a different search term.</p>
+            <p className="text-gray-300 text-sm">Try a different search term.</p>
           </div>
         )}
       </div>

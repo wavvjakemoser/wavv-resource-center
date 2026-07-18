@@ -362,15 +362,15 @@ function WebinarCard({
       <div className="p-4 flex flex-col flex-1">
         <h3 className="text-white font-bold text-sm leading-snug mb-2">{webinar.title}</h3>
         {webinar.description && (
-          <p className="text-gray-500 text-xs leading-relaxed mb-2">{webinar.description}</p>
+          <p className="text-gray-300 text-xs leading-relaxed mb-2">{webinar.description}</p>
         )}
         {webinar.host && (
-          <p className="text-gray-500 text-xs mb-2">
+          <p className="text-gray-300 text-xs mb-2">
             Host: <span className="text-gray-300">{webinar.host}</span>
           </p>
         )}
         {typeof webinar.viewCount === "number" && webinar.viewCount > 0 && (
-          <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
+          <p className="text-gray-300 text-xs mb-2 flex items-center gap-1">
             <Eye size={11} className="text-gray-600" />
             <span>{webinar.viewCount.toLocaleString()} {webinar.viewCount === 1 ? "view" : "views"}</span>
           </p>
@@ -630,8 +630,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <Star size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-400 text-sm font-medium">No Exclusive Webinars yet.</p>
-              <p className="text-gray-600 text-xs mt-1">Please check back soon!</p>
+              <p className="text-gray-200 text-sm font-medium">No Exclusive Webinars yet.</p>
+              <p className="text-gray-300 text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}
@@ -647,8 +647,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <RefreshCw size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-400 text-sm font-medium">No On-Demand Videos yet.</p>
-              <p className="text-gray-600 text-xs mt-1">Please check back soon!</p>
+              <p className="text-gray-200 text-sm font-medium">No On-Demand Videos yet.</p>
+              <p className="text-gray-300 text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}
@@ -664,8 +664,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <PlayCircle size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-400 text-sm font-medium">No Recordings yet.</p>
-              <p className="text-gray-600 text-xs mt-1">Please check back soon!</p>
+              <p className="text-gray-200 text-sm font-medium">No Recordings yet.</p>
+              <p className="text-gray-300 text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}

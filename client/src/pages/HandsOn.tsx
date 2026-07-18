@@ -363,15 +363,24 @@ export default function HandsOn() {
         {/* ── Playground sections ── */}
         {PLAYGROUND_SECTIONS.map((section) => (
           <div key={section.title}>
+            {/* Section header — gradient bar + logo + label */}
             <div className="flex items-center gap-3 mb-4">
+              <div
+                className="w-1 rounded-full flex-shrink-0"
+                style={{
+                  height: "28px",
+                  background: "linear-gradient(to bottom, #0074F4, #67C728)",
+                  boxShadow: "0 0 8px rgba(0,116,244,0.5)",
+                }}
+              />
               {section.logo && (
                 <img
                   src={section.logo}
                   alt={section.title}
-                  className="w-7 h-7 rounded-md object-contain"
+                  className="w-6 h-6 rounded-md object-contain flex-shrink-0"
                 />
               )}
-              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
                 {section.title}
               </h2>
             </div>
@@ -415,7 +424,7 @@ export default function HandsOn() {
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-500 text-xs leading-relaxed">{tool.desc}</p>
+                      <p className="text-gray-300 text-xs leading-relaxed">{tool.desc}</p>
                     </div>
                   </div>
                 );

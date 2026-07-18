@@ -2013,3 +2013,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Session 6 Fixes (Jul 17 2026)
 - [x] Resource Hub: replace plain section dividers for Help Articles, PDFs, and FAQs with gradient section headers (matching "What is WAVV?" style — accent bar + bold label + muted subtitle)
+
+## Session 7 Fixes (Jul 17 2026)
+- [x] Playground: add gradient bar separator to GO HIGH LEVEL and HUBSPOT section headers (keep logos, add the "|" bar)
+- [x] Site-wide: turn grey body/description text to white on Home, Academy, Webinars, Resource Hub, Playground
+- [x] Left nav panel: ensure all text fits without overflow; fix hidden banners not covering content

@@ -187,11 +187,11 @@ function LiveCourseCard({
           {course.title}
         </h3>
         {course.description && (
-          <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-3">
+          <p className="text-gray-300 text-xs leading-relaxed line-clamp-2 mb-3">
             {course.description}
           </p>
         )}
-        <div className="mt-auto flex items-center justify-between text-xs text-gray-600">
+        <div className="mt-auto flex items-center justify-between text-xs text-gray-400">
           {course.durationMinutes ? (
             <span className="flex items-center gap-1">
               <Clock size={11} />
@@ -258,7 +258,7 @@ function PlaceholderCourseCard({
         <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-3">
           {description}
         </p>
-        <div className="mt-auto flex items-center gap-1 text-xs text-gray-600">
+        <div className="mt-auto flex items-center gap-1 text-xs text-gray-400">
           <Clock size={11} />
           {duration}
         </div>
@@ -368,7 +368,7 @@ export default function Academy() {
               <GraduationCap size={32} style={{ color: "#0074F4" }} />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Content Coming Soon</h3>
-            <p className="text-gray-500 text-sm max-w-sm">
+            <p className="text-gray-300 text-sm max-w-sm">
               The WAVV Academy is being set up. Check back soon — structured learning paths and video lessons will be available here.
             </p>
           </div>
@@ -488,7 +488,7 @@ export function ContentRequestCTA({
           </div>
           <div>
             <p className="text-white font-semibold text-sm">Request a {typeLabel}</p>
-            <p className="text-gray-500 text-xs mt-0.5">{tagline}</p>
+            <p className="text-gray-300 text-xs mt-0.5">{tagline}</p>
           </div>
         </div>
         <button
@@ -553,7 +553,7 @@ export function ContentRequestForm({
       >
         <CheckCircle2 size={36} style={{ color: accent }} />
         <h3 className="text-white font-bold text-lg">Request Submitted</h3>
-        <p className="text-gray-400 text-sm">
+        <p className="text-gray-200 text-sm">
           Thanks for the suggestion. We review all requests and prioritize based on demand.
         </p>
         <button
@@ -579,7 +579,7 @@ export function ContentRequestForm({
         </div>
         <div>
           <h3 className="text-white font-bold text-base">Request a {typeLabel}</h3>
-          <p className="text-gray-500 text-xs">Don't see what you need? Let us know what to build next.</p>
+          <p className="text-gray-300 text-xs">Don't see what you need? Let us know what to build next.</p>
         </div>
       </div>
 

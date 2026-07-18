@@ -237,7 +237,7 @@ function SectionGroup({
             style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
           >
             <HelpCircle size={14} style={{ color: ACCENT, opacity: 0.4 }} />
-            <p className="text-xs text-gray-500">Help articles coming soon.</p>
+            <p className="text-xs text-gray-300">Help articles coming soon.</p>
           </div>
         ) : (
           <div className="space-y-0.5 mb-2">
@@ -287,7 +287,7 @@ export default function HelpArticlesSection({ search, onOpenArticle }: { search:
         style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}
       >
         <HelpCircle size={14} style={{ color: ACCENT, opacity: 0.4 }} />
-        <p className="text-xs text-gray-500">Help articles are being curated. Please check back shortly.</p>
+        <p className="text-xs text-gray-300">Help articles are being curated. Please check back shortly.</p>
       </div>
     );
   }
@@ -340,7 +340,7 @@ export default function HelpArticlesSection({ search, onOpenArticle }: { search:
         <div className="flex items-center gap-3 px-4 py-3 rounded-lg mt-2"
           style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}>
           <Search size={14} style={{ color: ACCENT, opacity: 0.4 }} />
-          <p className="text-xs text-gray-500">No help articles match "{search}".</p>
+          <p className="text-xs text-gray-300">No help articles match "{search}".</p>
         </div>
       )}
 

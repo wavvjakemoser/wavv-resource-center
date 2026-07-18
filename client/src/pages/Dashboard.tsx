@@ -507,10 +507,10 @@ export default function Dashboard() {
                   <div className="p-4 flex flex-col flex-1">
                     <h3 className="text-white font-bold text-sm leading-snug mb-2">{w.title}</h3>
                     {w.description && (
-                      <p className="text-gray-500 text-xs leading-relaxed mb-2">{w.description}</p>
+                       <p className="text-gray-300 text-xs leading-relaxed mb-2">{w.description}</p>
                     )}
                     {w.host && (
-                      <p className="text-gray-500 text-xs mb-2">
+                       <p className="text-gray-300 text-xs mb-2">
                         Host: <span className="text-gray-300">{w.host}</span>
                       </p>
                     )}
