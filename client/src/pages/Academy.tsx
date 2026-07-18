@@ -365,33 +365,81 @@ export default function Academy() {
                 <Link
                   href={`/academy/category/${encodeURIComponent(cat.key)}`}
                   className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
-                  style={{ textDecoration: "none", border: `1px solid ${cat.color}40`, height: "200px" }}
+                  style={{
+                    textDecoration: "none",
+                    border: `1px solid ${cat.color}60`,
+                    height: "200px",
+                    boxShadow: `0 0 0 1px ${cat.color}20, 0 4px 32px ${cat.color}18`,
+                  }}
                 >
-                  {/* Photo background */}
-                  {/* Thumbnail image — fixed height, right-aligned, fully visible inside tile */}
+                  {/* Deep space black base */}
+                  <div className="absolute inset-0" style={{ background: "#000" }} />
+
+                  {/* Circuit board SVG pattern */}
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <pattern id={`circuit-${cat.key}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                        <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={cat.color} strokeWidth="0.8" fill="none"/>
+                        <circle cx="10" cy="10" r="2" fill={cat.color}/>
+                        <circle cx="50" cy="10" r="2" fill={cat.color}/>
+                        <circle cx="50" cy="50" r="2" fill={cat.color}/>
+                        <circle cx="30" cy="30" r="1.5" fill={cat.color}/>
+                        <path d="M0 30 L10 30 M60 50 L50 50" stroke={cat.color} strokeWidth="0.6" fill="none"/>
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill={`url(#circuit-${cat.key})`}/>
+                  </svg>
+
+                  {/* Radial color glow — right side */}
+                  <div
+                    className="absolute pointer-events-none"
+                    style={{
+                      right: "-60px",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      width: "420px",
+                      height: "420px",
+                      borderRadius: "50%",
+                      background: `radial-gradient(circle, ${cat.color}30 0%, ${cat.color}10 40%, transparent 70%)`,
+                    }}
+                  />
+
+                  {/* Neon scan line */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: `linear-gradient(180deg, transparent 0%, ${cat.color}08 50%, transparent 100%)`,
+                    }}
+                  />
+
+                  {/* Thumbnail image — large, right-aligned, key part visible */}
                   <img
                     src={cat.thumbnail}
                     alt=""
                     className="absolute pointer-events-none"
                     style={{
-                      right: 0,
+                      right: "-20px",
                       top: "50%",
                       transform: "translateY(-50%)",
-                      height: "170px",
+                      height: "240px",
                       width: "auto",
-                      opacity: 0.85,
+                      opacity: 0.9,
+                      filter: `drop-shadow(0 0 16px ${cat.color}80)`,
                     }}
                   />
+
                   {/* Dark gradient overlay — left side for text legibility */}
                   <div
                     className="absolute inset-0"
-                    style={{ background: "linear-gradient(to right, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.15) 100%)" }}
+                    style={{ background: "linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 45%, rgba(0,0,0,0.2) 70%, transparent 100%)" }}
                   />
-                  {/* Subtle color tint at bottom */}
+
+                  {/* Hover neon border pulse */}
                   <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{ background: `linear-gradient(to top, ${cat.color}18 0%, transparent 60%)` }}
+                    className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ boxShadow: `inset 0 0 0 1px ${cat.color}80, 0 0 24px ${cat.color}30` }}
                   />
+
                   {/* Content overlay — category label, subtitle, and count badges */}
                   <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
                     <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: cat.color }}>
