@@ -714,13 +714,13 @@ export default function Accelerator() {
             </div>
 
             {/* Subline */}
-            <p className="mx-auto mb-4 leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)", maxWidth: "540px" }}>
+            <p className="mx-auto mb-4 leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.85rem, 1.5vw, 0.95rem)", maxWidth: "540px" }}>
               Complete the WAVV Accelerator and walk away with a fully configured dialer, a proven outreach cadence, and the skills to hit your connection rate targets.
             </p>
             {/* Schedule line */}
             <div className="flex items-center justify-center gap-2 mb-6">
               <Clock size={13} style={{ color: "rgba(0,169,226,0.7)" }} />
-              <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <span className="text-xs font-medium text-white">
                 Live coaching calls every Tuesday & Thursday
               </span>
             </div>
@@ -734,7 +734,7 @@ export default function Accelerator() {
               const nextSession = dbSessions.find(s => s.sessionDateTime && new Date(s.sessionDateTime).getTime() > now);
               if (nextSession && hasAccess) {
                 return (
-                  <p className="text-sm mt-4 mb-4" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  <p className="text-sm mt-4 mb-4 text-white">
                     Not registered?{" "}
                     <a
                       href={`/accelerator/session/${nextSession.id}`}
@@ -760,7 +760,7 @@ export default function Accelerator() {
               <div className="flex flex-col items-center gap-4">
                 {week1FreeActive ? (
                   <>
-                    <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.7)", maxWidth: "480px" }}>
+                    <p className="text-sm font-medium text-white" style={{ maxWidth: "480px" }}>
                       Session 1 is free through July 26 — upgrade to unlock the full program.
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-3">
@@ -785,7 +785,7 @@ export default function Accelerator() {
                   </>
                 ) : (
                   <>
-                    <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "480px" }}>
+                    <p className="text-sm text-white" style={{ maxWidth: "480px" }}>
                       The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost. Monthly subscribers can upgrade their plan to unlock access.
                     </p>
                     <UpgradeCTA reason="no_access" variant="inline" />
@@ -803,14 +803,14 @@ export default function Accelerator() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
-              <h2 className="text-xl font-bold text-white">The Curriculum</h2>
+              <h2 className="text-2xl font-extrabold text-white">The Curriculum</h2>
             </div>
             {hasAccess && (
-              <span className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.35)" }}>On-demand — start any session, any time</span>
+              <span className="text-[11px] font-medium text-white">On-demand — start any session, any time</span>
             )}
           </div>
           {!hasAccess && (
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <p className="text-sm text-white">
               On-demand access — start any session, any time. Each session pairs live sales coaching with hands-on WAVV product training.
             </p>
           )}
@@ -889,13 +889,13 @@ export default function Accelerator() {
                       </div>
                     </div>
                     <h3 className="text-[15px] font-semibold text-white leading-snug">{session.title}</h3>
-                    <p className="text-xs leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.45)" }}>
-                      <span className="font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>WAVV Focus:</span> {session.wavvFocus}
+                    <p className="text-xs leading-relaxed flex-1 text-white">
+                      <span className="font-medium text-white">WAVV Focus:</span> {session.wavvFocus}
                     </p>
                     <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                       <div className="flex items-start gap-2">
                         <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: session.color }} />
-                        <span className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.5)" }}>{session.outcome}</span>
+                        <span className="text-[11px] leading-snug text-white">{session.outcome}</span>
                       </div>
                     </div>
                   </a>
@@ -940,7 +940,7 @@ export default function Accelerator() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
-            <h2 className="text-xl font-bold text-white">The Partnership</h2>
+            <h2 className="text-2xl font-extrabold text-white">The Partnership</h2>
           </div>
           <div
             className="rounded-2xl p-6"
@@ -953,7 +953,7 @@ export default function Accelerator() {
                 <div className="h-12 flex items-center justify-center">
                   <img src="/manus-storage/wavv-logo-horizontal_6d9fa5a1.png" alt="WAVV" className="h-8 w-auto object-contain" />
                 </div>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <p className="text-sm leading-relaxed text-white">
                   WAVV is a native multi-line power dialer that lives inside your CRM. We provide the product training layer — short how-to clips, cheat sheets, and guided walkthroughs — so you can immediately apply every sales skill inside the dialer.
                 </p>
               </div>
@@ -979,14 +979,14 @@ export default function Accelerator() {
                     <img src="/manus-storage/pod_icon_417b718b.webp" alt="Prospecting On Demand" className="h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
                   </a>
                 </div>
-                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+                <p className="text-sm leading-relaxed text-white">
                   POD is a team of experienced outbound sales trainers who specialize in turning reps into closers. They own the live coaching curriculum — objection handling, conversation frameworks, follow-up systems, and the mindset work that separates top performers.
                 </p>
               </div>
             </div>
             {/* Bottom summary */}
             <div className="mt-3 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-              <p className="text-sm text-center" style={{ color: "rgba(255,255,255,0.45)" }}>
+              <p className="text-sm text-center text-white">
                 Together, we combine <span className="font-medium" style={{ color: "#0074F4" }}>hands-on product training</span> with <span className="font-medium" style={{ color: "#f97316" }}>live sales coaching</span> — so every skill you learn gets applied inside the tool you're already using.
               </p>
             </div>
@@ -997,7 +997,7 @@ export default function Accelerator() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
-            <h2 className="text-xl font-bold text-white">What's Included</h2>
+            <h2 className="text-2xl font-extrabold text-white">What's Included</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {VALUE_PROPS.map((prop) => (
@@ -1026,7 +1026,7 @@ export default function Accelerator() {
                   )}
                 </div>
                 <h3 className="text-sm font-semibold text-white">{prop.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed flex-1">{prop.description}</p>
+                <p className="text-xs text-white leading-relaxed flex-1">{prop.description}</p>
               </div>
             ))}
           </div>
@@ -1037,7 +1037,7 @@ export default function Accelerator() {
           <section className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #ECB22E, #E01E5A)" }} />
-              <h2 className="text-xl font-bold text-white">Join the Slack Community</h2>
+              <h2 className="text-2xl font-extrabold text-white">Join the Slack Community</h2>
             </div>
             {hasAccess ? (
               (() => {
@@ -1055,7 +1055,7 @@ export default function Accelerator() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(236,178,46,0.8)" }}>Members Only</p>
                       <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
-                      <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
+                      <p className="text-sm mt-1 text-white">Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
                     </div>
                     {slackSession?.slackUrl ? (
                       <a href={slackSession.slackUrl} target="_blank" rel="noopener noreferrer"
@@ -1086,7 +1086,7 @@ export default function Accelerator() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(236,178,46,0.5)" }}>Community</p>
                   <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
-                  <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
+                  <p className="text-sm mt-1 text-white">Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
                 </div>
                 <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
                   style={{ background: "rgba(74,21,75,0.15)", border: "1px solid rgba(74,21,75,0.3)", color: "rgba(255,255,255,0.3)" }}>
@@ -1101,7 +1101,7 @@ export default function Accelerator() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
-            <h2 className="text-xl font-bold text-white">FAQs</h2>
+            <h2 className="text-2xl font-extrabold text-white">FAQs</h2>
           </div>
           <div className="space-y-2">
             {FAQS.map((faq, idx) => (
@@ -1123,7 +1123,7 @@ export default function Accelerator() {
                 </button>
                 {openFaq === idx && (
                   <div className="px-5 pb-4">
-                    <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{faq.a}</p>
+                    <p className="text-sm leading-relaxed text-white">{faq.a}</p>
                   </div>
                 )}
               </div>
@@ -1134,11 +1134,11 @@ export default function Accelerator() {
         {/* ── Money Math Section ── */}
         <section className="rounded-2xl p-8 text-center space-y-4"
           style={{ background: "rgba(0,116,244,0.05)", border: "1px solid rgba(0,116,244,0.12)" }}>
-          <h2 className="text-xl font-bold text-white">The Money Math Equation</h2>
+          <h2 className="text-2xl font-extrabold text-white">The Money Math Equation</h2>
           <p className="text-2xl lg:text-3xl font-bold" style={{ color: "#0074F4" }}>
             Dials → Conversations → Appointments → Closes × Price = Revenue
           </p>
-          <p className="text-sm max-w-lg mx-auto" style={{ color: "rgba(255,255,255,0.45)" }}>
+          <p className="text-sm max-w-lg mx-auto text-white">
             Every module in the Accelerator is designed to improve one lever of this equation.
             WAVV is the engine that drives the volume. The Accelerator teaches you how to maximize every other lever.
           </p>
@@ -1147,8 +1147,8 @@ export default function Accelerator() {
         {/* ── Repeat CTA after FAQ (for non-access users) ── */}
         {!hasAccess && (
           <section className="text-center space-y-4 pb-6">
-            <h2 className="text-xl font-bold text-white">Ready to accelerate?</h2>
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+            <h2 className="text-2xl font-extrabold text-white">Ready to accelerate?</h2>
+            <p className="text-sm text-white">
               {week1FreeActive
                 ? "Session 1 is on us. Upgrade to a Quarterly or Annual plan to unlock the full program."
                 : "The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost."
@@ -1188,7 +1188,7 @@ export default function Accelerator() {
               <Lock size={22} style={{ color: "#f97316" }} />
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Access Restricted</h3>
-            <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.6)" }}>
+            <p className="text-sm leading-relaxed mb-6 text-white">
               Whoops, please contact your account rep or upgrade your plan to gain access to WAVV Accelerator.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

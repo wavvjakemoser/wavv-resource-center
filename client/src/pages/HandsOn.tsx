@@ -158,7 +158,7 @@ function RequestModal({
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <CheckCircle2 size={44} style={{ color: "#67C728" }} />
             <h3 className="text-white font-semibold text-lg">You're on the list!</h3>
-            <p className="text-gray-400 text-sm max-w-xs">
+            <p className="text-white text-sm max-w-xs">
               We'll notify you as soon as WAVV Playground is available.
             </p>
             <button
@@ -176,7 +176,7 @@ function RequestModal({
                 <Bell size={16} style={{ color: "#a855f7" }} />
                 <h3 className="text-white font-semibold text-base">Get Notified</h3>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-white text-sm leading-relaxed">
                 We'll send you a notification when WAVV Playground goes live.
               </p>
             </div>
@@ -184,7 +184,7 @@ function RequestModal({
             {/* User info — read-only if logged in, editable if not */}
             <div className="space-y-2 mb-4">
               <div>
-                <p className="text-xs text-gray-500 mb-1">Name</p>
+                <p className="text-xs text-white mb-1">Name</p>
                 {userName ? (
                   <div style={readonlyStyle}>{userName}</div>
                 ) : (
@@ -198,7 +198,7 @@ function RequestModal({
                 )}
               </div>
               <div>
-                <p className="text-xs text-gray-500 mb-1">Email</p>
+                <p className="text-xs text-white mb-1">Email</p>
                 {userEmail ? (
                   <div style={readonlyStyle}>{userEmail}</div>
                 ) : (
@@ -222,7 +222,7 @@ function RequestModal({
                   onChange={(e) => setOptIn(e.target.checked)}
                   className="mt-0.5 h-4 w-4 rounded accent-purple-500 cursor-pointer"
                 />
-                <span className="text-sm text-gray-300 leading-snug">
+                <span className="text-sm text-white leading-snug">
                   Yes, notify me when WAVV Playground is live. I agree to receive product communications from WAVV.
                 </span>
               </label>
@@ -275,7 +275,7 @@ export default function HandsOn() {
             </div>
             <div>
               <h2 className="text-base font-bold text-white">WAVV Playground</h2>
-              <p className="text-xs text-gray-500">Hands-on demos and sandbox environments</p>
+              <p className="text-xs text-white">Hands-on demos and sandbox environments</p>
             </div>
           </div>
           {/* Under-construction banner */}
@@ -291,7 +291,7 @@ export default function HandsOn() {
                   Under Construction
                 </div>
               </div>
-              <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
+              <p className="text-sm text-white leading-relaxed max-w-lg">
                 The WAVV Playground is being built out. Soon you'll be able to explore{" "}
                 <span className="text-white font-medium">hands-on sandbox environments</span> for the Dialer,{" "}
                 <span className="text-white font-medium">Call Boards</span>, and{" "}
@@ -354,7 +354,7 @@ export default function HandsOn() {
             </div>
 
             {/* Subline */}
-            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
               A safe, isolated environment to explore WAVV features without affecting your live account. Practice the dialer, explore call boards, and get comfortable with the platform before going live.
             </p>
           </div>
@@ -424,7 +424,7 @@ export default function HandsOn() {
                           </span>
                         )}
                       </div>
-                      <p className="text-gray-300 text-xs leading-relaxed">{tool.desc}</p>
+                      <p className="text-white text-xs leading-relaxed">{tool.desc}</p>
                     </div>
                   </div>
                 );
@@ -447,7 +447,7 @@ export default function HandsOn() {
             </div>
             <div>
               <p className="text-white font-semibold text-sm">Get Notified When WAVV Playground Launches</p>
-              <p className="text-gray-500 text-xs mt-0.5">Sign up and we'll let you know the moment it's ready.</p>
+              <p className="text-white text-xs mt-0.5">Sign up and we'll let you know the moment it's ready.</p>
             </div>
           </div>
           {alreadyRequested ? (

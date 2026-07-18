@@ -362,26 +362,26 @@ function WebinarCard({
       <div className="p-4 flex flex-col flex-1">
         <h3 className="text-white font-bold text-sm leading-snug mb-2">{webinar.title}</h3>
         {webinar.description && (
-          <p className="text-gray-300 text-xs leading-relaxed mb-2">{webinar.description}</p>
+          <p className="text-white text-xs leading-relaxed mb-2">{webinar.description}</p>
         )}
         {webinar.host && (
-          <p className="text-gray-300 text-xs mb-2">
-            Host: <span className="text-gray-300">{webinar.host}</span>
+          <p className="text-white text-xs mb-2">
+            Host: <span className="text-white">{webinar.host}</span>
           </p>
         )}
         {typeof webinar.viewCount === "number" && webinar.viewCount > 0 && (
-          <p className="text-gray-300 text-xs mb-2 flex items-center gap-1">
+          <p className="text-white text-xs mb-2 flex items-center gap-1">
             <Eye size={11} className="text-gray-600" />
             <span>{webinar.viewCount.toLocaleString()} {webinar.viewCount === 1 ? "view" : "views"}</span>
           </p>
         )}
         {variant === "exclusive" && webinar.scheduledAt && (
           <div className="space-y-0.5 mb-3">
-            <p className="text-xs text-gray-400 flex items-center gap-1.5">
+            <p className="text-xs text-white flex items-center gap-1.5">
               <Calendar size={11} style={{ color: accentColor }} />
               {new Date(webinar.scheduledAt).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
             </p>
-            <p className="text-xs text-gray-400 flex items-center gap-1.5">
+            <p className="text-xs text-white flex items-center gap-1.5">
               <Clock size={11} style={{ color: accentColor }} />
               {new Date(webinar.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })}
             </p>
@@ -584,7 +584,7 @@ export default function Webinars() {
             </div>
 
             {/* Subline */}
-            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
               Join exclusive live sessions and on-demand content from the WAVV team. Learn best practices, see new features in action, and sharpen your outbound strategy.
             </p>
           </div>
@@ -615,7 +615,7 @@ export default function Webinars() {
         {/* ── Section description ── */}
         <div className="flex items-center gap-2">
           <span style={{ color: cfg.accent }}>{cfg.icon}</span>
-          <p className="text-sm text-gray-400">{cfg.description}</p>
+          <p className="text-sm text-white">{cfg.description}</p>
         </div>
 
         {/* ── Section content ── */}
@@ -630,8 +630,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <Star size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-200 text-sm font-medium">No Exclusive Webinars yet.</p>
-              <p className="text-gray-300 text-xs mt-1">Please check back soon!</p>
+              <p className="text-white text-sm font-bold">No Exclusive Webinars yet.</p>
+              <p className="text-white text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}
@@ -647,8 +647,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <RefreshCw size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-200 text-sm font-medium">No On-Demand Videos yet.</p>
-              <p className="text-gray-300 text-xs mt-1">Please check back soon!</p>
+              <p className="text-white text-sm font-bold">No On-Demand Videos yet.</p>
+              <p className="text-white text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}
@@ -664,8 +664,8 @@ export default function Webinars() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
               <PlayCircle size={32} className="text-gray-700 mb-3" />
-              <p className="text-gray-200 text-sm font-medium">No Recordings yet.</p>
-              <p className="text-gray-300 text-xs mt-1">Please check back soon!</p>
+              <p className="text-white text-sm font-bold">No Recordings yet.</p>
+              <p className="text-white text-xs mt-1">Please check back soon!</p>
             </div>
           )
         )}

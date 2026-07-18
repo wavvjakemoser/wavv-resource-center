@@ -313,13 +313,13 @@ export default function Dashboard() {
             {/* Subline */}
             <p
               className="mx-auto mb-3 leading-relaxed font-medium"
-              style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
+              style={{ color: "#ffffff", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
             >
               Everything you need to get the most out of WAVV — in one place.
             </p>
             <p
               className="mx-auto mb-8 leading-relaxed"
-              style={{ color: "rgba(255,255,255,0.45)", fontSize: "clamp(0.85rem, 1.5vw, 1rem)", maxWidth: "560px" }}
+              style={{ color: "#ffffff", fontSize: "clamp(0.85rem, 1.5vw, 1rem)", maxWidth: "560px" }}
             >
               Whether you're just getting started or looking to sharpen your edge, the WAVV Success Center gives you the training, tools, and resources to dial smarter, connect more, and close faster.
             </p>
@@ -333,7 +333,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between gap-4 mb-2">
             <div className="flex items-center gap-2.5">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
-              <h2 className="text-sm font-bold text-white tracking-wide">What is WAVV?</h2>
+              <h2 className="text-base font-extrabold text-white tracking-wide">What is WAVV?</h2>
             </div>
             <a
               href="https://www.wavv.com"
@@ -363,8 +363,8 @@ export default function Dashboard() {
                   >
                     <PIcon size={18} style={{ color: p.color }} />
                   </div>
-                  <p className="text-white font-bold text-sm mb-2">{p.title}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.62)" }}>{p.body}</p>
+                  <p className="text-white font-extrabold text-base mb-2">{p.title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "#ffffff" }}>{p.body}</p>
                 </div>
               );
             })}
@@ -380,7 +380,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
               <BookOpen size={14} style={{ color: "#0074F4" }} />
-              <h2 className="text-sm font-bold text-white tracking-wide">Continue Learning</h2>
+              <h2 className="text-base font-extrabold text-white tracking-wide">Continue Learning</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -403,7 +403,7 @@ export default function Dashboard() {
                       <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(0,116,244,0.8)" }}>WAVV Academy</span>
                     </div>
                     <p className="text-white font-bold text-sm mb-1 leading-snug">{continueLearning.academyCourse.courseTitle}</p>
-                    <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.5)" }}>Up next: {continueLearning.academyCourse.nextLessonTitle}</p>
+                    <p className="text-xs mb-3" style={{ color: "#ffffff" }}>Up next: {continueLearning.academyCourse.nextLessonTitle}</p>
                     {/* Progress bar */}
                     <div className="mb-3">
                       <div className="flex justify-between text-xs mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>
@@ -441,7 +441,7 @@ export default function Dashboard() {
                     </div>
                     <p className="text-white font-bold text-sm mb-1 leading-snug">{continueLearning.webinar.title}</p>
                     {continueLearning.webinar.description && (
-                      <p className="text-xs mb-3 line-clamp-2" style={{ color: "rgba(255,255,255,0.5)" }}>{continueLearning.webinar.description}</p>
+                      <p className="text-xs mb-3 line-clamp-2" style={{ color: "#ffffff" }}>{continueLearning.webinar.description}</p>
                     )}
                     {continueLearning.webinar.host && (
                       <p className="text-xs mb-3" style={{ color: "rgba(255,255,255,0.4)" }}>Host: <span style={{ color: "rgba(255,255,255,0.65)" }}>{continueLearning.webinar.host}</span></p>
@@ -463,7 +463,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-2.5">
                 <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${ACCENT}, ${ACCENT}80)` }} />
                 <Star size={14} style={{ color: ACCENT }} />
-                <h2 className="text-sm font-bold text-white tracking-wide">Upcoming Exclusive Live Webinars</h2>
+                <h2 className="text-base font-extrabold text-white tracking-wide">Upcoming Exclusive Live Webinars</h2>
               </div>
               <Link href="/webinars" className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-white"
                 style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
@@ -507,20 +507,20 @@ export default function Dashboard() {
                   <div className="p-4 flex flex-col flex-1">
                     <h3 className="text-white font-bold text-sm leading-snug mb-2">{w.title}</h3>
                     {w.description && (
-                       <p className="text-gray-300 text-xs leading-relaxed mb-2">{w.description}</p>
+                       <p className="text-white text-xs leading-relaxed mb-2">{w.description}</p>
                     )}
                     {w.host && (
-                       <p className="text-gray-300 text-xs mb-2">
-                        Host: <span className="text-gray-300">{w.host}</span>
+                       <p className="text-white text-xs mb-2">
+                        Host: <span className="text-white">{w.host}</span>
                       </p>
                     )}
                     {w.scheduledAt && (
                       <div className="space-y-0.5 mb-3">
-                        <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                        <p className="text-xs text-white flex items-center gap-1.5">
                           <Calendar size={11} style={{ color: ACCENT }} />
                           {new Date(w.scheduledAt).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "America/Denver" })}
                         </p>
-                        <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                        <p className="text-xs text-white flex items-center gap-1.5">
                           <Clock size={11} style={{ color: ACCENT }} />
                           {new Date(w.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Denver", timeZoneName: "short" })}
                         </p>
@@ -552,7 +552,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2.5 mb-6">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
             <Sparkles size={14} style={{ color: "#0074F4" }} />
-            <h2 className="text-sm font-bold text-white tracking-wide">Explore the Center</h2>
+            <h2 className="text-base font-extrabold text-white tracking-wide">Explore the Center</h2>
           </div>
 
           {/* Full-width single-column stack */}
@@ -592,7 +592,7 @@ export default function Dashboard() {
                   {/* Text content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="text-white font-bold text-sm">{card.label}</p>
+                      <p className="text-white font-extrabold text-base">{card.label}</p>
                       {card.badge && (
                         <span
                           className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide flex-shrink-0"
@@ -602,7 +602,7 @@ export default function Dashboard() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                    <p className="text-xs leading-relaxed" style={{ color: "#ffffff" }}>
                       {card.description}
                     </p>
                   </div>

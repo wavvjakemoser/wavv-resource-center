@@ -105,7 +105,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
       </button>
       {open && (
         <div className="px-5 pb-4">
-          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>{a}</p>
+          <p className="text-sm leading-relaxed text-white">{a}</p>
         </div>
       )}
     </div>
@@ -124,10 +124,10 @@ function PartnerHub() {
           </div>
           <div>
             <h3 className="text-lg font-bold text-white">Welcome, Partner</h3>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Your WAVV Partner Hub</p>
+            <p className="text-xs text-white">Your WAVV Partner Hub</p>
           </div>
         </div>
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+        <p className="text-sm leading-relaxed text-white">
           This is your home base for partner resources, referral tracking, and co-marketing materials. Everything you need to grow your WAVV partnership is here.
         </p>
       </div>
@@ -158,7 +158,7 @@ function PartnerHub() {
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-semibold text-white mb-0.5">{item.title}</h4>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>{item.description}</p>
+                <p className="text-xs text-white">{item.description}</p>
               </div>
               <ChevronRight size={14} className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "rgba(255,255,255,0.4)" }} />
             </div>
@@ -186,7 +186,7 @@ function PartnerHub() {
               <FileText size={16} style={{ color: "rgba(255,255,255,0.4)" }} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white">{resource.title}</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{resource.description}</p>
+                <p className="text-xs text-white">{resource.description}</p>
               </div>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded" style={{ background: "rgba(0,116,244,0.12)", color: "#4a9eff" }}>
                 {resource.type}
@@ -198,8 +198,8 @@ function PartnerHub() {
 
       {/* Contact */}
       <div className="text-center py-4">
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>
-          Need help? Reach your partner manager or email{" "}
+        <p className="text-sm text-white">
+        Need help? Reach your partner manager or email{" "}
           <a href="mailto:partners@wavv.com" className="font-medium" style={{ color: "#0074F4" }}>partners@wavv.com</a>
         </p>
       </div>
@@ -295,7 +295,7 @@ export default function Partners() {
             </div>
 
             {/* Subline */}
-            <p className="mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
               Refer customers to WAVV and earn recurring revenue for every active account you bring in. Built for sales leaders and agency owners ready to turn their network into a revenue stream.
             </p>
 
@@ -339,7 +339,7 @@ export default function Partners() {
         <div className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #67C728)" }} />
-            <h2 className="text-xl font-bold text-white">Why Partner with WAVV?</h2>
+            <h2 className="text-2xl font-extrabold text-white">Why Partner with WAVV?</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -361,7 +361,7 @@ export default function Partners() {
                     <Icon size={18} style={{ color: p.color }} />
                   </div>
                   <p className="text-sm font-bold text-white">{p.title}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.58)" }}>{p.body}</p>
+                  <p className="text-xs leading-relaxed text-white">{p.body}</p>
                 </div>
               );
             })}
@@ -372,7 +372,7 @@ export default function Partners() {
         <div className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #67C728)" }} />
-            <h2 className="text-xl font-bold text-white">How It Works</h2>
+            <h2 className="text-2xl font-extrabold text-white">How It Works</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -398,7 +398,7 @@ export default function Partners() {
                     <div className="w-px h-6" style={{ background: "rgba(255,255,255,0.1)" }} />
                     <p className="text-sm font-bold text-white">{step.title}</p>
                   </div>
-                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.58)" }}>{step.body}</p>
+                  <p className="text-xs leading-relaxed text-white">{step.body}</p>
                 </div>
               </div>
             ))}
@@ -409,7 +409,7 @@ export default function Partners() {
         <div className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #67C728)" }} />
-            <h2 className="text-xl font-bold text-white">What You Get as a WAVV Partner</h2>
+            <h2 className="text-2xl font-extrabold text-white">What You Get as a WAVV Partner</h2>
           </div>
 
           <div
@@ -427,7 +427,7 @@ export default function Partners() {
             ].map((item) => (
               <div key={item} className="flex items-start gap-2.5">
                 <CheckCircle2 size={15} className="mt-0.5 flex-shrink-0" style={{ color: "#67C728" }} />
-                <span className="text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>{item}</span>
+                <span className="text-sm text-white">{item}</span>
               </div>
             ))}
           </div>
@@ -437,7 +437,7 @@ export default function Partners() {
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #67C728)" }} />
-            <h2 className="text-xl font-bold text-white">Frequently Asked Questions</h2>
+            <h2 className="text-2xl font-extrabold text-white">Frequently Asked Questions</h2>
           </div>
 
           <div className="space-y-2">
@@ -461,8 +461,8 @@ export default function Partners() {
             <Users size={26} style={{ color: "#0074F4" }} />
           </div>
           <div className="space-y-2">
-            <p className="text-xl font-bold text-white">Ready to become a WAVV Partner?</p>
-            <p className="text-sm max-w-md" style={{ color: "rgba(255,255,255,0.55)" }}>
+            <p className="text-2xl font-extrabold text-white">Ready to become a WAVV Partner?</p>
+            <p className="text-sm max-w-md text-white">
               Applications are reviewed and approved within minutes. After you apply, watch your email for the next steps. Join a growing network of partners earning recurring revenue by connecting their clients with WAVV.
             </p>
           </div>
@@ -478,7 +478,7 @@ export default function Partners() {
             Apply Now
             <ArrowRight size={15} />
           </a>
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+          <p className="text-xs text-white">
             Already an approved WAVV Partner?{" "}
             <a
               href="https://wavv.firstpromoter.com/login"
@@ -499,7 +499,7 @@ export default function Partners() {
         {!hasAccess && (
           <div className="sticky bottom-0 left-0 right-0 z-40 py-3 px-4 flex items-center justify-center gap-4"
             style={{ background: "linear-gradient(to top, rgba(8,12,20,0.98), rgba(8,12,20,0.92))", borderTop: "1px solid rgba(0,116,244,0.15)", backdropFilter: "blur(12px)" }}>
-            <span className="text-xs font-medium hidden sm:inline" style={{ color: "rgba(255,255,255,0.6)" }}>
+            <span className="text-xs font-medium hidden sm:inline text-white">
               Earn recurring revenue on every referral you bring to WAVV
             </span>
             <a
