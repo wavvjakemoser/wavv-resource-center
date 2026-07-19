@@ -2354,15 +2354,15 @@ function PortalUsersPanel() {
         <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
           <Table>
             <TableHeader>
-              <TableRow style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}>
-                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>User</TableHead>
-                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Type</TableHead>
-                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Subscription</TableHead>
-                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Plan</TableHead>
-                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Billing</TableHead>
-                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>WAVV Account ID</TableHead>
-                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>First Seen</TableHead>
-                <TableHead className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>Last Login</TableHead>
+              <TableRow style={{ borderBottom: "1px solid #2a2a2a", background: "#1d2230" }}>
+                <TableHead className="text-xs font-medium text-gray-300">User</TableHead>
+                <TableHead className="text-xs font-medium text-gray-300">Type</TableHead>
+                <TableHead className="text-xs font-medium text-gray-300">Subscription</TableHead>
+                <TableHead className="text-xs font-medium text-gray-300">Plan</TableHead>
+                <TableHead className="text-xs font-medium text-gray-300">Billing</TableHead>
+                <TableHead className="text-xs font-medium text-gray-300">WAVV Account ID</TableHead>
+                <TableHead className="text-xs font-medium text-gray-300">First Seen</TableHead>
+                <TableHead className="text-xs font-medium text-gray-300">Last Login</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -4814,9 +4814,9 @@ function PlaygroundTab() {
       {/* ── Requests table ── */}
       <div
         className="rounded-xl overflow-hidden"
-        style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+        style={{ border: "1px solid #2a2a2a" }}
       >
-        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
+        <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between" style={{ background: "#1d2230" }}>
           <h3 className="text-sm font-semibold text-white">All Requests</h3>
           <span className="text-xs font-medium text-white">{requests?.length ?? 0} total</span>
         </div>
@@ -4828,7 +4828,7 @@ function PlaygroundTab() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow style={{ borderColor: "#252d3d" }}>
+                <TableRow style={{ borderColor: "#252d3d", background: "#1d2230" }}>
                   <TableHead className="text-gray-400 text-xs">Name</TableHead>
                   <TableHead className="text-gray-400 text-xs">Email</TableHead>
                   <TableHead className="text-gray-400 text-xs">Playground</TableHead>
@@ -4838,7 +4838,7 @@ function PlaygroundTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow style={{ borderColor: "#252d3d" }}>
+                <TableRow style={{ borderColor: "#252d3d", background: "#111" }}>
                   <TableCell colSpan={6} className="text-center text-gray-500 text-sm py-8">
                     No requests
                   </TableCell>
@@ -4849,7 +4849,7 @@ function PlaygroundTab() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow style={{ borderColor: "#252d3d" }}>
+              <TableRow style={{ borderColor: "#252d3d", background: "#1d2230" }}>
                 <TableHead className="text-gray-400 text-xs">Name</TableHead>
                 <TableHead className="text-gray-400 text-xs">Email</TableHead>
                 <TableHead className="text-gray-400 text-xs">Playground</TableHead>
@@ -5721,15 +5721,13 @@ function GuidesTab() {
     <div className="space-y-6">
       <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(103,199,40,0.15)" }}>
-            <FileTextIcon size={18} style={{ color: "#67C728" }} />
-          </div>
           <div>
             <h2 className="text-base font-bold text-white">WAVV Resource Hub</h2>
             <p className="text-xs text-gray-500">Manage PDFs and Help Articles for the Resource Hub</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Help Articles (blue) */}
           <button
             onClick={() => { setShowAddSectionModal(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
@@ -5744,20 +5742,7 @@ function GuidesTab() {
           >
             <Plus size={13} /> Add Help Article
           </button>
-          <button
-            onClick={() => { setShowAddFaqSectionModal(true); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "rgba(234,179,8,0.15)", color: "#eab308", border: "1px solid rgba(234,179,8,0.3)" }}
-          >
-            <Plus size={13} /> Add FAQ Section
-          </button>
-          <button
-            onClick={() => { setGlobalFaqEntry(v => ({ ...v, sectionId: faqSectionsAdmin[0]?.id ?? 0 })); setShowAddFaqForm(f => !f); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
-            style={{ background: "#eab308" }}
-          >
-            <Plus size={13} /> Add FAQ
-          </button>
+          {/* PDF (cayenne/red) */}
           <button
             onClick={() => { setShowAddPdfSectionModal(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
@@ -5771,6 +5756,21 @@ function GuidesTab() {
             style={{ background: "#ef4444" }}
           >
             <Plus size={13} /> Add PDF
+          </button>
+          {/* FAQ (green) */}
+          <button
+            onClick={() => { setShowAddFaqSectionModal(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}
+          >
+            <Plus size={13} /> Add FAQ Section
+          </button>
+          <button
+            onClick={() => { setGlobalFaqEntry(v => ({ ...v, sectionId: faqSectionsAdmin[0]?.id ?? 0 })); setShowAddFaqForm(f => !f); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
+            style={{ background: "#22c55e" }}
+          >
+            <Plus size={13} /> Add FAQ
           </button>
         </div>
       </div>
@@ -6085,84 +6085,12 @@ function GuidesTab() {
           </form>
         </div>
       )}
-      {/* ── Section Visibility Divider ── */}
-      <div className="flex items-center gap-3 pt-2">
-        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, #2a2a2a, transparent)" }} />
-        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#4b5563" }}>Visibility Controls</span>
-        <div className="h-px flex-1" style={{ background: "linear-gradient(to left, #2a2a2a, transparent)" }} />
-      </div>
-      {/* ── Section Visibility ── */}
-      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Eye size={13} style={{ color: "#9ca3af" }} />
-          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
-          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
-        </div>
 
-        {/* ── Help Articles master toggle ── */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: "#0074F4" }} />
-            <span className="text-xs text-gray-300 font-medium">Help Articles</span>
-          </div>
-          <button
-            onClick={() => toggleGuideSection("help_article")}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-            style={guideVisibility.help_article !== false
-              ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-              : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-            }
-          >
-            {guideVisibility.help_article !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
-          </button>
-        </div>
-
-        {/* ── Separator ── */}
-        <div className="h-px" style={{ background: "#2a2a2a" }} />
-
-        {/* ── PDFs master toggle ── */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: "#00A9E2" }} />
-            <span className="text-xs text-gray-300 font-medium">PDFs</span>
-          </div>
-          <button
-            onClick={() => toggleGuideSection("pdf")}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-            style={guideVisibility.pdf !== false
-              ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-              : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-            }
-          >
-            {guideVisibility.pdf !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
-          </button>
-        </div>
-        {/* ── Separator ── */}
-        <div className="h-px" style={{ background: "#2a2a2a" }} />
-        {/* ── FAQs master toggle ── */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: "#67C728" }} />
-            <span className="text-xs text-gray-300 font-medium">FAQs</span>
-          </div>
-          <button
-            onClick={() => toggleGuideSection("faq")}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-            style={guideVisibility.faq !== false
-              ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-              : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-            }
-          >
-            {guideVisibility.faq !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
-          </button>
-        </div>
-      </div>
 
       {/* ── Help Articles category header ── */}
-      <div className="flex items-center gap-3 px-1">
+      <div className="flex items-center gap-3 px-4 py-3 rounded-t-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#0074F4" }} />
         <span className="text-sm font-semibold text-white">Help Articles</span>
-        <span className="text-xs text-gray-500">Published help articles grouped by section</span>
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4" }}>{helpArticleSectionsAdmin.length} sections</span>
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4" }}>{helpArticlesPublished.length} articles</span>
@@ -6482,10 +6410,9 @@ function PdfSectionsPanel({
   return (
     <div className="space-y-4">
       {/* PDF section header */}
-      <div className="flex items-center gap-3 px-1">
+      <div className="flex items-center gap-3 px-4 py-3 rounded-t-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PDF_COLOR }} />
         <span className="text-sm font-semibold text-white">PDFs</span>
-        <span className="text-xs text-gray-500">Viewable and Downloadable PDF documents</span>
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}18`, color: PDF_COLOR }}>{orderedSections.length} sections</span>
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${PDF_COLOR}18`, color: PDF_COLOR }}>{pdfGuides.length} PDFs</span>
@@ -6509,8 +6436,8 @@ function PdfSectionsPanel({
                   <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
                     <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
-                        <button onClick={() => setCollapsed(c => ({ ...c, [section.id]: !isCollapsed }))} className="text-gray-400 hover:text-white transition flex-shrink-0">
+                        <span className="text-white cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
+                        <button onClick={() => setCollapsed(c => ({ ...c, [section.id]: !isCollapsed }))} className="text-white hover:text-white transition flex-shrink-0">
                           {isCollapsed ? <ChevronRightIcon size={15} /> : <ChevronDown size={15} />}
                         </button>
                         {editingSectionId === section.id ? (
@@ -6769,13 +6696,12 @@ function FaqSectionsPanel() {
   return (
     <div className="space-y-3">
       {/* Section header removed — FAQs flow inline with Help Articles and PDFs */}
-      <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#eab308" }} />
+      <div className="flex items-center gap-3 px-4 py-3 rounded-t-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#22c55e" }} />
         <span className="text-sm font-semibold text-white">FAQs</span>
-        <span className="text-xs text-gray-500">Frequently asked questions grouped by topic</span>
         <div className="ml-auto flex items-center gap-1.5">
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(234,179,8,0.15)", color: "#eab308" }}>{sections.length} sections</span>
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(234,179,8,0.15)", color: "#eab308" }}>{sections.reduce((sum, s) => sum + (s.entries?.length ?? 0), 0)} entries</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}>{sections.length} sections</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}>{sections.reduce((sum, s) => sum + (s.entries?.length ?? 0), 0)} entries</span>
         </div>
       </div>
       {sections.length === 0 && (
@@ -6790,8 +6716,8 @@ function FaqSectionsPanel() {
           {/* Section row */}
           <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
-              <button onClick={() => toggleExpand(section.id)} className="text-gray-400 hover:text-white transition flex-shrink-0">
+              <span className="text-white cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
+              <button onClick={() => toggleExpand(section.id)} className="text-white hover:text-white transition flex-shrink-0">
                 {expandedSections.has(section.id) ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
               </button>
               {renamingSection?.id === section.id ? (
@@ -6827,11 +6753,7 @@ function FaqSectionsPanel() {
               >
                 {section.isVisible ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
               </button>
-              <button
-                onClick={() => setEditingSectionUrl({ id: section.id, url: section.sectionUrl ?? "" })}
-                className="text-gray-600 hover:text-blue-400 transition"
-                title="Set section URL (shown as Open in tab in the side panel)"
-              ><ExternalLink size={13} /></button>
+
               <button
                 onClick={() => { if (confirm(`Delete "${section.name}" and all its entries?`)) deleteSectionMutation.mutate({ id: section.id }); }}
                 className="text-gray-600 hover:text-red-400 transition"
@@ -8689,8 +8611,8 @@ function PublishedHelpArticlesPanel() {
               className="px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition"
               style={{ background: "#1d2230" }}
             >
-              <span className="text-gray-600 cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
-              <button onClick={e => { e.stopPropagation(); setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true })); }} className="text-gray-400 hover:text-white transition flex-shrink-0">
+              <span className="text-white cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
+              <button onClick={e => { e.stopPropagation(); setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true })); }} className="text-white hover:text-white transition flex-shrink-0">
                 {isCollapsed ? <ChevronRightIcon size={15} /> : <ChevronDown size={15} />}
               </button>
               <div className="flex-1 flex items-center gap-3 min-w-0">

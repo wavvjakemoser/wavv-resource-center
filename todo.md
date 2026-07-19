@@ -2207,3 +2207,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add gray tile background around "Access" section header
 - [x] Add gray tile background around "Content Requests" section header
 - [x] Add gray tile background around "WAVV Partners Content" section header
+
+## Playground / Resource Hub / Access UI Fixes (Jul 19 2026)
+- [x] Playground: column headers row (Name, Email, Playground, Notes, Date) should be gray, body below should be black
+- [x] Resource Hub: remove icon next to "WAVV Resource Hub" header
+- [x] Resource Hub: reorder sections to 1) Add Help Articles, 2) Add PDF, 3) Add FAQ
+- [x] Resource Hub: use new color schemes (blue, cayenne/red, green) for the 3 section buttons
+- [x] Resource Hub: remove "Visibility Controls" text entirely
+- [x] Resource Hub: remove external link button next to the 3 visibility buttons
+- [x] Resource Hub: remove subtext next to Help Articles, PDFs, and FAQs headers
+- [x] Resource Hub: section headers (Help Articles, PDFs, FAQs) get gray border, body below them is black (flip invert)
+- [x] Resource Hub: make caret and drag button white text, leave pencil gray
+- [x] Access WAVV Users: table column headers row (User, Type, Subscription, etc.) should be gray background
