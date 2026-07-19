@@ -71,9 +71,9 @@ const CATEGORIES = [
     subtitle: "Step-by-step walkthroughs for the features you use most.",
     color: "#00A9E2",
     icon: Wrench,
-    bgPosition: "60% 20%",
-    bgSize: "70% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-banner-VfckEZXCoBSM5mgbMe7eP5.webp",
+    bgPosition: "right center",
+    bgSize: "100% auto",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-banner-v2-6CnPWCCox7g7iceABtouGQ.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -107,9 +107,9 @@ const CATEGORIES = [
     subtitle: "Dial smarter, not harder. Frameworks and tactics to get more out of every session.",
     color: "#67C728",
     icon: Lightbulb,
-    bgPosition: "60% 20%",
-    bgSize: "70% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-banner-TYUrEvUSdZ4nQiZC2YJrtp.webp",
+    bgPosition: "right center",
+    bgSize: "100% auto",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-banner-v2-9a5wdymWp5onE8TCKPr3yq.webp",
     placeholders: [
       {
         id: "p-str-1",
