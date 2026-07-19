@@ -8084,7 +8084,7 @@ function SettingsTab() {
                 {([
                   { key: "video_requests_enabled", label: "Video Requests", icon: VideoIcon, enabled: videoRequestsEnabled, color: "#0074F4" },
                   { key: "webinar_requests_enabled", label: "Webinar Requests", icon: MonitorPlay, enabled: webinarRequestsEnabled, color: "#10b981" },
-                  { key: "guide_requests_enabled", label: "Guide Requests", icon: FileTextIcon, color: "#67C728", enabled: guideRequestsEnabled },
+                  { key: "guide_requests_enabled", label: "Resource Requests", icon: FileTextIcon, color: "#67C728", enabled: guideRequestsEnabled },
                   { key: "search_requests_enabled", label: "Search Requests", icon: Search, color: "#f59e0b", enabled: searchRequestsEnabled },
                 ] as { key: string; label: string; icon: React.ElementType; enabled: boolean; color: string }[]).map(({ key, label, icon: ReqIcon, enabled, color }) => (
                   <div key={key} className="flex items-center justify-between py-1">

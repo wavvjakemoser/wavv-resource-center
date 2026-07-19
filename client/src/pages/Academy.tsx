@@ -510,13 +510,13 @@ export function ContentRequestCTA({
   const settingKey = requestType === "video" ? "video_requests_enabled" : requestType === "guide" ? "guide_requests_enabled" : "webinar_requests_enabled";
   const isEnabled = settingsMap[settingKey] !== false;
   const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#10b981");
-  const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
+  const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Resource" : "Webinar";
   // Match the sidebar emblem for each section
   const CtaIcon = requestType === "video" ? GradCap : requestType === "guide" ? FileText : Video;
   const tagline = requestType === "video"
     ? "Don't see what you need? Help us build what matters most to you."
     : requestType === "guide"
-    ? "Missing a playbook or reference doc? Tell us what would help your team."
+    ? "Missing a resource, playbook, or reference doc? Tell us what would help your team."
     : "Want a session on a specific topic? Let us know what to cover next.";
 
   // If the owner has disabled this request type, render nothing
@@ -588,7 +588,7 @@ export function ContentRequestForm({
   onSuccess?: () => void;
 }) {
   const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#10b981");
-  const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
+  const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Resource" : "Webinar";
   const typeIcon = requestType === "video" ? Video : requestType === "guide" ? BookOpen : GraduationCap;
   const TypeIcon = typeIcon;
 

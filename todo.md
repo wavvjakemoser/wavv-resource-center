@@ -2042,3 +2042,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Webinars: update "Request a Webinar" CTA tile accent color to #10b981 (WAVV Webinars section color)
 - [x] Webinars: update default webinar accent fallback in ContentRequestCTA and ContentRequestForm to #10b981
 - [x] Webinars: verify each section (evergreen, exclusive, recording) has its own unique default thumbnail background
+
+## Resource Hub Redesign (Jul 18 2026)
+- [x] Generate 3 neon icon banners matching Academy style: magnifying glass (Help Articles), clipboard (PDFs), chat bubble (FAQs)
+- [x] Add Academy-style category tile banners to Resource Hub page (clickable, expand to show content)
+- [x] Rename "Request a Written Guide" to "Request a Resource" across CTA component and forms
+- [x] Update Resource Hub CTA accent color to match Resource Hub section color (#67C728)
+- [x] Update CMS Command Center Resource Hub tab to match new tile styling (admin toggle label renamed to 'Resource Requests')

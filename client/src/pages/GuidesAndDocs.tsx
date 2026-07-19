@@ -32,6 +32,31 @@ const PDF_COLOR     = "#ef4444";
 const FAQ_COLOR     = "#eab308";
 const ARTICLE_COLOR = "#8B5CF6";
 
+// ─── Category tile definitions ───────────────────────────────────────────────
+const RESOURCE_CATEGORIES = [
+  {
+    key: "help_article",
+    label: "Help Articles",
+    subtitle: "Step-by-step guides and reference documentation for every WAVV feature.",
+    color: ARTICLE_COLOR,
+    thumbnail: "/manus-storage/resourcehub-magnifying-glass_e84b4f50.png",
+  },
+  {
+    key: "pdf",
+    label: "PDFs",
+    subtitle: "Downloadable playbooks, checklists, and quick-reference documents.",
+    color: PDF_COLOR,
+    thumbnail: "/manus-storage/resourcehub-clipboard_62327747.png",
+  },
+  {
+    key: "faq",
+    label: "FAQs",
+    subtitle: "Quick answers to the most common questions about WAVV.",
+    color: FAQ_COLOR,
+    thumbnail: "/manus-storage/resourcehub-chat-bubble_b2ba88c7.png",
+  },
+];
+
 // ─── PDF Guide Row ────────────────────────────────────────────────────────────
 function PdfRow({
   guide,
@@ -194,22 +219,6 @@ function PdfSection({
 
   return (
     <section>
-      {/* Section header — gradient bar style */}
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          className="w-1 rounded-full flex-shrink-0"
-          style={{
-            height: "28px",
-            background: `linear-gradient(to bottom, ${PDF_COLOR}, #b91c1c)`,
-            boxShadow: `0 0 8px ${PDF_COLOR}60`,
-          }}
-        />
-        <span className="text-base font-bold text-white">PDFs</span>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${PDF_COLOR}15`, color: PDF_COLOR }}>
-          {items.length}
-        </span>
-      </div>
-
       {subSections.length > 0 ? (
         <div className="space-y-4 pl-2">
           {subSections.map(([name, sItems]) => (
@@ -336,21 +345,6 @@ function FaqSection({ sections, search, onOpenPanel }: { sections: FaqSectionTyp
 
   return (
     <section>
-      {/* Section header — gradient bar style */}
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          className="w-1 rounded-full flex-shrink-0"
-          style={{
-            height: "28px",
-            background: `linear-gradient(to bottom, ${FAQ_COLOR}, #a16207)`,
-            boxShadow: `0 0 8px ${FAQ_COLOR}60`,
-          }}
-        />
-        <span className="text-base font-bold text-white">FAQs</span>
-        <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: `${FAQ_COLOR}15`, color: FAQ_COLOR }}>
-          {filteredSections.reduce((acc, s) => acc + s.entries.filter(e => !search || e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())).length, 0)}
-        </span>
-      </div>
       <div className="space-y-6 pl-2">
         {filteredSections.map(section => (
           <FaqSubSection key={section.id} section={section} search={search} onOpenPanel={onOpenPanel} />
@@ -360,12 +354,132 @@ function FaqSection({ sections, search, onOpenPanel }: { sections: FaqSectionTyp
   );
 }
 
+// ─── Category Tile Banner ─────────────────────────────────────────────────────
+function CategoryTile({
+  cat,
+  count,
+  isActive,
+  onClick,
+}: {
+  cat: typeof RESOURCE_CATEGORIES[number];
+  count: number;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01] w-full text-left"
+      style={{
+        border: isActive ? `2px solid ${cat.color}` : `1px solid ${cat.color}60`,
+        height: "200px",
+        boxShadow: isActive
+          ? `0 0 0 1px ${cat.color}40, 0 4px 32px ${cat.color}30`
+          : `0 0 0 1px ${cat.color}20, 0 4px 32px ${cat.color}18`,
+      }}
+    >
+      {/* Deep space black base */}
+      <div className="absolute inset-0" style={{ background: "#000" }} />
+
+      {/* Circuit board SVG pattern */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id={`circuit-rh-${cat.key}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={cat.color} strokeWidth="0.8" fill="none"/>
+            <circle cx="10" cy="10" r="2" fill={cat.color}/>
+            <circle cx="50" cy="10" r="2" fill={cat.color}/>
+            <circle cx="50" cy="50" r="2" fill={cat.color}/>
+            <circle cx="30" cy="30" r="1.5" fill={cat.color}/>
+            <path d="M0 30 L10 30 M60 50 L50 50" stroke={cat.color} strokeWidth="0.6" fill="none"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill={`url(#circuit-rh-${cat.key})`}/>
+      </svg>
+
+      {/* Full-width radial color glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${cat.color}28 0%, ${cat.color}10 45%, transparent 75%)`,
+        }}
+      />
+
+      {/* Neon scan line */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `linear-gradient(180deg, ${cat.color}06 0%, ${cat.color}12 50%, ${cat.color}06 100%)`,
+        }}
+      />
+
+      {/* Top edge neon line */}
+      <div
+        className="absolute top-0 left-0 right-0 pointer-events-none"
+        style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${cat.color}60 30%, ${cat.color}90 60%, transparent 100%)` }}
+      />
+
+      {/* Full-bleed thumbnail */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `url(${cat.thumbnail})`,
+          backgroundSize: "100% auto",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+          opacity: 0.85,
+        }}
+      />
+
+      {/* Dark gradient overlay — left side for text legibility */}
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }}
+      />
+
+      {/* Hover neon border pulse */}
+      <div
+        className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ boxShadow: `inset 0 0 0 1px ${cat.color}80, 0 0 24px ${cat.color}30` }}
+      />
+
+      {/* Content overlay */}
+      <div className="relative flex flex-col justify-center h-full px-6 py-5 gap-1">
+        <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: cat.color }}>
+          WAVV Resource Hub
+        </p>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-1">
+          {cat.label}
+        </h2>
+        <p className="text-sm text-white mb-2 max-w-md">{cat.subtitle}</p>
+        <div className="flex items-center gap-2">
+          <span
+            className="text-[11px] font-bold px-3 py-1 rounded-full"
+            style={{ background: `${cat.color}35`, color: cat.color, border: `1px solid ${cat.color}` }}
+          >
+            {count} {count === 1 ? "item" : "items"}
+          </span>
+          {isActive && (
+            <span
+              className="text-[11px] font-bold px-3 py-1 rounded-full"
+              style={{ background: "rgba(255,255,255,0.15)", color: "#f3f4f6", border: "1px solid rgba(255,255,255,0.35)" }}
+            >
+              Viewing
+            </span>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function GuidesAndDocs() {
   const { user } = useAuth();
   const _firstName = user?.name?.split(" ")[0] ?? null;
   const [search, setSearch] = useState("");
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const { data: guides, isLoading } = trpc.guides.list.useQuery();
   const { data: pdfSectionsRaw } = trpc.guides.listPdfSectionsPublic.useQuery();
@@ -374,6 +488,17 @@ export default function GuidesAndDocs() {
   const { data: guideVisRaw } = trpc.siteSettings.get.useQuery({ key: "guides_sections_visibility" });
   const guideVisibility: Record<string, boolean> = (guideVisRaw as Record<string, boolean> | null) ?? { help_article: true, pdf: true, faq: true };
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
+
+  // Count items per category
+  const { data: helpArticles = [] } = trpc.helpArticles.listPublished.useQuery();
+  const pdfItems: GuideItem[] = (guides ?? []).filter(g => (g.fileType ?? "pdf") === "pdf");
+  const faqCount = (faqSections as FaqSectionType[]).filter(s => s.isVisible).reduce((acc, s) => acc + s.entries.filter(e => e.isVisible).length, 0);
+
+  const categoryCounts: Record<string, number> = {
+    help_article: helpArticles.length,
+    pdf: pdfItems.length,
+    faq: faqCount,
+  };
 
   const handleOpenPdf = (guide: GuideItem) => {
     if (!guide.fileUrl) return;
@@ -404,10 +529,8 @@ export default function GuidesAndDocs() {
     setPanelItem({ type: "article", title: article.title, nativeBody: article.nativeBody, fileUrl: article.fileUrl ?? null, articleUrl: article.articleUrl ?? null });
   };
 
-  // Only PDFs — filter by search
-  const pdfItems: GuideItem[] = (guides ?? []).filter(g => {
-    const type = g.fileType ?? "pdf";
-    if (type !== "pdf") return false;
+  // Filter PDFs by search
+  const filteredPdfItems: GuideItem[] = pdfItems.filter(g => {
     if (!search) return true;
     return (
       g.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -420,9 +543,13 @@ export default function GuidesAndDocs() {
     <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} pushMode={true} />
   );
 
+  const handleTileClick = (key: string) => {
+    setActiveCategory(prev => prev === key ? null : key);
+  };
+
   return (
     <PortalLayout title="WAVV Resource Hub" rightPanel={sidePanel}>
-      <div className="px-4 lg:px-8 py-6 space-y-6">
+      <div className="px-4 lg:px-8 py-6 space-y-8">
         {/* Spacer for consistent vertical alignment */}
         <div style={{ minHeight: "32px" }} />
 
@@ -441,24 +568,42 @@ export default function GuidesAndDocs() {
             </div>
 
             {/* Subline */}
-<p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
-            Help articles, PDFs, and FAQs organized by topic.
-          </p>
-
-            {/* Content type badges */}
-            <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
-              {[
-                { label: "Help Articles", color: ARTICLE_COLOR, icon: <BookOpen size={10} /> },
-                { label: "PDFs",          color: PDF_COLOR,     icon: <FileText size={10} /> },
-                { label: "FAQs",          color: FAQ_COLOR,     icon: <HelpCircle size={10} /> },
-              ].map(({ label, color, icon }) => (
-                <span key={label} className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full"
-                  style={{ background: `${color}15`, color, border: `1px solid ${color}25` }}>
-                  {icon}{label}
-                </span>
-              ))}
-            </div>
+            <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+              Help articles, PDFs, and FAQs organized by topic.
+            </p>
         </div>{/* end hero */}
+
+        {/* ── Category Tile Banners ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {RESOURCE_CATEGORIES.map(cat => (
+            guideVisibility[cat.key] !== false && (
+              <CategoryTile
+                key={cat.key}
+                cat={cat}
+                count={categoryCounts[cat.key] ?? 0}
+                isActive={activeCategory === cat.key}
+                onClick={() => handleTileClick(cat.key)}
+              />
+            )
+          ))}
+        </div>
+
+        {/* ── Search bar (shown when a category is active) ── */}
+        {activeCategory && (
+          <div className="relative max-w-md">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Search resources..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm text-white placeholder:text-gray-500 outline-none transition-all"
+              style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#67C728"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#2a2a2a"; }}
+            />
+          </div>
+        )}
 
         {/* Loading skeleton */}
         {isLoading && (
@@ -475,40 +620,55 @@ export default function GuidesAndDocs() {
           </div>
         )}
 
-        {/* 1. Help Articles */}
-        {guideVisibility["help_article"] !== false && (
-          <div>
+        {/* ── Content sections — shown based on active category ── */}
+
+        {/* Help Articles */}
+        {(activeCategory === "help_article" || activeCategory === null) && guideVisibility["help_article"] !== false && (
+          <div style={{ display: activeCategory === null ? "none" : undefined }}>
             <HelpArticlesSection search={search} onOpenArticle={handleOpenArticle} />
           </div>
         )}
 
-        {/* 2. PDFs */}
-        {!isLoading && guideVisibility["pdf"] !== false && (
-          <PdfSection
-            items={pdfItems}
-            dbSections={dbPdfSections}
-            onOpen={handleOpenPdf}
-          />
-        )}
-
-        {/* 3. FAQs */}
-        {guideVisibility["faq"] !== false && faqSections.length > 0 && (
-          <FaqSection sections={faqSections as FaqSectionType[]} search={search} onOpenPanel={handleOpenFaqSection} />
-        )}
-
-        {/* Empty state */}
-        {!isLoading && pdfItems.length === 0 && search && (
-          <div className="text-center py-16">
-            <Search size={40} className="text-gray-700 mx-auto mb-4" />
-            <h3 className="text-white font-semibold mb-2">No results for "{search}"</h3>
-            <p className="text-white text-sm">Try a different search term.</p>
+        {/* PDFs */}
+        {(activeCategory === "pdf" || activeCategory === null) && !isLoading && guideVisibility["pdf"] !== false && (
+          <div style={{ display: activeCategory === null ? "none" : undefined }}>
+            <PdfSection
+              items={filteredPdfItems}
+              dbSections={dbPdfSections}
+              onOpen={handleOpenPdf}
+            />
           </div>
+        )}
+
+        {/* FAQs */}
+        {(activeCategory === "faq" || activeCategory === null) && guideVisibility["faq"] !== false && (faqSections as FaqSectionType[]).length > 0 && (
+          <div style={{ display: activeCategory === null ? "none" : undefined }}>
+            <FaqSection sections={faqSections as FaqSectionType[]} search={search} onOpenPanel={handleOpenFaqSection} />
+          </div>
+        )}
+
+        {/* Empty state for search */}
+        {activeCategory && !isLoading && search && (
+          (() => {
+            let hasResults = false;
+            if (activeCategory === "help_article") hasResults = helpArticles.some(a => a.title.toLowerCase().includes(search.toLowerCase()));
+            if (activeCategory === "pdf") hasResults = filteredPdfItems.length > 0;
+            if (activeCategory === "faq") hasResults = (faqSections as FaqSectionType[]).some(s => s.entries.some(e => e.question.toLowerCase().includes(search.toLowerCase()) || e.answer.toLowerCase().includes(search.toLowerCase())));
+            if (!hasResults) return (
+              <div className="text-center py-16">
+                <Search size={40} className="text-gray-700 mx-auto mb-4" />
+                <h3 className="text-white font-semibold mb-2">No results for &quot;{search}&quot;</h3>
+                <p className="text-white text-sm">Try a different search term.</p>
+              </div>
+            );
+            return null;
+          })()
         )}
       </div>
 
-      {/* Request a Written Guide */}
+      {/* Request a Resource */}
       <div className="px-4 lg:px-8 pb-10">
-        <ContentRequestCTA requestType="guide" />
+        <ContentRequestCTA requestType="guide" accentColor="#67C728" />
       </div>
 
     </PortalLayout>
