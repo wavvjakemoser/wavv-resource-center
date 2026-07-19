@@ -37,7 +37,7 @@ const CATEGORIES = [
     icon: Compass,
     bgPosition: "60% center",
     bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-compass-banner-YbicPXD3ys442NgmseuCgq.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-compass-final-7uvVZPUanGGNUfoRPTBsJf.webp",
     placeholders: [
       {
         id: "p-onb-1",
@@ -73,7 +73,7 @@ const CATEGORIES = [
     icon: Wrench,
     bgPosition: "60% center",
     bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-v7-CM7DpCZhT4dJ5vhajk7Cxx.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-gear-final-VTbC9yYJNfb8jrs9o9VHrE.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -109,7 +109,7 @@ const CATEGORIES = [
     icon: Lightbulb,
     bgPosition: "60% center",
     bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-target-v4-XyKSdXDy32MhSKaKMuPKEK.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-target-final-UQQ74E86Jg7Dq5ZxY6bZGU.webp",
     placeholders: [
       {
         id: "p-str-1",
