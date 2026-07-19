@@ -7920,8 +7920,7 @@ function SettingsTab() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-semibold text-white flex items-center gap-2">
-          <Settings size={16} style={{ color: "#0074F4" }} />
+        <h2 className="text-base font-semibold text-white">
           Site Settings
         </h2>
         <p className="text-xs text-gray-500 mt-0.5">Owner-only controls for site-wide features and configuration</p>
@@ -7932,8 +7931,13 @@ function SettingsTab() {
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
 
-          {/* ── LEFT COLUMN: 5 stacked cards ── */}
-          <div className="space-y-4">
+          {/* ── LEFT COLUMN ── */}
+          <div className="space-y-6">
+
+            {/* ── SEGMENT: Site Controls ── */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#6b7280" }}>Site Controls</p>
+              <div className="space-y-4">
 
             {/* ── Announcement Banner ── */}
             <div className={sectionClass} style={sectionStyle}>
@@ -8035,9 +8039,13 @@ function SettingsTab() {
               </div>
             </div>
 
+              </div>{/* end Site Controls cards */}
+            </div>{/* end Site Controls segment */}
 
-
-
+            {/* ── SEGMENT: Visibility Controls ── */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#6b7280" }}>Visibility Controls</p>
+              <div className="space-y-4">
 
             {/* ── Profile Sections ── */}
             <div className={sectionClass} style={sectionStyle}>
@@ -8151,6 +8159,9 @@ function SettingsTab() {
                 ))}
               </div>
             </div>
+
+              </div>{/* end Visibility Controls cards */}
+            </div>{/* end Visibility Controls segment */}
 
           </div>{/* end left column */}
 
