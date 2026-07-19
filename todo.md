@@ -2169,3 +2169,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Redesign WAVV Users (Portal Users) view to mirror WAVV Team layout with subscription-based filter tiles
 - [x] Center the WAVV logo in the left sidebar
 - [x] Make external link icon white (not gray) in Quick Links sidebar section
+
+## WAVV Users + Requests Cleanup (Jul 19 2026)
+- [x] Remove "All Types / Customers / Guests" chip row from WAVV Users panel
+- [x] Remove bell icon from Content Requests header
+- [x] Rename request sections: Video Requests, Webinar Requests, Resource Requests, Search Requests
+- [x] Update request subtexts: WAVV Academy, WAVV Webinars, WAVV Resource Hub, General Search Bar
+- [x] Remove colored dots from request section headers
+- [x] Standardize all Export buttons to same blue color throughout the app

@@ -529,7 +529,7 @@ function StatDetailDrawer({
               onClick={() => exportTileCSV(label, rows, days)}
               disabled={rows.length === 0}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-white/10"
-              style={{ color, border: `1px solid ${color}40` }}
+              style={{ color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
               title="Export this data as CSV"
             >
               <ArrowDownToLine size={13} />
@@ -2331,7 +2331,7 @@ function PortalUsersPanel() {
         })}
       </div>
 
-      {/* Search + Account Type filter */}
+      {/* Search */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -2342,24 +2342,6 @@ function PortalUsersPanel() {
             className="pl-10"
             style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}
           />
-        </div>
-        <div className="flex items-center gap-2">
-          {([
-            { key: "all" as const, label: "All Types" },
-            { key: "customer" as const, label: "Customers" },
-            { key: "guest" as const, label: "Guests" },
-          ]).map(chip => (
-            <button
-              key={chip.key}
-              onClick={() => { setAccountTypeFilter(chip.key); setPage(0); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-              style={accountTypeFilter === chip.key
-                ? { background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }
-                : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}
-            >
-              {chip.label} {chip.key !== "all" && <span className="opacity-60 ml-1">({chip.key === "customer" ? byType.customer : byType.guest})</span>}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -4759,7 +4741,7 @@ function PlaygroundTab() {
         <button
           onClick={exportCSVRequests}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-          style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
+          style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
         >
           <ArrowDownToLine size={13} /> Export Requests
         </button>
@@ -7099,19 +7081,14 @@ function ContentRequestsTab() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
-            <Bell size={18} style={{ color: "#0074F4" }} />
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-white">Content Requests</h2>
-            <p className="text-xs text-gray-500">User-submitted requests for videos, guides, and webinars</p>
-          </div>
+        <div>
+          <h2 className="text-base font-bold text-white">Content Requests</h2>
+          <p className="text-xs text-gray-500">User-submitted requests for videos, guides, and webinars</p>
         </div>
         <button
           onClick={exportCSV}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-          style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
+          style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
         >
           <ArrowDownToLine size={13} /> Export All Requests
         </button>
@@ -7190,10 +7167,10 @@ function ContentRequestsTab() {
 }
 
 const CONTENT_REQUEST_GROUPS: Array<{ key: string; label: string; description: string }> = [
-  { key: "video",        label: "Video Requests",          description: "Academy lesson and tutorial requests" },
-  { key: "webinar",     label: "Webinar Requests",         description: "Live and on-demand webinar requests" },
-  { key: "guide",       label: "Guide Requests",           description: "Playbook, checklist, and doc requests" },
-  { key: "search_query", label: "Query Search Requests",  description: "Auto-logged from search bar — no results found" },
+  { key: "video",        label: "Video Requests",          description: "WAVV Academy" },
+  { key: "webinar",     label: "Webinar Requests",         description: "WAVV Webinars" },
+  { key: "guide",       label: "Resource Requests",        description: "WAVV Resource Hub" },
+  { key: "search_query", label: "Search Requests",         description: "General Search Bar" },
 ];
 
 function exportGroupCSV(groupKey: string, groupLabel: string, group: Array<{
@@ -7276,16 +7253,15 @@ function ContentRequestGroups({
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setCollapsed(c => ({ ...c, [key]: !c[key] })); }}
             >
               <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
                 <span className="text-sm font-semibold text-white">{label}</span>
                 <span className="text-xs text-gray-500">{description}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${color}20`, color }}>{group.length}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa" }}>{group.length}</span>
                 <button
                   onClick={(e) => { e.stopPropagation(); exportGroupCSV(key, label, group); }}
                   className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition hover:opacity-80"
-                  style={{ background: `${color}18`, color, border: `1px solid ${color}40` }}
+                  style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
                   title={`Export ${label} as CSV`}
                 >
                   <ArrowDownToLine size={13} /> Export
@@ -8325,7 +8301,7 @@ function ApprovedPartnersTab() {
         </div>
         <div className="flex gap-2">
           <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-            style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}>
+            style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>
             <ArrowDownToLine size={13} /> Export Partners
           </button>
         </div>

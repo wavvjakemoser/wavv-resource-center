@@ -78,7 +78,8 @@ export default function AdminAnalytics() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => exportCSV(days)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20 transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg hover:opacity-80 transition"
+              style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
             >
               <ArrowDownToLine size={14} />
               Export
