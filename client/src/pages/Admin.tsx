@@ -4730,9 +4730,6 @@ function PlaygroundTab() {
       {/* ── Header ── */}
       <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
-            <FlaskConical size={18} style={{ color: "#0074F4" }} />
-          </div>
           <div>
             <h2 className="text-base font-bold text-white">WAVV Playground</h2>
             <p className="text-xs text-gray-500">Manage playground categories, visibility, and access requests</p>
@@ -4785,11 +4782,8 @@ function PlaygroundTab() {
           className="rounded-xl p-4"
           style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <Bell size={14} style={{ color: "#0074F4" }} />
-            <span className="text-xs text-gray-400 font-medium">Total Requests</span>
-          </div>
-          <p className="text-2xl font-bold text-white">
+          <span className="text-xs text-gray-400 font-medium">Total Requests</span>
+          <p className="text-2xl font-bold text-white mt-1">
             {statsLoading ? "—" : (stats?.total ?? 0)}
           </p>
         </div>
@@ -4803,16 +4797,10 @@ function PlaygroundTab() {
                 className="rounded-xl p-4"
                 style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <FlaskConical
-                    size={14}
-                    style={{ color: PLAYGROUND_COLORS[item.playground] ?? "#9ca3af" }}
-                  />
-                  <span className="text-xs text-gray-400 font-medium truncate" title={item.playground}>
-                    {item.playground.replace(" Playground", "").replace("WAVV ", "")}
-                  </span>
-                </div>
-                <p className="text-2xl font-bold text-white">{item.count}</p>
+                <span className="text-xs text-gray-400 font-medium truncate" title={item.playground}>
+                  {item.playground.replace(" Playground", "").replace("WAVV ", "")}
+                </span>
+                <p className="text-2xl font-bold text-white mt-1">{item.count}</p>
                 <p className="text-xs text-gray-600 mt-0.5">requests</p>
               </div>
             ))}

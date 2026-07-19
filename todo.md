@@ -2182,3 +2182,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove icon next to "WAVV Partners Content" header
 - [x] Make WAVV Partners / WAVV Partners Portal toggle buttons standard blue
 - [x] Replace construction placeholder with subtle "Coming Soon" message
+
+## WAVV Playground Tab Cleanup (Jul 19 2026)
+- [x] Remove icon next to "WAVV Playground" header
+- [x] Remove icon from Total Requests tile
+- [x] Restructure: move All Requests inline with Total Requests (shrink tile, put them side by side)
+- [x] Make Export Requests button standard blue
