@@ -2297,3 +2297,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Sub-page for live-calls: banner header + list of upcoming live call events
 - [x] Sub-page for product-training: banner header + list of training clips
 - [x] Sub-page for recordings: banner header + list of previous recordings
+
+## AcceleratorSession Sub-Page Redesign (Jul 19 - Session 9)
+- [x] Replace card grid with Academy-style collapsible list rows on all 3 sub-pages
+- [x] Live Calls sub-page: list rows with countdown timer + Register/Join buttons (timer counts down to scheduled time)
+- [x] Product Training sub-page: list rows with Watch button (opens video player)
+- [x] Recordings sub-page: list rows with Watch button (opens video player)
+- [x] Layout matches Academy Onboarding pattern: banner header → numbered list rows with chevron expand

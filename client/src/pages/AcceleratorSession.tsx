@@ -524,6 +524,180 @@ function SubPageBanner({ title, subtitle, bannerIcon, color }: {
   );
 }
 
+// ─── LiveCallRow (Academy-style list row with countdown timer) ────────────
+function LiveCallRow({ call, now, color, index }: { call: LiveCallRecord; now: number; color: string; index: number }) {
+  const utcMs = new Date(call.scheduledAt).getTime();
+  const durationMs = (call.durationMinutes ?? 90) * 60 * 1000;
+  const isLive = now >= utcMs && now < utcMs + durationMs;
+  const isPast = now >= utcMs + durationMs;
+  const isJoinable = now >= utcMs - JOIN_WINDOW_MS && now < utcMs + durationMs;
+
+  const secondsLeft = Math.max(0, Math.floor((utcMs - now) / 1000));
+  const cd = { d: Math.floor(secondsLeft / 86400), h: Math.floor((secondsLeft % 86400) / 3600), m: Math.floor((secondsLeft % 3600) / 60), s: secondsLeft % 60 };
+
+  const dateLabel = new Date(call.scheduledAt).toLocaleString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit", timeZoneName: "short",
+  });
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden transition-all duration-200"
+      style={{ background: "#1d2230", border: `1px solid ${isLive ? "rgba(16,185,129,0.4)" : `${color}30`}` }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = isLive ? "rgba(16,185,129,0.5)" : color; e.currentTarget.style.boxShadow = `0 2px 12px ${isLive ? "rgba(16,185,129,0.15)" : `${color}15`}`; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLive ? "rgba(16,185,129,0.4)" : `${color}30`; e.currentTarget.style.boxShadow = "none"; }}
+    >
+      <div className="flex items-center gap-4 px-5 py-4">
+        {/* Left accent bar */}
+        <div className="w-1 self-stretch rounded-full flex-shrink-0" style={{ background: isLive ? "#10b981" : color }} />
+
+        {/* Title + date */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-white leading-snug">{index + 1}. {call.title}</p>
+          <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <Calendar size={11} />
+            {dateLabel}
+          </p>
+        </div>
+
+        {/* Countdown / status */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {isLive ? (
+            <span className="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide" style={{ background: "#10b981", color: "#fff" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              LIVE
+            </span>
+          ) : isPast ? (
+            <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>Completed</span>
+          ) : (
+            <div className="flex items-center gap-1 font-mono text-xs" style={{ color }}>
+              <Clock size={12} />
+              <span>{String(cd.d).padStart(2, "0")}d</span>
+              <span>{String(cd.h).padStart(2, "0")}h</span>
+              <span>{String(cd.m).padStart(2, "0")}m</span>
+              <span>{String(cd.s).padStart(2, "0")}s</span>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          {!isPast && call.registrationUrl && (
+            <a
+              href={call.registrationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+              style={{ background: `${color}22`, color, border: `1px solid ${color}40` }}
+            >
+              Register
+            </a>
+          )}
+          {isJoinable ? (
+            <a
+              href={call.joinUrl ?? "#"}
+              target={call.joinUrl ? "_blank" : undefined}
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-85"
+              style={{ background: isLive ? "#10b981" : color }}
+            >
+              <Play size={12} /> {isLive ? "Join Live" : "Join"}
+            </a>
+          ) : !isPast ? (
+            <span
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold cursor-not-allowed select-none"
+              style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
+            >
+              <Play size={12} /> Join
+            </span>
+          ) : null}
+        </div>
+      </div>
+      {!isPast && !isJoinable && (
+        <div className="px-5 pb-3">
+          <p className="text-[10px] italic" style={{ color: "rgba(255,255,255,0.3)" }}>* Join button opens 15 minutes before session</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── ContentRow (Academy-style list row with Watch button) ───────────────
+function ContentRow({
+  item,
+  index,
+  accentColor,
+  onPlay,
+  onCheatSheet,
+}: {
+  item: { id: number; title: string; loomUrl?: string | null; hostName?: string | null; description?: string | null; contentType: string; comingSoon?: boolean; cheatSheetUrl?: string | null };
+  index: number;
+  accentColor: string;
+  onPlay: (url: string, title: string) => void;
+  onCheatSheet?: (url: string, title: string) => void;
+}) {
+  const embedUrl = item.loomUrl ? getEmbedUrl(item.loomUrl) : null;
+  const isHostedVideo = item.loomUrl?.startsWith("/manus-storage");
+  const isComingSoon = item.comingSoon === true;
+  const hasVideo = !isComingSoon && (!!embedUrl || !!isHostedVideo);
+
+  function handleWatch() {
+    const playUrl = embedUrl ?? (isHostedVideo ? item.loomUrl! : null);
+    if (playUrl) onPlay(playUrl, item.title);
+  }
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden transition-all duration-200"
+      style={{ background: "#1d2230", border: `1px solid ${accentColor}30` }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = accentColor; e.currentTarget.style.boxShadow = `0 2px 12px ${accentColor}15`; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${accentColor}30`; e.currentTarget.style.boxShadow = "none"; }}
+    >
+      <div className="flex items-center gap-4 px-5 py-4">
+        {/* Left accent bar */}
+        <div className="w-1 self-stretch rounded-full flex-shrink-0" style={{ background: accentColor }} />
+
+        {/* Title + host */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-white leading-snug">{index + 1}. {item.title}</p>
+          {item.hostName && (
+            <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+              <User size={11} />
+              {item.hostName}
+            </p>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {isComingSoon ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+              <Timer size={12} /> Coming Soon
+            </span>
+          ) : hasVideo ? (
+            <button
+              type="button"
+              onClick={handleWatch}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+              style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
+            >
+              <PlayCircle size={12} /> Watch
+            </button>
+          ) : null}
+          {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
+            <button
+              type="button"
+              onClick={() => onCheatSheet(item.cheatSheetUrl!, item.title)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+              style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
+            >
+              <FileText size={12} /> Cheat Sheet
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function AcceleratorSession() {
   const params = useParams<{ id: string; section?: string }>();
@@ -741,29 +915,24 @@ export default function AcceleratorSession() {
           </div>
         )}
 
-        {/* ── Expanded content section ── */}
+        {/* ── Expanded content section (Academy-style list rows) ── */}
         {activeSection === "live-calls" && (
-          <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-            {/* Sub-page banner header */}
+          <section className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
             <SubPageBanner
               title="Live Call Events"
               subtitle={`Upcoming live coaching calls for Session ${weekId}`}
               bannerIcon={BANNER_ICONS.live}
               color={TILE_COLORS.live}
             />
-            <div className="flex items-center gap-2.5 mb-2">
-              <Clock size={14} style={{ color: TILE_COLORS.live }} />
-              <h2 className="text-base font-extrabold text-white tracking-wide">Upcoming Live Calls — Session {weekId}</h2>
-            </div>
             {visibleLiveCalls.length === 0 ? (
               <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
                 <p className="text-sm text-gray-400">No live call events scheduled for this session yet.</p>
                 <p className="text-xs text-gray-500 mt-1">Check back soon or contact your success manager.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {visibleLiveCalls.map((c: any) => (
-                  <SessionCallCard key={c.id} call={c} now={now} color={TILE_COLORS.live} isCurrentWeek={isCurrentWeek} />
+              <div className="space-y-3">
+                {visibleLiveCalls.map((c: any, idx: number) => (
+                  <LiveCallRow key={c.id} call={c} now={now} color={TILE_COLORS.live} index={idx} />
                 ))}
               </div>
             )}
@@ -771,23 +940,18 @@ export default function AcceleratorSession() {
         )}
 
         {activeSection === "product-training" && (
-          <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-            {/* Sub-page banner header */}
+          <section className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
             <SubPageBanner
               title="Product Training"
               subtitle={`WAVV how-to clips and cheat sheets for Session ${weekId}`}
               bannerIcon={BANNER_ICONS.training}
               color={TILE_COLORS.training}
             />
-            <div className="flex items-center gap-2.5 mb-2">
-              <Play size={14} style={{ color: TILE_COLORS.training }} />
-              <h2 className="text-base font-extrabold text-white tracking-wide">WAVV Product Training</h2>
-            </div>
 
             {/* Cheat Sheet callout */}
             {session.cheatSheetUrl && (
               <div
-                className="rounded-xl p-4 mb-4 flex items-center justify-between"
+                className="rounded-xl p-4 flex items-center justify-between"
                 style={{ background: `${TILE_COLORS.training}08`, border: `1px solid ${TILE_COLORS.training}18` }}
               >
                 <div className="flex items-center gap-3">
@@ -810,13 +974,13 @@ export default function AcceleratorSession() {
             )}
 
             {cmsProductTraining.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {cmsProductTraining.map((item: any) => (
-                  <ContentCard
+              <div className="space-y-3">
+                {cmsProductTraining.map((item: any, idx: number) => (
+                  <ContentRow
                     key={item.id}
                     item={item}
+                    index={idx}
                     accentColor={TILE_COLORS.training}
-                    badgeLabel="Training"
                     onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
                   />
@@ -825,33 +989,28 @@ export default function AcceleratorSession() {
             ) : (
               <div className="rounded-xl p-6 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}>
                 <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
-                <p className="text-xs text-gray-500">Product training video coming soon</p>
+                <p className="text-xs text-gray-500">Product training videos coming soon</p>
               </div>
             )}
           </section>
         )}
 
         {activeSection === "recordings" && (
-          <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-            {/* Sub-page banner header */}
+          <section className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
             <SubPageBanner
               title="Previous Recordings"
               subtitle={`Catch up on past session recordings for Session ${weekId}`}
               bannerIcon={BANNER_ICONS.recordings}
               color={TILE_COLORS.recordings}
             />
-            <div className="flex items-center gap-2.5 mb-2">
-              <Video size={14} style={{ color: TILE_COLORS.recordings }} />
-              <h2 className="text-base font-extrabold text-white tracking-wide">Previous Session Recordings</h2>
-            </div>
             {cmsRecordings.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {cmsRecordings.map((item: any) => (
-                  <ContentCard
+              <div className="space-y-3">
+                {cmsRecordings.map((item: any, idx: number) => (
+                  <ContentRow
                     key={item.id}
                     item={item}
+                    index={idx}
                     accentColor={TILE_COLORS.recordings}
-                    badgeLabel="Recording"
                     onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
                   />
