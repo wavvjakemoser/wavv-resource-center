@@ -73,7 +73,7 @@ const CATEGORIES = [
     icon: Wrench,
     bgPosition: "60% center",
     bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-v5-AfTpsWtpk2ButvBvwXkFq3.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-v6-mzNyx2YHHYx7BckrFcWMvz.webp",
     placeholders: [
       {
         id: "p-how-1",
