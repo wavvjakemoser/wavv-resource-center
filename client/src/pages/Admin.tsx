@@ -9449,6 +9449,61 @@ function AcceleratorTab() {
         </div>
       </div>
 
+      {/* ── Section Visibility ── */}
+      <div className="rounded-xl overflow-hidden mb-6" style={{ border: "1px solid #2a2a2a" }}>
+        <div className="px-4 py-3 flex items-center gap-2" style={{ background: "#1d2230" }}>
+          <span className="text-sm font-semibold text-white">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">&mdash; toggle to show/hide sessions from users</span>
+        </div>
+        <div className="divide-y" style={{ borderColor: "#2a2a2a", background: "#111" }}>
+          {sessions.map((s: any) => {
+            const sColor = SESSION_COLORS[s.week] ?? "#4b5563";
+            const isVisible = s.isPublished && !s.comingSoon;
+            const isComingSoon = s.comingSoon;
+            return (
+              <div key={s.id} className="px-4 py-2.5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full" style={{ background: sColor }} />
+                  <span className="text-sm text-gray-300">Session {s.week}: {s.title}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => updateMutation.mutate({ id: s.id, isPublished: true, comingSoon: false })}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                    style={isVisible
+                      ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                      : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                    }
+                  >
+                    {isVisible ? <><Eye size={11} /> Visible</> : <><Eye size={11} /> Visible</>}
+                  </button>
+                  <button
+                    onClick={() => updateMutation.mutate({ id: s.id, isPublished: false, comingSoon: true })}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                    style={isComingSoon
+                      ? { background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }
+                      : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                    }
+                  >
+                    Coming Soon
+                  </button>
+                  <button
+                    onClick={() => updateMutation.mutate({ id: s.id, isPublished: false, comingSoon: false })}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                    style={!isVisible && !isComingSoon
+                      ? { background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }
+                      : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                    }
+                  >
+                    <EyeOff size={11} /> Hidden
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Session blocks */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">

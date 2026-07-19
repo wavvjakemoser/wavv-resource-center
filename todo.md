@@ -2309,3 +2309,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Replace plain monospace countdown with flip-clock style (digit boxes, divider line, larger font)
 - [x] Match Accelerator BannerTile height/padding to Academy/Webinars/Resource Hub/Playground tiles
 - [x] Match SubPageBanner height/padding to the same standard
+
+## Accelerator CMS Section Visibility (Jul 19 - Session 11)
+- [x] Add Section Visibility panel to WAVV Accelerator CMS in Admin page (toggle show/hide for all 6 sessions)
