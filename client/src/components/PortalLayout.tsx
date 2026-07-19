@@ -228,8 +228,8 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
 
           {/* Main navigation — scrollable */}
           <nav className="flex-1 px-3 py-4 overflow-y-auto">
-            {/* ── Resources ── */}
-            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#ffffff" }}>Resources</p>
+            {/* ── Explore ── */}
+            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-center" style={{ color: "#ffffff" }}>Explore</p>
             <div className="space-y-0.5 mb-3">
               {visibleResourceItems.map((item) => {
                 const isActive = location === item.href || location.startsWith(item.href + "/") || (item.href === "/home" && location === "/");
@@ -250,7 +250,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             {visibleProgramItems.length > 0 && (
               <>
                 <div className="mx-3 my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#ffffff" }}>Programs</p>
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-center" style={{ color: "#ffffff" }}>Programs</p>
                 <div className="space-y-0.5">
                   {visibleProgramItems.map((item) => {
                     const isActive = location === item.href || location.startsWith(item.href + "/");
@@ -273,7 +273,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             {!settingsLoading && (allSettings as Record<string, unknown>)["chrome_extension_enabled"] !== false && (
               <>
                 <div className="mx-3 my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#ffffff" }}>Quick Links</p>
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-center" style={{ color: "#ffffff" }}>Quick Links</p>
                 <a
                   href="https://chromewebstore.google.com/detail/wavv/ioopokcefgfbajhpcmkkbmipeenohhpe"
                   target="_blank"
@@ -295,7 +295,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
           {isAdmin && (
             <div className="px-3 pt-3 pb-1" style={{ borderTop: "1px solid #1e2030" }}>
               {/* Section label */}
-              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#ffffff" }}>Admin Tools</p>
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-center" style={{ color: "#ffffff" }}>Admin Tools</p>
               <NavLink
                 {...adminItem}
                 isActive={location.startsWith(adminItem.href)}

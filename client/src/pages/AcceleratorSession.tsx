@@ -896,7 +896,7 @@ function ContentCard({
       {isComingSoon && (
         <div
           className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
-          style={{ background: "#FF990022", color: "#FF9900", borderBottom: "1px solid #FF990040" }}
+          style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", borderBottom: "1px solid rgba(245,158,11,0.3)" }}
         >
           <Timer size={11} />
           Coming Soon
@@ -918,7 +918,7 @@ function ContentCard({
 
         <div className="mt-auto flex items-center gap-2 flex-wrap">
           {isComingSoon ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "#FF990015", color: "#FF9900", border: "1px solid #FF990030" }}>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
               <Timer size={12} /> Coming Soon
             </span>
           ) : (embedUrl || isHostedVideo) ? (

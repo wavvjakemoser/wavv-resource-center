@@ -301,7 +301,7 @@ export default function ResourcePdfs() {
             {subSections.length > 0 ? (
               <>
                 {subSections.map(([name, sItems]) => (
-                  <PdfSubSection key={name} sectionName={name} items={sItems} onOpen={handleOpenPdf} defaultOpen={subSections.length === 1} />
+                  <PdfSubSection key={name} sectionName={name} items={sItems} onOpen={handleOpenPdf} defaultOpen={false} />
                 ))}
                 {unsectioned.length > 0 && (
                   <PdfSubSection sectionName="General" items={unsectioned} onOpen={handleOpenPdf} />

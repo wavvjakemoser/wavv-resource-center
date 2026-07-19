@@ -443,7 +443,7 @@ function SectionRow({
                   {video.status === "coming_soon" && (
                     <span
                       className="text-[10px] font-semibold px-2 py-0.5 rounded-full hidden sm:inline"
-                      style={{ background: "rgba(255,255,255,0.05)", color: "#555", border: "1px solid #333" }}
+                      style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
                     >
                       Coming Soon
                     </span>

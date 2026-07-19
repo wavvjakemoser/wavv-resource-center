@@ -256,7 +256,7 @@ export default function ResourceFaqs() {
                   section={section}
                   search={search}
                   onOpenPanel={handleOpenFaqSection}
-                  defaultOpen={filteredSections.length === 1}
+                  defaultOpen={false}
                 />
               ))
             )}

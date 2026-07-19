@@ -66,7 +66,7 @@ export default function Webinars() {
         <div style={{ minHeight: "32px" }} />
 
         {/* Hero */}
-        <div className="px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
+        <div className="px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center flex flex-col items-center justify-center" style={{ minHeight: "220px" }}>
           <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
             <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #bae6fd 30%, #7dd3fc 60%, #67C728 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
               WAVV Webinars

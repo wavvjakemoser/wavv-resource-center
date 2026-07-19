@@ -262,7 +262,7 @@ export default function Dashboard() {
         <div style={{ minHeight: "32px" }} />
 
         {/* ── Hero ── */}
-        <div className="px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
+        <div className="px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center flex flex-col items-center justify-center" style={{ minHeight: "220px" }}>
             {/* Headline */}
             <h1
               className="font-extrabold tracking-tight leading-[1.05] mb-4"
@@ -545,7 +545,7 @@ export default function Dashboard() {
                       {card.badge && (
                         <span
                           className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide flex-shrink-0"
-                          style={{ background: `${card.color}20`, color: card.color, border: `1px solid ${card.color}40` }}
+                          style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
                         >
                           {card.badge}
                         </span>

@@ -1,6 +1,6 @@
 import PortalLayout from "@/components/PortalLayout";
 import { Link } from "wouter";
-import { ArrowLeft, Construction } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const ACCENT = "#67C728";
 
@@ -58,9 +58,6 @@ export default function PlaygroundSalesforce() {
           className="flex flex-col items-center justify-center py-20 rounded-xl text-center"
           style={{ background: "#111", border: "1px dashed #2a2a2a" }}
         >
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: `${ACCENT}15` }}>
-            <Construction size={32} style={{ color: ACCENT }} />
-          </div>
           <h3 className="text-white font-bold text-lg mb-2">Coming Soon</h3>
           <p className="text-gray-400 text-sm max-w-md leading-relaxed">
             The Salesforce playground environment is currently under development. Check back soon for hands-on sandbox experiences with WAVV inside Salesforce.

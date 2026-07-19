@@ -110,7 +110,7 @@ function WebinarRow({
         {webinar.comingSoon ? (
           <span
             className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold"
-            style={{ background: "rgba(255,255,255,0.06)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.12)" }}
+            style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}
           >
             Coming Soon
           </span>

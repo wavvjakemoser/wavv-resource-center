@@ -2125,3 +2125,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix Coming Soon filter: show webinars in list with Coming Soon badge instead of hiding them entirely
 - [x] Standardize hero section heights across all pages (Home, Academy, Webinars, Resource Hub, Playground)
 - [x] Remove gradient bar ("|") next to "What is WAVV?" heading on homepage
+
+## UI Fixes Batch 4 (Jul 19 2026)
+- [x] Change Coming Soon badge color to Gold across all pages
+- [x] Remove construction icon from the 3 WAVV Playground section tiles
+- [x] Fix all 5 hero sections to same fixed height (match tallest) so tiles align when switching pages
+- [x] Collapse sub-sections by default in Help Articles, PDFs, and FAQs pages
+- [x] Rename "Resources" sidebar category to "Explore" + center all category titles
