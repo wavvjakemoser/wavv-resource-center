@@ -2190,11 +2190,20 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Make Export Requests button standard blue
 
 ## Playground Requests Area Cleanup (Jul 19 2026)
-- [ ] Remove Total Requests tile entirely
-- [ ] Make the total count in All Requests header white
-- [ ] Remove "No requests yet" icon (flask icon in empty state)
-- [ ] Add column headers (Name, Email, Playground, etc.) to All Requests table
-- [ ] Show "No requests" text row when empty (no icon)
+- [x] Remove Total Requests tile entirely
+- [x] Make the total count in All Requests header white
+- [x] Remove "No requests yet" icon (flask icon in empty state)
+- [x] Add column headers (Name, Email, Playground, etc.) to All Requests table
+- [x] Show "No requests" text row when empty (no icon)
 
 ## WAVV Users Search Bar Fix (Jul 19 2026)
 - [x] Make WAVV Users search bar same size/structure as WAVV Team search bar (remove extra wrapper div)
+
+## Gray/Black Tile Pattern (Jul 19 2026)
+- [x] Settings tab: Site Controls tiles (Announcement Banner, Auto Refresh, Maintenance Mode, Intercom) get gray header / black body
+- [x] Settings tab: Visibility Controls tiles (Section Visibility, Request Buttons, Slack Banners, Quick Links) get gray header / black body
+- [x] Settings tab: SITE CONTROLS and VISIBILITY CONTROLS column heading text → white
+- [x] Add gray tile background around "Site Settings" section header
+- [x] Add gray tile background around "Access" section header
+- [x] Add gray tile background around "Content Requests" section header
+- [x] Add gray tile background around "WAVV Partners Content" section header

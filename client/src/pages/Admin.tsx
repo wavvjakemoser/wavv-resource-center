@@ -1703,7 +1703,7 @@ function UsersTab() {
 
       {usersSubTab === "portal" && <PortalUsersPanel />}
             {usersSubTab === "team" && <>
-      <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex items-center justify-between flex-wrap gap-2 rounded-xl px-5 py-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <h2 className="text-base font-semibold text-white">Access</h2>
         <div className="flex items-center gap-2">
           <button
@@ -2280,7 +2280,7 @@ function PortalUsersPanel() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex items-center justify-between flex-wrap gap-2 rounded-xl px-5 py-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <h2 className="text-base font-semibold text-white">Access</h2>
         <div className="flex items-center gap-2">
           <button
@@ -7053,7 +7053,7 @@ function ContentRequestsTab() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-3 rounded-xl px-5 py-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div>
           <h2 className="text-base font-bold text-white">Content Requests</h2>
           <p className="text-xs text-gray-500">User-submitted requests for videos, guides, and webinars</p>
@@ -7892,12 +7892,14 @@ function SettingsTab() {
     updateSetting.mutate({ key: "announcement_text", value: localAnnouncement });
   }
 
-  const sectionClass = "rounded-xl p-5 space-y-4";
-  const sectionStyle = { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" };
+  const sectionClass = "rounded-xl overflow-hidden";
+  const sectionHeaderStyle: React.CSSProperties = { background: "#1d2230", padding: "14px 20px" };
+  const sectionBodyStyle: React.CSSProperties = { background: "#111", padding: "16px 20px" };
+  const sectionBorderStyle: React.CSSProperties = { border: "1px solid #2a2a2a" };
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="rounded-xl px-5 py-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <h2 className="text-base font-semibold text-white">
           Site Settings
         </h2>
@@ -7911,12 +7913,12 @@ function SettingsTab() {
 
           {/* ── LEFT COLUMN: Site Controls ── */}
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3 text-center" style={{ color: "#6b7280" }}>Site Controls</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3 text-center text-white">Site Controls</p>
             <div className="space-y-4">
 
             {/* ── Announcement Banner ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center justify-between">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div className="flex items-center justify-between" style={sectionHeaderStyle}>
                 <div>
                   <p className="text-sm font-medium text-white">Announcement Banner</p>
                   <p className="text-xs text-gray-500">Show a banner at the top of every page</p>
@@ -7932,7 +7934,7 @@ function SettingsTab() {
                   {announcementEnabled ? "Enabled" : "Disabled"}
                 </button>
               </div>
-              <div className="flex gap-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="flex gap-2" style={sectionBodyStyle}>
                 <input
                   type="text"
                   placeholder="e.g. New webinar this Friday — register now!"
@@ -7952,8 +7954,8 @@ function SettingsTab() {
             </div>
 
             {/* ── Auto-Refresh on Deploy ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center justify-between">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div className="flex items-center justify-between" style={sectionHeaderStyle}>
                 <div>
                   <p className="text-sm font-medium text-white">Auto-Refresh on Deploy</p>
                   <p className="text-xs text-gray-500">When enabled, logged-in users are automatically refreshed within ~90s of a new deployment. Turn off during stable production periods so users refresh on their own schedule.</p>
@@ -7972,8 +7974,8 @@ function SettingsTab() {
             </div>
 
             {/* ── Maintenance Mode ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center justify-between">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div className="flex items-center justify-between" style={sectionHeaderStyle}>
                 <div>
                   <p className="text-sm font-medium text-white">Maintenance Mode</p>
                   <p className="text-xs text-gray-500">Replace the public site with a "Coming soon" message. Owners can still access the Command Center.</p>
@@ -7995,8 +7997,8 @@ function SettingsTab() {
             </div>
 
             {/* ── Intercom / Fin ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center justify-between">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div className="flex items-center justify-between" style={sectionHeaderStyle}>
                 <div>
                   <p className="text-sm font-medium text-white">Intercom / Fin</p>
                   <p className="text-xs text-gray-500">Show or hide the Intercom chat bubble and AI Fin assistant site-wide</p>
@@ -8019,16 +8021,16 @@ function SettingsTab() {
 
           {/* ── RIGHT COLUMN: Visibility Controls ── */}
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3 text-center" style={{ color: "#6b7280" }}>Visibility Controls</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3 text-center text-white">Visibility Controls</p>
             <div className="space-y-4">
 
             {/* ── Section Visibility (formerly Navigation Visibility) ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="mb-3">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div style={sectionHeaderStyle}>
                 <p className="text-sm font-medium text-white">Section Visibility</p>
                 <p className="text-xs text-gray-500">Show or hide individual sidebar items for all users</p>
               </div>
-              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="space-y-2" style={sectionBodyStyle}>
                 {NAV_ITEMS.map(({ href, label }) => {
                   const isVisible = navVisibility[href] !== false; // default true
                   return (
@@ -8051,12 +8053,12 @@ function SettingsTab() {
             </div>
 
             {/* ── Profile Sections ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="mb-3">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div style={sectionHeaderStyle}>
                 <p className="text-sm font-medium text-white">Profile Sections</p>
                 <p className="text-xs text-gray-500">Show or hide Bookmarks and Badges on the customer Profile page</p>
               </div>
-              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="space-y-2" style={sectionBodyStyle}>
                 {([
                   { key: "bookmarks_enabled", label: "Bookmarks", enabled: bookmarksEnabled },
                   { key: "badges_enabled", label: "Badges", enabled: badgesEnabled },
@@ -8079,12 +8081,12 @@ function SettingsTab() {
             </div>
 
             {/* ── Request Buttons ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="mb-3">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div style={sectionHeaderStyle}>
                 <p className="text-sm font-medium text-white">Request Buttons</p>
                 <p className="text-xs text-gray-500">Show or hide content request CTAs across the portal</p>
               </div>
-              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="space-y-2" style={sectionBodyStyle}>
                 {([
                   { key: "video_requests_enabled", label: "Video Requests", enabled: videoRequestsEnabled },
                   { key: "webinar_requests_enabled", label: "Webinar Requests", enabled: webinarRequestsEnabled },
@@ -8109,12 +8111,12 @@ function SettingsTab() {
             </div>
 
             {/* ── Slack Banners ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="mb-3">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div style={sectionHeaderStyle}>
                 <p className="text-sm font-medium text-white">Slack Banners</p>
                 <p className="text-xs text-gray-500">Show or hide the "Join the WAVV Accelerator Slack" banner on each page</p>
               </div>
-              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="space-y-2" style={sectionBodyStyle}>
                 {([
                   { key: "slack_banner_wavv_enabled", label: "Non-WAVV Accelerator Member Page", enabled: slackBannerWavvEnabled },
                   { key: "slack_banner_accelerator_enabled", label: "WAVV Accelerator Member Page", enabled: slackBannerAcceleratorEnabled },
@@ -8137,12 +8139,12 @@ function SettingsTab() {
             </div>
 
             {/* ── Quick Links ── */}
-            <div className={sectionClass} style={sectionStyle}>
-              <div className="mb-3">
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div style={sectionHeaderStyle}>
                 <p className="text-sm font-medium text-white">Quick Links</p>
                 <p className="text-xs text-gray-500">Show or hide quick links in the sidebar</p>
               </div>
-              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+              <div className="space-y-2" style={sectionBodyStyle}>
                 {([
                   { key: "chrome_extension_enabled", label: "Chrome Extension", enabled: chromeExtensionEnabled },
                 ] as { key: string; label: string; enabled: boolean }[]).map(({ key, label, enabled }) => (
@@ -8365,7 +8367,7 @@ function PartnersContentTab() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between rounded-xl px-5 py-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-3">
           <div>
             <h2 className="text-base font-bold text-white">WAVV Partners Content</h2>
