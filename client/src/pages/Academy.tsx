@@ -553,7 +553,6 @@ export function ContentRequestCTA({
           onMouseEnter={(e) => { e.currentTarget.style.background = `${accent}35`; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = `${accent}20`; }}
         >
-          <Sparkles size={13} />
           Request a {typeLabel}
         </button>
       </div>

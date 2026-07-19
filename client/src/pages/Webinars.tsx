@@ -29,7 +29,7 @@ const WEBINAR_CATEGORIES = [
     color: LIVE_COLOR,
     icon: Star,
     href: "/webinars/live-exclusive",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-star-cyan-UGL7M86B3gpHA44y2Nwtia.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-spotlight-cyan-h3R3ejevDc4pwCeEujvETE.webp",
   },
   {
     key: "recording",

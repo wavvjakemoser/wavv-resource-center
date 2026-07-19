@@ -2100,3 +2100,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Webinar sub-pages: replace card grid with clean list (neon banner hero + video rows with Watch Now, Description, Host, Play)
 - [x] Resource Hub sub-pages: add neon icon banner hero at top
 - [x] Playground sub-pages: add actual GHL/HubSpot/Salesforce neon banner hero at top
+
+## Icon Removal + Banner Update (Jul 18 2026)
+- [x] Remove all sidebar nav icons (keep text labels only)
+- [x] Remove homepage "What is WAVV?" tile icons
+- [x] Remove CTA icons (request buttons)
+- [x] Regenerate Live Exclusive Webinar banner: spotlight/stage light instead of star
+- [x] Update banner URL in Webinars landing page and Live Exclusive sub-page

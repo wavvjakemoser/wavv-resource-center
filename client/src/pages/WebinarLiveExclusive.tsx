@@ -30,7 +30,7 @@ function getEmbedUrl(url: string): string | null {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ACCENT = "#00A9E2";
-const BANNER_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-star-cyan-UGL7M86B3gpHA44y2Nwtia.webp";
+const BANNER_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-spotlight-cyan-h3R3ejevDc4pwCeEujvETE.webp";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Video, Play, Mic, Radio, Users, UserCheck, GraduationCap,

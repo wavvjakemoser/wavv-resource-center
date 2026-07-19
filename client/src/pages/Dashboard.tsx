@@ -333,12 +333,7 @@ export default function Dashboard() {
                     border: `1px solid ${p.color}22`,
                   }}
                 >
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                    style={{ background: `${p.color}18`, border: `1px solid ${p.color}30` }}
-                  >
-                    <PIcon size={18} style={{ color: p.color }} />
-                  </div>
+
                   <p className="text-white font-extrabold text-base mb-2">{p.title}</p>
                   <p className="text-xs leading-relaxed" style={{ color: "#ffffff" }}>{p.body}</p>
                 </div>
@@ -557,13 +552,6 @@ export default function Dashboard() {
                     e.currentTarget.style.transform = "translateX(0)";
                   }}
                 >
-                  {/* Icon badge */}
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: `${card.color}18`, border: `1px solid ${card.color}30` }}
-                  >
-                    <Icon size={20} style={{ color: card.color }} />
-                  </div>
 
                   {/* Text content */}
                   <div className="flex-1 min-w-0">
@@ -593,7 +581,6 @@ export default function Dashboard() {
                         onMouseEnter={(e) => { e.currentTarget.style.background = `${card.color}35`; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = `${card.color}20`; }}
                       >
-                        <CtaIcon size={12} />
                         {card.cta}
                         <ArrowRight size={11} className="ml-auto" />
                       </button>
@@ -602,7 +589,6 @@ export default function Dashboard() {
                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
                         style={{ background: `${card.color}18`, color: card.color, border: `1px solid ${card.color}35` }}
                       >
-                        <CtaIcon size={12} />
                         {card.cta}
                         <ArrowRight size={11} className="ml-auto" />
                       </span>

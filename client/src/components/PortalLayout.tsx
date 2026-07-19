@@ -75,12 +75,7 @@ function NavLink({
       }}
       onClick={onClick}
     >
-      <div
-        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: isActive ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.06)" }}
-      >
-        <Icon size={17} style={{ color: "#ffffff" }} />
-      </div>
+
       <span className="flex-1 min-w-0" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "clip" }}>{label}</span>
 
       {comingSoon && (
@@ -288,23 +283,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                   onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(66,133,244,0.10)"; e.currentTarget.style.borderColor = "rgba(66,133,244,0.25)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
                 >
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(66,133,244,0.12)" }}>
-                    <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <defs>
-                        <filter id="chromeGlow" x="-20%" y="-20%" width="140%" height="140%">
-                          <feGaussianBlur stdDeviation="1.5" result="blur"/>
-                          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                      </defs>
-                      <g filter="url(#chromeGlow)">
-                        <path d="M24 8a16 16 0 0 1 13.86 8H24a8 8 0 0 0-6.93 4L12.14 11.5A16 16 0 0 1 24 8z" fill="#ff6b6b"/>
-                        <path d="M37.86 16a16 16 0 0 1-1.86 17.5l-4.93-8.5A8 8 0 0 0 32 20H24l-4.93-8.5z" fill="#ffd43b"/>
-                        <path d="M36 33.5A16 16 0 0 1 8.14 28l4.93-8.5A8 8 0 0 0 24 32h0l4.93 8.5z" fill="#51cf66"/>
-                        <path d="M8.14 28A16 16 0 0 1 12.14 11.5L17.07 20A8 8 0 0 0 16 24a8 8 0 0 0 1.07 4z" fill="#74b9ff"/>
-                        <circle cx="24" cy="24" r="5" fill="#e8eaed"/>
-                      </g>
-                    </svg>
-                  </div>
+
                   <span className="flex-1 min-w-0 text-sm whitespace-nowrap">WAVV Chrome Extension</span>
                   <ExternalLink size={12} className="flex-shrink-0 ml-2" style={{ color: "rgba(255,255,255,0.3)" }} />
                 </a>
