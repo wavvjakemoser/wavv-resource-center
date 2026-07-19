@@ -2268,3 +2268,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Clean up Community/Slack section: remove color coding and icon, minimal card
 - [x] Session page: match screenshot layout (clean hero, 3 tiles, minimal Community)
 - [x] Remove timer from AcceleratorSession page as well
+
+## AcceleratorSession Page Polish (Jul 19 - Session 5)
+- [x] Join Slack button → standard blue (#0074F4) instead of neutral gray
+- [x] 3 hub tiles → full-width stacked (not 3-col grid), styled like Academy/Webinar banner tiles
+- [x] Generate custom icons for Live Call Events, Product Training, Previous Recordings
+- [x] Session badge → larger white text "Session 1" style matching home page hero
+- [x] Section headers (Community etc.) → consistent font size/formatting across pages

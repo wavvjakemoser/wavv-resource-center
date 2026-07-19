@@ -41,9 +41,9 @@ import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
 
 // ─── Icon URLs ───────────────────────────────────────────────────────────────
 const TILE_ICONS = {
-  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-live-calls-3fxRXX6hrnFaQfUDmmNmyL.webp",
-  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-product-training-74W6B56QYPpoptvfwz37bg.webp",
-  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-prev-recordings-6B7nYVcrVn5WYpHnYoGuqN.webp",
+  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-live-v2-5SLFaHmkSJiRcBLANHk9Ux.webp",
+  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-training-v2-Ah5NsXzGWXLs5JLhmnHNvb.webp",
+  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-recordings-v2-2H8NKAbyymnW7VVmXdYEvx.webp",
 };
 
 // ─── Embed URL helper (Loom, YouTube, Vimeo) ────────────────────────────────
@@ -373,7 +373,7 @@ function ContentCard({
   );
 }
 
-// ─── Hub Tile component (Academy-style) ──────────────────────────────────────
+// ─── Hub Tile component (full-width banner style, matching Academy/Webinar tiles) ──
 function HubTile({ title, subtitle, icon, color, count, isActive, onClick }: {
   title: string;
   subtitle: string;
@@ -387,58 +387,58 @@ function HubTile({ title, subtitle, icon, color, count, isActive, onClick }: {
     <button
       type="button"
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01] text-left w-full"
+      className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.005] text-left w-full"
       style={{
-        border: isActive ? `2px solid ${color}` : `1px solid ${color}40`,
-        height: "200px",
-        boxShadow: isActive ? `0 0 24px ${color}30, inset 0 0 0 1px ${color}60` : `0 0 0 1px ${color}15, 0 4px 24px ${color}12`,
+        border: isActive ? `2px solid ${color}` : `1px solid ${color}30`,
+        minHeight: "140px",
+        boxShadow: isActive ? `0 0 30px ${color}25, inset 0 0 0 1px ${color}50` : `0 2px 16px ${color}08`,
       }}
     >
       {/* Deep space black base */}
-      <div className="absolute inset-0" style={{ background: "#000" }} />
+      <div className="absolute inset-0" style={{ background: "#0a0e17" }} />
 
       {/* Circuit board SVG pattern */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.1 }} xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.08 }} xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <pattern id={`circuit-tile-${title.replace(/\s/g, "")}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-            <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={color} strokeWidth="0.8" fill="none"/>
+          <pattern id={`circuit-tile-${title.replace(/\s/g, "")}`} x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+            <path d="M10 10 L70 10 M70 10 L70 70 M10 40 L40 40 M40 40 L40 70" stroke={color} strokeWidth="0.6" fill="none"/>
             <circle cx="10" cy="10" r="2" fill={color}/>
-            <circle cx="50" cy="10" r="2" fill={color}/>
-            <circle cx="50" cy="50" r="2" fill={color}/>
-            <circle cx="30" cy="30" r="1.5" fill={color}/>
+            <circle cx="70" cy="10" r="2" fill={color}/>
+            <circle cx="70" cy="70" r="2" fill={color}/>
+            <circle cx="40" cy="40" r="1.5" fill={color}/>
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill={`url(#circuit-tile-${title.replace(/\s/g, "")})`}/>
       </svg>
 
-      {/* Radial color glow */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 80% 50%, ${color}25 0%, ${color}08 45%, transparent 75%)` }} />
+      {/* Radial color glow on right */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 120% at 90% 50%, ${color}20 0%, transparent 70%)` }} />
 
       {/* Top edge neon line */}
-      <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${color}60 30%, ${color}90 60%, transparent 100%)` }} />
+      <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "2px", background: `linear-gradient(to right, transparent 0%, ${color}50 20%, ${color}80 50%, ${color}50 80%, transparent 100%)` }} />
 
-      {/* Hover border pulse */}
-      <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${color}80, 0 0 24px ${color}30` }} />
+      {/* Hover glow */}
+      <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${color}60, 0 0 20px ${color}20` }} />
 
       {/* Content */}
-      <div className="relative flex items-center h-full px-6 py-5 gap-5">
+      <div className="relative flex items-center h-full px-8 py-6 gap-6">
         {/* Icon */}
-        <div className="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-          <img src={icon} alt="" className="w-10 h-10 object-contain" style={{ filter: `drop-shadow(0 0 8px ${color})` }} />
+        <div className="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}12`, border: `1px solid ${color}25` }}>
+          <img src={icon} alt="" className="w-10 h-10 object-contain" style={{ filter: `drop-shadow(0 0 6px ${color})` }} />
         </div>
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-extrabold text-white leading-tight mb-1">{title}</h3>
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{subtitle}</p>
+          <h3 className="text-xl font-extrabold text-white leading-tight mb-1">{title}</h3>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>{subtitle}</p>
           {count > 0 && (
-            <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${color}18`, color }}>
+            <span className="inline-flex items-center gap-1 mt-2.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>
               {count} {count === 1 ? "item" : "items"}
             </span>
           )}
         </div>
         {/* Arrow */}
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: isActive ? `${color}30` : "rgba(255,255,255,0.04)" }}>
-          <ChevronRight size={16} style={{ color: isActive ? color : "rgba(255,255,255,0.4)" }} className={isActive ? "rotate-90 transition-transform" : "transition-transform"} />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: isActive ? `${color}25` : "rgba(255,255,255,0.04)" }}>
+          <ChevronRight size={18} style={{ color: isActive ? color : "rgba(255,255,255,0.4)" }} className={isActive ? "rotate-90 transition-transform" : "transition-transform"} />
         </div>
       </div>
     </button>
@@ -582,10 +582,10 @@ export default function AcceleratorSession() {
             Back to Accelerator
           </a>
 
-          <div className="flex items-center gap-2.5 mb-3">
+          <div className="mb-4">
             <span
-              className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-              style={{ background: `${color}25`, color, border: `1px solid ${color}35` }}
+              className="text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full"
+              style={{ background: `${color}20`, color, border: `1px solid ${color}40`, letterSpacing: "0.12em" }}
             >
               Session {session.week}
             </span>
@@ -634,7 +634,7 @@ export default function AcceleratorSession() {
         </div>
 
         {/* ── 3 Hub Tiles ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="flex flex-col gap-4">
           <HubTile
             title="Live Call Events"
             subtitle="Join live coaching calls or view upcoming schedule"
@@ -668,9 +668,8 @@ export default function AcceleratorSession() {
         {activeSection === "live" && (
           <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
               <Clock size={14} style={{ color }} />
-              <h2 className="text-sm font-bold text-white tracking-wide">Upcoming Live Calls \u2014 Session {weekId}</h2>
+              <h2 className="text-base font-extrabold text-white tracking-wide">Upcoming Live Calls \u2014 Session {weekId}</h2>
             </div>
             {visibleLiveCalls.length === 0 ? (
               <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -690,9 +689,8 @@ export default function AcceleratorSession() {
         {activeSection === "training" && (
           <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
               <Play size={14} style={{ color }} />
-              <h2 className="text-sm font-bold text-white tracking-wide">WAVV Product Training</h2>
+              <h2 className="text-base font-extrabold text-white tracking-wide">WAVV Product Training</h2>
             </div>
 
             {/* Cheat Sheet callout */}
@@ -745,9 +743,8 @@ export default function AcceleratorSession() {
         {activeSection === "recordings" && (
           <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
               <Video size={14} style={{ color }} />
-              <h2 className="text-sm font-bold text-white tracking-wide">Previous Session Recordings</h2>
+              <h2 className="text-base font-extrabold text-white tracking-wide">Previous Session Recordings</h2>
             </div>
             {cmsRecordings.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -775,9 +772,8 @@ export default function AcceleratorSession() {
         {resourceLinks.length > 0 && (
           <section>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
               <FileText size={14} style={{ color }} />
-              <h2 className="text-sm font-bold text-white tracking-wide">Resources</h2>
+              <h2 className="text-base font-extrabold text-white tracking-wide">Resources</h2>
             </div>
             <div className="space-y-2">
               {resourceLinks.map((link, i) => (
@@ -799,7 +795,7 @@ export default function AcceleratorSession() {
 
         {/* ── Community ── */}
         <section>
-          <h2 className="text-sm font-bold text-white tracking-wide mb-4">Community</h2>
+          <h2 className="text-base font-extrabold text-white tracking-wide mb-4">Community</h2>
           {session.slackUrl ? (
             <div
               className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
@@ -814,7 +810,7 @@ export default function AcceleratorSession() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
-                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}
+                style={{ background: "#0074F4", border: "1px solid #0074F4" }}
               >
                 Join Slack
               </a>
