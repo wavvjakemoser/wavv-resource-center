@@ -2289,3 +2289,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] 3 tiles: full-bleed Academy-style banners with big icon on right, linking to sub-URLs
 - [x] Sub-URL routing: /accelerator/session/:id/live-calls, /product-training, /recordings
 - [x] Duplicate structure for sessions 1-6 (same component, parameterized by :id)
+
+## AcceleratorSession Tile Polish + Sub-Pages (Jul 19 - Session 8)
+- [x] Tiles color-coded: Live Call Events = blue, Product Training = cyan, Previous Recordings = green
+- [x] Generate full-bleed banner icons (filled, covering right side like Academy banners)
+- [x] Sub-pages: AcademyCategory-style layout (banner+icon header, then content list below)
+- [x] Sub-page for live-calls: banner header + list of upcoming live call events
+- [x] Sub-page for product-training: banner header + list of training clips
+- [x] Sub-page for recordings: banner header + list of previous recordings

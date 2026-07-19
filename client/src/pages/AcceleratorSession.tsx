@@ -375,9 +375,16 @@ function ContentCard({
 
 // ─── Banner Tile component (full-bleed Academy-style with big icon on right) ──
 const BANNER_ICONS = {
-  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-banner-live-calls-5EyXxwCTagdQDdPtSkqjaP.webp",
-  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-banner-product-training-47JZCrKf2E8kfpYqtHoqGS.webp",
-  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-banner-recordings-oBcTb3aKUFixDo4uy3TbR6.webp",
+  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-fullbleed-live-calls-jWmJg5wpQb44RuG7iPBWX3.webp",
+  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-fullbleed-product-training-CEcemCKrKYHXsy2MvYdQiZ.webp",
+  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-fullbleed-recordings-oArawRqc62uvdFKA889Ema.webp",
+};
+
+// ─── Tile-specific colors ────────────────────────────────────────────────────
+const TILE_COLORS = {
+  live: "#0074F4",       // blue
+  training: "#00A9E2",  // cyan
+  recordings: "#67C728", // green
 };
 
 function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
@@ -438,13 +445,13 @@ function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
             </span>
           )}
         </div>
-        {/* Right big icon image */}
-        <div className="hidden md:flex items-center justify-center w-[280px] h-full flex-shrink-0 relative overflow-hidden">
+        {/* Right full-bleed icon image */}
+        <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none">
           <img
             src={bannerIcon}
             alt=""
-            className="w-[220px] h-[160px] object-contain"
-            style={{ filter: `drop-shadow(0 0 20px ${color}40)`, opacity: 0.9 }}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ opacity: 0.55, maskImage: "linear-gradient(to right, transparent 0%, black 30%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 30%)" }}
           />
         </div>
         {/* Arrow indicator */}
@@ -453,6 +460,67 @@ function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
         </div>
       </div>
     </a>
+  );
+}
+
+// ─── Sub-page banner header (AcademyCategory-style) ─────────────────────────
+function SubPageBanner({ title, subtitle, bannerIcon, color }: {
+  title: string;
+  subtitle: string;
+  bannerIcon: string;
+  color: string;
+}) {
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl"
+      style={{
+        border: `1px solid ${color}30`,
+        minHeight: "140px",
+        boxShadow: `0 2px 16px ${color}08`,
+      }}
+    >
+      {/* Deep space black base */}
+      <div className="absolute inset-0" style={{ background: "#0a0e17" }} />
+
+      {/* Circuit board SVG pattern */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.06 }} xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id={`subpage-banner-${title.replace(/\s/g, "")}`} x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+            <path d="M10 10 L70 10 M70 10 L70 70 M10 40 L40 40 M40 40 L40 70" stroke={color} strokeWidth="0.6" fill="none"/>
+            <circle cx="10" cy="10" r="2" fill={color}/>
+            <circle cx="70" cy="10" r="2" fill={color}/>
+            <circle cx="70" cy="70" r="2" fill={color}/>
+            <circle cx="40" cy="40" r="1.5" fill={color}/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill={`url(#subpage-banner-${title.replace(/\s/g, "")})`}/>
+      </svg>
+
+      {/* Radial color glow on right */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 50% 140% at 85% 50%, ${color}25 0%, transparent 65%)` }} />
+
+      {/* Top edge neon line */}
+      <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "2px", background: `linear-gradient(to right, transparent 0%, ${color}50 20%, ${color}80 50%, ${color}50 80%, transparent 100%)` }} />
+
+      {/* Full-bleed image on right */}
+      <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none">
+        <img
+          src={bannerIcon}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.45, maskImage: "linear-gradient(to right, transparent 0%, black 30%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 30%)" }}
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 px-8 py-6">
+        <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color }}>
+          WAVV Accelerator
+        </p>
+        <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-1">{title}</h2>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "420px" }}>{subtitle}</p>
+      </div>
+    </div>
   );
 }
 
@@ -650,7 +718,7 @@ export default function AcceleratorSession() {
               title="Live Call Events"
               subtitle="Join live coaching calls or view the upcoming schedule"
               bannerIcon={BANNER_ICONS.live}
-              color={color}
+              color={TILE_COLORS.live}
               count={visibleLiveCalls.length}
               href={`/accelerator/session/${weekId}/live-calls`}
             />
@@ -658,7 +726,7 @@ export default function AcceleratorSession() {
               title="Product Training"
               subtitle="WAVV how-to clips and cheat sheets for this session"
               bannerIcon={BANNER_ICONS.training}
-              color={color}
+              color={TILE_COLORS.training}
               count={cmsProductTraining.length}
               href={`/accelerator/session/${weekId}/product-training`}
             />
@@ -666,7 +734,7 @@ export default function AcceleratorSession() {
               title="Previous Recordings"
               subtitle="Catch up on past session recordings at your own pace"
               bannerIcon={BANNER_ICONS.recordings}
-              color={color}
+              color={TILE_COLORS.recordings}
               count={cmsRecordings.length}
               href={`/accelerator/session/${weekId}/recordings`}
             />
@@ -676,9 +744,16 @@ export default function AcceleratorSession() {
         {/* ── Expanded content section ── */}
         {activeSection === "live-calls" && (
           <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            {/* Sub-page banner header */}
+            <SubPageBanner
+              title="Live Call Events"
+              subtitle={`Upcoming live coaching calls for Session ${weekId}`}
+              bannerIcon={BANNER_ICONS.live}
+              color={TILE_COLORS.live}
+            />
             <div className="flex items-center gap-2.5 mb-2">
-              <Clock size={14} style={{ color }} />
-              <h2 className="text-base font-extrabold text-white tracking-wide">Upcoming Live Calls \u2014 Session {weekId}</h2>
+              <Clock size={14} style={{ color: TILE_COLORS.live }} />
+              <h2 className="text-base font-extrabold text-white tracking-wide">Upcoming Live Calls — Session {weekId}</h2>
             </div>
             {visibleLiveCalls.length === 0 ? (
               <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -688,7 +763,7 @@ export default function AcceleratorSession() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {visibleLiveCalls.map((c: any) => (
-                  <SessionCallCard key={c.id} call={c} now={now} color={color} isCurrentWeek={isCurrentWeek} />
+                  <SessionCallCard key={c.id} call={c} now={now} color={TILE_COLORS.live} isCurrentWeek={isCurrentWeek} />
                 ))}
               </div>
             )}
@@ -697,8 +772,15 @@ export default function AcceleratorSession() {
 
         {activeSection === "product-training" && (
           <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            {/* Sub-page banner header */}
+            <SubPageBanner
+              title="Product Training"
+              subtitle={`WAVV how-to clips and cheat sheets for Session ${weekId}`}
+              bannerIcon={BANNER_ICONS.training}
+              color={TILE_COLORS.training}
+            />
             <div className="flex items-center gap-2.5 mb-2">
-              <Play size={14} style={{ color }} />
+              <Play size={14} style={{ color: TILE_COLORS.training }} />
               <h2 className="text-base font-extrabold text-white tracking-wide">WAVV Product Training</h2>
             </div>
 
@@ -706,11 +788,11 @@ export default function AcceleratorSession() {
             {session.cheatSheetUrl && (
               <div
                 className="rounded-xl p-4 mb-4 flex items-center justify-between"
-                style={{ background: `${color}08`, border: `1px solid ${color}18` }}
+                style={{ background: `${TILE_COLORS.training}08`, border: `1px solid ${TILE_COLORS.training}18` }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${color}15` }}>
-                    <FileText size={16} style={{ color }} />
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${TILE_COLORS.training}15` }}>
+                    <FileText size={16} style={{ color: TILE_COLORS.training }} />
                   </div>
                   <div>
                     <p className="text-xs text-gray-400">Session {weekId} Resource</p>
@@ -720,7 +802,7 @@ export default function AcceleratorSession() {
                 <button
                   onClick={() => setPanelItem({ type: "pdf", title: `Session ${weekId} Cheat Sheet`, url: session.cheatSheetUrl! })}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
-                  style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+                  style={{ background: `linear-gradient(135deg, ${TILE_COLORS.training}, ${TILE_COLORS.training}cc)` }}
                 >
                   <FileText size={14} /> View Cheat Sheet
                 </button>
@@ -733,7 +815,7 @@ export default function AcceleratorSession() {
                   <ContentCard
                     key={item.id}
                     item={item}
-                    accentColor={color}
+                    accentColor={TILE_COLORS.training}
                     badgeLabel="Training"
                     onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
@@ -751,8 +833,15 @@ export default function AcceleratorSession() {
 
         {activeSection === "recordings" && (
           <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            {/* Sub-page banner header */}
+            <SubPageBanner
+              title="Previous Recordings"
+              subtitle={`Catch up on past session recordings for Session ${weekId}`}
+              bannerIcon={BANNER_ICONS.recordings}
+              color={TILE_COLORS.recordings}
+            />
             <div className="flex items-center gap-2.5 mb-2">
-              <Video size={14} style={{ color }} />
+              <Video size={14} style={{ color: TILE_COLORS.recordings }} />
               <h2 className="text-base font-extrabold text-white tracking-wide">Previous Session Recordings</h2>
             </div>
             {cmsRecordings.length > 0 ? (
@@ -761,7 +850,7 @@ export default function AcceleratorSession() {
                   <ContentCard
                     key={item.id}
                     item={item}
-                    accentColor={color}
+                    accentColor={TILE_COLORS.recordings}
                     badgeLabel="Recording"
                     onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
