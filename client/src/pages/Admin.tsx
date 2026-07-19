@@ -2726,7 +2726,7 @@ function SectionRow2({
       {/* Section header */}
       <div
         className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none"
-        style={{ background: "#1d2230" }}
+        style={{ background: "#000000" }}
         onClick={() => !renamingTitle && setOpen((v) => !v)}
       >
         {/* Expand chevron */}
@@ -2764,6 +2764,16 @@ function SectionRow2({
           ) : (
             <div className="flex items-center gap-2 flex-wrap">
               <p className="text-sm font-semibold text-white">{course.title}</p>
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>
+                {lessons.length} video{lessons.length !== 1 ? "s" : ""}
+              </span>
+              {!course.published && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                  style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
+                  Hidden
+                </span>
+              )}
               {sectionTags.map((tag) => {
                 const def = PRESET_TAGS.find((t) => t.label === tag);
                 return def ? (
@@ -2780,20 +2790,7 @@ function SectionRow2({
               })}
             </div>
           )}
-          {!renamingTitle && (
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>
-                {lessons.length} video{lessons.length !== 1 ? "s" : ""}
-              </span>
-              {!course.published && (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                  style={{ background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.25)" }}>
-                  Hidden
-                </span>
-              )}
-            </div>
-          )}
+
         </div>
         {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -2847,7 +2844,7 @@ function SectionRow2({
 
       {/* Section tag editor (inline, below header) */}
       {editingTags && (
-        <div className="px-4 pb-3" style={{ background: "#1d2230" }}>
+        <div className="px-4 pb-3" style={{ background: "#000000" }}>
           <SectionTagEditor
             courseId={course.id}
             currentTags={course.tags}
@@ -2866,7 +2863,7 @@ function SectionRow2({
               const prevLesson = lessons[lessonIdx - 1];
               const nextLesson = lessons[lessonIdx + 1];
               return (
-                <div key={lesson.id} className="relative group/lesson px-3 py-2" style={{ background: "#141414" }}>
+                <div key={lesson.id} className="relative group/lesson px-3 py-2" style={{ background: lessonIdx % 2 === 0 ? "#1a1f2e" : "#212840" }}>
                   {/* Lesson reorder arrows */}
                   {onReorderLesson && (
                     <div className="absolute -left-5 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover/lesson:opacity-100 transition-opacity">
@@ -3026,24 +3023,37 @@ function InactiveCategoryBlock({
   onDeleteLesson: (id: number, title: string) => void;
 }) {
   const totalInactive = inactiveCourses.length + inactiveLessons.length;
+  const [open, setOpen] = React.useState(true);
   return (
     <div className="rounded-xl overflow-hidden mb-3" style={{ border: "1px solid #2a2a2a" }}>
-      {/* Inactive category flat header — always expanded */}
-      <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
+      {/* Inactive category header — collapsible */}
+      <div
+        className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition"
+        style={{ background: "#000000" }}
+        onClick={() => setOpen((v) => !v)}
+      >
         <div className="flex items-center gap-3">
+          <button type="button" className="text-white flex-shrink-0">
+            {open ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
+          </button>
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#4b5563" }} />
           <span className="text-sm font-semibold text-white">{label}</span>
-          {subtitle && <span className="text-xs text-gray-500 hidden sm:inline">{subtitle}</span>}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
             {totalInactive} inactive
           </span>
         </div>
       </div>
-      {/* Always visible content */}
+      {/* Collapsible content */}
+      {open && (
       <div>
-        <div className="space-y-2 p-3" style={{ background: "#111" }}>
+        <div className="space-y-2 p-3" style={{ background: "#1a1f2e" }}>
+          {totalInactive === 0 && (
+            <div className="text-center py-6 text-gray-600 text-xs">
+              No inactive sections or courses here. Use the Hide or Deactivate controls above to move items here.
+            </div>
+          )}
           {inactiveCourses.map((course) => {
             const courseLessons = allLessons.filter((l) => l.courseId === course.id);
             return (
@@ -3085,6 +3095,7 @@ function InactiveCategoryBlock({
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
