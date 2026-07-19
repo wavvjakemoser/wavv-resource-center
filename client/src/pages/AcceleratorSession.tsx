@@ -407,57 +407,62 @@ function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
       }}
     >
       {/* Deep space black base */}
-      <div className="absolute inset-0" style={{ background: "#0a0e17" }} />
+      <div className="absolute inset-0" style={{ background: "#000" }} />
 
       {/* Circuit board SVG pattern */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.08 }} xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <pattern id={`banner-tile-${title.replace(/\s/g, "")}`} x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-            <path d="M10 10 L70 10 M70 10 L70 70 M10 40 L40 40 M40 40 L40 70" stroke={color} strokeWidth="0.6" fill="none"/>
+          <pattern id={`banner-tile-${title.replace(/\s/g, "")}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={color} strokeWidth="0.8" fill="none"/>
             <circle cx="10" cy="10" r="2" fill={color}/>
-            <circle cx="70" cy="10" r="2" fill={color}/>
-            <circle cx="70" cy="70" r="2" fill={color}/>
-            <circle cx="40" cy="40" r="1.5" fill={color}/>
+            <circle cx="50" cy="10" r="2" fill={color}/>
+            <circle cx="50" cy="50" r="2" fill={color}/>
+            <circle cx="30" cy="30" r="1.5" fill={color}/>
+            <path d="M0 30 L10 30 M60 50 L50 50" stroke={color} strokeWidth="0.6" fill="none"/>
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill={`url(#banner-tile-${title.replace(/\s/g, "")})`}/>
       </svg>
 
-      {/* Radial color glow on right */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 50% 140% at 85% 50%, ${color}25 0%, transparent 65%)` }} />
+      {/* Full-width radial color glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${color}28 0%, ${color}10 45%, transparent 75%)` }} />
+
+      {/* Neon scan line */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(180deg, ${color}06 0%, ${color}12 50%, ${color}06 100%)` }} />
 
       {/* Top edge neon line */}
-      <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "2px", background: `linear-gradient(to right, transparent 0%, ${color}50 20%, ${color}80 50%, ${color}50 80%, transparent 100%)` }} />
+      <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${color}60 30%, ${color}90 60%, transparent 100%)` }} />
 
-      {/* Hover glow */}
-      <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${color}60, 0 0 20px ${color}20` }} />
+      {/* Full-bleed thumbnail — covers entire tile as background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `url(${bannerIcon})`,
+          backgroundSize: "100% auto",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+          opacity: 0.85,
+        }}
+      />
 
-      {/* Content: left text + right big icon */}
-      <div className="relative flex items-center h-full">
-        {/* Left text block */}
-        <div className="flex-1 min-w-0 px-8 py-6 z-10">
-          <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color }}>WAVV Accelerator</p>
-          <h3 className="text-4xl font-extrabold text-white leading-tight mb-2">{title}</h3>
-          <p className="text-base text-white" style={{ maxWidth: "420px" }}>{subtitle}</p>
-          {count > 0 && (
-            <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>
+      {/* Dark gradient overlay — left side for text legibility */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }} />
+
+      {/* Hover neon border pulse */}
+      <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${color}80, 0 0 24px ${color}30` }} />
+
+      {/* Content overlay */}
+      <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
+        <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color }}>WAVV Accelerator</p>
+        <h3 className="text-4xl font-extrabold text-white leading-tight mb-1">{title}</h3>
+        <p className="text-base text-white mb-3" style={{ maxWidth: "420px" }}>{subtitle}</p>
+        {count > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ background: `${color}35`, color, border: `1px solid ${color}` }}>
               {count} {count === 1 ? "item" : "items"}
             </span>
-          )}
-        </div>
-        {/* Right full-bleed icon image */}
-        <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none">
-          <img
-            src={bannerIcon}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ opacity: 0.55, maskImage: "linear-gradient(to right, transparent 0%, black 30%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 30%)" }}
-          />
-        </div>
-        {/* Arrow indicator */}
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <ChevronRight size={18} style={{ color: "rgba(255,255,255,0.4)" }} />
-        </div>
+          </div>
+        )}
       </div>
     </a>
   );
@@ -480,44 +485,53 @@ function SubPageBanner({ title, subtitle, bannerIcon, color }: {
       }}
     >
       {/* Deep space black base */}
-      <div className="absolute inset-0" style={{ background: "#0a0e17" }} />
+      <div className="absolute inset-0" style={{ background: "#000" }} />
 
       {/* Circuit board SVG pattern */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.06 }} xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <pattern id={`subpage-banner-${title.replace(/\s/g, "")}`} x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-            <path d="M10 10 L70 10 M70 10 L70 70 M10 40 L40 40 M40 40 L40 70" stroke={color} strokeWidth="0.6" fill="none"/>
+          <pattern id={`subpage-banner-${title.replace(/\s/g, "")}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={color} strokeWidth="0.8" fill="none"/>
             <circle cx="10" cy="10" r="2" fill={color}/>
-            <circle cx="70" cy="10" r="2" fill={color}/>
-            <circle cx="70" cy="70" r="2" fill={color}/>
-            <circle cx="40" cy="40" r="1.5" fill={color}/>
+            <circle cx="50" cy="10" r="2" fill={color}/>
+            <circle cx="50" cy="50" r="2" fill={color}/>
+            <circle cx="30" cy="30" r="1.5" fill={color}/>
+            <path d="M0 30 L10 30 M60 50 L50 50" stroke={color} strokeWidth="0.6" fill="none"/>
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill={`url(#subpage-banner-${title.replace(/\s/g, "")})`}/>
       </svg>
 
-      {/* Radial color glow on right */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 50% 140% at 85% 50%, ${color}25 0%, transparent 65%)` }} />
+      {/* Full-width radial color glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${color}28 0%, ${color}10 45%, transparent 75%)` }} />
+
+      {/* Neon scan line */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(180deg, ${color}06 0%, ${color}12 50%, ${color}06 100%)` }} />
 
       {/* Top edge neon line */}
-      <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "2px", background: `linear-gradient(to right, transparent 0%, ${color}50 20%, ${color}80 50%, ${color}50 80%, transparent 100%)` }} />
+      <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${color}60 30%, ${color}90 60%, transparent 100%)` }} />
 
-      {/* Full-bleed image on right */}
-      <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[45%] overflow-hidden pointer-events-none">
-        <img
-          src={bannerIcon}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.45, maskImage: "linear-gradient(to right, transparent 0%, black 30%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 30%)" }}
-        />
-      </div>
+      {/* Full-bleed thumbnail — covers entire tile as background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `url(${bannerIcon})`,
+          backgroundSize: "100% auto",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center center",
+          opacity: 0.85,
+        }}
+      />
 
-      {/* Content */}
-      <div className="relative z-10 px-8 py-6 flex flex-col justify-center h-full">
+      {/* Dark gradient overlay — left side for text legibility */}
+      <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }} />
+
+      {/* Content overlay */}
+      <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
         <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color }}>
           WAVV Accelerator
         </p>
-        <h2 className="text-4xl font-extrabold text-white leading-tight mb-2">{title}</h2>
+        <h2 className="text-4xl font-extrabold text-white leading-tight mb-1">{title}</h2>
         <p className="text-base text-white" style={{ maxWidth: "420px" }}>{subtitle}</p>
       </div>
     </div>
@@ -529,48 +543,37 @@ function FlipDigit({ value, label, color }: { value: string; label: string; colo
   return (
     <div className="flex flex-col items-center">
       <div
-        className="relative flex flex-col overflow-hidden"
+        className="relative overflow-hidden"
         style={{
-          width: "46px",
-          height: "56px",
+          width: "48px",
+          height: "58px",
           borderRadius: "8px",
-          border: `1.5px solid ${color}35`,
-          boxShadow: `0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)`,
+          border: `1.5px solid ${color}30`,
+          boxShadow: `0 4px 12px rgba(0,0,0,0.5)`,
         }}
       >
-        {/* Top half */}
+        {/* Top half background */}
         <div
-          className="flex-1 flex items-end justify-center overflow-hidden"
-          style={{
-            background: "linear-gradient(180deg, #1e2536 0%, #151a26 100%)",
-            paddingBottom: "1px",
-          }}
-        >
-          <span
-            className="font-mono font-black text-2xl leading-none translate-y-[6px]"
-            style={{ color, textShadow: `0 0 10px ${color}50, 0 2px 4px rgba(0,0,0,0.3)` }}
-          >
-            {value}
-          </span>
-        </div>
+          className="absolute inset-x-0 top-0"
+          style={{ height: "50%", background: "linear-gradient(180deg, #1e2536 0%, #161c28 100%)" }}
+        />
+        {/* Bottom half background */}
+        <div
+          className="absolute inset-x-0 bottom-0"
+          style={{ height: "50%", background: "linear-gradient(180deg, #111825 0%, #171d2a 100%)" }}
+        />
         {/* Center split line */}
-        <div className="relative" style={{ height: "2px", background: "#000", boxShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>
-          <div className="absolute left-0 right-0 top-0" style={{ height: "1px", background: "rgba(255,255,255,0.04)" }} />
-          {/* Hinge dots */}
-          <div className="absolute left-[-1px] top-[-2px] w-[4px] h-[6px] rounded-full" style={{ background: "rgba(0,0,0,0.7)" }} />
-          <div className="absolute right-[-1px] top-[-2px] w-[4px] h-[6px] rounded-full" style={{ background: "rgba(0,0,0,0.7)" }} />
+        <div className="absolute inset-x-0" style={{ top: "calc(50% - 1px)", height: "2px", background: "#000", zIndex: 2 }}>
+          <div className="absolute inset-x-0 bottom-0" style={{ height: "1px", background: "rgba(255,255,255,0.03)" }} />
         </div>
-        {/* Bottom half */}
-        <div
-          className="flex-1 flex items-start justify-center overflow-hidden"
-          style={{
-            background: "linear-gradient(180deg, #0f1219 0%, #171d2a 100%)",
-            paddingTop: "1px",
-          }}
-        >
+        {/* Hinge notches */}
+        <div className="absolute left-0 rounded-r-sm" style={{ top: "calc(50% - 3px)", width: "3px", height: "6px", background: "rgba(0,0,0,0.8)", zIndex: 3 }} />
+        <div className="absolute right-0 rounded-l-sm" style={{ top: "calc(50% - 3px)", width: "3px", height: "6px", background: "rgba(0,0,0,0.8)", zIndex: 3 }} />
+        {/* Single centered number */}
+        <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 1 }}>
           <span
-            className="font-mono font-black text-2xl leading-none translate-y-[-6px]"
-            style={{ color, textShadow: `0 0 10px ${color}50, 0 2px 4px rgba(0,0,0,0.3)` }}
+            className="font-mono font-black text-[28px] leading-none"
+            style={{ color, textShadow: `0 0 12px ${color}40, 0 1px 3px rgba(0,0,0,0.4)` }}
           >
             {value}
           </span>

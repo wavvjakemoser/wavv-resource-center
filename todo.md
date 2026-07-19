@@ -2319,3 +2319,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] CMS Accelerator session rows: change "Edit Details" button to white "Edit" with pencil icon
 - [x] CMS header: change "WAVV Accelerator Sessions" to "WAVV Accelerator"
 - [x] Sidebar: add white divider line under each section header (Explore, Quick Links, Admin Tools) and increase text size
+
+## Flip Clock Bug + Tile Styling (Jul 19 - Session 13)
+- [x] Fix flip clock: digits showing doubled (top/bottom both render full number). Single centered number with split line.
+- [x] Accelerator tiles: match Academy tile style (full background image, dark gradient overlay on left for text legibility)
