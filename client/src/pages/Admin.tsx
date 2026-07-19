@@ -307,7 +307,7 @@ export default function Admin() {
 
         {/* ── Row 1: Operations ── */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#4b5563" }}>Operations</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#ffffff" }}>Operations</p>
           <div
             className="flex items-center gap-0.5 p-1 rounded-xl"
             style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
@@ -321,7 +321,7 @@ export default function Admin() {
 
         {/* ── Row 3: Content Management ── */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#4b5563" }}>Content Management</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "#ffffff" }}>Content Management</p>
           <div
             className="flex items-center gap-0.5 p-1 rounded-xl"
             style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
@@ -1710,7 +1710,7 @@ function UsersTab() {
             onClick={() => { refetch(); refetchEmployees(); }}
             disabled={isLoading || employeesLoading}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition disabled:opacity-40"
-            style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+            style={{ background: "rgba(255,255,255,0.06)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.15)" }}
           >
             <RefreshCw size={13} className={(isLoading || employeesLoading) ? "animate-spin" : ""} />
             Refresh
@@ -1719,7 +1719,7 @@ function UsersTab() {
             onClick={exportUsersCSV}
             disabled={!users || users.length === 0}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition disabled:opacity-40"
-            style={{ background: "rgba(6,182,212,0.1)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.2)" }}
+            style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}
           >
             <ArrowDownToLine size={13} />
             Export
@@ -2212,8 +2212,9 @@ const SUBSCRIPTION_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 function PortalUsersPanel() {
+  type SubFilter = "all" | "ACTIVE" | "TRIALING" | "SCHEDULED_CANCEL" | "CANCELED" | "INCOMPLETE" | "NONE";
+  const [subFilter, setSubFilter] = useState<SubFilter>("all");
   const [accountTypeFilter, setAccountTypeFilter] = useState<"all" | "customer" | "guest">("all");
-  const [subStatusFilter, setSubStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -2225,9 +2226,15 @@ function PortalUsersPanel() {
     return () => clearTimeout(t);
   }, [search]);
 
+  // Aggregate counts
+  const { data: countsData } = trpc.admin.portalUserCounts.useQuery();
+  const totalCount = countsData?.total ?? 0;
+  const byStatus = countsData?.byStatus ?? {};
+  const byType = countsData?.byType ?? { customer: 0, guest: 0 };
+
   const { data, isLoading, refetch: refetchPortal } = trpc.admin.listPortalUsers.useQuery({
     accountType: accountTypeFilter,
-    subscriptionStatus: subStatusFilter === "all" ? undefined : subStatusFilter,
+    subscriptionStatus: subFilter === "all" ? undefined : subFilter,
     search: debouncedSearch || undefined,
     limit: PAGE_SIZE,
     offset: page * PAGE_SIZE,
@@ -2236,9 +2243,6 @@ function PortalUsersPanel() {
   const portalUsers = data?.users ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
-
-  const customerCount = portalUsers.filter(u => u.accountType === "customer").length;
-  const guestCount = portalUsers.filter(u => u.accountType === "guest").length;
 
   function exportPortalCSV() {
     if (!portalUsers.length) return;
@@ -2264,19 +2268,26 @@ function PortalUsersPanel() {
     URL.revokeObjectURL(url);
   }
 
+  // Filter tile definitions — mirrors WAVV Team stat cards
+  const filterTiles: { filter: SubFilter; label: string; value: number; color: string; bg: string; activeBorder: string }[] = [
+    { filter: "all", label: "All Users", value: totalCount, color: "#60a5fa", bg: "rgba(96,165,250,0.1)", activeBorder: "#60a5fa" },
+    { filter: "ACTIVE", label: "Active", value: byStatus["ACTIVE"] ?? 0, color: "#4ade80", bg: "rgba(74,222,128,0.1)", activeBorder: "#4ade80" },
+    { filter: "TRIALING", label: "Trialing", value: byStatus["TRIALING"] ?? 0, color: "#60a5fa", bg: "rgba(96,165,250,0.1)", activeBorder: "#60a5fa" },
+    { filter: "SCHEDULED_CANCEL", label: "Canceling", value: byStatus["SCHEDULED_CANCEL"] ?? 0, color: "#fb923c", bg: "rgba(251,146,60,0.1)", activeBorder: "#fb923c" },
+    { filter: "CANCELED", label: "Canceled", value: byStatus["CANCELED"] ?? 0, color: "#f87171", bg: "rgba(248,113,113,0.1)", activeBorder: "#f87171" },
+    { filter: "NONE", label: "No Subscription", value: byStatus["NONE"] ?? 0, color: "rgba(255,255,255,0.5)", bg: "rgba(255,255,255,0.05)", activeBorder: "rgba(255,255,255,0.4)" },
+  ];
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-base font-semibold text-white">Portal Users</h2>
-        <div className="flex items-center gap-3">
-          <div className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
-            {total.toLocaleString()} total users
-          </div>
+        <h2 className="text-base font-semibold text-white">Access</h2>
+        <div className="flex items-center gap-2">
           <button
             onClick={() => refetchPortal()}
             disabled={isLoading}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40"
-            style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
+            style={{ background: "rgba(255,255,255,0.06)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.15)" }}
           >
             <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} /> Refresh
           </button>
@@ -2291,46 +2302,65 @@ function PortalUsersPanel() {
         </div>
       </div>
 
-      {/* Stat chips */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {([
-          { key: "all",      label: "All",       count: total },
-          { key: "customer", label: "Customers", count: customerCount },
-          { key: "guest",    label: "Guests",    count: guestCount },
-        ] as const).map(chip => (
-          <button
-            key={chip.key}
-            onClick={() => { setAccountTypeFilter(chip.key); setPage(0); }}
-            className="px-3 py-1 rounded-full text-xs font-medium transition-all"
-            style={accountTypeFilter === chip.key
-              ? { background: "#0074F4", color: "#fff" }
-              : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)" }}
-          >
-            {chip.label} {chip.count > 0 && <span className="opacity-70">({chip.count})</span>}
-          </button>
-        ))}
+      {/* Clickable filter tiles — mirrors WAVV Team */}
+      <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(6, minmax(0, 1fr))" }}>
+        {filterTiles.map((s) => {
+          const active = subFilter === s.filter;
+          return (
+            <button
+              key={s.filter}
+              onClick={() => { setSubFilter(active ? "all" : s.filter); setPage(0); }}
+              className="rounded-xl p-4 text-left transition-all relative"
+              style={{
+                background: "#1d2230",
+                border: active ? `1.5px solid ${s.activeBorder}` : "1px solid #2a2a2a",
+                boxShadow: active ? `0 0 12px ${s.activeBorder}33` : "none",
+              }}
+            >
+              <div className="flex flex-col gap-2">
+                <span
+                  className="inline-flex items-center self-start px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide"
+                  style={{ background: s.bg, color: s.color, border: `1px solid ${s.activeBorder}44` }}
+                >
+                  {s.label}
+                </span>
+                <p className="text-2xl font-bold text-white">{s.value}</p>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Filters row */}
+      {/* Search + Account Type filter */}
       <div className="flex items-center gap-3 flex-wrap">
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search name or email..."
-          className="px-3 py-1.5 rounded-lg text-xs outline-none w-56"
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff" }}
-        />
-        <select
-          value={subStatusFilter}
-          onChange={e => { setSubStatusFilter(e.target.value); setPage(0); }}
-          className="px-3 py-1.5 rounded-lg text-xs outline-none"
-          style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff" }}
-        >
-          <option value="all">All Subscription Statuses</option>
-          {Object.entries(SUBSCRIPTION_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Input
+            placeholder="Search by name or email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+            style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          {([
+            { key: "all" as const, label: "All Types" },
+            { key: "customer" as const, label: "Customers" },
+            { key: "guest" as const, label: "Guests" },
+          ]).map(chip => (
+            <button
+              key={chip.key}
+              onClick={() => { setAccountTypeFilter(chip.key); setPage(0); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={accountTypeFilter === chip.key
+                ? { background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }
+                : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}
+            >
+              {chip.label} {chip.key !== "all" && <span className="opacity-60 ml-1">({chip.key === "customer" ? byType.customer : byType.guest})</span>}
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       {/* Table */}

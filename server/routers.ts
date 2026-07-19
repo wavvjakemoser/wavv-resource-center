@@ -1405,6 +1405,30 @@ export const appRouter = router({
         };
       }),
 
+    /** Get aggregate counts for portal users by subscription status */
+    portalUserCounts: commandCenterProcedure
+      .query(async () => {
+        const db = await getDb();
+        if (!db) return { total: 0, byStatus: {} as Record<string, number>, byType: { customer: 0, guest: 0 } };
+        const rows = await db.select({
+          subscriptionStatus: users.subscriptionStatus,
+          accountType: users.accountType,
+          cnt: sql<number>`COUNT(*)`,
+        }).from(users).where(eq(users.isEmployee, false)).groupBy(users.subscriptionStatus, users.accountType);
+        let total = 0;
+        const byStatus: Record<string, number> = {};
+        const byType = { customer: 0, guest: 0 };
+        for (const r of rows) {
+          const cnt = Number(r.cnt);
+          total += cnt;
+          const statusKey = r.subscriptionStatus ?? "NONE";
+          byStatus[statusKey] = (byStatus[statusKey] ?? 0) + cnt;
+          if (r.accountType === "customer") byType.customer += cnt;
+          else byType.guest += cnt;
+        }
+        return { total, byStatus, byType };
+      }),
+
     /** Approve or deny a WAVV employee's Command Center access */
     updateApproval: ownerProcedure
       .input(z.object({

@@ -203,7 +203,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
         >
           {/* Logo */}
           <div
-            className="flex items-center gap-2 px-4 py-4"
+            className="flex items-center justify-center px-4 py-4"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", minHeight: "64px" }}
           >
             <a
@@ -285,7 +285,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                 >
 
                   <span className="flex-1 min-w-0 text-sm whitespace-nowrap">WAVV Chrome Extension</span>
-                  <ExternalLink size={12} className="flex-shrink-0 ml-2" style={{ color: "rgba(255,255,255,0.3)" }} />
+                  <ExternalLink size={12} className="flex-shrink-0 ml-2" style={{ color: "#ffffff" }} />
                 </a>
               </>
             )}

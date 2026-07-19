@@ -2162,3 +2162,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Replace greyed-out label text with colored role bubbles (orange for Owner, etc.)
 - [x] Audit Access section for additional cleanup opportunities
 - [x] Make filter tile label text white (not grey)
+
+## Access Tab Headers + Portal Users Redesign (Jul 19 2026)
+- [x] Make Operations and Content Management header text white
+- [x] Pick consistent colors for Refresh and Export buttons (both tabs)
+- [x] Redesign WAVV Users (Portal Users) view to mirror WAVV Team layout with subscription-based filter tiles
+- [x] Center the WAVV logo in the left sidebar
+- [x] Make external link icon white (not gray) in Quick Links sidebar section
