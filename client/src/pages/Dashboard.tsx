@@ -304,8 +304,8 @@ export default function Dashboard() {
 
         </div>{/* end hero */}
 
-        {/* ── What is WAVV ── only shown to unauthenticated visitors ── */}
-        {!isAuthenticated && (<section>
+        {/* ── What is WAVV ── always visible ── */}
+        <section>
           <div className="flex items-center justify-between gap-4 mb-2">
             <div className="flex items-center gap-2.5">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
@@ -345,7 +345,7 @@ export default function Dashboard() {
               );
             })}
           </div>
-        </section>)}
+        </section>
 
         {/* ── Continue Learning (shown only when user has activity) ── */}
         {isAuthenticated && continueLearning && (

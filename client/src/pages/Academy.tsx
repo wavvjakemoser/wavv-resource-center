@@ -73,7 +73,7 @@ const CATEGORIES = [
     icon: Wrench,
     bgPosition: "right center",
     bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-banner-YquyhqtPNnYQRs4aND6L48.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-v3-NrvVPsknskQzUMXfjKsd4C.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -109,7 +109,7 @@ const CATEGORIES = [
     icon: Lightbulb,
     bgPosition: "right center",
     bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-target-banner-jQtt8DH4jx23UjqAE8zARv.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-target-v3-5HQXHhN8f3YmQVjT3idTdh.webp",
     placeholders: [
       {
         id: "p-str-1",
