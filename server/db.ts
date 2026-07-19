@@ -264,7 +264,10 @@ export async function createLesson(data: {
   description?: string;
   videoUrl?: string;
   durationMinutes?: number;
+  durationSeconds?: number;
   sortOrder?: number;
+  fileUrl?: string;
+  pipEnabled?: boolean;
 }) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");

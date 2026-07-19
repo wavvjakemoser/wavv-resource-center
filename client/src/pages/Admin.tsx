@@ -1854,7 +1854,7 @@ function UsersTab() {
       <div className="rounded-xl overflow-hidden overflow-x-auto" style={{ border: "1px solid #2a2a2a" }}>
         <Table className="min-w-[560px]">
           <TableHeader>
-                        <TableRow style={{ background: "#1d2230", borderBottom: "1px solid #2a2a2a" }}>
+                        <TableRow style={{ background: "#000000", borderBottom: "1px solid #2a2a2a" }}>
               <TableHead className="text-gray-400">Name</TableHead>
               <TableHead className="text-gray-400">Email</TableHead>
               <TableHead className="text-gray-400">Access Level</TableHead>
@@ -2896,19 +2896,7 @@ function SectionRow2({
               );
             })
           )}
-          {/* Add Video button */}
-          {onAddVideo && (
-            <div className="px-3 py-2" style={{ background: "#141414" }}>
-              <button
-                type="button"
-                onClick={onAddVideo}
-                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition hover:opacity-90"
-                style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px dashed rgba(0,116,244,0.4)" }}
-              >
-                <Plus size={11} /> Add Video
-              </button>
-            </div>
-          )}
+
         </div>
       )}
     </div>
@@ -3010,17 +2998,7 @@ function CategoryBlock({
               </div>
             );
           })}
-          {/* Add Section button */}
-          {onAddSection && (
-            <button
-              type="button"
-              onClick={() => onAddSection(categoryKey)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-medium transition hover:opacity-90"
-              style={{ background: `${accentColor}12`, color: accentColor, border: `1px dashed ${accentColor}40` }}
-            >
-              <Plus size={13} /> Add Section
-            </button>
-          )}
+
         </div>
       )}
     </div>
@@ -3158,6 +3136,7 @@ function ContentTab() {
   });
 
   // Create lesson mutation
+  const uploadLessonFile = trpc.academy.adminUploadLessonFile.useMutation();
   const createLesson = trpc.academy.adminCreateLesson.useMutation({
     onSuccess: () => {
       utils.academy.adminGetAllLessons.invalidate();
@@ -3184,7 +3163,7 @@ function ContentTab() {
 
   // Dialog state: Add Video
   const [addVideoDialog, setAddVideoDialog] = useState<{ courseId: number; courseTitle: string } | null>(null);
-  const [newVideoForm, setNewVideoForm] = useState({ title: "", videoUrl: "", description: "", durationMinutes: "", durationSeconds: 0, tags: "" });
+  const [newVideoForm, setNewVideoForm] = useState({ title: "", videoUrl: "", description: "", durationMinutes: "", durationSeconds: 0, tags: "", pdfFile: null as File | null, pdfUrl: "", pdfFileName: "" });
   const [loomFetchStatus, setLoomFetchStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const fetchLoomDurationMutation = trpc.academy.fetchLoomDuration.useMutation();
 
@@ -3222,7 +3201,7 @@ function ContentTab() {
   }
 
   function handleAddVideo(courseId: number, courseTitle: string) {
-    setNewVideoForm({ title: "", videoUrl: "", description: "", durationMinutes: "", durationSeconds: 0, tags: "" });
+    setNewVideoForm({ title: "", videoUrl: "", description: "", durationMinutes: "", durationSeconds: 0, tags: "", pdfFile: null, pdfUrl: "", pdfFileName: "" });
     setLoomFetchStatus("idle");
     setAddVideoDialog({ courseId, courseTitle });
   }
@@ -3249,8 +3228,26 @@ function ContentTab() {
     }
   }
 
-  function confirmAddVideo() {
+  async function confirmAddVideo() {
     if (!addVideoDialog || !newVideoForm.title.trim()) return;
+    // Upload PDF if attached
+    let pdfFileUrl: string | undefined;
+    if (newVideoForm.pdfFile) {
+      try {
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve((reader.result as string).split(",")[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(newVideoForm.pdfFile!);
+        });
+        const result = await uploadLessonFile.mutateAsync({
+          base64,
+          mimeType: "application/pdf",
+          fileName: newVideoForm.pdfFileName,
+        });
+        pdfFileUrl = result.url;
+      } catch { toast.error("PDF upload failed"); return; }
+    }
     createLesson.mutate({
       courseId: addVideoDialog.courseId,
       title: newVideoForm.title.trim(),
@@ -3258,6 +3255,7 @@ function ContentTab() {
       description: newVideoForm.description.trim() || undefined,
       durationMinutes: newVideoForm.durationMinutes ? parseInt(newVideoForm.durationMinutes) : undefined,
       durationSeconds: newVideoForm.durationSeconds || undefined,
+      fileUrl: pdfFileUrl,
       sortOrder: 99,
     });
   }
@@ -3391,7 +3389,7 @@ function ContentTab() {
                     }
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-                  style={{ background: `${color}12`, color, border: `1px dashed ${color}50` }}
+                  style={{ background: color, color: '#fff' }}
                 >
                   <Plus size={12} /> Add {label} Video
                 </button>
@@ -3442,7 +3440,7 @@ function ContentTab() {
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#22c55e", boxShadow: "0 0 6px #22c55e80" }} />
             <h2 className="text-base font-bold text-white tracking-tight">Live Sections &amp; Courses</h2>
           </div>
-          <span className="text-xs text-gray-500 font-medium">Everything currently visible on WAVV Academy</span>
+          <span className="text-xs text-gray-500 font-medium"></span>
         </div>
         <div className="space-y-6">
           {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, videoCount, thumbnail }) => {
@@ -3478,8 +3476,8 @@ function ContentTab() {
       <div className="pt-2">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#4b5563" }} />
-          <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections and Courses</h2>
-          <span className="text-xs text-gray-500 font-medium ml-2">Hidden from users — deactivate first, then delete permanently</span>
+          <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections & Courses</h2>
+          <span className="text-xs text-gray-500 font-medium ml-2"></span>
         </div>
         <div className="space-y-6">
                 {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, thumbnail }) => {
@@ -3666,6 +3664,36 @@ function ContentTab() {
                 />
               </div>
             </div>
+          </div>
+          {/* PDF Attachment */}
+          <div className="border-t pt-3" style={{ borderColor: "#2a2a2a" }}>
+            <label className="text-xs text-gray-400 mb-2 block">Attach PDF (optional)</label>
+            {newVideoForm.pdfFileName ? (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "#111", border: "1px solid #2a2a2a" }}>
+                <FileText size={14} className="text-cyan-400 flex-shrink-0" />
+                <span className="text-xs text-gray-300 flex-1 truncate">{newVideoForm.pdfFileName}</span>
+                <button
+                  onClick={() => setNewVideoForm(f => ({ ...f, pdfFile: null, pdfUrl: "", pdfFileName: "" }))}
+                  className="text-gray-500 hover:text-red-400 transition flex-shrink-0"
+                ><X size={12} /></button>
+              </div>
+            ) : (
+              <label className="flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition hover:opacity-80" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
+                <Upload size={14} className="text-gray-500" />
+                <span className="text-xs text-gray-500">Click to attach a PDF</span>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 16 * 1024 * 1024) { toast.error("PDF must be under 16MB"); return; }
+                    setNewVideoForm(f => ({ ...f, pdfFile: file, pdfFileName: file.name }));
+                  }}
+                />
+              </label>
+            )}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAddVideoDialog(null)} className="text-gray-400">Cancel</Button>
@@ -5210,7 +5238,7 @@ const WEBINAR_GROUP_META: Record<string, { label: string; color: string; descrip
 // ─── Sortable row wrapper (shared by webinars + guides) ───────────────────────
 function SortableTableRow({ id, children, rowIndex }: { id: number; children: React.ReactNode; rowIndex?: number }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
-  const altBg = rowIndex !== undefined ? (rowIndex % 2 === 0 ? "#111" : "#1a1f2e") : "#111";
+  const altBg = rowIndex !== undefined ? (rowIndex % 2 === 0 ? "#1a1f2e" : "#212840") : "#1a1f2e";
   return (
     <TableRow
       ref={setNodeRef}
@@ -5321,28 +5349,9 @@ function WebinarGroups({
             )}
             {!isCollapsed && (
               group.length === 0 ? (
-                type === "exclusive" ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow style={{ background: "#000000", borderColor: "#252d3d" }}>
-                        <TableHead className="text-gray-400 text-xs w-6"></TableHead>
-                        <TableHead className="text-gray-400 text-xs">Title</TableHead>
-                        <TableHead className="text-gray-400 text-xs">Host</TableHead>
-                        <TableHead className="text-gray-400 text-xs">Views</TableHead>
-                        <TableHead className="text-gray-400 text-xs">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
-                        <TableCell colSpan={5} className="text-center py-6 text-gray-600 text-xs">No upcoming exclusive live webinars yet. Click "Add Webinar" above and set the type to "Upcoming WAVV Exclusive Live Webinars".</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                ) : (
                 <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
                   <p className="text-gray-600 text-xs">No {meta.label.toLowerCase()} webinars yet. Click "Add Webinar" above and set the type.</p>
                 </div>
-                )
               ) : (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(type, group, e)}>
                   <SortableContext items={orderedGroup.map(w => w.id)} strategy={verticalListSortingStrategy}>
@@ -5424,7 +5433,7 @@ function CompletedExclusiveWebinars() {
         <div className="flex items-center gap-3">
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#6b7280" }} />
           <span className="text-sm font-semibold text-gray-400">Completed Exclusive Webinars</span>
-          <span className="text-xs text-gray-600">Past-dated exclusive sessions — publish to On-Demand or keep archived</span>
+          
         </div>
         <div className="flex items-center gap-2">
           {!isLoading && (
@@ -6466,7 +6475,7 @@ function PdfSectionsPanel({
               return (
                 <SortablePdfSectionRow key={section.id} id={section.id}>
                   <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-                    <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
+                    <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#000000" }}>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <span className="text-white cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
                         <button onClick={() => setCollapsed(c => ({ ...c, [section.id]: !isCollapsed }))} className="text-white hover:text-white transition flex-shrink-0">
@@ -6520,7 +6529,7 @@ function PdfSectionsPanel({
                     </div>
                     {!isCollapsed && (
                       sectionGuides.length === 0 ? (
-                        <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
+                        <div className="px-5 py-8 text-center" style={{ background: "#1a1f2e" }}>
                           <p className="text-gray-600 text-xs">No PDFs in this section yet. Use "Add PDF" above and select this section.</p>
                         </div>
                       ) : (
@@ -6528,7 +6537,7 @@ function PdfSectionsPanel({
                           <SortableContext items={orderedGuides.map(g => g.id)} strategy={verticalListSortingStrategy}>
                             <Table>
                               <TableHeader>
-                                <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
+                                <TableRow style={{ background: "#1a1f2e", borderColor: "#252d3d" }}>
                                   <TableHead className="text-gray-400 text-xs w-6"></TableHead>
                                   <TableHead className="text-gray-400 text-xs">Title</TableHead>
                                   <TableHead className="text-gray-400 text-xs">Link Display Name</TableHead>
@@ -6585,7 +6594,7 @@ function PdfSectionsPanel({
       {/* Unsectioned PDFs */}
       {pdfGuides.filter(g => !g.category || !pdfSections.find(s => s.name === g.category)).length > 0 && (
         <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-          <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
+          <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#000000" }}>
             <div className="flex items-center gap-3">
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#6b7280" }} />
               <span className="text-sm font-semibold text-gray-400">Unsectioned</span>
@@ -6746,7 +6755,7 @@ function FaqSectionsPanel() {
         <SortableFaqSectionRow key={section.id} id={section.id}>
         <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
           {/* Section row */}
-          <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
+          <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#000000" }}>
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <span className="text-white cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
               <button onClick={() => toggleExpand(section.id)} className="text-white hover:text-white transition flex-shrink-0">
@@ -6814,9 +6823,9 @@ function FaqSectionsPanel() {
           )}
           {/* Entries */}
           {expandedSections.has(section.id) && (
-            <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#111" }}>
+            <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#1a1f2e" }}>
               {(section.entries ?? []).map((entry, entryIdx) => (
-                <div key={entry.id} className="px-5 py-3 space-y-1" style={{ background: entryIdx % 2 === 0 ? "#111" : "#1a1f2e" }}>
+                <div key={entry.id} className="px-5 py-3 space-y-1" style={{ background: entryIdx % 2 === 0 ? "#1a1f2e" : "#212840" }}>
                   {editingEntry?.id === entry.id ? (
                     <div className="space-y-2">
                       <input
@@ -8641,7 +8650,7 @@ function PublishedHelpArticlesPanel() {
               <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
             <div
               className="px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition"
-              style={{ background: "#1d2230" }}
+              style={{ background: "#000000" }}
             >
               <span className="text-white cursor-grab flex-shrink-0" title="Drag to reorder"><GripVertical size={14} /></span>
               <button onClick={e => { e.stopPropagation(); setCollapsed(c => ({ ...c, [sec.name]: isCollapsed ? false : true })); }} className="text-white hover:text-white transition flex-shrink-0">
@@ -8696,7 +8705,7 @@ function PublishedHelpArticlesPanel() {
             {!isCollapsed && (
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(sec.name, e)}>
                 <SortableContext items={group.map(a => a.intercomArticleId ?? a.id.toString())} strategy={verticalListSortingStrategy}>
-                  <div style={{ borderTop: "1px solid #2a2a2a", background: "#111" }}>
+                  <div style={{ borderTop: "1px solid #2a2a2a", background: "#1a1f2e" }}>
                     {group.length === 0 ? (
                       <div className="px-4 py-4 text-center">
                         <p className="text-xs text-gray-600">No articles in this section yet. Use Synced Help Articles below to publish articles here.</p>
@@ -8764,7 +8773,7 @@ function SortableHelpSectionRow({ id, children }: { id: number; children: React.
 function SortableHelpArticleRow({ article, onUnpublish, onEdit, rowIndex }: { article: { id: number; intercomArticleId: string | null; source?: string; title: string; url: string | null; sectionName: string; nativeBody?: string | null }; onUnpublish: () => void; onEdit?: () => void; rowIndex?: number }) {
   const ACCENT = "#0074F4";
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: article.intercomArticleId ?? article.id.toString() });
-  const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, background: (rowIndex ?? 0) % 2 === 0 ? "#111" : "#1a1f2e" };
+  const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, background: (rowIndex ?? 0) % 2 === 0 ? "#1a1f2e" : "#212840" };
   const isNative = article.source === "native";
   return (
     <div ref={setNodeRef} style={style} className="flex items-center gap-3 px-4 py-2.5">

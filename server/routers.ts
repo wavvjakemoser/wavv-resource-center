@@ -348,6 +348,7 @@ const academyRouter = router({
         durationSeconds: z.number().optional(),
         sortOrder: z.number().optional(),
         pipEnabled: z.boolean().optional(),
+        fileUrl: z.string().optional(),
       })
     )
     .mutation(({ input }) => createLesson(input)),
