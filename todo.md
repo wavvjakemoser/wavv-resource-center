@@ -2034,3 +2034,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Academy tiles: regenerate gear (How-To) and target (Strategy) banners to match compass composition
 - [x] Command Center Academy tab: replace Lucide icon watermarks with actual banner images matching public Academy
 - [x] Home page: show "What is WAVV?" section at all times (not conditional on auth)
+- [x] How-To gear banner: regenerate in correct How-To section color (#00A9E2 light blue) instead of blue/teal
+- [x] Academy tiles brightness: match public Academy tile brightness to CMS tile brightness (reduce overlay darkness)

@@ -73,7 +73,7 @@ const CATEGORIES = [
     icon: Wrench,
     bgPosition: "60% center",
     bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-v4-MdkF6C4sSpV4SpdaRUPmAq.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-v5-AfTpsWtpk2ButvBvwXkFq3.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -434,14 +434,14 @@ export default function Academy() {
                       backgroundSize: (cat as any).bgSize ?? "100% auto",
                       backgroundRepeat: "no-repeat",
                       backgroundPosition: cat.bgPosition ?? "center center",
-                      opacity: 0.55,
+                      opacity: 0.85,
                     }}
                   />
 
                   {/* Dark gradient overlay — left side for text legibility */}
                   <div
                     className="absolute inset-0"
-                    style={{ background: "linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.70) 40%, rgba(0,0,0,0.30) 70%, rgba(0,0,0,0.10) 100%)" }}
+                    style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }}
                   />
 
                   {/* Hover neon border pulse */}
