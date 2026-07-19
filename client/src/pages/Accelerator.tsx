@@ -792,20 +792,19 @@ export default function Accelerator() {
               // Hidden — don't render at all
               if (!isPublished && !isComingSoon) return null;
 
-              // Coming Soon — show banner with badge, not clickable
+              // Coming Soon — full-width banner with Coming Soon badge on right
               if (isComingSoon && hasAccess) {
                 return (
                   <div
                     key={session.id}
                     className="group relative overflow-hidden rounded-2xl block"
                     style={{
-                      border: `1px solid ${session.color}30`,
+                      border: `1px solid ${session.color}40`,
                       height: "180px",
-                      opacity: 0.6,
                     }}
                   >
                     <div className="absolute inset-0" style={{ background: "#000" }} />
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.08 }} xmlns="http://www.w3.org/2000/svg">
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.1 }} xmlns="http://www.w3.org/2000/svg">
                       <defs>
                         <pattern id={`circuit-acc-${session.id}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
                           <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={session.color} strokeWidth="0.8" fill="none"/>
@@ -817,16 +816,19 @@ export default function Accelerator() {
                       </defs>
                       <rect width="100%" height="100%" fill={`url(#circuit-acc-${session.id})`}/>
                     </svg>
-                    <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${session.color}15 0%, transparent 75%)` }} />
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${session.color}20 0%, ${session.color}08 45%, transparent 75%)` }} />
+                    <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${session.color}50 30%, ${session.color}80 60%, transparent 100%)` }} />
                     <div className="relative flex items-center h-full px-8 py-6 gap-6">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" style={{ background: `${session.color}18`, color: session.color }}>Session {session.id}</span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}>Coming Soon</span>
-                        </div>
-                        <h3 className="text-xl font-extrabold text-white leading-tight mb-1">{session.title}</h3>
-                        <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{session.wavvFocus}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: session.color }}>
+                          WAVV Accelerator
+                        </p>
+                        <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-1">
+                          Session {session.id}: {session.title}
+                        </h2>
+                        <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>{session.outcome}</p>
                       </div>
+                      <span className="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-full flex-shrink-0" style={{ background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>Coming Soon</span>
                     </div>
                   </div>
                 );
@@ -899,40 +901,45 @@ export default function Accelerator() {
                 );
               }
 
-              // Locked — grayed out banner
+              // Locked — full-width banner, heavily blurred text (non-member)
               return (
                 <div
                   key={session.id}
                   className="relative overflow-hidden rounded-2xl"
                   style={{
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    border: `1px solid ${session.color}15`,
                     height: "180px",
-                    opacity: 0.5,
                   }}
                 >
                   <div className="absolute inset-0" style={{ background: "#000" }} />
                   <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.06 }} xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                      <pattern id={`circuit-acc-${session.id}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                      <pattern id={`circuit-acc-locked-${session.id}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
                         <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={session.color} strokeWidth="0.8" fill="none"/>
                         <circle cx="10" cy="10" r="2" fill={session.color}/>
                         <circle cx="50" cy="10" r="2" fill={session.color}/>
                       </pattern>
                     </defs>
-                    <rect width="100%" height="100%" fill={`url(#circuit-acc-${session.id})`}/>
+                    <rect width="100%" height="100%" fill={`url(#circuit-acc-locked-${session.id})`}/>
                   </svg>
                   <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${session.color}10 0%, transparent 75%)` }} />
-                  <div className="relative flex items-center h-full px-8 py-6 gap-6 pointer-events-none select-none" style={{ filter: "blur(2px)" }}>
+                  <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${session.color}20 30%, ${session.color}35 60%, transparent 100%)` }} />
+                  <div className="relative flex items-center h-full px-8 py-6 gap-6 pointer-events-none select-none" style={{ filter: "blur(6px)" }}>
                     <div className="flex-1">
-                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: `${session.color}66` }}>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: session.color }}>
                         WAVV Accelerator
                       </p>
-                      <h2 className="text-2xl font-extrabold leading-tight mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>
+                      <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-1">
                         Session {session.id}: {session.title}
                       </h2>
-                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>{session.outcome}</p>
+                      <p className="text-sm text-white">{session.outcome}</p>
                     </div>
-                    <Lock size={20} style={{ color: "rgba(255,255,255,0.2)" }} />
+                  </div>
+                  {/* Lock overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                      <Lock size={20} style={{ color: "rgba(255,255,255,0.5)" }} />
+                    </div>
                   </div>
                 </div>
               );
@@ -1132,9 +1139,9 @@ export default function Accelerator() {
 
         {/* ── Money Math Section ── */}
         <section className="rounded-2xl p-8 text-center space-y-4"
-          style={{ background: "rgba(0,116,244,0.05)", border: "1px solid rgba(0,116,244,0.12)" }}>
+          style={{ background: "rgba(249,115,22,0.05)", border: "1px solid rgba(249,115,22,0.12)" }}>
           <h2 className="text-2xl font-extrabold text-white">The Money Math Equation</h2>
-          <p className="text-2xl lg:text-3xl font-bold" style={{ color: "#0074F4" }}>
+          <p className="text-2xl lg:text-3xl font-bold" style={{ color: "#f97316" }}>
             Dials → Conversations → Appointments → Closes × Price = Revenue
           </p>
           <p className="text-sm max-w-lg mx-auto text-white">

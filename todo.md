@@ -2275,3 +2275,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Generate custom icons for Live Call Events, Product Training, Previous Recordings
 - [x] Session badge → larger white text "Session 1" style matching home page hero
 - [x] Section headers (Community etc.) → consistent font size/formatting across pages
+
+## Accelerator Session Tiles Fix (Jul 19 - Session 6)
+- [x] Sessions 2-6: full-width banner tiles matching Session 1 structure/size
+- [x] Coming Soon badge: right-aligned, bigger/more prominent (gold per project rules)
+- [x] Non-member view: Sessions 2-6 need stronger blur (text unreadable)
+- [x] Add "WAVV ACCELERATOR" label above each session tile
+- [x] Money Math Equation text: change from blue to orange (#f97316)
