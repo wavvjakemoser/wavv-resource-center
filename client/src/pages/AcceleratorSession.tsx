@@ -529,28 +529,54 @@ function FlipDigit({ value, label, color }: { value: string; label: string; colo
   return (
     <div className="flex flex-col items-center">
       <div
-        className="relative flex items-center justify-center rounded-lg overflow-hidden"
+        className="relative flex flex-col overflow-hidden"
         style={{
-          width: "40px",
-          height: "48px",
-          background: "linear-gradient(180deg, #1a1f2e 0%, #0f1219 50%, #1a1f2e 100%)",
-          border: `1px solid ${color}40`,
-          boxShadow: `0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)`,
+          width: "46px",
+          height: "56px",
+          borderRadius: "8px",
+          border: `1.5px solid ${color}35`,
+          boxShadow: `0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)`,
         }}
       >
-        {/* Center divider line (flip effect) */}
+        {/* Top half */}
         <div
-          className="absolute left-0 right-0 pointer-events-none"
-          style={{ top: "50%", height: "1px", background: "rgba(0,0,0,0.6)", boxShadow: "0 1px 0 rgba(255,255,255,0.04)" }}
-        />
-        <span
-          className="font-mono font-extrabold text-xl leading-none"
-          style={{ color, textShadow: `0 0 8px ${color}60` }}
+          className="flex-1 flex items-end justify-center overflow-hidden"
+          style={{
+            background: "linear-gradient(180deg, #1e2536 0%, #151a26 100%)",
+            paddingBottom: "1px",
+          }}
         >
-          {value}
-        </span>
+          <span
+            className="font-mono font-black text-2xl leading-none translate-y-[6px]"
+            style={{ color, textShadow: `0 0 10px ${color}50, 0 2px 4px rgba(0,0,0,0.3)` }}
+          >
+            {value}
+          </span>
+        </div>
+        {/* Center split line */}
+        <div className="relative" style={{ height: "2px", background: "#000", boxShadow: "0 1px 2px rgba(0,0,0,0.8)" }}>
+          <div className="absolute left-0 right-0 top-0" style={{ height: "1px", background: "rgba(255,255,255,0.04)" }} />
+          {/* Hinge dots */}
+          <div className="absolute left-[-1px] top-[-2px] w-[4px] h-[6px] rounded-full" style={{ background: "rgba(0,0,0,0.7)" }} />
+          <div className="absolute right-[-1px] top-[-2px] w-[4px] h-[6px] rounded-full" style={{ background: "rgba(0,0,0,0.7)" }} />
+        </div>
+        {/* Bottom half */}
+        <div
+          className="flex-1 flex items-start justify-center overflow-hidden"
+          style={{
+            background: "linear-gradient(180deg, #0f1219 0%, #171d2a 100%)",
+            paddingTop: "1px",
+          }}
+        >
+          <span
+            className="font-mono font-black text-2xl leading-none translate-y-[-6px]"
+            style={{ color, textShadow: `0 0 10px ${color}50, 0 2px 4px rgba(0,0,0,0.3)` }}
+          >
+            {value}
+          </span>
+        </div>
       </div>
-      <span className="text-[9px] font-semibold uppercase tracking-wider mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+      <span className="text-[9px] font-bold uppercase tracking-widest mt-1.5" style={{ color: "rgba(255,255,255,0.4)" }}>
         {label}
       </span>
     </div>

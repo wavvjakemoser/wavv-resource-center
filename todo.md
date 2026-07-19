@@ -2312,3 +2312,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Accelerator CMS Section Visibility (Jul 19 - Session 11)
 - [x] Add Section Visibility panel to WAVV Accelerator CMS in Admin page (toggle show/hide for all 6 sessions)
+
+## Flip Clock Polish + CMS + Sidebar (Jul 19 - Session 12)
+- [x] Flip clock: make countdown more like a calendar flip clock (rounded boxes, visible split)
+- [x] CMS Accelerator session rows: gray background, remove call/video count badges
+- [x] CMS Accelerator session rows: change "Edit Details" button to white "Edit" with pencil icon
+- [x] CMS header: change "WAVV Accelerator Sessions" to "WAVV Accelerator"
+- [x] Sidebar: add white divider line under each section header (Explore, Quick Links, Admin Tools) and increase text size

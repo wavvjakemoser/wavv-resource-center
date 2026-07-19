@@ -9251,10 +9251,10 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
 
   return (
     <div className="rounded-xl overflow-hidden mb-3" style={{ border: "1px solid #2a2a2a" }}>
-      {/* Session header — collapsible, black */}
+      {/* Session header — collapsible, gray */}
       <div
         className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition"
-        style={{ background: "#000000" }}
+        style={{ background: "#1a1f2e" }}
         onClick={() => setOpen((v) => !v)}
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -9266,15 +9266,12 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
           <span className="text-sm font-semibold text-white truncate">{session.title}</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${SESSION_COLORS[session.week] ?? "#4b5563"}20`, color: SESSION_COLORS[session.week] ?? "#4b5563" }}>{liveCallCount} call{liveCallCount !== 1 ? "s" : ""}</span>
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>{contentCount} video{contentCount !== 1 ? "s" : ""}</span>
-          {/* Visibility + Coming Soon toggles — now in the expanded section, not the row header */}
           <button
             onClick={() => onEdit(session)}
-            className="flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full font-semibold transition-all"
-            style={{ background: `${session.color}18`, color: session.color, border: `1px solid ${session.color}40` }}
+            className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-lg font-semibold transition-all hover:opacity-80"
+            style={{ color: "#ffffff" }}
           >
-            <Pencil size={10} /> Edit Details
+            <Pencil size={12} /> Edit
           </button>
         </div>
       </div>
@@ -9421,8 +9418,7 @@ function AcceleratorTab() {
       <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-400" />
-          <h2 className="text-base font-bold text-white">WAVV Accelerator Sessions</h2>
-          <span className="text-xs text-gray-500">&mdash; {sessions.length} session{sessions.length !== 1 ? "s" : ""}</span>
+          <h2 className="text-base font-bold text-white">WAVV Accelerator</h2>
         </div>
         <div className="flex items-center gap-2">
           <button
