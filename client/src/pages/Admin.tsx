@@ -1803,35 +1803,35 @@ function UsersTab() {
                   boxShadow: active ? `0 0 12px ${s.activeBorder}33` : "none",
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg flex items-center justify-center" style={{ background: s.bg }}>
-                    {s.iconEl}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-500">{s.label}</p>
-                    <p className="text-2xl font-bold" style={{ color: active ? s.color : "#fff" }}>{s.value}</p>
-                  </div>
-                  {/* Info tooltip — stop propagation so clicking it doesn't toggle the filter */}
-                  <UITooltip>
-                    <TooltipTrigger asChild>
-                      <span
-                        className="absolute top-2 right-2 flex items-center justify-center rounded-full cursor-default"
-                        style={{ width: 18, height: 18 }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Info size={13} style={{ color: "rgba(255,255,255,0.25)" }} />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="bottom"
-                      className="max-w-[220px] text-xs leading-relaxed"
-                      style={{ background: "#1d2230", border: "1px solid #3a3a4a", color: "#d1d5db" }}
-                    >
-                      <p className="font-semibold mb-1" style={{ color: s.color }}>{s.label}</p>
-                      {s.description}
-                    </TooltipContent>
-                  </UITooltip>
+                <div className="flex flex-col gap-2">
+                  <span
+                    className="inline-flex items-center self-start px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide"
+                    style={{ background: s.bg, color: s.color, border: `1px solid ${s.activeBorder}44` }}
+                  >
+                    {s.label}
+                  </span>
+                  <p className="text-2xl font-bold text-white">{s.value}</p>
                 </div>
+                {/* Info tooltip — stop propagation so clicking it doesn't toggle the filter */}
+                <UITooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      className="absolute top-2 right-2 flex items-center justify-center rounded-full cursor-default"
+                      style={{ width: 18, height: 18 }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Info size={13} style={{ color: "rgba(255,255,255,0.25)" }} />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className="max-w-[220px] text-xs leading-relaxed"
+                    style={{ background: "#1d2230", border: "1px solid #3a3a4a", color: "#d1d5db" }}
+                  >
+                    <p className="font-semibold mb-1" style={{ color: s.color }}>{s.label}</p>
+                    {s.description}
+                  </TooltipContent>
+                </UITooltip>
               </button>
             );
           })}
@@ -1918,21 +1918,20 @@ function UsersTab() {
                     <TableCell>
                       <div className="flex flex-wrap items-center gap-1.5">
 {u.role === "owner" ? (
-                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(249,115,22,0.12)", color: "#f97316", border: "1px solid rgba(249,115,22,0.4)" }}>
-                             <Crown className="h-3 w-3" /> Owner
+                           <Badge className="text-[10px]" style={{ background: "rgba(249,115,22,0.12)", color: "#f97316", border: "1px solid rgba(249,115,22,0.4)" }}>
+                             Owner
                           </Badge>
 ) : u.role === "publisher" ? (
-                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(168,85,247,0.12)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.4)" }}>
-                             <SuperAdminIcon size={12} />
+                           <Badge className="text-[10px]" style={{ background: "rgba(168,85,247,0.12)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.4)" }}>
                             Publisher
                           </Badge>
                         ) : u.role === "partner_manager" ? (
-                          <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.4)" }}>
-                            <Users className="h-3 w-3" /> Partner Manager
+                          <Badge className="text-[10px]" style={{ background: "rgba(0,116,244,0.12)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.4)" }}>
+                            Partner Manager
                           </Badge>
 ) : u.role === "viewer" ? (
-                           <Badge className="text-[10px] flex items-center gap-1" style={{ background: "rgba(234,179,8,0.12)", color: "#eab308", border: "1px solid rgba(234,179,8,0.4)" }}>
-                             <Shield className="h-3 w-3" /> Viewer
+                           <Badge className="text-[10px]" style={{ background: "rgba(234,179,8,0.12)", color: "#eab308", border: "1px solid rgba(234,179,8,0.4)" }}>
+                             Viewer
                           </Badge>
                         ) : (
                           <Badge className="text-[10px]" style={{ background: "rgba(0,116,244,0.15)", color: "#a78bfa", border: "1px solid rgba(0,116,244,0.4)" }}>User</Badge>

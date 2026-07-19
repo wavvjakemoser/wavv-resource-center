@@ -2156,3 +2156,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove icons from Operations and Content Management tab buttons
 - [x] Add separators between tab sections (Operations / Content Management)
 - [x] Center "SITE CONTROLS" and "VISIBILITY CONTROLS" column headings
+
+## Access Tab Filter Tiles Polish (Jul 19 2026)
+- [x] Remove icons from All Users, Owners, Publishers, Partner Managers, Viewers filter tiles
+- [x] Replace greyed-out label text with colored role bubbles (orange for Owner, etc.)
+- [x] Audit Access section for additional cleanup opportunities
+- [x] Make filter tile label text white (not grey)
