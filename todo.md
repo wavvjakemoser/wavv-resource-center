@@ -2151,3 +2151,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Move Navigation Visibility into Visibility Controls segment, rename to "Section Visibility", place at top
 - [x] Make Settings tab 2-column: Site Controls (left), Visibility Controls (right)
 - [x] Fix sidebar hidden banners from gold to red
+
+## Admin Tab Icons + Layout Polish (Jul 19 2026)
+- [x] Remove icons from Operations and Content Management tab buttons
+- [x] Add separators between tab sections (Operations / Content Management)
+- [x] Center "SITE CONTROLS" and "VISIBILITY CONTROLS" column headings

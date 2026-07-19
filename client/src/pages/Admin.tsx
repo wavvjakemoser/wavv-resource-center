@@ -296,9 +296,6 @@ export default function Admin() {
             : { color: "#9ca3af" }
         }
       >
-        <span className="flex-shrink-0" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {tab.icon}
-        </span>
         {tab.label}
       </button>
     );
@@ -318,6 +315,9 @@ export default function Admin() {
             {operationsRow.filter(t => t.show).map(tab => <TabButton key={tab.id} tab={tab} />)}
           </div>
         </div>
+
+        {/* separator */}
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
 
         {/* ── Row 3: Content Management ── */}
         <div>
@@ -7933,7 +7933,7 @@ function SettingsTab() {
 
           {/* ── LEFT COLUMN: Site Controls ── */}
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#6b7280" }}>Site Controls</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3 text-center" style={{ color: "#6b7280" }}>Site Controls</p>
             <div className="space-y-4">
 
             {/* ── Announcement Banner ── */}
@@ -8041,7 +8041,7 @@ function SettingsTab() {
 
           {/* ── RIGHT COLUMN: Visibility Controls ── */}
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#6b7280" }}>Visibility Controls</p>
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3 text-center" style={{ color: "#6b7280" }}>Visibility Controls</p>
             <div className="space-y-4">
 
             {/* ── Section Visibility (formerly Navigation Visibility) ── */}
