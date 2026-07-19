@@ -1531,7 +1531,7 @@ export async function getSiteSetting(key: string): Promise<Record<string, boolea
   try { return JSON.parse(rows[0].value) as Record<string, boolean> | boolean | string | number; } catch { return rows[0].value ?? null; }
 }
 
-export async function upsertSiteSetting(key: string, value: boolean | string | number | Record<string, boolean>): Promise<void> {
+export async function upsertSiteSetting(key: string, value: boolean | string | number | Record<string, boolean> | Record<string, string>): Promise<void> {
   const db = await getDb();
   if (!db) return;
   const json = JSON.stringify(value);

@@ -2348,4 +2348,16 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Image Preloading + Homepage Layout (Jul 19 - Session 17)
 - [x] Fix banner/icon loading delay: add image preloading for Academy, Webinars, Resource Hub, Playground, and Accelerator tiles
-- [ ] Redesign homepage layout for fully-populated content state
+- [x] Redesign homepage layout for fully-populated content state
+  - [x] Keep Hero unchanged (gradient headline + subline)
+  - [x] Expand "What is WAVV?" tiles to Accelerator-style full-width value banners (blue/cyan/green)
+  - [x] Keep Continue Learning section (conditional, authenticated only)
+  - [x] Build Resources section: 3 Accelerator-style banner cards (Academy blue, Webinars cyan, Resource Hub green)
+  - [x] Build Programs section: Accelerator only (Accelerator-style banner + CTA)
+  - [x] Build Upcoming Live Events section: next Accelerator live calls + exclusive webinars (conditional)
+  - [x] Build Quick Links strip: Chrome Extension (primary) + WAVV Website
+  - [x] Remove old "Explore the Center" stacked rows
+  - [x] Remove Playground and Partners from homepage entirely
+  - [x] Add 3-state CMS visibility: Visible / Coming Soon / Hidden (per section)
+  - [x] Homepage cards respect CMS state: Live=clickable, Coming Soon=gold badge+not clickable, Hidden=not shown
+  - [x] Update Admin Navigation Visibility panel to support 3 states

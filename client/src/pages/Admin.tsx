@@ -7820,6 +7820,12 @@ function SettingsTab() {
   const announcementText = typeof settings["announcement_text"] === "string" ? settings["announcement_text"] : "";
   const announcementEnabled = settings["announcement_enabled"] === true;
   const navVisibility = (settings["nav_visibility"] ?? {}) as Record<string, boolean>;
+  const homepageSectionStatus = (settings["homepage_section_status"] ?? {}) as Record<string, string>;
+
+  function setHomepageStatus(href: string, status: "visible" | "coming_soon" | "hidden") {
+    const updated = { ...homepageSectionStatus, [href]: status };
+    updateSetting.mutate({ key: "homepage_section_status", value: updated });
+  }
   // Profile section toggles (default true = enabled)
   const bookmarksEnabled = settings["bookmarks_enabled"] !== false;
   const badgesEnabled = settings["badges_enabled"] !== false;
@@ -8020,6 +8026,53 @@ function SettingsTab() {
                         {isVisible ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
                         {isVisible ? "Visible" : "Hidden"}
                       </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Homepage Section Status (3-state: Visible / Coming Soon / Hidden) ── */}
+            <div className={sectionClass} style={sectionBorderStyle}>
+              <div style={sectionHeaderStyle}>
+                <p className="text-sm font-medium text-white">Homepage Section Status</p>
+                <p className="text-xs text-gray-500">Control how each section appears on the homepage (independent of sidebar visibility)</p>
+              </div>
+              <div className="space-y-2" style={sectionBodyStyle}>
+                {NAV_ITEMS.filter(n => n.href !== "/home").map(({ href, label }) => {
+                  const status = (homepageSectionStatus[href] || "visible") as string;
+                  return (
+                    <div key={href} className="flex items-center justify-between py-1.5">
+                      <span className="text-xs text-white">{label}</span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setHomepageStatus(href, "visible")}
+                          className="px-2 py-1 rounded text-[10px] font-medium transition-all"
+                          style={status === "visible"
+                            ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
+                            : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #333" }}
+                        >
+                          Visible
+                        </button>
+                        <button
+                          onClick={() => setHomepageStatus(href, "coming_soon")}
+                          className="px-2 py-1 rounded text-[10px] font-medium transition-all"
+                          style={status === "coming_soon"
+                            ? { background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }
+                            : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #333" }}
+                        >
+                          Coming Soon
+                        </button>
+                        <button
+                          onClick={() => setHomepageStatus(href, "hidden")}
+                          className="px-2 py-1 rounded text-[10px] font-medium transition-all"
+                          style={status === "hidden"
+                            ? { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }
+                            : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #333" }}
+                        >
+                          Hidden
+                        </button>
+                      </div>
                     </div>
                   );
                 })}

@@ -1727,7 +1727,7 @@ export const appRouter = router({
         return getSiteSetting(input.key);
       }),
     update: protectedProcedure
-      .input(z.object({ key: z.string(), value: z.union([z.boolean(), z.string(), z.number(), z.record(z.string(), z.boolean())]) }))
+      .input(z.object({ key: z.string(), value: z.union([z.boolean(), z.string(), z.number(), z.record(z.string(), z.boolean()), z.record(z.string(), z.string())]) }))
       .use(({ ctx, next }) => {
         if (ctx.user.role !== "owner") throw new TRPCError({ code: "FORBIDDEN", message: "Owner access required" });
         return next({ ctx });
