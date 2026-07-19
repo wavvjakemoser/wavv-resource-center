@@ -2331,3 +2331,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Product Training icon: book with graduation cap (cyan)
 - [x] Previous Recordings icon: play button with rewind circle (green)
 - [x] Removed "On-demand — start any session, any time" text from member and non-member views
+
+## New Tile Icons + Sidebar Bubbles (Jul 19 - Session 15)
+- [x] Generate new icons in Academy HUD style: video camera lens (blue), puzzle piece (cyan), rewind/play arrow (green)
+- [x] Wire new icons into AcceleratorSession BANNER_ICONS
+- [x] Sidebar section headers (Explore, Programs, Quick Links, Admin Tools): change to white bubble pills, left-aligned
