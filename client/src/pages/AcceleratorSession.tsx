@@ -375,9 +375,9 @@ function ContentCard({
 
 // ─── Banner Tile component (full-bleed Academy-style with big icon on right) ──
 const BANNER_ICONS = {
-  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-fullbleed-live-calls-jWmJg5wpQb44RuG7iPBWX3.webp",
-  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-fullbleed-product-training-CEcemCKrKYHXsy2MvYdQiZ.webp",
-  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-fullbleed-recordings-oArawRqc62uvdFKA889Ema.webp",
+  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/accel-tile-live-calls-v3-G4jpJGWud6A5maMW4xuRC9.webp",
+  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/accel-tile-training-v3-Myx7kHgueFeXP2RWGeiJ9j.webp",
+  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/accel-tile-recordings-v3-EMHTrjDHwEDW8BuzR4vNj3.webp",
 };
 
 // ─── Tile-specific colors ────────────────────────────────────────────────────
@@ -573,7 +573,7 @@ function FlipDigit({ value, label, color }: { value: string; label: string; colo
         <div className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 1 }}>
           <span
             className="font-mono font-black text-[28px] leading-none"
-            style={{ color, textShadow: `0 0 12px ${color}40, 0 1px 3px rgba(0,0,0,0.4)` }}
+            style={{ color: "#ffffff", textShadow: `0 0 12px ${color}40, 0 1px 3px rgba(0,0,0,0.4)` }}
           >
             {value}
           </span>

@@ -773,15 +773,7 @@ export default function Accelerator() {
             <div className="flex items-center gap-2">
               <h2 className="text-2xl font-extrabold text-white">The Curriculum</h2>
             </div>
-            {hasAccess && (
-              <span className="text-[11px] font-medium text-white">On-demand — start any session, any time</span>
-            )}
           </div>
-          {!hasAccess && (
-            <p className="text-sm text-white">
-              On-demand access — start any session, any time. Each session pairs live sales coaching with hands-on WAVV product training.
-            </p>
-          )}
           <div className="space-y-5">
             {SESSIONS.map((session) => {
               // Check visibility state from DB

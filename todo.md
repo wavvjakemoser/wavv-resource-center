@@ -2323,3 +2323,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Flip Clock Bug + Tile Styling (Jul 19 - Session 13)
 - [x] Fix flip clock: digits showing doubled (top/bottom both render full number). Single centered number with split line.
 - [x] Accelerator tiles: match Academy tile style (full background image, dark gradient overlay on left for text legibility)
+
+## White Clock + New Tile Icons (Jul 19 - Session 14)
+- [x] Flip clock digits: change color from blue to white
+- [x] Generate new tile icons matching Academy style (simple symbol + radiating lines, fading to black on left)
+- [x] Live Call Events icon: headphones (blue, like WAVV logo headphones)
+- [x] Product Training icon: book with graduation cap (cyan)
+- [x] Previous Recordings icon: play button with rewind circle (green)
+- [x] Removed "On-demand — start any session, any time" text from member and non-member views
