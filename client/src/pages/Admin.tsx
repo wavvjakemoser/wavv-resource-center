@@ -2953,8 +2953,8 @@ function CategoryBlock({
         style={{ border: `1px solid ${accentColor}55`, minHeight: "140px" }}
       >
         {/* Banner background image — matches public Academy tiles */}
-        {categoryThumbnail ? (
-          <div className="absolute inset-0" style={{ backgroundImage: `url(${categoryThumbnail})`, backgroundSize: "100% auto", backgroundPosition: "60% center", backgroundRepeat: "no-repeat", backgroundColor: "#0a0c12" }} />
+{categoryThumbnail ? (
+           <div className="absolute inset-0" style={{ backgroundImage: `url(${categoryThumbnail})`, backgroundSize: "100% auto", backgroundPosition: "center center", backgroundRepeat: "no-repeat", backgroundColor: "#0a0c12", opacity: 0.85 }} />
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${accentColor}18 100%)` }} />
         )}
@@ -3065,8 +3065,8 @@ function InactiveCategoryBlock({
         className="w-full relative overflow-hidden rounded-xl mb-3 group"
         style={{ border: `1px solid ${color}30`, minHeight: "110px", opacity: 0.80 }}
       >
-        {thumbnail ? (
-          <div className="absolute inset-0" style={{ backgroundImage: `url(${thumbnail})`, backgroundSize: "100% auto", backgroundPosition: "60% center", backgroundRepeat: "no-repeat", backgroundColor: "#0a0c12" }} />
+{thumbnail ? (
+           <div className="absolute inset-0" style={{ backgroundImage: `url(${thumbnail})`, backgroundSize: "100% auto", backgroundPosition: "center center", backgroundRepeat: "no-repeat", backgroundColor: "#0a0c12", opacity: 0.85 }} />
         ) : (
           <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${color}18 100%)` }} />
         )}
