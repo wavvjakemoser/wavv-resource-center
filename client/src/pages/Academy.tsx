@@ -35,7 +35,7 @@ const CATEGORIES = [
     subtitle: "Everything you need to hit the ground running — from day one to fully dialing.",
     color: "#0074F4",
     icon: Compass,
-    bgPosition: "60% center",
+    bgPosition: "center center",
     bgSize: "100% auto",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-compass-final-7uvVZPUanGGNUfoRPTBsJf.webp",
     placeholders: [
@@ -71,9 +71,9 @@ const CATEGORIES = [
     subtitle: "Step-by-step walkthroughs for the features you use most.",
     color: "#00A9E2",
     icon: Wrench,
-    bgPosition: "60% center",
-    bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-gear-final-VTbC9yYJNfb8jrs9o9VHrE.webp",
+    bgPosition: "center center",
+    bgSize: "90% auto",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-final-iVs9NQQvMq7PThAxPchbJm.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -107,8 +107,8 @@ const CATEGORIES = [
     subtitle: "Dial smarter, not harder. Frameworks and tactics to get more out of every session.",
     color: "#67C728",
     icon: Lightbulb,
-    bgPosition: "60% center",
-    bgSize: "100% auto",
+    bgPosition: "center center",
+    bgSize: "110% auto",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-target-final-UQQ74E86Jg7Dq5ZxY6bZGU.webp",
     placeholders: [
       {

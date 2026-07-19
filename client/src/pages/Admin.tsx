@@ -3354,7 +3354,7 @@ function ContentTab() {
       color: "#00A9E2",
       icon: Wrench,
       videoCount: 9,
-      thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-gear-final-VTbC9yYJNfb8jrs9o9VHrE.webp",
+      thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-final-iVs9NQQvMq7PThAxPchbJm.webp",
     },
     {
       key: "Strategy and Best Practices",
