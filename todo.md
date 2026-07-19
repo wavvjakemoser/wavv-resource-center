@@ -2029,3 +2029,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] All hero sections: remove tile/card background — keep text only
 - [x] Accelerator timer: update existing live call DB records to 12:00 PM MDT (18:00 UTC)
 - [x] Accelerator timer: fix form default so new calls default to noon MT (not noon UTC)
+
+## Session 9 Fixes (Jul 18 2026)
+- [x] Academy tiles: regenerate gear (How-To) and target (Strategy) banners to match compass composition
+- [x] Command Center Academy tab: replace Lucide icon watermarks with actual banner images matching public Academy
+- [x] Home page: show "What is WAVV?" section at all times (not conditional on auth)

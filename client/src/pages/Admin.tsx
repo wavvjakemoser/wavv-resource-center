@@ -169,6 +169,7 @@ import {
   RefreshCw,
   Bookmark,
   CalendarDays,
+  Compass,
 } from "lucide-react";
 import {
   Tooltip as UITooltip,
@@ -2911,6 +2912,7 @@ function CategoryBlock({
   categoryLabel,
   categoryIcon,
   categorySubtitle,
+  categoryThumbnail,
   videoCount,
   courses,
   allLessons,
@@ -2926,6 +2928,7 @@ function CategoryBlock({
   categoryLabel?: string;
   categoryIcon?: React.ElementType;
   categorySubtitle?: string;
+  categoryThumbnail?: string;
   videoCount?: number;
   courses: Array<{ id: number; title: string; category: string; published: boolean; tags?: string | null }>;
   allLessons: Array<any>;
@@ -2949,16 +2952,14 @@ function CategoryBlock({
         className="w-full relative overflow-hidden rounded-xl mb-3 group"
         style={{ border: `1px solid ${accentColor}55`, minHeight: "140px" }}
       >
-        {/* Dark gradient background */}
-        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${accentColor}18 100%)` }} />
-        {/* Large icon watermark — right side */}
-        {categoryIcon && React.createElement(categoryIcon, {
-          size: 100, strokeWidth: 1.2,
-          className: "absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none",
-          style: { opacity: 0.35, color: accentColor }
-        })}
-        {/* Colour glow */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 85% 50%, ${accentColor}30 0%, transparent 60%)` }} />
+        {/* Banner background image — matches public Academy tiles */}
+        {categoryThumbnail ? (
+          <div className="absolute inset-0" style={{ backgroundImage: `url(${categoryThumbnail})`, backgroundSize: "100% auto", backgroundPosition: "60% center", backgroundRepeat: "no-repeat", backgroundColor: "#0a0c12" }} />
+        ) : (
+          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${accentColor}18 100%)` }} />
+        )}
+        {/* Gradient overlay for text readability */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to right, rgba(10,12,18,0.85) 0%, rgba(10,12,18,0.4) 50%, transparent 70%)" }} />
         {/* Content — mirrors Academy landing page: WAVV ACADEMY label, title, subtitle, section+video badges */}
         <div className="relative flex flex-col justify-center h-full px-8 py-5 gap-1 text-left">
           <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: accentColor }}>WAVV Academy</p>
@@ -3037,11 +3038,11 @@ function CategoryBlock({
 // ─── InactiveCategoryBlock ────────────────────────────────────────────────
 // Extracted so useState can be called at top level (Rules of Hooks)
 function InactiveCategoryBlock({
-  categoryKey, label, subtitle, color, icon,
+  categoryKey, label, subtitle, color, icon, thumbnail,
   inactiveCourses, inactiveLessons, allLessons,
   onDeactivateLesson, onActivateLesson, onDeleteCourse, onDeleteLesson,
 }: {
-  categoryKey: string; label: string; subtitle?: string; color: string; icon?: React.ElementType;
+  categoryKey: string; label: string; subtitle?: string; color: string; icon?: React.ElementType; thumbnail?: string;
   inactiveCourses: Array<{ id: number; title: string; category: string; published: boolean; sortOrder: number | null }>;
   inactiveLessons: Array<{ id: number; title: string; courseId: number; published: boolean; courseTitle?: string | null; [key: string]: unknown }>;
   allLessons: Array<{
@@ -3064,9 +3065,12 @@ function InactiveCategoryBlock({
         className="w-full relative overflow-hidden rounded-xl mb-3 group"
         style={{ border: `1px solid ${color}30`, minHeight: "110px", opacity: 0.80 }}
       >
-        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${color}18 100%)` }} />
-        {icon && React.createElement(icon, { size: 100, strokeWidth: 1.2, className: "absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none", style: { opacity: 0.35, color } })}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 85% 50%, ${color}30 0%, transparent 60%)` }} />
+        {thumbnail ? (
+          <div className="absolute inset-0" style={{ backgroundImage: `url(${thumbnail})`, backgroundSize: "100% auto", backgroundPosition: "60% center", backgroundRepeat: "no-repeat", backgroundColor: "#0a0c12" }} />
+        ) : (
+          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${color}18 100%)` }} />
+        )}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to right, rgba(10,12,18,0.85) 0%, rgba(10,12,18,0.4) 50%, transparent 70%)" }} />
         <div className="relative flex flex-col justify-center h-full px-8 py-5 gap-1 text-left">
           <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color }}>WAVV Academy</p>
           <div className="flex items-center gap-2">
@@ -3339,8 +3343,9 @@ function ContentTab() {
       label: "Onboarding",
       subtitle: "Get your team up and running with WAVV",
       color: "#0074F4",
-      icon: Rocket,
+      icon: Compass,
       videoCount: 12,
+      thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-compass-banner-YbicPXD3ys442NgmseuCgq.webp",
     },
     {
       key: "How-To",
@@ -3349,6 +3354,7 @@ function ContentTab() {
       color: "#00A9E2",
       icon: Wrench,
       videoCount: 9,
+      thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-v4-MdkF6C4sSpV4SpdaRUPmAq.webp",
     },
     {
       key: "Strategy and Best Practices",
@@ -3357,6 +3363,7 @@ function ContentTab() {
       color: "#67C728",
       icon: Lightbulb,
       videoCount: 8,
+      thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-target-v4-XyKSdXDy32MhSKaKMuPKEK.webp",
     },
   ];
 
@@ -3455,7 +3462,7 @@ function ContentTab() {
           <span className="text-xs text-gray-500 font-medium">Everything currently visible on WAVV Academy</span>
         </div>
         <div className="space-y-6">
-          {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, videoCount }) => {
+          {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, videoCount, thumbnail }) => {
             // All published courses for this category = the live sections
             const categoryCourses = (byCategory[key] ?? []).filter((c) => c.published);
             return (
@@ -3465,6 +3472,7 @@ function ContentTab() {
                 categoryLabel={label}
                 categoryIcon={CatIcon}
                 categorySubtitle={subtitle}
+                categoryThumbnail={thumbnail}
                 videoCount={videoCount}
                 courses={categoryCourses}
                 allLessons={lessons}
@@ -3517,7 +3525,7 @@ function ContentTab() {
               </div>
             ) : (
               <div className="space-y-6">
-                {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon }) => {
+                {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, thumbnail }) => {
                   const catInactiveCourses = inactiveCourses.filter((c) => c.category === key);
                   const catCourseIds = new Set([...(byCategory[key] ?? []).map((c) => c.id), ...catInactiveCourses.map((c) => c.id)]);
                   const catInactiveLessons = inactiveLessons.filter((l) => catCourseIds.has(l.courseId));
@@ -3529,6 +3537,7 @@ function ContentTab() {
                       subtitle={subtitle}
                       color={color}
                       icon={CatIcon}
+                      thumbnail={thumbnail}
                       inactiveCourses={catInactiveCourses}
                       inactiveLessons={catInactiveLessons}
                       allLessons={lessons}
