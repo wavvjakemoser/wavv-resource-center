@@ -509,7 +509,7 @@ export function ContentRequestCTA({
   // Check the toggle for this request type — default true (visible)
   const settingKey = requestType === "video" ? "video_requests_enabled" : requestType === "guide" ? "guide_requests_enabled" : "webinar_requests_enabled";
   const isEnabled = settingsMap[settingKey] !== false;
-  const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#67C728");
+  const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#10b981");
   const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
   // Match the sidebar emblem for each section
   const CtaIcon = requestType === "video" ? GradCap : requestType === "guide" ? FileText : Video;
@@ -587,7 +587,7 @@ export function ContentRequestForm({
   accentColor?: string;
   onSuccess?: () => void;
 }) {
-  const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#67C728");
+  const accent = accentColor ?? (requestType === "video" ? "#0074F4" : requestType === "guide" ? "#00A9E2" : "#10b981");
   const typeLabel = requestType === "video" ? "Video" : requestType === "guide" ? "Written Guide" : "Webinar";
   const typeIcon = requestType === "video" ? Video : requestType === "guide" ? BookOpen : GraduationCap;
   const TypeIcon = typeIcon;

@@ -330,21 +330,7 @@ function WebinarCard({
             {variant === "exclusive" ? "Exclusive" : variant === "recording" ? "Exclusive On-Demand" : "On-Demand"}
           </span>
         </div>
-        {/* Play overlay for cards with video */}
-        {(embedUrl || isHostedVideo) && (
-          <div
-            className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-            style={{ background: "rgba(0,0,0,0.45)" }}
-            onClick={handleWatchClick}
-          >
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center"
-              style={{ background: `${accentColor}cc`, boxShadow: `0 0 20px ${accentColor}66` }}
-            >
-              <PlayCircle size={24} className="text-white" />
-            </div>
-          </div>
-        )}
+
       </div>
 
       {/* Coming Soon bar — shown only when comingSoon flag is explicitly set */}
@@ -654,7 +640,7 @@ export default function Webinars() {
 
       {/* ── Request a Webinar ── */}
       <div className="px-4 lg:px-8 pb-10">
-        <ContentRequestCTA requestType="webinar" accentColor="#00A9E2" />
+        <ContentRequestCTA requestType="webinar" accentColor="#10b981" />
       </div>
 
       {/* ── Inline Video Modal ── */}

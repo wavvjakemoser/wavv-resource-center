@@ -2036,3 +2036,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Home page: show "What is WAVV?" section at all times (not conditional on auth)
 - [x] How-To gear banner: regenerate in correct How-To section color (#00A9E2 light blue) instead of blue/teal
 - [x] Academy tiles brightness: match public Academy tile brightness to CMS tile brightness (reduce overlay darkness)
+
+## Session 10 Fixes (Jul 18 2026)
+- [x] Webinars: remove hover play button overlay from Exclusive On-Demand cards (was showing on all cards with video URLs)
+- [x] Webinars: update "Request a Webinar" CTA tile accent color to #10b981 (WAVV Webinars section color)
+- [x] Webinars: update default webinar accent fallback in ContentRequestCTA and ContentRequestForm to #10b981
+- [x] Webinars: verify each section (evergreen, exclusive, recording) has its own unique default thumbnail background
