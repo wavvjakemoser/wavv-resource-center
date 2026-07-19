@@ -9349,6 +9349,7 @@ function AcceleratorTab() {
     isPublished: false,
   });
 
+    const [addDialog, setAddDialog] = useState<{ type: "liveCall" | "productTraining" | "recording"; sessionNumber: number | null } | null>(null);
   const updateMutation = trpc.accelerator.update.useMutation({
     onSuccess: () => {
       utils.accelerator.list.invalidate();
@@ -9357,7 +9358,6 @@ function AcceleratorTab() {
     },
     onError: (e: any) => toast.error(e.message),
   });
-
   function startEdit(session: any) {
     setEditingId(session.id);
     setForm({
@@ -9400,8 +9400,6 @@ function AcceleratorTab() {
       </div>
     );
   }
-
-  const [addDialog, setAddDialog] = useState<{ type: "liveCall" | "productTraining" | "recording"; sessionNumber: number | null } | null>(null);
 
   return (
     <div className="space-y-4 mt-4">
