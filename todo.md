@@ -2336,3 +2336,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Generate new icons in Academy HUD style: video camera lens (blue), puzzle piece (cyan), rewind/play arrow (green)
 - [x] Wire new icons into AcceleratorSession BANNER_ICONS
 - [x] Sidebar section headers (Explore, Programs, Quick Links, Admin Tools): change to white bubble pills, left-aligned
+
+## Full Audit + Logo Fix (Jul 19 - Session 16)
+- [x] WAVV logo: move from centered to left-aligned in sidebar
+- [x] Audit: verify page loads across all sections
+- [x] Audit: verify content visibility (hidden/coming soon not leaking)
+- [x] Audit: verify session persistence on refresh (no forced re-auth)
+- [x] Audit: verify sidebar alignment (all items left-aligned)
+- [x] Audit: mobile responsiveness across all sections
+- [x] No critical issues found during audit

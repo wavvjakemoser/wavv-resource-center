@@ -203,7 +203,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
         >
           {/* Logo */}
           <div
-            className="flex items-center justify-center px-4 py-4"
+            className="flex items-center justify-start px-4 py-4"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", minHeight: "64px" }}
           >
             <a
