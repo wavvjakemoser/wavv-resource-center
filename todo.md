@@ -2120,3 +2120,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add neon gear banner to How-To Academy sub-page + remove section icons
 - [x] Add neon target banner to Strategy Academy sub-page + remove section icons
 - [x] Ensure all section landing page tiles are visually cohesive across Academy, Webinars, Resource Hub, Playground
+
+## UI Fixes Batch 3 (Jul 19 2026)
+- [x] Fix Coming Soon filter: show webinars in list with Coming Soon badge instead of hiding them entirely
+- [x] Standardize hero section heights across all pages (Home, Academy, Webinars, Resource Hub, Playground)
+- [x] Remove gradient bar ("|") next to "What is WAVV?" heading on homepage

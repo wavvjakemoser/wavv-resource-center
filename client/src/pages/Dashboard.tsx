@@ -256,7 +256,7 @@ export default function Dashboard() {
       {showPlaygroundModal && <PlaygroundModal onClose={() => setShowPlaygroundModal(false)} />}
 
       {/* Full-width content — no max-width cap on the outer wrapper */}
-      <div className="px-4 lg:px-8 py-8 space-y-12">
+      <div className="px-4 lg:px-8 py-6 space-y-8">
 
         {/* Spacer for consistent vertical alignment with pages that have toggle bars */}
         <div style={{ minHeight: "32px" }} />
@@ -278,28 +278,14 @@ export default function Dashboard() {
               </span>
             </h1>
 
-            {/* Gradient accent line */}
-            <div className="flex justify-center mb-6">
-              <div style={{
-                width: "200px",
-                height: "3px",
-                borderRadius: "2px",
-                background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)",
-              }} />
+            {/* Accent line */}
+            <div className="flex justify-center mb-5">
+              <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
             </div>
 
             {/* Subline */}
-            <p
-              className="mx-auto mb-3 leading-relaxed font-medium"
-              style={{ color: "#ffffff", fontSize: "clamp(1rem, 2vw, 1.2rem)", maxWidth: "640px" }}
-            >
-              Everything you need to get the most out of WAVV — in one place.
-            </p>
-            <p
-              className="mx-auto mb-8 leading-relaxed"
-              style={{ color: "#ffffff", fontSize: "clamp(0.85rem, 1.5vw, 1rem)", maxWidth: "560px" }}
-            >
-              Whether you're just getting started or looking to sharpen your edge, the WAVV Success Center gives you the training, tools, and resources to dial smarter, connect more, and close faster.
+            <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+              Everything you need to get the most out of WAVV — in one place. Training, tools, and resources to dial smarter, connect more, and close faster.
             </p>
 
         </div>{/* end hero */}
@@ -308,7 +294,6 @@ export default function Dashboard() {
         <section>
           <div className="flex items-center justify-between gap-4 mb-2">
             <div className="flex items-center gap-2.5">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
               <h2 className="text-base font-extrabold text-white tracking-wide">What is WAVV?</h2>
             </div>
             <a

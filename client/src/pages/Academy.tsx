@@ -309,7 +309,7 @@ export default function Academy() {
 
   return (
     <PortalLayout title="WAVV Academy">
-      <div className="px-4 lg:px-8 py-6 space-y-10">
+      <div className="px-4 lg:px-8 py-6 space-y-8">
         {/* Spacer for consistent vertical alignment with pages that have toggle bars */}
         <div style={{ minHeight: "32px" }} />
 

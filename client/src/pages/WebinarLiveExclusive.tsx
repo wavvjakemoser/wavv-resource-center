@@ -47,7 +47,7 @@ function WebinarRow({
   webinar,
   onPlay,
 }: {
-  webinar: { id: number; title: string; description?: string | null; host?: string | null; videoUrl?: string | null; registrationUrl?: string | null; iconName?: string | null; viewCount?: number | null };
+  webinar: { id: number; title: string; description?: string | null; host?: string | null; videoUrl?: string | null; registrationUrl?: string | null; iconName?: string | null; viewCount?: number | null; comingSoon?: boolean | null };
   onPlay?: (embedUrl: string, title: string) => void;
 }) {
   const watchMutation = trpc.webinars.watch.useMutation();
@@ -107,27 +107,38 @@ function WebinarRow({
 
       {/* Actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {(embedUrl || isHostedVideo) && (
-          <button
-            type="button"
-            onClick={handleWatchClick}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+        {webinar.comingSoon ? (
+          <span
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold"
+            style={{ background: "rgba(255,255,255,0.06)", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.12)" }}
           >
-            <PlayCircle size={13} /> Watch Now
-          </button>
-        )}
-        {!isHostedVideo && !embedUrl && webinar.registrationUrl && (
-          <a
-            href={webinar.registrationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => registerClickMutation.mutate({ webinarId: webinar.id })}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
-          >
-            <ExternalLink size={13} /> Register
-          </a>
+            Coming Soon
+          </span>
+        ) : (
+          <>
+            {(embedUrl || isHostedVideo) && (
+              <button
+                type="button"
+                onClick={handleWatchClick}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+              >
+                <PlayCircle size={13} /> Watch Now
+              </button>
+            )}
+            {!isHostedVideo && !embedUrl && webinar.registrationUrl && (
+              <a
+                href={webinar.registrationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => registerClickMutation.mutate({ webinarId: webinar.id })}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+              >
+                <ExternalLink size={13} /> Register
+              </a>
+            )}
+          </>
         )}
       </div>
     </div>

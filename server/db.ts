@@ -363,12 +363,12 @@ export async function getWebinars(type?: "upcoming" | "recording" | "exclusive" 
   // For exclusive webinars (user-facing): only show future/current sessions (scheduledAt > now)
   if (type === "exclusive") {
     return db.select().from(webinars).where(
-      and(eq(webinars.type, "exclusive"), eq(webinars.published, true), eq(webinars.comingSoon, false), gt(webinars.scheduledAt, now))
+      and(eq(webinars.type, "exclusive"), eq(webinars.published, true), gt(webinars.scheduledAt, now))
     ).orderBy(asc(webinars.scheduledAt));
   }
   const conditions = type
-    ? and(eq(webinars.type, type), eq(webinars.published, true), eq(webinars.comingSoon, false))
-    : and(eq(webinars.published, true), eq(webinars.comingSoon, false));
+? and(eq(webinars.type, type), eq(webinars.published, true))
+     : and(eq(webinars.published, true));
   return db.select().from(webinars).where(conditions).orderBy(desc(webinars.scheduledAt));
 }
 

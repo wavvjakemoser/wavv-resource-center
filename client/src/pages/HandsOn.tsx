@@ -240,6 +240,9 @@ export default function HandsOn() {
   return (
     <PortalLayout title="WAVV Playground">
       <div className="px-4 lg:px-8 py-6 space-y-8">
+        {/* Spacer for consistent vertical alignment */}
+        <div style={{ minHeight: "32px" }} />
+
         {/* ── Header ── */}
         <div className="px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
           <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
