@@ -1076,7 +1076,7 @@ export default function Accelerator() {
                     {slackSession?.slackUrl ? (
                       <a href={slackSession.slackUrl} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
-                        style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                        style={{ background: "#0074F4" }}>
                         Join Slack
                       </a>
                     ) : (
@@ -1097,8 +1097,8 @@ export default function Accelerator() {
                   <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
                   <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
                 </div>
-                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.3)" }}>
+                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white flex-shrink-0 cursor-not-allowed select-none"
+                  style={{ background: "#0074F4", opacity: 0.5 }}>
                   <Lock size={14} /> Members Only
                 </div>
               </div>
