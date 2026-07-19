@@ -3345,7 +3345,7 @@ function ContentTab() {
       color: "#0074F4",
       icon: Compass,
       videoCount: 12,
-      thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-compass-final-7uvVZPUanGGNUfoRPTBsJf.webp",
+      thumbnail: "/manus-storage/academy-compass-final-v2_3487d992.png",
     },
     {
       key: "How-To",
@@ -3354,7 +3354,7 @@ function ContentTab() {
       color: "#00A9E2",
       icon: Wrench,
       videoCount: 9,
-      thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-final-iVs9NQQvMq7PThAxPchbJm.webp",
+      thumbnail: "/manus-storage/academy-gear-final-v2_007ed77c.png",
     },
     {
       key: "Strategy and Best Practices",
@@ -3363,7 +3363,7 @@ function ContentTab() {
       color: "#67C728",
       icon: Lightbulb,
       videoCount: 8,
-      thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-target-final-UQQ74E86Jg7Dq5ZxY6bZGU.webp",
+      thumbnail: "/manus-storage/academy-target-final-v2_b4297674.png",
     },
   ];
 

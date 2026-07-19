@@ -37,7 +37,7 @@ const CATEGORIES = [
     icon: Compass,
     bgPosition: "center center",
     bgSize: "100% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-compass-final-7uvVZPUanGGNUfoRPTBsJf.webp",
+    thumbnail: "/manus-storage/academy-compass-final-v2_3487d992.png",
     placeholders: [
       {
         id: "p-onb-1",
@@ -72,8 +72,8 @@ const CATEGORIES = [
     color: "#00A9E2",
     icon: Wrench,
     bgPosition: "center center",
-    bgSize: "90% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-gear-final-iVs9NQQvMq7PThAxPchbJm.webp",
+    bgSize: "100% auto",
+    thumbnail: "/manus-storage/academy-gear-final-v2_007ed77c.png",
     placeholders: [
       {
         id: "p-how-1",
@@ -108,8 +108,8 @@ const CATEGORIES = [
     color: "#67C728",
     icon: Lightbulb,
     bgPosition: "center center",
-    bgSize: "110% auto",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-banner-target-final-UQQ74E86Jg7Dq5ZxY6bZGU.webp",
+    bgSize: "100% auto",
+    thumbnail: "/manus-storage/academy-target-final-v2_b4297674.png",
     placeholders: [
       {
         id: "p-str-1",
