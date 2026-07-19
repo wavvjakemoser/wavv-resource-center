@@ -3403,29 +3403,22 @@ function ContentTab() {
         </div>
       </div>
 
-      {/* ── Section Visibility Divider ── */}
-      <div className="flex items-center gap-3 pt-2 mb-3">
-        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, #2a2a2a, transparent)" }} />
-        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#4b5563" }}>Visibility Controls</span>
-        <div className="h-px flex-1" style={{ background: "linear-gradient(to left, #2a2a2a, transparent)" }} />
-      </div>
       {/* ── Section Visibility ── */}
-      <div className="rounded-xl p-4 space-y-3 mb-6" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Eye size={13} style={{ color: "#9ca3af" }} />
-          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
-          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide categories from users</span>
+      <div className="rounded-xl overflow-hidden mb-6" style={{ border: "1px solid #2a2a2a" }}>
+        <div className="px-4 py-3 flex items-center gap-2" style={{ background: "#1d2230" }}>
+          <span className="text-sm font-semibold text-white">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">&mdash; toggle to show/hide categories from users</span>
         </div>
-        {[
-          { key: "Onboarding",                    label: "Onboarding",                    color: "#0074F4" },
-          { key: "How-To",                         label: "How-To",                         color: "#00A9E2" },
-          { key: "Strategy and Best Practices",    label: "Strategy & Best Practices",      color: "#67C728" },
-        ].map(({ key, label, color }, i, arr) => (
-          <React.Fragment key={key}>
-            <div className="flex items-center justify-between">
+        <div className="divide-y" style={{ borderColor: "#2a2a2a", background: "#111" }}>
+          {[
+            { key: "Onboarding",                    label: "Onboarding",                    color: "#0074F4" },
+            { key: "How-To",                         label: "How-To",                         color: "#00A9E2" },
+            { key: "Strategy and Best Practices",    label: "Strategy & Best Practices",      color: "#67C728" },
+          ].map(({ key, label, color }) => (
+            <div key={key} className="px-4 py-2.5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-                <span className="text-xs text-gray-300">{label}</span>
+                <span className="text-sm text-gray-300">{label}</span>
               </div>
               <button
                 onClick={() => toggleAcademySection(key)}
@@ -3438,9 +3431,8 @@ function ContentTab() {
                 {academyVis[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
               </button>
             </div>
-            {i < arr.length - 1 && <div className="h-px" style={{ background: "#2a2a2a" }} />}
-          </React.Fragment>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* ── Top-level Add Section bar ── */}
@@ -4742,35 +4734,36 @@ function PlaygroundTab() {
         </button>
       </div>
 
-      {/* ── Section Visibility Toggles ── */}
-      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Eye size={13} style={{ color: "#9ca3af" }} />
-          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
-          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide categories from users</span>
+      {/* ── Section Visibility ── */}
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+        <div className="px-4 py-3 flex items-center gap-2" style={{ background: "#1d2230" }}>
+          <span className="text-sm font-semibold text-white">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">&mdash; toggle to show/hide categories from users</span>
         </div>
-        {[
-          { key: "gohighlevel", label: "Go High Level", color: "#0074F4" },
-          { key: "hubspot",     label: "HubSpot",       color: "#00A9E2" },
-          { key: "salesforce",  label: "Salesforce",    color: "#67C728" },
-        ].map(({ key, label, color }) => (
-          <div key={key} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-              <span className="text-xs text-gray-300">{label}</span>
+        <div className="divide-y" style={{ borderColor: "#2a2a2a", background: "#111" }}>
+          {[
+            { key: "gohighlevel", label: "Go High Level", color: "#0074F4" },
+            { key: "hubspot",     label: "HubSpot",       color: "#00A9E2" },
+            { key: "salesforce",  label: "Salesforce",    color: "#67C728" },
+          ].map(({ key, label, color }) => (
+            <div key={key} className="px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+                <span className="text-sm text-gray-300">{label}</span>
+              </div>
+              <button
+                onClick={() => togglePgSection(key)}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                style={pgVisibility[key] !== false
+                  ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                }
+              >
+                {pgVisibility[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+              </button>
             </div>
-            <button
-              onClick={() => togglePgSection(key)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-              style={pgVisibility[key] !== false
-                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-              }
-            >
-              {pgVisibility[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
-            </button>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
 
@@ -5210,41 +5203,36 @@ function WebinarsTab() {
         </div>
       )}
 
-      {/* ── Section Visibility Divider ── */}
-      <div className="flex items-center gap-3 pt-2 mb-3">
-        <div className="h-px flex-1" style={{ background: "linear-gradient(to right, #2a2a2a, transparent)" }} />
-        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#4b5563" }}>Visibility Controls</span>
-        <div className="h-px flex-1" style={{ background: "linear-gradient(to left, #2a2a2a, transparent)" }} />
-      </div>
-      {/* Section Visibility Toggles */}
-      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Eye size={13} style={{ color: "#9ca3af" }} />
-          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
-          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
+      {/* ── Section Visibility ── */}
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+        <div className="px-4 py-3 flex items-center gap-2" style={{ background: "#1d2230" }}>
+          <span className="text-sm font-semibold text-white">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">&mdash; toggle to show/hide sections from users</span>
         </div>
-        {[
-          { key: "evergreen",  label: "WAVV On-Demand Series",                    color: "#0074F4" },
-          { key: "exclusive",  label: "Upcoming WAVV Exclusive Live Webinars",     color: "#00A9E2" },
-          { key: "recordings", label: "WAVV Exclusive On-Demand Webinars",         color: "#67C728" },
-        ].map(({ key, label, color }) => (
-          <div key={key} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-              <span className="text-xs text-gray-300">{label}</span>
+        <div className="divide-y" style={{ borderColor: "#2a2a2a", background: "#111" }}>
+          {[
+            { key: "evergreen",  label: "WAVV On-Demand Series",                    color: "#0074F4" },
+            { key: "exclusive",  label: "Upcoming WAVV Exclusive Live Webinars",     color: "#00A9E2" },
+            { key: "recordings", label: "WAVV Exclusive On-Demand Webinars",         color: "#67C728" },
+          ].map(({ key, label, color }) => (
+            <div key={key} className="px-4 py-2.5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+                <span className="text-sm text-gray-300">{label}</span>
+              </div>
+              <button
+                onClick={() => toggleSection(key)}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                style={visibility[key] !== false
+                  ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                }
+              >
+                {visibility[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+              </button>
             </div>
-            <button
-              onClick={() => toggleSection(key)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-              style={visibility[key] !== false
-                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-              }
-            >
-              {visibility[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
-            </button>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       {/* Grouped sections */}
       {isLoading ? (
@@ -5746,14 +5734,14 @@ function GuidesTab() {
           <button
             onClick={() => { setShowAddPdfSectionModal(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }}
+            style={{ background: "rgba(155,35,53,0.2)", color: "#e85d6f", border: "1px solid rgba(155,35,53,0.4)" }}
           >
             <Plus size={13} /> Add PDF Section
           </button>
           <button
             onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
-            style={{ background: "#ef4444" }}
+            style={{ background: "#9B2335" }}
           >
             <Plus size={13} /> Add PDF
           </button>
@@ -5777,7 +5765,6 @@ function GuidesTab() {
       {/* ── Section Visibility ── */}
       <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
         <div className="px-4 py-3 flex items-center gap-2" style={{ background: "#1d2230" }}>
-          <Eye size={14} className="text-green-400" />
           <span className="text-sm font-semibold text-white">Section Visibility</span>
           <span className="text-xs text-gray-500 ml-1">&mdash; toggle to show/hide categories from users</span>
         </div>
@@ -5802,7 +5789,7 @@ function GuidesTab() {
           {/* PDFs */}
           <div className="px-4 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full" style={{ background: "#ef4444" }} />
+              <span className="w-2 h-2 rounded-full" style={{ background: "#9B2335" }} />
               <span className="text-sm text-gray-300">PDFs</span>
             </div>
             <button
@@ -6843,7 +6830,7 @@ function FaqSectionsPanel() {
           )}
           {/* Entries */}
           {expandedSections.has(section.id) && (
-            <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#161b27" }}>
+            <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#111" }}>
               {(section.entries ?? []).map(entry => (
                 <div key={entry.id} className="px-5 py-3 space-y-1">
                   {editingEntry?.id === entry.id ? (

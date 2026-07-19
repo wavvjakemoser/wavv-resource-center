@@ -2222,3 +2222,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 
 ## Resource Hub Section Visibility Tile (Jul 19 2026)
 - [x] Add Section Visibility tile back to Resource Hub with toggles for Help Articles, PDFs, and FAQs (matching dark tile style)
+
+## Resource Hub + Section Visibility Fixes (Jul 19 2026)
+- [x] PDF buttons → cayenne/dark red color (not bright red)
+- [x] Help Articles/PDFs/FAQs subsection rows → black background when expanded
+- [x] Remove green eye icon from Section Visibility header
+- [x] PDFs dot in Section Visibility → cayenne (not red)
+- [x] Replicate Section Visibility tile to WAVV Academy tab (replace existing visibility controls)
+- [x] Replicate Section Visibility tile to WAVV Webinars tab (replace existing visibility controls)
+- [x] Replicate Section Visibility tile to WAVV Playground tab (replace existing visibility controls)
