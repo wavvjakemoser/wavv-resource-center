@@ -2219,3 +2219,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Resource Hub: section headers (Help Articles, PDFs, FAQs) get gray border, body below them is black (flip invert)
 - [x] Resource Hub: make caret and drag button white text, leave pencil gray
 - [x] Access WAVV Users: table column headers row (User, Type, Subscription, etc.) should be gray background
+
+## Resource Hub Section Visibility Tile (Jul 19 2026)
+- [x] Add Section Visibility tile back to Resource Hub with toggles for Help Articles, PDFs, and FAQs (matching dark tile style)

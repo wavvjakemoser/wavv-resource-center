@@ -5774,6 +5774,67 @@ function GuidesTab() {
           </button>
         </div>
       </div>
+      {/* ── Section Visibility ── */}
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+        <div className="px-4 py-3 flex items-center gap-2" style={{ background: "#1d2230" }}>
+          <Eye size={14} className="text-green-400" />
+          <span className="text-sm font-semibold text-white">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">&mdash; toggle to show/hide categories from users</span>
+        </div>
+        <div className="divide-y" style={{ borderColor: "#2a2a2a", background: "#111" }}>
+          {/* Help Articles */}
+          <div className="px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ background: "#0074F4" }} />
+              <span className="text-sm text-gray-300">Help Articles</span>
+            </div>
+            <button
+              onClick={() => toggleGuideSection("help_article")}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+              style={guideVisibility.help_article !== false
+                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+              }
+            >
+              {guideVisibility.help_article !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+            </button>
+          </div>
+          {/* PDFs */}
+          <div className="px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ background: "#ef4444" }} />
+              <span className="text-sm text-gray-300">PDFs</span>
+            </div>
+            <button
+              onClick={() => toggleGuideSection("pdf")}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+              style={guideVisibility.pdf !== false
+                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+              }
+            >
+              {guideVisibility.pdf !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+            </button>
+          </div>
+          {/* FAQs */}
+          <div className="px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ background: "#22c55e" }} />
+              <span className="text-sm text-gray-300">FAQs</span>
+            </div>
+            <button
+              onClick={() => toggleGuideSection("faq")}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+              style={guideVisibility.faq !== false
+                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+              }
+            >
+              {guideVisibility.faq !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+            </button>
+          </div>
+        </div>
+      </div>
       {/* ── Add FAQ Entry Inline Form ── */}
       {showAddFaqForm && (
         <div className="rounded-xl p-5 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
