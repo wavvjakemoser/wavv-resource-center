@@ -3023,7 +3023,7 @@ function InactiveCategoryBlock({
   onDeleteLesson: (id: number, title: string) => void;
 }) {
   const totalInactive = inactiveCourses.length + inactiveLessons.length;
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   return (
     <div className="rounded-xl overflow-hidden mb-3" style={{ border: "1px solid #2a2a2a" }}>
       {/* Inactive category header — collapsible */}
@@ -9226,6 +9226,16 @@ function HelpArticlesAdminTab() {
 
 
 // ─── Accelerator Tab ─────────────────────────────────────────────────────────
+// Session 1=blue, 2=cyan, 3=green, 4=blue, 5=cyan, 6=green
+const SESSION_COLORS: Record<number, string> = {
+  1: "#0074F4",
+  2: "#00A9E2",
+  3: "#67C728",
+  4: "#0074F4",
+  5: "#00A9E2",
+  6: "#67C728",
+};
+
 function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s: any) => void }) {
   const [open, setOpen] = React.useState(false);
   const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: session.week });
@@ -9251,41 +9261,14 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
           <button type="button" className="text-white flex-shrink-0">
             {open ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
           </button>
-          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: session.color }} />
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: SESSION_COLORS[session.week] ?? "#4b5563" }} />
           <span className="text-sm font-bold text-white">Session {session.week}</span>
           <span className="text-sm font-semibold text-white truncate">{session.title}</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${session.color}20`, color: session.color }}>{liveCallCount} call{liveCallCount !== 1 ? "s" : ""}</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${SESSION_COLORS[session.week] ?? "#4b5563"}20`, color: SESSION_COLORS[session.week] ?? "#4b5563" }}>{liveCallCount} call{liveCallCount !== 1 ? "s" : ""}</span>
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>{contentCount} video{contentCount !== 1 ? "s" : ""}</span>
-          {/* Visibility toggles */}
-          <button
-            onClick={() => updateMutation.mutate({ id: session.id, isPublished: true, comingSoon: false })}
-            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
-            style={{
-              background: session.isPublished && !session.comingSoon ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
-              color: session.isPublished && !session.comingSoon ? "#10b981" : "rgba(255,255,255,0.25)",
-              border: session.isPublished && !session.comingSoon ? "1px solid rgba(16,185,129,0.3)" : "1px solid rgba(255,255,255,0.08)",
-            }}
-          >Visible</button>
-          <button
-            onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: false })}
-            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
-            style={{
-              background: !session.isPublished && !session.comingSoon ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.04)",
-              color: !session.isPublished && !session.comingSoon ? "#ef4444" : "rgba(255,255,255,0.25)",
-              border: !session.isPublished && !session.comingSoon ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(255,255,255,0.08)",
-            }}
-          >Hidden</button>
-          <button
-            onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: true })}
-            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
-            style={{
-              background: session.comingSoon ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.04)",
-              color: session.comingSoon ? "#f59e0b" : "rgba(255,255,255,0.25)",
-              border: session.comingSoon ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(255,255,255,0.08)",
-            }}
-          >Coming Soon</button>
+          {/* Visibility + Coming Soon toggles — now in the expanded section, not the row header */}
           <button
             onClick={() => onEdit(session)}
             className="flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full font-semibold transition-all"
@@ -9298,6 +9281,37 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
       {/* Collapsible content — 3 sub-tables: Live Calls, Product Training, Recordings */}
       {open && (
         <div style={{ background: "#1a1f2e" }}>
+          {/* Visibility + Coming Soon row — inside the expanded body */}
+          <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: "1px solid #2a2a2a", background: "#161a22" }}>
+            <span className="text-[11px] text-gray-400 font-medium mr-1">Visibility:</span>
+            <button
+              onClick={() => updateMutation.mutate({ id: session.id, isPublished: true, comingSoon: false })}
+              className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
+              style={{
+                background: session.isPublished && !session.comingSoon ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
+                color: session.isPublished && !session.comingSoon ? "#10b981" : "rgba(255,255,255,0.25)",
+                border: session.isPublished && !session.comingSoon ? "1px solid rgba(16,185,129,0.3)" : "1px solid rgba(255,255,255,0.08)",
+              }}
+            >Visible</button>
+            <button
+              onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: false })}
+              className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
+              style={{
+                background: !session.isPublished && !session.comingSoon ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.04)",
+                color: !session.isPublished && !session.comingSoon ? "#ef4444" : "rgba(255,255,255,0.25)",
+                border: !session.isPublished && !session.comingSoon ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(255,255,255,0.08)",
+              }}
+            >Hidden</button>
+            <button
+              onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: true })}
+              className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
+              style={{
+                background: session.comingSoon ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.04)",
+                color: session.comingSoon ? "#f59e0b" : "rgba(255,255,255,0.25)",
+                border: session.comingSoon ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(255,255,255,0.08)",
+              }}
+            >Coming Soon</button>
+          </div>
           <AcceleratorSubTable
             title="Live Call Events"
             icon="calendar"
@@ -9311,7 +9325,7 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
             title="Product Training"
             icon="play"
             color="#00A9E2"
-            columns={["Title", "Host", "Duration", "Actions"]}
+            columns={["Title", "Host", "Actions"]}
             sessionNumber={session.week}
             sessionColor={session.color}
             contentType="product_training"
@@ -9320,7 +9334,7 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
             title="Previous Session Recordings"
             icon="video"
             color="#67C728"
-            columns={["Title", "Host", "Duration", "Actions"]}
+            columns={["Title", "Host", "Actions"]}
             sessionNumber={session.week}
             sessionColor={session.color}
             contentType="recording"
@@ -9720,13 +9734,7 @@ function AcceleratorSubTable({
             {rows.length}
           </span>
         </div>
-        <button
-          onClick={() => { resetForm(); setShowForm(true); }}
-          className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg font-semibold transition hover:opacity-90"
-          style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}
-        >
-          <Plus size={11} /> Add
-        </button>
+        {/* Add button removed — use top header buttons instead */}
       </div>
 
       {/* Column headers — gray */}
@@ -9734,7 +9742,7 @@ function AcceleratorSubTable({
         className="grid text-[10px] font-semibold text-gray-400 px-4 py-1.5"
         style={{
           background: "#1d2230",
-          gridTemplateColumns: contentType === "liveCalls" ? "1fr 1fr 80px 80px" : "1fr 120px 80px 80px",
+              gridTemplateColumns: contentType === "liveCalls" ? "1fr 1fr 80px 80px" : "1fr 140px 80px",
         }}
       >
         {columns.map((col) => <span key={col}>{col}</span>)}
@@ -9780,14 +9788,13 @@ function AcceleratorSubTable({
                 key={item.id}
                 className="grid items-center px-4 py-2.5 text-xs"
                 style={{
-                  gridTemplateColumns: "1fr 120px 80px 80px",
+                  gridTemplateColumns: "1fr 140px 80px",
                   background: i % 2 === 0 ? "#1a1f2e" : "#212840",
                   borderTop: "1px solid #2a2a2a",
                 }}
               >
                 <span className="text-white font-medium truncate pr-2">{item.title}</span>
                 <span className="text-gray-400 truncate pr-2">{item.hostName ?? "—"}</span>
-                <span className="text-gray-400">{item.duration ?? "—"}</span>
                 <div className="flex items-center gap-1.5">
                   <button onClick={() => startEditCt(item)} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white transition"><Pencil size={11} /></button>
                   <button onClick={() => { if (confirm("Delete this content?")) deleteCtMut.mutate({ id: item.id }); }} className="p-1 rounded hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition"><Trash2 size={11} /></button>
