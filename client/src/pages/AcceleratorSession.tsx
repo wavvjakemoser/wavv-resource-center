@@ -1,24 +1,22 @@
 /**
  * AcceleratorSession.tsx
  *
- * Individual week/session page for the WAVV Accelerator.
- * URL: /accelerator/session/:id  (id = week number 1–6)
+ * Individual session hub page for the WAVV Accelerator.
+ * URL: /accelerator/session/:id  (id = session number 1-6)
  *
- * Features:
- *  - Hero header band with week badge, title, outcome, and back link
- *  - Live call cards as the dominant visual element
- *  - Mid-cycle late-joiner callout (always visible)
- *  - Session recordings (Loom embed)
- *  - WAVV product training video
- *  - Resource links
- *  - Full 12-session schedule table
+ * Redesigned as a 3-tile hub page (Academy-style):
+ *  - Hero header band with session badge, title, outcome, and back link
+ *  - 3 clickable tiles: Live Call Events, Product Training, Previous Recordings
+ *  - Clicking a tile expands to show content inline below the tiles
+ *  - Timer/countdown preserved in hero
+ *  - Access gating preserved
  */
 
 import { useParams } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ArrowLeft,
   Calendar,
@@ -36,9 +34,17 @@ import {
   Timer,
   MessageSquare,
   ExternalLink,
+  ChevronRight,
 } from "lucide-react";
 import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
 import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
+
+// ─── Icon URLs ───────────────────────────────────────────────────────────────
+const TILE_ICONS = {
+  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-live-calls-3fxRXX6hrnFaQfUDmmNmyL.webp",
+  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-product-training-74W6B56QYPpoptvfwz37bg.webp",
+  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-prev-recordings-6B7nYVcrVn5WYpHnYoGuqN.webp",
+};
 
 // ─── Embed URL helper (Loom, YouTube, Vimeo) ────────────────────────────────
 function getEmbedUrl(url: string): string | null {
@@ -54,14 +60,13 @@ function getEmbedUrl(url: string): string | null {
   return null;
 }
 
-// ─── Live call schedule is now CMS-driven via accelerator_live_calls table ───
-
+// ─── Live call schedule constants ────────────────────────────────────────────
 const CALL_DURATION_MS = 90 * 60 * 1000;
 const JOIN_WINDOW_MS   = 15 * 60 * 1000;
 
 // ─── Week 1 Free Window (must stay in sync with Accelerator.tsx) ─────────────
-const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 10, 0, 0, 0);  // Jul 10 00:00 UTC
-const WEEK1_FREE_END_UTC   = Date.UTC(2026, 6, 27, 6, 0, 0);  // Jul 27 00:00 MDT
+const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 10, 0, 0, 0);
+const WEEK1_FREE_END_UTC   = Date.UTC(2026, 6, 27, 6, 0, 0);
 
 function isWeek1FreeNow() {
   const now = Date.now();
@@ -87,7 +92,7 @@ function useAcceleratorAccess() {
   return { hasAccess: false, reason: "no_access" as const, isLoading: false, week1FreeActive };
 }
 
-// ─── Upgrade button (Stripe portal, falls back to pricing page) ──────────────
+// ─── Upgrade button ──────────────────────────────────────────────────────────
 function UpgradeButton() {
   const manageUrl = trpc.accelerator.getManageSubscriptionUrl.useMutation();
   const handleClick = async () => {
@@ -110,7 +115,7 @@ function UpgradeButton() {
   );
 }
 
-// ─── Countdown hook ───────────────────────────────────────────────────────────
+// ─── Countdown hook ──────────────────────────────────────────────────────────
 function useNow() {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -144,7 +149,6 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
   const isJoinable = now >= utcMs - JOIN_WINDOW_MS && now < utcMs + durationMs;
   const glowColor  = isLive ? "#10b981" : color;
 
-  // Format date label from scheduledAt
   const dateLabel = new Date(call.scheduledAt).toLocaleString("en-US", {
     weekday: "long", month: "long", day: "numeric", year: "numeric",
     hour: "numeric", minute: "2-digit", timeZoneName: "short",
@@ -159,14 +163,12 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
     >
       {/* Thumbnail header */}
       <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "160px" }}>
-        {/* Webinar-style: full background image at high opacity, no tint overlay */}
         <img src={DEFAULT_LIVE_CALL_BG} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.9, objectPosition: "center 30%" }} />
         <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${glowColor}20 0%, transparent 60%)` }} />
         {call.thumbnailUrl && (
           <img src={call.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.92 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
         )}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
-        {/* Badge */}
         <div className="absolute top-3 right-3">
           {isLive ? (
             <span className="flex items-center gap-1.5 text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase" style={{ background: "#10b981", color: "#fff" }}>
@@ -190,7 +192,7 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
           <span className="text-gray-300">{dateLabel}</span>
         </p>
 
-        {/* Countdown digit boxes — only shown for current week, upcoming calls */}
+        {/* Countdown digit boxes */}
         {isCurrentWeek && !isPast && !isLive && (() => {
           const secsLeft = Math.max(0, Math.floor((utcMs - now) / 1000));
           const d = Math.floor(secsLeft / 86400);
@@ -241,10 +243,9 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
           );
         })()}
 
-        {/* CTA buttons — centered, larger */}
+        {/* CTA buttons */}
         <div className="pt-3 flex flex-col items-center gap-2" style={{ borderTop: `1px solid ${glowColor}18` }}>
           <div className="flex items-center justify-center gap-3 w-full">
-            {/* Register button */}
             {!isPast && call.registrationUrl && (
               <a
                 href={call.registrationUrl}
@@ -256,7 +257,6 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
                 Register
               </a>
             )}
-            {/* Join button */}
             {isJoinable ? (
               <a
                 href={call.joinUrl ?? "#"}
@@ -285,523 +285,6 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
         </div>
       </div>
     </div>
-  );
-}
-
-// ─── Loom embed ───────────────────────────────────────────────────────────────
-function LoomEmbed({ url, title }: { url: string; title: string }) {
-  const embedUrl = url.replace("loom.com/share/", "loom.com/embed/");
-  return (
-    <div className="rounded-2xl overflow-hidden" style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
-      <iframe
-        src={embedUrl}
-        title={title}
-        allowFullScreen
-        allow="autoplay; fullscreen; picture-in-picture"
-        style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
-      />
-    </div>
-  );
-}
-
-// ─── Section header ───────────────────────────────────────────────────────────
-function SectionHeader({ icon: Icon, label, color }: { icon: React.ElementType; label: string; color: string }) {
-  return (
-    <div className="flex items-center gap-2.5 mb-4">
-      <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
-      <Icon size={14} style={{ color }} />
-      <h2 className="text-sm font-bold text-white tracking-wide">{label}</h2>
-    </div>
-  );
-}
-
-// ─── Full schedule table (DB-driven) ────────────────────────────────────────
-function FullScheduleTable({ currentWeek, now }: { currentWeek: number; now: number }) {
-  const { data: allCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
-  const weeks = [1, 2, 3, 4, 5, 6];
-  return (
-    <section>
-      <SectionHeader icon={Calendar} label="Full Program Schedule" color="#0074F4" />
-      <div className="space-y-2">
-        {weeks.map(w => {
-          const wCalls = allCalls.filter((c: any) => c.sessionNumber === w && c.isVisible !== false);
-          const isCurrentWeek = w === currentWeek;
-          return (
-            <div
-              key={w}
-              className="rounded-xl overflow-hidden"
-              style={{
-                border: isCurrentWeek ? "1px solid rgba(0,116,244,0.35)" : "1px solid rgba(255,255,255,0.05)",
-                background: isCurrentWeek ? "rgba(0,116,244,0.05)" : "rgba(255,255,255,0.015)",
-              }}
-            >
-              {/* Week header */}
-              <a
-                href={`/accelerator/session/${w}`}
-                className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-white/5"
-                style={{ textDecoration: "none" }}
-              >
-                <div className="flex items-center gap-2.5">
-                  {isCurrentWeek && (
-                    <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                      style={{ background: "rgba(0,116,244,0.2)", color: "#60a5fa" }}>
-                      Current
-                    </span>
-                  )}
-                  <span className="text-sm font-semibold text-white">Session {w}</span>
-                </div>
-                <span className="text-xs" style={{ color: "rgba(0,116,244,0.7)" }}>View →</span>
-              </a>
-              {/* Calls */}
-              {wCalls.length === 0 ? (
-                <div className="px-4 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                  <p className="text-[11px] text-gray-500">No events scheduled yet</p>
-                </div>
-              ) : wCalls.map((c: any) => {
-                const utcMs = new Date(c.scheduledAt).getTime();
-                const durationMs = (c.durationMinutes ?? 90) * 60 * 1000;
-                const isLive = now >= utcMs && now < utcMs + durationMs;
-                const isPast = now >= utcMs + durationMs;
-                const isJoinable = now >= utcMs - JOIN_WINDOW_MS && now < utcMs + durationMs;
-                const dateLabel = new Date(c.scheduledAt).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
-                return (
-                  <div
-                    key={c.id}
-                    className="px-4 py-3 flex items-center justify-between gap-4 flex-wrap"
-                    style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
-                  >
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-white">Call {c.callNumber} of 2</p>
-                      <p className="text-[11px] mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>{dateLabel}</p>
-                    </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      {isLive && (
-                        <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          LIVE
-                        </span>
-                      )}
-                      {!isPast && !isLive && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full"
-                          style={{ background: "rgba(0,116,244,0.1)", color: "rgba(0,116,244,0.7)" }}>
-                          Upcoming
-                        </span>
-                      )}
-                      {isPast && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full"
-                          style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.25)" }}>
-                          Done
-                        </span>
-                      )}
-                      {isJoinable ? (
-                        <a
-                          href={c.joinUrl ?? "#"}
-                          target={c.joinUrl ? "_blank" : undefined}
-                          rel="noopener noreferrer"
-                          className="text-[11px] font-semibold px-3 py-1 rounded-lg text-white"
-                          style={{ background: isLive ? "#10b981" : "#0074F4" }}
-                        >
-                          Join
-                        </a>
-                      ) : isPast ? (
-                        <a
-                          href={`/accelerator/session/${w}`}
-                          className="text-[11px] font-semibold px-3 py-1 rounded-lg"
-                          style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)" }}
-                        >
-                          Recording
-                        </a>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-// ─── Main page ────────────────────────────────────────────────────────────────
-export default function AcceleratorSession() {
-  const params = useParams<{ id: string }>();
-  const weekId = parseInt(params.id ?? "1", 10);
-  const { hasAccess, reason, week1FreeActive } = useAcceleratorAccess();
-  const now = useNow();
-
-  const { data: session, isLoading } = trpc.accelerator.get.useQuery({ id: weekId });
-
-  // Fetch dynamic content from CMS (must be before any conditional returns to avoid hook-order issues)
-  const { data: sessionContent = [] } = trpc.accelerator.listContent.useQuery({ sessionNumber: weekId });
-
-  // DB-driven live calls (must be before any conditional returns to avoid hook-order issues)
-  const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: weekId });
-  const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
-
-  // Video player state (must be before any conditional returns)
-  const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
-
-  // Cheat sheet side panel state (must be before any conditional returns)
-  const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
-
-  if (isLoading) {
-    return (
-      <PortalLayout title="Loading...">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      </PortalLayout>
-    );
-  }
-
-  if (!session) {
-    return (
-      <PortalLayout title="Session Not Found">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center space-y-3">
-            <p className="text-gray-400">Session not found.</p>
-            <a href="/accelerator" className="text-sm font-medium" style={{ color: "#0074F4" }}>
-              ← Back to Accelerator
-            </a>
-          </div>
-        </div>
-      </PortalLayout>
-    );
-  }
-
-  const color = session.color ?? "#0074F4";
-
-  // ─── No-access view (bypass for Session 1 during free window) ─────────────
-  const sessionFree = week1FreeActive && weekId === 1;
-  if (!hasAccess && !sessionFree) {
-    return (
-      <PortalLayout title={`Session ${session.week}: ${session.title}`}>
-        <div className="px-4 lg:px-8 py-8 max-w-3xl space-y-6">
-          <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
-            <ArrowLeft size={14} />
-            Back to Accelerator
-          </a>
-          <div className="rounded-2xl p-12 text-center space-y-4"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: `${color}15` }}>
-              <Lock size={28} style={{ color }} />
-            </div>
-            <h2 className="text-xl font-bold text-white">Session {session.week}: {session.title}</h2>
-            <p className="text-sm text-gray-400 max-w-md mx-auto">
-              This session is available to WAVV Quarterly and Annual subscribers.
-            </p>
-            {reason === "unauthenticated" ? (
-              <a href="/api/oauth/login?return_path=/accelerator"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold mt-2"
-                style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", color: "#fff" }}>
-                Sign In to Check Access
-              </a>
-            ) : (
-              <UpgradeButton />
-            )}
-          </div>
-        </div>
-      </PortalLayout>
-    );
-  }
-
-  // Parse resource links
-  let resourceLinks: { label: string; url: string }[] = [];
-  try { if (session.resourceLinks) resourceLinks = JSON.parse(session.resourceLinks); } catch { /* ignore */ }
-
-  // Determine if this page's week is the "current" active week
-  // Current week = the week containing the next upcoming call (or live call)
-  const nextCall = allLiveCalls.find((c: any) => new Date(c.scheduledAt).getTime() + (c.durationMinutes ?? 90) * 60 * 1000 > now);
-  const isCurrentWeek = nextCall ? nextCall.sessionNumber === weekId : false;
-
-  const cmsRecordings = sessionContent.filter((c: any) => c.contentType === "recording" && c.isVisible);
-  const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
-
-  // Side panel for cheat sheet PDF viewer
-  const sidePanel = (
-    <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} pushMode={true} />
-  );
-
-  // ─── Member view ─────────────────────────────────────────────────────────
-  return (
-    <PortalLayout title={`Session ${session.week}: ${session.title}`} rightPanel={sidePanel}>
-
-      {/* ── Hero header band ── */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          background: `radial-gradient(ellipse 120% 80% at 60% 0%, ${color}28 0%, ${color}08 45%, transparent 75%), #080c14`,
-          borderBottom: `1px solid ${color}18`,
-        }}
-      >
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.02]"
-          style={{
-            backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
-        {/* Glow orb */}
-        <div className="absolute top-0 right-0 w-[600px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${color}18, transparent 65%)`, transform: "translate(20%, -30%)" }} />
-
-        <div className="relative z-10 px-4 lg:px-8 py-8 pb-10">
-          {/* Back link */}
-          <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-6">
-            <ArrowLeft size={14} />
-            Back to Accelerator
-          </a>
-
-          {/* Week badge + title */}
-          <div className="flex items-center gap-2.5 mb-3">
-            <span
-              className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-              style={{ background: `${color}25`, color, border: `1px solid ${color}35` }}
-            >
-              Session {session.week}
-            </span>
-          </div>
-          <h1 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-3">
-            {session.heroHeadline || session.title}
-          </h1>
-          {(session.heroSubline || session.wavvFocus) && (
-            <p className="text-base mb-5" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "600px" }}>
-              {session.heroSubline || session.wavvFocus}
-            </p>
-          )}
-
-          {/* Outcome pill */}
-          {session.outcome && (
-            <div
-              className="inline-flex items-start gap-2.5 rounded-xl px-4 py-3"
-              style={{ background: `${color}10`, border: `1px solid ${color}22`, maxWidth: "560px" }}
-            >
-              <CheckCircle2 size={15} style={{ color }} className="flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: `${color}cc` }}>
-                  By the end of this session
-                </p>
-                <p className="text-sm text-white">{session.outcome}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Page body ── */}
-      <div className="px-4 lg:px-8 py-8 space-y-14">
-
-        {/* ── Late-joiner callout ── */}
-        <div
-          className="flex items-start gap-3 rounded-xl px-4 py-3.5"
-          style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.18)" }}
-        >
-          <AlertCircle size={15} className="flex-shrink-0 mt-0.5" style={{ color: "#fbbf24" }} />
-          <div>
-            <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle or catching up?</p>
-            <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Every previous session recording is available below. You can catch up at your own pace.
-            </p>
-          </div>
-        </div>
-
-
-        {/* ── Live call cards — dominant section ── */}
-        <section>
-          <SectionHeader icon={Clock} label={`Upcoming Live Calls — Session ${weekId}`} color={color} />
-          {liveCalls.length === 0 ? (
-            <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <p className="text-sm text-gray-400">No live call events scheduled for this session yet.</p>
-              <p className="text-xs text-gray-500 mt-1">Check back soon or contact your success manager.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {liveCalls.filter((c: any) => c.isVisible !== false).map((c: any) => (
-                <SessionCallCard key={c.id} call={c} now={now} color={color} isCurrentWeek={isCurrentWeek} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* ── WAVV Product Training (webinar-style cards) ── */}
-        <section>
-          <SectionHeader icon={Play} label="WAVV Product Training" color={color} />
-
-          {/* Cheat Sheet callout — pinned at top of Product Training */}
-          {session.cheatSheetUrl && (
-            <div
-              className="rounded-xl p-4 mb-4 flex items-center justify-between"
-              style={{ background: `${color}08`, border: `1px solid ${color}18` }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center"
-                  style={{ background: `${color}15` }}
-                >
-                  <FileText size={16} style={{ color }} />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400">Session {weekId} Resource</p>
-                  <p className="text-sm font-semibold text-white">Session Cheat Sheet</p>
-                </div>
-              </div>
-              <button
-                onClick={() =>
-                  setPanelItem({
-                    type: "pdf",
-                    title: `Session ${weekId} Cheat Sheet`,
-                    url: session.cheatSheetUrl!,
-                  })
-                }
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
-                style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
-              >
-                <FileText size={14} /> View Cheat Sheet
-              </button>
-            </div>
-          )}
-
-          {cmsProductTraining.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {cmsProductTraining.map((item: any) => (
-                <ContentCard
-                  key={item.id}
-                  item={item}
-                  accentColor={color}
-                  badgeLabel="Training"
-                  onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
-                  onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} — Cheat Sheet`, url })}
-                />
-              ))}
-            </div>
-          ) : (
-            <div
-              className="rounded-xl p-6 text-center"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}
-            >
-              <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
-              <p className="text-xs text-gray-500">Product training video coming soon</p>
-            </div>
-          )}
-        </section>
-
-        {/* ── Previous Session Recordings (webinar-style cards) ── */}
-        <section>
-          <SectionHeader icon={Video} label="Previous Session Recordings" color={color} />
-          {cmsRecordings.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {cmsRecordings.map((item: any) => (
-                <ContentCard
-                  key={item.id}
-                  item={item}
-                  accentColor={color}
-                  badgeLabel="Recording"
-                  onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
-                  onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} — Cheat Sheet`, url })}
-                />
-              ))}
-            </div>
-          ) : (
-            <div
-              className="rounded-xl p-8 text-center"
-              style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}
-            >
-              <Video size={28} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
-              <p className="text-xs text-gray-500">No recordings yet — check back after the live call.</p>
-            </div>
-          )}
-        </section>
-
-        {/* ── Resource links ── */}
-        {resourceLinks.length > 0 && (
-          <section>
-            <SectionHeader icon={FileText} label="Resources" color={color} />
-            <div className="space-y-2">
-              {resourceLinks.map((link, i) => (
-                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
-                  className="rounded-xl p-4 flex items-center gap-3 transition-all"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", textDecoration: "none" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${color}30`; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; }}
-                >
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${color}15` }}>
-                    <Download size={18} style={{ color }} />
-                  </div>
-                  <span className="text-sm font-medium text-white">{link.label}</span>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── Join the Slack Community (always at bottom) ── */}
-        <section>
-          <SectionHeader icon={MessageSquare} label="Join the Slack Community" color="#ECB22E" />
-          {session.slackUrl ? (
-            <div
-              className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
-              style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.18) 0%, rgba(74,21,75,0.06) 100%)", border: "1px solid rgba(74,21,75,0.35)", boxShadow: "0 0 32px rgba(74,21,75,0.12)" }}
-            >
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(74,21,75,0.3)", border: "1px solid rgba(74,21,75,0.5)" }}>
-                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 0 8px #ECB22E) drop-shadow(0 0 16px #E01E5A44)" }}>
-                  <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(236,178,46,0.8)" }}>Members Only</p>
-                <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
-                <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
-              </div>
-              <a
-                href={session.slackUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #4A154B, #611f69)", boxShadow: "0 4px 16px rgba(74,21,75,0.4)" }}
-              >
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="white"/></svg>
-                Join Slack
-              </a>
-            </div>
-          ) : (
-            <div
-              className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
-              style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.12) 0%, rgba(74,21,75,0.04) 100%)", border: "1px solid rgba(74,21,75,0.25)" }}
-            >
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(74,21,75,0.2)", border: "1px solid rgba(74,21,75,0.35)" }}>
-                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.5 }}>
-                  <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(236,178,46,0.5)" }}>Community</p>
-                <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
-                <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
-              </div>
-              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
-                style={{ background: "rgba(74,21,75,0.15)", border: "1px solid rgba(74,21,75,0.3)", color: "rgba(255,255,255,0.3)" }}>
-                <Lock size={14} /> Link Coming Soon
-              </div>
-            </div>
-          )}
-        </section>
-
-
-
-      </div>
-
-      {/* Floating video player */}
-      {activeVideo && (
-        <FloatingVideoPlayer
-          title={activeVideo.title}
-          embedUrl={activeVideo.url}
-          onClose={() => setActiveVideo(null)}
-        />
-      )}
-    </PortalLayout>
   );
 }
 
@@ -849,7 +332,6 @@ function ContentCard({
       {/* Thumbnail */}
       <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "160px" }}>
         {item.thumbnailUrl ? (
-          /* Custom thumbnail */
           <>
             <img
               src={item.thumbnailUrl}
@@ -861,21 +343,18 @@ function ContentCard({
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
           </>
         ) : (
-          /* Default bg — webinar style: full image at high opacity, subtle color tint */
           <>
             <img src={defaultBg} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.9 }} />
             <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${accentColor}18 0%, transparent 60%)` }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
           </>
         )}
-        {/* Badge */}
         <div className="absolute top-3 right-3">
           <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase"
             style={{ background: accentColor, color: "#fff" }}>
             {badgeLabel}
           </span>
         </div>
-        {/* Play overlay — hidden when Coming Soon */}
         {!isComingSoon && (embedUrl || isHostedVideo) && (
           <div
             className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
@@ -892,7 +371,6 @@ function ContentCard({
         )}
       </div>
 
-      {/* Coming Soon banner */}
       {isComingSoon && (
         <div
           className="flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold"
@@ -903,7 +381,6 @@ function ContentCard({
         </div>
       )}
 
-      {/* Body */}
       <div className="p-4 flex flex-col flex-1">
         <h3 className="text-white font-bold text-sm leading-snug mb-2">{item.title}</h3>
         {item.description && (
@@ -944,5 +421,485 @@ function ContentCard({
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Hub Tile component (Academy-style) ──────────────────────────────────────
+function HubTile({ title, subtitle, icon, color, count, isActive, onClick }: {
+  title: string;
+  subtitle: string;
+  icon: string;
+  color: string;
+  count: number;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01] text-left w-full"
+      style={{
+        border: isActive ? `2px solid ${color}` : `1px solid ${color}40`,
+        height: "200px",
+        boxShadow: isActive ? `0 0 24px ${color}30, inset 0 0 0 1px ${color}60` : `0 0 0 1px ${color}15, 0 4px 24px ${color}12`,
+      }}
+    >
+      {/* Deep space black base */}
+      <div className="absolute inset-0" style={{ background: "#000" }} />
+
+      {/* Circuit board SVG pattern */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.1 }} xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id={`circuit-tile-${title.replace(/\s/g, "")}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={color} strokeWidth="0.8" fill="none"/>
+            <circle cx="10" cy="10" r="2" fill={color}/>
+            <circle cx="50" cy="10" r="2" fill={color}/>
+            <circle cx="50" cy="50" r="2" fill={color}/>
+            <circle cx="30" cy="30" r="1.5" fill={color}/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill={`url(#circuit-tile-${title.replace(/\s/g, "")})`}/>
+      </svg>
+
+      {/* Radial color glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 80% 50%, ${color}25 0%, ${color}08 45%, transparent 75%)` }} />
+
+      {/* Top edge neon line */}
+      <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${color}60 30%, ${color}90 60%, transparent 100%)` }} />
+
+      {/* Hover border pulse */}
+      <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${color}80, 0 0 24px ${color}30` }} />
+
+      {/* Content */}
+      <div className="relative flex items-center h-full px-6 py-5 gap-5">
+        {/* Icon */}
+        <div className="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
+          <img src={icon} alt="" className="w-10 h-10 object-contain" style={{ filter: `drop-shadow(0 0 8px ${color})` }} />
+        </div>
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-extrabold text-white leading-tight mb-1">{title}</h3>
+          <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{subtitle}</p>
+          {count > 0 && (
+            <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${color}18`, color }}>
+              {count} {count === 1 ? "item" : "items"}
+            </span>
+          )}
+        </div>
+        {/* Arrow */}
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: isActive ? `${color}30` : "rgba(255,255,255,0.04)" }}>
+          <ChevronRight size={16} style={{ color: isActive ? color : "rgba(255,255,255,0.4)" }} className={isActive ? "rotate-90 transition-transform" : "transition-transform"} />
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+export default function AcceleratorSession() {
+  const params = useParams<{ id: string }>();
+  const weekId = parseInt(params.id ?? "1", 10);
+  const { hasAccess, reason, week1FreeActive } = useAcceleratorAccess();
+  const now = useNow();
+
+  const { data: session, isLoading } = trpc.accelerator.get.useQuery({ id: weekId });
+
+  // Fetch dynamic content from CMS
+  const { data: sessionContent = [] } = trpc.accelerator.listContent.useQuery({ sessionNumber: weekId });
+
+  // DB-driven live calls
+  const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: weekId });
+  const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
+
+  // Video player state
+  const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
+
+  // Cheat sheet side panel state
+  const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
+
+  // Active tile section (null = none expanded)
+  const [activeSection, setActiveSection] = useState<"live" | "training" | "recordings" | null>(null);
+
+  if (isLoading) {
+    return (
+      <PortalLayout title="Loading...">
+        <div className="flex items-center justify-center h-64">
+          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </PortalLayout>
+    );
+  }
+
+  if (!session) {
+    return (
+      <PortalLayout title="Session Not Found">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center space-y-3">
+            <p className="text-gray-400">Session not found.</p>
+            <a href="/accelerator" className="text-sm font-medium" style={{ color: "#0074F4" }}>
+              \u2190 Back to Accelerator
+            </a>
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
+
+  const color = session.color ?? "#0074F4";
+
+  // ─── No-access view ─────────────────────────────────────────────────────────
+  const sessionFree = week1FreeActive && weekId === 1;
+  if (!hasAccess && !sessionFree) {
+    return (
+      <PortalLayout title={`Session ${session.week}: ${session.title}`}>
+        <div className="px-4 lg:px-8 py-8 max-w-3xl space-y-6">
+          <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
+            <ArrowLeft size={14} />
+            Back to Accelerator
+          </a>
+          <div className="rounded-2xl p-12 text-center space-y-4"
+            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: `${color}15` }}>
+              <Lock size={28} style={{ color }} />
+            </div>
+            <h2 className="text-xl font-bold text-white">Session {session.week}: {session.title}</h2>
+            <p className="text-sm text-gray-400 max-w-md mx-auto">
+              This session is available to WAVV Quarterly and Annual subscribers.
+            </p>
+            {reason === "unauthenticated" ? (
+              <a href="/api/oauth/login?return_path=/accelerator"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold mt-2"
+                style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", color: "#fff" }}>
+                Sign In to Check Access
+              </a>
+            ) : (
+              <UpgradeButton />
+            )}
+          </div>
+        </div>
+      </PortalLayout>
+    );
+  }
+
+  // Parse resource links
+  let resourceLinks: { label: string; url: string }[] = [];
+  try { if (session.resourceLinks) resourceLinks = JSON.parse(session.resourceLinks); } catch { /* ignore */ }
+
+  // Determine if this page's week is the "current" active week
+  const nextCall = allLiveCalls.find((c: any) => new Date(c.scheduledAt).getTime() + (c.durationMinutes ?? 90) * 60 * 1000 > now);
+  const isCurrentWeek = nextCall ? nextCall.sessionNumber === weekId : false;
+
+  const cmsRecordings = sessionContent.filter((c: any) => c.contentType === "recording" && c.isVisible);
+  const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
+
+  const visibleLiveCalls = liveCalls.filter((c: any) => c.isVisible !== false);
+
+  // Side panel for cheat sheet PDF viewer
+  const sidePanel = (
+    <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} pushMode={true} />
+  );
+
+  // Toggle section
+  const toggleSection = (section: "live" | "training" | "recordings") => {
+    setActiveSection(prev => prev === section ? null : section);
+  };
+
+  // ─── Member view ─────────────────────────────────────────────────────────
+  return (
+    <PortalLayout title={`Session ${session.week}: ${session.title}`} rightPanel={sidePanel}>
+
+      {/* ── Hero header band ── */}
+      <div
+        className="relative overflow-hidden"
+        style={{
+          background: `radial-gradient(ellipse 120% 80% at 60% 0%, ${color}28 0%, ${color}08 45%, transparent 75%), #080c14`,
+          borderBottom: `1px solid ${color}18`,
+        }}
+      >
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.02]"
+          style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div className="absolute top-0 right-0 w-[600px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${color}18, transparent 65%)`, transform: "translate(20%, -30%)" }} />
+
+        <div className="relative z-10 px-4 lg:px-8 py-8 pb-10">
+          <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-6">
+            <ArrowLeft size={14} />
+            Back to Accelerator
+          </a>
+
+          <div className="flex items-center gap-2.5 mb-3">
+            <span
+              className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+              style={{ background: `${color}25`, color, border: `1px solid ${color}35` }}
+            >
+              Session {session.week}
+            </span>
+          </div>
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-3">
+            {session.heroHeadline || session.title}
+          </h1>
+          {(session.heroSubline || session.wavvFocus) && (
+            <p className="text-base mb-5" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "600px" }}>
+              {session.heroSubline || session.wavvFocus}
+            </p>
+          )}
+
+          {session.outcome && (
+            <div
+              className="inline-flex items-start gap-2.5 rounded-xl px-4 py-3"
+              style={{ background: `${color}10`, border: `1px solid ${color}22`, maxWidth: "560px" }}
+            >
+              <CheckCircle2 size={15} style={{ color }} className="flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: `${color}cc` }}>
+                  By the end of this session
+                </p>
+                <p className="text-sm text-white">{session.outcome}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Page body ── */}
+      <div className="px-4 lg:px-8 py-8 space-y-8">
+
+        {/* ── Late-joiner callout ── */}
+        <div
+          className="flex items-start gap-3 rounded-xl px-4 py-3.5"
+          style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.18)" }}
+        >
+          <AlertCircle size={15} className="flex-shrink-0 mt-0.5" style={{ color: "#fbbf24" }} />
+          <div>
+            <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle or catching up?</p>
+            <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+              Every previous session recording is available below. You can catch up at your own pace.
+            </p>
+          </div>
+        </div>
+
+        {/* ── 3 Hub Tiles ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <HubTile
+            title="Live Call Events"
+            subtitle="Join live coaching calls or view upcoming schedule"
+            icon={TILE_ICONS.live}
+            color={color}
+            count={visibleLiveCalls.length}
+            isActive={activeSection === "live"}
+            onClick={() => toggleSection("live")}
+          />
+          <HubTile
+            title="Product Training"
+            subtitle="WAVV how-to clips and cheat sheets for this session"
+            icon={TILE_ICONS.training}
+            color={color}
+            count={cmsProductTraining.length}
+            isActive={activeSection === "training"}
+            onClick={() => toggleSection("training")}
+          />
+          <HubTile
+            title="Previous Recordings"
+            subtitle="Catch up on past session recordings at your own pace"
+            icon={TILE_ICONS.recordings}
+            color={color}
+            count={cmsRecordings.length}
+            isActive={activeSection === "recordings"}
+            onClick={() => toggleSection("recordings")}
+          />
+        </div>
+
+        {/* ── Expanded content section ── */}
+        {activeSection === "live" && (
+          <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
+              <Clock size={14} style={{ color }} />
+              <h2 className="text-sm font-bold text-white tracking-wide">Upcoming Live Calls \u2014 Session {weekId}</h2>
+            </div>
+            {visibleLiveCalls.length === 0 ? (
+              <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                <p className="text-sm text-gray-400">No live call events scheduled for this session yet.</p>
+                <p className="text-xs text-gray-500 mt-1">Check back soon or contact your success manager.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {visibleLiveCalls.map((c: any) => (
+                  <SessionCallCard key={c.id} call={c} now={now} color={color} isCurrentWeek={isCurrentWeek} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeSection === "training" && (
+          <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
+              <Play size={14} style={{ color }} />
+              <h2 className="text-sm font-bold text-white tracking-wide">WAVV Product Training</h2>
+            </div>
+
+            {/* Cheat Sheet callout */}
+            {session.cheatSheetUrl && (
+              <div
+                className="rounded-xl p-4 mb-4 flex items-center justify-between"
+                style={{ background: `${color}08`, border: `1px solid ${color}18` }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${color}15` }}>
+                    <FileText size={16} style={{ color }} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Session {weekId} Resource</p>
+                    <p className="text-sm font-semibold text-white">Session Cheat Sheet</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setPanelItem({ type: "pdf", title: `Session ${weekId} Cheat Sheet`, url: session.cheatSheetUrl! })}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
+                  style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+                >
+                  <FileText size={14} /> View Cheat Sheet
+                </button>
+              </div>
+            )}
+
+            {cmsProductTraining.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {cmsProductTraining.map((item: any) => (
+                  <ContentCard
+                    key={item.id}
+                    item={item}
+                    accentColor={color}
+                    badgeLabel="Training"
+                    onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                    onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl p-6 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}>
+                <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
+                <p className="text-xs text-gray-500">Product training video coming soon</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeSection === "recordings" && (
+          <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
+              <Video size={14} style={{ color }} />
+              <h2 className="text-sm font-bold text-white tracking-wide">Previous Session Recordings</h2>
+            </div>
+            {cmsRecordings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {cmsRecordings.map((item: any) => (
+                  <ContentCard
+                    key={item.id}
+                    item={item}
+                    accentColor={color}
+                    badgeLabel="Recording"
+                    onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                    onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}>
+                <Video size={28} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
+                <p className="text-xs text-gray-500">No recordings yet \u2014 check back after the live call.</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ── Resource links ── */}
+        {resourceLinks.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${color}, ${color}55)` }} />
+              <FileText size={14} style={{ color }} />
+              <h2 className="text-sm font-bold text-white tracking-wide">Resources</h2>
+            </div>
+            <div className="space-y-2">
+              {resourceLinks.map((link, i) => (
+                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer"
+                  className="rounded-xl p-4 flex items-center gap-3 transition-all"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", textDecoration: "none" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${color}30`; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; }}
+                >
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${color}15` }}>
+                    <Download size={18} style={{ color }} />
+                  </div>
+                  <span className="text-sm font-medium text-white">{link.label}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Community (simplified) ── */}
+        <section>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #ECB22E, #E01E5A)" }} />
+            <h2 className="text-sm font-bold text-white tracking-wide">Community</h2>
+          </div>
+          {session.slackUrl ? (
+            <div
+              className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
+              style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.18) 0%, rgba(74,21,75,0.06) 100%)", border: "1px solid rgba(74,21,75,0.35)", boxShadow: "0 0 32px rgba(74,21,75,0.12)" }}
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
+                <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
+              </div>
+              <a
+                href={session.slackUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
+                style={{ background: "linear-gradient(135deg, #4A154B, #611f69)", boxShadow: "0 4px 16px rgba(74,21,75,0.4)" }}
+              >
+                Join Slack
+              </a>
+            </div>
+          ) : (
+            <div
+              className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
+              style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.12) 0%, rgba(74,21,75,0.04) 100%)", border: "1px solid rgba(74,21,75,0.25)" }}
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
+                <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
+              </div>
+              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
+                style={{ background: "rgba(74,21,75,0.15)", border: "1px solid rgba(74,21,75,0.3)", color: "rgba(255,255,255,0.3)" }}>
+                <Lock size={14} /> Link Coming Soon
+              </div>
+            </div>
+          )}
+        </section>
+
+      </div>
+
+      {/* Floating video player */}
+      {activeVideo && (
+        <FloatingVideoPlayer
+          title={activeVideo.title}
+          embedUrl={activeVideo.url}
+          onClose={() => setActiveVideo(null)}
+        />
+      )}
+    </PortalLayout>
   );
 }

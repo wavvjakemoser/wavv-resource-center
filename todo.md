@@ -2251,3 +2251,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] AcceleratorTab: each session block expands to show 3 sub-tables (Live Call Events, Product Training, Previous Session Recordings)
 - [x] AcceleratorSubTable: black sub-table headers, gray column headers, alternating gray content rows
 - [x] AcceleratorAddDialog: global add dialog from top header buttons with session selector and type switcher
+
+## Accelerator Customer-Facing Rebuild (Jul 19 - Session 3)
+- [x] Accelerator landing: Replace session cards with Academy-style full-bleed banner tiles (circuit pattern, color-coded S1/S4 blue, S2/S5 cyan, S3/S6 green)
+- [x] Accelerator landing: Section headers (Curriculum, Partnership, Community, FAQs) use gradient dash only — remove icons from What's Included cards
+- [x] Accelerator landing: "Join the Slack Community" → just "Community" with gradient dash, no Slack icon in header
+- [x] Accelerator landing: FAQs section — remove the gradient bar, keep just text heading with gradient dash
+- [x] AcceleratorSession: Redesign as a 3-tile hub page (Live Call Events, Product Training, Previous Recordings) matching Academy category tile style
+- [x] AcceleratorSession: Generate unique icons for Live Call Events, Product Training, and Previous Recordings tiles
+- [x] AcceleratorSession: Preserve timer/countdown, access gating, and all existing CMS data queries

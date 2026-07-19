@@ -109,7 +109,7 @@ const SESSIONS = [
     title: "Prospecting Frames & Angles",
     wavvFocus: "Build or import a list; segment it; load it into a dialing campaign",
     outcome: "A live, dialer-ready list loaded in WAVV",
-    color: "#10b981",
+    color: "#00A9E2",
   },
   {
     id: 3,
@@ -117,7 +117,7 @@ const SESSIONS = [
     title: "The Conversation: Sales Psychology",
     wavvFocus: "Power/multi-line dialing, using local presence, live-call controls, voicemail drops",
     outcome: "Confident running the dialer during real conversations",
-    color: "#8b5cf6",
+    color: "#67C728",
   },
   {
     id: 4,
@@ -125,7 +125,7 @@ const SESSIONS = [
     title: "Follow-Up Systems That Convert",
     wavvFocus: "Dispositions, tags, follow-up cadences, SMS/texting, and reminders inside WAVV",
     outcome: "A repeatable follow-up cadence built in WAVV",
-    color: "#f97316",
+    color: "#0074F4",
   },
   {
     id: 5,
@@ -133,7 +133,7 @@ const SESSIONS = [
     title: "Objection Handling",
     wavvFocus: "Call recordings & notes to review calls; saved scripts/snippets for fast responses",
     outcome: "Uses recordings + saved scripts to improve call over call",
-    color: "#ec4899",
+    color: "#00A9E2",
   },
   {
     id: 6,
@@ -141,7 +141,7 @@ const SESSIONS = [
     title: "The 1-Call Close & Wins Review",
     wavvFocus: "Pipeline/disposition reporting; CRM sync; reading conversion stats to find the next lever",
     outcome: "Can track closes in WAVV and see which lever to move next",
-    color: "#06b6d4",
+    color: "#67C728",
   },
 ];
 
@@ -778,7 +778,7 @@ export default function Accelerator() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
+              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #67C728)" }} />
               <h2 className="text-2xl font-extrabold text-white">The Curriculum</h2>
             </div>
             {hasAccess && (
@@ -790,7 +790,7 @@ export default function Accelerator() {
               On-demand access — start any session, any time. Each session pairs live sales coaching with hands-on WAVV product training.
             </p>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="space-y-5">
             {SESSIONS.map((session) => {
               // Check visibility state from DB
               const dbSession = dbSessions.find(s => s.id === session.id);
@@ -800,32 +800,40 @@ export default function Accelerator() {
               // Hidden — don't render at all
               if (!isPublished && !isComingSoon) return null;
 
-              // Coming Soon — show card with badge, not clickable
+              // Coming Soon — show banner with badge, not clickable
               if (isComingSoon && hasAccess) {
                 return (
                   <div
                     key={session.id}
-                    className="rounded-2xl p-6 space-y-4 h-full flex flex-col relative"
-                    style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", opacity: 0.7 }}
+                    className="group relative overflow-hidden rounded-2xl block"
+                    style={{
+                      border: `1px solid ${session.color}30`,
+                      height: "180px",
+                      opacity: 0.6,
+                    }}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                        style={{ background: `${session.color}12`, color: `${session.color}99` }}>
-                        Session {session.id}
-                      </span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                        style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}>
-                        Coming Soon
-                      </span>
-                    </div>
-                    <h3 className="text-[15px] font-semibold leading-snug" style={{ color: "rgba(255,255,255,0.7)" }}>{session.title}</h3>
-                    <p className="text-xs leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.35)" }}>
-                      <span className="font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>WAVV Focus:</span> {session.wavvFocus}
-                    </p>
-                    <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                      <div className="flex items-start gap-2">
-                        <Clock size={13} className="flex-shrink-0 mt-0.5" style={{ color: "#f59e0b" }} />
-                        <span className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.4)" }}>Content will be available soon</span>
+                    <div className="absolute inset-0" style={{ background: "#000" }} />
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.08 }} xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern id={`circuit-acc-${session.id}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                          <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={session.color} strokeWidth="0.8" fill="none"/>
+                          <circle cx="10" cy="10" r="2" fill={session.color}/>
+                          <circle cx="50" cy="10" r="2" fill={session.color}/>
+                          <circle cx="50" cy="50" r="2" fill={session.color}/>
+                          <circle cx="30" cy="30" r="1.5" fill={session.color}/>
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill={`url(#circuit-acc-${session.id})`}/>
+                    </svg>
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${session.color}15 0%, transparent 75%)` }} />
+                    <div className="relative flex items-center h-full px-8 py-6 gap-6">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" style={{ background: `${session.color}18`, color: session.color }}>Session {session.id}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}>Coming Soon</span>
+                        </div>
+                        <h3 className="text-xl font-extrabold text-white leading-tight mb-1">{session.title}</h3>
+                        <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>{session.wavvFocus}</p>
                       </div>
                     </div>
                   </div>
@@ -839,69 +847,100 @@ export default function Accelerator() {
                   <a
                     key={session.id}
                     href={`/accelerator/session/${session.id}`}
-                    className="rounded-2xl p-6 space-y-4 transition-all group cursor-pointer h-full flex flex-col"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = `${session.color}0a`;
-                      e.currentTarget.style.borderColor = `${session.color}30`;
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = `0 8px 24px ${session.color}12`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "none";
+                    className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.005]"
+                    style={{
+                      textDecoration: "none",
+                      border: `1px solid ${session.color}60`,
+                      height: "180px",
+                      boxShadow: `0 0 0 1px ${session.color}20, 0 4px 32px ${session.color}18`,
                     }}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                        style={{ background: `${session.color}18`, color: session.color }}>
-                        Session {session.id}
-                      </span>
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
-                        style={{ background: "rgba(255,255,255,0.04)" }}>
-                        <ChevronRight size={14} className="text-gray-600 group-hover:text-white transition-colors" />
+                    {/* Deep space black base */}
+                    <div className="absolute inset-0" style={{ background: "#000" }} />
+
+                    {/* Circuit board SVG pattern */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern id={`circuit-acc-${session.id}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                          <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={session.color} strokeWidth="0.8" fill="none"/>
+                          <circle cx="10" cy="10" r="2" fill={session.color}/>
+                          <circle cx="50" cy="10" r="2" fill={session.color}/>
+                          <circle cx="50" cy="50" r="2" fill={session.color}/>
+                          <circle cx="30" cy="30" r="1.5" fill={session.color}/>
+                          <path d="M0 30 L10 30 M60 50 L50 50" stroke={session.color} strokeWidth="0.6" fill="none"/>
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill={`url(#circuit-acc-${session.id})`}/>
+                    </svg>
+
+                    {/* Full-width radial color glow */}
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${session.color}28 0%, ${session.color}10 45%, transparent 75%)` }} />
+
+                    {/* Secondary glow — left edge */}
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 80% at 15% 50%, ${session.color}12 0%, transparent 60%)` }} />
+
+                    {/* Neon scan line */}
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(180deg, ${session.color}06 0%, ${session.color}12 50%, ${session.color}06 100%)` }} />
+
+                    {/* Top edge neon line */}
+                    <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${session.color}60 30%, ${session.color}90 60%, transparent 100%)` }} />
+
+                    {/* Hover neon border pulse */}
+                    <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${session.color}80, 0 0 24px ${session.color}30` }} />
+
+                    {/* Content overlay */}
+                    <div className="relative flex items-center h-full px-8 py-6 gap-6">
+                      <div className="flex-1">
+                        <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: session.color }}>
+                          WAVV Accelerator
+                        </p>
+                        <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-1">
+                          Session {session.id}: {session.title}
+                        </h2>
+                        <p className="text-sm text-white" style={{ maxWidth: "500px" }}>{session.outcome}</p>
                       </div>
-                    </div>
-                    <h3 className="text-[15px] font-semibold text-white leading-snug">{session.title}</h3>
-                    <p className="text-xs leading-relaxed flex-1 text-white">
-                      <span className="font-medium text-white">WAVV Focus:</span> {session.wavvFocus}
-                    </p>
-                    <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                      <div className="flex items-start gap-2">
-                        <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: session.color }} />
-                        <span className="text-[11px] leading-snug text-white">{session.outcome}</span>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors" style={{ background: `${session.color}20` }}>
+                        <ChevronRight size={20} style={{ color: session.color }} className="group-hover:translate-x-0.5 transition-transform" />
                       </div>
                     </div>
                   </a>
                 );
               }
-              // Locked — grayed out with Week 1 free badge if applicable
+
+              // Locked — grayed out banner
               return (
                 <div
                   key={session.id}
-                  className="rounded-2xl p-6 h-full flex flex-col relative overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", opacity: session.week === 1 && week1FreeActive ? 0.75 : 0.55 }}
+                  className="relative overflow-hidden rounded-2xl"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    height: "180px",
+                    opacity: 0.5,
+                  }}
                 >
-                  <div className="space-y-4 h-full flex flex-col pointer-events-none select-none" style={{ filter: "blur(4px)" }}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                        style={{ background: `${session.color}12`, color: `${session.color}99` }}>
-                        Session {session.id}
-                      </span>
-                      <Lock size={14} style={{ color: "rgba(255,255,255,0.25)" }} />
+                  <div className="absolute inset-0" style={{ background: "#000" }} />
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.06 }} xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <pattern id={`circuit-acc-${session.id}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                        <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={session.color} strokeWidth="0.8" fill="none"/>
+                        <circle cx="10" cy="10" r="2" fill={session.color}/>
+                        <circle cx="50" cy="10" r="2" fill={session.color}/>
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill={`url(#circuit-acc-${session.id})`}/>
+                  </svg>
+                  <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${session.color}10 0%, transparent 75%)` }} />
+                  <div className="relative flex items-center h-full px-8 py-6 gap-6 pointer-events-none select-none" style={{ filter: "blur(2px)" }}>
+                    <div className="flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: `${session.color}66` }}>
+                        WAVV Accelerator
+                      </p>
+                      <h2 className="text-2xl font-extrabold leading-tight mb-1" style={{ color: "rgba(255,255,255,0.5)" }}>
+                        Session {session.id}: {session.title}
+                      </h2>
+                      <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>{session.outcome}</p>
                     </div>
-                    <h3 className="text-[15px] font-semibold leading-snug" style={{ color: "rgba(255,255,255,0.6)" }}>{session.title}</h3>
-                    <p className="text-xs leading-relaxed flex-1" style={{ color: "rgba(255,255,255,0.35)" }}>
-                      <span className="font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>WAVV Focus:</span> {session.wavvFocus}
-                    </p>
-                    <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                      <div className="flex items-start gap-2">
-                        <CheckCircle2 size={13} className="flex-shrink-0 mt-0.5" style={{ color: `${session.color}66` }} />
-                        <span className="text-[11px] leading-snug" style={{ color: "rgba(255,255,255,0.35)" }}>{session.outcome}</span>
-                      </div>
-                    </div>
+                    <Lock size={20} style={{ color: "rgba(255,255,255,0.2)" }} />
                   </div>
                 </div>
               );
@@ -915,7 +954,7 @@ export default function Accelerator() {
         {/* ── The Partnership ── */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
+            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #00A9E2)" }} />
             <h2 className="text-2xl font-extrabold text-white">The Partnership</h2>
           </div>
           <div
@@ -972,7 +1011,7 @@ export default function Accelerator() {
         {/* ── What's Included ── */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
+            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #67C728)" }} />
             <h2 className="text-2xl font-extrabold text-white">What's Included</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -990,17 +1029,7 @@ export default function Accelerator() {
                   e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
                 }}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: `${prop.color}15` }}>
-                  {prop.title === "Private Slack Community" ? (
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                      style={{ filter: `drop-shadow(0 0 5px ${prop.color})` }}>
-                      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#f97316"/>
-                    </svg>
-                  ) : (
-                    <prop.icon size={20} style={{ color: prop.color }} />
-                  )}
-                </div>
+                <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: `linear-gradient(180deg, ${prop.color}, ${prop.color}55)` }} />
                 <h3 className="text-sm font-semibold text-white">{prop.title}</h3>
                 <p className="text-xs text-white leading-relaxed flex-1">{prop.description}</p>
               </div>
@@ -1013,7 +1042,7 @@ export default function Accelerator() {
           <section className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #ECB22E, #E01E5A)" }} />
-              <h2 className="text-2xl font-extrabold text-white">Join the Slack Community</h2>
+              <h2 className="text-2xl font-extrabold text-white">Community</h2>
             </div>
             {hasAccess ? (
               (() => {
@@ -1075,10 +1104,7 @@ export default function Accelerator() {
 
         {/* ── FAQ ── */}
         <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #f97316, #ea580c)" }} />
-            <h2 className="text-2xl font-extrabold text-white">FAQs</h2>
-          </div>
+          <h2 className="text-2xl font-extrabold text-white">FAQs</h2>
           <div className="space-y-2">
             {FAQS.map((faq, idx) => (
               <div
