@@ -36,6 +36,7 @@ const CATEGORIES = [
     color: "#0074F4",
     icon: Compass,
     bgPosition: "60% center",
+    bgSize: "100% auto",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-onboarding-compass-banner-YbicPXD3ys442NgmseuCgq.webp",
     placeholders: [
       {
@@ -71,6 +72,7 @@ const CATEGORIES = [
     color: "#00A9E2",
     icon: Wrench,
     bgPosition: "60% 20%",
+    bgSize: "70% auto",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-howto-banner-VfckEZXCoBSM5mgbMe7eP5.webp",
     placeholders: [
       {
@@ -106,6 +108,7 @@ const CATEGORIES = [
     color: "#67C728",
     icon: Lightbulb,
     bgPosition: "60% 20%",
+    bgSize: "70% auto",
     thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/academy-strategy-banner-TYUrEvUSdZ4nQiZC2YJrtp.webp",
     placeholders: [
       {
@@ -428,9 +431,9 @@ export default function Academy() {
                     className="absolute inset-0 pointer-events-none"
                     style={{
                       backgroundImage: `url(${cat.thumbnail})`,
-                      backgroundSize: "cover",
+                      backgroundSize: (cat as any).bgSize ?? "100% auto",
                       backgroundRepeat: "no-repeat",
-                      backgroundPosition: cat.bgPosition ?? "right center",
+                      backgroundPosition: cat.bgPosition ?? "center center",
                       opacity: 0.55,
                     }}
                   />
