@@ -3448,7 +3448,7 @@ function ContentTab() {
 
       {/* ── Section 1: Live Sections & Courses ── */}
       <div className="pb-10">
-        <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center gap-3 mb-5 px-4 py-3 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#22c55e", boxShadow: "0 0 6px #22c55e80" }} />
             <h2 className="text-base font-bold text-white tracking-tight">Live Sections &amp; Courses</h2>
@@ -3486,7 +3486,7 @@ function ContentTab() {
 
       {/* ── Section 2: Inactive Sections / Videos ── always visible ── */}
       <div className="pt-2">
-        <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center gap-3 mb-5 px-4 py-3 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
           <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#4b5563" }} />
           <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections &amp; Courses</h2>
         </div>
@@ -9295,11 +9295,36 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
           </button>
         </div>
       </div>
-      {/* Collapsible content */}
+      {/* Collapsible content — 3 sub-tables: Live Calls, Product Training, Recordings */}
       {open && (
         <div style={{ background: "#1a1f2e" }}>
-          <SessionLiveCallsInline sessionNumber={session.week} sessionColor={session.color} />
-          <SessionContentInline sessionNumber={session.week} sessionColor={session.color} />
+          <AcceleratorSubTable
+            title="Live Call Events"
+            icon="calendar"
+            color="#0074F4"
+            columns={["Title", "Date / Time", "Call #", "Actions"]}
+            sessionNumber={session.week}
+            sessionColor={session.color}
+            contentType="liveCalls"
+          />
+          <AcceleratorSubTable
+            title="Product Training"
+            icon="play"
+            color="#00A9E2"
+            columns={["Title", "Host", "Duration", "Actions"]}
+            sessionNumber={session.week}
+            sessionColor={session.color}
+            contentType="product_training"
+          />
+          <AcceleratorSubTable
+            title="Previous Session Recordings"
+            icon="video"
+            color="#67C728"
+            columns={["Title", "Host", "Duration", "Actions"]}
+            sessionNumber={session.week}
+            sessionColor={session.color}
+            contentType="recording"
+          />
         </div>
       )}
     </div>
@@ -9376,13 +9401,39 @@ function AcceleratorTab() {
     );
   }
 
+  const [addDialog, setAddDialog] = useState<{ type: "liveCall" | "productTraining" | "recording"; sessionNumber: number | null } | null>(null);
+
   return (
     <div className="space-y-4 mt-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      {/* Top header bar — mirrors Webinars CMS */}
+      <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-400" />
-          <h2 className="text-base font-bold text-white">Live Sessions</h2>
+          <h2 className="text-base font-bold text-white">WAVV Accelerator Sessions</h2>
+          <span className="text-xs text-gray-500">&mdash; {sessions.length} session{sessions.length !== 1 ? "s" : ""}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setAddDialog({ type: "liveCall", sessionNumber: sessions[0]?.week ?? null })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
+          >
+            <Plus size={12} /> Add Live Call Event
+          </button>
+          <button
+            onClick={() => setAddDialog({ type: "productTraining", sessionNumber: sessions[0]?.week ?? null })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}
+          >
+            <Plus size={12} /> Add Product Training
+          </button>
+          <button
+            onClick={() => setAddDialog({ type: "recording", sessionNumber: sessions[0]?.week ?? null })}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }}
+          >
+            <Plus size={12} /> Add Previous Recording
+          </button>
         </div>
       </div>
 
@@ -9397,6 +9448,16 @@ function AcceleratorTab() {
             <AcceleratorSessionBlock key={session.id} session={session} onEdit={startEdit} />
           ))}
         </div>
+      )}
+
+      {/* Global Add Dialog — opens from top header buttons */}
+      {addDialog && (
+        <AcceleratorAddDialog
+          sessions={sessions}
+          initialType={addDialog.type}
+          initialSession={addDialog.sessionNumber}
+          onClose={() => setAddDialog(null)}
+        />
       )}
 
       {/* Edit Details Dialog */}
@@ -9469,6 +9530,610 @@ function AcceleratorTab() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── AcceleratorSubTable — webinar-style sub-table for each content type ─────
+function AcceleratorSubTable({
+  title, icon, color, columns, sessionNumber, sessionColor, contentType
+}: {
+  title: string;
+  icon: "calendar" | "play" | "video";
+  color: string;
+  columns: string[];
+  sessionNumber: number;
+  sessionColor: string;
+  contentType: "liveCalls" | "product_training" | "recording";
+}) {
+  const utils = trpc.useUtils();
+  const { data: liveCalls = [], isLoading: lcLoading } = trpc.accelerator.listLiveCalls.useQuery(
+    { sessionNumber },
+    { enabled: contentType === "liveCalls" }
+  );
+  const { data: content = [], isLoading: ctLoading } = trpc.accelerator.listContent.useQuery(
+    { sessionNumber, contentType: contentType !== "liveCalls" ? contentType : undefined },
+    { enabled: contentType !== "liveCalls" }
+  );
+
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  // Live call form state
+  const [lcForm, setLcForm] = useState({
+    callNumber: 1, title: "", description: "", scheduledDate: "", scheduledTime: "12:00",
+    timezone: "America/Denver" as string, durationMinutes: 90, registrationUrl: "", joinUrl: "",
+  });
+
+  // Content form state
+  const [ctForm, setCtForm] = useState({
+    title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "",
+    description: "", comingSoon: false, cheatSheetUrl: "",
+  });
+
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingCheatSheet, setUploadingCheatSheet] = useState(false);
+
+  const inputStyle: React.CSSProperties = {
+    background: "#111", border: "1px solid #2a2a2a", color: "#fff",
+    borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none"
+  };
+
+  // Mutations — live calls
+  const createLcMut = trpc.accelerator.createLiveCall.useMutation({
+    onSuccess: () => { utils.accelerator.listLiveCalls.invalidate(); toast.success("Live call created"); resetForm(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const updateLcMut = trpc.accelerator.updateLiveCall.useMutation({
+    onSuccess: () => { utils.accelerator.listLiveCalls.invalidate(); toast.success("Live call updated"); resetForm(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const deleteLcMut = trpc.accelerator.deleteLiveCall.useMutation({
+    onSuccess: () => { utils.accelerator.listLiveCalls.invalidate(); toast.success("Deleted"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  // Mutations — content
+  const uploadVideoMut = trpc.accelerator.uploadVideo.useMutation({
+    onError: (e: any) => toast.error("Upload failed: " + e.message),
+  });
+  const uploadCheatSheetMut = trpc.accelerator.uploadCheatSheet.useMutation({
+    onError: (e: any) => toast.error("Upload failed: " + e.message),
+  });
+  const createCtMut = trpc.accelerator.createContent.useMutation({
+    onSuccess: () => { utils.accelerator.listContent.invalidate({ sessionNumber }); toast.success("Content added"); resetForm(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const updateCtMut = trpc.accelerator.updateContent.useMutation({
+    onSuccess: () => { utils.accelerator.listContent.invalidate({ sessionNumber }); toast.success("Updated"); resetForm(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const deleteCtMut = trpc.accelerator.deleteContent.useMutation({
+    onSuccess: () => { utils.accelerator.listContent.invalidate({ sessionNumber }); toast.success("Deleted"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  function resetForm() {
+    setShowForm(false);
+    setEditingId(null);
+    setLcForm({ callNumber: 1, title: "", description: "", scheduledDate: "", scheduledTime: "12:00", timezone: "America/Denver", durationMinutes: 90, registrationUrl: "", joinUrl: "" });
+    setCtForm({ title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "", description: "", comingSoon: false, cheatSheetUrl: "" });
+  }
+
+  function startEditLc(call: any) {
+    setEditingId(call.id);
+    setShowForm(true);
+    const d = call.scheduledAt ? new Date(call.scheduledAt) : null;
+    setLcForm({
+      callNumber: call.callNumber ?? 1,
+      title: call.title ?? "",
+      description: call.description ?? "",
+      scheduledDate: d ? d.toISOString().slice(0, 10) : "",
+      scheduledTime: d ? `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}` : "12:00",
+      timezone: "America/Denver",
+      durationMinutes: call.durationMinutes ?? 90,
+      registrationUrl: call.registrationUrl ?? "",
+      joinUrl: call.joinUrl ?? "",
+    });
+  }
+
+  function startEditCt(item: any) {
+    setEditingId(item.id);
+    setShowForm(true);
+    setCtForm({
+      title: item.title ?? "",
+      loomUrl: item.loomUrl ?? "",
+      thumbnailUrl: item.thumbnailUrl ?? "",
+      hostName: item.hostName ?? "",
+      duration: item.duration ?? "",
+      description: item.description ?? "",
+      comingSoon: item.comingSoon ?? false,
+      cheatSheetUrl: item.cheatSheetUrl ?? "",
+    });
+  }
+
+  function tzLocalToUtc(dateStr: string, timeStr: string, tz: string): string {
+    // Build a date string and parse it as if it's in the given timezone
+    const dtStr = `${dateStr}T${timeStr}:00`;
+    // Use Intl to get the offset
+    const d = new Date(dtStr);
+    const formatter = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const parts = formatter.formatToParts(d);
+    const p: Record<string, string> = {};
+    parts.forEach(({ type, value }) => { p[type] = value; });
+    const localDate = new Date(`${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}`);
+    const offset = localDate.getTime() - d.getTime();
+    return new Date(d.getTime() - offset).toISOString();
+  }
+
+  function saveLc() {
+    const utcScheduledAt = lcForm.scheduledDate ? tzLocalToUtc(lcForm.scheduledDate, lcForm.scheduledTime, lcForm.timezone) : "";
+    if (editingId) {
+      updateLcMut.mutate({ id: editingId, callNumber: lcForm.callNumber, title: lcForm.title, description: lcForm.description || null, scheduledAt: utcScheduledAt, durationMinutes: lcForm.durationMinutes, registrationUrl: lcForm.registrationUrl || null, joinUrl: lcForm.joinUrl || null, thumbnailUrl: null });
+    } else {
+      createLcMut.mutate({ sessionNumber, callNumber: lcForm.callNumber, title: lcForm.title, description: lcForm.description || null, scheduledAt: utcScheduledAt, durationMinutes: lcForm.durationMinutes, registrationUrl: lcForm.registrationUrl || null, joinUrl: lcForm.joinUrl || null, thumbnailUrl: null });
+    }
+  }
+
+  async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500 * 1024 * 1024) { toast.error("Video too large — max 500 MB"); return; }
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "mp4";
+    type AllowedMime = "video/mp4" | "video/webm" | "video/ogg" | "video/quicktime";
+    const mimeMap: Record<string, AllowedMime> = { mp4: "video/mp4", webm: "video/webm", ogg: "video/ogg", mov: "video/quicktime" };
+    const mimeType = mimeMap[ext];
+    if (!mimeType) { toast.error("Unsupported format — use MP4, WebM, OGG, or MOV"); return; }
+    setUploadingVideo(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const result = await uploadVideoMut.mutateAsync({ base64, mimeType, fileName: file.name });
+      setCtForm(f => ({ ...f, loomUrl: result.url }));
+      toast.success("Video uploaded");
+    } catch { /* handled */ } finally { setUploadingVideo(false); }
+  }
+
+  function saveCt() {
+    if (editingId) {
+      updateCtMut.mutate({ id: editingId, title: ctForm.title, loomUrl: ctForm.loomUrl || null, thumbnailUrl: ctForm.thumbnailUrl || null, hostName: ctForm.hostName || null, duration: ctForm.duration || null, description: ctForm.description || null, comingSoon: ctForm.comingSoon, cheatSheetUrl: ctForm.cheatSheetUrl || null });
+    } else {
+      createCtMut.mutate({ sessionNumber, contentType: contentType as "recording" | "product_training", title: ctForm.title, loomUrl: ctForm.loomUrl || null, thumbnailUrl: ctForm.thumbnailUrl || null, hostName: ctForm.hostName || null, duration: ctForm.duration || null, description: ctForm.description || null, comingSoon: ctForm.comingSoon, cheatSheetUrl: ctForm.cheatSheetUrl || null });
+    }
+  }
+
+  const isLoading = contentType === "liveCalls" ? lcLoading : ctLoading;
+  const rows = contentType === "liveCalls" ? liveCalls : content;
+
+  return (
+    <div style={{ borderTop: "1px solid #2a2a2a" }}>
+      {/* Sub-table header — black, always visible */}
+      <div className="flex items-center justify-between px-4 py-2.5" style={{ background: "#000000" }}>
+        <div className="flex items-center gap-2">
+          {icon === "calendar" && <CalendarDays size={13} style={{ color }} />}
+          {icon === "play" && <Play size={13} style={{ color }} />}
+          {icon === "video" && <Video size={13} style={{ color }} />}
+          <span className="text-xs font-semibold text-white">{title}</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: `${color}18`, color }}>
+            {rows.length}
+          </span>
+        </div>
+        <button
+          onClick={() => { resetForm(); setShowForm(true); }}
+          className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg font-semibold transition hover:opacity-90"
+          style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}
+        >
+          <Plus size={11} /> Add
+        </button>
+      </div>
+
+      {/* Column headers — gray */}
+      <div
+        className="grid text-[10px] font-semibold text-gray-400 px-4 py-1.5"
+        style={{
+          background: "#1d2230",
+          gridTemplateColumns: contentType === "liveCalls" ? "1fr 1fr 80px 80px" : "1fr 120px 80px 80px",
+        }}
+      >
+        {columns.map((col) => <span key={col}>{col}</span>)}
+      </div>
+
+      {/* Rows */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-6" style={{ background: "#1a1f2e" }}>
+          <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${color} transparent ${color} ${color}` }} />
+        </div>
+      ) : rows.length === 0 && !showForm ? (
+        <div className="px-4 py-4 text-center" style={{ background: "#1a1f2e" }}>
+          <p className="text-xs text-gray-500">No {title.toLowerCase()} yet for Session {sessionNumber}.</p>
+        </div>
+      ) : (
+        <div style={{ background: "#1a1f2e" }}>
+          {contentType === "liveCalls" ? (
+            (rows as any[]).map((call: any, i: number) => (
+              <div
+                key={call.id}
+                className="grid items-center px-4 py-2.5 text-xs"
+                style={{
+                  gridTemplateColumns: "1fr 1fr 80px 80px",
+                  background: i % 2 === 0 ? "#1a1f2e" : "#212840",
+                  borderTop: "1px solid #2a2a2a",
+                }}
+              >
+                <span className="text-white font-medium truncate pr-2">{call.title}</span>
+                <span className="text-gray-400 truncate pr-2">
+                  {call.scheduledAt ? new Date(call.scheduledAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true }) : "—"}
+                  {call.durationMinutes && <span className="text-gray-500"> · {call.durationMinutes}m</span>}
+                </span>
+                <span className="text-gray-400">Call {call.callNumber ?? "—"}</span>
+                <div className="flex items-center gap-1.5">
+                  <button onClick={() => startEditLc(call)} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white transition"><Pencil size={11} /></button>
+                  <button onClick={() => { if (confirm("Delete this live call?")) deleteLcMut.mutate({ id: call.id }); }} className="p-1 rounded hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition"><Trash2 size={11} /></button>
+                </div>
+              </div>
+            ))
+          ) : (
+            (rows as any[]).map((item: any, i: number) => (
+              <div
+                key={item.id}
+                className="grid items-center px-4 py-2.5 text-xs"
+                style={{
+                  gridTemplateColumns: "1fr 120px 80px 80px",
+                  background: i % 2 === 0 ? "#1a1f2e" : "#212840",
+                  borderTop: "1px solid #2a2a2a",
+                }}
+              >
+                <span className="text-white font-medium truncate pr-2">{item.title}</span>
+                <span className="text-gray-400 truncate pr-2">{item.hostName ?? "—"}</span>
+                <span className="text-gray-400">{item.duration ?? "—"}</span>
+                <div className="flex items-center gap-1.5">
+                  <button onClick={() => startEditCt(item)} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white transition"><Pencil size={11} /></button>
+                  <button onClick={() => { if (confirm("Delete this content?")) deleteCtMut.mutate({ id: item.id }); }} className="p-1 rounded hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition"><Trash2 size={11} /></button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Inline Add/Edit Form */}
+      {showForm && (
+        <div className="p-4" style={{ background: "#161a22", borderTop: "1px solid #2a2a2a" }}>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-white">
+              {editingId ? `Edit ${title.slice(0, -1)}` : `New ${title.slice(0, -1)}`}
+            </h4>
+            <button onClick={resetForm} className="text-gray-400 hover:text-white"><X size={15} /></button>
+          </div>
+
+          {contentType === "liveCalls" ? (
+            /* Live Call Form */
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="text-[11px] text-gray-400 mb-1 block">Title *</label>
+                  <input style={inputStyle} value={lcForm.title} onChange={e => setLcForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Session 1 · Call 1 of 2" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Call Number</label>
+                  <select style={inputStyle} value={lcForm.callNumber} onChange={e => setLcForm(f => ({ ...f, callNumber: Number(e.target.value) }))}>
+                    <option value={1}>Call 1 of 2</option>
+                    <option value={2}>Call 2 of 2</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Date *</label>
+                  <input type="date" style={inputStyle} value={lcForm.scheduledDate} onChange={e => setLcForm(f => ({ ...f, scheduledDate: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Time *</label>
+                  <select style={inputStyle} value={lcForm.scheduledTime} onChange={e => setLcForm(f => ({ ...f, scheduledTime: e.target.value }))}>
+                    {Array.from({ length: 48 }, (_, i) => {
+                      const h = Math.floor(i / 2);
+                      const m = i % 2 === 0 ? "00" : "30";
+                      const val = `${String(h).padStart(2, "0")}:${m}`;
+                      const label = new Date(`2000-01-01T${val}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+                      return <option key={val} value={val}>{label}</option>;
+                    })}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Timezone</label>
+                  <select style={inputStyle} value={lcForm.timezone} onChange={e => setLcForm(f => ({ ...f, timezone: e.target.value }))}>
+                    <option value="America/New_York">Eastern (ET)</option>
+                    <option value="America/Chicago">Central (CT)</option>
+                    <option value="America/Denver">Mountain (MT)</option>
+                    <option value="America/Los_Angeles">Pacific (PT)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Registration URL</label>
+                  <input style={inputStyle} value={lcForm.registrationUrl} onChange={e => setLcForm(f => ({ ...f, registrationUrl: e.target.value }))} placeholder="https://zoom.us/..." />
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Join URL</label>
+                  <input style={inputStyle} value={lcForm.joinUrl} onChange={e => setLcForm(f => ({ ...f, joinUrl: e.target.value }))} placeholder="https://zoom.us/j/..." />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-1">
+                <button onClick={resetForm} className="text-xs px-3 py-1.5 rounded-lg text-gray-400 hover:text-white">Cancel</button>
+                <button
+                  onClick={saveLc}
+                  disabled={!lcForm.title || createLcMut.isPending || updateLcMut.isPending}
+                  className="text-xs px-4 py-1.5 rounded-lg font-medium text-white disabled:opacity-50"
+                  style={{ background: color }}
+                >
+                  {(createLcMut.isPending || updateLcMut.isPending) ? "Saving..." : editingId ? "Update" : "Create"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Content Form (Product Training / Recording) */
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Title *</label>
+                  <input style={inputStyle} value={ctForm.title} onChange={e => setCtForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Session 1 Recording" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Host</label>
+                  <input style={inputStyle} value={ctForm.hostName} onChange={e => setCtForm(f => ({ ...f, hostName: e.target.value }))} placeholder="e.g. Jake Moser" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-gray-400 mb-1 block">Duration</label>
+                  <input style={inputStyle} value={ctForm.duration} onChange={e => setCtForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45 min" />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-[11px] text-gray-400 mb-1 block">Video URL <span className="text-gray-600">(or upload below)</span></label>
+                  <div className="flex gap-2 items-center">
+                    <input style={{ ...inputStyle, flex: 1 }} value={ctForm.loomUrl} onChange={e => setCtForm(f => ({ ...f, loomUrl: e.target.value }))} placeholder="Paste URL (YouTube, Loom, Vimeo, etc.)" />
+                    <label
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                      style={{ background: uploadingVideo ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingVideo ? "#9ca3af" : "#fff" }}
+                    >
+                      {uploadingVideo ? <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</> : <><FileDown size={13} /> Upload</>}
+                      <input type="file" accept=".mp4,.webm,.ogg,.mov" className="hidden" onChange={handleVideoUpload} disabled={uploadingVideo} />
+                    </label>
+                  </div>
+                </div>
+                {contentType === "product_training" && (
+                  <div className="col-span-2">
+                    <label className="text-[11px] text-gray-400 mb-1 block">Cheat Sheet PDF (optional)</label>
+                    <div className="flex items-center gap-2">
+                      <label
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition hover:opacity-90 flex-shrink-0"
+                        style={{ background: uploadingCheatSheet ? "#252d3d" : "#1d2230", border: "1px solid #3a3a3a", color: uploadingCheatSheet ? "#9ca3af" : "#fff" }}
+                      >
+                        {uploadingCheatSheet ? <><span className="animate-spin w-3 h-3 border border-gray-400 border-t-transparent rounded-full inline-block" /> Uploading...</> : <>📄 {ctForm.cheatSheetUrl ? "Replace PDF" : "Upload PDF"}</>}
+                        <input type="file" accept=".pdf" className="hidden" disabled={uploadingCheatSheet} onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 16 * 1024 * 1024) { toast.error("PDF must be under 16MB"); return; }
+                          setUploadingCheatSheet(true);
+                          try {
+                            const reader = new FileReader();
+                            reader.onload = async () => {
+                              const base64 = (reader.result as string).split(",")[1];
+                              const result = await uploadCheatSheetMut.mutateAsync({ base64, fileName: file.name });
+                              setCtForm(f => ({ ...f, cheatSheetUrl: result.url }));
+                              setUploadingCheatSheet(false);
+                              toast.success("PDF uploaded");
+                            };
+                            reader.readAsDataURL(file);
+                          } catch { setUploadingCheatSheet(false); toast.error("Upload failed"); }
+                        }} />
+                      </label>
+                      {ctForm.cheatSheetUrl && (
+                        <span className="text-[11px] text-green-400 flex items-center gap-1">
+                          ✓ PDF attached
+                          <button onClick={() => setCtForm(f => ({ ...f, cheatSheetUrl: "" }))} className="text-red-400 hover:text-red-300 ml-1">✕</button>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" checked={ctForm.comingSoon} onChange={e => setCtForm(f => ({ ...f, comingSoon: e.target.checked }))} className="w-3.5 h-3.5 rounded accent-yellow-400" />
+                <span className="text-xs" style={{ color: ctForm.comingSoon ? "#F59E0B" : "#6b7280" }}>Mark as Coming Soon</span>
+              </label>
+              <div className="flex justify-end gap-2 pt-1">
+                <button onClick={resetForm} className="text-xs px-3 py-1.5 rounded-lg text-gray-400 hover:text-white">Cancel</button>
+                <button
+                  onClick={saveCt}
+                  disabled={!ctForm.title || createCtMut.isPending || updateCtMut.isPending}
+                  className="text-xs px-4 py-1.5 rounded-lg font-medium text-white disabled:opacity-50"
+                  style={{ background: color }}
+                >
+                  {(createCtMut.isPending || updateCtMut.isPending) ? "Saving..." : editingId ? "Save Changes" : "Create"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── AcceleratorAddDialog — global add dialog from top header buttons ─────────
+function AcceleratorAddDialog({
+  sessions, initialType, initialSession, onClose
+}: {
+  sessions: any[];
+  initialType: "liveCall" | "productTraining" | "recording";
+  initialSession: number | null;
+  onClose: () => void;
+}) {
+  const utils = trpc.useUtils();
+  const [selectedSession, setSelectedSession] = useState<number>(initialSession ?? sessions[0]?.week ?? 1);
+  const [type, setType] = useState(initialType);
+
+  const typeToContentType = { liveCall: "liveCalls" as const, productTraining: "product_training" as const, recording: "recording" as const };
+  const typeColor = { liveCall: "#0074F4", productTraining: "#00A9E2", recording: "#67C728" };
+  const typeLabel = { liveCall: "Live Call Event", productTraining: "Product Training", recording: "Previous Recording" };
+
+  const [lcForm, setLcForm] = useState({
+    callNumber: 1, title: "", description: "", scheduledDate: "", scheduledTime: "12:00",
+    timezone: "America/Denver" as string, durationMinutes: 90, registrationUrl: "", joinUrl: "",
+  });
+  const [ctForm, setCtForm] = useState({
+    title: "", loomUrl: "", thumbnailUrl: "", hostName: "", duration: "",
+    description: "", comingSoon: false, cheatSheetUrl: "",
+  });
+
+  const inputStyle: React.CSSProperties = {
+    background: "#111", border: "1px solid #2a2a2a", color: "#fff",
+    borderRadius: "8px", padding: "8px 10px", fontSize: "13px", width: "100%", outline: "none"
+  };
+
+  const createLcMut = trpc.accelerator.createLiveCall.useMutation({
+    onSuccess: () => { utils.accelerator.listLiveCalls.invalidate(); toast.success("Live call created"); onClose(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+  const createCtMut = trpc.accelerator.createContent.useMutation({
+    onSuccess: () => { utils.accelerator.listContent.invalidate(); toast.success("Content added"); onClose(); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  function save() {
+    if (type === "liveCall") {
+      if (!lcForm.title || !lcForm.scheduledDate) { toast.error("Title and date are required"); return; }
+      const d = new Date(`${lcForm.scheduledDate}T${lcForm.scheduledTime}:00`);
+      createLcMut.mutate({ sessionNumber: selectedSession, callNumber: lcForm.callNumber, title: lcForm.title, description: lcForm.description || null, scheduledAt: d.toISOString(), durationMinutes: lcForm.durationMinutes, registrationUrl: lcForm.registrationUrl || null, joinUrl: lcForm.joinUrl || null, thumbnailUrl: null });
+    } else {
+      if (!ctForm.title) { toast.error("Title is required"); return; }
+      const contentType = type === "productTraining" ? "product_training" : "recording";
+      createCtMut.mutate({ sessionNumber: selectedSession, contentType, title: ctForm.title, loomUrl: ctForm.loomUrl || null, thumbnailUrl: null, hostName: ctForm.hostName || null, duration: ctForm.duration || null, description: ctForm.description || null, comingSoon: ctForm.comingSoon, cheatSheetUrl: ctForm.cheatSheetUrl || null });
+    }
+  }
+
+  const color = typeColor[type];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 space-y-4" style={{ background: "#161a22", border: "1px solid #2a2a2a" }} onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-white">Add {typeLabel[type]}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={18} /></button>
+        </div>
+
+        {/* Type selector */}
+        <div className="flex gap-2">
+          {(["liveCall", "productTraining", "recording"] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className="flex-1 text-xs py-1.5 rounded-lg font-semibold transition"
+              style={type === t
+                ? { background: `${typeColor[t]}20`, color: typeColor[t], border: `1px solid ${typeColor[t]}50` }
+                : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }
+              }
+            >
+              {typeLabel[t]}
+            </button>
+          ))}
+        </div>
+
+        {/* Session selector */}
+        <div>
+          <label className="text-[11px] text-gray-400 mb-1 block">Session</label>
+          <select style={inputStyle} value={selectedSession} onChange={e => setSelectedSession(Number(e.target.value))}>
+            {sessions.map((s: any) => (
+              <option key={s.week} value={s.week}>Session {s.week}{s.title ? ` — ${s.title}` : ""}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Form fields */}
+        {type === "liveCall" ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-[11px] text-gray-400 mb-1 block">Title *</label>
+              <input style={inputStyle} value={lcForm.title} onChange={e => setLcForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Session 1 · Call 1 of 2" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Call Number</label>
+                <select style={inputStyle} value={lcForm.callNumber} onChange={e => setLcForm(f => ({ ...f, callNumber: Number(e.target.value) }))}>
+                  <option value={1}>Call 1 of 2</option>
+                  <option value={2}>Call 2 of 2</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Date *</label>
+                <input type="date" style={inputStyle} value={lcForm.scheduledDate} onChange={e => setLcForm(f => ({ ...f, scheduledDate: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Time</label>
+                <select style={inputStyle} value={lcForm.scheduledTime} onChange={e => setLcForm(f => ({ ...f, scheduledTime: e.target.value }))}>
+                  {Array.from({ length: 48 }, (_, i) => {
+                    const h = Math.floor(i / 2);
+                    const m = i % 2 === 0 ? "00" : "30";
+                    const val = `${String(h).padStart(2, "0")}:${m}`;
+                    const label = new Date(`2000-01-01T${val}`).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+                    return <option key={val} value={val}>{label}</option>;
+                  })}
+                </select>
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Timezone</label>
+                <select style={inputStyle} value={lcForm.timezone} onChange={e => setLcForm(f => ({ ...f, timezone: e.target.value }))}>
+                  <option value="America/New_York">Eastern (ET)</option>
+                  <option value="America/Chicago">Central (CT)</option>
+                  <option value="America/Denver">Mountain (MT)</option>
+                  <option value="America/Los_Angeles">Pacific (PT)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Registration URL</label>
+                <input style={inputStyle} value={lcForm.registrationUrl} onChange={e => setLcForm(f => ({ ...f, registrationUrl: e.target.value }))} placeholder="https://zoom.us/..." />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Join URL</label>
+                <input style={inputStyle} value={lcForm.joinUrl} onChange={e => setLcForm(f => ({ ...f, joinUrl: e.target.value }))} placeholder="https://zoom.us/j/..." />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Title *</label>
+                <input style={inputStyle} value={ctForm.title} onChange={e => setCtForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Session 1 Recording" />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Host</label>
+                <input style={inputStyle} value={ctForm.hostName} onChange={e => setCtForm(f => ({ ...f, hostName: e.target.value }))} placeholder="e.g. Jake Moser" />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Duration</label>
+                <input style={inputStyle} value={ctForm.duration} onChange={e => setCtForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45 min" />
+              </div>
+              <div>
+                <label className="text-[11px] text-gray-400 mb-1 block">Video URL</label>
+                <input style={inputStyle} value={ctForm.loomUrl} onChange={e => setCtForm(f => ({ ...f, loomUrl: e.target.value }))} placeholder="YouTube, Loom, Vimeo..." />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2 pt-2">
+          <button onClick={onClose} className="text-xs px-3 py-1.5 rounded-lg text-gray-400 hover:text-white">Cancel</button>
+          <button
+            onClick={save}
+            disabled={createLcMut.isPending || createCtMut.isPending}
+            className="text-xs px-4 py-1.5 rounded-lg font-medium text-white disabled:opacity-50"
+            style={{ background: color }}
+          >
+            {(createLcMut.isPending || createCtMut.isPending) ? "Saving..." : "Create"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

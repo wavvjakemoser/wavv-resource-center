@@ -2243,3 +2243,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] WAVV Academy CMS → Inactive Sections always expanded/visible (no click to open)
 - [x] WAVV Academy CMS → remove "Section PDF Resources" section, merge PDF upload into Add Video flow
 - [x] WAVV Academy CMS → move Add Section + Add Video buttons to top right (matching other CMS sections)
+
+## Academy + Accelerator CMS Fixes (Jul 19 2026 - Session 2)
+- [x] ContentTab: "Live Sections & Courses" header row → gray background bar (#1d2230) with border
+- [x] ContentTab: "Inactive Sections & Courses" header row → gray background bar (#1d2230) with border
+- [x] AcceleratorTab: add top header bar with 3 Add buttons (blue: Live Call Event, cyan: Product Training, green: Previous Recording)
+- [x] AcceleratorTab: each session block expands to show 3 sub-tables (Live Call Events, Product Training, Previous Session Recordings)
+- [x] AcceleratorSubTable: black sub-table headers, gray column headers, alternating gray content rows
+- [x] AcceleratorAddDialog: global add dialog from top header buttons with session selector and type switcher
