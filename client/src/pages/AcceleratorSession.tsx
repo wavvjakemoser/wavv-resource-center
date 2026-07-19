@@ -192,57 +192,6 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
           <span className="text-gray-300">{dateLabel}</span>
         </p>
 
-        {/* Countdown digit boxes */}
-        {isCurrentWeek && !isPast && !isLive && (() => {
-          const secsLeft = Math.max(0, Math.floor((utcMs - now) / 1000));
-          const d = Math.floor(secsLeft / 86400);
-          const h = Math.floor((secsLeft % 86400) / 3600);
-          const m = Math.floor((secsLeft % 3600) / 60);
-          const sec = secsLeft % 60;
-          const digits = [
-            { val: d, label: "Days" },
-            { val: h, label: "Hrs" },
-            { val: m, label: "Min" },
-            { val: sec, label: "Sec" },
-          ];
-          return (
-            <div className="flex flex-col items-center gap-1.5 py-1">
-              <span className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>Starts in</span>
-              <div className="flex items-end gap-1">
-                {digits.map(({ val, label }, idx) => (
-                  <div key={label} className="flex items-end gap-1">
-                    <div className="text-center">
-                      <div
-                        className="w-[48px] h-[48px] sm:w-[56px] sm:h-[56px] rounded-xl flex items-center justify-center relative overflow-hidden"
-                        style={{
-                          background: `linear-gradient(160deg, ${glowColor}22 0%, ${glowColor}0a 100%)`,
-                          border: `1.5px solid ${glowColor}40`,
-                          boxShadow: `0 0 12px ${glowColor}15, inset 0 1px 0 rgba(255,255,255,0.06)`,
-                        }}
-                      >
-                        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${glowColor}50, transparent)` }} />
-                        <p
-                          className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight"
-                          style={{ color: "#fff", textShadow: `0 0 16px ${glowColor}70, 0 0 32px ${glowColor}25`, fontVariantNumeric: "tabular-nums" }}
-                        >
-                          {String(val).padStart(2, "0")}
-                        </p>
-                      </div>
-                      <p className="mt-1 text-[8px] uppercase tracking-[0.12em] font-bold" style={{ color: `${glowColor}90` }}>{label}</p>
-                    </div>
-                    {idx < 3 && (
-                      <div className="flex flex-col gap-1.5 pb-5 flex-shrink-0">
-                        <div className="w-1 h-1 rounded-full" style={{ background: `${glowColor}55` }} />
-                        <div className="w-1 h-1 rounded-full" style={{ background: `${glowColor}55` }} />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })()}
-
         {/* CTA buttons */}
         <div className="pt-3 flex flex-col items-center gap-2" style={{ borderTop: `1px solid ${glowColor}18` }}>
           <div className="flex items-center justify-center gap-3 w-full">
@@ -848,16 +797,13 @@ export default function AcceleratorSession() {
           </section>
         )}
 
-        {/* ── Community (simplified) ── */}
+        {/* ── Community ── */}
         <section>
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #ECB22E, #E01E5A)" }} />
-            <h2 className="text-sm font-bold text-white tracking-wide">Community</h2>
-          </div>
+          <h2 className="text-sm font-bold text-white tracking-wide mb-4">Community</h2>
           {session.slackUrl ? (
             <div
               className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
-              style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.18) 0%, rgba(74,21,75,0.06) 100%)", border: "1px solid rgba(74,21,75,0.35)", boxShadow: "0 0 32px rgba(74,21,75,0.12)" }}
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               <div className="flex-1 min-w-0">
                 <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
@@ -868,7 +814,7 @@ export default function AcceleratorSession() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
-                style={{ background: "linear-gradient(135deg, #4A154B, #611f69)", boxShadow: "0 4px 16px rgba(74,21,75,0.4)" }}
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}
               >
                 Join Slack
               </a>
@@ -876,14 +822,14 @@ export default function AcceleratorSession() {
           ) : (
             <div
               className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
-              style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.12) 0%, rgba(74,21,75,0.04) 100%)", border: "1px solid rgba(74,21,75,0.25)" }}
+              style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}
             >
               <div className="flex-1 min-w-0">
                 <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
                 <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
               </div>
               <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
-                style={{ background: "rgba(74,21,75,0.15)", border: "1px solid rgba(74,21,75,0.3)", color: "rgba(255,255,255,0.3)" }}>
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.3)" }}>
                 <Lock size={14} /> Link Coming Soon
               </div>
             </div>

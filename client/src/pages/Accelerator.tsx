@@ -147,40 +147,34 @@ const SESSIONS = [
 
 const VALUE_PROPS = [
   {
-    icon: Target,
     title: "Sales Accelerator Program",
     description: "Live coaching calls twice a week, built around the Money Math equation: more dials → more conversations → more closes.",
     color: "#0074F4",
   },
   {
-    icon: TrendingUp,
     title: "WAVV Product Training",
     description: "Short how-to clips and cheat sheets mapped to each module — learn the sales skill AND how to execute it in WAVV.",
-    color: "#10b981",
+    color: "#00A9E2",
   },
   {
-    icon: Users,
     title: "Community & Accountability",
     description: "Weekly leaderboards, peer mentorship, and a wins channel to keep you dialing and celebrating results.",
-    color: "#8b5cf6",
+    color: "#67C728",
   },
   {
-    icon: Calendar,
     title: "Live Calls & Recordings",
     description: "Join live Tuesday/Thursday coaching calls or catch up with on-demand recordings at your own pace.",
-    color: "#ec4899",
+    color: "#0074F4",
   },
   {
-    icon: Award,
     title: "Milestones & Recognition",
     description: "Earn badges and rewards tied to real activity — first dial, 100 dials, first appointment, first close.",
-    color: "#06b6d4",
+    color: "#00A9E2",
   },
   {
-    icon: MessageSquare,
     title: "Private Slack Community",
     description: "Connect with your cohort, share wins, ask questions, and get peer support between live sessions.",
-    color: "#f97316",
+    color: "#67C728",
   },
 ];
 
@@ -688,7 +682,7 @@ export default function Accelerator() {
 
             {/* Accent line */}
             <div className="flex justify-center mb-5">
-              <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
+  
             </div>
 
             {/* Subline */}
@@ -703,8 +697,7 @@ export default function Accelerator() {
               </span>
             </div>
 
-            {/* ── Large Countdown Timer (inline in hero) ── */}
-            <LiveCallCountdown hasAccess={hasAccess} liveCalls={visibleLiveCalls} dbSessions={dbSessions} />
+
 
             {/* ── "Not registered?" CTA ── */}
             {(() => {
@@ -778,7 +771,6 @@ export default function Accelerator() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #67C728)" }} />
               <h2 className="text-2xl font-extrabold text-white">The Curriculum</h2>
             </div>
             {hasAccess && (
@@ -954,7 +946,6 @@ export default function Accelerator() {
         {/* ── The Partnership ── */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #00A9E2)" }} />
             <h2 className="text-2xl font-extrabold text-white">The Partnership</h2>
           </div>
           <div
@@ -1010,68 +1001,80 @@ export default function Accelerator() {
 
         {/* ── What's Included ── */}
         <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #0074F4, #67C728)" }} />
-            <h2 className="text-2xl font-extrabold text-white">What's Included</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {VALUE_PROPS.map((prop) => (
+          <h2 className="text-2xl font-extrabold text-white">What's Included</h2>
+          <div className="space-y-4">
+            {VALUE_PROPS.map((prop, idx) => (
               <div
                 key={prop.title}
-                className="rounded-2xl p-5 space-y-3 transition-all h-full flex flex-col"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `${prop.color}08`;
-                  e.currentTarget.style.borderColor = `${prop.color}20`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
+                className="group relative overflow-hidden rounded-2xl transition-all duration-200 hover:scale-[1.003]"
+                style={{
+                  border: `1px solid ${prop.color}40`,
+                  height: "120px",
+                  boxShadow: `0 0 0 1px ${prop.color}15, 0 4px 24px ${prop.color}10`,
                 }}
               >
-                <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: `linear-gradient(180deg, ${prop.color}, ${prop.color}55)` }} />
-                <h3 className="text-sm font-semibold text-white">{prop.title}</h3>
-                <p className="text-xs text-white leading-relaxed flex-1">{prop.description}</p>
+                {/* Black base */}
+                <div className="absolute inset-0" style={{ background: "#000" }} />
+
+                {/* Circuit pattern */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.10 }} xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id={`circuit-inc-${idx}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                      <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={prop.color} strokeWidth="0.8" fill="none"/>
+                      <circle cx="10" cy="10" r="2" fill={prop.color}/>
+                      <circle cx="50" cy="10" r="2" fill={prop.color}/>
+                      <circle cx="50" cy="50" r="2" fill={prop.color}/>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill={`url(#circuit-inc-${idx})`}/>
+                </svg>
+
+                {/* Radial glow */}
+                <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 80% 50%, ${prop.color}20 0%, transparent 70%)` }} />
+
+                {/* Top neon line */}
+                <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${prop.color}50 30%, ${prop.color}80 60%, transparent 100%)` }} />
+
+                {/* Hover glow */}
+                <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${prop.color}60, 0 0 20px ${prop.color}20` }} />
+
+                {/* Content */}
+                <div className="relative flex items-center h-full px-6 py-4 gap-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-bold text-white mb-1">{prop.title}</h3>
+                    <p className="text-sm text-white" style={{ maxWidth: "500px" }}>{prop.description}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── Join the Slack Community (standalone section, always visible) ── */}
+        {/* ── Community ── */}
         {accessResolved && (
           <section className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(180deg, #ECB22E, #E01E5A)" }} />
-              <h2 className="text-2xl font-extrabold text-white">Community</h2>
-            </div>
+            <h2 className="text-2xl font-extrabold text-white">Community</h2>
             {hasAccess ? (
               (() => {
                 const slackSession = dbSessions.find((s: any) => s.slackUrl);
                 return (
                   <div
                     className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
-                    style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.18) 0%, rgba(74,21,75,0.06) 100%)", border: "1px solid rgba(74,21,75,0.35)", boxShadow: "0 0 32px rgba(74,21,75,0.12)" }}
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
                   >
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(74,21,75,0.3)", border: "1px solid rgba(74,21,75,0.5)" }}>
-                      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 0 8px #ECB22E) drop-shadow(0 0 16px #E01E5A44)" }}>
-                        <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
-                      </svg>
-                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(236,178,46,0.8)" }}>Members Only</p>
                       <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
-                      <p className="text-sm mt-1 text-white">Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
+                      <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
                     </div>
                     {slackSession?.slackUrl ? (
                       <a href={slackSession.slackUrl} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
-                        style={{ background: "linear-gradient(135deg, #4A154B, #611f69)", boxShadow: "0 4px 16px rgba(74,21,75,0.4)" }}>
-                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="white"/></svg>
+                        style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.15)" }}>
                         Join Slack
                       </a>
                     ) : (
                       <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
-                        style={{ background: "rgba(74,21,75,0.2)", border: "1px solid rgba(74,21,75,0.3)", color: "rgba(255,255,255,0.3)" }}>
+                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.3)" }}>
                         Link Coming Soon
                       </span>
                     )}
@@ -1081,20 +1084,14 @@ export default function Accelerator() {
             ) : (
               <div
                 className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
-                style={{ background: "linear-gradient(135deg, rgba(74,21,75,0.12) 0%, rgba(74,21,75,0.04) 100%)", border: "1px solid rgba(74,21,75,0.25)" }}
+                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}
               >
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(74,21,75,0.2)", border: "1px solid rgba(74,21,75,0.35)" }}>
-                  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.5 }}>
-                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
-                  </svg>
-                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "rgba(236,178,46,0.5)" }}>Community</p>
                   <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
-                  <p className="text-sm mt-1 text-white">Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
+                  <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
                 </div>
                 <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
-                  style={{ background: "rgba(74,21,75,0.15)", border: "1px solid rgba(74,21,75,0.3)", color: "rgba(255,255,255,0.3)" }}>
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.3)" }}>
                   <Lock size={14} /> Members Only
                 </div>
               </div>

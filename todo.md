@@ -2260,3 +2260,11 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] AcceleratorSession: Redesign as a 3-tile hub page (Live Call Events, Product Training, Previous Recordings) matching Academy category tile style
 - [x] AcceleratorSession: Generate unique icons for Live Call Events, Product Training, and Previous Recordings tiles
 - [x] AcceleratorSession: Preserve timer/countdown, access gating, and all existing CMS data queries
+
+## Accelerator Polish Fixes (Jul 19 - Session 4)
+- [x] Remove timer/countdown from Accelerator landing page (both member and non-member views)
+- [x] Remove all "|" gradient bars from section headers on Accelerator pages
+- [x] Rebuild "What's Included" as full-bleed banner tiles (like Curriculum), blue/cyan/green rotation
+- [x] Clean up Community/Slack section: remove color coding and icon, minimal card
+- [x] Session page: match screenshot layout (clean hero, 3 tiles, minimal Community)
+- [x] Remove timer from AcceleratorSession page as well
