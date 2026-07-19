@@ -7931,13 +7931,10 @@ function SettingsTab() {
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
 
-          {/* ── LEFT COLUMN ── */}
-          <div className="space-y-6">
-
-            {/* ── SEGMENT: Site Controls ── */}
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#6b7280" }}>Site Controls</p>
-              <div className="space-y-4">
+          {/* ── LEFT COLUMN: Site Controls ── */}
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#6b7280" }}>Site Controls</p>
+            <div className="space-y-4">
 
             {/* ── Announcement Banner ── */}
             <div className={sectionClass} style={sectionStyle}>
@@ -8039,13 +8036,41 @@ function SettingsTab() {
               </div>
             </div>
 
-              </div>{/* end Site Controls cards */}
-            </div>{/* end Site Controls segment */}
+            </div>{/* end Site Controls cards */}
+          </div>{/* end left column */}
 
-            {/* ── SEGMENT: Visibility Controls ── */}
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#6b7280" }}>Visibility Controls</p>
-              <div className="space-y-4">
+          {/* ── RIGHT COLUMN: Visibility Controls ── */}
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#6b7280" }}>Visibility Controls</p>
+            <div className="space-y-4">
+
+            {/* ── Section Visibility (formerly Navigation Visibility) ── */}
+            <div className={sectionClass} style={sectionStyle}>
+              <div className="mb-3">
+                <p className="text-sm font-medium text-white">Section Visibility</p>
+                <p className="text-xs text-gray-500">Show or hide individual sidebar items for all users</p>
+              </div>
+              <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                {NAV_ITEMS.map(({ href, label }) => {
+                  const isVisible = navVisibility[href] !== false; // default true
+                  return (
+                    <div key={href} className="flex items-center justify-between py-1">
+                      <span className="text-xs" style={{ color: isVisible ? "#d1d5db" : "#6b7280" }}>{label}</span>
+                      <button
+                        onClick={() => toggleNavItem(href)}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                        style={isVisible
+                          ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
+                          : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
+                      >
+                        {isVisible ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
+                        {isVisible ? "Visible" : "Hidden"}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* ── Profile Sections ── */}
             <div className={sectionClass} style={sectionStyle}>
@@ -8160,37 +8185,7 @@ function SettingsTab() {
               </div>
             </div>
 
-              </div>{/* end Visibility Controls cards */}
-            </div>{/* end Visibility Controls segment */}
-
-          </div>{/* end left column */}
-
-          {/* ── RIGHT COLUMN: Navigation Visibility (spans full height) ── */}
-          <div className={sectionClass} style={sectionStyle}>
-            <div className="mb-3">
-              <p className="text-sm font-medium text-white">Navigation Visibility</p>
-              <p className="text-xs text-gray-500">Show or hide individual sidebar items for all users</p>
-            </div>
-            <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-              {NAV_ITEMS.map(({ href, label }) => {
-                const isVisible = navVisibility[href] !== false; // default true
-                return (
-                  <div key={href} className="flex items-center justify-between py-1">
-                    <span className="text-xs" style={{ color: isVisible ? "#d1d5db" : "#6b7280" }}>{label}</span>
-                    <button
-                      onClick={() => toggleNavItem(href)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
-                      style={isVisible
-                        ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
-                        : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
-                    >
-                      {isVisible ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
-                      {isVisible ? "Visible" : "Hidden"}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+            </div>{/* end Visibility Controls cards */}
           </div>{/* end right column */}
 
         </div>

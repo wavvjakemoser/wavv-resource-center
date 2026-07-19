@@ -2146,3 +2146,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Settings Tab Reorganization (Jul 19 2026)
 - [x] Remove gear icon from "Site Settings" heading
 - [x] Reorganize Settings into logical segments with sub-headings (Site Controls, Visibility Controls, Integrations)
+
+## Settings Tab Layout + Sidebar Fix (Jul 19 2026)
+- [x] Move Navigation Visibility into Visibility Controls segment, rename to "Section Visibility", place at top
+- [x] Make Settings tab 2-column: Site Controls (left), Visibility Controls (right)
+- [x] Fix sidebar hidden banners from gold to red
