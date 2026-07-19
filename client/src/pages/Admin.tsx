@@ -3368,34 +3368,36 @@ function ContentTab() {
           <h2 className="text-base font-bold text-white">WAVV Academy</h2>
           <p className="text-xs text-gray-500">Manage courses, lessons, and learning content for all Academy categories</p>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {ACADEMY_CATEGORIES.map(({ key, label, color }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handleAddSection(key)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-              style={{ background: `${color}18`, color, border: `1px solid ${color}40` }}
-            >
-              <Plus size={12} /> {label}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => { if (courses.length > 0) { handleAddVideo(courses[0].id, courses[0].title); } else { toast.error("Create a section first"); } }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
-          >
-            <Plus size={12} /> Add Video
-          </button>
-          <button
-            type="button"
-            onClick={() => setUploadDialog(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "rgba(96,165,250,0.12)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.3)" }}
-          >
-            <Plus size={12} /> Add PDF
-          </button>
+        <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+          {ACADEMY_CATEGORIES.map(({ key, label, color }) => {
+            const catCourses = (byCategory[key] ?? []).filter((c) => c.published);
+            return (
+              <React.Fragment key={key}>
+                <button
+                  type="button"
+                  onClick={() => handleAddSection(key)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+                  style={{ background: `${color}18`, color, border: `1px solid ${color}40` }}
+                >
+                  <Plus size={12} /> Add {label} Section
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (catCourses.length > 0) {
+                      handleAddVideo(catCourses[0].id, catCourses[0].title);
+                    } else {
+                      toast.error(`Create a ${label} section first`);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+                  style={{ background: `${color}12`, color, border: `1px dashed ${color}50` }}
+                >
+                  <Plus size={12} /> Add {label} Video
+                </button>
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
 
@@ -3470,34 +3472,16 @@ function ContentTab() {
         </div>
       </div>
 
-      {/* ── Divider between Live and Inactive ── */}
-      <div className="relative flex items-center py-6">
-        <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
-        <div className="mx-4 flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#4b5563" }} />
-          <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">Inactive</span>
-        </div>
-        <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
-      </div>
+
 
       {/* ── Section 2: Inactive Sections / Videos ── always visible ── */}
       <div className="pt-2">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#4b5563" }} />
-          <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections / Videos</h2>
+          <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections and Courses</h2>
           <span className="text-xs text-gray-500 font-medium ml-2">Hidden from users — deactivate first, then delete permanently</span>
         </div>
-        <>
-            {!hasInactive ? (
-              <div
-                className="rounded-xl px-5 py-6 text-center"
-                style={{ background: "#141414", border: "1px solid #2a2a2a" }}
-              >
-                <p className="text-sm text-gray-500">No inactive sections or videos.</p>
-                <p className="text-xs text-gray-600 mt-1">Use the Hide/Deactivate controls on any section or video above to move it here.</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
+        <div className="space-y-6">
                 {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, thumbnail }) => {
                   const catInactiveCourses = inactiveCourses.filter((c) => c.category === key);
                   const catCourseIds = new Set([...(byCategory[key] ?? []).map((c) => c.id), ...catInactiveCourses.map((c) => c.id)]);
@@ -3522,8 +3506,6 @@ function ContentTab() {
                   );
                 })}
               </div>
-            )}
-          </>
       </div>
 
       {/* ── Add Section dialog ── */}
@@ -3578,10 +3560,39 @@ function ContentTab() {
           <DialogHeader>
             <DialogTitle className="text-white">Add Video</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Adding to section: <span className="font-medium text-gray-300">{addVideoDialog?.courseTitle}</span>
+              Add a video lesson and optionally attach a PDF resource.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
+            {/* Section picker */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Section <span className="text-red-400">*</span></label>
+              <Select
+                value={addVideoDialog ? String(addVideoDialog.courseId) : ""}
+                onValueChange={(v) => {
+                  const c = courses.find((x) => String(x.id) === v);
+                  if (c) setAddVideoDialog({ courseId: c.id, courseTitle: c.title });
+                }}
+              >
+                <SelectTrigger className="bg-black/30 border-white/10 text-white">
+                  <SelectValue placeholder="Select a section..." />
+                </SelectTrigger>
+                <SelectContent style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+                  {ACADEMY_CATEGORIES.map(({ key, label: catLabel, color }) => {
+                    const catCourses2 = (byCategory[key] ?? []).filter((c) => c.published);
+                    if (catCourses2.length === 0) return null;
+                    return (
+                      <React.Fragment key={key}>
+                        <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-widest" style={{ color }}>{catLabel}</div>
+                        {catCourses2.map((c) => (
+                          <SelectItem key={c.id} value={String(c.id)} className="text-white">{c.title}</SelectItem>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
             {/* Title */}
             <div>
               <label className="text-xs text-gray-400 mb-1 block">Video Title <span className="text-red-400">*</span></label>
@@ -3868,14 +3879,7 @@ function SectionResourcesPanel({
         <div className="flex items-center justify-center h-20">
           <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full" />
         </div>
-      ) : resources.length === 0 ? (
-        <div className="rounded-xl px-5 py-8 text-center" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <FileText size={28} className="text-gray-600 mx-auto mb-2" />
-          <p className="text-sm text-gray-500">No PDF resources yet.</p>
-          <p className="text-xs text-gray-600 mt-1">Click “Upload PDF Resource” to add a standalone PDF to any section.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
+      ) : (    <div className="space-y-3">
           {publishedCourses
             .filter((c) => resourcesByCourse[c.id]?.length > 0)
             .map((course) => {
@@ -5301,12 +5305,26 @@ function WebinarGroups({
                 <ChevronDown size={14} className={`text-gray-500 transition-transform ${isCollapsed ? "" : "rotate-180"}`} />
               </div>
             </button>
+            {/* Always-visible column headers for exclusive type */}
+            {type === "exclusive" && (
+              <Table>
+                <TableHeader>
+                  <TableRow style={{ background: "#000000", borderColor: "#252d3d" }}>
+                    <TableHead className="text-gray-400 text-xs w-6"></TableHead>
+                    <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                    <TableHead className="text-gray-400 text-xs">Host</TableHead>
+                    <TableHead className="text-gray-400 text-xs">Views</TableHead>
+                    <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            )}
             {!isCollapsed && (
               group.length === 0 ? (
                 type === "exclusive" ? (
                   <Table>
                     <TableHeader>
-                      <TableRow style={{ background: "#1d2230", borderColor: "#252d3d" }}>
+                      <TableRow style={{ background: "#000000", borderColor: "#252d3d" }}>
                         <TableHead className="text-gray-400 text-xs w-6"></TableHead>
                         <TableHead className="text-gray-400 text-xs">Title</TableHead>
                         <TableHead className="text-gray-400 text-xs">Host</TableHead>
@@ -5330,7 +5348,7 @@ function WebinarGroups({
                   <SortableContext items={orderedGroup.map(w => w.id)} strategy={verticalListSortingStrategy}>
                     <Table>
                       <TableHeader>
-                        <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
+                        <TableRow style={{ background: type === "exclusive" ? "#000000" : "#111", borderColor: "#252d3d" }}>
                           <TableHead className="text-gray-400 text-xs w-6"></TableHead>
                           <TableHead className="text-gray-400 text-xs">Title</TableHead>
                           <TableHead className="text-gray-400 text-xs">Host</TableHead>
