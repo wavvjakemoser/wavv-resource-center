@@ -2953,44 +2953,27 @@ function CategoryBlock({
   const displayLabel = categoryLabel ?? categoryKey;
 
   return (
-    <div>
-      {/* Category banner header — mirrors Academy landing page */}
-      <button
-        type="button"
+    <div className="rounded-xl overflow-hidden mb-3" style={{ border: "1px solid #2a2a2a" }}>
+      {/* Category flat header — matches other CMS sections */}
+      <div
+        className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition"
+        style={{ background: "#1d2230" }}
         onClick={() => setOpen((v) => !v)}
-        className="w-full relative overflow-hidden rounded-xl mb-3 group"
-        style={{ border: `1px solid ${accentColor}55`, minHeight: "140px" }}
       >
-        {/* Banner background image — matches public Academy tiles */}
-{categoryThumbnail ? (
-           <div className="absolute inset-0" style={{ backgroundImage: `url(${categoryThumbnail})`, backgroundSize: "100% auto", backgroundPosition: "center center", backgroundRepeat: "no-repeat", backgroundColor: "#0a0c12", opacity: 0.85 }} />
-        ) : (
-          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${accentColor}18 100%)` }} />
-        )}
-        {/* Gradient overlay for text readability */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to right, rgba(10,12,18,0.85) 0%, rgba(10,12,18,0.4) 50%, transparent 70%)" }} />
-        {/* Content — mirrors Academy landing page: WAVV ACADEMY label, title, subtitle, section+video badges */}
-        <div className="relative flex flex-col justify-center h-full px-8 py-5 gap-1 text-left">
-          <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: accentColor }}>WAVV Academy</p>
-          <div className="flex items-center gap-2">
-            {open ? <ChevronDown size={15} style={{ color: accentColor }} /> : <ChevronRightIcon size={15} style={{ color: accentColor }} />}
-            <h2 className="text-2xl font-extrabold text-white leading-tight">{displayLabel}</h2>
-          </div>
-          {categorySubtitle && <p className="text-sm text-gray-300 mb-1">{categorySubtitle}</p>}
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: `${accentColor}25`, color: accentColor, border: `1px solid ${accentColor}50` }}>
-              {courses.length} section{courses.length !== 1 ? "s" : ""}
-            </span>
-            {videoCount !== undefined && (
-              <span className="text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.07)", color: "#aaa", border: "1px solid #333" }}>
-                {videoCount} video{videoCount !== 1 ? "s" : ""}
-              </span>
-            )}
-          </div>
+        <div className="flex items-center gap-3">
+          <button type="button" className="text-white flex-shrink-0">
+            {open ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
+          </button>
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: accentColor }} />
+          <span className="text-sm font-semibold text-white">{displayLabel}</span>
+          {categorySubtitle && <span className="text-xs text-gray-500 hidden sm:inline">{categorySubtitle}</span>}
         </div>
-      </button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${accentColor}20`, color: accentColor }}>{courses.length} section{courses.length !== 1 ? "s" : ""}</span>
+        </div>
+      </div>
       {open && (
-        <div className="space-y-2 ml-8">
+        <div className="space-y-2 p-3" style={{ background: "#111" }}>
           {courses.map((course, idx) => {
             const courseLessons = allLessons.filter((l) => l.courseId === course.id);
             const prevCourse = courses[idx - 1];
@@ -3064,39 +3047,25 @@ function InactiveCategoryBlock({
   onDeleteCourse: (id: number, title: string) => void;
   onDeleteLesson: (id: number, title: string) => void;
 }) {
-  const [open, setOpen] = React.useState(false);
   const totalInactive = inactiveCourses.length + inactiveLessons.length;
   return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full relative overflow-hidden rounded-xl mb-3 group"
-        style={{ border: `1px solid ${color}30`, minHeight: "110px", opacity: 0.80 }}
-      >
-{thumbnail ? (
-           <div className="absolute inset-0" style={{ backgroundImage: `url(${thumbnail})`, backgroundSize: "100% auto", backgroundPosition: "center center", backgroundRepeat: "no-repeat", backgroundColor: "#0a0c12", opacity: 0.85 }} />
-        ) : (
-          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #0a0c12 0%, ${color}18 100%)` }} />
-        )}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to right, rgba(10,12,18,0.85) 0%, rgba(10,12,18,0.4) 50%, transparent 70%)" }} />
-        <div className="relative flex flex-col justify-center h-full px-8 py-5 gap-1 text-left">
-          <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color }}>WAVV Academy</p>
-          <div className="flex items-center gap-2">
-            {open ? <ChevronDown size={15} style={{ color }} /> : <ChevronRightIcon size={15} style={{ color }} />}
-            <h2 className="text-2xl font-extrabold text-white leading-tight">{label}</h2>
-          </div>
-          {subtitle && <p className="text-sm text-gray-400">{subtitle}</p>}
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[12px] font-semibold px-3 py-1 rounded-full"
-              style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
-              {totalInactive} inactive
-            </span>
-          </div>
+    <div className="rounded-xl overflow-hidden mb-3" style={{ border: "1px solid #2a2a2a" }}>
+      {/* Inactive category flat header — always expanded */}
+      <div className="px-4 py-3 flex items-center justify-between" style={{ background: "#1d2230" }}>
+        <div className="flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#4b5563" }} />
+          <span className="text-sm font-semibold text-white">{label}</span>
+          {subtitle && <span className="text-xs text-gray-500 hidden sm:inline">{subtitle}</span>}
         </div>
-      </button>
-      {open && (
-        <div className="space-y-2 ml-8">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
+            {totalInactive} inactive
+          </span>
+        </div>
+      </div>
+      {/* Always visible content */}
+      <div>
+        <div className="space-y-2 p-3" style={{ background: "#111" }}>
           {inactiveCourses.map((course) => {
             const courseLessons = allLessons.filter((l) => l.courseId === course.id);
             return (
@@ -3137,7 +3106,7 @@ function InactiveCategoryBlock({
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -3234,6 +3203,7 @@ function ContentTab() {
   const [deleteDialog, setDeleteDialog] = useState<{ type: "lesson" | "course"; id: number; title: string } | null>(null);
   // Inactive panel collapsed by default
   const [showInactive, setShowInactive] = useState(false);
+  const [uploadDialog, setUploadDialog] = useState(false);
 
   function handleAddSection(categoryKey: string) {
     setNewSectionTitle("");
@@ -3393,13 +3363,39 @@ function ContentTab() {
   return (
     <div className="space-y-0">
       {/* Hero header */}
-      <div className="rounded-xl p-4 mb-6 flex items-center gap-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
-          <GraduationCap size={18} style={{ color: "#0074F4" }} />
-        </div>
+      <div className="rounded-xl p-4 mb-6 flex items-center justify-between gap-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div>
           <h2 className="text-base font-bold text-white">WAVV Academy</h2>
           <p className="text-xs text-gray-500">Manage courses, lessons, and learning content for all Academy categories</p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {ACADEMY_CATEGORIES.map(({ key, label, color }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => handleAddSection(key)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+              style={{ background: `${color}18`, color, border: `1px solid ${color}40` }}
+            >
+              <Plus size={12} /> {label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => { if (courses.length > 0) { handleAddVideo(courses[0].id, courses[0].title); } else { toast.error("Create a section first"); } }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
+          >
+            <Plus size={12} /> Add Video
+          </button>
+          <button
+            type="button"
+            onClick={() => setUploadDialog(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
+            style={{ background: "rgba(96,165,250,0.12)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.3)" }}
+          >
+            <Plus size={12} /> Add PDF
+          </button>
         </div>
       </div>
 
@@ -3435,23 +3431,7 @@ function ContentTab() {
         </div>
       </div>
 
-      {/* ── Top-level Add Section bar ── */}
-      <div className="flex items-center gap-3 mb-6 p-3 rounded-xl" style={{ background: "rgba(0,116,244,0.06)", border: "1px solid rgba(0,116,244,0.18)" }}>
-        <span className="text-xs font-semibold text-gray-400 whitespace-nowrap">Add Section to:</span>
-        <div className="flex flex-wrap gap-2 flex-1">
-          {ACADEMY_CATEGORIES.map(({ key, label, color }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handleAddSection(key)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-              style={{ background: `${color}18`, color, border: `1px solid ${color}40` }}
-            >
-              <Plus size={12} /> {label}
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* ── Section 1: Live Sections & Courses ── */}
       <div className="pb-10">
@@ -3500,22 +3480,14 @@ function ContentTab() {
         <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
       </div>
 
-      {/* ── Section 2: Inactive Sections / Videos ── */}
+      {/* ── Section 2: Inactive Sections / Videos ── always visible ── */}
       <div className="pt-2">
-        {/* Collapsible header — closed by default */}
-        <button
-          onClick={() => setShowInactive((v) => !v)}
-          className="flex items-center gap-3 mb-5 w-full text-left"
-        >
+        <div className="flex items-center gap-3 mb-5">
           <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#4b5563" }} />
           <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections / Videos</h2>
           <span className="text-xs text-gray-500 font-medium ml-2">Hidden from users — deactivate first, then delete permanently</span>
-          <span className="ml-auto flex-shrink-0" style={{ color: "#6b7280" }}>
-            {showInactive ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-          </span>
-        </button>
-        {showInactive && (
-          <>
+        </div>
+        <>
             {!hasInactive ? (
               <div
                 className="rounded-xl px-5 py-6 text-center"
@@ -3552,7 +3524,6 @@ function ContentTab() {
               </div>
             )}
           </>
-        )}
       </div>
 
       {/* ── Add Section dialog ── */}
@@ -3737,8 +3708,8 @@ function ContentTab() {
         </DialogContent>
       </Dialog>
 
-      {/* ── PDF Resources Section ── */}
-      <SectionResourcesPanel courses={courses} />
+      {/* ── PDF Resources Section ── (dialog triggered from header Add PDF button) ── */}
+      <SectionResourcesPanel courses={courses} externalOpen={uploadDialog} onClose={() => setUploadDialog(false)} />
 
       {/* ── Permanent delete confirmation dialog ── */}
       <Dialog open={!!deleteDialog} onOpenChange={(open) => !open && setDeleteDialog(null)}>
@@ -3774,9 +3745,11 @@ function ContentTab() {
 }
 // ─── Section Resources Panel ──────────────────────────────────────────────────
 function SectionResourcesPanel({
-  courses,
+  courses, externalOpen, onClose,
 }: {
   courses: Array<{ id: number; title: string; category: string; published: boolean }>;
+  externalOpen?: boolean;
+  onClose?: () => void;
 }) {
   const utils = trpc.useUtils();
   const { user } = useAuth();
@@ -3784,9 +3757,13 @@ function SectionResourcesPanel({
 
   const { data: resources = [], isLoading } = trpc.academy.adminGetSectionResources.useQuery();
 
-  // Upload dialog state
+  // Upload dialog state - can be controlled externally
   const [uploadDialog, setUploadDialog] = React.useState(false);
   const [uploadForm, setUploadForm] = React.useState({ courseId: "", label: "", fileName: "", base64: "", mimeType: "" });
+  // Sync external open state
+  React.useEffect(() => {
+    if (externalOpen) { setUploadDialog(true); }
+  }, [externalOpen]);
   const [uploading, setUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -3885,35 +3862,7 @@ function SectionResourcesPanel({
     });
 
   return (
-    <div className="mt-10">
-      {/* Divider */}
-      <div className="relative flex items-center py-6">
-        <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
-        <div className="mx-4 flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#60a5fa" }} />
-          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">PDF Resources</span>
-        </div>
-        <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, #2a2a2a 20%, #3a3a3a 50%, #2a2a2a 80%, transparent)" }} />
-      </div>
-
-      {/* Header + Upload button */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-base font-bold text-white">Section PDF Resources</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Standalone PDFs attached to a section — shown below the video list on the Academy page</p>
-        </div>
-        {isSuperAdmin && (
-          <button
-            type="button"
-            onClick={() => { setUploadForm({ courseId: "", label: "", fileName: "", base64: "", mimeType: "" }); setUploadDialog(true); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition hover:opacity-90"
-            style={{ background: "rgba(96,165,250,0.12)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.3)" }}
-          >
-            <FileUp size={14} /> Upload PDF Resource
-          </button>
-        )}
-      </div>
-
+    <div>
       {/* Resource list grouped by section */}
       {isLoading ? (
         <div className="flex items-center justify-center h-20">
@@ -5055,9 +5004,6 @@ function WebinarsTab() {
     <div className="space-y-6">
       <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(16,185,129,0.15)" }}>
-            <VideoIcon size={18} style={{ color: "#10b981" }} />
-          </div>
           <div>
             <h2 className="text-base font-bold text-white">WAVV Webinars</h2>
             <p className="text-xs text-gray-500">Manage on-demand series, exclusive live webinars, and recordings</p>
@@ -5258,8 +5204,9 @@ const WEBINAR_GROUP_META: Record<string, { label: string; color: string; descrip
 };
 
 // ─── Sortable row wrapper (shared by webinars + guides) ───────────────────────
-function SortableTableRow({ id, children }: { id: number; children: React.ReactNode }) {
+function SortableTableRow({ id, children, rowIndex }: { id: number; children: React.ReactNode; rowIndex?: number }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const altBg = rowIndex !== undefined ? (rowIndex % 2 === 0 ? "#111" : "#1a1f2e") : "#111";
   return (
     <TableRow
       ref={setNodeRef}
@@ -5268,7 +5215,7 @@ function SortableTableRow({ id, children }: { id: number; children: React.ReactN
         transform: CSS.Transform.toString(transform),
         transition,
         opacity: isDragging ? 0.5 : 1,
-        background: isDragging ? "rgba(0,116,244,0.08)" : "transparent",
+        background: isDragging ? "rgba(0,116,244,0.08)" : altBg,
         cursor: "grab",
       }}
       {...attributes}
@@ -5356,9 +5303,28 @@ function WebinarGroups({
             </button>
             {!isCollapsed && (
               group.length === 0 ? (
+                type === "exclusive" ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow style={{ background: "#1d2230", borderColor: "#252d3d" }}>
+                        <TableHead className="text-gray-400 text-xs w-6"></TableHead>
+                        <TableHead className="text-gray-400 text-xs">Title</TableHead>
+                        <TableHead className="text-gray-400 text-xs">Host</TableHead>
+                        <TableHead className="text-gray-400 text-xs">Views</TableHead>
+                        <TableHead className="text-gray-400 text-xs">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow style={{ background: "#111", borderColor: "#252d3d" }}>
+                        <TableCell colSpan={5} className="text-center py-6 text-gray-600 text-xs">No upcoming exclusive live webinars yet. Click "Add Webinar" above and set the type to "Upcoming WAVV Exclusive Live Webinars".</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                ) : (
                 <div className="px-5 py-8 text-center" style={{ background: "#111" }}>
                   <p className="text-gray-600 text-xs">No {meta.label.toLowerCase()} webinars yet. Click "Add Webinar" above and set the type.</p>
                 </div>
+                )
               ) : (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(type, group, e)}>
                   <SortableContext items={orderedGroup.map(w => w.id)} strategy={verticalListSortingStrategy}>
@@ -5734,14 +5700,14 @@ function GuidesTab() {
           <button
             onClick={() => { setShowAddPdfSectionModal(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "rgba(155,35,53,0.2)", color: "#e85d6f", border: "1px solid rgba(155,35,53,0.4)" }}
+            style={{ background: "rgba(0,169,226,0.15)", color: "#00A9E2", border: "1px solid rgba(0,169,226,0.3)" }}
           >
             <Plus size={13} /> Add PDF Section
           </button>
           <button
             onClick={() => { setEditId(null); resetForm(); setShowForm(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
-            style={{ background: "#9B2335" }}
+            style={{ background: "#00A9E2" }}
           >
             <Plus size={13} /> Add PDF
           </button>
@@ -5789,7 +5755,7 @@ function GuidesTab() {
           {/* PDFs */}
           <div className="px-4 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full" style={{ background: "#9B2335" }} />
+              <span className="w-2 h-2 rounded-full" style={{ background: "#00A9E2" }} />
               <span className="text-sm text-gray-300">PDFs</span>
             </div>
             <button
@@ -6554,8 +6520,8 @@ function PdfSectionsPanel({
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {orderedGuides.map((g) => (
-                                  <SortableTableRow key={g.id} id={g.id}>
+                                {orderedGuides.map((g, gIdx) => (
+                                  <SortableTableRow key={g.id} id={g.id} rowIndex={gIdx}>
                                     <TableCell className="text-gray-600 text-xs w-6" style={{ cursor: "grab" }}>⠿</TableCell>
                                     <TableCell className="text-white text-sm font-medium max-w-xs truncate">{g.title}</TableCell>
                                     <TableCell className="text-xs max-w-[160px] truncate">
@@ -6790,7 +6756,7 @@ function FaqSectionsPanel() {
               ><Pencil size={12} /></button>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(234,179,8,0.15)", color: "#eab308" }}>{section.entries?.length ?? 0}</span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}>{section.entries?.length ?? 0}</span>
               <button
                 onClick={() => toggleVisibilityMutation.mutate({ id: section.id, isVisible: !section.isVisible })}
                 className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
@@ -6831,8 +6797,8 @@ function FaqSectionsPanel() {
           {/* Entries */}
           {expandedSections.has(section.id) && (
             <div className="divide-y" style={{ borderTop: "1px solid #2a2a2a", background: "#111" }}>
-              {(section.entries ?? []).map(entry => (
-                <div key={entry.id} className="px-5 py-3 space-y-1">
+              {(section.entries ?? []).map((entry, entryIdx) => (
+                <div key={entry.id} className="px-5 py-3 space-y-1" style={{ background: entryIdx % 2 === 0 ? "#111" : "#1a1f2e" }}>
                   {editingEntry?.id === entry.id ? (
                     <div className="space-y-2">
                       <input
@@ -8719,10 +8685,11 @@ function PublishedHelpArticlesPanel() {
                       </div>
                     ) : (
                       <div className="divide-y" style={{ borderColor: "#2a2a2a" }}>
-                        {group.map((a) => (
+                        {group.map((a, aIdx) => (
                           <SortableHelpArticleRow
                             key={a.intercomArticleId ?? a.id}
                             article={a}
+                            rowIndex={aIdx}
                             onUnpublish={() => {
                               if (a.source === "native") {
                                 unpublishByIdMutation.mutate({ id: a.id });
@@ -8776,10 +8743,10 @@ function SortableHelpSectionRow({ id, children }: { id: number; children: React.
     </div>
   );
 }
-function SortableHelpArticleRow({ article, onUnpublish, onEdit }: { article: { id: number; intercomArticleId: string | null; source?: string; title: string; url: string | null; sectionName: string; nativeBody?: string | null }; onUnpublish: () => void; onEdit?: () => void }) {
+function SortableHelpArticleRow({ article, onUnpublish, onEdit, rowIndex }: { article: { id: number; intercomArticleId: string | null; source?: string; title: string; url: string | null; sectionName: string; nativeBody?: string | null }; onUnpublish: () => void; onEdit?: () => void; rowIndex?: number }) {
   const ACCENT = "#0074F4";
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: article.intercomArticleId ?? article.id.toString() });
-  const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, background: (rowIndex ?? 0) % 2 === 0 ? "#111" : "#1a1f2e" };
   const isNative = article.source === "native";
   return (
     <div ref={setNodeRef} style={style} className="flex items-center gap-3 px-4 py-2.5">

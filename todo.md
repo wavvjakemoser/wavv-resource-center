@@ -2231,3 +2231,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Replicate Section Visibility tile to WAVV Academy tab (replace existing visibility controls)
 - [x] Replicate Section Visibility tile to WAVV Webinars tab (replace existing visibility controls)
 - [x] Replicate Section Visibility tile to WAVV Playground tab (replace existing visibility controls)
+
+## Comprehensive CMS UI Fixes (Jul 19 2026)
+- [x] PDF buttons (Add PDF Section, Add PDF) → cyan color (#00A9E2)
+- [x] Help Articles/PDFs/FAQs subsection rows → black background, content inside rows → gray (alternating)
+- [x] FAQ counter badge on section rows → green (not yellow)
+- [x] WAVV Webinars header → remove icon
+- [x] Upcoming Exclusive Live Webinars tile → add column headers (Title, Host, Views, Actions) always visible even when empty
+- [x] WAVV Academy CMS → remove icon next to WAVV Academy header
+- [x] WAVV Academy CMS → remove colored banner images from section cards
+- [x] WAVV Academy CMS → Inactive Sections always expanded/visible (no click to open)
+- [x] WAVV Academy CMS → remove "Section PDF Resources" section, merge PDF upload into Add Video flow
+- [x] WAVV Academy CMS → move Add Section + Add Video buttons to top right (matching other CMS sections)
