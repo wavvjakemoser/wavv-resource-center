@@ -2188,3 +2188,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove icon from Total Requests tile
 - [x] Restructure: move All Requests inline with Total Requests (shrink tile, put them side by side)
 - [x] Make Export Requests button standard blue
+
+## Playground Requests Area Cleanup (Jul 19 2026)
+- [ ] Remove Total Requests tile entirely
+- [ ] Make the total count in All Requests header white
+- [ ] Remove "No requests yet" icon (flask icon in empty state)
+- [ ] Add column headers (Name, Email, Playground, etc.) to All Requests table
+- [ ] Show "No requests" text row when empty (no icon)
+
+## WAVV Users Search Bar Fix (Jul 19 2026)
+- [x] Make WAVV Users search bar same size/structure as WAVV Team search bar (remove extra wrapper div)

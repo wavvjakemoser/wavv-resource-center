@@ -2332,17 +2332,15 @@ function PortalUsersPanel() {
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <Input
-            placeholder="Search by name or email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-            style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}
-          />
-        </div>
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <Input
+          placeholder="Search by name or email..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-10"
+          style={{ background: "#1d2230", border: "1px solid #2a2a2a", color: "#fff" }}
+        />
       </div>
 
       {/* Table */}
@@ -4775,36 +4773,7 @@ function PlaygroundTab() {
         ))}
       </div>
 
-      {/* ── Stats cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total requests */}
-        <div
-          className="rounded-xl p-4"
-          style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
-        >
-          <span className="text-xs text-gray-400 font-medium">Total Requests</span>
-          <p className="text-2xl font-bold text-white mt-1">
-            {statsLoading ? "—" : (stats?.total ?? 0)}
-          </p>
-        </div>
 
-        {/* Per-playground breakdown */}
-        {statsLoading
-          ? null
-          : (stats?.byPlayground ?? []).slice(0, 3).map((item) => (
-              <div
-                key={item.playground}
-                className="rounded-xl p-4"
-                style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
-              >
-                <span className="text-xs text-gray-400 font-medium truncate" title={item.playground}>
-                  {item.playground.replace(" Playground", "").replace("WAVV ", "")}
-                </span>
-                <p className="text-2xl font-bold text-white mt-1">{item.count}</p>
-                <p className="text-xs text-gray-600 mt-0.5">requests</p>
-              </div>
-            ))}
-      </div>
 
       {/* ── Bar chart ── */}
       {!statsLoading && (stats?.byPlayground ?? []).length > 0 && (
@@ -4849,17 +4818,33 @@ function PlaygroundTab() {
       >
         <div className="px-5 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">All Requests</h3>
-          <span className="text-xs text-gray-500">{requests?.length ?? 0} total</span>
+          <span className="text-xs font-medium text-white">{requests?.length ?? 0} total</span>
         </div>
         {reqLoading ? (
           <div className="flex items-center justify-center h-24">
             <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
           </div>
         ) : !requests || requests.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <FlaskConical size={28} className="text-gray-600 mb-2" />
-            <p className="text-gray-500 text-sm">No requests yet</p>
-            <p className="text-gray-600 text-xs mt-1">Submissions will appear here once users click "Notify Me"</p>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow style={{ borderColor: "#252d3d" }}>
+                  <TableHead className="text-gray-400 text-xs">Name</TableHead>
+                  <TableHead className="text-gray-400 text-xs">Email</TableHead>
+                  <TableHead className="text-gray-400 text-xs">Playground</TableHead>
+                  <TableHead className="text-gray-400 text-xs">Notes</TableHead>
+                  <TableHead className="text-gray-400 text-xs">Date</TableHead>
+                  <TableHead className="text-gray-400 text-xs w-16"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow style={{ borderColor: "#252d3d" }}>
+                  <TableCell colSpan={6} className="text-center text-gray-500 text-sm py-8">
+                    No requests
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <Table>
