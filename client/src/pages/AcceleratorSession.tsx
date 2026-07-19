@@ -398,11 +398,11 @@ function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
   return (
     <a
       href={href}
-      className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.003] text-left w-full"
+      className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01] text-left w-full"
       style={{
-        border: `1px solid ${color}30`,
-        minHeight: "180px",
-        boxShadow: `0 2px 16px ${color}08`,
+        border: `1px solid ${color}60`,
+        height: "260px",
+        boxShadow: `0 0 0 1px ${color}20, 0 4px 32px ${color}18`,
         textDecoration: "none",
       }}
     >
@@ -433,12 +433,12 @@ function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
       <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${color}60, 0 0 20px ${color}20` }} />
 
       {/* Content: left text + right big icon */}
-      <div className="relative flex items-center h-full min-h-[180px]">
+      <div className="relative flex items-center h-full">
         {/* Left text block */}
         <div className="flex-1 min-w-0 px-8 py-6 z-10">
           <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color }}>WAVV Accelerator</p>
-          <h3 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-2">{title}</h3>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "420px" }}>{subtitle}</p>
+          <h3 className="text-4xl font-extrabold text-white leading-tight mb-2">{title}</h3>
+          <p className="text-base text-white" style={{ maxWidth: "420px" }}>{subtitle}</p>
           {count > 0 && (
             <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>
               {count} {count === 1 ? "item" : "items"}
@@ -474,9 +474,9 @@ function SubPageBanner({ title, subtitle, bannerIcon, color }: {
     <div
       className="relative overflow-hidden rounded-2xl"
       style={{
-        border: `1px solid ${color}30`,
-        minHeight: "140px",
-        boxShadow: `0 2px 16px ${color}08`,
+        border: `1px solid ${color}60`,
+        height: "260px",
+        boxShadow: `0 0 0 1px ${color}20, 0 4px 32px ${color}18`,
       }}
     >
       {/* Deep space black base */}
@@ -513,13 +513,46 @@ function SubPageBanner({ title, subtitle, bannerIcon, color }: {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 px-8 py-6">
-        <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color }}>
+      <div className="relative z-10 px-8 py-6 flex flex-col justify-center h-full">
+        <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color }}>
           WAVV Accelerator
         </p>
-        <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-1">{title}</h2>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "420px" }}>{subtitle}</p>
+        <h2 className="text-4xl font-extrabold text-white leading-tight mb-2">{title}</h2>
+        <p className="text-base text-white" style={{ maxWidth: "420px" }}>{subtitle}</p>
       </div>
+    </div>
+  );
+}
+
+// ─── FlipDigit (flip-clock style digit box) ────────────────────────────────
+function FlipDigit({ value, label, color }: { value: string; label: string; color: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        className="relative flex items-center justify-center rounded-lg overflow-hidden"
+        style={{
+          width: "40px",
+          height: "48px",
+          background: "linear-gradient(180deg, #1a1f2e 0%, #0f1219 50%, #1a1f2e 100%)",
+          border: `1px solid ${color}40`,
+          boxShadow: `0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)`,
+        }}
+      >
+        {/* Center divider line (flip effect) */}
+        <div
+          className="absolute left-0 right-0 pointer-events-none"
+          style={{ top: "50%", height: "1px", background: "rgba(0,0,0,0.6)", boxShadow: "0 1px 0 rgba(255,255,255,0.04)" }}
+        />
+        <span
+          className="font-mono font-extrabold text-xl leading-none"
+          style={{ color, textShadow: `0 0 8px ${color}60` }}
+        >
+          {value}
+        </span>
+      </div>
+      <span className="text-[9px] font-semibold uppercase tracking-wider mt-1" style={{ color: "rgba(255,255,255,0.35)" }}>
+        {label}
+      </span>
     </div>
   );
 }
@@ -570,12 +603,14 @@ function LiveCallRow({ call, now, color, index }: { call: LiveCallRecord; now: n
           ) : isPast ? (
             <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>Completed</span>
           ) : (
-            <div className="flex items-center gap-1 font-mono text-xs" style={{ color }}>
-              <Clock size={12} />
-              <span>{String(cd.d).padStart(2, "0")}d</span>
-              <span>{String(cd.h).padStart(2, "0")}h</span>
-              <span>{String(cd.m).padStart(2, "0")}m</span>
-              <span>{String(cd.s).padStart(2, "0")}s</span>
+            <div className="flex items-center gap-1.5">
+              <FlipDigit value={String(cd.d).padStart(2, "0")} label="days" color={color} />
+              <span className="text-lg font-bold" style={{ color: `${color}80` }}>:</span>
+              <FlipDigit value={String(cd.h).padStart(2, "0")} label="hrs" color={color} />
+              <span className="text-lg font-bold" style={{ color: `${color}80` }}>:</span>
+              <FlipDigit value={String(cd.m).padStart(2, "0")} label="min" color={color} />
+              <span className="text-lg font-bold" style={{ color: `${color}80` }}>:</span>
+              <FlipDigit value={String(cd.s).padStart(2, "0")} label="sec" color={color} />
             </div>
           )}
 

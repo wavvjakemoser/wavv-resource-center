@@ -2304,3 +2304,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Product Training sub-page: list rows with Watch button (opens video player)
 - [x] Recordings sub-page: list rows with Watch button (opens video player)
 - [x] Layout matches Academy Onboarding pattern: banner header → numbered list rows with chevron expand
+
+## Flip Clock + Tile Sizing (Jul 19 - Session 10)
+- [x] Replace plain monospace countdown with flip-clock style (digit boxes, divider line, larger font)
+- [x] Match Accelerator BannerTile height/padding to Academy/Webinars/Resource Hub/Playground tiles
+- [x] Match SubPageBanner height/padding to the same standard
