@@ -8394,12 +8394,6 @@ function PartnersContentTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(0,169,226,0.15)" }}
-          >
-            <Users size={18} style={{ color: "#00A9E2" }} />
-          </div>
           <div>
             <h2 className="text-base font-bold text-white">WAVV Partners Content</h2>
             <p className="text-xs text-gray-500">Manage content for the public Partners page and the WAVV Partners Portal</p>
@@ -8409,67 +8403,15 @@ function PartnersContentTab() {
           {(["public", "portal"] as const).map(t => (
             <button key={t} onClick={() => setPageTarget(t)}
               className="px-4 py-1.5 text-xs font-medium transition-all"
-              style={pageTarget === t ? { background: "linear-gradient(135deg,#3b82f6,#8b5cf6)", color: "#fff" } : { background: "transparent", color: "#9ca3af" }}>
+              style={pageTarget === t ? { background: "#0074F4", color: "#fff" } : { background: "transparent", color: "#9ca3af" }}>
               {t === "public" ? "WAVV Partners" : "WAVV Partners Portal"}
             </button>
           ))}
         </div>
       </div>
-      {/* Under Construction placeholder */}
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{ background: "rgba(0,169,226,0.07)", border: "2px dashed rgba(0,169,226,0.35)" }}
-      >
-        <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
-          {/* Icon */}
-          <div
-            className="w-20 h-20 rounded-2xl flex items-center justify-center"
-            style={{ background: "rgba(0,169,226,0.15)" }}
-          >
-            <AlertTriangle size={40} style={{ color: "#00A9E2" }} />
-          </div>
-
-          {/* Heading */}
-          <div className="space-y-2">
-            <h3 className="text-2xl font-bold text-white tracking-tight">
-              {pageTarget === "public" ? "WAVV Partners" : "WAVV Partners Portal"}
-            </h3>
-            <div
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-              style={{ background: "rgba(0,169,226,0.2)", color: "#00A9E2" }}
-            >
-              <AlertTriangle size={11} />
-              Under Construction
-            </div>
-          </div>
-
-          {/* Description */}
-          <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
-            This section will surface{" "}
-            <span className="text-white font-medium">partner onboarding resources</span>,{" "}
-            <span className="text-white font-medium">co-sell enablement content</span>, and{" "}
-            <span className="text-white font-medium">portal access management</span>{" "}
-            once the partner program is ready to launch.
-          </p>
-
-          {/* Upcoming features list */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
-            {[
-              { icon: <Users size={14} />, label: "Partner Onboarding" },
-              { icon: <FileText size={14} />, label: "Co-Sell Resources" },
-              { icon: <BarChart3 size={14} />, label: "Partner Analytics" },
-            ].map(({ icon, label }) => (
-              <div
-                key={label}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#9ca3af" }}
-              >
-                <span style={{ color: "#00A9E2" }}>{icon}</span>
-                {label}
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Coming Soon placeholder */}
+      <div className="flex items-center justify-center py-16">
+        <p className="text-sm text-gray-500 italic">Coming Soon</p>
       </div>
       {false && isLoading ? (
         <div className="text-center py-12 text-gray-500">Loading content...</div>
