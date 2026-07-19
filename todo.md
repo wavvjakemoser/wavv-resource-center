@@ -2282,3 +2282,10 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Non-member view: Sessions 2-6 need stronger blur (text unreadable)
 - [x] Add "WAVV ACCELERATOR" label above each session tile
 - [x] Money Math Equation text: change from blue to orange (#f97316)
+
+## AcceleratorSession Full Rebuild (Jul 19 - Session 7)
+- [x] Generate 3 custom banner icons (Live Calls, Product Training, Previous Recordings) — Academy-style large icons
+- [x] Session header: "Session 1: Build Your Number & Mindset Reset" style (not bubble)
+- [x] 3 tiles: full-bleed Academy-style banners with big icon on right, linking to sub-URLs
+- [x] Sub-URL routing: /accelerator/session/:id/live-calls, /product-training, /recordings
+- [x] Duplicate structure for sessions 1-6 (same component, parameterized by :id)

@@ -373,25 +373,30 @@ function ContentCard({
   );
 }
 
-// ─── Hub Tile component (full-width banner style, matching Academy/Webinar tiles) ──
-function HubTile({ title, subtitle, icon, color, count, isActive, onClick }: {
+// ─── Banner Tile component (full-bleed Academy-style with big icon on right) ──
+const BANNER_ICONS = {
+  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-banner-live-calls-5EyXxwCTagdQDdPtSkqjaP.webp",
+  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-banner-product-training-47JZCrKf2E8kfpYqtHoqGS.webp",
+  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-banner-recordings-oBcTb3aKUFixDo4uy3TbR6.webp",
+};
+
+function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
   title: string;
   subtitle: string;
-  icon: string;
+  bannerIcon: string;
   color: string;
   count: number;
-  isActive: boolean;
-  onClick: () => void;
+  href: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.005] text-left w-full"
+    <a
+      href={href}
+      className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.003] text-left w-full"
       style={{
-        border: isActive ? `2px solid ${color}` : `1px solid ${color}30`,
-        minHeight: "140px",
-        boxShadow: isActive ? `0 0 30px ${color}25, inset 0 0 0 1px ${color}50` : `0 2px 16px ${color}08`,
+        border: `1px solid ${color}30`,
+        minHeight: "180px",
+        boxShadow: `0 2px 16px ${color}08`,
+        textDecoration: "none",
       }}
     >
       {/* Deep space black base */}
@@ -400,7 +405,7 @@ function HubTile({ title, subtitle, icon, color, count, isActive, onClick }: {
       {/* Circuit board SVG pattern */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.08 }} xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <pattern id={`circuit-tile-${title.replace(/\s/g, "")}`} x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+          <pattern id={`banner-tile-${title.replace(/\s/g, "")}`} x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
             <path d="M10 10 L70 10 M70 10 L70 70 M10 40 L40 40 M40 40 L40 70" stroke={color} strokeWidth="0.6" fill="none"/>
             <circle cx="10" cy="10" r="2" fill={color}/>
             <circle cx="70" cy="10" r="2" fill={color}/>
@@ -408,11 +413,11 @@ function HubTile({ title, subtitle, icon, color, count, isActive, onClick }: {
             <circle cx="40" cy="40" r="1.5" fill={color}/>
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill={`url(#circuit-tile-${title.replace(/\s/g, "")})`}/>
+        <rect width="100%" height="100%" fill={`url(#banner-tile-${title.replace(/\s/g, "")})`}/>
       </svg>
 
       {/* Radial color glow on right */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 120% at 90% 50%, ${color}20 0%, transparent 70%)` }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 50% 140% at 85% 50%, ${color}25 0%, transparent 65%)` }} />
 
       {/* Top edge neon line */}
       <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "2px", background: `linear-gradient(to right, transparent 0%, ${color}50 20%, ${color}80 50%, ${color}50 80%, transparent 100%)` }} />
@@ -420,34 +425,40 @@ function HubTile({ title, subtitle, icon, color, count, isActive, onClick }: {
       {/* Hover glow */}
       <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${color}60, 0 0 20px ${color}20` }} />
 
-      {/* Content */}
-      <div className="relative flex items-center h-full px-8 py-6 gap-6">
-        {/* Icon */}
-        <div className="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}12`, border: `1px solid ${color}25` }}>
-          <img src={icon} alt="" className="w-10 h-10 object-contain" style={{ filter: `drop-shadow(0 0 6px ${color})` }} />
-        </div>
-        {/* Text */}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-xl font-extrabold text-white leading-tight mb-1">{title}</h3>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>{subtitle}</p>
+      {/* Content: left text + right big icon */}
+      <div className="relative flex items-center h-full min-h-[180px]">
+        {/* Left text block */}
+        <div className="flex-1 min-w-0 px-8 py-6 z-10">
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color }}>WAVV Accelerator</p>
+          <h3 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-2">{title}</h3>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "420px" }}>{subtitle}</p>
           {count > 0 && (
-            <span className="inline-flex items-center gap-1 mt-2.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>
+            <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>
               {count} {count === 1 ? "item" : "items"}
             </span>
           )}
         </div>
-        {/* Arrow */}
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: isActive ? `${color}25` : "rgba(255,255,255,0.04)" }}>
-          <ChevronRight size={18} style={{ color: isActive ? color : "rgba(255,255,255,0.4)" }} className={isActive ? "rotate-90 transition-transform" : "transition-transform"} />
+        {/* Right big icon image */}
+        <div className="hidden md:flex items-center justify-center w-[280px] h-full flex-shrink-0 relative overflow-hidden">
+          <img
+            src={bannerIcon}
+            alt=""
+            className="w-[220px] h-[160px] object-contain"
+            style={{ filter: `drop-shadow(0 0 20px ${color}40)`, opacity: 0.9 }}
+          />
+        </div>
+        {/* Arrow indicator */}
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <ChevronRight size={18} style={{ color: "rgba(255,255,255,0.4)" }} />
         </div>
       </div>
-    </button>
+    </a>
   );
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function AcceleratorSession() {
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ id: string; section?: string }>();
   const weekId = parseInt(params.id ?? "1", 10);
   const { hasAccess, reason, week1FreeActive } = useAcceleratorAccess();
   const now = useNow();
@@ -467,8 +478,8 @@ export default function AcceleratorSession() {
   // Cheat sheet side panel state
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
 
-  // Active tile section (null = none expanded)
-  const [activeSection, setActiveSection] = useState<"live" | "training" | "recordings" | null>(null);
+  // Active section from URL param (sub-route)
+  const activeSection = params.section as "live-calls" | "product-training" | "recordings" | undefined;
 
   if (isLoading) {
     return (
@@ -549,10 +560,7 @@ export default function AcceleratorSession() {
     <ResourceSidePanel item={panelItem} onClose={() => setPanelItem(null)} pushMode={true} />
   );
 
-  // Toggle section
-  const toggleSection = (section: "live" | "training" | "recordings") => {
-    setActiveSection(prev => prev === section ? null : section);
-  };
+
 
   // ─── Member view ─────────────────────────────────────────────────────────
   return (
@@ -582,16 +590,8 @@ export default function AcceleratorSession() {
             Back to Accelerator
           </a>
 
-          <div className="mb-4">
-            <span
-              className="text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full"
-              style={{ background: `${color}20`, color, border: `1px solid ${color}40`, letterSpacing: "0.12em" }}
-            >
-              Session {session.week}
-            </span>
-          </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-3">
-            {session.heroHeadline || session.title}
+            Session {session.week}: {session.heroHeadline || session.title}
           </h1>
           {(session.heroSubline || session.wavvFocus) && (
             <p className="text-base mb-5" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "600px" }}>
@@ -619,53 +619,62 @@ export default function AcceleratorSession() {
       {/* ── Page body ── */}
       <div className="px-4 lg:px-8 py-8 space-y-8">
 
-        {/* ── Late-joiner callout ── */}
-        <div
-          className="flex items-start gap-3 rounded-xl px-4 py-3.5"
-          style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.18)" }}
-        >
-          <AlertCircle size={15} className="flex-shrink-0 mt-0.5" style={{ color: "#fbbf24" }} />
-          <div>
-            <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle or catching up?</p>
-            <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Every previous session recording is available below. You can catch up at your own pace.
-            </p>
-          </div>
-        </div>
+        {/* ── Back to session hub when in sub-section ── */}
+        {activeSection && (
+          <a href={`/accelerator/session/${weekId}`} className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-white" style={{ color }}>
+            <ArrowLeft size={14} />
+            Back to Session {weekId} Overview
+          </a>
+        )}
 
-        {/* ── 3 Hub Tiles ── */}
-        <div className="flex flex-col gap-4">
-          <HubTile
-            title="Live Call Events"
-            subtitle="Join live coaching calls or view upcoming schedule"
-            icon={TILE_ICONS.live}
-            color={color}
-            count={visibleLiveCalls.length}
-            isActive={activeSection === "live"}
-            onClick={() => toggleSection("live")}
-          />
-          <HubTile
-            title="Product Training"
-            subtitle="WAVV how-to clips and cheat sheets for this session"
-            icon={TILE_ICONS.training}
-            color={color}
-            count={cmsProductTraining.length}
-            isActive={activeSection === "training"}
-            onClick={() => toggleSection("training")}
-          />
-          <HubTile
-            title="Previous Recordings"
-            subtitle="Catch up on past session recordings at your own pace"
-            icon={TILE_ICONS.recordings}
-            color={color}
-            count={cmsRecordings.length}
-            isActive={activeSection === "recordings"}
-            onClick={() => toggleSection("recordings")}
-          />
-        </div>
+        {/* ── Late-joiner callout (only on hub view) ── */}
+        {!activeSection && (
+          <div
+            className="flex items-start gap-3 rounded-xl px-4 py-3.5"
+            style={{ background: "rgba(251,191,36,0.06)", border: "1px solid rgba(251,191,36,0.18)" }}
+          >
+            <AlertCircle size={15} className="flex-shrink-0 mt-0.5" style={{ color: "#fbbf24" }} />
+            <div>
+              <p className="text-xs font-semibold" style={{ color: "#fbbf24" }}>Joining mid-cycle or catching up?</p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+                Every previous session recording is available below. You can catch up at your own pace.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── 3 Banner Tiles (link to sub-URLs) ── */}
+        {!activeSection && (
+          <div className="flex flex-col gap-5">
+            <BannerTile
+              title="Live Call Events"
+              subtitle="Join live coaching calls or view the upcoming schedule"
+              bannerIcon={BANNER_ICONS.live}
+              color={color}
+              count={visibleLiveCalls.length}
+              href={`/accelerator/session/${weekId}/live-calls`}
+            />
+            <BannerTile
+              title="Product Training"
+              subtitle="WAVV how-to clips and cheat sheets for this session"
+              bannerIcon={BANNER_ICONS.training}
+              color={color}
+              count={cmsProductTraining.length}
+              href={`/accelerator/session/${weekId}/product-training`}
+            />
+            <BannerTile
+              title="Previous Recordings"
+              subtitle="Catch up on past session recordings at your own pace"
+              bannerIcon={BANNER_ICONS.recordings}
+              color={color}
+              count={cmsRecordings.length}
+              href={`/accelerator/session/${weekId}/recordings`}
+            />
+          </div>
+        )}
 
         {/* ── Expanded content section ── */}
-        {activeSection === "live" && (
+        {activeSection === "live-calls" && (
           <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2.5 mb-2">
               <Clock size={14} style={{ color }} />
@@ -686,7 +695,7 @@ export default function AcceleratorSession() {
           </section>
         )}
 
-        {activeSection === "training" && (
+        {activeSection === "product-training" && (
           <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2.5 mb-2">
               <Play size={14} style={{ color }} />
@@ -768,7 +777,8 @@ export default function AcceleratorSession() {
           </section>
         )}
 
-        {/* ── Resource links ── */}
+        {/* ── Resource links (hub view only) ── */}
+        {!activeSection && (<>
         {resourceLinks.length > 0 && (
           <section>
             <div className="flex items-center gap-2.5 mb-4">
@@ -831,6 +841,7 @@ export default function AcceleratorSession() {
             </div>
           )}
         </section>
+        </>)}
 
       </div>
 
