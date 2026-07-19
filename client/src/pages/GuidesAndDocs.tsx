@@ -18,7 +18,7 @@ const RESOURCE_CATEGORIES = [
     color: ARTICLE_COLOR,
     icon: Search,
     href: "/resources/help-articles",
-    thumbnail: "/manus-storage/resourcehub-magnifying-glass_e84b4f50.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/resourcehub-magnifying-glass-blue-FxJp26QMdJL3HeH4mFUR3T.webp",
   },
   {
     key: "pdf",
@@ -27,7 +27,7 @@ const RESOURCE_CATEGORIES = [
     color: PDF_COLOR,
     icon: FileText,
     href: "/resources/pdfs",
-    thumbnail: "/manus-storage/resourcehub-clipboard_62327747.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/resourcehub-clipboard-cyan-4kXWpwfSmQhpcznnbHnJNo.webp",
   },
   {
     key: "faq",
@@ -36,7 +36,7 @@ const RESOURCE_CATEGORIES = [
     color: FAQ_COLOR,
     icon: MessageCircle,
     href: "/resources/faqs",
-    thumbnail: "/manus-storage/resourcehub-chat-bubble_b2ba88c7.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/resourcehub-chatbubble-green-EGqi927ejMw37kPEVzw5U9.webp",
   },
 ];
 
@@ -190,7 +190,7 @@ export default function GuidesAndDocs() {
 
       {/* Request a Resource */}
       <div className="px-4 lg:px-8 pb-10">
-        <ContentRequestCTA requestType="guide" accentColor="#67C728" />
+        <ContentRequestCTA requestType="guide" accentColor="#ffffff" />
       </div>
     </PortalLayout>
   );

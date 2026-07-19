@@ -104,7 +104,7 @@ const WAVV_PILLARS = [
   },
   {
     icon: BarChart3,
-    color: "#10b981",
+    color: "#00A9E2",
     title: "More Connections, Less Wasted Time",
     body: "Dial multiple lines simultaneously, skip voicemails automatically, and let WAVV's call boards keep your team focused on the contacts most likely to answer.",
   },

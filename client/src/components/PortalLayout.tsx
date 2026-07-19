@@ -18,22 +18,22 @@ import {
 
 // ── Resources section nav items
 const resourceNavItems = [
-  { href: "/home", label: "Home",              icon: Home,          color: "#6366f1" },
-  { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#0074F4" },
-  { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#10b981" },
-  { href: "/resourcehub",    label: "WAVV Resource Hub",   icon: FileText,      color: "#67C728" },
-  { href: "/playground",  label: "WAVV Playground",    icon: FlaskConical,  color: "#a855f7" },
+  { href: "/home", label: "Home",              icon: Home,          color: "#ffffff" },
+  { href: "/academy",   label: "WAVV Academy",       icon: GraduationCap, color: "#ffffff" },
+  { href: "/webinars",  label: "WAVV Webinars",      icon: Video,         color: "#ffffff" },
+  { href: "/resourcehub",    label: "WAVV Resource Hub",   icon: FileText,      color: "#ffffff" },
+  { href: "/playground",  label: "WAVV Playground",    icon: FlaskConical,  color: "#ffffff" },
 ];
 // ── Programs section nav items
 const programNavItems = [
-  { href: "/accelerator", label: "WAVV Accelerator", icon: Rocket, color: "#f97316" },
-  { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" },
+  { href: "/accelerator", label: "WAVV Accelerator", icon: Rocket, color: "#ffffff" },
+  { href: "/partners", label: "WAVV Partners", icon: Users, color: "#ffffff" },
 ];
 // Combined for backward compat with visibility logic
 const baseNavItems = [...resourceNavItems];
-const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#00A9E2" };
+const publicPartnerItem = { href: "/partners", label: "WAVV Partners", icon: Users, color: "#ffffff" };
 
-const adminItem = { href: "/wavvcommandcenter", label: "WAVV Command Center", icon: Shield, color: "#f43f5e" };
+const adminItem = { href: "/wavvcommandcenter", label: "WAVV Command Center", icon: Shield, color: "#ffffff" };
 
 interface PortalLayoutProps {
   children: React.ReactNode;
@@ -51,9 +51,9 @@ function NavLink({
       style={{
         fontSize: "15px",
         ...(isActive ? {
-          background: `${color}18`,
+          background: "rgba(255,255,255,0.08)",
           border: "1px solid transparent",
-          borderLeft: `3px solid ${color}`,
+          borderLeft: "3px solid #ffffff",
           color: "#ffffff",
         } : {
           background: "transparent",
@@ -63,8 +63,8 @@ function NavLink({
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
-          e.currentTarget.style.background = `${color}12`;
-          e.currentTarget.style.borderColor = `${color}25`;
+          e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+          e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
         }
       }}
       onMouseLeave={(e) => {
@@ -77,9 +77,9 @@ function NavLink({
     >
       <div
         className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: isActive ? `${color}28` : `${color}18` }}
+        style={{ background: isActive ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.06)" }}
       >
-        <Icon size={17} style={{ color }} />
+        <Icon size={17} style={{ color: "#ffffff" }} />
       </div>
       <span className="flex-1 min-w-0" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "clip" }}>{label}</span>
 

@@ -12,7 +12,6 @@ import {
   Clapperboard, MonitorPlay, ExternalLink, PictureInPicture2, X, ArrowLeft, Gem,
   type LucideIcon,
 } from "lucide-react";
-import { toast } from "sonner";
 import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -31,9 +30,7 @@ function getEmbedUrl(url: string): string | null {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ACCENT = "#67C728";
-const VARIANT = "recording" as const;
-
-const SECTION_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-ondemand-clapperboard-XGLnb93SFV6vDUAxePhB3u.webp";
+const BANNER_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-diamond-green-kJkuBhauSZkpAuqKMkTrq5.webp";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Video, Play, Mic, Radio, Users, UserCheck, GraduationCap,
@@ -45,23 +42,20 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Clapperboard, MonitorPlay, PlayCircle,
 };
 
-// ─── WebinarCard ──────────────────────────────────────────────────────────────
-function WebinarCard({
+// ─── WebinarRow ──────────────────────────────────────────────────────────────
+function WebinarRow({
   webinar,
   onPlay,
 }: {
-  webinar: { id: number; title: string; description?: string | null; host?: string | null; scheduledAt?: Date | null; registrationUrl?: string | null; videoUrl?: string | null; viewCount?: number | null; accentColor?: string | null; thumbnailUrl?: string | null; iconName?: string | null; comingSoon?: boolean | null; createdAt?: Date | null };
+  webinar: { id: number; title: string; description?: string | null; host?: string | null; videoUrl?: string | null; registrationUrl?: string | null; iconName?: string | null; viewCount?: number | null };
   onPlay?: (embedUrl: string, title: string) => void;
 }) {
   const watchMutation = trpc.webinars.watch.useMutation();
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
 
-  const CardIcon: LucideIcon | undefined = webinar.iconName
-    ? ICON_MAP[webinar.iconName]
-    : Gem;
-
   const embedUrl = webinar.videoUrl ? getEmbedUrl(webinar.videoUrl) : null;
   const isHostedVideo = webinar.videoUrl?.startsWith("/manus-storage") ?? false;
+  const CardIcon: LucideIcon | undefined = webinar.iconName ? ICON_MAP[webinar.iconName] : Gem;
 
   function handleWatchClick() {
     const playUrl = embedUrl ?? (isHostedVideo ? webinar.videoUrl! : null);
@@ -70,68 +64,58 @@ function WebinarCard({
     trackAnon.mutate({
       eventType: "webinar_watch",
       resourceType: "webinar",
-      metadata: JSON.stringify({ id: webinar.id, title: webinar.title, type: VARIANT }),
+      metadata: JSON.stringify({ id: webinar.id, title: webinar.title, type: "recording" }),
     });
     onPlay?.(playUrl, webinar.title);
   }
 
   return (
     <div
-      className="group relative overflow-hidden rounded-xl transition-all duration-200 hover:scale-[1.02] cursor-default"
-      style={{
-        background: "#111318",
-        border: `1px solid ${ACCENT}30`,
-        boxShadow: `0 2px 12px ${ACCENT}10`,
-      }}
+      className="flex items-center gap-4 p-4 rounded-xl transition-all duration-150 hover:scale-[1.005]"
+      style={{ background: "#111318", border: `1px solid ${ACCENT}20` }}
     >
-      <div
-        className="absolute inset-0 pointer-events-none"
+      {/* Play button / Icon */}
+      <button
+        type="button"
+        onClick={(embedUrl || isHostedVideo) ? handleWatchClick : undefined}
+        disabled={!embedUrl && !isHostedVideo}
+        className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-all"
         style={{
-          backgroundImage: webinar.thumbnailUrl ? `url(${webinar.thumbnailUrl})` : `url(${SECTION_BG})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          opacity: 0.15,
+          background: (embedUrl || isHostedVideo) ? `${ACCENT}18` : "rgba(255,255,255,0.04)",
+          border: `1px solid ${(embedUrl || isHostedVideo) ? `${ACCENT}40` : "rgba(255,255,255,0.08)"}`,
+          cursor: (embedUrl || isHostedVideo) ? "pointer" : "default",
         }}
-      />
+      >
+        {(embedUrl || isHostedVideo) ? (
+          <Play size={18} style={{ color: ACCENT }} fill={ACCENT} />
+        ) : CardIcon ? (
+          <CardIcon size={18} style={{ color: "rgba(255,255,255,0.4)" }} />
+        ) : null}
+      </button>
 
-      <div className="relative p-5 flex flex-col gap-3 h-full" style={{ minHeight: "200px" }}>
-        <div className="flex items-start gap-3">
-          {CardIcon && (
-            <div
-              className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center"
-              style={{ background: `${ACCENT}20`, border: `1px solid ${ACCENT}40` }}
-            >
-              <CardIcon size={16} style={{ color: ACCENT }} />
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-white leading-tight line-clamp-2">{webinar.title}</h3>
-            {webinar.host && (
-              <p className="text-xs mt-1" style={{ color: `${ACCENT}cc` }}>
-                Hosted by {webinar.host}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {webinar.description && (
-          <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">{webinar.description}</p>
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <h3 className="text-sm font-bold text-white leading-tight truncate">{webinar.title}</h3>
+        {webinar.host && (
+          <p className="text-xs mt-0.5" style={{ color: `${ACCENT}cc` }}>Hosted by {webinar.host}</p>
         )}
+        {webinar.description && (
+          <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-relaxed">{webinar.description}</p>
+        )}
+      </div>
 
-        <div className="flex-1" />
-
-        <div className="flex items-center gap-2 flex-wrap">
-          {(embedUrl || isHostedVideo) && (
-            <button
-              type="button"
-              onClick={handleWatchClick}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-              style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
-            >
-              <PlayCircle size={12} /> Watch Now
-            </button>
-          )}
-        </div>
+      {/* Actions */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {(embedUrl || isHostedVideo) && (
+          <button
+            type="button"
+            onClick={handleWatchClick}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+            style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
+          >
+            <PlayCircle size={13} /> Watch Now
+          </button>
+        )}
       </div>
     </div>
   );
@@ -148,7 +132,6 @@ export default function WebinarExclusiveOnDemand() {
   }, []);
 
   const [autoPlayFired, setAutoPlayFired] = useState(false);
-
   const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; isHosted?: boolean } | null>(null);
   const [floatingVideo, setFloatingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
 
@@ -159,7 +142,6 @@ export default function WebinarExclusiveOnDemand() {
   }
 
   function handleCloseModal() { setPlayingVideo(null); }
-
   function handlePopOut() {
     if (!playingVideo) return;
     setFloatingVideo({ embedUrl: playingVideo.embedUrl, title: playingVideo.title });
@@ -170,9 +152,9 @@ export default function WebinarExclusiveOnDemand() {
     if (autoPlayFired || !autoPlayId || !webinars || webinars.length === 0) return;
     const target = webinars.find((w: any) => w.id === autoPlayId);
     if (!target || !target.videoUrl) return;
-    const embedUrl = getEmbedUrl(target.videoUrl);
-    if (!embedUrl && !target.videoUrl.startsWith("/manus-storage")) return;
-    handlePlay(embedUrl ?? target.videoUrl, target.title);
+    const eUrl = getEmbedUrl(target.videoUrl);
+    if (!eUrl && !target.videoUrl.startsWith("/manus-storage")) return;
+    handlePlay(eUrl ?? target.videoUrl, target.title);
     setAutoPlayFired(true);
   }, [autoPlayId, webinars, autoPlayFired]);
 
@@ -191,13 +173,38 @@ export default function WebinarExclusiveOnDemand() {
           Back to WAVV Webinars
         </Link>
 
-        {/* Hero banner */}
-        <div className="relative overflow-hidden rounded-2xl" style={{ height: "160px", border: `1px solid ${ACCENT}40` }}>
-          <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, rgba(8,10,16,1) 0%, rgba(8,10,16,0.95) 60%, ${ACCENT}18 100%)` }} />
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none" style={{ opacity: 0.35, color: ACCENT }}>
-            <Gem size={100} strokeWidth={1.2} />
-          </div>
-          <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 80% 50%, ${ACCENT}14 0%, transparent 55%)` }} />
+        {/* Hero banner with neon icon image */}
+        <div
+          className="relative overflow-hidden rounded-2xl"
+          style={{ height: "200px", border: `1px solid ${ACCENT}40`, boxShadow: `0 0 0 1px ${ACCENT}20, 0 4px 32px ${ACCENT}18` }}
+        >
+          <div className="absolute inset-0" style={{ background: "#000" }} />
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="circuit-exclusive" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={ACCENT} strokeWidth="0.8" fill="none"/>
+                <circle cx="10" cy="10" r="2" fill={ACCENT}/>
+                <circle cx="50" cy="10" r="2" fill={ACCENT}/>
+                <circle cx="50" cy="50" r="2" fill={ACCENT}/>
+                <circle cx="30" cy="30" r="1.5" fill={ACCENT}/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#circuit-exclusive)"/>
+          </svg>
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: `url(${BANNER_URL})`,
+              backgroundSize: "100% auto",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center center",
+              opacity: 0.85,
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }}
+          />
           <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: ACCENT }}>WAVV Webinars</p>
             <h1 className="text-2xl font-extrabold text-white leading-tight">WAVV Exclusive On-Demand Webinars</h1>
@@ -210,24 +217,24 @@ export default function WebinarExclusiveOnDemand() {
           </div>
         </div>
 
-        {/* Content grid */}
+        {/* Content list */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-52 rounded-xl animate-pulse" style={{ background: "#1d2230" }} />
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-20 rounded-xl animate-pulse" style={{ background: "#1d2230" }} />
             ))}
           </div>
         ) : (webinars ?? []).length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-3">
             {(webinars ?? []).map((w) => (
-              <WebinarCard key={w.id} webinar={w} onPlay={handlePlay} />
+              <WebinarRow key={w.id} webinar={w} onPlay={handlePlay} />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
             <Gem size={32} className="text-gray-700 mb-3" />
-            <p className="text-white text-sm font-bold">No Recordings yet.</p>
-            <p className="text-white text-xs mt-1">Please check back soon!</p>
+            <p className="text-white text-sm font-bold">No Exclusive On-Demand Webinars yet.</p>
+            <p className="text-white text-xs mt-1">Check back soon for premium replays!</p>
           </div>
         )}
       </div>
@@ -254,7 +261,7 @@ export default function WebinarExclusiveOnDemand() {
             </div>
             <div className="flex items-center justify-between px-5 py-3" style={{ borderTop: "1px solid #2a2a2a", background: "#0d0f14" }}>
               <p className="text-xs text-gray-500">Click outside or press Esc to close</p>
-              <p className="text-xs text-gray-600 flex items-center gap-1"><PictureInPicture2 size={11} />Pop out to keep watching while you browse</p>
+              <p className="text-xs text-gray-600 flex items-center gap-1"><PictureInPicture2 size={11} />Pop out to keep watching</p>
             </div>
           </div>
         </div>

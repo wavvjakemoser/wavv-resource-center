@@ -29,7 +29,7 @@ const WEBINAR_CATEGORIES = [
     color: LIVE_COLOR,
     icon: Star,
     href: "/webinars/live-exclusive",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-exclusive-live-star-KjxqVKGQiBBpKDhmiVbebz.webp",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-star-cyan-UGL7M86B3gpHA44y2Nwtia.webp",
   },
   {
     key: "recording",
@@ -191,7 +191,7 @@ export default function Webinars() {
 
       {/* Request a Webinar */}
       <div className="px-4 lg:px-8 pb-10">
-        <ContentRequestCTA requestType="webinar" accentColor="#10b981" />
+        <ContentRequestCTA requestType="webinar" accentColor="#ffffff" />
       </div>
     </PortalLayout>
   );

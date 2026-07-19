@@ -267,50 +267,61 @@ export default function HandsOn() {
           <span className="text-xs text-gray-400 ml-1">— WAVV Playground is currently under development. Sign up below to get notified when it launches.</span>
         </div>
 
-        {/* ── Category Tiles ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* ── Category Tiles (stacked rectangles — same as Academy/Webinars) ── */}
+        <div className="space-y-5">
           {visibleCategories.map((cat) => (
             <Link
               key={cat.key}
               href={cat.href}
-              className="group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer"
+              className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.01]"
               style={{
-                background: "#111318",
-                border: `1px solid ${cat.color}30`,
-                boxShadow: `0 4px 20px ${cat.color}08`,
-                minHeight: "260px",
+                textDecoration: "none",
+                border: `1px solid ${cat.color}60`,
+                height: "260px",
+                boxShadow: `0 0 0 1px ${cat.color}20, 0 4px 32px ${cat.color}18`,
               }}
             >
-              {/* Banner image */}
-              <div className="relative h-36 overflow-hidden flex-shrink-0">
-                <img
-                  src={cat.banner}
-                  alt={cat.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{ background: `linear-gradient(to top, #111318 0%, transparent 60%)` }}
-                />
-              </div>
+              {/* Deep space black base */}
+              <div className="absolute inset-0" style={{ background: "#000" }} />
 
-              {/* Content */}
-              <div className="flex-1 flex flex-col px-5 pb-5 pt-2">
-                <h3 className="text-lg font-bold text-white mb-1">{cat.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-3">{cat.description}</p>
-                <div className="flex-1" />
-                <div className="flex items-center justify-between">
-                  <span
-                    className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
-                    style={{ background: `${cat.color}18`, color: cat.color, border: `1px solid ${cat.color}40` }}
-                  >
-                    Coming Soon
-                  </span>
-                  <ChevronRight
-                    size={16}
-                    className="transition-transform group-hover:translate-x-1"
-                    style={{ color: cat.color }}
-                  />
+              {/* Circuit board SVG pattern */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id={`circuit-pg-${cat.key}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                    <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={cat.color} strokeWidth="0.8" fill="none"/>
+                    <circle cx="10" cy="10" r="2" fill={cat.color}/>
+                    <circle cx="50" cy="10" r="2" fill={cat.color}/>
+                    <circle cx="50" cy="50" r="2" fill={cat.color}/>
+                    <circle cx="30" cy="30" r="1.5" fill={cat.color}/>
+                    <path d="M0 30 L10 30 M60 50 L50 50" stroke={cat.color} strokeWidth="0.6" fill="none"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#circuit-pg-${cat.key})`}/>
+              </svg>
+
+              {/* Radial color glow */}
+              <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${cat.color}28 0%, ${cat.color}10 45%, transparent 75%)` }} />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 60% 80% at 15% 50%, ${cat.color}12 0%, transparent 60%)` }} />
+
+              {/* Top edge neon line */}
+              <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${cat.color}60 30%, ${cat.color}90 60%, transparent 100%)` }} />
+
+              {/* Full-bleed thumbnail */}
+              <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url(${cat.banner})`, backgroundSize: "100% auto", backgroundRepeat: "no-repeat", backgroundPosition: "center center", opacity: 0.85 }} />
+
+              {/* Dark gradient overlay for text */}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }} />
+
+              {/* Hover neon border pulse */}
+              <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ boxShadow: `inset 0 0 0 1px ${cat.color}80, 0 0 24px ${cat.color}30` }} />
+
+              {/* Content overlay */}
+              <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
+                <p className="text-sm font-bold uppercase tracking-widest mb-1" style={{ color: cat.color }}>WAVV Playground</p>
+                <h2 className="text-4xl font-extrabold text-white leading-tight mb-1">{cat.title}</h2>
+                <p className="text-base text-white mb-3">{cat.description}</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold px-3 py-1 rounded-full" style={{ background: `${cat.color}35`, color: cat.color, border: `1px solid ${cat.color}` }}>Coming Soon</span>
                 </div>
               </div>
             </Link>

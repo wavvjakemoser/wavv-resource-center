@@ -216,24 +216,37 @@ export default function ResourcePdfs() {
           WAVV Resource Hub
         </Link>
 
-        {/* Hero banner */}
+        {/* Hero banner with neon icon image */}
         <div
           className="relative overflow-hidden rounded-2xl"
-          style={{ height: "160px", border: `1px solid ${ACCENT}40` }}
+          style={{ height: "200px", border: `1px solid ${ACCENT}40`, boxShadow: `0 0 0 1px ${ACCENT}20, 0 4px 32px ${ACCENT}18` }}
         >
-          <div
-            className="absolute inset-0"
-            style={{ background: `linear-gradient(135deg, rgba(8,10,16,1) 0%, rgba(8,10,16,0.95) 60%, ${ACCENT}18 100%)` }}
-          />
-          <div
-            className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ opacity: 0.35, color: ACCENT }}
-          >
-            <FileText size={100} strokeWidth={1.2} />
-          </div>
+          <div className="absolute inset-0" style={{ background: "#000" }} />
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="circuit-pdfs" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={ACCENT} strokeWidth="0.8" fill="none"/>
+                <circle cx="10" cy="10" r="2" fill={ACCENT}/>
+                <circle cx="50" cy="10" r="2" fill={ACCENT}/>
+                <circle cx="50" cy="50" r="2" fill={ACCENT}/>
+                <circle cx="30" cy="30" r="1.5" fill={ACCENT}/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#circuit-pdfs)"/>
+          </svg>
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse at 80% 50%, ${ACCENT}14 0%, transparent 55%)` }}
+            style={{
+              backgroundImage: `url(https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/resourcehub-clipboard-cyan-4kXWpwfSmQhpcznnbHnJNo.webp)`,
+              backgroundSize: "100% auto",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center center",
+              opacity: 0.85,
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }}
           />
           <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: ACCENT }}>

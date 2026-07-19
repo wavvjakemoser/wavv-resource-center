@@ -489,7 +489,7 @@ export default function Academy() {
 
       {/* ── Request a Video CTA ── */}
       <div className="px-4 lg:px-8 pb-10">
-        <ContentRequestCTA requestType="video" accentColor="#0074F4" />
+        <ContentRequestCTA requestType="video" accentColor="#ffffff" />
       </div>
     </PortalLayout>
   );

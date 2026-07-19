@@ -2088,3 +2088,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Register routes in App.tsx
 - [x] Build Playground CMS with per-tile hide/show
 - [x] Per-tile visibility controls for all sections
+
+## UI Fixes Batch (Jul 18 2026)
+- [x] Fix Webinar Live Exclusive banner: change from gold/yellow to cyan (#00A9E2)
+- [x] Fix Resource Hub icon banners: update colors from purple/red/gold to blue/cyan/green
+- [x] Fix Playground tile layout: change from 3-up grid to stacked rectangles (same as Academy/Webinars)
+- [x] Sidebar icons: make all icons and text white (remove colored active states)
+- [x] Request buttons: make white instead of colored
+- [x] What is WAVV tiles on homepage: use blue, cyan, green
+- [x] Academy sub-URLs: already correct (dynamic /academy/category/:key pattern)
+- [x] Webinar sub-pages: replace card grid with clean list (neon banner hero + video rows with Watch Now, Description, Host, Play)
+- [x] Resource Hub sub-pages: add neon icon banner hero at top
+- [x] Playground sub-pages: add actual GHL/HubSpot/Salesforce neon banner hero at top
