@@ -434,6 +434,7 @@ function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
       <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${color}60 30%, ${color}90 60%, transparent 100%)` }} />
 
       {/* Full-bleed thumbnail — covers entire tile as background */}
+      <img src={bannerIcon} alt="" loading="eager" fetchPriority="high" className="hidden" />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -512,6 +513,7 @@ function SubPageBanner({ title, subtitle, bannerIcon, color }: {
       <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${color}60 30%, ${color}90 60%, transparent 100%)` }} />
 
       {/* Full-bleed thumbnail — covers entire tile as background */}
+      <img src={bannerIcon} alt="" loading="eager" fetchPriority="high" className="hidden" />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{

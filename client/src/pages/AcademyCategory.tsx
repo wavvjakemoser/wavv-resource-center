@@ -773,6 +773,7 @@ export default function AcademyCategory() {
             <rect width="100%" height="100%" fill={`url(#circuit-ac-${cat.key})`}/>
           </svg>
           {/* Neon banner image */}
+          <img src={cat.thumbnail} alt="" loading="eager" fetchPriority="high" className="hidden" />
           <div
             className="absolute inset-0 pointer-events-none"
             style={{

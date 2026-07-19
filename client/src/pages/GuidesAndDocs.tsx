@@ -141,6 +141,7 @@ export default function GuidesAndDocs() {
                 />
 
                 {/* Full-bleed thumbnail */}
+                <img src={cat.thumbnail} alt="" loading="eager" fetchPriority="high" className="hidden" />
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{

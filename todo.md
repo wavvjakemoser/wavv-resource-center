@@ -2345,3 +2345,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Audit: verify sidebar alignment (all items left-aligned)
 - [x] Audit: mobile responsiveness across all sections
 - [x] No critical issues found during audit
+
+## Image Preloading + Homepage Layout (Jul 19 - Session 17)
+- [x] Fix banner/icon loading delay: add image preloading for Academy, Webinars, Resource Hub, Playground, and Accelerator tiles
+- [ ] Redesign homepage layout for fully-populated content state

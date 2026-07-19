@@ -299,6 +299,7 @@ export default function HandsOn() {
               <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${cat.color}60 30%, ${cat.color}90 60%, transparent 100%)` }} />
 
               {/* Full-bleed thumbnail */}
+              <img src={cat.banner} alt="" loading="eager" fetchPriority="high" className="hidden" />
               <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url(${cat.banner})`, backgroundSize: "100% auto", backgroundRepeat: "no-repeat", backgroundPosition: "center center", opacity: 0.85 }} />
 
               {/* Dark gradient overlay for text */}

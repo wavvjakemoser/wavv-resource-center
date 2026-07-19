@@ -172,6 +172,8 @@ function LiveCourseCard({
             src={course.thumbnailUrl}
             alt={course.title}
             className="w-full h-full object-cover"
+            loading="eager"
+            fetchPriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div
@@ -427,6 +429,7 @@ export default function Academy() {
                   />
 
                   {/* Full-bleed thumbnail — covers entire tile as background */}
+                  <img src={cat.thumbnail} alt="" loading="eager" fetchPriority="high" className="hidden" />
                   <div
                     className="absolute inset-0 pointer-events-none"
                     style={{
