@@ -2863,7 +2863,7 @@ function SectionRow2({
               const prevLesson = lessons[lessonIdx - 1];
               const nextLesson = lessons[lessonIdx + 1];
               return (
-                <div key={lesson.id} className="relative group/lesson px-3 py-2" style={{ background: lessonIdx % 2 === 0 ? "#1a1f2e" : "#212840" }}>
+                <div key={lesson.id} className="relative group/lesson px-3 py-2" style={{ background: "#1a1f2e" }}>
                   {/* Lesson reorder arrows */}
                   {onReorderLesson && (
                     <div className="absolute -left-5 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 opacity-0 group-hover/lesson:opacity-100 transition-opacity">
@@ -2942,7 +2942,7 @@ function CategoryBlock({
       {/* Category flat header — matches other CMS sections */}
       <div
         className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition"
-        style={{ background: "#1d2230" }}
+        style={{ background: "#000000" }}
         onClick={() => setOpen((v) => !v)}
       >
         <div className="flex items-center gap-3">
@@ -2951,14 +2951,14 @@ function CategoryBlock({
           </button>
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: accentColor }} />
           <span className="text-sm font-semibold text-white">{displayLabel}</span>
-          {categorySubtitle && <span className="text-xs text-gray-500 hidden sm:inline">{categorySubtitle}</span>}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${accentColor}20`, color: accentColor }}>{courses.length} section{courses.length !== 1 ? "s" : ""}</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>{allLessons.filter(l => courses.some(c => c.id === l.courseId)).length} video{allLessons.filter(l => courses.some(c => c.id === l.courseId)).length !== 1 ? "s" : ""}</span>
         </div>
       </div>
       {open && (
-        <div className="space-y-2 p-3" style={{ background: "#111" }}>
+        <div className="space-y-2 p-3" style={{ background: "#1a1f2e" }}>
           {courses.map((course, idx) => {
             const courseLessons = allLessons.filter((l) => l.courseId === course.id);
             const prevCourse = courses[idx - 1];
@@ -3040,6 +3040,8 @@ function InactiveCategoryBlock({
           <span className="text-sm font-semibold text-white">{label}</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${color}20`, color }}>{inactiveCourses.length} section{inactiveCourses.length !== 1 ? "s" : ""}</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>{inactiveLessons.length} video{inactiveLessons.length !== 1 ? "s" : ""}</span>
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(239,68,68,0.15)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}>
             {totalInactive} inactive
           </span>
@@ -3451,7 +3453,6 @@ function ContentTab() {
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#22c55e", boxShadow: "0 0 6px #22c55e80" }} />
             <h2 className="text-base font-bold text-white tracking-tight">Live Sections &amp; Courses</h2>
           </div>
-          <span className="text-xs text-gray-500 font-medium"></span>
         </div>
         <div className="space-y-6">
           {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, videoCount, thumbnail }) => {
@@ -3487,8 +3488,7 @@ function ContentTab() {
       <div className="pt-2">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "#4b5563" }} />
-          <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections & Courses</h2>
-          <span className="text-xs text-gray-500 font-medium ml-2"></span>
+          <h2 className="text-base font-bold text-white tracking-tight flex-shrink-0">Inactive Sections &amp; Courses</h2>
         </div>
         <div className="space-y-6">
                 {ACADEMY_CATEGORIES.map(({ key, label, subtitle, color, icon: CatIcon, thumbnail }) => {
@@ -9226,6 +9226,86 @@ function HelpArticlesAdminTab() {
 
 
 // ─── Accelerator Tab ─────────────────────────────────────────────────────────
+function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s: any) => void }) {
+  const [open, setOpen] = React.useState(false);
+  const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: session.week });
+  const { data: content = [] } = trpc.accelerator.listContent.useQuery({ sessionNumber: session.week });
+  const utils = trpc.useUtils();
+  const updateMutation = trpc.accelerator.update.useMutation({
+    onSuccess: () => { utils.accelerator.list.invalidate(); toast.success("Updated"); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const liveCallCount = liveCalls.length;
+  const contentCount = content.length;
+
+  return (
+    <div className="rounded-xl overflow-hidden mb-3" style={{ border: "1px solid #2a2a2a" }}>
+      {/* Session header — collapsible, black */}
+      <div
+        className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-white/5 transition"
+        style={{ background: "#000000" }}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <button type="button" className="text-white flex-shrink-0">
+            {open ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
+          </button>
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: session.color }} />
+          <span className="text-sm font-bold text-white">Session {session.week}</span>
+          <span className="text-sm font-semibold text-white truncate">{session.title}</span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${session.color}20`, color: session.color }}>{liveCallCount} call{liveCallCount !== 1 ? "s" : ""}</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }}>{contentCount} video{contentCount !== 1 ? "s" : ""}</span>
+          {/* Visibility toggles */}
+          <button
+            onClick={() => updateMutation.mutate({ id: session.id, isPublished: true, comingSoon: false })}
+            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
+            style={{
+              background: session.isPublished && !session.comingSoon ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
+              color: session.isPublished && !session.comingSoon ? "#10b981" : "rgba(255,255,255,0.25)",
+              border: session.isPublished && !session.comingSoon ? "1px solid rgba(16,185,129,0.3)" : "1px solid rgba(255,255,255,0.08)",
+            }}
+          >Visible</button>
+          <button
+            onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: false })}
+            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
+            style={{
+              background: !session.isPublished && !session.comingSoon ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.04)",
+              color: !session.isPublished && !session.comingSoon ? "#ef4444" : "rgba(255,255,255,0.25)",
+              border: !session.isPublished && !session.comingSoon ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(255,255,255,0.08)",
+            }}
+          >Hidden</button>
+          <button
+            onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: true })}
+            className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full transition-all"
+            style={{
+              background: session.comingSoon ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.04)",
+              color: session.comingSoon ? "#f59e0b" : "rgba(255,255,255,0.25)",
+              border: session.comingSoon ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(255,255,255,0.08)",
+            }}
+          >Coming Soon</button>
+          <button
+            onClick={() => onEdit(session)}
+            className="flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full font-semibold transition-all"
+            style={{ background: `${session.color}18`, color: session.color, border: `1px solid ${session.color}40` }}
+          >
+            <Pencil size={10} /> Edit Details
+          </button>
+        </div>
+      </div>
+      {/* Collapsible content */}
+      {open && (
+        <div style={{ background: "#1a1f2e" }}>
+          <SessionLiveCallsInline sessionNumber={session.week} sessionColor={session.color} />
+          <SessionContentInline sessionNumber={session.week} sessionColor={session.color} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AcceleratorTab() {
   const utils = trpc.useUtils();
   const { data: sessions = [], isLoading } = trpc.accelerator.list.useQuery();
@@ -9298,217 +9378,97 @@ function AcceleratorTab() {
 
   return (
     <div className="space-y-4 mt-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-white">WAVV Sales Accelerator</h2>
-          <p className="text-xs text-gray-400">Manage the 6 session landing pages. Edit content, toggle publish status, and build out each week.</p>
+        <div className="flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-green-400" />
+          <h2 className="text-base font-bold text-white">Live Sessions</h2>
         </div>
       </div>
 
-      <div className="space-y-3">
-        {sessions.map((session: any) => (
-          <div
-            key={session.id}
-            className="rounded-xl p-4 transition-all"
-            style={{
-              background: editingId === session.id ? "rgba(0,116,244,0.06)" : "rgba(255,255,255,0.03)",
-              border: editingId === session.id ? "1px solid rgba(0,116,244,0.25)" : "1px solid rgba(255,255,255,0.06)",
-            }}
-          >
-            {editingId === session.id ? (
-              /* ── Edit mode ── */
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                    style={{ background: `${session.color}18`, color: session.color }}>
-                    Session {session.week}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="text-xs px-3 py-1.5 rounded-lg"
-                      style={{ color: "#9ca3af" }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={saveEdit}
-                      disabled={updateMutation.isPending}
-                      className="text-xs px-3 py-1.5 rounded-lg font-medium"
-                      style={{ background: "#0074F4", color: "#fff" }}
-                    >
-                      {updateMutation.isPending ? "Saving..." : "Save"}
-                    </button>
-                  </div>
-                </div>
+      {/* Session blocks */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : (
+        <div>
+          {sessions.map((session: any) => (
+            <AcceleratorSessionBlock key={session.id} session={session} onEdit={startEdit} />
+          ))}
+        </div>
+      )}
 
-                {/* Title */}
-                <div>
-                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Session Title</label>
-                  <Input
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                  />
-                </div>
+      {/* Edit Details Dialog */}
+      {editingId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setEditingId(null)}>
+          <div className="rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 space-y-4" style={{ background: "#161a22", border: "1px solid #2a2a2a" }} onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-white">Edit Session Details</h3>
+              <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-white"><X size={18} /></button>
+            </div>
 
-                {/* WAVV Focus + Outcome side by side */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">WAVV Focus</label>
-                    <textarea
-                      value={form.wavvFocus}
-                      onChange={(e) => setForm({ ...form, wavvFocus: e.target.value })}
-                      rows={3}
-                      className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 resize-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Outcome</label>
-                    <textarea
-                      value={form.outcome}
-                      onChange={(e) => setForm({ ...form, outcome: e.target.value })}
-                      rows={3}
-                      className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 resize-none"
-                    />
-                  </div>
-                </div>
+            {/* Title */}
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Session Title</label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="bg-[#0d1117] border-gray-700 text-white text-sm" />
+            </div>
 
-                {/* Hero Headline + Subline */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Hero Headline (landing page)</label>
-                    <Input
-                      value={form.heroHeadline}
-                      onChange={(e) => setForm({ ...form, heroHeadline: e.target.value })}
-                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                      placeholder="e.g. Build Your Number & Mindset Reset"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-gray-400 mb-1 block">Hero Subline</label>
-                    <Input
-                      value={form.heroSubline}
-                      onChange={(e) => setForm({ ...form, heroSubline: e.target.value })}
-                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                      placeholder="Short description for the session page"
-                    />
-                  </div>
-                </div>
-
-                {/* Body Content */}
-                <div>
-                  <label className="text-[11px] font-medium text-gray-400 mb-1 block">Body Content (Markdown)</label>
-                  <textarea
-                    value={form.bodyContent}
-                    onChange={(e) => setForm({ ...form, bodyContent: e.target.value })}
-                    rows={8}
-                    className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 font-mono resize-y"
-                    placeholder="Write the session landing page content in Markdown..."
-                  />
-                </div>
-
-                {/* ── Inline Live Calls for this session ── */}
-                <SessionLiveCallsInline sessionNumber={session.week} sessionColor={session.color} />
-
-                {/* ── Inline Content (Recordings + Product Training) for this session ── */}
-                <SessionContentInline sessionNumber={session.week} sessionColor={session.color} />
-
-                {/* ── Slack Community Section (below all session content) ── */}
-                <div className="rounded-lg p-3 space-y-2 mt-2" style={{ background: "rgba(74,21,75,0.12)", border: "1px solid rgba(74,21,75,0.3)" }}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
-                      </svg>
-                      <span className="text-[11px] font-semibold text-gray-300">Slack Community Section</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, showSlack: !form.showSlack })}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
-                      style={form.showSlack
-                        ? { background: "rgba(74,21,75,0.35)", color: "#ECB22E", border: "1px solid rgba(74,21,75,0.6)" }
-                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
-                    >
-                      {form.showSlack ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
-                      {form.showSlack ? "Visible" : "Hidden"}
-                    </button>
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-gray-500 mb-1 block">Slack Invite URL <span className="text-gray-600">(optional)</span></label>
-                    <Input
-                      value={form.slackUrl}
-                      onChange={(e) => setForm({ ...form, slackUrl: e.target.value })}
-                      className="bg-[#0d1117] border-gray-700 text-white text-sm"
-                      placeholder="https://join.slack.com/t/wavv-community/..."
-                    />
-                  </div>
-                </div>
+            {/* WAVV Focus + Outcome */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-medium text-gray-400 mb-1 block">WAVV Focus</label>
+                <textarea value={form.wavvFocus} onChange={(e) => setForm({ ...form, wavvFocus: e.target.value })} rows={3} className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 resize-none" />
               </div>
-            ) : (
-              /* ── View mode ── */
-              <div
-                className="flex items-center justify-between gap-4 cursor-pointer group"
-                onClick={() => startEdit(session)}
-                title="Click anywhere to edit session"
-              >
-                <div
-                  className="flex items-center gap-3 min-w-0"
-                >
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0"
-                    style={{ background: `${session.color}18`, color: session.color }}>
-                    Session {session.week}
-                  </span>
-                  <h3 className="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">{session.title}</h3>
-                  <Pencil size={11} className="text-gray-600 group-hover:text-blue-400 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100" />
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                  {/* Visibility toggles */}
-                  <button
-                    onClick={() => updateMutation.mutate({ id: session.id, isPublished: true, comingSoon: false })}
-                    className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
-                    style={{
-                      background: session.isPublished && !session.comingSoon ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.04)",
-                      color: session.isPublished && !session.comingSoon ? "#10b981" : "rgba(255,255,255,0.25)",
-                      border: session.isPublished && !session.comingSoon ? "1px solid rgba(16,185,129,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    Visible
-                  </button>
-                  <button
-                    onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: false })}
-                    className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
-                    style={{
-                      background: !session.isPublished && !session.comingSoon ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.04)",
-                      color: !session.isPublished && !session.comingSoon ? "#ef4444" : "rgba(255,255,255,0.25)",
-                      border: !session.isPublished && !session.comingSoon ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    Hidden
-                  </button>
-                  <button
-                    onClick={() => updateMutation.mutate({ id: session.id, isPublished: false, comingSoon: true })}
-                    className="text-[10px] font-semibold px-3 py-1 rounded-full transition-all"
-                    style={{
-                      background: session.comingSoon ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.04)",
-                      color: session.comingSoon ? "#f59e0b" : "rgba(255,255,255,0.25)",
-                      border: session.comingSoon ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    Coming Soon
-                  </button>
-
-                </div>
+              <div>
+                <label className="text-[11px] font-medium text-gray-400 mb-1 block">Outcome</label>
+                <textarea value={form.outcome} onChange={(e) => setForm({ ...form, outcome: e.target.value })} rows={3} className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 resize-none" />
               </div>
-            )}
+            </div>
+
+            {/* Hero Headline + Subline */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-medium text-gray-400 mb-1 block">Hero Headline</label>
+                <Input value={form.heroHeadline} onChange={(e) => setForm({ ...form, heroHeadline: e.target.value })} className="bg-[#0d1117] border-gray-700 text-white text-sm" placeholder="e.g. Build Your Number & Mindset Reset" />
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-gray-400 mb-1 block">Hero Subline</label>
+                <Input value={form.heroSubline} onChange={(e) => setForm({ ...form, heroSubline: e.target.value })} className="bg-[#0d1117] border-gray-700 text-white text-sm" placeholder="Short description for the session page" />
+              </div>
+            </div>
+
+            {/* Body Content */}
+            <div>
+              <label className="text-[11px] font-medium text-gray-400 mb-1 block">Body Content (Markdown)</label>
+              <textarea value={form.bodyContent} onChange={(e) => setForm({ ...form, bodyContent: e.target.value })} rows={8} className="w-full rounded-md bg-[#0d1117] border border-gray-700 text-white text-sm px-3 py-2 font-mono resize-y" placeholder="Write the session landing page content in Markdown..." />
+            </div>
+
+            {/* Slack Community Section */}
+            <div className="rounded-lg p-3 space-y-2" style={{ background: "rgba(74,21,75,0.12)", border: "1px solid rgba(74,21,75,0.3)" }}>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-gray-300">Slack Community Section</span>
+                <button type="button" onClick={() => setForm({ ...form, showSlack: !form.showSlack })} className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all" style={form.showSlack ? { background: "rgba(74,21,75,0.35)", color: "#ECB22E", border: "1px solid rgba(74,21,75,0.6)" } : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}>
+                  {form.showSlack ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
+                  {form.showSlack ? "Visible" : "Hidden"}
+                </button>
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-gray-500 mb-1 block">Slack Invite URL <span className="text-gray-600">(optional)</span></label>
+                <Input value={form.slackUrl} onChange={(e) => setForm({ ...form, slackUrl: e.target.value })} className="bg-[#0d1117] border-gray-700 text-white text-sm" placeholder="https://join.slack.com/t/wavv-community/..." />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2 pt-2">
+              <button onClick={() => setEditingId(null)} className="text-xs px-3 py-1.5 rounded-lg" style={{ color: "#9ca3af" }}>Cancel</button>
+              <button onClick={saveEdit} disabled={updateMutation.isPending} className="text-xs px-4 py-1.5 rounded-lg font-medium" style={{ background: "#0074F4", color: "#fff" }}>
+                {updateMutation.isPending ? "Saving..." : "Save"}
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
-
-
-
-
+        </div>
+      )}
     </div>
   );
 }
