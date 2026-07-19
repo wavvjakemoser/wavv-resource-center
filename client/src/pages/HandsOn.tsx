@@ -1,69 +1,46 @@
 import { useState } from "react";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
+import { Link } from "wouter";
 import { toast } from "sonner";
 import {
   FlaskConical,
-  Phone,
-  LayoutDashboard,
-  MessageSquare,
-  Construction,
-  CheckCircle2,
-  Send,
   Bell,
+  CheckCircle2,
   X,
-  AlertTriangle,
+  ChevronRight,
+  Construction,
 } from "lucide-react";
 
-const PLAYGROUND_CARDS = [
+// ─── Category Tiles ───────────────────────────────────────────────────────────
+const CATEGORIES = [
   {
-    label: "WAVV Dialer Playground",
-    desc: "Practice calling flows, power dialer settings, and call dispositions in a safe environment without affecting your live account.",
-    icon: Phone,
-    color: "#0074F4",
-  },
-  {
-    label: "WAVV Call Boards Playground",
-    desc: "Explore call board layouts, team queues, and real-time metrics without affecting live data or active campaigns.",
-    icon: LayoutDashboard,
-    color: "#00A9E2",
-  },
-  {
-    label: "WAVV Messenger Playground",
-    desc: "Test SMS messaging workflows, templates, and conversation threads in a sandbox without sending real messages.",
-    icon: MessageSquare,
-    color: "#67C728",
-  },
-];
-
-const PLAYGROUND_SECTIONS = [
-  {
+    key: "gohighlevel",
     title: "Go High Level",
-    logo: "/manus-storage/gohighlevel-icon_fa969308.jpeg",
-    cards: [
-      { label: "WAVV Dialer Playground", desc: "Practice calling flows and power dialer settings inside Go High Level.", icon: Phone, color: "#0074F4" },
-      { label: "WAVV Call Boards Playground", desc: "Explore call board layouts and team queues within Go High Level.", icon: LayoutDashboard, color: "#00A9E2" },
-      { label: "WAVV Messenger Playground", desc: "Test SMS messaging workflows and templates inside Go High Level.", icon: MessageSquare, color: "#67C728" },
-    ],
+    description: "Practice WAVV features inside the Go High Level CRM — calling flows, call boards, and messaging.",
+    color: "#0074F4",
+    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/playground-ghl-blue-9my73T937GTNr4y28Vikct.webp",
+    href: "/playground/gohighlevel",
   },
   {
+    key: "hubspot",
     title: "HubSpot",
-    logo: "/manus-storage/hubspot-icon_3afa13d9.png",
-    cards: [
-      { label: "WAVV Dialer Playground", desc: "Practice calling flows and power dialer settings inside HubSpot.", icon: Phone, color: "#0074F4" },
-      { label: "WAVV Call Boards Playground", desc: "Explore call board layouts and team queues within HubSpot.", icon: LayoutDashboard, color: "#00A9E2" },
-      { label: "WAVV Messenger Playground", desc: "Test SMS messaging workflows and templates inside HubSpot.", icon: MessageSquare, color: "#67C728" },
-    ],
+    description: "Explore WAVV's integration with HubSpot — dialer, call boards, and messenger in a sandbox environment.",
+    color: "#00A9E2",
+    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/playground-hubspot-cyan-3he7kCA44vZmpDJSXetC2q.webp",
+    href: "/playground/hubspot",
+  },
+  {
+    key: "salesforce",
+    title: "Salesforce",
+    description: "Experience WAVV within Salesforce — practice calling, explore boards, and test messaging workflows.",
+    color: "#67C728",
+    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/playground-salesforce-green-dGSqmbKvh8vqj9nNxyiSyF.webp",
+    href: "/playground/salesforce",
   },
 ];
 
-const PLAYGROUND_OPTIONS = [
-  "WAVV Dialer Playground",
-  "WAVV Call Boards Playground",
-  "WAVV Messenger Playground",
-  "Other / General Feedback",
-];
-
+// ─── Request Modal ────────────────────────────────────────────────────────────
 function RequestModal({
   open,
   onClose,
@@ -103,10 +80,8 @@ function RequestModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (userName && userEmail) {
-      // Logged-in user — use protected procedure
       submitMutation.mutate({ optIn });
     } else {
-      // Anonymous user — use public procedure with manually entered name/email
       if (!localName.trim() || !localEmail.trim()) {
         toast.error("Please enter your name and email.");
         return;
@@ -127,7 +102,7 @@ function RequestModal({
 
   if (!open) return null;
 
-  const readonlyStyle: React.CSSProperties = {
+  const inputStyle: React.CSSProperties = {
     background: "#0f1318",
     border: "1px solid #1e1e1e",
     color: "#9ca3af",
@@ -145,7 +120,7 @@ function RequestModal({
     >
       <div
         className="relative w-full max-w-sm rounded-2xl p-6 shadow-2xl"
-        style={{ background: "#161616", border: "1px solid rgba(168,85,247,0.25)" }}
+        style={{ background: "#161616", border: "1px solid rgba(0,116,244,0.25)" }}
       >
         <button
           onClick={handleClose}
@@ -164,7 +139,7 @@ function RequestModal({
             <button
               onClick={handleClose}
               className="mt-3 px-5 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+              style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
             >
               Done
             </button>
@@ -173,7 +148,7 @@ function RequestModal({
           <>
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-2">
-                <Bell size={16} style={{ color: "#a855f7" }} />
+                <Bell size={16} style={{ color: "#0074F4" }} />
                 <h3 className="text-white font-semibold text-base">Get Notified</h3>
               </div>
               <p className="text-white text-sm leading-relaxed">
@@ -181,46 +156,44 @@ function RequestModal({
               </p>
             </div>
 
-            {/* User info — read-only if logged in, editable if not */}
             <div className="space-y-2 mb-4">
               <div>
                 <p className="text-xs text-white mb-1">Name</p>
                 {userName ? (
-                  <div style={readonlyStyle}>{userName}</div>
+                  <div style={inputStyle}>{userName}</div>
                 ) : (
                   <input
                     type="text"
                     value={localName}
                     onChange={(e) => setLocalName(e.target.value)}
                     placeholder="Your name"
-                    style={{ ...readonlyStyle, color: "#e5e7eb", border: "1px solid rgba(168,85,247,0.3)" }}
+                    style={{ ...inputStyle, color: "#e5e7eb", border: "1px solid rgba(0,116,244,0.3)" }}
                   />
                 )}
               </div>
               <div>
                 <p className="text-xs text-white mb-1">Email</p>
                 {userEmail ? (
-                  <div style={readonlyStyle}>{userEmail}</div>
+                  <div style={inputStyle}>{userEmail}</div>
                 ) : (
                   <input
                     type="email"
                     value={localEmail}
                     onChange={(e) => setLocalEmail(e.target.value)}
                     placeholder="your@email.com"
-                    style={{ ...readonlyStyle, color: "#e5e7eb", border: "1px solid rgba(168,85,247,0.3)" }}
+                    style={{ ...inputStyle, color: "#e5e7eb", border: "1px solid rgba(0,116,244,0.3)" }}
                   />
                 )}
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Opt-in checkbox */}
               <label className="flex items-start gap-3 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={optIn}
                   onChange={(e) => setOptIn(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded accent-purple-500 cursor-pointer"
+                  className="mt-0.5 h-4 w-4 rounded accent-blue-500 cursor-pointer"
                 />
                 <span className="text-sm text-white leading-snug">
                   Yes, notify me when WAVV Playground is live. I agree to receive product communications from WAVV.
@@ -231,7 +204,7 @@ function RequestModal({
                 type="submit"
                 disabled={isPending || !optIn}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+                style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
               >
                 <Bell size={13} />
                 {isPending ? "Submitting…" : "Notify Me"}
@@ -244,14 +217,10 @@ function RequestModal({
   );
 }
 
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function HandsOn() {
   const { data: user } = trpc.auth.me.useQuery(undefined, { retry: false });
   const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const playgroundUnderConstruction = siteSettings["playground_under_construction"] === true;
-  const { data: playgroundStats } = trpc.playground.getStats.useQuery(
-    undefined,
-    { enabled: !!user && (user.role === 'owner' || user.role === 'publisher' || user.role === 'viewer'), retry: false }
-  );
   const { data: requestStatus } = trpc.playground.hasRequested.useQuery(
     undefined,
     { enabled: !!user, retry: false }
@@ -259,171 +228,106 @@ export default function HandsOn() {
   const [modalOpen, setModalOpen] = useState(false);
   const alreadyRequested = requestStatus?.hasRequested ?? false;
 
-  // Determine the most requested playground (if any requests exist)
-  const mostRequested = playgroundStats?.byPlayground?.[0]?.playground ?? null;
+  // Per-tile visibility from site settings
+  const playgroundVisibility = (siteSettings["playground_sections_visibility"] as Record<string, boolean>) ?? {};
 
-  if (playgroundUnderConstruction) {
-    return (
-      <PortalLayout title="WAVV Playground">
-        <div className="px-4 lg:px-8 py-6">
-          {/* Spacer for consistent vertical alignment */}
-          <div style={{ minHeight: "32px" }} />
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(168,85,247,0.15)" }}>
-              <FlaskConical size={18} style={{ color: "#a855f7" }} />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-white">WAVV Playground</h2>
-              <p className="text-xs text-white">Hands-on demos and sandbox environments</p>
-            </div>
-          </div>
-          {/* Under-construction banner */}
-          <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(168,85,247,0.07)", border: "2px dashed rgba(168,85,247,0.35)" }}>
-            <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.15)" }}>
-                <Construction size={40} style={{ color: "#a855f7" }} />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-bold text-white tracking-tight">WAVV Playground</h3>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider" style={{ background: "rgba(168,85,247,0.2)", color: "#a855f7" }}>
-                  <AlertTriangle size={11} />
-                  Under Construction
-                </div>
-              </div>
-              <p className="text-sm text-white leading-relaxed max-w-lg">
-                The WAVV Playground is being built out. Soon you'll be able to explore{" "}
-                <span className="text-white font-medium">hands-on sandbox environments</span> for the Dialer,{" "}
-                <span className="text-white font-medium">Call Boards</span>, and{" "}
-                <span className="text-white font-medium">Messenger</span> — all in a risk-free environment.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
-                {[
-                  { icon: <Phone size={14} />, label: "Dialer Playground" },
-                  { icon: <LayoutDashboard size={14} />, label: "Call Boards Playground" },
-                  { icon: <MessageSquare size={14} />, label: "Messenger Playground" },
-                ].map(({ icon, label }) => (
-                  <div key={label} className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium" style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.18)", color: "#a855f7" }}>
-                    <span style={{ color: "#a855f7" }}>{icon}</span>
-                    {label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </PortalLayout>
-    );
-  }
+  // Filter visible categories
+  const visibleCategories = CATEGORIES.filter((cat) => {
+    const visible = playgroundVisibility[cat.key];
+    return visible !== false; // default to visible if not explicitly hidden
+  });
 
   return (
     <PortalLayout title="WAVV Playground">
       <div className="px-4 lg:px-8 py-6 space-y-8">
-        {/* Spacer for consistent vertical alignment with pages that have toggle bars */}
-        <div style={{ minHeight: "32px" }} />
-
         {/* ── Header ── */}
         <div className="px-4 sm:px-6 lg:px-16 py-8 sm:py-12 text-center">
-            {/* Headline */}
-            <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
-              <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                WAVV Playground
-              </span>
-            </h1>
-            {/* Accent line */}
-            <div className="flex justify-center mb-5">
-              <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
-            </div>
-            {/* Subline */}
-            <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
-              A safe, isolated environment to explore WAVV features without affecting your live account. Practice the dialer, explore call boards, and get comfortable with the platform before going live.
-            </p>
+          <h1 className="font-extrabold tracking-tight leading-[1.05] mb-4" style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)" }}>
+            <span style={{ background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #4ade80 70%, #22c55e 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              WAVV Playground
+            </span>
+          </h1>
+          <div className="flex justify-center mb-5">
+            <div style={{ width: "200px", height: "3px", borderRadius: "2px", background: "linear-gradient(to right, #0074F4, #00A9E2 50%, #67C728)" }} />
+          </div>
+          <p className="mx-auto leading-relaxed" style={{ color: "#ffffff", fontSize: "clamp(0.88rem, 1.6vw, 1rem)", maxWidth: "560px" }}>
+            A safe, isolated environment to explore WAVV features within your CRM. Practice calling, explore call boards, and get comfortable before going live.
+          </p>
         </div>
 
-        {/* ── Playground sections ── */}
-        {PLAYGROUND_SECTIONS.map((section) => (
-          <div key={section.title}>
-            {/* Section header — gradient bar + logo + label */}
-            <div className="flex items-center gap-3 mb-4">
-              <div
-                className="w-1 rounded-full flex-shrink-0"
-                style={{
-                  height: "28px",
-                  background: "linear-gradient(to bottom, #0074F4, #67C728)",
-                  boxShadow: "0 0 8px rgba(0,116,244,0.5)",
-                }}
-              />
-              {section.logo && (
-                <img
-                  src={section.logo}
-                  alt={section.title}
-                  className="w-6 h-6 rounded-md object-contain flex-shrink-0"
-                />
-              )}
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                {section.title}
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {section.cards.map((tool) => {
-                const Icon = tool.icon;
-                const isMostRequested = mostRequested === tool.label;
-                return (
-                  <div
-                    key={`${section.title}-${tool.label}`}
-                    className="relative flex flex-col gap-3 p-5 rounded-xl overflow-hidden"
-                    style={{
-                      background: "#1d2230",
-                      border: isMostRequested ? `1px solid ${tool.color}40` : "1px solid #2a2a2a",
-                      opacity: 0.85,
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: `${tool.color}20` }}
-                      >
-                        <Icon size={20} style={{ color: tool.color }} />
-                      </div>
-                      <span
-                        className="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide"
-                        style={{ background: "rgba(168,85,247,0.18)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.35)" }}
-                      >
-                        Coming Soon
-                      </span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-white font-semibold text-sm">{tool.label}</h3>
-                        {isMostRequested && (
-                          <span
-                            className="text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide"
-                            style={{ background: `${tool.color}20`, color: tool.color }}
-                          >
-                            Most Requested
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-white text-xs leading-relaxed">{tool.desc}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-
-        {/* ── CTA banner ── */}
+        {/* ── Coming Soon Banner ── */}
         <div
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-4"
+          className="flex items-center gap-3 rounded-xl px-5 py-3"
+          style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.25)" }}
+        >
+          <Construction size={18} style={{ color: "#0074F4" }} />
+          <p className="text-sm font-semibold" style={{ color: "#0074F4" }}>
+            Coming Soon
+          </p>
+          <span className="text-xs text-gray-400 ml-1">— WAVV Playground is currently under development. Sign up below to get notified when it launches.</span>
+        </div>
+
+        {/* ── Category Tiles ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {visibleCategories.map((cat) => (
+            <Link
+              key={cat.key}
+              href={cat.href}
+              className="group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer"
+              style={{
+                background: "#111318",
+                border: `1px solid ${cat.color}30`,
+                boxShadow: `0 4px 20px ${cat.color}08`,
+                minHeight: "260px",
+              }}
+            >
+              {/* Banner image */}
+              <div className="relative h-36 overflow-hidden flex-shrink-0">
+                <img
+                  src={cat.banner}
+                  alt={cat.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: `linear-gradient(to top, #111318 0%, transparent 60%)` }}
+                />
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 flex flex-col px-5 pb-5 pt-2">
+                <h3 className="text-lg font-bold text-white mb-1">{cat.title}</h3>
+                <p className="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-3">{cat.description}</p>
+                <div className="flex-1" />
+                <div className="flex items-center justify-between">
+                  <span
+                    className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
+                    style={{ background: `${cat.color}18`, color: cat.color, border: `1px solid ${cat.color}40` }}
+                  >
+                    Coming Soon
+                  </span>
+                  <ChevronRight
+                    size={16}
+                    className="transition-transform group-hover:translate-x-1"
+                    style={{ color: cat.color }}
+                  />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* ── Request Access / Notify Me CTA ── */}
+        <div
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-5"
           style={{
-            background: "rgba(168,85,247,0.08)",
-            border: "1px solid rgba(168,85,247,0.2)",
+            background: "rgba(0,116,244,0.06)",
+            border: "1px solid rgba(0,116,244,0.2)",
           }}
         >
           <div className="flex items-center gap-4">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(168,85,247,0.15)" }}>
-              <Bell size={16} className="text-purple-400" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+              <Bell size={18} style={{ color: "#0074F4" }} />
             </div>
             <div>
               <p className="text-white font-semibold text-sm">Get Notified When WAVV Playground Launches</p>
@@ -433,7 +337,7 @@ export default function HandsOn() {
           {alreadyRequested ? (
             <div
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 cursor-default"
-              style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.3)", color: "#c084fc" }}
+              style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.3)", color: "#0074F4" }}
             >
               <CheckCircle2 size={14} />
               Requested
@@ -442,14 +346,13 @@ export default function HandsOn() {
             <button
               onClick={() => setModalOpen(true)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #a855f7, #7c3aed)" }}
+              style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
             >
               <Bell size={14} />
-              Notify Me
+              Request Access
             </button>
           )}
         </div>
-
       </div>
 
       {/* ── Modal ── */}

@@ -2049,3 +2049,42 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Rename "Request a Written Guide" to "Request a Resource" across CTA component and forms
 - [x] Update Resource Hub CTA accent color to match Resource Hub section color (#67C728)
 - [x] Update CMS Command Center Resource Hub tab to match new tile styling (admin toggle label renamed to 'Resource Requests')
+
+## Resource Hub Color + CMS Layout Update (Jul 18 2026)
+- [x] Update Resource Hub colors from purple/red/gold to WAVV brand: Help Articles=#0074F4 (blue), PDFs=#00A9E2 (cyan), FAQs=#67C728 (green)
+- [x] Redesign CMS Resource Hub layout to match public-facing tile organization (category tile headers, clean sections)
+- [x] Add collapsible/minimizable wrapper to Synced Help Articles section in CMS
+
+## Resource Hub Restructure - Academy Mirror (Jul 18 2026)
+- [x] Rewrite Resource Hub landing page with 3 large rectangle tiles (navigational links, not expandable)
+- [x] Create /resources/help-articles sub-page showing all help articles content
+- [x] Create /resources/pdfs sub-page showing all PDF content
+- [x] Create /resources/faqs sub-page showing all FAQ content
+- [x] Register routes in App.tsx for sub-pages
+- [x] Update colors: Help Articles=#0074F4, PDFs=#00A9E2, FAQs=#67C728
+- [x] CMS: Update FAQ color references from #eab308 to #67C728
+- [x] CMS: Add collapsible wrapper to Synced Help Articles section
+
+## Webinars Restructure (Jul 18 2026)
+- [x] Generate neon banner: play circle (blue #0074F4) for On-Demand Series
+- [x] Generate neon banner: diamond (green #67C728) for Exclusive On-Demand
+- [x] Keep existing star banner (cyan #00A9E2) for Live Exclusive
+- [x] Rewrite Webinars landing page with 3 large navigational tiles
+- [x] Create /webinars/on-demand sub-page
+- [x] Create /webinars/live-exclusive sub-page
+- [x] Create /webinars/exclusive-on-demand sub-page
+- [x] Register routes in App.tsx
+- [x] Rebuild Webinars CMS to Academy-style with per-tile visibility toggles
+
+## Playground Restructure (Jul 18 2026)
+- [x] Generate neon banner: Go High Level logo (blue #0074F4)
+- [x] Generate neon banner: HubSpot logo (cyan #00A9E2)
+- [x] Generate neon banner: Salesforce logo (green #67C728)
+- [x] Build Playground landing page with 3 tiles + Coming Soon banner
+- [x] Add Request Access / Get Notified CTA at bottom
+- [x] Create /playground/gohighlevel sub-page
+- [x] Create /playground/hubspot sub-page
+- [x] Create /playground/salesforce sub-page
+- [x] Register routes in App.tsx
+- [x] Build Playground CMS with per-tile hide/show
+- [x] Per-tile visibility controls for all sections

@@ -17,7 +17,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { HelpCircle, ExternalLink, ChevronDown, ChevronRight, Search, X, ArrowLeft, BookOpen } from "lucide-react";
 
-const ACCENT = "#8B5CF6";
+const ACCENT = "#0074F4";
 
 // ─── Inline Article Modal ─────────────────────────────────────────────────────
 

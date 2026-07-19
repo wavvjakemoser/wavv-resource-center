@@ -10,7 +10,16 @@ import CourseDetail from "./pages/CourseDetail";
 import AcademyCategory from "./pages/AcademyCategory";
 import LessonViewer from "./pages/LessonViewer";
 import Webinars from "./pages/Webinars";
+import WebinarOnDemand from "./pages/WebinarOnDemand";
+import WebinarLiveExclusive from "./pages/WebinarLiveExclusive";
+import WebinarExclusiveOnDemand from "./pages/WebinarExclusiveOnDemand";
+import PlaygroundGoHighLevel from "./pages/PlaygroundGoHighLevel";
+import PlaygroundHubSpot from "./pages/PlaygroundHubSpot";
+import PlaygroundSalesforce from "./pages/PlaygroundSalesforce";
 import GuidesAndDocs from "./pages/GuidesAndDocs";
+import ResourceHelpArticles from "./pages/ResourceHelpArticles";
+import ResourcePdfs from "./pages/ResourcePdfs";
+import ResourceFaqs from "./pages/ResourceFaqs";
 import Admin from "./pages/Admin";
 import HandsOn from "./pages/HandsOn";
 import Login from "./pages/Login";
@@ -93,7 +102,10 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      <Route path="/login" component={Login} />
+      <Route path="/playground" component={HandsOn} />
+      <Route path="/playground/gohighlevel" component={PlaygroundGoHighLevel} />
+      <Route path="/playground/hubspot" component={PlaygroundHubSpot} />
+      <Route path="/playground/salesforce" component={PlaygroundSalesforce} />
       <Route path="/home">{() => <Redirect to="/" />}</Route>
       <Route path="/resources">{() => <Redirect to="/resourcehub" />}</Route>
       <Route path="/academy" component={Academy} />
@@ -101,7 +113,13 @@ function Router() {
       <Route path="/academy/:courseId" component={CourseDetail} />
       <Route path="/academy/:courseId/lesson/:lessonId" component={LessonViewer} />
       <Route path="/webinars" component={Webinars} />
+      <Route path="/webinars/on-demand" component={WebinarOnDemand} />
+      <Route path="/webinars/live-exclusive" component={WebinarLiveExclusive} />
+      <Route path="/webinars/exclusive-on-demand" component={WebinarExclusiveOnDemand} />
       <Route path="/resourcehub" component={GuidesAndDocs} />
+      <Route path="/resources/help-articles" component={ResourceHelpArticles} />
+      <Route path="/resources/pdfs" component={ResourcePdfs} />
+      <Route path="/resources/faqs" component={ResourceFaqs} />
       <Route path="/guides">{() => <Redirect to="/resourcehub" />}</Route>
       <Route path="/accelerator">{() => <NavGuard href="/accelerator"><Accelerator /></NavGuard>}</Route>
       <Route path="/accelerator/session/:id">{() => <NavGuard href="/accelerator"><AcceleratorSession /></NavGuard>}</Route>

@@ -39,9 +39,9 @@ export type PanelItem =
   | { type: "faq";     sectionName: string; entries: FaqPanelEntry[]; sectionUrl?: string | null };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const ARTICLE_COLOR = "#8B5CF6";
-const PDF_COLOR     = "#ef4444";
-const FAQ_COLOR     = "#eab308";
+const ARTICLE_COLOR = "#0074F4";
+const PDF_COLOR     = "#00A9E2";
+const FAQ_COLOR     = "#67C728";
 
 const DEFAULT_WIDTH = 520;
 const MIN_WIDTH     = 360;

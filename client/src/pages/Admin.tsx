@@ -805,7 +805,7 @@ function AnonAnalyticsContent({ days }: { days: 7 | 30 | 90 | 180 | 365 | 0 }) {
     playbook: "Playbooks", other: "Resources",
   };
   const GUIDE_TYPE_COLORS: Record<string, string> = {
-    help_article: "#8B5CF6", pdf: "#ef4444", checklist: "#67C728",
+    help_article: "#0074F4", pdf: "#00A9E2", checklist: "#67C728",
     playbook: "#0074F4", other: "#FF9900",
   };
   const WEBINAR_TYPE_COLORS: Record<string, string> = {
@@ -1935,7 +1935,7 @@ function UsersTab() {
                              <Shield className="h-3 w-3" /> Viewer
                           </Badge>
                         ) : (
-                          <Badge className="text-[10px]" style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.4)" }}>User</Badge>
+                          <Badge className="text-[10px]" style={{ background: "rgba(0,116,244,0.15)", color: "#a78bfa", border: "1px solid rgba(0,116,244,0.4)" }}>User</Badge>
                         )}
 
                                             </div>
@@ -4666,7 +4666,15 @@ function PlaygroundTab() {
   const { data: stats, isLoading: statsLoading } = trpc.playground.getStats.useQuery();
   const { data: requests, isLoading: reqLoading } = trpc.playground.getRequests.useQuery();
   const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
-  const playgroundUnderConstruction = true; // Always under construction in Content Management
+  const { data: visibilityRaw } = trpc.siteSettings.get.useQuery({ key: "playground_sections_visibility" });
+  const pgVisibility: Record<string, boolean> = (visibilityRaw as Record<string, boolean> | null) ?? { gohighlevel: true, hubspot: true, salesforce: true };
+  const updatePgVisibility = trpc.siteSettings.update.useMutation({
+    onSuccess: () => { utils.siteSettings.get.invalidate(); toast.success("Visibility updated"); },
+    onError: (e) => toast.error(e.message),
+  });
+  function togglePgSection(key: string) {
+    updatePgVisibility.mutate({ key: "playground_sections_visibility", value: { ...pgVisibility, [key]: !pgVisibility[key] } });
+  }
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
   const deleteRequestMutation = trpc.playground.deleteRequest.useMutation({
     onSuccess: () => {
@@ -4699,59 +4707,64 @@ function PlaygroundTab() {
     "WAVV Dialer Playground": "#0074F4",
     "WAVV Call Boards Playground": "#00A9E2",
     "WAVV Settings Playground": "#67C728",
-    "Other / General Feedback": "#a855f7",
+    "WAVV Playground": "#0074F4",
+    "Go High Level": "#0074F4",
+    "HubSpot": "#00A9E2",
+    "Salesforce": "#67C728",
+    "Other / General Feedback": "#6b7280",
   };
 
   return (
     <div className="space-y-6">
-      {/* ── Under Construction overlay ── */}
-      {playgroundUnderConstruction && (
-        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(168,85,247,0.07)", border: "2px dashed rgba(168,85,247,0.35)" }}>
-          <div className="flex flex-col items-center justify-center text-center py-16 px-8 gap-5">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "rgba(168,85,247,0.15)" }}>
-              <AlertTriangle size={40} style={{ color: "#a855f7" }} />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-white tracking-tight">WAVV Playground</h3>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider" style={{ background: "rgba(168,85,247,0.2)", color: "#c084fc" }}>
-                <AlertTriangle size={11} />
-                Under Construction
-              </div>
-            </div>
-            <p className="text-sm text-gray-400 leading-relaxed max-w-lg">
-              The WAVV Playground is currently <span className="text-white font-medium">under construction</span>. Disable this banner in Settings when the Playground is ready to go live.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-xl mt-2">
-              {[
-                { icon: <FlaskConical size={14} />, label: "Hands-On Demos" },
-                { icon: <Bell size={14} />, label: "Session Requests" },
-                { icon: <BarChart3 size={14} />, label: "Usage Analytics" },
-              ].map(({ icon, label }) => (
-                <div key={label} className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium" style={{ background: "rgba(168,85,247,0.1)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.2)" }}>
-                  {icon} {label}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="flex items-center justify-between">
+      {/* ── Header ── */}
+      <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(168,85,247,0.15)" }}>
-            <FlaskConical size={18} style={{ color: "#a855f7" }} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+            <FlaskConical size={18} style={{ color: "#0074F4" }} />
           </div>
           <div>
             <h2 className="text-base font-bold text-white">WAVV Playground</h2>
-            <p className="text-xs text-gray-500">Playground session requests and hands-on demo management</p>
+            <p className="text-xs text-gray-500">Manage playground categories, visibility, and access requests</p>
           </div>
         </div>
         <button
           onClick={exportCSVRequests}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition"
-          style={{ background: "rgba(168,85,247,0.15)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.3)" }}
+          style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
         >
-          <ArrowDownToLine size={13} /> Export Notify Requests
+          <ArrowDownToLine size={13} /> Export Requests
         </button>
+      </div>
+
+      {/* ── Section Visibility Toggles ── */}
+      <div className="rounded-xl p-4 space-y-3" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
+        <div className="flex items-center gap-2 mb-1">
+          <Eye size={13} style={{ color: "#9ca3af" }} />
+          <span className="text-xs font-semibold text-gray-300">Section Visibility</span>
+          <span className="text-xs text-gray-500 ml-1">— toggle to show/hide categories from users</span>
+        </div>
+        {[
+          { key: "gohighlevel", label: "Go High Level", color: "#0074F4" },
+          { key: "hubspot",     label: "HubSpot",       color: "#00A9E2" },
+          { key: "salesforce",  label: "Salesforce",    color: "#67C728" },
+        ].map(({ key, label, color }) => (
+          <div key={key} className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full" style={{ background: color }} />
+              <span className="text-xs text-gray-300">{label}</span>
+            </div>
+            <button
+              onClick={() => togglePgSection(key)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+              style={pgVisibility[key] !== false
+                ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+              }
+            >
+              {pgVisibility[key] !== false ? <><Eye size={11} /> Visible</> : <><EyeOff size={11} /> Hidden</>}
+            </button>
+          </div>
+        ))}
       </div>
 
       {/* ── Stats cards ── */}
@@ -4762,7 +4775,7 @@ function PlaygroundTab() {
           style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}
         >
           <div className="flex items-center gap-2 mb-2">
-            <Bell size={14} style={{ color: "#a855f7" }} />
+            <Bell size={14} style={{ color: "#0074F4" }} />
             <span className="text-xs text-gray-400 font-medium">Total Requests</span>
           </div>
           <p className="text-2xl font-bold text-white">
@@ -4815,13 +4828,13 @@ function PlaygroundTab() {
               <Tooltip
                 contentStyle={{ background: "#1d2230", border: "1px solid #2a2a2a", borderRadius: "8px" }}
                 labelStyle={{ color: "#fff", fontSize: 12 }}
-                itemStyle={{ color: "#a855f7" }}
+                itemStyle={{ color: "#0074F4" }}
               />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                 {(stats?.byPlayground ?? []).map((entry) => (
                   <Cell
                     key={entry.playground}
-                    fill={PLAYGROUND_COLORS[entry.playground] ?? "#a855f7"}
+                    fill={PLAYGROUND_COLORS[entry.playground] ?? "#0074F4"}
                   />
                 ))}
               </Bar>
@@ -4841,7 +4854,7 @@ function PlaygroundTab() {
         </div>
         {reqLoading ? (
           <div className="flex items-center justify-center h-24">
-            <div className="animate-spin w-6 h-6 border-2 border-[#a855f7] border-t-transparent rounded-full" />
+            <div className="animate-spin w-6 h-6 border-2 border-[#0074F4] border-t-transparent rounded-full" />
           </div>
         ) : !requests || requests.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -4870,8 +4883,8 @@ function PlaygroundTab() {
                     <span
                       className="text-[10px] px-2 py-0.5 rounded-full font-semibold"
                       style={{
-                        background: `${PLAYGROUND_COLORS[req.playground] ?? "#a855f7"}20`,
-                        color: PLAYGROUND_COLORS[req.playground] ?? "#a855f7",
+                        background: `${PLAYGROUND_COLORS[req.playground] ?? "#0074F4"}20`,
+                        color: PLAYGROUND_COLORS[req.playground] ?? "#0074F4",
                       }}
                     >
                       {req.playground.replace(" Playground", "").replace("WAVV ", "")}
@@ -5163,7 +5176,7 @@ function WebinarsTab() {
             <div className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
               <label className="block text-xs text-gray-400 mb-2">Thumbnail</label>
               <div className="flex items-center gap-3">
-                <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: `2px solid ${form.type === "exclusive" ? "#D4AF37" : form.type === "recording" ? "#00A9E2" : "#7C3AED"}` }}>
+                <div className="relative rounded-lg overflow-hidden flex-shrink-0" style={{ width: 80, height: 45, border: `2px solid ${form.type === "exclusive" ? "#00A9E2" : form.type === "recording" ? "#67C728" : "#0074F4"}` }}>
                   <img
                     src={form.type === "exclusive"
                       ? "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-thumb-exclusive-v2-gGXX6nYRkYWDJDcBByZ8iX.webp"
@@ -5227,9 +5240,9 @@ function WebinarsTab() {
           <span className="text-xs text-gray-500 ml-1">— toggle to show/hide sections from users</span>
         </div>
         {[
-          { key: "evergreen",  label: "WAVV On-Demand Series",                    color: "#7C3AED" },
-          { key: "exclusive",  label: "Upcoming WAVV Exclusive Live Webinars",     color: "#D4AF37" },
-          { key: "recordings", label: "WAVV Exclusive On-Demand Webinars",         color: "#00A9E2" },
+          { key: "evergreen",  label: "WAVV On-Demand Series",                    color: "#0074F4" },
+          { key: "exclusive",  label: "Upcoming WAVV Exclusive Live Webinars",     color: "#00A9E2" },
+          { key: "recordings", label: "WAVV Exclusive On-Demand Webinars",         color: "#67C728" },
         ].map(({ key, label, color }) => (
           <div key={key} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -5266,9 +5279,9 @@ function WebinarsTab() {
 }
 
 const WEBINAR_GROUP_META: Record<string, { label: string; color: string; description: string }> = {
-  evergreen:  { label: "WAVV On-Demand Series",                color: "#7C3AED", description: "Always-available training content" },
-  exclusive:  { label: "Upcoming WAVV Exclusive Live Webinars", color: "#D4AF37", description: "Live or invite-only sessions" },
-  recording:  { label: "WAVV Exclusive On-Demand Webinars",    color: "#00A9E2", description: "Recorded sessions available anytime" },
+  evergreen:  { label: "WAVV On-Demand Series",                color: "#0074F4", description: "Always-available training content" },
+  exclusive:  { label: "Upcoming WAVV Exclusive Live Webinars", color: "#00A9E2", description: "Live or invite-only sessions" },
+  recording:  { label: "WAVV Exclusive On-Demand Webinars",    color: "#67C728", description: "Recorded sessions available anytime" },
   upcoming:   { label: "Upcoming (Legacy)",    color: "#6b7280", description: "Legacy upcoming entries" },
 };
 
@@ -5536,6 +5549,7 @@ function GuidesTab() {
   function toggleGuideSection(key: string) {
     updateGuideVisibility.mutate({ key: "guides_sections_visibility", value: { ...guideVisibility, [key]: !guideVisibility[key] } });
   }
+  const [syncedCollapsed, setSyncedCollapsed] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -5735,14 +5749,14 @@ function GuidesTab() {
           <button
             onClick={() => { setShowAddSectionModal(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition hover:opacity-90"
-            style={{ background: "rgba(139,92,246,0.15)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.3)" }}
+            style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}
           >
             <Plus size={13} /> Add Help Article Section
           </button>
           <button
             onClick={() => { resetNativeForm(); setShowNativeArticleForm(f => !f); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90"
-            style={{ background: "#8B5CF6" }}
+            style={{ background: "#0074F4" }}
           >
             <Plus size={13} /> Add Help Article
           </button>
@@ -5903,7 +5917,7 @@ function GuidesTab() {
                       onClick={() => setNativeForm(f => ({ ...f, sectionName: f.sectionName === s.name ? "" : s.name }))}
                       className="px-2.5 py-1 rounded-full text-xs font-medium transition-all"
                       style={nativeForm.sectionName === s.name
-                        ? { background: "rgba(139,92,246,0.2)", color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.4)" }
+                        ? { background: "rgba(0,116,244,0.2)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.4)" }
                         : { background: "#1d2230", color: "#9ca3af", border: "1px solid #2a2a2a" }
                       }>{s.name}</button>
                   ))}
@@ -5976,7 +5990,7 @@ function GuidesTab() {
                 // form close + reset handled in createNativeMutation.onSuccess
               }}
               className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-              style={{ background: "#8B5CF6" }}
+              style={{ background: "#0074F4" }}
             >{createNativeMutation.isPending ? "Saving…" : "Add Help Article"}</button>
           </div>
         </div>
@@ -6104,7 +6118,7 @@ function GuidesTab() {
         {/* ── Help Articles master toggle ── */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: "#8B5CF6" }} />
+            <span className="w-2 h-2 rounded-full" style={{ background: "#0074F4" }} />
             <span className="text-xs text-gray-300 font-medium">Help Articles</span>
           </div>
           <button
@@ -6125,7 +6139,7 @@ function GuidesTab() {
         {/* ── PDFs master toggle ── */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: "#ef4444" }} />
+            <span className="w-2 h-2 rounded-full" style={{ background: "#00A9E2" }} />
             <span className="text-xs text-gray-300 font-medium">PDFs</span>
           </div>
           <button
@@ -6144,7 +6158,7 @@ function GuidesTab() {
         {/* ── FAQs master toggle ── */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: "#eab308" }} />
+            <span className="w-2 h-2 rounded-full" style={{ background: "#67C728" }} />
             <span className="text-xs text-gray-300 font-medium">FAQs</span>
           </div>
           <button
@@ -6162,12 +6176,12 @@ function GuidesTab() {
 
       {/* ── Help Articles category header ── */}
       <div className="flex items-center gap-3 px-1">
-        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#8B5CF6" }} />
+        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#0074F4" }} />
         <span className="text-sm font-semibold text-white">Help Articles</span>
         <span className="text-xs text-gray-500">Published help articles grouped by section</span>
         <div className="ml-auto flex items-center gap-1.5">
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(139,92,246,0.15)", color: "#8B5CF6" }}>{helpArticleSectionsAdmin.length} sections</span>
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(139,92,246,0.15)", color: "#8B5CF6" }}>{helpArticlesPublished.length} articles</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4" }}>{helpArticleSectionsAdmin.length} sections</span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4" }}>{helpArticlesPublished.length} articles</span>
         </div>
       </div>
 
@@ -6187,17 +6201,29 @@ function GuidesTab() {
 
             {/* ── FAQ Sections Panel ── */}
       <FaqSectionsPanel />
-      {/* ── Divider ── */}
-      <div className="flex items-center gap-3 py-1">
-        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: "#1a1f2e", border: "1px solid #2a2a2a" }}>
-          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#8B5CF6" }} />
-          <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "#6b7280" }}>SYNCED HELP ARTICLES</span>
-        </div>
-        <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
+      {/* ── Synced Help Articles (Collapsible) ── */}
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
+        <button
+          type="button"
+          onClick={() => setSyncedCollapsed(v => !v)}
+          className="w-full flex items-center gap-3 px-4 py-3 cursor-pointer select-none transition-colors hover:bg-white/[0.02]"
+          style={{ background: "#1d2230" }}
+        >
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(0,116,244,0.15)" }}>
+            <HelpCircle size={14} style={{ color: "#0074F4" }} />
+          </div>
+          <span className="text-sm font-bold text-white flex-1 text-left">Synced Help Articles</span>
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4" }}>Intercom</span>
+          {syncedCollapsed
+            ? <ChevronRightIcon size={14} className="text-gray-500 flex-shrink-0" />
+            : <ChevronDown size={14} className="text-gray-500 flex-shrink-0" />}
+        </button>
+        {!syncedCollapsed && (
+          <div className="px-4 py-4" style={{ background: "#0d1117" }}>
+            <SyncedHelpArticlesPanel />
+          </div>
+        )}
       </div>
-      {/* ── Synced Help Articles (Intercom source) ── */}
-      <SyncedHelpArticlesPanel />
 
       {/* ── Add Help Article Section Modal ── */}
       <Dialog open={showAddSectionModal} onOpenChange={setShowAddSectionModal}>
@@ -6224,7 +6250,7 @@ function GuidesTab() {
               onClick={() => { if (newSectionName.trim()) createSectionMutation.mutate({ name: newSectionName.trim() }); }}
               disabled={!newSectionName.trim() || createSectionMutation.isPending}
               className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-              style={{ background: "#8B5CF6" }}
+              style={{ background: "#0074F4" }}
             >
               {createSectionMutation.isPending ? "Creating…" : "Create Section"}
             </button>
@@ -6379,8 +6405,8 @@ function GuidesTab() {
   );
 }
 const GUIDE_GROUP_META: Record<string, { label: string; color: string; description: string }> = {
-  help_article: { label: "Help Article", color: "#8B5CF6", description: "Common questions and troubleshooting" },
-  pdf:       { label: "PDF",       color: "#ef4444", description: "Downloadable PDF documents" },
+  help_article: { label: "Help Article", color: "#0074F4", description: "Common questions and troubleshooting" },
+  pdf:       { label: "PDF",       color: "#00A9E2", description: "Downloadable PDF documents" },
   checklist: { label: "Checklist", color: "#67C728", description: "Step-by-step checklists" },
   playbook:  { label: "Playbook",  color: "#0074F4", description: "Strategy and process playbooks" },
   resource:  { label: "Resource",  color: "#FF9900", description: "Reference materials and templates" },
@@ -6467,7 +6493,7 @@ function PdfSectionsPanel({
     return order.map(id => sectionGuides.find(g => g.id === id)).filter(Boolean) as typeof pdfGuides;
   }
 
-  const PDF_COLOR = "#ef4444";
+  const PDF_COLOR = "#00A9E2";
 
   return (
     <div className="space-y-4">
@@ -8652,7 +8678,7 @@ function PartnersContentTab() {
 
 // ─── Admin Help Articles Section (header + PublishedHelpArticlesPanel) ──────────
 function AdminHelpArticlesSection() {
-  const ACCENT = "#8B5CF6";
+  const ACCENT = "#0074F4";
   const { data: adminSections = [] } = trpc.helpArticles.listSectionsAdmin.useQuery();
   const { data: published = [] } = trpc.helpArticles.listPublished.useQuery();
   return (
@@ -8682,7 +8708,7 @@ function AdminHelpArticlesSection() {
 
 // ─── Published Help Articles Management Panel ─────────────────────────────────
 function PublishedHelpArticlesPanel() {
-  const ACCENT = "#8B5CF6";
+  const ACCENT = "#0074F4";
   const utils = trpc.useUtils();
   // Use sections as the source of truth — show all sections even if empty
   const { data: adminSections = [], isLoading: sectionsLoading } = trpc.helpArticles.listSectionsAdmin.useQuery();
@@ -8912,7 +8938,7 @@ function SortableHelpSectionRow({ id, children }: { id: number; children: React.
   );
 }
 function SortableHelpArticleRow({ article, onUnpublish, onEdit }: { article: { id: number; intercomArticleId: string | null; source?: string; title: string; url: string | null; sectionName: string; nativeBody?: string | null }; onUnpublish: () => void; onEdit?: () => void }) {
-  const ACCENT = "#8B5CF6";
+  const ACCENT = "#0074F4";
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: article.intercomArticleId ?? article.id.toString() });
   const style: React.CSSProperties = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
   const isNative = article.source === "native";
@@ -8944,7 +8970,7 @@ function HelpArticlesInline() {
 }
 
 function SyncedHelpArticlesPanel() {
-  const ACCENT = "#8B5CF6";
+  const ACCENT = "#0074F4";
   const utils = trpc.useUtils();
   const { data: collections, isLoading: colLoading } = trpc.helpArticles.adminListCollections.useQuery();
   const { data: articles, isLoading: artLoading } = trpc.helpArticles.adminListAll.useQuery();
@@ -9129,7 +9155,7 @@ function SyncedHelpArticlesPanel() {
 
 // ─── Help Articles Admin Tab ──────────────────────────────────────────────────
 function HelpArticlesAdminTab() {
-  const ACCENT = "#8B5CF6";
+  const ACCENT = "#0074F4";
   const utils = trpc.useUtils();
 
   const { data: collections, isLoading: colLoading } = trpc.helpArticles.adminListCollections.useQuery();
