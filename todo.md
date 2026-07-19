@@ -2132,3 +2132,13 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix all 5 hero sections to same fixed height (match tallest) so tiles align when switching pages
 - [x] Collapse sub-sections by default in Help Articles, PDFs, and FAQs pages
 - [x] Rename "Resources" sidebar category to "Explore" + center all category titles
+
+## Admin Settings Tab UI Polish (Jul 19 2026)
+- [x] Remove all small icons next to items in Settings tab sections
+- [x] Announcement Banner: top 2 toggles gold, rest blue
+- [x] Maintenance Mode: keep red banner
+- [x] Profile Sections: visible = green, hidden = red
+- [x] Request Buttons: visible = green, hidden = red
+- [x] Slack Banners: visible = green, hidden = red
+- [x] Quick Links: visible = green, hidden = red
+- [x] Navigation Visibility: remove icons, visible = green, hidden = red

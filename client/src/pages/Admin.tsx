@@ -7938,14 +7938,9 @@ function SettingsTab() {
             {/* ── Announcement Banner ── */}
             <div className={sectionClass} style={sectionStyle}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(251,191,36,0.12)" }}>
-                    <Megaphone size={15} style={{ color: "#fbbf24" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Announcement Banner</p>
-                    <p className="text-xs text-gray-500">Show a banner at the top of every page</p>
-                  </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Announcement Banner</p>
+                  <p className="text-xs text-gray-500">Show a banner at the top of every page</p>
                 </div>
                 <button
                   onClick={() => toggle("announcement_enabled", announcementEnabled)}
@@ -7980,20 +7975,15 @@ function SettingsTab() {
             {/* ── Auto-Refresh on Deploy ── */}
             <div className={sectionClass} style={sectionStyle}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(99,102,241,0.12)" }}>
-                    <RefreshCw size={15} style={{ color: "#818cf8" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Auto-Refresh on Deploy</p>
-                    <p className="text-xs text-gray-500">When enabled, logged-in users are automatically refreshed within ~90s of a new deployment. Turn off during stable production periods so users refresh on their own schedule.</p>
-                  </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Auto-Refresh on Deploy</p>
+                  <p className="text-xs text-gray-500">When enabled, logged-in users are automatically refreshed within ~90s of a new deployment. Turn off during stable production periods so users refresh on their own schedule.</p>
                 </div>
                 <button
                   onClick={() => toggle("auto_refresh_enabled", autoRefreshEnabled)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex-shrink-0 ml-4"
                   style={autoRefreshEnabled
-                    ? { background: "rgba(99,102,241,0.15)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.3)" }
+                    ? { background: "rgba(0,116,244,0.15)", color: "#60a5fa", border: "1px solid rgba(0,116,244,0.3)" }
                     : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #333" }}
                 >
                   {autoRefreshEnabled ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
@@ -8005,14 +7995,9 @@ function SettingsTab() {
             {/* ── Maintenance Mode ── */}
             <div className={sectionClass} style={sectionStyle}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(239,68,68,0.12)" }}>
-                    <Wrench size={15} style={{ color: "#ef4444" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Maintenance Mode</p>
-                        <p className="text-xs text-gray-500">Replace the public site with a "Coming soon" message. Owners can still access the Command Center.</p>
-                  </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Maintenance Mode</p>
+                  <p className="text-xs text-gray-500">Replace the public site with a "Coming soon" message. Owners can still access the Command Center.</p>
                 </div>
                 <button
                   onClick={() => {
@@ -8033,14 +8018,9 @@ function SettingsTab() {
             {/* ── Intercom / Fin ── */}
             <div className={sectionClass} style={sectionStyle}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,116,244,0.12)" }}>
-                    <Bot size={15} style={{ color: "#0074F4" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">Intercom / Fin</p>
-                    <p className="text-xs text-gray-500">Show or hide the Intercom chat bubble and AI Fin assistant site-wide</p>
-                  </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Intercom / Fin</p>
+                  <p className="text-xs text-gray-500">Show or hide the Intercom chat bubble and AI Fin assistant site-wide</p>
                 </div>
                 <button
                   onClick={() => toggle("intercom_enabled", intercomEnabled)}
@@ -8061,31 +8041,23 @@ function SettingsTab() {
 
             {/* ── Profile Sections ── */}
             <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(251,191,36,0.12)" }}>
-                  <Bookmark size={15} style={{ color: "#fbbf24" }} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Profile Sections</p>
-                  <p className="text-xs text-gray-500">Show or hide Bookmarks and Badges on the customer Profile page</p>
-                </div>
+              <div className="mb-3">
+                <p className="text-sm font-medium text-white">Profile Sections</p>
+                <p className="text-xs text-gray-500">Show or hide Bookmarks and Badges on the customer Profile page</p>
               </div>
               <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 {([
-                  { key: "bookmarks_enabled", label: "Bookmarks", icon: Bookmark, enabled: bookmarksEnabled, color: "#fbbf24" },
-                  { key: "badges_enabled", label: "Badges", icon: Award, enabled: badgesEnabled, color: "#00A9E2" },
-                ] as { key: string; label: string; icon: React.ElementType; enabled: boolean; color: string }[]).map(({ key, label, icon: SectionIcon, enabled, color }) => (
+                  { key: "bookmarks_enabled", label: "Bookmarks", enabled: bookmarksEnabled },
+                  { key: "badges_enabled", label: "Badges", enabled: badgesEnabled },
+                ] as { key: string; label: string; enabled: boolean }[]).map(({ key, label, enabled }) => (
                   <div key={key} className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <SectionIcon size={14} style={{ color: enabled ? color : "#4b5563" }} />
-                      <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
-                    </div>
+                    <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
                     <button
                       onClick={() => toggle(key, enabled)}
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                       style={enabled
-                        ? { background: `${color}18`, color, border: `1px solid ${color}35` }
-                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                        ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
+                        : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
                     >
                       {enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
                       {enabled ? "Visible" : "Hidden"}
@@ -8097,33 +8069,25 @@ function SettingsTab() {
 
             {/* ── Request Buttons ── */}
             <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(168,85,247,0.12)" }}>
-                  <MessageSquare size={15} style={{ color: "#c084fc" }} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Request Buttons</p>
-                  <p className="text-xs text-gray-500">Show or hide content request CTAs across the portal</p>
-                </div>
+              <div className="mb-3">
+                <p className="text-sm font-medium text-white">Request Buttons</p>
+                <p className="text-xs text-gray-500">Show or hide content request CTAs across the portal</p>
               </div>
               <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 {([
-                  { key: "video_requests_enabled", label: "Video Requests", icon: VideoIcon, enabled: videoRequestsEnabled, color: "#0074F4" },
-                  { key: "webinar_requests_enabled", label: "Webinar Requests", icon: MonitorPlay, enabled: webinarRequestsEnabled, color: "#10b981" },
-                  { key: "guide_requests_enabled", label: "Resource Requests", icon: FileTextIcon, color: "#67C728", enabled: guideRequestsEnabled },
-                  { key: "search_requests_enabled", label: "Search Requests", icon: Search, color: "#f59e0b", enabled: searchRequestsEnabled },
-                ] as { key: string; label: string; icon: React.ElementType; enabled: boolean; color: string }[]).map(({ key, label, icon: ReqIcon, enabled, color }) => (
+                  { key: "video_requests_enabled", label: "Video Requests", enabled: videoRequestsEnabled },
+                  { key: "webinar_requests_enabled", label: "Webinar Requests", enabled: webinarRequestsEnabled },
+                  { key: "guide_requests_enabled", label: "Resource Requests", enabled: guideRequestsEnabled },
+                  { key: "search_requests_enabled", label: "Search Requests", enabled: searchRequestsEnabled },
+                ] as { key: string; label: string; enabled: boolean }[]).map(({ key, label, enabled }) => (
                   <div key={key} className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <ReqIcon size={14} style={{ color: enabled ? color : "#4b5563" }} />
-                      <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
-                    </div>
+                    <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
                     <button
                       onClick={() => toggle(key, enabled)}
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                       style={enabled
-                        ? { background: `${color}18`, color, border: `1px solid ${color}35` }
-                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                        ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
+                        : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
                     >
                       {enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
                       {enabled ? "Visible" : "Hidden"}
@@ -8135,16 +8099,9 @@ function SettingsTab() {
 
             {/* ── Slack Banners ── */}
             <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(74,21,75,0.18)" }}>
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: "drop-shadow(0 0 4px #e01e5a)" }}>
-                    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E"/>
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Slack Banners</p>
-                  <p className="text-xs text-gray-500">Show or hide the "Join the WAVV Accelerator Slack" banner on each page</p>
-                </div>
+              <div className="mb-3">
+                <p className="text-sm font-medium text-white">Slack Banners</p>
+                <p className="text-xs text-gray-500">Show or hide the "Join the WAVV Accelerator Slack" banner on each page</p>
               </div>
               <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 {([
@@ -8157,8 +8114,8 @@ function SettingsTab() {
                       onClick={() => toggle(key, enabled)}
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                       style={enabled
-                        ? { background: "rgba(74,21,75,0.25)", color: "#ECB22E", border: "1px solid rgba(74,21,75,0.5)" }
-                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                        ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
+                        : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
                     >
                       {enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
                       {enabled ? "Visible" : "Hidden"}
@@ -8170,30 +8127,22 @@ function SettingsTab() {
 
             {/* ── Quick Links ── */}
             <div className={sectionClass} style={sectionStyle}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(103,199,40,0.12)" }}>
-                  <ExternalLink size={15} style={{ color: "#67C728" }} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Quick Links</p>
-                  <p className="text-xs text-gray-500">Show or hide quick links in the sidebar</p>
-                </div>
+              <div className="mb-3">
+                <p className="text-sm font-medium text-white">Quick Links</p>
+                <p className="text-xs text-gray-500">Show or hide quick links in the sidebar</p>
               </div>
               <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
                 {([
-                  { key: "chrome_extension_enabled", label: "Chrome Extension", icon: ExternalLink, enabled: chromeExtensionEnabled, color: "#67C728" },
-                ] as { key: string; label: string; icon: React.ElementType; enabled: boolean; color: string }[]).map(({ key, label, icon: QLIcon, enabled, color }) => (
+                  { key: "chrome_extension_enabled", label: "Chrome Extension", enabled: chromeExtensionEnabled },
+                ] as { key: string; label: string; enabled: boolean }[]).map(({ key, label, enabled }) => (
                   <div key={key} className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <QLIcon size={14} style={{ color: enabled ? color : "#4b5563" }} />
-                      <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
-                    </div>
+                    <span className="text-xs" style={{ color: enabled ? "#d1d5db" : "#6b7280" }}>{label}</span>
                     <button
                       onClick={() => toggle(key, enabled)}
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                       style={enabled
-                        ? { background: `${color}18`, color, border: `1px solid ${color}35` }
-                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                        ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
+                        : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
                     >
                       {enabled ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
                       {enabled ? "Visible" : "Hidden"}
@@ -8207,32 +8156,24 @@ function SettingsTab() {
 
           {/* ── RIGHT COLUMN: Navigation Visibility (spans full height) ── */}
           <div className={sectionClass} style={sectionStyle}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(99,102,241,0.12)" }}>
-                <Navigation size={15} style={{ color: "#818cf8" }} />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">Navigation Visibility</p>
-                <p className="text-xs text-gray-500">Show or hide individual sidebar items for all users</p>
-              </div>
+            <div className="mb-3">
+              <p className="text-sm font-medium text-white">Navigation Visibility</p>
+              <p className="text-xs text-gray-500">Show or hide individual sidebar items for all users</p>
             </div>
             <div className="space-y-2 pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-              {NAV_ITEMS.map(({ href, label, icon: NavIcon }) => {
+              {NAV_ITEMS.map(({ href, label }) => {
                 const isVisible = navVisibility[href] !== false; // default true
                 return (
                   <div key={href} className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <NavIcon size={14} style={{ color: isVisible ? "#9ca3af" : "#4b5563" }} />
-                      <span className="text-xs" style={{ color: isVisible ? "#d1d5db" : "#6b7280" }}>{label}</span>
-                    </div>
+                    <span className="text-xs" style={{ color: isVisible ? "#d1d5db" : "#6b7280" }}>{label}</span>
                     <button
                       onClick={() => toggleNavItem(href)}
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                       style={isVisible
-                        ? { background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.25)" }
-                        : { background: "rgba(255,255,255,0.04)", color: "#6b7280", border: "1px solid #2a2a2a" }}
+                        ? { background: "rgba(34,197,94,0.15)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }
+                        : { background: "rgba(239,68,68,0.12)", color: "#f87171", border: "1px solid rgba(239,68,68,0.3)" }}
                     >
-                      {isVisible ? <Eye size={11} /> : <EyeOff size={11} />}
+                      {isVisible ? <ToggleRight size={11} /> : <ToggleLeft size={11} />}
                       {isVisible ? "Visible" : "Hidden"}
                     </button>
                   </div>
