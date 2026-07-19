@@ -255,17 +255,6 @@ export default function HandsOn() {
           </p>
         </div>
 
-        {/* ── Coming Soon Banner ── */}
-        <div
-          className="flex items-center gap-3 rounded-xl px-5 py-3"
-          style={{ background: "rgba(0,116,244,0.08)", border: "1px solid rgba(0,116,244,0.25)" }}
-        >
-          <Construction size={18} style={{ color: "#0074F4" }} />
-          <p className="text-sm font-semibold" style={{ color: "#0074F4" }}>
-            Coming Soon
-          </p>
-          <span className="text-xs text-gray-400 ml-1">— WAVV Playground is currently under development. Sign up below to get notified when it launches.</span>
-        </div>
 
         {/* ── Category Tiles (stacked rectangles — same as Academy/Webinars) ── */}
         <div className="space-y-5">
@@ -329,24 +318,22 @@ export default function HandsOn() {
         </div>
 
         {/* ── Request Access / Notify Me CTA ── */}
+        <div className="mb-6" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} />
         <div
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-5"
+          className="flex flex-col sm:flex-row items-center gap-5 rounded-2xl px-6 py-5"
           style={{
-            background: "rgba(0,116,244,0.06)",
-            border: "1px solid rgba(0,116,244,0.2)",
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.12)",
           }}
         >
-          <div className="flex items-center gap-4">
-
-            <div>
-              <p className="text-white font-semibold text-sm">Get Notified When WAVV Playground Launches</p>
-              <p className="text-white text-xs mt-0.5">Sign up and we'll let you know the moment it's ready.</p>
-            </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-bold text-sm mb-0.5">Get Notified When WAVV Playground Launches</p>
+            <p className="text-[#94a3b8] text-xs leading-relaxed">Sign up and we'll let you know the moment it's ready.</p>
           </div>
           {alreadyRequested ? (
             <div
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold flex-shrink-0 cursor-default"
-              style={{ background: "rgba(0,116,244,0.12)", border: "1px solid rgba(0,116,244,0.3)", color: "#0074F4" }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold flex-shrink-0 cursor-default"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.2)", color: "#94a3b8" }}
             >
               <CheckCircle2 size={14} />
               Requested
@@ -354,8 +341,10 @@ export default function HandsOn() {
           ) : (
             <button
               onClick={() => setModalOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)" }}
+              className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all"
+              style={{ background: "transparent", color: "#ffffff", border: "1px solid rgba(255,255,255,0.3)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
               Request Access
             </button>

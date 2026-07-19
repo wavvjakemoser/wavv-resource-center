@@ -89,7 +89,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Onboarding",
     subtitle: "Get your team up and running with WAVV quickly and effectively.",
     color: "#0074F4",
-    thumbnail: "https://files.manuscdn.com/user_upload_by_module/session_file/310519663417013740/JHIRajYPPlnohilQ.png",
+    thumbnail: "/manus-storage/academy-compass-final-v2_3487d992.png",
     sections: [
       {
         id: "onb-1",
@@ -182,7 +182,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "How-To",
     subtitle: "Step-by-step guides for every core WAVV feature.",
     color: "#00A9E2",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-howto-v6-K3TYV9Xeg5ZaWLpmZiJwHh.webp",
+    thumbnail: "/manus-storage/academy-gear-final-v2_007ed77c.png",
     sections: [
       {
         id: "how-1",
@@ -248,7 +248,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Strategy & Best Practices",
     subtitle: "Maximize connection rates, conversions, and team performance.",
     color: "#67C728",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/banner-strategy-v7-h4rfU3p4xkyGFotsGxeuPW.webp",
+    thumbnail: "/manus-storage/academy-target-final-v2_b4297674.png",
     sections: [
       {
         id: "str-1",
@@ -338,7 +338,7 @@ function SectionRow({
         onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = `${accentColor}16`; }}
         onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = open ? `${accentColor}12` : `${accentColor}07`; }}
       >
-        {(() => { const Icon = CATEGORY_ICONS[categoryKey] ?? Rocket; return <Icon size={16} style={{ color: accentColor, flexShrink: 0 }} />; })()}
+
         <span className="text-sm font-bold text-white tracking-tight">{section.title}</span>
         {courseTags.length > 0 && (
           <div className="flex flex-wrap gap-1 ml-1">
@@ -752,29 +752,41 @@ export default function AcademyCategory() {
           WAVV Academy
         </Link>
 
-        {/* ── Category hero banner — simple gradient + icon (matches Academy.tsx cards) ── */}
+        {/* ── Category hero banner — neon banner image (matches webinar sub-pages) ── */}
         <div
           className="relative overflow-hidden rounded-2xl"
-          style={{ height: "160px", border: `1px solid ${cat.color}40` }}
+          style={{ height: "200px", border: `1px solid ${cat.color}40`, boxShadow: `0 0 0 1px ${cat.color}20, 0 4px 32px ${cat.color}18` }}
         >
-          {/* Background gradient — no image, clean dark card with colour accent */}
-          <div
-            className="absolute inset-0"
-            style={{ background: `linear-gradient(135deg, rgba(8,10,16,1) 0%, rgba(8,10,16,0.95) 60%, ${cat.color}18 100%)` }}
-          />
-          {/* Large icon watermark — right side */}
-          {(() => { const HeroIcon = CATEGORY_ICONS[cat.key] ?? Rocket; return (
-            <div
-              className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none"
-              style={{ opacity: 0.35, color: cat.color }}
-            >
-              <HeroIcon size={100} strokeWidth={1.2} />
-            </div>
-          ); })()}
-          {/* Colour accent glow — subtle, centre-right */}
+          {/* Black base */}
+          <div className="absolute inset-0" style={{ background: "#000" }} />
+          {/* Circuit board SVG pattern */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }} xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id={`circuit-ac-${cat.key}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={cat.color} strokeWidth="0.8" fill="none"/>
+                <circle cx="10" cy="10" r="2" fill={cat.color}/>
+                <circle cx="50" cy="10" r="2" fill={cat.color}/>
+                <circle cx="50" cy="50" r="2" fill={cat.color}/>
+                <circle cx="30" cy="30" r="1.5" fill={cat.color}/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill={`url(#circuit-ac-${cat.key})`}/>
+          </svg>
+          {/* Neon banner image */}
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse at 80% 50%, ${cat.color}14 0%, transparent 55%)` }}
+            style={{
+              backgroundImage: `url(${cat.thumbnail})`,
+              backgroundSize: "100% auto",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center center",
+              opacity: 0.85,
+            }}
+          />
+          {/* Dark gradient overlay for text */}
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }}
           />
           {/* Content overlay */}
           <div className="relative flex flex-col justify-center h-full px-8 py-6 gap-1">

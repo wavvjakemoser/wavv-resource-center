@@ -2107,3 +2107,16 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove CTA icons (request buttons)
 - [x] Regenerate Live Exclusive Webinar banner: spotlight/stage light instead of star
 - [x] Update banner URL in Webinars landing page and Live Exclusive sub-page
+
+## UI Fixes Batch 2 (Jul 18 2026)
+- [x] Remove icons from all Request CTA sections (Request a Video, Request a Resource, etc.)
+- [x] Make Request CTA button style consistent across all sections (white outline button)
+- [x] Make "Learn More →" white instead of blue on homepage
+- [x] Ensure "Coming Soon" CMS checkbox reflects on customer-facing tiles
+- [x] Remove star icon from Live Exclusive Webinars empty state
+- [x] Remove "Help Articles" heading from Help Articles sub-page (match PDFs/FAQs layout)
+- [x] Remove "Coming Soon" banner from Playground landing page (already shown on tiles)
+- [x] Add neon compass banner to Onboarding Academy sub-page + remove section icons
+- [x] Add neon gear banner to How-To Academy sub-page + remove section icons
+- [x] Add neon target banner to Strategy Academy sub-page + remove section icons
+- [x] Ensure all section landing page tiles are visually cohesive across Academy, Webinars, Resource Hub, Playground

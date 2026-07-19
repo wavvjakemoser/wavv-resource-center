@@ -529,29 +529,22 @@ export function ContentRequestCTA({
       <div
         className="flex flex-col sm:flex-row items-center gap-5 rounded-2xl px-6 py-5"
         style={{
-          background: `linear-gradient(135deg, ${accent}08 0%, rgba(0,0,0,0) 100%)`,
-          border: `1px solid ${accent}20`,
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.12)",
         }}
       >
-        {/* Icon badge */}
-        <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: `${accent}15`, border: `1px solid ${accent}30` }}
-        >
-          <CtaIcon size={22} style={{ color: accent }} />
-        </div>
         {/* Text */}
         <div className="flex-1 min-w-0">
           <p className="text-white font-bold text-sm mb-0.5">Request a {typeLabel}</p>
-          <p className="text-white text-xs leading-relaxed">{tagline}</p>
+          <p className="text-[#94a3b8] text-xs leading-relaxed">{tagline}</p>
         </div>
         {/* CTA button */}
         <button
           onClick={() => setOpen(true)}
           className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all"
-          style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}40` }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = `${accent}35`; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = `${accent}20`; }}
+          style={{ background: "transparent", color: "#ffffff", border: "1px solid rgba(255,255,255,0.3)" }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
         >
           Request a {typeLabel}
         </button>

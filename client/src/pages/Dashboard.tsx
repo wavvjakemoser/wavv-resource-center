@@ -316,7 +316,7 @@ export default function Dashboard() {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs font-semibold transition-opacity hover:opacity-70"
-              style={{ color: "#0074F4", textDecoration: "none" }}
+              style={{ color: "#ffffff", textDecoration: "none" }}
             >
               Learn More <ArrowRight size={11} />
             </a>

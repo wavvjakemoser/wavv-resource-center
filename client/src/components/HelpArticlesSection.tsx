@@ -292,24 +292,7 @@ export default function HelpArticlesSection({ search, onOpenArticle }: { search:
 
   return (
     <>
-      {/* Section header — gradient bar style matching "What is WAVV?" */}
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          className="w-1 rounded-full flex-shrink-0"
-          style={{
-            height: "28px",
-            background: `linear-gradient(to bottom, ${ACCENT}, #6366f1)`,
-            boxShadow: `0 0 8px ${ACCENT}60`,
-          }}
-        />
-        <span className="text-base font-bold text-white">Help Articles</span>
-        <span
-          className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-          style={{ background: `${ACCENT}15`, color: ACCENT }}
-        >
-          {totalFiltered}
-        </span>
-      </div>
+
       {/* Sections — always shown, even if empty */}
       <div className="space-y-6 pl-2">
         {sections.map((sec) => (

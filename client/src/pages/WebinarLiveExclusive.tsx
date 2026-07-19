@@ -56,7 +56,7 @@ function WebinarRow({
 
   const embedUrl = webinar.videoUrl ? getEmbedUrl(webinar.videoUrl) : null;
   const isHostedVideo = webinar.videoUrl?.startsWith("/manus-storage") ?? false;
-  const CardIcon: LucideIcon | undefined = webinar.iconName ? ICON_MAP[webinar.iconName] : Star;
+  const CardIcon: LucideIcon | undefined = webinar.iconName ? ICON_MAP[webinar.iconName] : undefined;
 
   function handleWatchClick() {
     const playUrl = embedUrl ?? (isHostedVideo ? webinar.videoUrl! : null);
@@ -245,9 +245,8 @@ export default function WebinarLiveExclusive() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 rounded-xl text-center" style={{ background: "#111", border: "1px dashed #2a2a2a" }}>
-            <Star size={32} className="text-gray-700 mb-3" />
             <p className="text-white text-sm font-bold">No Live Exclusive Webinars scheduled.</p>
-            <p className="text-white text-xs mt-1">Check back soon for upcoming sessions!</p>
+            <p className="text-[#94a3b8] text-xs mt-1">Check back soon for upcoming sessions!</p>
           </div>
         )}
       </div>
