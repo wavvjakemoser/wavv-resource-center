@@ -7883,7 +7883,7 @@ function SettingsTab() {
 
           {/* ── LEFT COLUMN: Site Controls ── */}
           <div>
-            <div className="flex justify-center mb-3"><span className="inline-block px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}>Site Controls</span></div>
+            <div className="flex justify-center mb-3"><span className="inline-block px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full" style={{ background: "#0074F4", color: "#ffffff" }}>Site Controls</span></div>
             <div className="space-y-4">
 
             {/* ── Announcement Banner ── */}
@@ -7991,7 +7991,7 @@ function SettingsTab() {
 
           {/* ── RIGHT COLUMN: Visibility Controls ── */}
           <div>
-            <div className="flex justify-center mb-3"><span className="inline-block px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}>Visibility Controls</span></div>
+            <div className="flex justify-center mb-3"><span className="inline-block px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full" style={{ background: "#0074F4", color: "#ffffff" }}>Visibility Controls</span></div>
             <div className="space-y-4">
 
             {/* ── Section Visibility (formerly Navigation Visibility) ── */}

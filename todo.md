@@ -2388,3 +2388,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add visual imagery/patterns to homepage Explore and Programs cards (stronger glow, pattern, gradient)
 - [x] Change admin settings section headers from white bubbles to blue bubbles
 - [x] Implement Accelerator free-session date logic (auto-flip on July 27 from free to upgrade CTA) — already built in, auto-flips at WEEK1_FREE_END_UTC
+
+## Section Label Styling Update (Jul 20 - Session 18)
+- [x] Change sidebar section labels (Explore, Programs, Quick Links, Admin Tools) from white to solid blue (#0074F4) with white text
+- [x] Change admin Settings tab headers (Site Controls, Visibility Controls) from blue-outline to solid blue (#0074F4) with white text
