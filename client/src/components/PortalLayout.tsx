@@ -349,7 +349,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
               // Strip any existing Google size suffix (e.g. =s96-c) before appending our own
               const pictureSrc = rawAvatarUrl ? `${rawAvatarUrl.replace(/=s\d+(-c)?$/, "")}=s40-c` : null;
               return (
-                <a
+                <Link
                   href="/profile"
                   className="flex-shrink-0 flex items-center gap-2 px-2 py-1 rounded-xl transition-all duration-150"
                   style={{ textDecoration: "none", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
@@ -380,7 +380,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                   <span className="text-sm font-medium text-white hidden sm:block" style={{ maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {user.name ?? user.email?.split("@")[0]}
                   </span>
-                </a>
+                </Link>
                             );            })()}
 
             {/* Sign In button — shown only when confirmed not logged in (suppress during auth load to prevent flash) */}

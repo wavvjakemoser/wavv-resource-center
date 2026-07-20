@@ -12,7 +12,7 @@
  *  - Access gating preserved
  */
 
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -805,9 +805,9 @@ export default function AcceleratorSession() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center space-y-3">
             <p className="text-gray-400">Session not found.</p>
-            <a href="/accelerator" className="text-sm font-medium" style={{ color: "#0074F4" }}>
+            <Link href="/accelerator" className="text-sm font-medium" style={{ color: "#0074F4" }}>
               \u2190 Back to Accelerator
-            </a>
+            </Link>
           </div>
         </div>
       </PortalLayout>
@@ -822,10 +822,10 @@ export default function AcceleratorSession() {
     return (
       <PortalLayout title={`Session ${session.week}: ${session.title}`}>
         <div className="px-4 lg:px-8 py-8 max-w-3xl space-y-6">
-          <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
+          <Link href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
             <ArrowLeft size={14} />
             Back to Accelerator
-          </a>
+          </Link>
           <div className="rounded-2xl p-12 text-center space-y-4"
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: `${color}15` }}>
@@ -893,10 +893,10 @@ export default function AcceleratorSession() {
           style={{ background: `radial-gradient(circle, ${color}18, transparent 65%)`, transform: "translate(20%, -30%)" }} />
 
         <div className="relative z-10 px-4 lg:px-8 py-8 pb-10">
-          <a href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-6">
+          <Link href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-6">
             <ArrowLeft size={14} />
             Back to Accelerator
-          </a>
+          </Link>
 
           <h1 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-3">
             Session {session.week}: {session.heroHeadline || session.title}

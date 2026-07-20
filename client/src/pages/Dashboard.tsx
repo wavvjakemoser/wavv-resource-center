@@ -16,7 +16,7 @@ import {
   BarChart3,
   Users,
   Rocket,
-
+  Lock,
 } from "lucide-react";
 import { Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
@@ -641,7 +641,15 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className="mt-auto">
-                      {event.registrationUrl ? (
+                      {!isAuthenticated ? (
+                        <a
+                          href="/api/oauth/login"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                          style={{ background: "rgba(255,255,255,0.08)", color: "#9ca3af", border: "1px solid rgba(255,255,255,0.12)", textDecoration: "none" }}
+                        >
+                          <Lock size={11} /> Sign In to Register
+                        </a>
+                      ) : event.registrationUrl ? (
                         <a
                           href={event.registrationUrl}
                           target="_blank"

@@ -1,4 +1,5 @@
 import PortalLayout from "@/components/PortalLayout";
+import { Link } from "wouter";
 import { Headphones, MessageCircle } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -63,7 +64,7 @@ export default function Support() {
             </p>
             <p className="mx-auto mt-3" style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.82rem" }}>
               Looking for help articles or downloadable guides? Visit{" "}
-              <a href="/resourcehub" className="text-blue-400 hover:underline">the Resource Hub</a>.
+              <Link href="/resourcehub" className="text-blue-400 hover:underline">the Resource Hub</Link>.
             </p>
           </div>
         </div>

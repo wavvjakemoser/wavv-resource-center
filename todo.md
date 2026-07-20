@@ -2392,3 +2392,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## Section Label Styling Update (Jul 20 - Session 18)
 - [x] Change sidebar section labels (Explore, Programs, Quick Links, Admin Tools) from white to solid blue (#0074F4) with white text
 - [x] Change admin Settings tab headers (Site Controls, Visibility Controls) from blue-outline to solid blue (#0074F4) with white text
+
+## PIP Video Persistence Bug (Jul 20 - Session 18)
+- [x] Fix: PIP video disappears when using browser back button — should persist across all navigation including back/forward
+- [x] Fix: Upcoming Live Events register/upgrade buttons should only show for signed-in users who qualify (not for unauthenticated visitors)

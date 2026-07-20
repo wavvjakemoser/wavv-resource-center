@@ -1,4 +1,5 @@
 import PortalLayout from "@/components/PortalLayout";
+import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useState, useEffect, useMemo } from "react";
@@ -738,7 +739,7 @@ export default function Accelerator() {
                       {(() => {
                         const sessionColor = SESSIONS[0]?.color ?? "#0074F4";
                         return (
-                          <a
+                          <Link
                             href="/accelerator/session/1"
                             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
                             style={{ background: `linear-gradient(135deg, ${sessionColor}, ${sessionColor}cc)` }}
@@ -748,7 +749,7 @@ export default function Accelerator() {
                             <Calendar size={14} />
                             Go to Session 1
                             <ArrowRight size={15} />
-                          </a>
+                          </Link>
                         );
                       })()}
                       <UpgradeCTA reason="no_access" variant="inline" />
