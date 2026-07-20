@@ -104,10 +104,10 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      <Route path="/playground" component={HandsOn} />
-      <Route path="/playground/gohighlevel" component={PlaygroundGoHighLevel} />
-      <Route path="/playground/hubspot" component={PlaygroundHubSpot} />
-      <Route path="/playground/salesforce" component={PlaygroundSalesforce} />
+      <Route path="/playground">{() => <NavGuard href="/playground"><HandsOn /></NavGuard>}</Route>
+      <Route path="/playground/gohighlevel">{() => <NavGuard href="/playground"><PlaygroundGoHighLevel /></NavGuard>}</Route>
+      <Route path="/playground/hubspot">{() => <NavGuard href="/playground"><PlaygroundHubSpot /></NavGuard>}</Route>
+      <Route path="/playground/salesforce">{() => <NavGuard href="/playground"><PlaygroundSalesforce /></NavGuard>}</Route>
       <Route path="/home">{() => <Redirect to="/" />}</Route>
       <Route path="/resources">{() => <Redirect to="/resourcehub" />}</Route>
       <Route path="/academy" component={Academy} />
@@ -130,7 +130,6 @@ function Router() {
       <Route path="/wavvpartner">{() => <Redirect to="/404" />}</Route>
       <Route path="/wavvcommandcenter">{() => <AdminGuard><Admin /></AdminGuard>}</Route>
       <Route path="/wavvadmin">{() => <Redirect to="/wavvcommandcenter" />}</Route>
-      <Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>
       <Route path="/hands-on">{() => <Redirect to="/playground" />}</Route>
       <Route path="/profile" component={Profile} />
       <Route path="/404" component={NotFound} />

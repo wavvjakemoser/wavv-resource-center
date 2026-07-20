@@ -1,116 +1,106 @@
-# Full Audit Findings - Jul 19, 2026
+# WAVV Success Center - Comprehensive Audit (Jul 20, 2026)
 
-## Build Health
-- TypeScript: 0 errors (npx tsc --noEmit exit code 0)
-- Vitest: 56 tests passed across 4 test files
-- esbuild: Accelerator.tsx and AcceleratorSession.tsx both compile cleanly
-- The Accelerator.tsx:1102 error in console logs is STALE from 5:26 PM — subsequent HMR updates resolved it
+## Content Loading Performance
+**Status: GOOD** — All pages load immediately with no visible delay.
+- Homepage: instant render, all sections visible
+- Academy: banner tiles load instantly with preloaded images (loading="eager" + fetchPriority="high")
+- Academy > Onboarding: banner + section list loads instantly
+- Webinars: all 3 category tiles with banners load instantly
+- Webinars > On-Demand: banner + 6 webinar rows load instantly
+- Resource Hub: all 3 category tiles load instantly
+- Playground: all 3 CRM tiles load instantly
+- No browser console errors (ERROR/WARN) in current session
+- No failed network requests (all 200/204/304)
 
-## Desktop Audit (Non-Authenticated)
+## Bugs Found
 
-### Home Page
-- PASS: Page loads correctly
-- PASS: Sidebar shows EXPLORE + QUICK LINKS white bubble pills, left-aligned
-- PASS: WAVV logo now left-aligned (was centered, fixed)
-- PASS: Search bar visible in top bar
-- PASS: Sign In button visible top-right
-- PASS: Hero section with "WAVV Success Center" renders
-- PASS: "What is WAVV?" section with 3 feature cards
-- PASS: Footer with Privacy Policy + Terms & Conditions
-- PASS: Only Home + Chrome Extension visible (correct for non-auth)
+### BUG 1: Duplicate /playground route in App.tsx (MEDIUM)
+- Line 107: `<Route path="/playground" component={HandsOn} />` (no NavGuard)
+- Line 133: `<Route path="/playground">{() => <NavGuard href="/hands-on"><HandsOn /></NavGuard>}</Route>`
+- The first route wins (wouter), so the NavGuard on line 133 is NEVER reached
+- This means /playground is always accessible even if nav_visibility hides it
+- **Fix:** Remove line 107 (the one without NavGuard), or consolidate
 
-### Academy Page (Non-Authenticated)
-- PASS: Page loads, shows 3 category tiles (Onboarding, How-To, Strategy)
-- PASS: Tiles have Academy HUD icons (compass, gear, target)
-- PASS: Each tile shows section/video counts
-- PASS: Tiles are clickable links to sub-pages
+### BUG 2: NavGuard for Playground uses wrong href key (MEDIUM)
+- Line 133: `<NavGuard href="/hands-on">` but nav_visibility likely uses "/playground" as the key
+- The sidebar PortalLayout uses `href="/playground"` for the Playground link
+- This means the NavGuard check looks for "/hands-on" in nav_visibility but the setting is stored under "/playground"
+- **Fix:** Change NavGuard href to "/playground"
 
-### Accelerator Page (Non-Authenticated)
-- PASS: Redirects to 404 (correct — requires auth per visibility settings)
-- PASS: 404 page renders cleanly with "Back to Home" button
+### BUG 3: Resource Hub FAQs shows "0 items" (LOW/COSMETIC)
+- When a category has 0 items, it displays "0 items" which looks empty/broken
+- Consider: hide the count badge when 0, or show "Coming Soon" badge instead
 
-## Session Persistence
-- NOTE: Cannot fully test OAuth flow from sandbox browser (redirects to admin.wavv.com)
-- The OAuth flow uses httpOnly cookies — session should persist across refreshes
-- Need Jake to verify: after signing in on production, refresh should NOT log out
+### BUG 4: ComponentShowcase page has no route (ORPHANED CODE)
+- `/components` href exists in ComponentShowcase.tsx breadcrumb
+- No route defined in App.tsx for /components
+- This is likely dev-only dead code — not user-facing, but should be cleaned up
 
-## Logo Fix Applied
-- Changed sidebar logo container from `justify-center` to `justify-start`
-- Logo now left-aligned in sidebar
+## Visual / Design Issues
 
-## Additional Pages Checked (Non-Auth)
+### ISSUE 5: Homepage Explore/Programs cards are plain text (LOW)
+- Unlike Academy/Webinars/Resource Hub section pages which have rich circuit-board HUD banner images, the homepage Explore/Programs cards are plain dark cards with text only
+- They're functional and clean, but less visually impactful than the section pages themselves
+- Consider: adding subtle background patterns or the same banner images to these cards
 
-### Resource Hub
-- PASS: Loads correctly with 3 category tiles (Help Articles, PDFs, FAQs)
-- PASS: Tiles have Academy-style HUD icons
-- PASS: Item counts shown
+### ISSUE 6: Sidebar only shows "Home" when all sections are Coming Soon (CORRECT BEHAVIOR)
+- When all sections have nav_visibility=false, sidebar only shows Home + Quick Links
+- This is correct — just noting it's sparse for launch
 
-### Academy > Onboarding (Sub-page)
-- PASS: Loads with banner header + numbered list rows
-- PASS: 5 sections displayed with video counts
-- PASS: Breadcrumb back to Academy works
+## Copy Quality Assessment
+**Status: CLEAN** — No AI artifacts found.
+- No double-dashes (--) anywhere in user-visible text
+- No "delve", "leverage", "utilize", "elevate", "streamline", "empower", "synergy", "paradigm"
+- All em dashes (—) are used correctly as standard punctuation
+- All descriptions are concise, action-oriented, benefit-focused
+- Consistent voice throughout
 
-### Accelerator (Non-Auth)
-- PASS: Correctly redirects to 404 (nav_visibility set to hidden)
-- NOTE: This is correct behavior - Accelerator requires auth
+## Things You May Not Be Thinking About
 
-## Session Persistence Analysis
-- Cookie: httpOnly, sameSite=lax, secure (on HTTPS), maxAge=ONE_YEAR (365 days)
-- Auth query: staleTime=5min, retry=false, refetchOnWindowFocus=false
-- Sign In button: suppressed during auth loading (prevents flash)
-- VERDICT: Session should persist on refresh. Cookie is long-lived. No client-side logout on refresh.
+1. **Search bar works for unauthenticated users** — The search procedure is public. Users can search before logging in. This is probably fine (helps them discover content), but be aware they can see content titles/descriptions without auth.
 
-## Content Visibility Analysis
-- NavGuard checks nav_visibility settings before rendering pages
-- filterByVisibility hides nav items during settingsLoading (returns false)
-- Approved employees bypass visibility (always see all items)
-- VERDICT: Content visibility is properly gated. Hidden sections won't leak.
+2. **Playground is accessible via direct URL** — Due to Bug #1 above, anyone who knows /playground can access it directly even if hidden from nav. Fix the duplicate route.
 
-## Additional Pages Checked (Non-Auth)
+3. **"Learn More →" on homepage** — Links to wavv.com. Is this the right destination? Or should it link to a section within the Success Center?
 
-### Webinars
-- PASS: Loads with 3 category tiles (On-Demand Series, Live Exclusive, Exclusive On-Demand)
-- PASS: Tiles have HUD icons, item counts shown
+4. **No loading skeletons for data-dependent sections** — If API is slow, users see empty space before content appears. Not an issue now (fast), but could matter at scale.
 
-### Playground
-- PASS: Loads with 3 CRM tiles (Go High Level, HubSpot, Salesforce)
-- PASS: All show "Coming Soon" badges
-- PASS: Request Access form visible
+5. **Accelerator live calls show registration URL** — The two live calls on the homepage both link to the same Zoom registration URL. Verify these are correct and not test data.
 
-## Mobile Responsiveness Analysis
+6. **"Session 1 is free through July 26"** — This date is hardcoded in Accelerator.tsx (line 735). After July 26, this copy will be stale. Need a plan to update or remove it.
 
-### Sidebar
-- PASS: Sidebar is fixed off-screen on mobile (-translate-x-full), slides in via hamburger
-- PASS: Mobile overlay (bg-black/60) covers content when sidebar is open
-- PASS: Close button (X) visible on mobile sidebar
-- PASS: Hamburger menu in top bar (lg:hidden)
+7. **Intercom integration** — VITE_INTERCOM_APP_ID is set in env. Verify the messenger bubble appears on the live site for customer support.
 
-### Top Bar
-- PASS: Search bar shrinks on mobile (flex-1 min-w-0)
-- PASS: Sign In / Avatar pinned to far right
+8. **No favicon visible** — The browser tab shows a generic icon. May need to upload a WAVV favicon.
 
-### BannerTile (Accelerator)
-- PASS: Tiles are full-width (w-full) in a flex-col layout, stack vertically
-- PASS: Fixed height 260px works on mobile (content fits)
-- NOTE: Text on tiles may be slightly crowded on very small screens due to background image
+9. **Footer copyright says "2026"** — Correct for now, but consider making it dynamic (new Date().getFullYear()).
 
-### FlipDigit (Countdown)
-- Uses fixed widths (w-16 h-20 with text-2xl) — may be slightly large on 320px screens
-- Acceptable on 375px+ (standard iPhone)
+10. **Mobile hamburger menu** — Exists and is properly implemented (lg:hidden breakpoint). Sidebar slides in from left with overlay. Should work correctly on mobile.
 
-### Content Rows (LiveCallRow, ContentRow)
-- PASS: Uses sm:flex-row with flex-col fallback for mobile
-- PASS: Buttons stack on mobile
+## Mobile Audit Results
 
-### Overall Mobile Assessment
-- PASS: All critical flows work on mobile
-- MINOR: Flip clock digits could use responsive sizing for very small screens (320px)
-- MINOR: BannerTile 260px height is fine for 375px+ but background image may dominate on small screens
+**Responsive Layout: GOOD** — All pages use proper breakpoints (grid-cols-1 on mobile, sm:grid-cols-2 on tablet, lg:grid-cols-3 on desktop). Stacking works correctly.
 
-## Issues Found
-1. LOGO: Fixed - now left-aligned (was centered)
-2. STALE ERROR: The Accelerator.tsx:1102 error in console is from 5:26 PM and was fixed by subsequent edits. TypeScript reports 0 errors.
-3. NO CRITICAL BUGS FOUND
+**Touch Targets: ACCEPTABLE** — All buttons/links meet 44px minimum. Sidebar nav items have adequate padding.
 
-## Verdict
-Ready to push live. All pages load correctly, content visibility is properly gated, session persistence is robust (1-year cookie, no client-side logout on refresh), and mobile is functional.
+**Text Overflow: CLEAN** — User name truncated with ellipsis, nav items clipped, video titles truncated in PIP player.
+
+**Floating Video Player on Mobile: MINOR ISSUE** — No touch event handlers (only mouse events). Mobile users cannot drag/reposition the PIP player. It still plays and close button works, just stuck in position. Severity: LOW.
+
+**Sidebar on Mobile: GOOD** — Hamburger at lg:hidden, overlay backdrop, auto-closes on route change.
+
+---
+
+## Fixes Applied This Session
+
+1. **FIXED: Bug #1 + #2** — Removed duplicate /playground route. All playground routes now use NavGuard with correct href="/playground". Nav visibility controls now properly gate access.
+
+## Remaining Recommendations (Priority Order)
+
+1. ~~Fix Bug #1 + #2~~ — **DONE**
+2. **Fix Bug #3** — Hide "0 items" badge or show "Coming Soon" for empty Resource Hub categories. 5 min fix.
+3. **Remove stale "July 26" date** — Hardcoded in Accelerator.tsx. Make it dynamic or remove after the free period ends.
+4. **Add favicon** — Upload WAVV icon as favicon.ico for brand consistency in browser tabs.
+5. **Clean up ComponentShowcase** — Remove orphaned dev page or add a route (admin-only).
+6. **Add touch events to PIP player** — Enable drag on mobile devices.
+7. **Consider homepage card imagery** — Add subtle visuals to Explore/Programs cards for more impact.
