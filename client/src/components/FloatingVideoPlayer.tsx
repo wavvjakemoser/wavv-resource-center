@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, GripHorizontal, Maximize2, Minimize2 } from "lucide-react";
-import { useLocation } from "wouter";
 
 export interface FloatingVideoPlayerProps {
   title: string;
@@ -9,25 +8,16 @@ export interface FloatingVideoPlayerProps {
 }
 
 /**
- * Custom in-page floating video player.
+ * Global floating video player (PIP-style).
  *
- * - Draggable overlay anchored to the page DOM (not the OS).
- * - Closes automatically when the user navigates to a different route.
- * - Closes on Escape key.
+ * - Draggable overlay anchored to the viewport.
+ * - Persists across page navigation (managed by VideoPlayerContext at App level).
+ * - Closes on Escape key or close button.
+ * - Closes when a new video is started (handled by context).
  * - Resizable between compact and expanded mode.
- * - Available to all roles/users.
  */
 export default function FloatingVideoPlayer({ title, embedUrl, onClose }: FloatingVideoPlayerProps) {
-  const [location] = useLocation();
-  const mountLocationRef = useRef(location);
   const [expanded, setExpanded] = useState(false);
-
-  // Close when user navigates away from the page where the player was opened
-  useEffect(() => {
-    if (location !== mountLocationRef.current) {
-      onClose();
-    }
-  }, [location, onClose]);
 
   // Close on Escape
   useEffect(() => {

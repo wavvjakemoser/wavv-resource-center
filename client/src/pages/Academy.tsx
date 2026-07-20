@@ -5,7 +5,6 @@ import { Link } from "wouter";
 import { useState } from "react";
 import {
   BookOpen,
-  Clock,
   ChevronRight,
   GraduationCap,
   Compass,
@@ -200,14 +199,7 @@ function LiveCourseCard({
           </p>
         )}
         <div className="mt-auto flex items-center justify-between text-xs text-gray-400">
-          {course.durationMinutes ? (
-            <span className="flex items-center gap-1">
-              <Clock size={11} />
-              {course.durationMinutes} min
-            </span>
-          ) : (
-            <span />
-          )}
+          <span />
           <ChevronRight
             size={14}
             className="text-gray-600 group-hover:text-gray-400 transition-colors"
@@ -266,10 +258,7 @@ function PlaceholderCourseCard({
         <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 mb-3">
           {description}
         </p>
-        <div className="mt-auto flex items-center gap-1 text-xs text-gray-400">
-          <Clock size={11} />
-          {duration}
-        </div>
+        <div className="mt-auto" />
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ import {
   X,
   PictureInPicture2,
 } from "lucide-react";
-import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
+import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
 
@@ -437,9 +437,6 @@ function SectionRow({
                 </div>
                 {/* Badge / arrow / bookmark */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
-                  {video.duration && (
-                    <span className="text-[11px] text-gray-600 hidden sm:inline">{video.duration}</span>
-                  )}
                   {video.status === "coming_soon" && (
                     <span
                       className="text-[10px] font-semibold px-2 py-0.5 rounded-full hidden sm:inline"
@@ -563,16 +560,16 @@ export default function AcademyCategory() {
 
   // Video player modal state
   const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
-  const [floatingVideo, setFloatingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo } = useVideoPlayer();
 
   function handlePopOut() {
     if (!playingVideo) return;
-    setFloatingVideo({ embedUrl: playingVideo.embedUrl, title: playingVideo.title });
+    globalPlayVideo(playingVideo.embedUrl, playingVideo.title);
     handleClosePlayer();
   }
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
   const handlePlay = (embedUrl: string, title: string, sectionTitle: string, lessonId?: string) => {
-    setFloatingVideo(null); // close any existing floating player before opening a new video
+    globalCloseVideo(); // close any existing floating player before opening a new video
     setPlayingVideo({ embedUrl, title });
     trackAnon.mutate({
       eventType: "academy_video_play",
@@ -914,14 +911,7 @@ export default function AcademyCategory() {
 
     </PortalLayout>
 
-      {/* ── Floating video player (persists while browsing within the page) ── */}
-      {floatingVideo && (
-        <FloatingVideoPlayer
-          title={floatingVideo.title}
-          embedUrl={floatingVideo.embedUrl}
-          onClose={() => setFloatingVideo(null)}
-        />
-      )}
+
     </>
   );
 }

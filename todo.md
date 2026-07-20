@@ -2370,3 +2370,15 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Add WAVV Partners and WAVV Playground to Homepage Section Status CMS panel (3-state: Visible/Coming Soon/Hidden)
 - [x] Wire Partners and Playground into homepage Explore/Programs sections with CMS state
 - [x] Make "Site Controls" and "Visibility Controls" admin section headers use white bubble/pill style
+
+## CMS Description + PIP Persistence (Jul 20 - Session 17 cont.)
+- [x] Replace duration with short description field in Accelerator sessions CMS
+- [x] Replace duration with short description field in Academy lessons CMS
+- [x] Replace duration with short description field in Webinars CMS (already had description, no duration)
+- [x] Replace duration with short description field in Resource Hub CMS (already had description, no duration)
+- [x] Add character limit (~120 chars) to all description fields
+- [x] Implement persistent PIP video that survives page navigation (stays until closed or another video starts)
+- [x] Lift FloatingVideoPlayer to global VideoPlayerContext at App level
+- [x] Remove route-change auto-close from FloatingVideoPlayer
+- [x] Update AcademyCategory, AcceleratorSession, WebinarOnDemand, WebinarExclusiveOnDemand, WebinarLiveExclusive to use global context
+- [x] Remove duration display from user-facing Academy and Accelerator pages

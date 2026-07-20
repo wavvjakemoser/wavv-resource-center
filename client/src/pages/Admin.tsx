@@ -3643,28 +3643,18 @@ function ContentTab() {
             </div>
             {/* Description */}
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Description (optional)</label>
+              <label className="text-xs text-gray-400 mb-1 block">Description <span className="text-gray-600">({newVideoForm.description.length}/120)</span></label>
               <textarea
                 placeholder="Brief description of what this video covers"
                 value={newVideoForm.description}
-                onChange={(e) => setNewVideoForm((f) => ({ ...f, description: e.target.value }))}
+                onChange={(e) => { if (e.target.value.length <= 120) setNewVideoForm((f) => ({ ...f, description: e.target.value })); }}
+                maxLength={120}
                 rows={2}
                 className="w-full rounded-md px-3 py-2 text-sm bg-black/30 border border-white/10 text-white placeholder:text-gray-600 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
-            {/* Duration + Tags row */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-gray-400 mb-1 block">Duration (minutes)</label>
-                <Input
-                  type="number"
-                  placeholder="e.g. 8"
-                  min={1}
-                  value={newVideoForm.durationMinutes}
-                  onChange={(e) => setNewVideoForm((f) => ({ ...f, durationMinutes: e.target.value }))}
-                  className="bg-black/30 border-white/10 text-white placeholder:text-gray-600"
-                />
-              </div>
+            {/* Tags row */}
+            <div className="grid grid-cols-1 gap-3">
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Tags (comma-separated)</label>
                 <Input
@@ -9877,7 +9867,7 @@ function AcceleratorSubTable({
                 <span className="text-white font-medium truncate pr-2">{call.title}</span>
                 <span className="text-gray-400 truncate pr-2">
                   {call.scheduledAt ? new Date(call.scheduledAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true }) : "—"}
-                  {call.durationMinutes && <span className="text-gray-500"> · {call.durationMinutes}m</span>}
+
                 </span>
                 <span className="text-gray-400">Call {call.callNumber ?? "—"}</span>
                 <div className="flex items-center gap-1.5">
@@ -9992,9 +9982,9 @@ function AcceleratorSubTable({
                   <label className="text-[11px] text-gray-400 mb-1 block">Host</label>
                   <input style={inputStyle} value={ctForm.hostName} onChange={e => setCtForm(f => ({ ...f, hostName: e.target.value }))} placeholder="e.g. Jake Moser" />
                 </div>
-                <div>
-                  <label className="text-[11px] text-gray-400 mb-1 block">Duration</label>
-                  <input style={inputStyle} value={ctForm.duration} onChange={e => setCtForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45 min" />
+                <div className="col-span-2">
+                  <label className="text-[11px] text-gray-400 mb-1 block">Description <span className="text-gray-600">({(ctForm.description || "").length}/120)</span></label>
+                  <textarea style={{ ...inputStyle, minHeight: "50px", resize: "vertical" }} value={ctForm.description} onChange={e => { if (e.target.value.length <= 120) setCtForm(f => ({ ...f, description: e.target.value })); }} maxLength={120} placeholder="Brief description shown on the card" />
                 </div>
                 <div className="col-span-2">
                   <label className="text-[11px] text-gray-400 mb-1 block">Video URL <span className="text-gray-600">(or upload below)</span></label>
@@ -10219,9 +10209,9 @@ function AcceleratorAddDialog({
                 <label className="text-[11px] text-gray-400 mb-1 block">Host</label>
                 <input style={inputStyle} value={ctForm.hostName} onChange={e => setCtForm(f => ({ ...f, hostName: e.target.value }))} placeholder="e.g. Jake Moser" />
               </div>
-              <div>
-                <label className="text-[11px] text-gray-400 mb-1 block">Duration</label>
-                <input style={inputStyle} value={ctForm.duration} onChange={e => setCtForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45 min" />
+              <div className="col-span-2">
+                <label className="text-[11px] text-gray-400 mb-1 block">Description <span className="text-gray-600">({(ctForm.description || "").length}/120)</span></label>
+                <textarea style={{ ...inputStyle, minHeight: "50px", resize: "vertical" }} value={ctForm.description} onChange={e => { if (e.target.value.length <= 120) setCtForm(f => ({ ...f, description: e.target.value })); }} maxLength={120} placeholder="Brief description shown on the card" />
               </div>
               <div>
                 <label className="text-[11px] text-gray-400 mb-1 block">Video URL</label>
@@ -10401,8 +10391,8 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
               <input style={inputStyle} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. Session 1 · Call 1 of 2" />
             </div>
             <div className="col-span-2">
-              <label className="text-[11px] text-gray-400 mb-1 block">Description</label>
-              <textarea style={{ ...inputStyle, minHeight: "60px", resize: "vertical" }} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Brief description for the card" />
+              <label className="text-[11px] text-gray-400 mb-1 block">Description <span className="text-gray-600">({(form.description || "").length}/120)</span></label>
+              <textarea style={{ ...inputStyle, minHeight: "60px", resize: "vertical" }} value={form.description} onChange={(e) => { if (e.target.value.length <= 120) setForm({ ...form, description: e.target.value }); }} maxLength={120} placeholder="Brief description for the card" />
             </div>
             <div>
               <label className="text-[11px] text-gray-400 mb-1 block">Call Number *</label>
@@ -10492,7 +10482,7 @@ function SessionLiveCallsInline({ sessionNumber, sessionColor }: { sessionNumber
                   <p className="text-sm text-white font-medium">{call.title}</p>
                   <p className="text-[11px] text-gray-400">
                     {call.scheduledAt ? new Date(call.scheduledAt).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }) : "No date set"}
-                    {call.durationMinutes && <span> · {call.durationMinutes} min</span>}
+
                   </p>
                 </div>
               </div>
@@ -10920,8 +10910,7 @@ function AccContentRow({ item, onEdit, onDelete, sessionColor }: { item: any; on
           <p className="text-sm text-white font-medium">{item.title}</p>
           <p className="text-[11px] text-gray-400">
             {item.hostName && <span>{item.hostName}</span>}
-            {item.hostName && item.duration && <span> · </span>}
-            {item.duration && <span>{item.duration}</span>}
+
           </p>
         </div>
       </div>

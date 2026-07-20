@@ -12,7 +12,7 @@ import {
   Clapperboard, MonitorPlay, ExternalLink, PictureInPicture2, X, ArrowLeft,
   type LucideIcon,
 } from "lucide-react";
-import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
+import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getEmbedUrl(url: string): string | null {
@@ -157,10 +157,10 @@ export default function WebinarLiveExclusive() {
 
   const [autoPlayFired, setAutoPlayFired] = useState(false);
   const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; isHosted?: boolean } | null>(null);
-  const [floatingVideo, setFloatingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo } = useVideoPlayer();
 
   function handlePlay(embedUrl: string, title: string) {
-    setFloatingVideo(null);
+    globalCloseVideo();
     const isHosted = embedUrl.startsWith("/manus-storage");
     setPlayingVideo({ embedUrl, title, isHosted });
   }
@@ -168,7 +168,7 @@ export default function WebinarLiveExclusive() {
   function handleCloseModal() { setPlayingVideo(null); }
   function handlePopOut() {
     if (!playingVideo) return;
-    setFloatingVideo({ embedUrl: playingVideo.embedUrl, title: playingVideo.title });
+    globalPlayVideo(playingVideo.embedUrl, playingVideo.title);
     handleCloseModal();
   }
 
@@ -290,9 +290,7 @@ export default function WebinarLiveExclusive() {
         </div>
       )}
 
-      {floatingVideo && (
-        <FloatingVideoPlayer title={floatingVideo.title} embedUrl={floatingVideo.embedUrl} onClose={() => setFloatingVideo(null)} />
-      )}
+
     </PortalLayout>
   );
 }

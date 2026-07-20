@@ -36,7 +36,7 @@ import {
   ExternalLink,
   ChevronRight,
 } from "lucide-react";
-import FloatingVideoPlayer from "@/components/FloatingVideoPlayer";
+import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
 import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
 
 // ─── Icon URLs ───────────────────────────────────────────────────────────────
@@ -781,7 +781,7 @@ export default function AcceleratorSession() {
   const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
   // Video player state
-  const [activeVideo, setActiveVideo] = useState<{ url: string; title: string } | null>(null);
+  const { playVideo: globalPlayVideo } = useVideoPlayer();
 
   // Cheat sheet side panel state
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
@@ -1047,7 +1047,7 @@ export default function AcceleratorSession() {
                     item={item}
                     index={idx}
                     accentColor={TILE_COLORS.training}
-                    onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                    onPlay={(url: string, title: string) => globalPlayVideo(url, title)}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
                   />
                 ))}
@@ -1077,7 +1077,7 @@ export default function AcceleratorSession() {
                     item={item}
                     index={idx}
                     accentColor={TILE_COLORS.recordings}
-                    onPlay={(url: string, title: string) => setActiveVideo({ url, title })}
+                    onPlay={(url: string, title: string) => globalPlayVideo(url, title)}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
                   />
                 ))}
@@ -1159,14 +1159,7 @@ export default function AcceleratorSession() {
 
       </div>
 
-      {/* Floating video player */}
-      {activeVideo && (
-        <FloatingVideoPlayer
-          title={activeVideo.title}
-          embedUrl={activeVideo.url}
-          onClose={() => setActiveVideo(null)}
-        />
-      )}
+
     </PortalLayout>
   );
 }

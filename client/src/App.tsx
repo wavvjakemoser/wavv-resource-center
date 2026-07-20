@@ -34,6 +34,8 @@ import { trpc } from "./lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useVersionCheck } from "./hooks/useVersionCheck";
 import { UpdateBanner } from "./components/UpdateBanner";
+import { VideoPlayerProvider } from "./contexts/VideoPlayerContext";
+import GlobalVideoPlayer from "./components/GlobalVideoPlayer";
 
 
 // Guard for pages that can be disabled via nav_visibility in site settings.
@@ -159,7 +161,10 @@ function App() {
               },
             }}
           />
-          <Router />
+          <VideoPlayerProvider>
+            <Router />
+            <GlobalVideoPlayer />
+          </VideoPlayerProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
