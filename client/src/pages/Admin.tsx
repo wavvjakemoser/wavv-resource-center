@@ -7883,7 +7883,7 @@ function SettingsTab() {
 
           {/* ── LEFT COLUMN: Site Controls ── */}
           <div>
-            <div className="flex justify-center mb-3"><span className="inline-block px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full" style={{ background: "rgba(255,255,255,0.95)", color: "#0f1219" }}>Site Controls</span></div>
+            <div className="flex justify-center mb-3"><span className="inline-block px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}>Site Controls</span></div>
             <div className="space-y-4">
 
             {/* ── Announcement Banner ── */}
@@ -7991,7 +7991,7 @@ function SettingsTab() {
 
           {/* ── RIGHT COLUMN: Visibility Controls ── */}
           <div>
-            <div className="flex justify-center mb-3"><span className="inline-block px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full" style={{ background: "rgba(255,255,255,0.95)", color: "#0f1219" }}>Visibility Controls</span></div>
+            <div className="flex justify-center mb-3"><span className="inline-block px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}>Visibility Controls</span></div>
             <div className="space-y-4">
 
             {/* ── Section Visibility (formerly Navigation Visibility) ── */}
@@ -9459,9 +9459,9 @@ function AcceleratorTab() {
     <div className="space-y-4 mt-4">
       {/* Top header bar — mirrors Webinars CMS */}
       <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: "#1d2230", border: "1px solid #2a2a2a" }}>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-400" />
+        <div>
           <h2 className="text-base font-bold text-white">WAVV Accelerator</h2>
+          <p className="text-xs text-gray-500 mt-0.5">Manage sessions, live calls, product training, and recordings for the 6-week coaching program</p>
         </div>
         <div className="flex items-center gap-2">
           <button

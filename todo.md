@@ -2382,3 +2382,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove route-change auto-close from FloatingVideoPlayer
 - [x] Update AcademyCategory, AcceleratorSession, WebinarOnDemand, WebinarExclusiveOnDemand, WebinarLiveExclusive to use global context
 - [x] Remove duration display from user-facing Academy and Accelerator pages
+
+## Admin CMS + Homepage Visual Polish
+- [x] Remove green dot from WAVV Accelerator CMS tab, add description text instead
+- [x] Add visual imagery/patterns to homepage Explore and Programs cards (stronger glow, pattern, gradient)
+- [x] Change admin settings section headers from white bubbles to blue bubbles
+- [x] Implement Accelerator free-session date logic (auto-flip on July 27 from free to upgrade CTA) — already built in, auto-flips at WEEK1_FREE_END_UTC

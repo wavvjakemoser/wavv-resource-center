@@ -146,7 +146,7 @@ function SectionBanner({
       style={{
         border: `1px solid ${color}${isComingSoon ? "25" : "40"}`,
         minHeight: "130px",
-        boxShadow: `0 0 0 1px ${color}${isComingSoon ? "08" : "15"}, 0 4px 24px ${color}${isComingSoon ? "05" : "10"}`,
+        boxShadow: `0 0 0 1px ${color}${isComingSoon ? "08" : "15"}, 0 4px 24px ${color}${isComingSoon ? "08" : "18"}, 0 0 40px ${color}${isComingSoon ? "03" : "08"}`,
         opacity: isComingSoon ? 0.7 : 1,
         cursor: isComingSoon ? "default" : "pointer",
       }}
@@ -155,7 +155,7 @@ function SectionBanner({
       <div className="absolute inset-0" style={{ background: "#000" }} />
 
       {/* Circuit board SVG pattern */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: isComingSoon ? 0.05 : 0.10 }} xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: isComingSoon ? 0.08 : 0.18 }} xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id={patternId} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
             <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={color} strokeWidth="0.8" fill="none"/>
@@ -168,7 +168,10 @@ function SectionBanner({
       </svg>
 
       {/* Radial glow */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 80% 50%, ${color}${isComingSoon ? "10" : "20"} 0%, transparent 70%)` }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 80% 50%, ${color}${isComingSoon ? "12" : "28"} 0%, transparent 70%)` }} />
+
+      {/* Left-side color accent */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(to right, ${color}${isComingSoon ? "08" : "12"} 0%, transparent 30%)` }} />
 
       {/* Top neon line */}
       <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${color}${isComingSoon ? "30" : "50"} 30%, ${color}${isComingSoon ? "50" : "80"} 60%, transparent 100%)` }} />
