@@ -16,8 +16,7 @@ import {
   BarChart3,
   Users,
   Rocket,
-  Chrome,
-  Globe,
+
 } from "lucide-react";
 import { Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
@@ -80,6 +79,16 @@ const RESOURCE_CARDS = [
     description: "Help articles, downloadable PDF guides, and FAQs organized by topic — answers to your questions, on demand.",
     cta: "Browse Resources",
   },
+  {
+    id: "playground",
+    href: "/playground",
+    navHref: "/playground",
+    label: "WAVV Playground",
+    icon: FlaskConical,
+    color: "#a855f7",
+    description: "An interactive sandbox to experiment with WAVV features, test call flows, and explore what's possible — risk-free.",
+    cta: "Explore",
+  },
 ];
 
 // ─── Program section cards ───────────────────────────────────────────────────
@@ -92,6 +101,16 @@ const PROGRAM_CARDS = [
     icon: Rocket,
     color: "#0074F4",
     description: "A 6-session sales coaching program with live calls, product training, and community — designed to turn dials into closes.",
+    cta: "Learn More",
+  },
+  {
+    id: "partners",
+    href: "/partners",
+    navHref: "/partners",
+    label: "WAVV Partners",
+    icon: Users,
+    color: "#10b981",
+    description: "Join the WAVV partner ecosystem — co-sell, refer, and grow together with tools and support built for agencies and resellers.",
     cta: "Learn More",
   },
 ];
@@ -161,12 +180,9 @@ function SectionBanner({
 
       {/* Content */}
       <div className="relative flex items-center h-full px-6 py-5 gap-4">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${color}${isComingSoon ? "10" : "20"}` }}>
-          <Icon size={20} style={{ color: isComingSoon ? `${color}80` : color }} />
-        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2.5 mb-1">
-            <h3 className="text-base font-bold text-white">{title}</h3>
+            <h3 className="text-lg font-bold text-white">{title}</h3>
             {isComingSoon && (
               <span
                 className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide uppercase flex-shrink-0"
@@ -176,7 +192,7 @@ function SectionBanner({
               </span>
             )}
           </div>
-          <p className="text-sm text-white" style={{ maxWidth: "600px", opacity: isComingSoon ? 0.6 : 1 }}>{description}</p>
+          <p className="text-sm text-white" style={{ opacity: isComingSoon ? 0.6 : 1 }}>{description}</p>
           {children}
         </div>
         {!isComingSoon && (
@@ -559,62 +575,6 @@ export default function Dashboard() {
           </section>
         )}
 
-        {/* ── Resources ── */}
-        {!settingsLoading && (
-          <section>
-            <div className="flex items-center gap-2.5 mb-5">
-              <h2 className="text-base font-extrabold text-white tracking-wide">Explore</h2>
-            </div>
-            <div className="space-y-3">
-              {RESOURCE_CARDS.map((card) => (
-                <SectionBanner
-                  key={card.id}
-                  color={card.color}
-                  title={card.label}
-                  description={card.description}
-                  cta={card.cta}
-                  href={card.href}
-                  status={getSectionStatus(card.navHref)}
-                  icon={card.icon}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── Programs ── */}
-        {!settingsLoading && (
-          <section>
-            <div className="flex items-center gap-2.5 mb-5">
-              <h2 className="text-base font-extrabold text-white tracking-wide">Programs</h2>
-            </div>
-            <div className="space-y-3">
-              {PROGRAM_CARDS.map((card) => (
-                <SectionBanner
-                  key={card.id}
-                  color={card.color}
-                  title={card.label}
-                  description={card.description}
-                  cta={card.cta}
-                  href={card.href}
-                  status={getSectionStatus(card.navHref)}
-                  icon={card.icon}
-                >
-                  {/* Show next live call date inline if available */}
-                  {card.id === "accelerator" && nextAcceleratorCall && getSectionStatus(card.navHref) === "visible" && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <Calendar size={12} style={{ color: "#f59e0b" }} />
-                      <span className="text-xs font-medium" style={{ color: "#f59e0b" }}>
-                        Next live call: {new Date(nextAcceleratorCall.scheduledAt).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "America/Denver" })} at {new Date(nextAcceleratorCall.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Denver", timeZoneName: "short" })}
-                      </span>
-                    </div>
-                  )}
-                </SectionBanner>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* ── Upcoming Live Events (conditional) ── */}
         {upcomingEvents.length > 0 && (
           <section>
@@ -706,49 +666,63 @@ export default function Dashboard() {
           </section>
         )}
 
-        {/* ── Quick Links ── */}
-        <section>
-          <div className="flex items-center gap-2.5 mb-5">
-            <h2 className="text-base font-extrabold text-white tracking-wide">Quick Links</h2>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {/* Chrome Extension — primary */}
-            <a
-              href="https://chromewebstore.google.com/detail/wavv/ioopokcefgfbajhpcmkkbmipeenohhpe"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center gap-3 px-5 py-3.5 rounded-xl transition-all duration-200"
-              style={{ background: "rgba(0,116,244,0.10)", border: "1px solid rgba(0,116,244,0.30)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,116,244,0.18)"; e.currentTarget.style.borderColor = "rgba(0,116,244,0.50)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,116,244,0.10)"; e.currentTarget.style.borderColor = "rgba(0,116,244,0.30)"; }}
-            >
-              <Chrome size={18} style={{ color: "#0074F4" }} />
-              <div>
-                <p className="text-sm font-semibold text-white">WAVV Chrome Extension</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Power dial directly from your browser</p>
-              </div>
-              <ExternalLink size={12} className="ml-2 flex-shrink-0" style={{ color: "rgba(255,255,255,0.3)" }} />
-            </a>
+        {/* ── Resources ── */}
+        {!settingsLoading && (
+          <section>
+            <div className="flex items-center gap-2.5 mb-5">
+              <h2 className="text-base font-extrabold text-white tracking-wide">Explore</h2>
+            </div>
+            <div className="space-y-3">
+              {RESOURCE_CARDS.map((card) => (
+                <SectionBanner
+                  key={card.id}
+                  color={card.color}
+                  title={card.label}
+                  description={card.description}
+                  cta={card.cta}
+                  href={card.href}
+                  status={getSectionStatus(card.navHref)}
+                  icon={card.icon}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-            {/* WAVV Website — secondary */}
-            <a
-              href="https://www.wavv.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center gap-3 px-5 py-3.5 rounded-xl transition-all duration-200"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.20)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)"; }}
-            >
-              <Globe size={18} style={{ color: "#ffffff" }} />
-              <div>
-                <p className="text-sm font-semibold text-white">WAVV Website</p>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Visit wavv.com</p>
-              </div>
-              <ExternalLink size={12} className="ml-2 flex-shrink-0" style={{ color: "rgba(255,255,255,0.3)" }} />
-            </a>
-          </div>
-        </section>
+        {/* ── Programs ── */}
+        {!settingsLoading && (
+          <section>
+            <div className="flex items-center gap-2.5 mb-5">
+              <h2 className="text-base font-extrabold text-white tracking-wide">Programs</h2>
+            </div>
+            <div className="space-y-3">
+              {PROGRAM_CARDS.map((card) => (
+                <SectionBanner
+                  key={card.id}
+                  color={card.color}
+                  title={card.label}
+                  description={card.description}
+                  cta={card.cta}
+                  href={card.href}
+                  status={getSectionStatus(card.navHref)}
+                  icon={card.icon}
+                >
+                  {/* Show next live call date inline if available */}
+                  {card.id === "accelerator" && nextAcceleratorCall && getSectionStatus(card.navHref) === "visible" && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Calendar size={12} style={{ color: "#f59e0b" }} />
+                      <span className="text-xs font-medium" style={{ color: "#f59e0b" }}>
+                        Next live call: {new Date(nextAcceleratorCall.scheduledAt).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "America/Denver" })} at {new Date(nextAcceleratorCall.scheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Denver", timeZoneName: "short" })}
+                      </span>
+                    </div>
+                  )}
+                </SectionBanner>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Quick Links removed — now in sidebar only ── */}
 
       </div>
     </PortalLayout>

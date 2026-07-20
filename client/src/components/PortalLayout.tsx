@@ -287,6 +287,18 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
                   <span className="flex-1 min-w-0 text-sm whitespace-nowrap">WAVV Chrome Extension</span>
                   <ExternalLink size={12} className="flex-shrink-0 ml-2" style={{ color: "#ffffff" }} />
                 </a>
+                <a
+                  href="https://www.wavv.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-all duration-150 cursor-pointer overflow-hidden"
+                  style={{ fontSize: "14px", background: "transparent", border: "1px solid transparent", color: "#ffffff" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(66,133,244,0.10)"; e.currentTarget.style.borderColor = "rgba(66,133,244,0.25)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "transparent"; }}
+                >
+                  <span className="flex-1 min-w-0 text-sm whitespace-nowrap">WAVV Website</span>
+                  <ExternalLink size={12} className="flex-shrink-0 ml-2" style={{ color: "#ffffff" }} />
+                </a>
               </>
             )}
           </nav>

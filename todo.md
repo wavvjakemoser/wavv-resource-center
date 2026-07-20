@@ -2361,3 +2361,12 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
   - [x] Add 3-state CMS visibility: Visible / Coming Soon / Hidden (per section)
   - [x] Homepage cards respect CMS state: Live=clickable, Coming Soon=gold badge+not clickable, Hidden=not shown
   - [x] Update Admin Navigation Visibility panel to support 3 states
+
+## Homepage + Sidebar Adjustments (Jul 20 - Session 17 cont.)
+- [x] Add WAVV Website link to sidebar Quick Links section
+- [x] Remove Quick Links section from homepage entirely
+- [x] Remove icons from Explore/Programs banner tiles (Academy, Webinars, Resource Hub, Accelerator)
+- [x] Move Upcoming Live Events section above Explore on homepage
+- [x] Add WAVV Partners and WAVV Playground to Homepage Section Status CMS panel (3-state: Visible/Coming Soon/Hidden)
+- [x] Wire Partners and Playground into homepage Explore/Programs sections with CMS state
+- [x] Make "Site Controls" and "Visibility Controls" admin section headers use white bubble/pill style
