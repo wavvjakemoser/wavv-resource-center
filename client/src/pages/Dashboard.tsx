@@ -573,7 +573,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
               <BookOpen size={14} style={{ color: "#0074F4" }} />
-              <h2 className="text-base font-extrabold text-white tracking-wide">Resources</h2>
+              <h2 className="text-base font-extrabold text-white tracking-wide">Explore</h2>
             </div>
             <div className="space-y-3">
               {RESOURCE_CARDS.map((card) => (
