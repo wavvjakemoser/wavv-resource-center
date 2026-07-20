@@ -229,7 +229,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
           {/* Main navigation — scrollable */}
           <nav className="flex-1 px-3 py-4 overflow-y-auto">
             {/* ── Explore ── */}
-            <div className="px-3 mb-2"><span className="inline-block px-3 py-1.5 text-sm font-medium rounded-lg" style={{ background: "#0074F4", color: "#fff" }}>Explore</span></div>
+            <div className="px-3 mb-2"><span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: "#0074F4", color: "#fff" }}>Explore</span></div>
             <div className="space-y-0.5 mb-3">
               {visibleResourceItems.map((item) => {
                 const isActive = location === item.href || location.startsWith(item.href + "/") || (item.href === "/home" && location === "/");
@@ -250,7 +250,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             {visibleProgramItems.length > 0 && (
               <>
                 <div className="mx-3 my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-                <div className="px-3 mb-2"><span className="inline-block px-3 py-1.5 text-sm font-medium rounded-lg" style={{ background: "#0074F4", color: "#fff" }}>Programs</span></div>
+                <div className="px-3 mb-2"><span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: "#0074F4", color: "#fff" }}>Programs</span></div>
                 <div className="space-y-0.5">
                   {visibleProgramItems.map((item) => {
                     const isActive = location === item.href || location.startsWith(item.href + "/");
@@ -273,7 +273,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
             {!settingsLoading && (allSettings as Record<string, unknown>)["chrome_extension_enabled"] !== false && (
               <>
                 <div className="mx-3 my-3" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
-                <div className="px-3 mb-2"><span className="inline-block px-3 py-1.5 text-sm font-medium rounded-lg" style={{ background: "#0074F4", color: "#fff" }}>Quick Links</span></div>
+                <div className="px-3 mb-2"><span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: "#0074F4", color: "#fff" }}>Quick Links</span></div>
                 <a
                   href="https://chromewebstore.google.com/detail/wavv/ioopokcefgfbajhpcmkkbmipeenohhpe"
                   target="_blank"
@@ -307,7 +307,7 @@ export default function PortalLayout({ children, title, rightPanel }: PortalLayo
           {isAdmin && (
             <div className="px-3 pt-3 pb-1" style={{ borderTop: "1px solid #1e2030" }}>
               {/* Section label */}
-              <div className="px-3 mb-2"><span className="inline-block px-3 py-1.5 text-sm font-medium rounded-lg" style={{ background: "#0074F4", color: "#fff" }}>Admin Tools</span></div>
+              <div className="px-3 mb-2"><span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: "#0074F4", color: "#fff" }}>Admin Tools</span></div>
               <NavLink
                 {...adminItem}
                 isActive={location.startsWith(adminItem.href)}
