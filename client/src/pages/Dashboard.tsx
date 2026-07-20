@@ -5,16 +5,13 @@ import {
   Video,
   FileText,
   FlaskConical,
-  Star,
   Calendar,
   Clock,
   ExternalLink,
   ArrowRight,
-  BookOpen,
   Send,
   CheckCircle2,
   X,
-  Bell,
   PhoneCall,
   BarChart3,
   Users,
@@ -469,12 +466,9 @@ export default function Dashboard() {
 
                   {/* Content */}
                   <div className="relative flex items-center h-full px-6 py-5 gap-4">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${p.color}20` }}>
-                      <PIcon size={20} style={{ color: p.color }} />
-                    </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-white mb-1">{p.title}</h3>
-                      <p className="text-sm text-white" style={{ maxWidth: "600px" }}>{p.body}</p>
+                      <h3 className="text-lg font-bold text-white mb-1">{p.title}</h3>
+                      <p className="text-sm text-white">{p.body}</p>
                     </div>
                   </div>
                 </div>
@@ -490,8 +484,6 @@ export default function Dashboard() {
         ) && (
           <section>
             <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
-              <BookOpen size={14} style={{ color: "#0074F4" }} />
               <h2 className="text-base font-extrabold text-white tracking-wide">Continue Learning</h2>
             </div>
 
@@ -571,8 +563,6 @@ export default function Dashboard() {
         {!settingsLoading && (
           <section>
             <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #67C728)" }} />
-              <BookOpen size={14} style={{ color: "#0074F4" }} />
               <h2 className="text-base font-extrabold text-white tracking-wide">Explore</h2>
             </div>
             <div className="space-y-3">
@@ -596,8 +586,6 @@ export default function Dashboard() {
         {!settingsLoading && (
           <section>
             <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #0074F4, #00A9E2)" }} />
-              <Rocket size={14} style={{ color: "#0074F4" }} />
               <h2 className="text-base font-extrabold text-white tracking-wide">Programs</h2>
             </div>
             <div className="space-y-3">
@@ -631,8 +619,6 @@ export default function Dashboard() {
         {upcomingEvents.length > 0 && (
           <section>
             <div className="flex items-center gap-2.5 mb-5">
-              <div className="w-1 h-5 rounded-full" style={{ background: `linear-gradient(to bottom, ${ACCENT}, ${ACCENT}80)` }} />
-              <Star size={14} style={{ color: ACCENT }} />
               <h2 className="text-base font-extrabold text-white tracking-wide">Upcoming Live Events</h2>
             </div>
 
@@ -667,7 +653,7 @@ export default function Dashboard() {
                   {event.type === "accelerator" && (
                     <div className="px-4 pt-4 pb-2">
                       <span className="text-[9px] font-bold px-2 py-1 rounded-full tracking-wide uppercase" style={{ background: "rgba(0,116,244,0.15)", color: "#0074F4", border: "1px solid rgba(0,116,244,0.3)" }}>
-                        Accelerator Live Call
+                        WAVV Accelerator Live Call
                       </span>
                     </div>
                   )}
@@ -723,8 +709,6 @@ export default function Dashboard() {
         {/* ── Quick Links ── */}
         <section>
           <div className="flex items-center gap-2.5 mb-5">
-            <div className="w-1 h-5 rounded-full" style={{ background: "linear-gradient(to bottom, #60a5fa, #0074F4)" }} />
-            <ExternalLink size={14} style={{ color: "#60a5fa" }} />
             <h2 className="text-base font-extrabold text-white tracking-wide">Quick Links</h2>
           </div>
           <div className="flex flex-wrap gap-3">
