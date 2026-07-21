@@ -55,7 +55,7 @@ export default function ResourceHelpArticles() {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `url(https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/resourcehub-magnifying-glass-blue-FxJp26QMdJL3HeH4mFUR3T.webp)`,
+              backgroundImage: `url(https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-resource-magnify-3VqzGXJGmYFcEXcBfnfVEe.webp)`,
               backgroundSize: "100% auto",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center center",

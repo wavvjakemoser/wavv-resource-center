@@ -375,9 +375,9 @@ function ContentCard({
 
 // ─── Banner Tile component (full-bleed Academy-style with big icon on right) ──
 const BANNER_ICONS = {
-  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/accel-tile-live-v4-Jh7oXtvmr2YEFVrBtuTz8Z.webp",
-  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/accel-tile-training-v4-Y7crstB84sUkihmcEPUvEu.webp",
-  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/accel-tile-recordings-v4-J7XSxJ3SUrxbb9WmzyKVXj.webp",
+  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-accel-live-sign-8NNXKgfkEL5MUvrqjTZ8E3.webp",
+  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-accel-training-eFNVJBXJxVWKnJm6Nv5UwX.webp",
+  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-accel-recordings-cVrLuiCnTLmRQdpxEXhJBR.webp",
 };
 
 // ─── Tile-specific colors ────────────────────────────────────────────────────

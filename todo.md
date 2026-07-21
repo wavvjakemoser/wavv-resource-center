@@ -2396,3 +2396,16 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 ## PIP Video Persistence Bug (Jul 20 - Session 18)
 - [x] Fix: PIP video disappears when using browser back button — should persist across all navigation including back/forward
 - [x] Fix: Upcoming Live Events register/upgrade buttons should only show for signed-in users who qualify (not for unauthenticated visitors)
+
+## Portal-Style Tile Update (Jul 21 - Session 19)
+- [x] Generate LIVE sign tile for Accelerator Live Calls
+- [x] Generate green film reel tile for Webinar Exclusive On-Demand (replacing diamond)
+- [x] Apply all portal-style tiles to Academy page
+- [x] Apply all portal-style tiles to Webinars page
+- [x] Apply all portal-style tiles to Resource Hub page
+- [x] Apply all portal-style tiles to Playground page
+- [x] Apply all portal-style tiles to Accelerator Sessions page
+- [x] Update homepage "What is WAVV?" tile backgrounds to match portal style (already uses circuit-board portal pattern)
+- [x] Update Accelerator landing page tile backgrounds to match portal style (already uses circuit-board portal pattern)
+- [x] Update all preload links in index.html to new portal tile URLs
+- [x] Update all sub-page banner references (AcademyCategory, Admin, Playground sub-pages, Resource Hub sub-pages, Webinar sub-pages)

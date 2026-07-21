@@ -89,7 +89,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Onboarding",
     subtitle: "Get your team up and running with WAVV quickly and effectively.",
     color: "#0074F4",
-    thumbnail: "/manus-storage/academy-compass-final-v2_3487d992.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-academy-compass-jqGmLFf4LpvCGBFCBQPnKS.webp",
     sections: [
       {
         id: "onb-1",
@@ -182,7 +182,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "How-To",
     subtitle: "Step-by-step guides for every core WAVV feature.",
     color: "#00A9E2",
-    thumbnail: "/manus-storage/academy-gear-final-v2_007ed77c.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-academy-gear-cFLaGCVJH5M3kbcLPBGPnU.webp",
     sections: [
       {
         id: "how-1",
@@ -248,7 +248,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Strategy & Best Practices",
     subtitle: "Maximize connection rates, conversions, and team performance.",
     color: "#67C728",
-    thumbnail: "/manus-storage/academy-target-final-v2_b4297674.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-academy-target-8S7FUzDZjqWfqrNbXVNNcS.webp",
     sections: [
       {
         id: "str-1",

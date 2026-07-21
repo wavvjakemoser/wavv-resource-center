@@ -19,7 +19,7 @@ const CATEGORIES = [
     title: "Go High Level",
     description: "Practice WAVV features inside the Go High Level CRM — calling flows, call boards, and messaging.",
     color: "#0074F4",
-    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/playground-ghl-blue-9my73T937GTNr4y28Vikct.webp",
+    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-playground-ghl-bVFEpKfb5Dn8tpJnJqBBvP.webp",
     href: "/playground/gohighlevel",
   },
   {
@@ -27,7 +27,7 @@ const CATEGORIES = [
     title: "HubSpot",
     description: "Explore WAVV's integration with HubSpot — dialer, call boards, and messenger in a sandbox environment.",
     color: "#00A9E2",
-    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/playground-hubspot-cyan-3he7kCA44vZmpDJSXetC2q.webp",
+    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-playground-hubspot-3TfQZJmJhFnBKbwjAqBaLG.webp",
     href: "/playground/hubspot",
   },
   {
@@ -35,7 +35,7 @@ const CATEGORIES = [
     title: "Salesforce",
     description: "Experience WAVV within Salesforce — practice calling, explore boards, and test messaging workflows.",
     color: "#67C728",
-    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/playground-salesforce-green-dGSqmbKvh8vqj9nNxyiSyF.webp",
+    banner: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-playground-salesforce-8iqxJLiTnqJMWPqCEYjXv3.webp",
     href: "/playground/salesforce",
   },
 ];

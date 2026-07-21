@@ -35,7 +35,7 @@ export default function PlaygroundGoHighLevel() {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `url(https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/playground-ghl-blue-9my73T937GTNr4y28Vikct.webp)`,
+              backgroundImage: `url(https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-playground-ghl-bVFEpKfb5Dn8tpJnJqBBvP.webp)`,
               backgroundSize: "100% auto",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center center",

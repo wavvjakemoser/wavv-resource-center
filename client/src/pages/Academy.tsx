@@ -36,7 +36,7 @@ const CATEGORIES = [
     icon: Compass,
     bgPosition: "center center",
     bgSize: "100% auto",
-    thumbnail: "/manus-storage/academy-compass-final-v2_3487d992.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-academy-compass-jqGmLFf4LpvCGBFCBQPnKS.webp",
     placeholders: [
       {
         id: "p-onb-1",
@@ -72,7 +72,7 @@ const CATEGORIES = [
     icon: Wrench,
     bgPosition: "center center",
     bgSize: "100% auto",
-    thumbnail: "/manus-storage/academy-gear-final-v2_007ed77c.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-academy-gear-cFLaGCVJH5M3kbcLPBGPnU.webp",
     placeholders: [
       {
         id: "p-how-1",
@@ -108,7 +108,7 @@ const CATEGORIES = [
     icon: Lightbulb,
     bgPosition: "center center",
     bgSize: "100% auto",
-    thumbnail: "/manus-storage/academy-target-final-v2_b4297674.png",
+    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-academy-target-8S7FUzDZjqWfqrNbXVNNcS.webp",
     placeholders: [
       {
         id: "p-str-1",

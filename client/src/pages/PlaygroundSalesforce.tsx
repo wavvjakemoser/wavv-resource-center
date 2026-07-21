@@ -35,7 +35,7 @@ export default function PlaygroundSalesforce() {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `url(https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/playground-salesforce-green-dGSqmbKvh8vqj9nNxyiSyF.webp)`,
+              backgroundImage: `url(https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-playground-salesforce-8iqxJLiTnqJMWPqCEYjXv3.webp)`,
               backgroundSize: "100% auto",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center center",
