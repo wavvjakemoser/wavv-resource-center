@@ -177,7 +177,7 @@ export default function ResourceFaqs() {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `url(https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-resource-chat-4Vu5dSJNUxS2Dn3xGH3DZt.webp)`,
+              backgroundImage: `url(/manus-storage/final-resource-chat_164bafd5.png)`,
               backgroundSize: "100% auto",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center center",

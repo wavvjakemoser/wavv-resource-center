@@ -375,9 +375,9 @@ function ContentCard({
 
 // ─── Banner Tile component (full-bleed Academy-style with big icon on right) ──
 const BANNER_ICONS = {
-  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-accel-live-sign-8NNXKgfkEL5MUvrqjTZ8E3.webp",
-  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-accel-training-eFNVJBXJxVWKnJm6Nv5UwX.webp",
-  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-accel-recordings-cVrLuiCnTLmRQdpxEXhJBR.webp",
+  live: "/manus-storage/final-accel-live-sign_4b46b78a.png",
+  training: "/manus-storage/final-accel-training_2a09a936.png",
+  recordings: "/manus-storage/final-accel-recordings_f282f2b3.png",
 };
 
 // ─── Tile-specific colors ────────────────────────────────────────────────────

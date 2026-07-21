@@ -19,7 +19,7 @@ const WEBINAR_CATEGORIES = [
     color: ONDEMAND_COLOR,
     icon: PlayCircle,
     href: "/webinars/on-demand",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-webinar-play-8gDXhCmGaLNJnXjKNWGnRZ.webp",
+    thumbnail: "/manus-storage/final-webinar-play_13450a3a.png",
   },
   {
     key: "exclusive",
@@ -29,7 +29,7 @@ const WEBINAR_CATEGORIES = [
     color: LIVE_COLOR,
     icon: Star,
     href: "/webinars/live-exclusive",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-webinar-spotlight-fxVVPVUKPNq2ij1qRcKTXj.webp",
+    thumbnail: "/manus-storage/final-webinar-spotlight_ae5ec900.png",
   },
   {
     key: "recording",
@@ -39,7 +39,7 @@ const WEBINAR_CATEGORIES = [
     color: EXCLUSIVE_COLOR,
     icon: Gem,
     href: "/webinars/exclusive-on-demand",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-webinar-filmreel-Ls9D5rBMA8HxMhoLYPVHDb.webp",
+    thumbnail: "/manus-storage/final-webinar-filmreel_60a267f3.png",
   },
 ];
 

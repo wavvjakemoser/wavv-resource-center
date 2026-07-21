@@ -18,7 +18,7 @@ const RESOURCE_CATEGORIES = [
     color: ARTICLE_COLOR,
     icon: Search,
     href: "/resources/help-articles",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-resource-magnify-3VqzGXJGmYFcEXcBfnfVEe.webp",
+    thumbnail: "/manus-storage/final-resource-magnify_17bb4dc4.png",
   },
   {
     key: "pdf",
@@ -27,7 +27,7 @@ const RESOURCE_CATEGORIES = [
     color: PDF_COLOR,
     icon: FileText,
     href: "/resources/pdfs",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-resource-clipboard-7RLjcGvCjfNGPPRLDhMqBh.webp",
+    thumbnail: "/manus-storage/final-resource-clipboard_ac540005.png",
   },
   {
     key: "faq",
@@ -36,7 +36,7 @@ const RESOURCE_CATEGORIES = [
     color: FAQ_COLOR,
     icon: MessageCircle,
     href: "/resources/faqs",
-    thumbnail: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/final-resource-chat-4Vu5dSJNUxS2Dn3xGH3DZt.webp",
+    thumbnail: "/manus-storage/final-resource-chat_164bafd5.png",
   },
 ];
 
