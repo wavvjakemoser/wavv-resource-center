@@ -2424,3 +2424,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix Webinar film reel vertical alignment — adjusted bgPosition values for all 3 tiles
 - [x] Fix Accelerator LIVE tile — was using wrong source (target), now using correct LIVE sign transparent
 - [x] Fix Webinar icon vertical alignment v2 — adjusted bgPosition to 42% for spotlight/film reel, bumped play to 55% bgSize
+- [x] Fix Webinar icon alignment v3 — re-centered all 3 PNGs (shifted visual center of mass to 50%) using Academy-matching background-image approach (50% auto, right center)
