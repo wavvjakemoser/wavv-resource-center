@@ -35,8 +35,8 @@ export default function PlaygroundSalesforce() {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `url(/manus-storage/final-playground-salesforce_080ae767.png)`,
-              backgroundSize: "cover",
+              backgroundImage: `url(/manus-storage/final-playground-salesforce-v3_c96910ff.png)`,
+              backgroundSize: "auto 90%",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

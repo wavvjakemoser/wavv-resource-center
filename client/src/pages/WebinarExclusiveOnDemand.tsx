@@ -195,7 +195,7 @@ export default function WebinarExclusiveOnDemand() {
             className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `url(${BANNER_URL})`,
-              backgroundSize: "cover",
+              backgroundSize: "auto 90%",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

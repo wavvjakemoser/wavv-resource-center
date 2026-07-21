@@ -35,8 +35,8 @@ export default function PlaygroundHubSpot() {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `url(/manus-storage/final-playground-hubspot-tilted_dd28387b.png)`,
-              backgroundSize: "cover",
+              backgroundImage: `url(/manus-storage/final-playground-hubspot-v3_d748a257.png)`,
+              backgroundSize: "auto 90%",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

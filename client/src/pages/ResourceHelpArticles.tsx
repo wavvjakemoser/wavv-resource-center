@@ -56,7 +56,7 @@ export default function ResourceHelpArticles() {
             className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `url(/manus-storage/final-resource-magnify_17bb4dc4.png)`,
-              backgroundSize: "cover",
+              backgroundSize: "auto 90%",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

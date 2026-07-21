@@ -2413,3 +2413,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Regenerate GHL tile with tilted angle to match other portal tiles
 - [x] Regenerate HubSpot tile with tilted angle to match other portal tiles
 - [x] Apply Accelerator LIVE/Training/Recordings tiles to Sessions 2-6 (already shared via dynamic component)
+- [x] Fix CSS tile zoom — changed to auto 90% so full icon is visible without excessive crop
+- [x] Fix Webinar icons vertical alignment — added per-tile bgPosition offsets
+- [x] Regenerate Playground tiles with correct Blue/Cyan/Green color scheme
+- [x] Regenerate GHL tile with correct GHL arrows icon (blue, tilted)
+- [x] Regenerate Accelerator Product Training tile (puzzle) with tilt angle
+- [x] Regenerate Accelerator Previous Recordings tile (replay) with tilt angle

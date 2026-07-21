@@ -238,7 +238,7 @@ export default function ResourcePdfs() {
             className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `url(/manus-storage/final-resource-clipboard_ac540005.png)`,
-              backgroundSize: "cover",
+              backgroundSize: "auto 90%",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

@@ -19,7 +19,7 @@ const CATEGORIES = [
     title: "Go High Level",
     description: "Practice WAVV features inside the Go High Level CRM — calling flows, call boards, and messaging.",
     color: "#0074F4",
-    banner: "/manus-storage/final-playground-ghl-tilted_73c75759.png",
+    banner: "/manus-storage/final-playground-ghl-v3_5593bbc8.png",
     href: "/playground/gohighlevel",
   },
   {
@@ -27,7 +27,7 @@ const CATEGORIES = [
     title: "HubSpot",
     description: "Explore WAVV's integration with HubSpot — dialer, call boards, and messenger in a sandbox environment.",
     color: "#00A9E2",
-    banner: "/manus-storage/final-playground-hubspot-tilted_dd28387b.png",
+    banner: "/manus-storage/final-playground-hubspot-v3_d748a257.png",
     href: "/playground/hubspot",
   },
   {
@@ -35,7 +35,7 @@ const CATEGORIES = [
     title: "Salesforce",
     description: "Experience WAVV within Salesforce — practice calling, explore boards, and test messaging workflows.",
     color: "#67C728",
-    banner: "/manus-storage/final-playground-salesforce_080ae767.png",
+    banner: "/manus-storage/final-playground-salesforce-v3_c96910ff.png",
     href: "/playground/salesforce",
   },
 ];
@@ -300,7 +300,7 @@ export default function HandsOn() {
 
               {/* Full-bleed thumbnail */}
               <img src={cat.banner} alt="" loading="eager" fetchPriority="high" className="hidden" />
-              <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url(${cat.banner})`, backgroundSize: "cover", backgroundRepeat: "no-repeat", backgroundPosition: "right center", opacity: 0.85 }} />
+              <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url(${cat.banner})`, backgroundSize: "auto 90%", backgroundRepeat: "no-repeat", backgroundPosition: "right center", opacity: 0.85 }} />
 
               {/* Dark gradient overlay for text */}
               <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }} />

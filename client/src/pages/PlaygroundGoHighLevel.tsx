@@ -35,8 +35,8 @@ export default function PlaygroundGoHighLevel() {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `url(/manus-storage/final-playground-ghl-tilted_73c75759.png)`,
-              backgroundSize: "cover",
+              backgroundImage: `url(/manus-storage/final-playground-ghl-v3_5593bbc8.png)`,
+              backgroundSize: "auto 90%",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

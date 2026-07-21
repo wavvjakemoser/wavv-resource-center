@@ -423,7 +423,7 @@ export default function Academy() {
                     className="absolute inset-0 pointer-events-none"
                     style={{
                       backgroundImage: `url(${cat.thumbnail})`,
-                      backgroundSize: "cover",
+                      backgroundSize: "auto 90%",
                       backgroundRepeat: "no-repeat",
                       backgroundPosition: "right center",
                       opacity: 0.85,
