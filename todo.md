@@ -2409,3 +2409,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Update Accelerator landing page tile backgrounds to match portal style (already uses circuit-board portal pattern)
 - [x] Update all preload links in index.html to new portal tile URLs
 - [x] Update all sub-page banner references (AcademyCategory, Admin, Playground sub-pages, Resource Hub sub-pages, Webinar sub-pages)
+- [x] Fix CSS so tile icons are fully visible (no cropping from object-fit: cover)
+- [x] Regenerate GHL tile with tilted angle to match other portal tiles
+- [x] Regenerate HubSpot tile with tilted angle to match other portal tiles
+- [x] Apply Accelerator LIVE/Training/Recordings tiles to Sessions 2-6 (already shared via dynamic component)

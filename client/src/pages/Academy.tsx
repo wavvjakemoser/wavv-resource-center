@@ -423,9 +423,9 @@ export default function Academy() {
                     className="absolute inset-0 pointer-events-none"
                     style={{
                       backgroundImage: `url(${cat.thumbnail})`,
-                      backgroundSize: (cat as any).bgSize ?? "100% auto",
+                      backgroundSize: "auto 100%",
                       backgroundRepeat: "no-repeat",
-                      backgroundPosition: cat.bgPosition ?? "center center",
+                      backgroundPosition: "right center",
                       opacity: 0.85,
                     }}
                   />
