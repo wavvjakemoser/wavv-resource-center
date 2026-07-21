@@ -20,7 +20,8 @@ const WEBINAR_CATEGORIES = [
     icon: PlayCircle,
     href: "/webinars/on-demand",
     thumbnail: "/manus-storage/final-webinar-play-transparent_cf1ed606.png",
-    bgPosition: "right 50%",
+    bgPosition: "right center",
+    bgSize: "50% auto",
   },
   {
     key: "exclusive",
@@ -31,7 +32,8 @@ const WEBINAR_CATEGORIES = [
     icon: Star,
     href: "/webinars/live-exclusive",
     thumbnail: "/manus-storage/final-webinar-spotlight-transparent_00828638.png",
-    bgPosition: "right 45%",
+    bgPosition: "right center",
+    bgSize: "50% auto",
   },
   {
     key: "recording",
@@ -42,7 +44,8 @@ const WEBINAR_CATEGORIES = [
     icon: Gem,
     href: "/webinars/exclusive-on-demand",
     thumbnail: "/manus-storage/final-webinar-filmreel-transparent_0081cd77.png",
-    bgPosition: "right 48%",
+    bgPosition: "right center",
+    bgSize: "58% auto",
   },
 ];
 
@@ -150,7 +153,7 @@ export default function Webinars() {
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     backgroundImage: `url(${cat.thumbnail})`,
-                    backgroundSize: "50% auto",
+                    backgroundSize: (cat as any).bgSize || "50% auto",
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: cat.bgPosition || "right center",
                     opacity: 0.85,
