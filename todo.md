@@ -2421,3 +2421,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Regenerate Accelerator Previous Recordings tile (replay) with tilt angle
 - [x] Convert all 15 tiles to transparent PNGs so icons blend with tile circuit-board background
 - [x] Upload transparent tiles to manus-storage and update all code references
+- [x] Fix Webinar film reel vertical alignment — adjusted bgPosition values for all 3 tiles
+- [x] Fix Accelerator LIVE tile — was using wrong source (target), now using correct LIVE sign transparent

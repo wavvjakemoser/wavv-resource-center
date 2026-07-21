@@ -20,7 +20,7 @@ const WEBINAR_CATEGORIES = [
     icon: PlayCircle,
     href: "/webinars/on-demand",
     thumbnail: "/manus-storage/final-webinar-play-transparent_cf1ed606.png",
-    bgPosition: "right 46%",
+    bgPosition: "right 50%",
   },
   {
     key: "exclusive",
@@ -31,7 +31,7 @@ const WEBINAR_CATEGORIES = [
     icon: Star,
     href: "/webinars/live-exclusive",
     thumbnail: "/manus-storage/final-webinar-spotlight-transparent_00828638.png",
-    bgPosition: "right 62%",
+    bgPosition: "right 45%",
   },
   {
     key: "recording",
@@ -42,7 +42,7 @@ const WEBINAR_CATEGORIES = [
     icon: Gem,
     href: "/webinars/exclusive-on-demand",
     thumbnail: "/manus-storage/final-webinar-filmreel-transparent_0081cd77.png",
-    bgPosition: "right 53%",
+    bgPosition: "right 48%",
   },
 ];
 
