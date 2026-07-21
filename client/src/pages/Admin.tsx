@@ -3335,7 +3335,7 @@ function ContentTab() {
       color: "#0074F4",
       icon: Compass,
       videoCount: 12,
-      thumbnail: "/manus-storage/final-academy-compass_f8cf7c44.png",
+      thumbnail: "/manus-storage/final-academy-compass-transparent_32a08754.png",
     },
     {
       key: "How-To",
@@ -3344,7 +3344,7 @@ function ContentTab() {
       color: "#00A9E2",
       icon: Wrench,
       videoCount: 9,
-      thumbnail: "/manus-storage/final-academy-gear_338eb91b.png",
+      thumbnail: "/manus-storage/final-academy-gear-transparent_ac0cdee8.png",
     },
     {
       key: "Strategy and Best Practices",
@@ -3353,7 +3353,7 @@ function ContentTab() {
       color: "#67C728",
       icon: Lightbulb,
       videoCount: 8,
-      thumbnail: "/manus-storage/final-academy-target_c09bb24b.png",
+      thumbnail: "/manus-storage/final-academy-target-transparent_20740ef4.png",
     },
   ];
 

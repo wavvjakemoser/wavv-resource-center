@@ -2419,3 +2419,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Regenerate GHL tile with correct GHL arrows icon (blue, tilted)
 - [x] Regenerate Accelerator Product Training tile (puzzle) with tilt angle
 - [x] Regenerate Accelerator Previous Recordings tile (replay) with tilt angle
+- [x] Convert all 15 tiles to transparent PNGs so icons blend with tile circuit-board background
+- [x] Upload transparent tiles to manus-storage and update all code references

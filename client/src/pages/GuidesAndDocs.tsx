@@ -18,7 +18,7 @@ const RESOURCE_CATEGORIES = [
     color: ARTICLE_COLOR,
     icon: Search,
     href: "/resources/help-articles",
-    thumbnail: "/manus-storage/final-resource-magnify_17bb4dc4.png",
+    thumbnail: "/manus-storage/final-resource-magnify-transparent_9f363da5.png",
   },
   {
     key: "pdf",
@@ -27,7 +27,7 @@ const RESOURCE_CATEGORIES = [
     color: PDF_COLOR,
     icon: FileText,
     href: "/resources/pdfs",
-    thumbnail: "/manus-storage/final-resource-clipboard_ac540005.png",
+    thumbnail: "/manus-storage/final-resource-clipboard-transparent_4bb4c6a9.png",
   },
   {
     key: "faq",
@@ -36,7 +36,7 @@ const RESOURCE_CATEGORIES = [
     color: FAQ_COLOR,
     icon: MessageCircle,
     href: "/resources/faqs",
-    thumbnail: "/manus-storage/final-resource-chat_164bafd5.png",
+    thumbnail: "/manus-storage/final-resource-chat-transparent_622347fe.png",
   },
 ];
 
@@ -146,7 +146,7 @@ export default function GuidesAndDocs() {
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     backgroundImage: `url(${cat.thumbnail})`,
-                    backgroundSize: "auto 90%",
+                    backgroundSize: "50% auto",
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "right center",
                     opacity: 0.85,

@@ -89,7 +89,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Onboarding",
     subtitle: "Get your team up and running with WAVV quickly and effectively.",
     color: "#0074F4",
-    thumbnail: "/manus-storage/final-academy-compass_f8cf7c44.png",
+    thumbnail: "/manus-storage/final-academy-compass-transparent_32a08754.png",
     sections: [
       {
         id: "onb-1",
@@ -182,7 +182,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "How-To",
     subtitle: "Step-by-step guides for every core WAVV feature.",
     color: "#00A9E2",
-    thumbnail: "/manus-storage/final-academy-gear_338eb91b.png",
+    thumbnail: "/manus-storage/final-academy-gear-transparent_ac0cdee8.png",
     sections: [
       {
         id: "how-1",
@@ -248,7 +248,7 @@ const CATEGORY_DATA: CategoryData[] = [
     label: "Strategy & Best Practices",
     subtitle: "Maximize connection rates, conversions, and team performance.",
     color: "#67C728",
-    thumbnail: "/manus-storage/final-academy-target_c09bb24b.png",
+    thumbnail: "/manus-storage/final-academy-target-transparent_20740ef4.png",
     sections: [
       {
         id: "str-1",
@@ -775,7 +775,7 @@ export default function AcademyCategory() {
             className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `url(${cat.thumbnail})`,
-              backgroundSize: "auto 90%",
+              backgroundSize: "50% auto",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

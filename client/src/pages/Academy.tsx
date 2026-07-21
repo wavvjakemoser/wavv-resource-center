@@ -36,7 +36,7 @@ const CATEGORIES = [
     icon: Compass,
     bgPosition: "center center",
     bgSize: "100% auto",
-    thumbnail: "/manus-storage/final-academy-compass_f8cf7c44.png",
+    thumbnail: "/manus-storage/final-academy-compass-transparent_32a08754.png",
     placeholders: [
       {
         id: "p-onb-1",
@@ -72,7 +72,7 @@ const CATEGORIES = [
     icon: Wrench,
     bgPosition: "center center",
     bgSize: "100% auto",
-    thumbnail: "/manus-storage/final-academy-gear_338eb91b.png",
+    thumbnail: "/manus-storage/final-academy-gear-transparent_ac0cdee8.png",
     placeholders: [
       {
         id: "p-how-1",
@@ -108,7 +108,7 @@ const CATEGORIES = [
     icon: Lightbulb,
     bgPosition: "center center",
     bgSize: "100% auto",
-    thumbnail: "/manus-storage/final-academy-target_c09bb24b.png",
+    thumbnail: "/manus-storage/final-academy-target-transparent_20740ef4.png",
     placeholders: [
       {
         id: "p-str-1",
@@ -423,7 +423,7 @@ export default function Academy() {
                     className="absolute inset-0 pointer-events-none"
                     style={{
                       backgroundImage: `url(${cat.thumbnail})`,
-                      backgroundSize: "auto 90%",
+                      backgroundSize: "50% auto",
                       backgroundRepeat: "no-repeat",
                       backgroundPosition: "right center",
                       opacity: 0.85,

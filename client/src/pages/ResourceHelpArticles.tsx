@@ -55,8 +55,8 @@ export default function ResourceHelpArticles() {
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `url(/manus-storage/final-resource-magnify_17bb4dc4.png)`,
-              backgroundSize: "auto 90%",
+              backgroundImage: `url(/manus-storage/final-resource-magnify-transparent_9f363da5.png)`,
+              backgroundSize: "50% auto",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

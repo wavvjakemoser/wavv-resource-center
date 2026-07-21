@@ -375,9 +375,9 @@ function ContentCard({
 
 // ─── Banner Tile component (full-bleed Academy-style with big icon on right) ──
 const BANNER_ICONS = {
-  live: "/manus-storage/final-accel-live-sign_4b46b78a.png",
-  training: "/manus-storage/final-accel-training-v3_bd70817c.png",
-  recordings: "/manus-storage/final-accel-recordings-v3_019d325f.png",
+  live: "/manus-storage/final-accel-live-transparent_478242ec.png",
+  training: "/manus-storage/final-accel-training-v3-transparent_1572c6f8.png",
+  recordings: "/manus-storage/final-accel-recordings-v3-transparent_ec91855f.png",
 };
 
 // ─── Tile-specific colors ────────────────────────────────────────────────────
@@ -439,7 +439,7 @@ function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `url(${bannerIcon})`,
-          backgroundSize: "auto 90%",
+          backgroundSize: "50% auto",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right center",
           opacity: 0.85,
@@ -518,7 +518,7 @@ function SubPageBanner({ title, subtitle, bannerIcon, color }: {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `url(${bannerIcon})`,
-          backgroundSize: "auto 90%",
+          backgroundSize: "50% auto",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right center",
           opacity: 0.85,

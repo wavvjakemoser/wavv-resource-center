@@ -30,7 +30,7 @@ function getEmbedUrl(url: string): string | null {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ACCENT = "#67C728";
-const BANNER_URL = "/manus-storage/final-webinar-filmreel_60a267f3.png";
+const BANNER_URL = "/manus-storage/final-webinar-filmreel-transparent_0081cd77.png";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Video, Play, Mic, Radio, Users, UserCheck, GraduationCap,
@@ -195,7 +195,7 @@ export default function WebinarExclusiveOnDemand() {
             className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `url(${BANNER_URL})`,
-              backgroundSize: "auto 90%",
+              backgroundSize: "50% auto",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,
