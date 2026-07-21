@@ -19,9 +19,7 @@ const WEBINAR_CATEGORIES = [
     color: ONDEMAND_COLOR,
     icon: PlayCircle,
     href: "/webinars/on-demand",
-    thumbnail: "/manus-storage/final-webinar-play-transparent_cf1ed606.png",
-    bgPosition: "right center",
-    bgSize: "55% auto",
+    thumbnail: "/manus-storage/webinar-play-icon-centered_f3579d01.png",
   },
   {
     key: "exclusive",
@@ -31,9 +29,7 @@ const WEBINAR_CATEGORIES = [
     color: LIVE_COLOR,
     icon: Star,
     href: "/webinars/live-exclusive",
-    thumbnail: "/manus-storage/final-webinar-spotlight-transparent_00828638.png",
-    bgPosition: "right 42%",
-    bgSize: "55% auto",
+    thumbnail: "/manus-storage/webinar-spotlight-icon-centered_84003027.png",
   },
   {
     key: "recording",
@@ -43,9 +39,7 @@ const WEBINAR_CATEGORIES = [
     color: EXCLUSIVE_COLOR,
     icon: Gem,
     href: "/webinars/exclusive-on-demand",
-    thumbnail: "/manus-storage/final-webinar-filmreel-transparent_0081cd77.png",
-    bgPosition: "right 42%",
-    bgSize: "58% auto",
+    thumbnail: "/manus-storage/webinar-filmreel-icon-centered_367eeec7.png",
   },
 ];
 
@@ -147,18 +141,16 @@ export default function Webinars() {
                   style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${cat.color}60 30%, ${cat.color}90 60%, transparent 100%)` }}
                 />
 
-                {/* Full-bleed thumbnail */}
-                <img src={cat.thumbnail} alt="" loading="eager" fetchPriority="high" className="hidden" />
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    backgroundImage: `url(${cat.thumbnail})`,
-                    backgroundSize: (cat as any).bgSize || "50% auto",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: cat.bgPosition || "right center",
-                    opacity: 0.85,
-                  }}
-                />
+                {/* Icon image — absolutely positioned right-center */}
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-end">
+                  <img
+                    src={cat.thumbnail}
+                    alt=""
+                    loading="eager"
+                    fetchPriority="high"
+                    className="h-full max-h-[240px] w-auto object-contain opacity-85 mr-4"
+                  />
+                </div>
 
                 {/* Dark gradient overlay — left side for text legibility */}
                 <div
