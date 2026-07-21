@@ -2423,3 +2423,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Upload transparent tiles to manus-storage and update all code references
 - [x] Fix Webinar film reel vertical alignment — adjusted bgPosition values for all 3 tiles
 - [x] Fix Accelerator LIVE tile — was using wrong source (target), now using correct LIVE sign transparent
+- [x] Fix Webinar icon vertical alignment v2 — adjusted bgPosition to 42% for spotlight/film reel, bumped play to 55% bgSize

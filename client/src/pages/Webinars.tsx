@@ -21,7 +21,7 @@ const WEBINAR_CATEGORIES = [
     href: "/webinars/on-demand",
     thumbnail: "/manus-storage/final-webinar-play-transparent_cf1ed606.png",
     bgPosition: "right center",
-    bgSize: "50% auto",
+    bgSize: "55% auto",
   },
   {
     key: "exclusive",
@@ -32,8 +32,8 @@ const WEBINAR_CATEGORIES = [
     icon: Star,
     href: "/webinars/live-exclusive",
     thumbnail: "/manus-storage/final-webinar-spotlight-transparent_00828638.png",
-    bgPosition: "right center",
-    bgSize: "50% auto",
+    bgPosition: "right 42%",
+    bgSize: "55% auto",
   },
   {
     key: "recording",
@@ -44,7 +44,7 @@ const WEBINAR_CATEGORIES = [
     icon: Gem,
     href: "/webinars/exclusive-on-demand",
     thumbnail: "/manus-storage/final-webinar-filmreel-transparent_0081cd77.png",
-    bgPosition: "right center",
+    bgPosition: "right 42%",
     bgSize: "58% auto",
   },
 ];
