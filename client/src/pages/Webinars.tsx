@@ -19,7 +19,7 @@ const WEBINAR_CATEGORIES = [
     color: ONDEMAND_COLOR,
     icon: PlayCircle,
     href: "/webinars/on-demand",
-    thumbnail: "/manus-storage/webinar-play-v4-final_9e25b57e.png",
+    thumbnail: "/manus-storage/final-webinar-play-centered-v2_9ef3e1da.png",
   },
   {
     key: "exclusive",
@@ -29,7 +29,7 @@ const WEBINAR_CATEGORIES = [
     color: LIVE_COLOR,
     icon: Star,
     href: "/webinars/live-exclusive",
-    thumbnail: "/manus-storage/webinar-spotlight-v4-final_d81040c5.png",
+    thumbnail: "/manus-storage/final-webinar-spotlight-centered-v2_21b58a55.png",
   },
   {
     key: "recording",
@@ -39,7 +39,7 @@ const WEBINAR_CATEGORIES = [
     color: EXCLUSIVE_COLOR,
     icon: Gem,
     href: "/webinars/exclusive-on-demand",
-    thumbnail: "/manus-storage/webinar-filmreel-v4-final_fccb678b.png",
+    thumbnail: "/manus-storage/final-webinar-filmreel-centered-v2_47c4c99b.png",
   },
 ];
 
@@ -147,7 +147,7 @@ export default function Webinars() {
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     backgroundImage: `url(${cat.thumbnail})`,
-                    backgroundSize: "auto 100%",
+                    backgroundSize: "50% auto",
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "right center",
                     opacity: 0.85,
