@@ -147,7 +147,7 @@ export default function Webinars() {
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     backgroundImage: `url(${cat.thumbnail})`,
-                    backgroundSize: "auto 100%",
+                    backgroundSize: "cover",
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "right center",
                     opacity: 0.85,

@@ -36,7 +36,7 @@ export default function PlaygroundGoHighLevel() {
             className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `url(/manus-storage/final-playground-ghl-tilted_73c75759.png)`,
-              backgroundSize: "auto 100%",
+              backgroundSize: "cover",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "right center",
               opacity: 0.85,

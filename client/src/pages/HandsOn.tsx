@@ -300,7 +300,7 @@ export default function HandsOn() {
 
               {/* Full-bleed thumbnail */}
               <img src={cat.banner} alt="" loading="eager" fetchPriority="high" className="hidden" />
-              <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url(${cat.banner})`, backgroundSize: "auto 100%", backgroundRepeat: "no-repeat", backgroundPosition: "right center", opacity: 0.85 }} />
+              <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: `url(${cat.banner})`, backgroundSize: "cover", backgroundRepeat: "no-repeat", backgroundPosition: "right center", opacity: 0.85 }} />
 
               {/* Dark gradient overlay for text */}
               <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.50) 40%, rgba(0,0,0,0.15) 70%, transparent 100%)" }} />
