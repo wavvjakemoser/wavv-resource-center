@@ -7883,7 +7883,7 @@ function SettingsTab() {
 
           {/* ── LEFT COLUMN: Site Controls ── */}
           <div>
-            <div className="mb-3"><span className="text-[15px] font-extrabold tracking-wider text-white uppercase">Site Controls</span></div>
+            <div className="mb-3"><span className="text-[15px] font-bold tracking-normal text-white uppercase">Site Controls</span></div>
             <div className="space-y-4">
 
             {/* ── Announcement Banner ── */}
@@ -7991,7 +7991,7 @@ function SettingsTab() {
 
           {/* ── RIGHT COLUMN: Visibility Controls ── */}
           <div>
-            <div className="mb-3"><span className="text-[15px] font-extrabold tracking-wider text-white uppercase">Visibility Controls</span></div>
+            <div className="mb-3"><span className="text-[15px] font-bold tracking-normal text-white uppercase">Visibility Controls</span></div>
             <div className="space-y-4">
 
             {/* ── Section Visibility (formerly Navigation Visibility) ── */}

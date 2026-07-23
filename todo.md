@@ -2439,3 +2439,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Remove "Non-WAVV Accelerator Member Page" Slack banner toggle from admin
 - [x] Rename "WAVV Accelerator Member Page" Slack toggle to just "WAVV Accelerator"
 - [x] Verify Slack banner hidden state is respected on customer-facing Accelerator page
+- [x] Section headers (EXPLORE, PROGRAMS, QUICK LINKS, ADMIN TOOLS, SITE CONTROLS, VISIBILITY CONTROLS): match site font, just bolded + bigger — remove extra tracking
