@@ -326,7 +326,7 @@ function ContentCard({
 // ─── Banner Tile component (full-bleed Academy-style with big icon on right) ──
 const BANNER_ICONS = {
   live: "/manus-storage/final-accel-live-sign-transparent_581be7cc.png",
-  training: "/manus-storage/final-accel-training-v3-transparent_1572c6f8.png",
+  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/accel-training-cyan-puzzle-4RANaqq4oC9NmZpR6FRh7r.webp",
   recordings: "/manus-storage/final-accel-recordings-v3-transparent_ec91855f.png",
 };
 
