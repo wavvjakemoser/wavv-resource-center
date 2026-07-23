@@ -2220,6 +2220,7 @@ export const appRouter = router({
         showSlack: z.boolean().optional(),
         comingSoon: z.boolean().optional(),
         isPublished: z.boolean().optional(),
+        publishAt: z.string().nullable().optional(), // ISO string for scheduled auto-publish
         sortOrder: z.number().optional(),
       }))
       .mutation(async ({ input }) => {

@@ -125,6 +125,43 @@ async function startServer() {
     }
   });
 
+  // ── Scheduled: Auto-publish Coming Soon sessions ────────────────────────────
+  app.post("/api/scheduled/accelerator-auto-publish", async (req, res) => {
+    const taskUid = req.headers["x-manus-cron-task-uid"] as string | undefined;
+    if (!taskUid) {
+      return res.status(403).json({ error: "cron-only endpoint" });
+    }
+    try {
+      const { getDb } = await import("../db");
+      const db = await getDb();
+      if (!db) return res.json({ ok: true, published: 0 });
+      const { acceleratorSessions } = await import("../../drizzle/schema");
+      const { and, eq, lte, isNotNull } = await import("drizzle-orm");
+      const now = new Date();
+      // Find sessions that are comingSoon=true, have a publishAt <= now
+      const due = await db.select().from(acceleratorSessions).where(
+        and(
+          eq(acceleratorSessions.comingSoon, true),
+          isNotNull(acceleratorSessions.publishAt),
+          lte(acceleratorSessions.publishAt, now)
+        )
+      );
+      let published = 0;
+      for (const s of due) {
+        await db.update(acceleratorSessions)
+          .set({ comingSoon: false, isPublished: true, publishAt: null })
+          .where(eq(acceleratorSessions.id, s.id));
+        published++;
+      }
+      console.log(`[AutoPublish] Published ${published} sessions`);
+      return res.json({ ok: true, published, ids: due.map(s => s.id) });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("[AutoPublish] Failed:", message);
+      return res.status(500).json({ error: message });
+    }
+  });
+
   // ── Version endpoint (client polls for auto-refresh on deploy) ─────────────
   // No auth required — returns the current build hash, deploy time, and the
   // auto_refresh_enabled flag from site_settings (default: true).

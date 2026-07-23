@@ -2425,3 +2425,9 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix Accelerator LIVE tile — was using wrong source (target), now using correct LIVE sign transparent
 - [x] Fix Webinar icon vertical alignment v2 — adjusted bgPosition to 42% for spotlight/film reel, bumped play to 55% bgSize
 - [x] Fix Webinar icon alignment v3 — re-centered all 3 PNGs (shifted visual center of mass to 50%) using Academy-matching background-image approach (50% auto, right center)
+- [x] Sidebar: Remove blue pill badges from section headers, replace with bold white text + separator lines
+- [x] Accelerator: Remove member toggle and non-member view — everyone sees full content
+- [x] Accelerator: Remove upgrade button and plan-gating (no quarterly/annual tier restrictions)
+- [x] Accelerator: Remove "Session X" prefix from tile titles — show just the topic title
+- [x] Accelerator: Fix session numbering — only Live Call tiles show "Session X of 2", other tiles show no session numbering
+- [x] Accelerator Admin CMS: Add "Coming Soon" toggle with date/time picker for scheduled auto-publish (heartbeat job: every 5 min)

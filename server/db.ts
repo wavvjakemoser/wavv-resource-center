@@ -3046,14 +3046,18 @@ export async function updateAcceleratorSession(id: number, data: Partial<{
   showSlack: boolean;
   comingSoon: boolean;
   isPublished: boolean;
+  publishAt: string | null;
   sortOrder: number;
 }>) {
   const db = await getDb();
   if (!db) return null;
-  const { sessionDateTime, ...rest } = data;
+  const { sessionDateTime, publishAt, ...rest } = data;
   const setData: Record<string, unknown> = { ...rest };
   if (sessionDateTime !== undefined) {
     setData.sessionDateTime = sessionDateTime ? new Date(sessionDateTime) : null;
+  }
+  if (publishAt !== undefined) {
+    setData.publishAt = publishAt ? new Date(publishAt) : null;
   }
   await db.update(acceleratorSessions).set(setData).where(eq(acceleratorSessions.id, id));
   return getAcceleratorSession(id);

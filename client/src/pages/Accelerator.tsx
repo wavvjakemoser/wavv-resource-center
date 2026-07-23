@@ -18,10 +18,6 @@ import {
   ChevronUp,
   Handshake,
   Clock,
-  Gift,
-  Info,
-  ExternalLink,
-  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -90,9 +86,7 @@ function formatCountdown(totalSeconds: number) {
   return { d, h, m, s };
 }
 
-// ─── Qualifying plans for Accelerator access ────────────────────────────────
-// TODO: Confirm exact plan strings with Steve once Stripe SKU is finalized
-const QUALIFYING_PLANS = ["quarterly", "annual"];
+
 
 // ─── Session data (static for V1.0 — content populated later) ───────────────
 const SESSIONS = [
@@ -189,8 +183,8 @@ const FAQS = [
     a: "Every live coaching call is recorded and available on-demand within 24 hours. You'll also get the cheat sheet and action items for that session so you never fall behind.",
   },
   {
-    q: "What plan do I need?",
-    a: "The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost. Monthly subscribers can upgrade their plan to unlock access.",
+    q: "Is this available on all plans?",
+    a: "Yes. The WAVV Sales Accelerator is available to all WAVV users at no additional cost, regardless of your plan.",
   },
   {
     q: "Is this live or self-paced?",
@@ -206,132 +200,11 @@ const FAQS = [
   },
 ];
 
-// ─── Week 1 free window constants ────────────────────────────────────────────
-// Starts now (Jul 10) → locks Jul 27 00:00 MDT
-const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 10, 0, 0, 0);  // Jul 10 00:00 UTC (live now)
-const WEEK1_FREE_END_UTC   = Date.UTC(2026, 6, 27, 6, 0, 0);  // Jul 27 00:00 MDT
-
-function isWeek1FreeNow() {
-  const now = Date.now();
-  return now >= WEEK1_FREE_START_UTC && now < WEEK1_FREE_END_UTC;
-}
-
-// ─── Access logic (live API — subscription data no longer in token) ──────────
+// ─── Access logic (open to all — no plan gating) ──────────────────────────────
 function useAcceleratorAccess() {
   const { user } = useAuth();
-  const entitlementQuery = trpc.accelerator.getEntitlement.useQuery(undefined, {
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000, // cache for 5 min, re-fetch on focus
-  });
-
-  const week1FreeActive = isWeek1FreeNow();
-  const week1FreeEndsAt = WEEK1_FREE_END_UTC;
-
-  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, user: null, isLoading: false, week1FreeActive, week1FreeEndsAt };
-  if (entitlementQuery.isLoading) return { hasAccess: false, reason: "loading" as const, user, isLoading: true, week1FreeActive, week1FreeEndsAt };
-
-  const e = entitlementQuery.data;
-  if (!e) return { hasAccess: false, reason: "no_access" as const, user, isLoading: false, week1FreeActive, week1FreeEndsAt };
-  if (e.isEmployee) return { hasAccess: true, reason: "employee" as const, user, isLoading: false, week1FreeActive, week1FreeEndsAt };
-  if (e.entitled) return { hasAccess: true, reason: "qualifying_plan" as const, user, isLoading: false, week1FreeActive, week1FreeEndsAt };
-  return { hasAccess: false, reason: "no_access" as const, user, isLoading: false, week1FreeActive, week1FreeEndsAt };
-}
-
-// ─── Upgrade CTA component (reused in multiple places) ──────────────────────
-function UpgradeCTA({ reason, variant = "inline" }: { reason: string; variant?: "inline" | "sticky" }) {
-  const manageUrl = trpc.accelerator.getManageSubscriptionUrl.useMutation();
-
-  const handleUpgradeClick = async () => {
-    try {
-      const result = await manageUrl.mutateAsync();
-      window.location.href = result.url;
-    } catch {
-      // Employee accounts don't have Stripe subscriptions — show a toast instead of redirecting
-      toast.info("Employee preview mode", {
-        description: "This button is for subscribers only. Real customers will be directed to their Stripe billing portal.",
-      });
-    }
-  };
-
-  if (reason === "unauthenticated") {
-    return (
-      <a
-        href="/api/oauth/login?return_path=/accelerator"
-        className={`inline-flex items-center gap-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${variant === "sticky" ? "px-5 py-2" : "px-6 py-2.5"}`}
-        style={{ background: "linear-gradient(135deg, #f97316, #ea580c)", textDecoration: "none" }}
-        onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-      >
-        Sign In to Upgrade
-        <ArrowRight size={15} />
-      </a>
-    );
-  }
-  return (
-    <button
-      onClick={handleUpgradeClick}
-      disabled={manageUrl.isPending}
-      className={`inline-flex items-center gap-2 rounded-xl text-sm font-semibold text-white transition-all duration-200 ${variant === "sticky" ? "px-5 py-2" : "px-6 py-2.5"}`}
-      style={{ background: "linear-gradient(135deg, #f97316, #ea580c)", opacity: manageUrl.isPending ? 0.7 : 1 }}
-      onMouseEnter={(e) => { if (!manageUrl.isPending) { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
-      onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-    >
-      {manageUrl.isPending ? "Loading..." : reason === "no_access" ? "Upgrade Your Plan" : "Unlock the Full Accelerator"}
-      {!manageUrl.isPending && <ArrowRight size={15} />}
-    </button>
-  );
-}
-
-// ─── Week 1 Free Banner with countdown ─────────────────────────────────────
-function Week1FreeBanner({ endsAt, reason }: { endsAt: number; reason: string }) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const secsLeft = Math.max(0, Math.floor((endsAt - now) / 1000));
-  const d = Math.floor(secsLeft / 86400);
-  const h = Math.floor((secsLeft % 86400) / 3600);
-  const m = Math.floor((secsLeft % 3600) / 60);
-  const s = secsLeft % 60;
-  const pad = (n: number) => String(n).padStart(2, "0");
-
-  const countdownStr = d > 0
-    ? `${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`
-    : `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
-
-  return (
-    <div
-      className="rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-5"
-      style={{
-        background: "linear-gradient(135deg, rgba(249,115,22,0.10) 0%, rgba(249,115,22,0.04) 100%), #0d1117",
-        border: "1px solid rgba(249,115,22,0.22)",
-        boxShadow: "0 0 24px rgba(249,115,22,0.06)",
-      }}
-    >
-      {/* Gift icon */}
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: "rgba(249,115,22,0.15)" }}>
-        <Gift size={20} style={{ color: "#f97316" }} />
-      </div>
-
-      {/* Text */}
-      <div className="flex-1 text-center sm:text-left">
-        <p className="text-sm font-bold text-white">
-          Session 1 is free through July 26
-        </p>
-        <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.55)" }}>
-          Free access ends in{" "}
-          <span className="font-semibold tabular-nums" style={{ color: "#f97316" }}>{countdownStr}</span>
-          {" "}· Upgrade to unlock the full program
-        </p>
-      </div>
-
-      {/* CTA */}
-      <UpgradeCTA reason={reason} variant="inline" />
-    </div>
-  );
+  const isEmployee = !!(user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
+  return { hasAccess: true, user, isLoading: false, isEmployee };
 }
 
 // ─── Live Call Countdown component ──────────────────────────────────────────
@@ -612,10 +485,8 @@ function UpcomingCallsList({ liveCalls }: { liveCalls: LiveCallItem[] }) {
 }
 
 export default function Accelerator() {
-  const { hasAccess: realAccess, reason: realReason, user, isLoading: accessLoading, week1FreeActive, week1FreeEndsAt } = useAcceleratorAccess();
+  const { hasAccess, user, isLoading: accessLoading, isEmployee: isApprovedEmployee } = useAcceleratorAccess();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [previewAsCustomer, setPreviewAsCustomer] = useState(false);
-  const [showAccessPopup, setShowAccessPopup] = useState(false);
 
   // Fetch DB-backed session data for countdown, registration, and coming soon
   const sessionsQuery = trpc.accelerator.list.useQuery();
@@ -625,50 +496,12 @@ export default function Accelerator() {
   const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
   const visibleLiveCalls = allLiveCalls.filter((c: any) => c.isVisible !== false) as LiveCallItem[];
 
-  // Show pop-up for signed-in users who don't qualify (suppress during Week 1 free window)
-  useEffect(() => {
-    if (realReason === "no_access" && !previewAsCustomer && !week1FreeActive) {
-      setShowAccessPopup(true);
-    }
-  }, [realReason, previewAsCustomer, week1FreeActive]);
-
-  // Allow employees to preview the locked/customer view
-  const isApprovedEmployee = (user as any)?.isEmployee && (user as any)?.approvalStatus === "approved";
-  const hasAccess = previewAsCustomer ? false : realAccess;
-  const reason = previewAsCustomer ? "no_access" : realReason;
-  // Suppress non-member-specific UI until entitlement resolves to prevent flash
   const accessResolved = !accessLoading;
-  // Session 1 is accessible to everyone during the free window (including employee preview-as-customer)
-  const week1Open = week1FreeActive;
 
   return (
     <PortalLayout title="WAVV Accelerator">
       <div className="px-4 lg:px-8 py-6 space-y-14 pb-24">
-        {/* ── Employee Preview Toggle (fixed height to prevent layout shift) ── */}
-        <div style={{ minHeight: "32px" }}>
-        {isApprovedEmployee && (
-          <div className="flex items-center justify-end gap-3">
-            <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Viewing As: {previewAsCustomer ? "Non WAVV Accelerator Member" : "WAVV Accelerator Member"}
-            </span>
-            <button
-              onClick={() => setPreviewAsCustomer(!previewAsCustomer)}
-              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200"
-              style={{ background: previewAsCustomer ? "#f97316" : "rgba(0,116,244,0.3)" }}
-            >
-              <span
-                className="inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200"
-                style={{ transform: previewAsCustomer ? "translateX(22px)" : "translateX(4px)" }}
-              />
-            </button>
-          </div>
-        )}
-        </div>
 
-        {/* ── Week 1 Free Banner (shown to non-members during the free window) ── */}
-        {!hasAccess && week1FreeActive && (
-          <Week1FreeBanner endsAt={week1FreeEndsAt} reason={reason} />
-        )}
 
 
 
@@ -725,46 +558,7 @@ export default function Accelerator() {
             })()}
 
 
-            {reason === "unauthenticated" && (
-              <UpgradeCTA reason="unauthenticated" variant="inline" />
-            )}
-            {reason === "no_access" && (
-              <div className="flex flex-col items-center gap-4">
-                {week1FreeActive ? (
-                  <>
-                    <p className="text-sm font-medium text-white" style={{ maxWidth: "480px" }}>
-                      Session 1 is free through July 26 — upgrade to unlock the full program.
-                    </p>
-                    <div className="flex flex-wrap items-center justify-center gap-3">
-                      {(() => {
-                        const sessionColor = SESSIONS[0]?.color ?? "#0074F4";
-                        return (
-                          <Link
-                            href="/accelerator/session/1"
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-                            style={{ background: `linear-gradient(135deg, ${sessionColor}, ${sessionColor}cc)` }}
-                            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-                          >
-                            <Calendar size={14} />
-                            Go to Session 1
-                            <ArrowRight size={15} />
-                          </Link>
-                        );
-                      })()}
-                      <UpgradeCTA reason="no_access" variant="inline" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm text-white" style={{ maxWidth: "480px" }}>
-                      The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost. Monthly subscribers can upgrade their plan to unlock access.
-                    </p>
-                    <UpgradeCTA reason="no_access" variant="inline" />
-                  </>
-                )}
-              </div>
-            )}
+
         </div>{/* end hero */}
 
 
@@ -827,10 +621,8 @@ export default function Accelerator() {
                 );
               }
 
-              // Week 1 is open to all during the free window
-              const sessionOpen = hasAccess || (week1Open && session.week === 1);
-              if (sessionOpen) {
-                return (
+              // All sessions are open to everyone
+              return (
                   <a
                     key={session.id}
                     href={`/accelerator/session/${session.id}`}
@@ -882,7 +674,7 @@ export default function Accelerator() {
                           WAVV Accelerator
                         </p>
                         <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-1">
-                          Session {session.id}: {session.title}
+                          {session.title}
                         </h2>
                         <p className="text-sm text-white" style={{ maxWidth: "500px" }}>{session.outcome}</p>
                       </div>
@@ -891,50 +683,6 @@ export default function Accelerator() {
                       </div>
                     </div>
                   </a>
-                );
-              }
-
-              // Locked — full-width banner, heavily blurred text (non-member)
-              return (
-                <div
-                  key={session.id}
-                  className="relative overflow-hidden rounded-2xl"
-                  style={{
-                    border: `1px solid ${session.color}15`,
-                    height: "180px",
-                  }}
-                >
-                  <div className="absolute inset-0" style={{ background: "#000" }} />
-                  <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.06 }} xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                      <pattern id={`circuit-acc-locked-${session.id}`} x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-                        <path d="M10 10 L50 10 M50 10 L50 50 M10 30 L30 30 M30 30 L30 50" stroke={session.color} strokeWidth="0.8" fill="none"/>
-                        <circle cx="10" cy="10" r="2" fill={session.color}/>
-                        <circle cx="50" cy="10" r="2" fill={session.color}/>
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill={`url(#circuit-acc-locked-${session.id})`}/>
-                  </svg>
-                  <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 120% 100% at 70% 50%, ${session.color}10 0%, transparent 75%)` }} />
-                  <div className="absolute top-0 left-0 right-0 pointer-events-none" style={{ height: "1px", background: `linear-gradient(to right, transparent 0%, ${session.color}20 30%, ${session.color}35 60%, transparent 100%)` }} />
-                  <div className="relative flex items-center h-full px-8 py-6 gap-6 pointer-events-none select-none" style={{ filter: "blur(6px)" }}>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: session.color }}>
-                        WAVV Accelerator
-                      </p>
-                      <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-1">
-                        Session {session.id}: {session.title}
-                      </h2>
-                      <p className="text-sm text-white">{session.outcome}</p>
-                    </div>
-                  </div>
-                  {/* Lock overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                      <Lock size={20} style={{ color: "rgba(255,255,255,0.5)" }} />
-                    </div>
-                  </div>
-                </div>
               );
             })}
           </div>
@@ -1051,53 +799,35 @@ export default function Accelerator() {
         </section>
 
         {/* ── Community ── */}
-        {accessResolved && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-extrabold text-white">Community</h2>
-            {hasAccess ? (
-              (() => {
-                const slackSession = dbSessions.find((s: any) => s.slackUrl);
-                return (
-                  <div
-                    className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
-                      <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
-                    </div>
-                    {slackSession?.slackUrl ? (
-                      <a href={slackSession.slackUrl} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
-                        style={{ background: "#0074F4" }}>
-                        Join Slack
-                      </a>
-                    ) : (
-                      <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
-                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.3)" }}>
-                        Link Coming Soon
-                      </span>
-                    )}
-                  </div>
-                );
-              })()
-            ) : (
+        <section className="space-y-4">
+          <h2 className="text-2xl font-extrabold text-white">Community</h2>
+          {(() => {
+            const slackSession = dbSessions.find((s: any) => s.slackUrl);
+            return (
               <div
                 className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
-                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}
+                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
-                  <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.45)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
+                  <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
                 </div>
-                <div className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white flex-shrink-0 cursor-not-allowed select-none"
-                  style={{ background: "#0074F4", opacity: 0.5 }}>
-                  <Lock size={14} /> Members Only
-                </div>
+                {slackSession?.slackUrl ? (
+                  <a href={slackSession.slackUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
+                    style={{ background: "#0074F4" }}>
+                    Join Slack
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold flex-shrink-0 cursor-not-allowed select-none"
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.3)" }}>
+                    Link Coming Soon
+                  </span>
+                )}
               </div>
-            )}
-          </section>
-        )}
+            );
+          })()}
+        </section>
 
         {/* ── FAQ ── */}
         <section className="space-y-4">
@@ -1143,68 +873,12 @@ export default function Accelerator() {
           </p>
         </section>
 
-        {/* ── Repeat CTA after FAQ (for non-access users) ── */}
-        {!hasAccess && (
-          <section className="text-center space-y-4 pb-6">
-            <h2 className="text-2xl font-extrabold text-white">Ready to accelerate?</h2>
-            <p className="text-sm text-white">
-              {week1FreeActive
-                ? "Session 1 is on us. Upgrade to a Quarterly or Annual plan to unlock the full program."
-                : "The WAVV Sales Accelerator is included with Quarterly and Annual subscriptions at no additional cost."
-              }
-            </p>
-            <UpgradeCTA reason={reason} />
-          </section>
-        )}
+
 
 
       </div>
 
-      {/* ── Sticky availability bar (non-access users only) ── */}
-      {!hasAccess && (
-        <div
-          className="sticky bottom-0 left-0 right-0 z-40 flex items-center justify-center px-4 py-3"
-          style={{
-            background: "linear-gradient(180deg, rgba(8,12,20,0.85) 0%, rgba(8,12,20,0.98) 100%)",
-            borderTop: "1px solid rgba(0,116,244,0.15)",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          <div className="flex items-center gap-2">
-            <Lock size={14} style={{ color: "#4a9eff" }} />
-            <span className="text-xs sm:text-sm font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
-              Available on Quarterly and Annual Plans
-            </span>
-          </div>
-        </div>
-      )}
 
-      {/* ── Access Denied Pop-up (signed-in but not qualified) ── */}
-      {showAccessPopup && reason === "no_access" && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
-          <div className="relative w-full max-w-md rounded-2xl p-6 text-center" style={{ background: "linear-gradient(135deg, #0f1a2e 0%, #162240 100%)", border: "1px solid rgba(0,116,244,0.2)", boxShadow: "0 24px 48px rgba(0,0,0,0.5)" }}>
-            <div className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: "rgba(249,115,22,0.15)" }}>
-              <Lock size={22} style={{ color: "#f97316" }} />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Access Restricted</h3>
-            <p className="text-sm leading-relaxed mb-6 text-white">
-              Whoops, please contact your account rep or upgrade your plan to gain access to WAVV Accelerator.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <UpgradeCTA reason="no_access" variant="inline" />
-              <button
-                onClick={() => setShowAccessPopup(false)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
-                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.12)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </PortalLayout>
   );
 }

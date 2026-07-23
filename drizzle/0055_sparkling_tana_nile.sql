@@ -1,0 +1,1 @@
+ALTER TABLE `accelerator_sessions` ADD `publish_at` timestamp;

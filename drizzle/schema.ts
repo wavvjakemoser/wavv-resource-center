@@ -530,6 +530,7 @@ export const acceleratorSessions = mysqlTable("accelerator_sessions", {
   showSlack: boolean("show_slack").default(true).notNull(), // Whether to show the Slack section on this session page
   comingSoon: boolean("coming_soon").default(false).notNull(), // Hides session from public access
   isPublished: boolean("is_published").default(false).notNull(),
+  publishAt: timestamp("publish_at"), // Scheduled auto-publish date/time (UTC) — when set with comingSoon=true, auto-publishes at this time
   sortOrder: int("sort_order").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

@@ -65,56 +65,6 @@ const CALL_DURATION_MS = 90 * 60 * 1000;
 const JOIN_WINDOW_MS   = 15 * 60 * 1000;
 
 // ─── Week 1 Free Window (must stay in sync with Accelerator.tsx) ─────────────
-const WEEK1_FREE_START_UTC = Date.UTC(2026, 6, 10, 0, 0, 0);
-const WEEK1_FREE_END_UTC   = Date.UTC(2026, 6, 27, 6, 0, 0);
-
-function isWeek1FreeNow() {
-  const now = Date.now();
-  return now >= WEEK1_FREE_START_UTC && now < WEEK1_FREE_END_UTC;
-}
-
-// ─── Qualifying plans ─────────────────────────────────────────────────────────
-const QUALIFYING_PLANS = ["quarterly", "annual"];
-
-function useAcceleratorAccess() {
-  const { user } = useAuth();
-  const entitlementQuery = trpc.accelerator.getEntitlement.useQuery(undefined, {
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-  });
-  const week1FreeActive = isWeek1FreeNow();
-  if (!user) return { hasAccess: false, reason: "unauthenticated" as const, isLoading: false, week1FreeActive };
-  if (entitlementQuery.isLoading) return { hasAccess: false, reason: "loading" as const, isLoading: true, week1FreeActive };
-  const e = entitlementQuery.data;
-  if (!e) return { hasAccess: false, reason: "no_access" as const, isLoading: false, week1FreeActive };
-  if (e.isEmployee) return { hasAccess: true, reason: "employee" as const, isLoading: false, week1FreeActive };
-  if (e.entitled) return { hasAccess: true, reason: "qualifying_plan" as const, isLoading: false, week1FreeActive };
-  return { hasAccess: false, reason: "no_access" as const, isLoading: false, week1FreeActive };
-}
-
-// ─── Upgrade button ──────────────────────────────────────────────────────────
-function UpgradeButton() {
-  const manageUrl = trpc.accelerator.getManageSubscriptionUrl.useMutation();
-  const handleClick = async () => {
-    try {
-      const result = await manageUrl.mutateAsync();
-      window.location.href = result.url;
-    } catch {
-      window.open("https://www.wavv.com/pricing", "_blank");
-    }
-  };
-  return (
-    <button
-      onClick={handleClick}
-      disabled={manageUrl.isPending}
-      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold mt-2"
-      style={{ background: "#f97316", color: "#fff", opacity: manageUrl.isPending ? 0.7 : 1 }}
-    >
-      {manageUrl.isPending ? "Loading..." : "Upgrade to Unlock"}
-    </button>
-  );
-}
-
 // ─── Countdown hook ──────────────────────────────────────────────────────────
 function useNow() {
   const [now, setNow] = useState(() => Date.now());
@@ -768,7 +718,8 @@ function ContentRow({
 export default function AcceleratorSession() {
   const params = useParams<{ id: string; section?: string }>();
   const weekId = parseInt(params.id ?? "1", 10);
-  const { hasAccess, reason, week1FreeActive } = useAcceleratorAccess();
+  // Access is open to all users — no plan gating
+  const hasAccess = true;
   const now = useNow();
 
   const { data: session, isLoading } = trpc.accelerator.get.useQuery({ id: weekId });
@@ -816,39 +767,6 @@ export default function AcceleratorSession() {
 
   const color = session.color ?? "#0074F4";
 
-  // ─── No-access view ─────────────────────────────────────────────────────────
-  const sessionFree = week1FreeActive && weekId === 1;
-  if (!hasAccess && !sessionFree) {
-    return (
-      <PortalLayout title={`Session ${session.week}: ${session.title}`}>
-        <div className="px-4 lg:px-8 py-8 max-w-3xl space-y-6">
-          <Link href="/accelerator" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors">
-            <ArrowLeft size={14} />
-            Back to Accelerator
-          </Link>
-          <div className="rounded-2xl p-12 text-center space-y-4"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: `${color}15` }}>
-              <Lock size={28} style={{ color }} />
-            </div>
-            <h2 className="text-xl font-bold text-white">Session {session.week}: {session.title}</h2>
-            <p className="text-sm text-gray-400 max-w-md mx-auto">
-              This session is available to WAVV Quarterly and Annual subscribers.
-            </p>
-            {reason === "unauthenticated" ? (
-              <a href="/api/oauth/login?return_path=/accelerator"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold mt-2"
-                style={{ background: "linear-gradient(135deg, #0074F4, #00A9E2)", color: "#fff" }}>
-                Sign In to Check Access
-              </a>
-            ) : (
-              <UpgradeButton />
-            )}
-          </div>
-        </div>
-      </PortalLayout>
-    );
-  }
 
   // Parse resource links
   let resourceLinks: { label: string; url: string }[] = [];
@@ -872,7 +790,7 @@ export default function AcceleratorSession() {
 
   // ─── Member view ─────────────────────────────────────────────────────────
   return (
-    <PortalLayout title={`Session ${session.week}: ${session.title}`} rightPanel={sidePanel}>
+    <PortalLayout title={`${session.title}`} rightPanel={sidePanel}>
 
       {/* ── Hero header band ── */}
       <div
@@ -899,7 +817,7 @@ export default function AcceleratorSession() {
           </Link>
 
           <h1 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-3">
-            Session {session.week}: {session.heroHeadline || session.title}
+            {session.heroHeadline || session.title}
           </h1>
           {(session.heroSubline || session.wavvFocus) && (
             <p className="text-base mb-5" style={{ color: "rgba(255,255,255,0.55)", maxWidth: "600px" }}>
@@ -931,7 +849,7 @@ export default function AcceleratorSession() {
         {activeSection && (
           <a href={`/accelerator/session/${weekId}`} className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-white" style={{ color }}>
             <ArrowLeft size={14} />
-            Back to Session {weekId} Overview
+            Back to Overview
           </a>
         )}
 
@@ -986,7 +904,7 @@ export default function AcceleratorSession() {
           <section className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
             <SubPageBanner
               title="Live Call Events"
-              subtitle={`Upcoming live coaching calls for Session ${weekId}`}
+              subtitle={`Upcoming live coaching calls`}
               bannerIcon={BANNER_ICONS.live}
               color={TILE_COLORS.live}
             />
@@ -1009,7 +927,7 @@ export default function AcceleratorSession() {
           <section className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
             <SubPageBanner
               title="Product Training"
-              subtitle={`WAVV how-to clips and cheat sheets for Session ${weekId}`}
+              subtitle={`WAVV how-to clips and cheat sheets`}
               bannerIcon={BANNER_ICONS.training}
               color={TILE_COLORS.training}
             />
@@ -1025,12 +943,12 @@ export default function AcceleratorSession() {
                     <FileText size={16} style={{ color: TILE_COLORS.training }} />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">Session {weekId} Resource</p>
-                    <p className="text-sm font-semibold text-white">Session Cheat Sheet</p>
+                    <p className="text-xs text-gray-400">Resource</p>
+                    <p className="text-sm font-semibold text-white">Cheat Sheet</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => setPanelItem({ type: "pdf", title: `Session ${weekId} Cheat Sheet`, url: session.cheatSheetUrl! })}
+                  onClick={() => setPanelItem({ type: "pdf", title: `Cheat Sheet`, url: session.cheatSheetUrl! })}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85"
                   style={{ background: `linear-gradient(135deg, ${TILE_COLORS.training}, ${TILE_COLORS.training}cc)` }}
                 >
@@ -1065,7 +983,7 @@ export default function AcceleratorSession() {
           <section className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
             <SubPageBanner
               title="Previous Recordings"
-              subtitle={`Catch up on past session recordings for Session ${weekId}`}
+              subtitle={`Catch up on past session recordings`}
               bannerIcon={BANNER_ICONS.recordings}
               color={TILE_COLORS.recordings}
             />

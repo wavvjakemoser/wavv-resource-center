@@ -9352,6 +9352,27 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
               }}
             >Coming Soon</button>
           </div>
+          {/* Scheduled publish date/time picker (shown when Coming Soon is active) */}
+          {session.comingSoon && (
+            <div className="flex items-center gap-2 mt-2 ml-1">
+              <span className="text-[10px] text-amber-400 font-medium">Auto-publish at:</span>
+              <input
+                type="datetime-local"
+                className="text-[11px] px-2 py-0.5 rounded-md bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
+                value={session.publishAt ? new Date(session.publishAt).toISOString().slice(0, 16) : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  updateMutation.mutate({ id: session.id, publishAt: val ? new Date(val).toISOString() : null });
+                }}
+              />
+              {session.publishAt && (
+                <button
+                  onClick={() => updateMutation.mutate({ id: session.id, publishAt: null })}
+                  className="text-[9px] text-gray-400 hover:text-red-400 transition-colors"
+                >✕</button>
+              )}
+            </div>
+          )}
           <AcceleratorSubTable
             title="Live Call Events"
             icon="calendar"
@@ -9503,7 +9524,7 @@ function AcceleratorTab() {
               <div key={s.id} className="px-4 py-2.5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full" style={{ background: sColor }} />
-                  <span className="text-sm text-gray-300">Session {s.week}: {s.title}</span>
+                  <span className="text-sm text-gray-300">{s.title}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
@@ -9537,6 +9558,20 @@ function AcceleratorTab() {
                     <EyeOff size={11} /> Hidden
                   </button>
                 </div>
+                {isComingSoon && (
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[10px] text-amber-400">Publishes:</span>
+                    <input
+                      type="datetime-local"
+                      className="text-[10px] px-1.5 py-0.5 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
+                      value={s.publishAt ? new Date(s.publishAt).toISOString().slice(0, 16) : ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateMutation.mutate({ id: s.id, publishAt: val ? new Date(val).toISOString() : null });
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
