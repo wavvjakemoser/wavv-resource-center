@@ -100,7 +100,7 @@ const PROGRAM_CARDS = [
     label: "WAVV Accelerator",
     icon: Rocket,
     color: "#0074F4",
-    description: "A 6-session sales coaching program with live calls, product training, and community — designed to turn dials into closes.",
+    description: "A structured sales coaching program with live calls, product training, and previously recorded sessions.",
     cta: "Learn More",
   },
   {

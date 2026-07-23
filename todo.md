@@ -2440,3 +2440,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Rename "WAVV Accelerator Member Page" Slack toggle to just "WAVV Accelerator"
 - [x] Verify Slack banner hidden state is respected on customer-facing Accelerator page
 - [x] Section headers (EXPLORE, PROGRAMS, QUICK LINKS, ADMIN TOOLS, SITE CONTROLS, VISIBILITY CONTROLS): match site font, just bolded + bigger — remove extra tracking
+- [x] Coming Soon date/time picker: fix save behavior and make less clunky (replace native datetime-local with cleaner UX)
+- [x] Update Accelerator description on home page to "A structured sales coaching program with live calls, product training, and previously recorded sessions"
+- [x] Fix date/time picker calendar icon visibility (black on dark background)
