@@ -9357,6 +9357,7 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
               <input
                 type="datetime-local"
                 className="text-[11px] px-2 py-0.5 rounded-md bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
+                style={{ colorScheme: "dark" }}
                 value={session.publishAt ? new Date(session.publishAt).toISOString().slice(0, 16) : ""}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -9364,10 +9365,14 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
                 }}
               />
               {session.publishAt && (
-                <button
-                  onClick={() => updateMutation.mutate({ id: session.id, publishAt: null })}
-                  className="text-[9px] text-gray-400 hover:text-red-400 transition-colors"
-                >✕</button>
+                <>
+                  <span className="text-green-400 text-[13px]" title="Saved">✓</span>
+                  <button
+                    onClick={() => updateMutation.mutate({ id: session.id, publishAt: null })}
+                    className="text-[11px] text-gray-400 hover:text-red-400 transition-colors ml-1"
+                    title="Clear scheduled date"
+                  >✕</button>
+                </>
               )}
             </div>
           )}
@@ -9570,16 +9575,10 @@ function AcceleratorTab() {
                           className="text-[11px] px-2 py-1 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
                           style={{ colorScheme: "dark" }}
                           defaultValue={s.publishAt ? new Date(s.publishAt).toISOString().slice(0, 16) : ""}
-                          onBlur={(e) => {
+                          onChange={(e) => {
                             const val = e.target.value;
-                            const newPublishAt = val ? new Date(val).toISOString() : null;
-                            if (newPublishAt !== s.publishAt) {
-                              updateMutation.mutate({ id: s.id, publishAt: newPublishAt });
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              (e.target as HTMLInputElement).blur();
+                            if (val && val.length === 16) {
+                              updateMutation.mutate({ id: s.id, publishAt: new Date(val).toISOString() });
                             }
                           }}
                         />
