@@ -7883,7 +7883,7 @@ function SettingsTab() {
 
           {/* ── LEFT COLUMN: Site Controls ── */}
           <div>
-            <div className="flex justify-center mb-3"><span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: "#0074F4", color: "#fff" }}>Site Controls</span></div>
+            <div className="mb-3"><span className="text-[15px] font-extrabold tracking-wider text-white uppercase">Site Controls</span></div>
             <div className="space-y-4">
 
             {/* ── Announcement Banner ── */}
@@ -7991,7 +7991,7 @@ function SettingsTab() {
 
           {/* ── RIGHT COLUMN: Visibility Controls ── */}
           <div>
-            <div className="flex justify-center mb-3"><span className="inline-block px-2.5 py-1 text-xs font-semibold rounded-full" style={{ background: "#0074F4", color: "#fff" }}>Visibility Controls</span></div>
+            <div className="mb-3"><span className="text-[15px] font-extrabold tracking-wider text-white uppercase">Visibility Controls</span></div>
             <div className="space-y-4">
 
             {/* ── Section Visibility (formerly Navigation Visibility) ── */}
@@ -9305,8 +9305,7 @@ function AcceleratorSessionBlock({ session, onEdit }: { session: any; onEdit: (s
             {open ? <ChevronDown size={15} /> : <ChevronRightIcon size={15} />}
           </button>
           <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: SESSION_COLORS[session.week] ?? "#4b5563" }} />
-          <span className="text-sm font-bold text-white">Session {session.week}</span>
-          <span className="text-sm font-semibold text-white truncate">{session.title}</span>
+          <span className="text-sm font-bold text-white truncate">{session.title}</span>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           <button
@@ -9521,57 +9520,62 @@ function AcceleratorTab() {
             const isVisible = s.isPublished && !s.comingSoon;
             const isComingSoon = s.comingSoon;
             return (
-              <div key={s.id} className="px-4 py-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full" style={{ background: sColor }} />
-                  <span className="text-sm text-gray-300">{s.title}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => updateMutation.mutate({ id: s.id, isPublished: true, comingSoon: false })}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-                    style={isVisible
-                      ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
-                      : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-                    }
-                  >
-                    {isVisible ? <><Eye size={11} /> Visible</> : <><Eye size={11} /> Visible</>}
-                  </button>
-                  <button
-                    onClick={() => updateMutation.mutate({ id: s.id, isPublished: false, comingSoon: true })}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-                    style={isComingSoon
-                      ? { background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }
-                      : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-                    }
-                  >
-                    Coming Soon
-                  </button>
-                  <button
-                    onClick={() => updateMutation.mutate({ id: s.id, isPublished: false, comingSoon: false })}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
-                    style={!isVisible && !isComingSoon
-                      ? { background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }
-                      : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
-                    }
-                  >
-                    <EyeOff size={11} /> Hidden
-                  </button>
-                </div>
-                {isComingSoon && (
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-[10px] text-amber-400">Publishes:</span>
-                    <input
-                      type="datetime-local"
-                      className="text-[10px] px-1.5 py-0.5 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
-                      value={s.publishAt ? new Date(s.publishAt).toISOString().slice(0, 16) : ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        updateMutation.mutate({ id: s.id, publishAt: val ? new Date(val).toISOString() : null });
-                      }}
-                    />
+              <div key={s.id} className="px-4 py-3" style={{ borderBottom: "1px solid #2a2a2a" }}>
+                <div className="flex items-center gap-4">
+                  {/* Title */}
+                  <div className="flex items-center gap-2 min-w-[180px]">
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: sColor }} />
+                    <span className="text-sm font-medium text-gray-200 truncate">{s.title}</span>
                   </div>
-                )}
+                  {/* Status buttons */}
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => updateMutation.mutate({ id: s.id, isPublished: true, comingSoon: false })}
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                      style={isVisible
+                        ? { background: "rgba(103,199,40,0.15)", color: "#67C728", border: "1px solid rgba(103,199,40,0.3)" }
+                        : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                      }
+                    >
+                      <Eye size={11} /> Visible
+                    </button>
+                    <button
+                      onClick={() => updateMutation.mutate({ id: s.id, isPublished: false, comingSoon: true })}
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                      style={isComingSoon
+                        ? { background: "rgba(245,158,11,0.15)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }
+                        : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                      }
+                    >
+                      Coming Soon
+                    </button>
+                    <button
+                      onClick={() => updateMutation.mutate({ id: s.id, isPublished: false, comingSoon: false })}
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition"
+                      style={!isVisible && !isComingSoon
+                        ? { background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.3)" }
+                        : { background: "rgba(255,255,255,0.05)", color: "#6b7280", border: "1px solid #2a2a2a" }
+                      }
+                    >
+                      <EyeOff size={11} /> Hidden
+                    </button>
+                  </div>
+                  {/* Date picker - always visible when Coming Soon */}
+                  {isComingSoon && (
+                    <div className="flex items-center gap-2 ml-auto">
+                      <span className="text-[11px] text-amber-400 font-medium">Publishes:</span>
+                      <input
+                        type="datetime-local"
+                        className="text-[11px] px-2 py-1 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
+                        value={s.publishAt ? new Date(s.publishAt).toISOString().slice(0, 16) : ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          updateMutation.mutate({ id: s.id, publishAt: val ? new Date(val).toISOString() : null });
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -10178,7 +10182,7 @@ function AcceleratorAddDialog({
           <label className="text-[11px] text-gray-400 mb-1 block">Session</label>
           <select style={inputStyle} value={selectedSession} onChange={e => setSelectedSession(Number(e.target.value))}>
             {sessions.map((s: any) => (
-              <option key={s.week} value={s.week}>Session {s.week}{s.title ? ` — ${s.title}` : ""}</option>
+              <option key={s.week} value={s.week}>{s.title || `Week ${s.week}`}</option>
             ))}
           </select>
         </div>

@@ -2431,3 +2431,8 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Accelerator: Remove "Session X" prefix from tile titles — show just the topic title
 - [x] Accelerator: Fix session numbering — only Live Call tiles show "Session X of 2", other tiles show no session numbering
 - [x] Accelerator Admin CMS: Add "Coming Soon" toggle with date/time picker for scheduled auto-publish (heartbeat job: every 5 min)
+- [x] Sidebar headers: Make EXPLORE, PROGRAMS, QUICK LINKS, ADMIN TOOLS brighter white, bigger font, clear category header style
+- [x] Admin Command Center: Apply same category header style to "Site Controls" and "Visibility Controls"
+- [x] Accelerator public tiles: Confirmed DB titles are clean, code already shows just title (was cached deploy)
+- [x] Admin CMS accordion rows: Removed "Session X" prefix, now shows just the title
+- [x] Admin visibility summary: Restructured to single-row layout (title | buttons | date picker inline)

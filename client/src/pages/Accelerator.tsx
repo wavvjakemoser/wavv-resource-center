@@ -611,7 +611,7 @@ export default function Accelerator() {
                           WAVV Accelerator
                         </p>
                         <h2 className="text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-1">
-                          Session {session.id}: {session.title}
+                          {session.title}
                         </h2>
                         <p className="text-sm" style={{ color: "rgba(255,255,255,0.5)" }}>{session.outcome}</p>
                       </div>
