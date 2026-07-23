@@ -389,9 +389,9 @@ function BannerTile({ title, subtitle, bannerIcon, color, count, href }: {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `url(${bannerIcon})`,
-          backgroundSize: "50% auto",
+          backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "right center",
+          backgroundPosition: "center center",
           opacity: 0.85,
         }}
       />
@@ -468,9 +468,9 @@ function SubPageBanner({ title, subtitle, bannerIcon, color }: {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `url(${bannerIcon})`,
-          backgroundSize: "50% auto",
+          backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "right center",
+          backgroundPosition: "center center",
           opacity: 0.85,
         }}
       />
