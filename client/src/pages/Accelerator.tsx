@@ -488,6 +488,10 @@ export default function Accelerator() {
   const { hasAccess, user, isLoading: accessLoading, isEmployee: isApprovedEmployee } = useAcceleratorAccess();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  // Fetch site settings (for Slack banner visibility)
+  const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
+  const slackBannerEnabled = siteSettings["slack_banner_accelerator_enabled"] !== false;
+
   // Fetch DB-backed session data for countdown, registration, and coming soon
   const sessionsQuery = trpc.accelerator.list.useQuery();
   const dbSessions = sessionsQuery.data ?? [];
@@ -799,6 +803,7 @@ export default function Accelerator() {
         </section>
 
         {/* ── Community ── */}
+        {slackBannerEnabled && (
         <section className="space-y-4">
           <h2 className="text-2xl font-extrabold text-white">Community</h2>
           {(() => {
@@ -828,6 +833,7 @@ export default function Accelerator() {
             );
           })()}
         </section>
+        )}
 
         {/* ── FAQ ── */}
         <section className="space-y-4">

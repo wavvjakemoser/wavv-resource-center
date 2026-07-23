@@ -2436,3 +2436,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Accelerator public tiles: Confirmed DB titles are clean, code already shows just title (was cached deploy)
 - [x] Admin CMS accordion rows: Removed "Session X" prefix, now shows just the title
 - [x] Admin visibility summary: Restructured to single-row layout (title | buttons | date picker inline)
+- [x] Remove "Non-WAVV Accelerator Member Page" Slack banner toggle from admin
+- [x] Rename "WAVV Accelerator Member Page" Slack toggle to just "WAVV Accelerator"
+- [x] Verify Slack banner hidden state is respected on customer-facing Accelerator page
