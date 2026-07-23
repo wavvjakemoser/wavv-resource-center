@@ -9571,17 +9571,90 @@ function AcceleratorTab() {
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] text-amber-400 font-medium">Publishes:</span>
                         <input
-                          type="datetime-local"
+                          type="date"
                           className="text-[11px] px-2 py-1 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
                           style={{ colorScheme: "dark" }}
-                          defaultValue={s.publishAt ? new Date(s.publishAt).toISOString().slice(0, 16) : ""}
+                          defaultValue={s.publishAt ? new Date(s.publishAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)}
                           onChange={(e) => {
-                            const val = e.target.value;
-                            if (val && val.length === 16) {
-                              updateMutation.mutate({ id: s.id, publishAt: new Date(val).toISOString() });
+                            const dateVal = e.target.value;
+                            if (!dateVal) return;
+                            const hourEl = e.target.parentElement?.querySelector('[data-field="hour"]') as HTMLSelectElement;
+                            const minEl = e.target.parentElement?.querySelector('[data-field="min"]') as HTMLSelectElement;
+                            const ampmEl = e.target.parentElement?.querySelector('[data-field="ampm"]') as HTMLSelectElement;
+                            if (hourEl?.value && minEl?.value && ampmEl?.value) {
+                              let hour = parseInt(hourEl.value);
+                              if (ampmEl.value === "PM" && hour !== 12) hour += 12;
+                              if (ampmEl.value === "AM" && hour === 12) hour = 0;
+                              const dt = new Date(`${dateVal}T${String(hour).padStart(2, "0")}:${minEl.value}:00`);
+                              updateMutation.mutate({ id: s.id, publishAt: dt.toISOString() });
                             }
                           }}
                         />
+                        <select
+                          data-field="hour"
+                          className="text-[11px] px-1 py-1 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
+                          defaultValue={s.publishAt ? (((new Date(s.publishAt).getHours() % 12) || 12).toString()) : ""}
+                          onChange={(e) => {
+                            const parent = e.target.parentElement;
+                            const dateEl = parent?.querySelector('input[type="date"]') as HTMLInputElement;
+                            const minEl = parent?.querySelector('[data-field="min"]') as HTMLSelectElement;
+                            const ampmEl = parent?.querySelector('[data-field="ampm"]') as HTMLSelectElement;
+                            if (dateEl?.value && e.target.value && minEl?.value && ampmEl?.value) {
+                              let hour = parseInt(e.target.value);
+                              if (ampmEl.value === "PM" && hour !== 12) hour += 12;
+                              if (ampmEl.value === "AM" && hour === 12) hour = 0;
+                              const dt = new Date(`${dateEl.value}T${String(hour).padStart(2, "0")}:${minEl.value}:00`);
+                              updateMutation.mutate({ id: s.id, publishAt: dt.toISOString() });
+                            }
+                          }}
+                        >
+                          <option value="">--</option>
+                          {[12,1,2,3,4,5,6,7,8,9,10,11].map(h => <option key={h} value={h.toString()}>{h}</option>)}
+                        </select>
+                        <span className="text-[11px] text-gray-400">:</span>
+                        <select
+                          data-field="min"
+                          className="text-[11px] px-1 py-1 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
+                          defaultValue={s.publishAt ? String(new Date(s.publishAt).getMinutes()).padStart(2, "0") : ""}
+                          onChange={(e) => {
+                            const parent = e.target.parentElement;
+                            const dateEl = parent?.querySelector('input[type="date"]') as HTMLInputElement;
+                            const hourEl = parent?.querySelector('[data-field="hour"]') as HTMLSelectElement;
+                            const ampmEl = parent?.querySelector('[data-field="ampm"]') as HTMLSelectElement;
+                            if (dateEl?.value && hourEl?.value && e.target.value && ampmEl?.value) {
+                              let hour = parseInt(hourEl.value);
+                              if (ampmEl.value === "PM" && hour !== 12) hour += 12;
+                              if (ampmEl.value === "AM" && hour === 12) hour = 0;
+                              const dt = new Date(`${dateEl.value}T${String(hour).padStart(2, "0")}:${e.target.value}:00`);
+                              updateMutation.mutate({ id: s.id, publishAt: dt.toISOString() });
+                            }
+                          }}
+                        >
+                          <option value="">--</option>
+                          {Array.from({length: 60}, (_, i) => String(i).padStart(2, "0")).map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                        <select
+                          data-field="ampm"
+                          className="text-[11px] px-1 py-1 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
+                          defaultValue={s.publishAt ? (new Date(s.publishAt).getHours() >= 12 ? "PM" : "AM") : ""}
+                          onChange={(e) => {
+                            const parent = e.target.parentElement;
+                            const dateEl = parent?.querySelector('input[type="date"]') as HTMLInputElement;
+                            const hourEl = parent?.querySelector('[data-field="hour"]') as HTMLSelectElement;
+                            const minEl = parent?.querySelector('[data-field="min"]') as HTMLSelectElement;
+                            if (dateEl?.value && hourEl?.value && minEl?.value && e.target.value) {
+                              let hour = parseInt(hourEl.value);
+                              if (e.target.value === "PM" && hour !== 12) hour += 12;
+                              if (e.target.value === "AM" && hour === 12) hour = 0;
+                              const dt = new Date(`${dateEl.value}T${String(hour).padStart(2, "0")}:${minEl.value}:00`);
+                              updateMutation.mutate({ id: s.id, publishAt: dt.toISOString() });
+                            }
+                          }}
+                        >
+                          <option value="">--</option>
+                          <option value="AM">AM</option>
+                          <option value="PM">PM</option>
+                        </select>
                         {s.publishAt && (
                           <>
                             <span className="text-green-400 text-[13px]" title="Saved">✓</span>
