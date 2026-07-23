@@ -9583,10 +9583,14 @@ function AcceleratorTab() {
                           }}
                         />
                         {s.publishAt && (
-                          <button
-                            onClick={() => updateMutation.mutate({ id: s.id, publishAt: null })}
-                            className="text-[9px] text-gray-400 hover:text-red-400 transition-colors"
-                          >✕</button>
+                          <>
+                            <span className="text-green-400 text-[13px]" title="Saved">✓</span>
+                            <button
+                              onClick={() => updateMutation.mutate({ id: s.id, publishAt: null })}
+                              className="text-[11px] text-gray-400 hover:text-red-400 transition-colors ml-1"
+                              title="Clear scheduled date"
+                            >✕</button>
+                          </>
                         )}
                       </div>
                     )}
