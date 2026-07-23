@@ -9568,12 +9568,27 @@ function AcceleratorTab() {
                         <input
                           type="datetime-local"
                           className="text-[11px] px-2 py-1 rounded bg-[#1a1f2e] text-white border border-amber-500/30 focus:border-amber-500 focus:outline-none"
-                          value={s.publishAt ? new Date(s.publishAt).toISOString().slice(0, 16) : ""}
-                          onChange={(e) => {
+                          style={{ colorScheme: "dark" }}
+                          defaultValue={s.publishAt ? new Date(s.publishAt).toISOString().slice(0, 16) : ""}
+                          onBlur={(e) => {
                             const val = e.target.value;
-                            updateMutation.mutate({ id: s.id, publishAt: val ? new Date(val).toISOString() : null });
+                            const newPublishAt = val ? new Date(val).toISOString() : null;
+                            if (newPublishAt !== s.publishAt) {
+                              updateMutation.mutate({ id: s.id, publishAt: newPublishAt });
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              (e.target as HTMLInputElement).blur();
+                            }
                           }}
                         />
+                        {s.publishAt && (
+                          <button
+                            onClick={() => updateMutation.mutate({ id: s.id, publishAt: null })}
+                            className="text-[9px] text-gray-400 hover:text-red-400 transition-colors"
+                          >✕</button>
+                        )}
                       </div>
                     )}
                   </div>
