@@ -2,7 +2,7 @@
  * AcceleratorSession.tsx
  *
  * Individual session hub page for the WAVV Accelerator.
- * URL: /accelerator/session/:id  (id = session number 1-6)
+ * URL: /accelerator/:id  (id = session number 1-6)
  *
  * Redesigned as a 3-tile hub page (Academy-style):
  *  - Hero header band with session badge, title, outcome, and back link
@@ -847,7 +847,7 @@ export default function AcceleratorSession() {
 
         {/* ── Back to session hub when in sub-section ── */}
         {activeSection && (
-          <a href={`/accelerator/session/${weekId}`} className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-white" style={{ color }}>
+          <a href={`/accelerator/${weekId}`} className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-white" style={{ color }}>
             <ArrowLeft size={14} />
             Back to Overview
           </a>
@@ -878,7 +878,7 @@ export default function AcceleratorSession() {
               bannerIcon={BANNER_ICONS.live}
               color={TILE_COLORS.live}
               count={visibleLiveCalls.length}
-              href={`/accelerator/session/${weekId}/live-calls`}
+              href={`/accelerator/${weekId}/live-calls`}
             />
             <BannerTile
               title="Product Training"
@@ -886,7 +886,7 @@ export default function AcceleratorSession() {
               bannerIcon={BANNER_ICONS.training}
               color={TILE_COLORS.training}
               count={cmsProductTraining.length}
-              href={`/accelerator/session/${weekId}/product-training`}
+              href={`/accelerator/${weekId}/product-training`}
             />
             <BannerTile
               title="Previous Recordings"
@@ -894,7 +894,7 @@ export default function AcceleratorSession() {
               bannerIcon={BANNER_ICONS.recordings}
               color={TILE_COLORS.recordings}
               count={cmsRecordings.length}
-              href={`/accelerator/session/${weekId}/recordings`}
+              href={`/accelerator/${weekId}/recordings`}
             />
           </div>
         )}

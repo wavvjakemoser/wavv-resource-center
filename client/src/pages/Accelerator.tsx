@@ -344,7 +344,7 @@ function LiveCallCountdown({ hasAccess, liveCalls, dbSessions = [] }: { hasAcces
           const btnBg = isLive ? "#10b981" : sessionColor;
           return (
             <a
-              href={`/accelerator/session/${sessionPageId}`}
+              href={`/accelerator/${sessionPageId}`}
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200"
               style={{ background: `linear-gradient(135deg, ${btnBg}, ${btnBg}cc)` }}
               onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.88"; e.currentTarget.style.transform = "translateY(-1px)"; }}
@@ -448,7 +448,7 @@ function UpcomingCallsList({ liveCalls }: { liveCalls: LiveCallItem[] }) {
                 <div className="flex justify-end">
                   {isJoinable ? (
                     <a
-                      href={c.joinUrl ?? `/accelerator/session/${c.sessionNumber}`}
+                      href={c.joinUrl ?? `/accelerator/${c.sessionNumber}`}
                       target={c.joinUrl ? "_blank" : undefined}
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all"
@@ -546,7 +546,7 @@ export default function Accelerator() {
                   <p className="text-sm mt-4 mb-4 text-white">
                     Not registered?{" "}
                     <a
-                      href={`/accelerator/session/${nextSession.id}`}
+                      href={`/accelerator/${nextSession.id}`}
                       className="font-semibold underline underline-offset-2 transition-colors"
                       style={{ color: "#4a9eff" }}
                       onMouseEnter={(e) => { e.currentTarget.style.color = "#7dd3fc"; }}
@@ -629,7 +629,7 @@ export default function Accelerator() {
               return (
                   <a
                     key={session.id}
-                    href={`/accelerator/session/${session.id}`}
+                    href={`/accelerator/${session.id}`}
                     className="group relative overflow-hidden rounded-2xl block cursor-pointer transition-all duration-200 hover:scale-[1.005]"
                     style={{
                       textDecoration: "none",

@@ -2445,3 +2445,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix date/time picker calendar icon visibility (black on dark background)
 - [x] Product Training puzzle piece image needs to be CYAN (not blue) — match the WAVV ACCELERATOR label color
 - [x] Fix 1 error bubble showing on production site
+- [ ] Rename Accelerator sub-URLs from /accelerator/session/:id to /accelerator/:id (drop "session" from path)

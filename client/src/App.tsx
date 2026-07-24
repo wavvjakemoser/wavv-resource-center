@@ -124,8 +124,8 @@ function Router() {
       <Route path="/resources/faqs" component={ResourceFaqs} />
       <Route path="/guides">{() => <Redirect to="/resourcehub" />}</Route>
       <Route path="/accelerator">{() => <NavGuard href="/accelerator"><Accelerator /></NavGuard>}</Route>
-      <Route path="/accelerator/session/:id/:section">{() => <NavGuard href="/accelerator"><AcceleratorSession /></NavGuard>}</Route>
-      <Route path="/accelerator/session/:id">{() => <NavGuard href="/accelerator"><AcceleratorSession /></NavGuard>}</Route>
+      <Route path="/accelerator/:id/:section">{() => <NavGuard href="/accelerator"><AcceleratorSession /></NavGuard>}</Route>
+      <Route path="/accelerator/:id">{() => <NavGuard href="/accelerator"><AcceleratorSession /></NavGuard>}</Route>
       <Route path="/partners">{() => <NavGuard href="/partners"><Partners /></NavGuard>}</Route>
       <Route path="/wavvpartner">{() => <Redirect to="/404" />}</Route>
       <Route path="/wavvcommandcenter">{() => <AdminGuard><Admin /></AdminGuard>}</Route>
