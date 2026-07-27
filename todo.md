@@ -2446,3 +2446,7 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Product Training puzzle piece image needs to be CYAN (not blue) — match the WAVV ACCELERATOR label color
 - [x] Fix 1 error bubble showing on production site
 - [ ] Rename Accelerator sub-URLs from /accelerator/session/:id to /accelerator/:id (drop "session" from path)
+- [x] Fix scheduled cron auth (both endpoints returning 403 due to wrong header check - replaced with sdk.authenticateRequest)
+- [x] Apply SDK patches: CRON_OPEN_ID_PREFIX, AuthenticatedUser type, buildCronUser helper in sdk.ts
+- [x] Add taskUid field to GetUserInfoWithJwtResponse in manusTypes.ts
+- [x] Manually publish Topic 2 (Prospecting Frames & Angles) which was stuck in coming_soon state

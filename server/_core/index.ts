@@ -10,6 +10,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { runIntercomSync } from "../intercomSync";
 import { registerOAuthRoutes } from "./oauth";
+import { sdk } from "./sdk";
 
 // ── Rate Limiting ─────────────────────────────────────────────────────────────
 // The site is publicly accessible on the internet, so we apply two tiers:
@@ -108,9 +109,13 @@ async function startServer() {
 
   // ── Scheduled: Intercom Help Center sync ──────────────────────────────────
   app.post("/api/scheduled/intercom-sync", async (req, res) => {
-    // Validate cron caller via platform header
-    const taskUid = req.headers["x-manus-cron-task-uid"] as string | undefined;
-    if (!taskUid) {
+    // Validate cron caller via SDK authentication
+    try {
+      const user = await sdk.authenticateRequest(req);
+      if (!user.isCron || !user.taskUid) {
+        return res.status(403).json({ error: "cron-only endpoint" });
+      }
+    } catch {
       return res.status(403).json({ error: "cron-only endpoint" });
     }
     try {
@@ -127,8 +132,13 @@ async function startServer() {
 
   // ── Scheduled: Auto-publish Coming Soon sessions ────────────────────────────
   app.post("/api/scheduled/accelerator-auto-publish", async (req, res) => {
-    const taskUid = req.headers["x-manus-cron-task-uid"] as string | undefined;
-    if (!taskUid) {
+    // Validate cron caller via SDK authentication
+    try {
+      const user = await sdk.authenticateRequest(req);
+      if (!user.isCron || !user.taskUid) {
+        return res.status(403).json({ error: "cron-only endpoint" });
+      }
+    } catch {
       return res.status(403).json({ error: "cron-only endpoint" });
     }
     try {
