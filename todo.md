@@ -2462,3 +2462,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Preload/eager-load thumbnails and images on WAVV Accelerator pages (match behavior of other sections)
 - [x] Fix Accelerator thumbnail loading delay — use link preload tags so banner images are ready instantly on session pages
 - [x] Make Accelerator content tiles bigger (product training, recorded sessions, live calls rows + their buttons)
+- [x] Floating PIP video must not cover the document/cheat sheet side panel — keep PIP within main content area only

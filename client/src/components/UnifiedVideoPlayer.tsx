@@ -18,18 +18,50 @@ export default function UnifiedVideoPlayer() {
   const dragState = useRef<{ startX: number; startY: number; origLeft: number; origTop: number } | null>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
 
+  // Detect available width (exclude side panel if open)
+  const getAvailableRight = useCallback(() => {
+    // The ResourceSidePanel is rendered as a flex-shrink-0 sibling inside the body row.
+    // Detect it by looking for the panel's container that has borderLeft set.
+    const panels = document.querySelectorAll<HTMLElement>('[data-side-panel="true"]');
+    for (const panel of panels) {
+      const w = panel.offsetWidth;
+      if (w > 0) return window.innerWidth - w;
+    }
+    return window.innerWidth;
+  }, []);
+
   // Reset position when switching to floating mode
   useEffect(() => {
     if (mode === "floating") {
-      const vw = window.innerWidth;
+      const availableRight = getAvailableRight();
       const vh = window.innerHeight;
-      const w = floatingExpanded ? Math.min(800, vw - 32) : Math.min(480, vw - 32);
+      const w = floatingExpanded ? Math.min(800, availableRight - 32) : Math.min(480, availableRight - 32);
       const h = floatingExpanded ? Math.min(500, vh - 80) : Math.min(300, vh - 80);
-      setPos({ left: vw - w - 24, top: vh - h - 24 });
+      setPos({ left: availableRight - w - 24, top: vh - h - 24 });
     } else {
       setPos(null);
     }
-  }, [mode, floatingExpanded]);
+  }, [mode, floatingExpanded, getAvailableRight]);
+
+  // Re-position when side panel opens/closes (observe DOM mutations)
+  useEffect(() => {
+    if (mode !== "floating") return;
+    const observer = new MutationObserver(() => {
+      const availableRight = getAvailableRight();
+      const vh = window.innerHeight;
+      const w = floatingExpanded ? Math.min(800, availableRight - 32) : Math.min(480, availableRight - 32);
+      const h = floatingExpanded ? Math.min(500, vh - 80) : Math.min(300, vh - 80);
+      setPos((prev) => {
+        if (!prev) return { left: availableRight - w - 24, top: vh - h - 24 };
+        // If current position would overlap the panel, nudge left
+        const maxLeft = availableRight - (containerRef.current?.offsetWidth ?? w) - 8;
+        if (prev.left > maxLeft) return { ...prev, left: Math.max(0, maxLeft) };
+        return prev;
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
+    return () => observer.disconnect();
+  }, [mode, floatingExpanded, getAvailableRight]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -49,8 +81,9 @@ export default function UnifiedVideoPlayer() {
       const vh = window.innerHeight;
       const w = containerRef.current?.offsetWidth ?? 480;
       const h = containerRef.current?.offsetHeight ?? 300;
+      const availableRight = getAvailableRight();
       setPos({
-        left: Math.max(0, Math.min(vw - w, newLeft)),
+        left: Math.max(0, Math.min(availableRight - w, newLeft)),
         top: Math.max(0, Math.min(vh - h, newTop)),
       });
     }
@@ -81,7 +114,8 @@ export default function UnifiedVideoPlayer() {
   const accentColor = video.accentColor || "#00A9E2";
   const isModal = mode === "modal";
   const isFloating = mode === "floating";
-  const floatingWidth = floatingExpanded ? Math.min(800, window.innerWidth - 32) : Math.min(480, window.innerWidth - 32);
+  const availableWidth = getAvailableRight();
+  const floatingWidth = floatingExpanded ? Math.min(800, availableWidth - 32) : Math.min(480, availableWidth - 32);
 
   // ── Compute wrapper styles based on mode ────────────────────────────────────
   const wrapperStyle: React.CSSProperties = isModal
