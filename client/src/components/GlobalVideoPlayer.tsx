@@ -1,23 +1,10 @@
-import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
-import FloatingVideoPlayer from "./FloatingVideoPlayer";
+import UnifiedVideoPlayer from "./UnifiedVideoPlayer";
 
 /**
- * Renders the floating video player at the App level.
- * This component reads from VideoPlayerContext and renders the player
- * when a video is active. It persists across route changes.
+ * Renders the unified video player at the App level.
+ * This component persists across route changes and handles both
+ * modal (full-screen) and floating (PIP) display modes with a single iframe.
  */
 export default function GlobalVideoPlayer() {
-  const { video, closeVideo, onExpandFull } = useVideoPlayer();
-
-  if (!video) return null;
-
-  return (
-    <FloatingVideoPlayer
-      title={video.title}
-      embedUrl={video.embedUrl}
-      startTime={video.startTime}
-      onClose={closeVideo}
-      onExpandFull={onExpandFull ?? undefined}
-    />
-  );
+  return <UnifiedVideoPlayer />;
 }

@@ -1,49 +1,77 @@
 import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from "react";
 
-interface VideoPlayerState {
+/**
+ * Unified Video Player Context
+ *
+ * Architecture: A SINGLE iframe is rendered at the App level (in UnifiedVideoPlayer).
+ * It can be displayed in two visual modes:
+ *   - "modal": Full-screen centered overlay (what pages show when you click Watch)
+ *   - "floating": Draggable PIP in the bottom-right corner
+ *
+ * Transitions between modes just change CSS — the iframe is NEVER destroyed/recreated.
+ * This means the video keeps playing with zero interruption regardless of mode switch.
+ */
+
+export type VideoDisplayMode = "modal" | "floating";
+
+interface VideoState {
   embedUrl: string;
   title: string;
-  startTime?: number; // seconds into the video to resume from
+  accentColor?: string;
+  isHosted?: boolean; // for /manus-storage hosted videos
 }
 
 interface VideoPlayerContextValue {
-  /** Currently playing video (null = no floating player visible) */
-  video: VideoPlayerState | null;
-  /** Open the floating player with a new video. Replaces any currently playing video. */
-  playVideo: (embedUrl: string, title: string, startTime?: number) => void;
-  /** Close the floating player */
+  /** Currently playing video (null = nothing playing) */
+  video: VideoState | null;
+  /** Current display mode */
+  mode: VideoDisplayMode;
+  /** Start playing a video in modal mode */
+  openVideoModal: (embedUrl: string, title: string, accentColor?: string, isHosted?: boolean) => void;
+  /** Switch from modal to floating (pop out) — no iframe reload */
+  popOutToFloating: () => void;
+  /** Switch from floating back to modal (expand) — no iframe reload */
+  expandToModal: () => void;
+  /** Close the video entirely (stops playback) */
   closeVideo: () => void;
-  /** Callback to expand back to full screen — set by the page that has the full modal */
-  onExpandFull: (() => void) | null;
-  /** Register the expand-full callback (called by pages with full-screen modal) */
-  setExpandFullHandler: (handler: (() => void) | null) => void;
-  /** Ref to store the latest tracked playback time from the floating player */
-  trackedTimeRef: React.MutableRefObject<number>;
+  /** Whether a video is currently active */
+  isPlaying: boolean;
 }
 
 const VideoPlayerContext = createContext<VideoPlayerContextValue | null>(null);
 
 export function VideoPlayerProvider({ children }: { children: ReactNode }) {
-  const [video, setVideo] = useState<VideoPlayerState | null>(null);
-  const [expandFullHandler, setExpandFullHandlerState] = useState<(() => void) | null>(null);
-  const trackedTimeRef = useRef<number>(0);
+  const [video, setVideo] = useState<VideoState | null>(null);
+  const [mode, setMode] = useState<VideoDisplayMode>("modal");
 
-  const playVideo = useCallback((embedUrl: string, title: string, startTime?: number) => {
-    trackedTimeRef.current = startTime || 0;
-    setVideo({ embedUrl, title, startTime });
+  const openVideoModal = useCallback((embedUrl: string, title: string, accentColor?: string, isHosted?: boolean) => {
+    setVideo({ embedUrl, title, accentColor, isHosted });
+    setMode("modal");
+  }, []);
+
+  const popOutToFloating = useCallback(() => {
+    setMode("floating");
+  }, []);
+
+  const expandToModal = useCallback(() => {
+    setMode("modal");
   }, []);
 
   const closeVideo = useCallback(() => {
     setVideo(null);
-    trackedTimeRef.current = 0;
-  }, []);
-
-  const setExpandFullHandler = useCallback((handler: (() => void) | null) => {
-    setExpandFullHandlerState(() => handler);
+    setMode("modal");
   }, []);
 
   return (
-    <VideoPlayerContext.Provider value={{ video, playVideo, closeVideo, onExpandFull: expandFullHandler, setExpandFullHandler, trackedTimeRef }}>
+    <VideoPlayerContext.Provider value={{
+      video,
+      mode,
+      openVideoModal,
+      popOutToFloating,
+      expandToModal,
+      closeVideo,
+      isPlaying: video !== null,
+    }}>
       {children}
     </VideoPlayerContext.Provider>
   );

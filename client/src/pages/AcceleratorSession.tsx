@@ -16,7 +16,7 @@ import { useParams, Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ArrowLeft,
   Calendar,
@@ -38,7 +38,7 @@ import {
   PictureInPicture2,
 } from "lucide-react";
 import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
-import { addYouTubeApiParam, buildEmbedUrlWithTime, isYouTubeUrl } from "@/lib/videoUtils";
+
 import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
 
 // ─── Icon URLs ───────────────────────────────────────────────────────────────
@@ -752,66 +752,15 @@ export default function AcceleratorSession() {
   const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: weekId });
   const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
-  // Video player state — full-page modal (Academy-style) + PIP pop-out
-  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler, trackedTimeRef } = useVideoPlayer();
-  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; accentColor: string; startTime?: number } | null>(null);
-  const modalIframeRef = useRef<HTMLIFrameElement>(null);
-  const modalTimeRef = useRef<number>(0);
+  // Video player — uses unified persistent player (no local modal)
+  const { openVideoModal, closeVideo } = useVideoPlayer();
 
-  function handleOpenVideo(embedUrl: string, title: string, accentColor?: string, startTime?: number) {
-    globalCloseVideo(); // close any existing floating player
-    modalTimeRef.current = startTime || 0;
-    setPlayingVideo({ embedUrl, title, accentColor: accentColor || "#00A9E2", startTime });
+  function handleOpenVideo(embedUrl: string, title: string, accentColor?: string) {
+    openVideoModal(embedUrl, title, accentColor || "#00A9E2");
   }
   function handleClosePlayer() {
-    setPlayingVideo(null);
-    modalTimeRef.current = 0;
+    closeVideo();
   }
-  function handlePopOut() {
-    if (!playingVideo) return;
-    const video = playingVideo;
-    const currentTime = modalTimeRef.current;
-    globalPlayVideo(video.embedUrl, video.title, currentTime);
-    handleClosePlayer();
-    // Register expand-full handler so floating player can return to full screen
-    setExpandFullHandler(() => {
-      const resumeTime = trackedTimeRef.current;
-      globalCloseVideo();
-      handleOpenVideo(video.embedUrl, video.title, video.accentColor, resumeTime);
-    });
-  }
-
-    // Escape key closes video modal
-  useEffect(() => {
-    if (!playingVideo) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClosePlayer(); };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [playingVideo]);
-
-  // Track playback time from modal iframe (YouTube postMessage API)
-  useEffect(() => {
-    if (!playingVideo || !isYouTubeUrl(playingVideo.embedUrl)) return;
-    function handleMessage(event: MessageEvent) {
-      if (!event.data || typeof event.data !== "string") return;
-      try {
-        const data = JSON.parse(event.data);
-        if (data.event === "infoDelivery" && data.info && typeof data.info.currentTime === "number") {
-          modalTimeRef.current = data.info.currentTime;
-        }
-      } catch { /* ignore */ }
-    }
-    window.addEventListener("message", handleMessage);
-    const poll = setInterval(() => {
-      if (modalIframeRef.current?.contentWindow) {
-        modalIframeRef.current.contentWindow.postMessage(JSON.stringify({ event: "listening" }), "*");
-      }
-    }, 2000);
-    return () => {
-      window.removeEventListener("message", handleMessage);
-      clearInterval(poll);
-    };
-  }, [playingVideo]);
 
   // Cheat sheet side panel state
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
@@ -1160,64 +1109,7 @@ export default function AcceleratorSession() {
 
     </PortalLayout>
 
-      {/* ── Full-page video modal (Academy-style) ── */}
-      {playingVideo && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/85 backdrop-blur-sm"
-            onClick={handleClosePlayer}
-          />
-          {/* Modal content */}
-          <div className="relative w-full max-w-5xl mx-4 z-10 animate-in fade-in zoom-in-95 duration-200">
-            {/* Header bar */}
-            <div className="flex items-center gap-3 mb-3">
-              <p className="text-sm font-semibold text-white truncate flex-1">{playingVideo.title}</p>
-              <button
-                type="button"
-                onClick={handlePopOut}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-                style={{ background: `${playingVideo.accentColor}18`, color: playingVideo.accentColor, border: `1px solid ${playingVideo.accentColor}40` }}
-                title="Pop out to mini-player"
-              >
-                <PictureInPicture2 size={13} /> Pop Out
-              </button>
-              <button
-                type="button"
-                onClick={handleClosePlayer}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all hover:bg-white/10"
-                style={{ color: "rgba(255,255,255,0.7)" }}
-                title="Close"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            {/* Video iframe */}
-            <div className="relative w-full rounded-xl overflow-hidden shadow-2xl" style={{ paddingBottom: "56.25%" }}>
-              <iframe
-                ref={modalIframeRef}
-                className="absolute inset-0 w-full h-full"
-                src={buildEmbedUrlWithTime(addYouTubeApiParam(playingVideo.embedUrl), playingVideo.startTime || 0)}
-                title={playingVideo.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowFullScreen
-                style={{ border: "none" }}
-              />
-            </div>
-            {/* Footer hint */}
-            <div
-              className="flex items-center justify-between mt-3 px-1"
-              style={{ color: "rgba(255,255,255,0.35)" }}
-            >
-              <p className="text-xs">Click outside or press Esc to close</p>
-              <p className="text-xs flex items-center gap-1" style={{ color: `${playingVideo.accentColor}90` }}>
-                <PictureInPicture2 size={11} />
-                Pop out to keep watching while you browse
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+
     </>
   );
 }

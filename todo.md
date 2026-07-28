@@ -2456,5 +2456,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Floating video player defaults to medium/expanded size (not small) when popped out
 - [x] Floating video player has a "Back to full screen" button to re-open the full modal
 - [x] Video playback position persists when popping out to floating player or expanding back to full screen (no reset)
+- [x] Video plays continuously with zero interruption when switching between modal and floating player (persistent iframe, no reload)
 - [x] Make Watch Now buttons bigger/more prominent across video pages (Academy, Accelerator, Webinars)
 - [x] Make Accelerator Cheat Sheet button bigger and more visible (reduce dead space around it)

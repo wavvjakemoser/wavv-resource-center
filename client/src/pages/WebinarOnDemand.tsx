@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
-import { addYouTubeApiParam, buildEmbedUrlWithTime, isYouTubeUrl } from "@/lib/videoUtils";
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getEmbedUrl(url: string): string | null {
@@ -159,33 +159,15 @@ export default function WebinarOnDemand() {
 
   const [autoPlayFired, setAutoPlayFired] = useState(false);
 
-  // Video modal state
-  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; isHosted?: boolean; startTime?: number } | null>(null);
-  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler, trackedTimeRef } = useVideoPlayer();
-  const modalIframeRef = useRef<HTMLIFrameElement>(null);
-  const modalTimeRef = useRef<number>(0);
+  // Video player — uses unified persistent player (no local modal)
+  const { openVideoModal, closeVideo } = useVideoPlayer();
 
   function handlePlay(embedUrl: string, title: string) {
-    globalCloseVideo();
     const isHosted = embedUrl.startsWith("/manus-storage");
-    modalTimeRef.current = 0;
-    setPlayingVideo({ embedUrl, title, isHosted });
+    openVideoModal(embedUrl, title, undefined, isHosted);
   }
 
-  function handleCloseModal() { setPlayingVideo(null); modalTimeRef.current = 0; }
-  function handlePopOut() {
-    if (!playingVideo) return;
-    const video = playingVideo;
-    const currentTime = modalTimeRef.current;
-    globalPlayVideo(video.embedUrl, video.title, currentTime);
-    handleCloseModal();
-    setExpandFullHandler(() => {
-      const resumeTime = trackedTimeRef.current;
-      globalCloseVideo();
-      modalTimeRef.current = resumeTime;
-      setPlayingVideo({ ...video, startTime: resumeTime });
-    });
-  }
+  function handleCloseModal() { closeVideo(); }
 
   // Auto-play deep link
   useEffect(() => {
@@ -198,36 +180,7 @@ export default function WebinarOnDemand() {
     setAutoPlayFired(true);
   }, [autoPlayId, webinars, autoPlayFired]);
 
-  // Track playback time from modal iframe (YouTube postMessage API)
-  useEffect(() => {
-    if (!playingVideo || !isYouTubeUrl(playingVideo.embedUrl)) return;
-    function handleMessage(event: MessageEvent) {
-      if (!event.data || typeof event.data !== "string") return;
-      try {
-        const data = JSON.parse(event.data);
-        if (data.event === "infoDelivery" && data.info && typeof data.info.currentTime === "number") {
-          modalTimeRef.current = data.info.currentTime;
-        }
-      } catch { /* ignore */ }
-    }
-    window.addEventListener("message", handleMessage);
-    const poll = setInterval(() => {
-      if (modalIframeRef.current?.contentWindow) {
-        modalIframeRef.current.contentWindow.postMessage(JSON.stringify({ event: "listening" }), "*");
-      }
-    }, 2000);
-    return () => {
-      window.removeEventListener("message", handleMessage);
-      clearInterval(poll);
-    };
-  }, [playingVideo]);
 
-  // Escape key closes modal
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setPlayingVideo(null); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
 
   return (
     <PortalLayout title="On-Demand Series">
@@ -318,69 +271,7 @@ export default function WebinarOnDemand() {
         )}
       </div>
 
-      {/* Video Modal */}
-      {playingVideo && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.88)" }}
-          onClick={handleCloseModal}
-        >
-          <div
-            className="relative w-full max-w-4xl rounded-2xl overflow-hidden"
-            style={{ background: "#111", border: "1px solid #2a2a2a", boxShadow: "0 25px 80px rgba(0,0,0,0.7)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-3 gap-3" style={{ borderBottom: "1px solid #2a2a2a" }}>
-              <p className="text-sm font-semibold text-white truncate flex-1">{playingVideo.title}</p>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={handlePopOut}
-                  title="Pop out to floating window"
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
-                  style={{ background: `${ACCENT}20`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
-                >
-                  <PictureInPicture2 size={13} />
-                  <span className="hidden sm:inline">Pop out</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
-                  aria-label="Close video"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-            <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-              {playingVideo.isHosted ? (
-                <video controls autoPlay className="absolute inset-0 w-full h-full" style={{ background: "#000", border: "none" }}>
-                  <source src={playingVideo.embedUrl} />
-                </video>
-              ) : (
-                <iframe
-                  ref={modalIframeRef}
-                  src={buildEmbedUrlWithTime(addYouTubeApiParam(playingVideo.embedUrl), playingVideo.startTime || 0)}
-                  title={playingVideo.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                  allowFullScreen
-                  sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
-                  className="absolute inset-0 w-full h-full"
-                  style={{ border: "none" }}
-                />
-              )}
-            </div>
-            <div className="flex items-center justify-between px-5 py-3" style={{ borderTop: "1px solid #2a2a2a", background: "#0d0f14" }}>
-              <p className="text-xs text-gray-500">Click outside or press Esc to close</p>
-              <p className="text-xs text-gray-600 flex items-center gap-1">
-                <PictureInPicture2 size={11} />
-                Pop out to keep watching while you browse
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+
 
 
     </PortalLayout>
