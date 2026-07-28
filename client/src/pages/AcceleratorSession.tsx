@@ -753,11 +753,11 @@ export default function AcceleratorSession() {
 
   // Video player state — full-page modal (Academy-style) + PIP pop-out
   const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo } = useVideoPlayer();
-  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; accentColor: string } | null>(null);
 
-  function handleOpenVideo(embedUrl: string, title: string) {
+  function handleOpenVideo(embedUrl: string, title: string, accentColor?: string) {
     globalCloseVideo(); // close any existing floating player
-    setPlayingVideo({ embedUrl, title });
+    setPlayingVideo({ embedUrl, title, accentColor: accentColor || "#00A9E2" });
   }
   function handleClosePlayer() {
     setPlayingVideo(null);
@@ -1008,7 +1008,7 @@ export default function AcceleratorSession() {
                     item={item}
                     index={idx}
                     accentColor={TILE_COLORS.training}
-                    onPlay={(url: string, title: string) => handleOpenVideo(url, title)}
+                    onPlay={(url: string, title: string) => handleOpenVideo(url, title, TILE_COLORS.training)}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
                   />
                 ))}
@@ -1038,7 +1038,7 @@ export default function AcceleratorSession() {
                     item={item}
                     index={idx}
                     accentColor={TILE_COLORS.recordings}
-                    onPlay={(url: string, title: string) => handleOpenVideo(url, title)}
+                    onPlay={(url: string, title: string) => handleOpenVideo(url, title, TILE_COLORS.recordings)}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
                   />
                 ))}
@@ -1140,7 +1140,7 @@ export default function AcceleratorSession() {
                 type="button"
                 onClick={handlePopOut}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
-                style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.12)" }}
+                style={{ background: `${playingVideo.accentColor}18`, color: playingVideo.accentColor, border: `1px solid ${playingVideo.accentColor}40` }}
                 title="Pop out to mini-player"
               >
                 <PictureInPicture2 size={13} /> Pop Out
@@ -1172,7 +1172,7 @@ export default function AcceleratorSession() {
               style={{ color: "rgba(255,255,255,0.35)" }}
             >
               <p className="text-xs">Click outside or press Esc to close</p>
-              <p className="text-xs flex items-center gap-1">
+              <p className="text-xs flex items-center gap-1" style={{ color: `${playingVideo.accentColor}90` }}>
                 <PictureInPicture2 size={11} />
                 Pop out to keep watching while you browse
               </p>
