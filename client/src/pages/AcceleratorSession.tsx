@@ -115,10 +115,10 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
     >
       {/* Thumbnail header */}
       <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "160px" }}>
-        <img src={DEFAULT_LIVE_CALL_BG} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.9, objectPosition: "center 30%" }} />
+        <img src={DEFAULT_LIVE_CALL_BG} alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" fetchPriority="high" style={{ opacity: 0.9, objectPosition: "center 30%" }} />
         <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${glowColor}20 0%, transparent 60%)` }} />
         {call.thumbnailUrl && (
-          <img src={call.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.92 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+          <img src={call.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" fetchPriority="high" style={{ opacity: 0.92 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
         )}
         <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
         <div className="absolute top-3 right-3">
@@ -238,6 +238,8 @@ function ContentCard({
               src={item.thumbnailUrl}
               alt=""
               className="absolute inset-0 w-full h-full object-cover"
+              loading="eager"
+              fetchPriority="high"
               style={{ opacity: 0.92 }}
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
             />
@@ -245,7 +247,7 @@ function ContentCard({
           </>
         ) : (
           <>
-            <img src={defaultBg} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: 0.9 }} />
+            <img src={defaultBg} alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" fetchPriority="high" style={{ opacity: 0.9 }} />
             <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${accentColor}18 0%, transparent 60%)` }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(15,19,24,0.85))" }} />
           </>
@@ -808,6 +810,21 @@ export default function AcceleratorSession() {
   const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
 
   const visibleLiveCalls = liveCalls.filter((c: any) => c.isVisible !== false);
+
+  // ── Preload all thumbnails eagerly when data arrives ──────────────────────
+  useEffect(() => {
+    const urls: string[] = [
+      DEFAULT_LIVE_CALL_BG,
+      DEFAULT_RECORDING_BG,
+      DEFAULT_TRAINING_BG,
+      ...visibleLiveCalls.map((c: any) => c.thumbnailUrl).filter(Boolean),
+      ...sessionContent.map((c: any) => c.thumbnailUrl).filter(Boolean),
+    ];
+    urls.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, [visibleLiveCalls, sessionContent]);
 
   // Side panel for cheat sheet PDF viewer
   const sidePanel = (

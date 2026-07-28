@@ -2459,3 +2459,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Video plays continuously with zero interruption when switching between modal and floating player (persistent iframe, no reload)
 - [x] Make Watch Now buttons bigger/more prominent across video pages (Academy, Accelerator, Webinars)
 - [x] Make Accelerator Cheat Sheet button bigger and more visible (reduce dead space around it)
+- [x] Preload/eager-load thumbnails and images on WAVV Accelerator pages (match behavior of other sections)

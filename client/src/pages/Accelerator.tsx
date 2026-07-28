@@ -502,6 +502,21 @@ export default function Accelerator() {
 
   const accessResolved = !accessLoading;
 
+  // Preload AcceleratorSession images so they're cached before user navigates
+  useEffect(() => {
+    const urls = [
+      "/manus-storage/final-accel-live-sign-transparent_581be7cc.png",
+      "/manus-storage/accel-training-cyan-transparent-final_f3e37c72.png",
+      "/manus-storage/final-accel-recordings-v3-transparent_ec91855f.png",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-live-v2-5SLFaHmkSJiRcBLANHk9Ux.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-training-v2-Ah5NsXzGWXLs5JLhmnHNvb.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-recordings-v2-2H8NKAbyymnW7VVmXdYEvx.webp",
+    ];
+    urls.forEach((url) => { const img = new Image(); img.src = url; });
+  }, []);
+
   return (
     <PortalLayout title="WAVV Accelerator">
       <div className="px-4 lg:px-8 py-6 space-y-14 pb-24">
