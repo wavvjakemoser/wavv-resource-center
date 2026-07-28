@@ -157,7 +157,7 @@ export default function WebinarLiveExclusive() {
 
   const [autoPlayFired, setAutoPlayFired] = useState(false);
   const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; isHosted?: boolean } | null>(null);
-  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo } = useVideoPlayer();
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler } = useVideoPlayer();
 
   function handlePlay(embedUrl: string, title: string) {
     globalCloseVideo();
@@ -168,8 +168,13 @@ export default function WebinarLiveExclusive() {
   function handleCloseModal() { setPlayingVideo(null); }
   function handlePopOut() {
     if (!playingVideo) return;
-    globalPlayVideo(playingVideo.embedUrl, playingVideo.title);
+    const video = playingVideo;
+    globalPlayVideo(video.embedUrl, video.title);
     handleCloseModal();
+    setExpandFullHandler(() => {
+      globalCloseVideo();
+      setPlayingVideo(video);
+    });
   }
 
   useEffect(() => {

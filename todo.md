@@ -2453,3 +2453,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Accelerator Product Training + Previous Recordings: clicking a video tile opens a full-page video view (like Academy), not a mini-player
 - [x] Full-page video view should include PIP (picture-in-picture) option
 - [x] Entire video tile row should be clickable (not just the Watch button) to open the video
+- [ ] Floating video player defaults to medium/expanded size (not small) when popped out
+- [ ] Floating video player has a "Back to full screen" button to re-open the full modal

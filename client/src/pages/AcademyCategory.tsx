@@ -560,12 +560,18 @@ export default function AcademyCategory() {
 
   // Video player modal state
   const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
-  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo } = useVideoPlayer();
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler } = useVideoPlayer();
 
   function handlePopOut() {
     if (!playingVideo) return;
-    globalPlayVideo(playingVideo.embedUrl, playingVideo.title);
+    const video = playingVideo;
+    globalPlayVideo(video.embedUrl, video.title);
     handleClosePlayer();
+    // Register expand-full handler so floating player can return to full screen
+    setExpandFullHandler(() => {
+      globalCloseVideo();
+      setPlayingVideo(video);
+    });
   }
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
   const handlePlay = (embedUrl: string, title: string, sectionTitle: string, lessonId?: string) => {

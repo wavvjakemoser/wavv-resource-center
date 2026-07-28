@@ -752,7 +752,7 @@ export default function AcceleratorSession() {
   const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
   // Video player state — full-page modal (Academy-style) + PIP pop-out
-  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo } = useVideoPlayer();
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler } = useVideoPlayer();
   const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; accentColor: string } | null>(null);
 
   function handleOpenVideo(embedUrl: string, title: string, accentColor?: string) {
@@ -764,8 +764,14 @@ export default function AcceleratorSession() {
   }
   function handlePopOut() {
     if (!playingVideo) return;
-    globalPlayVideo(playingVideo.embedUrl, playingVideo.title);
+    const video = playingVideo;
+    globalPlayVideo(video.embedUrl, video.title);
     handleClosePlayer();
+    // Register expand-full handler so floating player can return to full screen
+    setExpandFullHandler(() => {
+      globalCloseVideo();
+      handleOpenVideo(video.embedUrl, video.title, video.accentColor);
+    });
   }
 
   // Escape key closes video modal

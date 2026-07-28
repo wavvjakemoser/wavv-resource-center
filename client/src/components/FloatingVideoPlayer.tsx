@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, GripHorizontal, Maximize2, Minimize2 } from "lucide-react";
+import { X, GripHorizontal, Maximize2, Minimize2, Expand } from "lucide-react";
 
 export interface FloatingVideoPlayerProps {
   title: string;
   embedUrl: string;
   onClose: () => void;
+  /** Optional callback to expand back to the full-screen modal */
+  onExpandFull?: () => void;
 }
 
 /**
@@ -15,9 +17,11 @@ export interface FloatingVideoPlayerProps {
  * - Closes on Escape key or close button.
  * - Closes when a new video is started (handled by context).
  * - Resizable between compact and expanded mode.
+ * - Defaults to expanded (medium) size.
+ * - "Back to full screen" button re-opens the full modal.
  */
-export default function FloatingVideoPlayer({ title, embedUrl, onClose }: FloatingVideoPlayerProps) {
-  const [expanded, setExpanded] = useState(false);
+export default function FloatingVideoPlayer({ title, embedUrl, onClose, onExpandFull }: FloatingVideoPlayerProps) {
+  const [expanded, setExpanded] = useState(true); // Default to medium/expanded size
 
   // Close on Escape
   useEffect(() => {
@@ -102,6 +106,16 @@ export default function FloatingVideoPlayer({ title, embedUrl, onClose }: Floati
         <GripHorizontal size={13} style={{ color: "#4b5563", flexShrink: 0 }} />
         <p className="text-xs font-semibold text-white truncate flex-1">{title}</p>
         <div className="flex items-center gap-1 flex-shrink-0" onMouseDown={(e) => e.stopPropagation()}>
+          {onExpandFull && (
+            <button
+              type="button"
+              onClick={onExpandFull}
+              title="Back to full screen"
+              className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <Expand size={13} />
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
@@ -140,7 +154,17 @@ export default function FloatingVideoPlayer({ title, embedUrl, onClose }: Floati
         style={{ borderTop: "1px solid #1e2030", background: "#0d0f14" }}
       >
         <p className="text-[10px] text-gray-600">Drag to reposition · Esc to close</p>
-        <p className="text-[10px] text-gray-700">Floating Player</p>
+        {onExpandFull ? (
+          <button
+            type="button"
+            onClick={onExpandFull}
+            className="text-[10px] text-gray-500 hover:text-white transition-colors flex items-center gap-1"
+          >
+            <Expand size={10} /> Full Screen
+          </button>
+        ) : (
+          <p className="text-[10px] text-gray-700">Floating Player</p>
+        )}
       </div>
     </div>
   );

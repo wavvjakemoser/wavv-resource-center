@@ -7,7 +7,7 @@ import FloatingVideoPlayer from "./FloatingVideoPlayer";
  * when a video is active. It persists across route changes.
  */
 export default function GlobalVideoPlayer() {
-  const { video, closeVideo } = useVideoPlayer();
+  const { video, closeVideo, onExpandFull } = useVideoPlayer();
 
   if (!video) return null;
 
@@ -16,6 +16,7 @@ export default function GlobalVideoPlayer() {
       title={video.title}
       embedUrl={video.embedUrl}
       onClose={closeVideo}
+      onExpandFull={onExpandFull ?? undefined}
     />
   );
 }
