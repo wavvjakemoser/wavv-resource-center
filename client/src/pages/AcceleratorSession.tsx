@@ -114,7 +114,7 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLive ? "rgba(16,185,129,0.4)" : isPast ? "#252d3d" : `${color}30`; e.currentTarget.style.boxShadow = "none"; }}
     >
       {/* Thumbnail header */}
-      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "160px" }}>
+      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "200px" }}>
         <img src={DEFAULT_LIVE_CALL_BG} alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" fetchPriority="high" style={{ opacity: 0.9, objectPosition: "center 30%" }} />
         <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${glowColor}20 0%, transparent 60%)` }} />
         {call.thumbnailUrl && (
@@ -136,11 +136,11 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
       </div>
 
       {/* Body */}
-      <div className="px-4 pt-3 pb-3 flex flex-col gap-2">
-        <h3 className="text-white font-bold text-sm leading-snug">{call.title}</h3>
-        {call.description && <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">{call.description}</p>}
-        <p className="text-gray-500 text-xs flex items-center gap-1.5">
-          <Calendar size={11} className="text-gray-600" />
+      <div className="px-5 pt-4 pb-4 flex flex-col gap-2.5">
+        <h3 className="text-white font-bold text-base leading-snug">{call.title}</h3>
+        {call.description && <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">{call.description}</p>}
+        <p className="text-gray-500 text-sm flex items-center gap-1.5">
+          <Calendar size={13} className="text-gray-600" />
           <span className="text-gray-300">{dateLabel}</span>
         </p>
 
@@ -231,7 +231,7 @@ function ContentCard({
       }}
     >
       {/* Thumbnail */}
-      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "160px" }}>
+      <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: "200px" }}>
         {item.thumbnailUrl ? (
           <>
             <img
@@ -284,41 +284,41 @@ function ContentCard({
         </div>
       )}
 
-      <div className="p-4 flex flex-col flex-1">
-        <h3 className="text-white font-bold text-sm leading-snug mb-2">{item.title}</h3>
+      <div className="p-5 flex flex-col flex-1">
+        <h3 className="text-white font-bold text-base leading-snug mb-2">{item.title}</h3>
         {item.description && (
-          <p className="text-gray-500 text-xs leading-relaxed mb-2">{item.description}</p>
+          <p className="text-gray-500 text-sm leading-relaxed mb-2">{item.description}</p>
         )}
         {item.hostName && (
-          <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
-            <User size={11} className="text-gray-600" />
+          <p className="text-gray-500 text-sm mb-2 flex items-center gap-1.5">
+            <User size={13} className="text-gray-600" />
             <span className="text-gray-300">{item.hostName}</span>
           </p>
         )}
 
-        <div className="mt-auto flex items-center gap-2 flex-wrap">
+        <div className="mt-auto flex items-center gap-3 flex-wrap">
           {isComingSoon ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
-              <Timer size={12} /> Coming Soon
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+              <Timer size={14} /> Coming Soon
             </span>
           ) : (embedUrl || isHostedVideo) ? (
             <button
               type="button"
               onClick={handleWatch}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:opacity-80"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-base font-bold transition-all hover:opacity-80"
               style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
             >
-              <PlayCircle size={14} /> Watch Now
+              <PlayCircle size={18} /> Watch Now
             </button>
           ) : null}
           {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
             <button
               type="button"
               onClick={() => onCheatSheet(item.cheatSheetUrl!, item.title)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:opacity-80"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-base font-bold transition-all hover:opacity-80"
               style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
             >
-              <FileText size={14} /> Cheat Sheet
+              <FileText size={18} /> Cheat Sheet
             </button>
           )}
         </div>
@@ -565,15 +565,15 @@ function LiveCallRow({ call, now, color, index }: { call: LiveCallRecord; now: n
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = isLive ? "rgba(16,185,129,0.5)" : color; e.currentTarget.style.boxShadow = `0 2px 12px ${isLive ? "rgba(16,185,129,0.15)" : `${color}15`}`; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLive ? "rgba(16,185,129,0.4)" : `${color}30`; e.currentTarget.style.boxShadow = "none"; }}
     >
-      <div className="flex items-center gap-4 px-5 py-4">
+      <div className="flex items-center gap-5 px-6 py-5">
         {/* Left accent bar */}
-        <div className="w-1 self-stretch rounded-full flex-shrink-0" style={{ background: isLive ? "#10b981" : color }} />
+        <div className="w-1.5 self-stretch rounded-full flex-shrink-0" style={{ background: isLive ? "#10b981" : color }} />
 
         {/* Title + date */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-white leading-snug">{index + 1}. {call.title}</p>
-          <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-            <Calendar size={11} />
+          <p className="text-base font-bold text-white leading-snug">{index + 1}. {call.title}</p>
+          <p className="text-sm mt-1.5 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <Calendar size={13} />
             {dateLabel}
           </p>
         </div>
@@ -605,7 +605,7 @@ function LiveCallRow({ call, now, color, index }: { call: LiveCallRecord; now: n
               href={call.registrationUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-opacity hover:opacity-80"
               style={{ background: `${color}22`, color, border: `1px solid ${color}40` }}
             >
               Register
@@ -616,17 +616,17 @@ function LiveCallRow({ call, now, color, index }: { call: LiveCallRecord; now: n
               href={call.joinUrl ?? "#"}
               target={call.joinUrl ? "_blank" : undefined}
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-85"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-85"
               style={{ background: isLive ? "#10b981" : color }}
             >
-              <Play size={12} /> {isLive ? "Join Live" : "Join"}
+              <Play size={14} /> {isLive ? "Join Live" : "Join"}
             </a>
           ) : !isPast ? (
             <span
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold cursor-not-allowed select-none"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold cursor-not-allowed select-none"
               style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.06)" }}
             >
-              <Play size={12} /> Join
+              <Play size={14} /> Join
             </span>
           ) : null}
         </div>
@@ -665,43 +665,43 @@ function ContentRow({
   }
 
   const rowContent = (
-    <div className="flex items-center gap-4 px-5 py-4">
+    <div className="flex items-center gap-5 px-6 py-5">
       {/* Left accent bar */}
-      <div className="w-1 self-stretch rounded-full flex-shrink-0" style={{ background: accentColor }} />
+      <div className="w-1.5 self-stretch rounded-full flex-shrink-0" style={{ background: accentColor }} />
 
       {/* Title + host */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-white leading-snug">{index + 1}. {item.title}</p>
+        <p className="text-base font-bold text-white leading-snug">{index + 1}. {item.title}</p>
         {item.hostName && (
-          <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-            <User size={11} />
+          <p className="text-sm mt-1.5 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <User size={13} />
             {item.hostName}
           </p>
         )}
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center gap-3 flex-shrink-0">
         {isComingSoon ? (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
-            <Timer size={12} /> Coming Soon
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+            <Timer size={14} /> Coming Soon
           </span>
         ) : hasVideo ? (
           <span
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-base font-bold"
             style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
           >
-            <PlayCircle size={14} /> Watch Now
+            <PlayCircle size={18} /> Watch Now
           </span>
         ) : null}
         {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onCheatSheet(item.cheatSheetUrl!, item.title); }}
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-base font-bold transition-opacity hover:opacity-80"
             style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
           >
-            <FileText size={14} /> Cheat Sheet
+            <FileText size={18} /> Cheat Sheet
           </button>
         )}
       </div>
