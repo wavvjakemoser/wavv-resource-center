@@ -2450,3 +2450,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Apply SDK patches: CRON_OPEN_ID_PREFIX, AuthenticatedUser type, buildCronUser helper in sdk.ts
 - [x] Add taskUid field to GetUserInfoWithJwtResponse in manusTypes.ts
 - [x] Manually publish Topic 2 (Prospecting Frames & Angles) which was stuck in coming_soon state
+- [x] Accelerator Product Training + Previous Recordings: clicking a video tile opens a full-page video view (like Academy), not a mini-player
+- [ ] Full-page video view should include PIP (picture-in-picture) option
+- [x] Entire video tile row should be clickable (not just the Watch button) to open the video

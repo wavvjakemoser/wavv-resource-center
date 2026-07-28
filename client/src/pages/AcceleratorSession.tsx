@@ -35,6 +35,7 @@ import {
   MessageSquare,
   ExternalLink,
   ChevronRight,
+  PictureInPicture2,
 } from "lucide-react";
 import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
 import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
@@ -636,7 +637,7 @@ function LiveCallRow({ call, now, color, index }: { call: LiveCallRecord; now: n
   );
 }
 
-// ─── ContentRow (Academy-style list row with Watch button) ───────────────
+// ─── ContentRow (Academy-style list row — entire row is clickable) ───────────────
 function ContentRow({
   item,
   index,
@@ -660,56 +661,75 @@ function ContentRow({
     if (playUrl) onPlay(playUrl, item.title);
   }
 
+  const rowContent = (
+    <div className="flex items-center gap-4 px-5 py-4">
+      {/* Left accent bar */}
+      <div className="w-1 self-stretch rounded-full flex-shrink-0" style={{ background: accentColor }} />
+
+      {/* Title + host */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold text-white leading-snug">{index + 1}. {item.title}</p>
+        {item.hostName && (
+          <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <User size={11} />
+            {item.hostName}
+          </p>
+        )}
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {isComingSoon ? (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+            <Timer size={12} /> Coming Soon
+          </span>
+        ) : hasVideo ? (
+          <span
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold"
+            style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
+          >
+            <PlayCircle size={12} /> Watch
+          </span>
+        ) : null}
+        {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onCheatSheet(item.cheatSheetUrl!, item.title); }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+            style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
+          >
+            <FileText size={12} /> Cheat Sheet
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  // If video is available, make the entire row clickable
+  if (hasVideo) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleWatch}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleWatch(); } }}
+        className="rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
+        style={{ background: "#1d2230", border: `1px solid ${accentColor}30` }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = accentColor; e.currentTarget.style.boxShadow = `0 2px 12px ${accentColor}15`; e.currentTarget.style.background = `${accentColor}08`; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${accentColor}30`; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.background = "#1d2230"; }}
+      >
+        {rowContent}
+      </div>
+    );
+  }
+
+  // Non-clickable row (coming soon or no video)
   return (
     <div
       className="rounded-xl overflow-hidden transition-all duration-200"
       style={{ background: "#1d2230", border: `1px solid ${accentColor}30` }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = accentColor; e.currentTarget.style.boxShadow = `0 2px 12px ${accentColor}15`; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${accentColor}30`; e.currentTarget.style.boxShadow = "none"; }}
     >
-      <div className="flex items-center gap-4 px-5 py-4">
-        {/* Left accent bar */}
-        <div className="w-1 self-stretch rounded-full flex-shrink-0" style={{ background: accentColor }} />
-
-        {/* Title + host */}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-white leading-snug">{index + 1}. {item.title}</p>
-          {item.hostName && (
-            <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-              <User size={11} />
-              {item.hostName}
-            </p>
-          )}
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {isComingSoon ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
-              <Timer size={12} /> Coming Soon
-            </span>
-          ) : hasVideo ? (
-            <button
-              type="button"
-              onClick={handleWatch}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
-              style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
-            >
-              <PlayCircle size={12} /> Watch
-            </button>
-          ) : null}
-          {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
-            <button
-              type="button"
-              onClick={() => onCheatSheet(item.cheatSheetUrl!, item.title)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
-              style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
-            >
-              <FileText size={12} /> Cheat Sheet
-            </button>
-          )}
-        </div>
-      </div>
+      {rowContent}
     </div>
   );
 }
@@ -731,8 +751,30 @@ export default function AcceleratorSession() {
   const { data: liveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({ sessionNumber: weekId });
   const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
-  // Video player state
-  const { playVideo: globalPlayVideo } = useVideoPlayer();
+  // Video player state — full-page modal (Academy-style) + PIP pop-out
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo } = useVideoPlayer();
+  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
+
+  function handleOpenVideo(embedUrl: string, title: string) {
+    globalCloseVideo(); // close any existing floating player
+    setPlayingVideo({ embedUrl, title });
+  }
+  function handleClosePlayer() {
+    setPlayingVideo(null);
+  }
+  function handlePopOut() {
+    if (!playingVideo) return;
+    globalPlayVideo(playingVideo.embedUrl, playingVideo.title);
+    handleClosePlayer();
+  }
+
+  // Escape key closes video modal
+  useEffect(() => {
+    if (!playingVideo) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClosePlayer(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [playingVideo]);
 
   // Cheat sheet side panel state
   const [panelItem, setPanelItem] = useState<PanelItem | null>(null);
@@ -790,6 +832,7 @@ export default function AcceleratorSession() {
 
   // ─── Member view ─────────────────────────────────────────────────────────
   return (
+    <>
     <PortalLayout title={`${session.title}`} rightPanel={sidePanel}>
 
       {/* ── Hero header band ── */}
@@ -965,7 +1008,7 @@ export default function AcceleratorSession() {
                     item={item}
                     index={idx}
                     accentColor={TILE_COLORS.training}
-                    onPlay={(url: string, title: string) => globalPlayVideo(url, title)}
+                    onPlay={(url: string, title: string) => handleOpenVideo(url, title)}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
                   />
                 ))}
@@ -995,7 +1038,7 @@ export default function AcceleratorSession() {
                     item={item}
                     index={idx}
                     accentColor={TILE_COLORS.recordings}
-                    onPlay={(url: string, title: string) => globalPlayVideo(url, title)}
+                    onPlay={(url: string, title: string) => handleOpenVideo(url, title)}
                     onCheatSheet={(url: string, title: string) => setPanelItem({ type: "pdf", title: `${title} \u2014 Cheat Sheet`, url })}
                   />
                 ))}
@@ -1079,5 +1122,64 @@ export default function AcceleratorSession() {
 
 
     </PortalLayout>
+
+      {/* ── Full-page video modal (Academy-style) ── */}
+      {playingVideo && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/85 backdrop-blur-sm"
+            onClick={handleClosePlayer}
+          />
+          {/* Modal content */}
+          <div className="relative w-full max-w-5xl mx-4 z-10 animate-in fade-in zoom-in-95 duration-200">
+            {/* Header bar */}
+            <div className="flex items-center gap-3 mb-3">
+              <p className="text-sm font-semibold text-white truncate flex-1">{playingVideo.title}</p>
+              <button
+                type="button"
+                onClick={handlePopOut}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+                style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.12)" }}
+                title="Pop out to mini-player"
+              >
+                <PictureInPicture2 size={13} /> Pop Out
+              </button>
+              <button
+                type="button"
+                onClick={handleClosePlayer}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all hover:bg-white/10"
+                style={{ color: "rgba(255,255,255,0.7)" }}
+                title="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            {/* Video iframe */}
+            <div className="relative w-full rounded-xl overflow-hidden shadow-2xl" style={{ paddingBottom: "56.25%" }}>
+              <iframe
+                className="absolute inset-0 w-full h-full"
+                src={playingVideo.embedUrl}
+                title={playingVideo.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                allowFullScreen
+                style={{ border: "none" }}
+              />
+            </div>
+            {/* Footer hint */}
+            <div
+              className="flex items-center justify-between mt-3 px-1"
+              style={{ color: "rgba(255,255,255,0.35)" }}
+            >
+              <p className="text-xs">Click outside or press Esc to close</p>
+              <p className="text-xs flex items-center gap-1">
+                <PictureInPicture2 size={11} />
+                Pop out to keep watching while you browse
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
