@@ -15,6 +15,7 @@ export default function GlobalVideoPlayer() {
     <FloatingVideoPlayer
       title={video.title}
       embedUrl={video.embedUrl}
+      startTime={video.startTime}
       onClose={closeVideo}
       onExpandFull={onExpandFull ?? undefined}
     />

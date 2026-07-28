@@ -1,21 +1,24 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from "react";
 
 interface VideoPlayerState {
   embedUrl: string;
   title: string;
+  startTime?: number; // seconds into the video to resume from
 }
 
 interface VideoPlayerContextValue {
   /** Currently playing video (null = no floating player visible) */
   video: VideoPlayerState | null;
   /** Open the floating player with a new video. Replaces any currently playing video. */
-  playVideo: (embedUrl: string, title: string) => void;
+  playVideo: (embedUrl: string, title: string, startTime?: number) => void;
   /** Close the floating player */
   closeVideo: () => void;
   /** Callback to expand back to full screen — set by the page that has the full modal */
   onExpandFull: (() => void) | null;
   /** Register the expand-full callback (called by pages with full-screen modal) */
   setExpandFullHandler: (handler: (() => void) | null) => void;
+  /** Ref to store the latest tracked playback time from the floating player */
+  trackedTimeRef: React.MutableRefObject<number>;
 }
 
 const VideoPlayerContext = createContext<VideoPlayerContextValue | null>(null);
@@ -23,13 +26,16 @@ const VideoPlayerContext = createContext<VideoPlayerContextValue | null>(null);
 export function VideoPlayerProvider({ children }: { children: ReactNode }) {
   const [video, setVideo] = useState<VideoPlayerState | null>(null);
   const [expandFullHandler, setExpandFullHandlerState] = useState<(() => void) | null>(null);
+  const trackedTimeRef = useRef<number>(0);
 
-  const playVideo = useCallback((embedUrl: string, title: string) => {
-    setVideo({ embedUrl, title });
+  const playVideo = useCallback((embedUrl: string, title: string, startTime?: number) => {
+    trackedTimeRef.current = startTime || 0;
+    setVideo({ embedUrl, title, startTime });
   }, []);
 
   const closeVideo = useCallback(() => {
     setVideo(null);
+    trackedTimeRef.current = 0;
   }, []);
 
   const setExpandFullHandler = useCallback((handler: (() => void) | null) => {
@@ -37,7 +43,7 @@ export function VideoPlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <VideoPlayerContext.Provider value={{ video, playVideo, closeVideo, onExpandFull: expandFullHandler, setExpandFullHandler }}>
+    <VideoPlayerContext.Provider value={{ video, playVideo, closeVideo, onExpandFull: expandFullHandler, setExpandFullHandler, trackedTimeRef }}>
       {children}
     </VideoPlayerContext.Provider>
   );

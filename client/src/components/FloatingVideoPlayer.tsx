@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, GripHorizontal, Maximize2, Minimize2, Expand } from "lucide-react";
+import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
+import { addYouTubeApiParam, buildEmbedUrlWithTime, isYouTubeUrl } from "@/lib/videoUtils";
 
 export interface FloatingVideoPlayerProps {
   title: string;
   embedUrl: string;
+  startTime?: number;
   onClose: () => void;
   /** Optional callback to expand back to the full-screen modal */
   onExpandFull?: () => void;
@@ -19,16 +22,87 @@ export interface FloatingVideoPlayerProps {
  * - Resizable between compact and expanded mode.
  * - Defaults to expanded (medium) size.
  * - "Back to full screen" button re-opens the full modal.
+ * - Tracks playback time via YouTube postMessage API for seamless transitions.
  */
-export default function FloatingVideoPlayer({ title, embedUrl, onClose, onExpandFull }: FloatingVideoPlayerProps) {
+export default function FloatingVideoPlayer({ title, embedUrl, startTime, onClose, onExpandFull }: FloatingVideoPlayerProps) {
   const [expanded, setExpanded] = useState(true); // Default to medium/expanded size
+  const { trackedTimeRef } = useVideoPlayer();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Build the actual iframe src with startTime and enablejsapi
+  const iframeSrc = (() => {
+    let url = embedUrl;
+    // Add YouTube JS API param for time tracking
+    url = addYouTubeApiParam(url);
+    // Apply startTime if provided
+    if (startTime && startTime > 1) {
+      url = buildEmbedUrlWithTime(url, startTime);
+    }
+    return url;
+  })();
+
+  // ── YouTube postMessage time tracking ──────────────────────────────────────
+  useEffect(() => {
+    if (!isYouTubeUrl(embedUrl)) return;
+
+    function handleMessage(event: MessageEvent) {
+      // YouTube sends messages as JSON strings
+      if (!event.data || typeof event.data !== "string") return;
+      try {
+        const data = JSON.parse(event.data);
+        // YouTube iframe API sends infoDelivery with currentTime
+        if (data.event === "infoDelivery" && data.info && typeof data.info.currentTime === "number") {
+          trackedTimeRef.current = data.info.currentTime;
+        }
+      } catch {
+        // Not a JSON message from YouTube, ignore
+      }
+    }
+
+    window.addEventListener("message", handleMessage);
+
+    // Poll YouTube iframe for current time every 2 seconds
+    // YouTube requires us to send a "listening" message first, then it auto-sends infoDelivery
+    pollIntervalRef.current = setInterval(() => {
+      if (iframeRef.current?.contentWindow) {
+        // Tell YouTube we're listening for events
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: "listening" }),
+          "*"
+        );
+      }
+    }, 2000);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [embedUrl, trackedTimeRef]);
+
+  // Handle expand-full: pass tracked time back
+  const handleExpandFull = useCallback(() => {
+    if (onExpandFull) {
+      // trackedTimeRef.current already has the latest time
+      onExpandFull();
+    }
+  }, [onExpandFull]);
+
+  // Handle close: reset tracked time
+  const handleClose = useCallback(() => {
+    trackedTimeRef.current = 0;
+    onClose();
+  }, [onClose, trackedTimeRef]);
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, [handleClose]);
 
   // ── Drag logic ────────────────────────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null);
@@ -109,7 +183,7 @@ export default function FloatingVideoPlayer({ title, embedUrl, onClose, onExpand
           {onExpandFull && (
             <button
               type="button"
-              onClick={onExpandFull}
+              onClick={handleExpandFull}
               title="Back to full screen"
               className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
             >
@@ -126,7 +200,7 @@ export default function FloatingVideoPlayer({ title, embedUrl, onClose, onExpand
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-colors"
             aria-label="Close floating player"
           >
@@ -138,7 +212,8 @@ export default function FloatingVideoPlayer({ title, embedUrl, onClose, onExpand
       {/* ── 16:9 iframe ── */}
       <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
         <iframe
-          src={embedUrl}
+          ref={iframeRef}
+          src={iframeSrc}
           title={title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
           allowFullScreen
@@ -157,7 +232,7 @@ export default function FloatingVideoPlayer({ title, embedUrl, onClose, onExpand
         {onExpandFull ? (
           <button
             type="button"
-            onClick={onExpandFull}
+            onClick={handleExpandFull}
             className="text-[10px] text-gray-500 hover:text-white transition-colors flex items-center gap-1"
           >
             <Expand size={10} /> Full Screen

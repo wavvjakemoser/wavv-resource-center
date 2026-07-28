@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useParams } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
@@ -20,6 +20,7 @@ import {
   PictureInPicture2,
 } from "lucide-react";
 import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
+import { addYouTubeApiParam, buildEmbedUrlWithTime, isYouTubeUrl } from "@/lib/videoUtils";
 import { toast } from "sonner";
 import type { LucideIcon } from "lucide-react";
 
@@ -447,11 +448,11 @@ function SectionRow({
                   )}
                   {video.status === "available" && (
                     <span
-                      className="text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 flex-shrink-0"
+                      className="text-xs font-bold px-4 py-1.5 rounded-lg flex items-center gap-1.5 flex-shrink-0"
                       style={{ background: `${accentColor}18`, color: accentColor, border: `1px solid ${accentColor}40` }}
                     >
-                      <Play size={9} style={{ color: accentColor }} />
-                      <span className="hidden sm:inline">Watch</span>
+                      <Play size={11} style={{ color: accentColor }} />
+                      <span className="hidden sm:inline">Watch Now</span>
                     </span>
                   )}
                 </div>
@@ -559,18 +560,23 @@ export default function AcademyCategory() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   // Video player modal state
-  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string } | null>(null);
-  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler } = useVideoPlayer();
+  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; startTime?: number } | null>(null);
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler, trackedTimeRef } = useVideoPlayer();
+  const modalIframeRef = useRef<HTMLIFrameElement>(null);
+  const modalTimeRef = useRef<number>(0);
 
   function handlePopOut() {
     if (!playingVideo) return;
     const video = playingVideo;
-    globalPlayVideo(video.embedUrl, video.title);
+    const currentTime = modalTimeRef.current;
+    globalPlayVideo(video.embedUrl, video.title, currentTime);
     handleClosePlayer();
     // Register expand-full handler so floating player can return to full screen
     setExpandFullHandler(() => {
+      const resumeTime = trackedTimeRef.current;
       globalCloseVideo();
-      setPlayingVideo(video);
+      modalTimeRef.current = resumeTime;
+      setPlayingVideo({ ...video, startTime: resumeTime });
     });
   }
   const trackAnon = trpc.analytics.trackAnon.useMutation({ onError: () => {} });
@@ -588,7 +594,31 @@ export default function AcademyCategory() {
       metadata: JSON.stringify({ title, section: sectionTitle, category: cat?.key ?? "", lessonId }),
     });
   };
-  const handleClosePlayer = () => { setPlayingVideo(null); };
+  const handleClosePlayer = () => { setPlayingVideo(null); modalTimeRef.current = 0; };
+
+  // Track playback time from modal iframe (YouTube postMessage API)
+  useEffect(() => {
+    if (!playingVideo || !isYouTubeUrl(playingVideo.embedUrl)) return;
+    function handleMessage(event: MessageEvent) {
+      if (!event.data || typeof event.data !== "string") return;
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === "infoDelivery" && data.info && typeof data.info.currentTime === "number") {
+          modalTimeRef.current = data.info.currentTime;
+        }
+      } catch { /* ignore */ }
+    }
+    window.addEventListener("message", handleMessage);
+    const poll = setInterval(() => {
+      if (modalIframeRef.current?.contentWindow) {
+        modalIframeRef.current.contentWindow.postMessage(JSON.stringify({ event: "listening" }), "*");
+      }
+    }, 2000);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      clearInterval(poll);
+    };
+  }, [playingVideo]);
 
   // Fetch DB lessons for this category to get tags + createdAt
   const { data: dbLessons = [] } = trpc.academy.getLessonsByCategory.useQuery(
@@ -891,7 +921,8 @@ export default function AcademyCategory() {
             {/* 16:9 iframe */}
             <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
               <iframe
-                src={playingVideo.embedUrl}
+                ref={modalIframeRef}
+                src={buildEmbedUrlWithTime(addYouTubeApiParam(playingVideo.embedUrl), playingVideo.startTime || 0)}
                 title={playingVideo.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen

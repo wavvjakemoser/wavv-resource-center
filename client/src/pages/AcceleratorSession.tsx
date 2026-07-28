@@ -16,7 +16,7 @@ import { useParams, Link } from "wouter";
 import PortalLayout from "@/components/PortalLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   ArrowLeft,
   Calendar,
@@ -38,6 +38,7 @@ import {
   PictureInPicture2,
 } from "lucide-react";
 import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
+import { addYouTubeApiParam, buildEmbedUrlWithTime, isYouTubeUrl } from "@/lib/videoUtils";
 import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
 
 // ─── Icon URLs ───────────────────────────────────────────────────────────────
@@ -302,20 +303,20 @@ function ContentCard({
             <button
               type="button"
               onClick={handleWatch}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:opacity-80"
               style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
             >
-              <PlayCircle size={12} /> Watch Now
+              <PlayCircle size={14} /> Watch Now
             </button>
           ) : null}
           {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
             <button
               type="button"
               onClick={() => onCheatSheet(item.cheatSheetUrl!, item.title)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:opacity-80"
               style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
             >
-              <FileText size={12} /> Cheat Sheet
+              <FileText size={14} /> Cheat Sheet
             </button>
           )}
         </div>
@@ -685,20 +686,20 @@ function ContentRow({
           </span>
         ) : hasVideo ? (
           <span
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold"
             style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
           >
-            <PlayCircle size={12} /> Watch
+            <PlayCircle size={14} /> Watch Now
           </span>
         ) : null}
         {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onCheatSheet(item.cheatSheetUrl!, item.title); }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold transition-opacity hover:opacity-80"
             style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
           >
-            <FileText size={12} /> Cheat Sheet
+            <FileText size={14} /> Cheat Sheet
           </button>
         )}
       </div>
@@ -752,34 +753,64 @@ export default function AcceleratorSession() {
   const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
   // Video player state — full-page modal (Academy-style) + PIP pop-out
-  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler } = useVideoPlayer();
-  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; accentColor: string } | null>(null);
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler, trackedTimeRef } = useVideoPlayer();
+  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; accentColor: string; startTime?: number } | null>(null);
+  const modalIframeRef = useRef<HTMLIFrameElement>(null);
+  const modalTimeRef = useRef<number>(0);
 
-  function handleOpenVideo(embedUrl: string, title: string, accentColor?: string) {
+  function handleOpenVideo(embedUrl: string, title: string, accentColor?: string, startTime?: number) {
     globalCloseVideo(); // close any existing floating player
-    setPlayingVideo({ embedUrl, title, accentColor: accentColor || "#00A9E2" });
+    modalTimeRef.current = startTime || 0;
+    setPlayingVideo({ embedUrl, title, accentColor: accentColor || "#00A9E2", startTime });
   }
   function handleClosePlayer() {
     setPlayingVideo(null);
+    modalTimeRef.current = 0;
   }
   function handlePopOut() {
     if (!playingVideo) return;
     const video = playingVideo;
-    globalPlayVideo(video.embedUrl, video.title);
+    const currentTime = modalTimeRef.current;
+    globalPlayVideo(video.embedUrl, video.title, currentTime);
     handleClosePlayer();
     // Register expand-full handler so floating player can return to full screen
     setExpandFullHandler(() => {
+      const resumeTime = trackedTimeRef.current;
       globalCloseVideo();
-      handleOpenVideo(video.embedUrl, video.title, video.accentColor);
+      handleOpenVideo(video.embedUrl, video.title, video.accentColor, resumeTime);
     });
   }
 
-  // Escape key closes video modal
+    // Escape key closes video modal
   useEffect(() => {
     if (!playingVideo) return;
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClosePlayer(); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
+  }, [playingVideo]);
+
+  // Track playback time from modal iframe (YouTube postMessage API)
+  useEffect(() => {
+    if (!playingVideo || !isYouTubeUrl(playingVideo.embedUrl)) return;
+    function handleMessage(event: MessageEvent) {
+      if (!event.data || typeof event.data !== "string") return;
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === "infoDelivery" && data.info && typeof data.info.currentTime === "number") {
+          modalTimeRef.current = data.info.currentTime;
+        }
+      } catch { /* ignore */ }
+    }
+    window.addEventListener("message", handleMessage);
+    const poll = setInterval(() => {
+      if (modalIframeRef.current?.contentWindow) {
+        modalIframeRef.current.contentWindow.postMessage(JSON.stringify({ event: "listening" }), "*");
+      }
+    }, 2000);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      clearInterval(poll);
+    };
   }, [playingVideo]);
 
   // Cheat sheet side panel state
@@ -1164,8 +1195,9 @@ export default function AcceleratorSession() {
             {/* Video iframe */}
             <div className="relative w-full rounded-xl overflow-hidden shadow-2xl" style={{ paddingBottom: "56.25%" }}>
               <iframe
+                ref={modalIframeRef}
                 className="absolute inset-0 w-full h-full"
-                src={playingVideo.embedUrl}
+                src={buildEmbedUrlWithTime(addYouTubeApiParam(playingVideo.embedUrl), playingVideo.startTime || 0)}
                 title={playingVideo.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen

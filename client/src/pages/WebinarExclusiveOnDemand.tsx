@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import PortalLayout from "@/components/PortalLayout";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
+import { addYouTubeApiParam, buildEmbedUrlWithTime, isYouTubeUrl } from "@/lib/videoUtils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getEmbedUrl(url: string): string | null {
@@ -110,10 +111,10 @@ function WebinarRow({
           <button
             type="button"
             onClick={handleWatchClick}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-80"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold transition-all hover:opacity-80"
             style={{ background: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}40` }}
           >
-            <PlayCircle size={13} /> Watch Now
+            <PlayCircle size={15} /> Watch Now
           </button>
         )}
       </div>
@@ -132,26 +133,56 @@ export default function WebinarExclusiveOnDemand() {
   }, []);
 
   const [autoPlayFired, setAutoPlayFired] = useState(false);
-  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; isHosted?: boolean } | null>(null);
-  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler } = useVideoPlayer();
+  const [playingVideo, setPlayingVideo] = useState<{ embedUrl: string; title: string; isHosted?: boolean; startTime?: number } | null>(null);
+  const { playVideo: globalPlayVideo, closeVideo: globalCloseVideo, setExpandFullHandler, trackedTimeRef } = useVideoPlayer();
+  const modalIframeRef = useRef<HTMLIFrameElement>(null);
+  const modalTimeRef = useRef<number>(0);
 
   function handlePlay(embedUrl: string, title: string) {
     globalCloseVideo();
     const isHosted = embedUrl.startsWith("/manus-storage");
+    modalTimeRef.current = 0;
     setPlayingVideo({ embedUrl, title, isHosted });
   }
 
-  function handleCloseModal() { setPlayingVideo(null); }
+  function handleCloseModal() { setPlayingVideo(null); modalTimeRef.current = 0; }
   function handlePopOut() {
     if (!playingVideo) return;
     const video = playingVideo;
-    globalPlayVideo(video.embedUrl, video.title);
+    const currentTime = modalTimeRef.current;
+    globalPlayVideo(video.embedUrl, video.title, currentTime);
     handleCloseModal();
     setExpandFullHandler(() => {
+      const resumeTime = trackedTimeRef.current;
       globalCloseVideo();
-      setPlayingVideo(video);
+      modalTimeRef.current = resumeTime;
+      setPlayingVideo({ ...video, startTime: resumeTime });
     });
   }
+
+  // Track playback time from modal iframe (YouTube postMessage API)
+  useEffect(() => {
+    if (!playingVideo || !isYouTubeUrl(playingVideo.embedUrl)) return;
+    function handleMessage(event: MessageEvent) {
+      if (!event.data || typeof event.data !== "string") return;
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === "infoDelivery" && data.info && typeof data.info.currentTime === "number") {
+          modalTimeRef.current = data.info.currentTime;
+        }
+      } catch { /* ignore */ }
+    }
+    window.addEventListener("message", handleMessage);
+    const poll = setInterval(() => {
+      if (modalIframeRef.current?.contentWindow) {
+        modalIframeRef.current.contentWindow.postMessage(JSON.stringify({ event: "listening" }), "*");
+      }
+    }, 2000);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      clearInterval(poll);
+    };
+  }, [playingVideo]);
 
   useEffect(() => {
     if (autoPlayFired || !autoPlayId || !webinars || webinars.length === 0) return;
@@ -261,7 +292,7 @@ export default function WebinarExclusiveOnDemand() {
               {playingVideo.isHosted ? (
                 <video controls autoPlay className="absolute inset-0 w-full h-full" style={{ background: "#000", border: "none" }}><source src={playingVideo.embedUrl} /></video>
               ) : (
-                <iframe src={playingVideo.embedUrl} title={playingVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" className="absolute inset-0 w-full h-full" style={{ border: "none" }} />
+                <iframe ref={modalIframeRef} src={buildEmbedUrlWithTime(addYouTubeApiParam(playingVideo.embedUrl), playingVideo.startTime || 0)} title={playingVideo.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" className="absolute inset-0 w-full h-full" style={{ border: "none" }} />
               )}
             </div>
             <div className="flex items-center justify-between px-5 py-3" style={{ borderTop: "1px solid #2a2a2a", background: "#0d0f14" }}>
