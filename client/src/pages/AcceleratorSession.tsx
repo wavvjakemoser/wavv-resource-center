@@ -43,9 +43,9 @@ import ResourceSidePanel, { PanelItem } from "@/components/ResourceSidePanel";
 
 // ─── Icon URLs ───────────────────────────────────────────────────────────────
 const TILE_ICONS = {
-  live: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-live-v2-5SLFaHmkSJiRcBLANHk9Ux.webp",
-  training: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-training-v2-Ah5NsXzGWXLs5JLhmnHNvb.webp",
-  recordings: "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-recordings-v2-2H8NKAbyymnW7VVmXdYEvx.webp",
+  live: "/manus-storage/acc-icon-live-v2_f1fb9fe1.webp",
+  training: "/manus-storage/acc-icon-training-v2_dfaf6373.webp",
+  recordings: "/manus-storage/acc-icon-recordings-v2_e5fc871c.webp",
 };
 
 // ─── Embed URL helper (Loom, YouTube, Vimeo) ────────────────────────────────
@@ -91,7 +91,7 @@ interface LiveCallRecord {
   thumbnailUrl?: string | null;
 }
 
-const DEFAULT_LIVE_CALL_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
+const DEFAULT_LIVE_CALL_BG = "/manus-storage/acc-default-live-call-bg_30caf4c0.webp";
 
 function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRecord; now: number; color: string; isCurrentWeek: boolean }) {
   const utcMs = new Date(call.scheduledAt).getTime();
@@ -190,8 +190,8 @@ function SessionCallCard({ call, now, color, isCurrentWeek }: { call: LiveCallRe
 }
 
 // ─── Default background for content cards ────────────────────────────────────
-const DEFAULT_RECORDING_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp";
-const DEFAULT_TRAINING_BG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp";
+const DEFAULT_RECORDING_BG = "/manus-storage/acc-default-live-call-bg_30caf4c0.webp";
+const DEFAULT_TRAINING_BG = "/manus-storage/acc-default-training-bg_7f70af01.webp";
 
 // ─── Webinar-style content card ──────────────────────────────────────────────
 function ContentCard({

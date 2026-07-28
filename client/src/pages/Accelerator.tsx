@@ -508,11 +508,11 @@ export default function Accelerator() {
       "/manus-storage/final-accel-live-sign-transparent_581be7cc.png",
       "/manus-storage/accel-training-cyan-transparent-final_f3e37c72.png",
       "/manus-storage/final-accel-recordings-v3-transparent_ec91855f.png",
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/wavv-accelerator-unique-thumb-PH5cZf5TmQyJjKNTX8EsfM.webp",
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/webinar-bg-ondemand-playcircle-86q8N7uvwmsgxRr4MDpcr4.webp",
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-live-v2-5SLFaHmkSJiRcBLANHk9Ux.webp",
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-training-v2-Ah5NsXzGWXLs5JLhmnHNvb.webp",
-      "https://d2xsxph8kpxj0f.cloudfront.net/310519663417013740/gkLpfNMVYQYMxzYT6m74Yk/acc-icon-recordings-v2-2H8NKAbyymnW7VVmXdYEvx.webp",
+      "/manus-storage/acc-default-live-call-bg_30caf4c0.webp",
+      "/manus-storage/acc-default-training-bg_7f70af01.webp",
+      "/manus-storage/acc-icon-live-v2_f1fb9fe1.webp",
+      "/manus-storage/acc-icon-training-v2_dfaf6373.webp",
+      "/manus-storage/acc-icon-recordings-v2_e5fc871c.webp",
     ];
     urls.forEach((url) => { const img = new Image(); img.src = url; });
   }, []);
