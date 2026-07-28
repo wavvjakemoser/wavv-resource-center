@@ -770,6 +770,21 @@ export default function AcceleratorSession() {
   // Active section from URL param (sub-route)
   const activeSection = params.section as "live-calls" | "product-training" | "recordings" | undefined;
 
+  // ── Preload all thumbnails eagerly when data arrives ──────────────────────
+  useEffect(() => {
+    const urls: string[] = [
+      DEFAULT_LIVE_CALL_BG,
+      DEFAULT_RECORDING_BG,
+      DEFAULT_TRAINING_BG,
+      ...liveCalls.filter((c: any) => c.isVisible !== false && c.thumbnailUrl).map((c: any) => c.thumbnailUrl),
+      ...sessionContent.filter((c: any) => c.thumbnailUrl).map((c: any) => c.thumbnailUrl),
+    ];
+    urls.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, [liveCalls, sessionContent]);
+
   if (isLoading) {
     return (
       <PortalLayout title="Loading...">
@@ -810,21 +825,6 @@ export default function AcceleratorSession() {
   const cmsProductTraining = sessionContent.filter((c: any) => c.contentType === "product_training" && c.isVisible);
 
   const visibleLiveCalls = liveCalls.filter((c: any) => c.isVisible !== false);
-
-  // ── Preload all thumbnails eagerly when data arrives ──────────────────────
-  useEffect(() => {
-    const urls: string[] = [
-      DEFAULT_LIVE_CALL_BG,
-      DEFAULT_RECORDING_BG,
-      DEFAULT_TRAINING_BG,
-      ...visibleLiveCalls.map((c: any) => c.thumbnailUrl).filter(Boolean),
-      ...sessionContent.map((c: any) => c.thumbnailUrl).filter(Boolean),
-    ];
-    urls.forEach((url) => {
-      const img = new Image();
-      img.src = url;
-    });
-  }, [visibleLiveCalls, sessionContent]);
 
   // Side panel for cheat sheet PDF viewer
   const sidePanel = (
