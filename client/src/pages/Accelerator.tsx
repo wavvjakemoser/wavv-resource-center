@@ -822,7 +822,7 @@ export default function Accelerator() {
         <section className="space-y-4">
           <h2 className="text-2xl font-extrabold text-white">Community</h2>
           {(() => {
-            const slackSession = dbSessions.find((s: any) => s.slackUrl);
+            const slackUrl = typeof siteSettings["slack_invite_url"] === "string" ? siteSettings["slack_invite_url"] as string : "";
             return (
               <div
                 className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
@@ -832,8 +832,8 @@ export default function Accelerator() {
                   <p className="text-lg font-bold text-white">WAVV Accelerator Slack Community</p>
                   <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
                 </div>
-                {slackSession?.slackUrl ? (
-                  <a href={slackSession.slackUrl} target="_blank" rel="noopener noreferrer"
+                {slackUrl ? (
+                  <a href={slackUrl} target="_blank" rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
                     style={{ background: "#0074F4" }}>
                     Join Slack

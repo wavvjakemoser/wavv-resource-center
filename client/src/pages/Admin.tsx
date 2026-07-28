@@ -8133,7 +8133,7 @@ function SettingsTab() {
                 <p className="text-sm font-medium text-white">Slack Banners</p>
                 <p className="text-xs text-gray-500">Show or hide the "Join the WAVV Accelerator Slack" banner on each page</p>
               </div>
-              <div className="space-y-2" style={sectionBodyStyle}>
+              <div className="space-y-3" style={sectionBodyStyle}>
                 {([
                   { key: "slack_banner_accelerator_enabled", label: "WAVV Accelerator", enabled: slackBannerAcceleratorEnabled },
                 ] as { key: string; label: string; enabled: boolean }[]).map(({ key, label, enabled }) => (
@@ -8151,6 +8151,23 @@ function SettingsTab() {
                     </button>
                   </div>
                 ))}
+                <div className="pt-2 border-t border-gray-800">
+                  <label className="text-[11px] font-medium text-gray-500 mb-1.5 block">Slack Invite URL <span className="text-gray-600">(used by the Join Slack button)</span></label>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      defaultValue={typeof settings["slack_invite_url"] === "string" ? settings["slack_invite_url"] as string : ""}
+                      placeholder="https://join.slack.com/t/wavvcommunity/shared_invite/..."
+                      onBlur={(e) => {
+                        const val = e.target.value.trim();
+                        if (val !== (settings["slack_invite_url"] || "")) {
+                          updateSetting.mutate({ key: "slack_invite_url", value: val });
+                        }
+                      }}
+                      className="flex-1 bg-[#0d1117] border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-600"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

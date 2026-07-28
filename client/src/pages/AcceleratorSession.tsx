@@ -746,6 +746,7 @@ export default function AcceleratorSession() {
   const now = useNow();
 
   const { data: session, isLoading } = trpc.accelerator.get.useQuery({ id: weekId });
+  const { data: siteSettings = {} } = trpc.siteSettings.getAll.useQuery();
 
   // Fetch dynamic content from CMS
   const { data: sessionContent = [] } = trpc.accelerator.listContent.useQuery({ sessionNumber: weekId });
@@ -1082,9 +1083,12 @@ export default function AcceleratorSession() {
         )}
 
         {/* ── Community ── */}
+        {session.showSlack !== false && (
         <section>
           <h2 className="text-base font-extrabold text-white tracking-wide mb-4">Community</h2>
-          {session.slackUrl ? (
+          {(() => {
+            const slackUrl = session.slackUrl || (typeof siteSettings["slack_invite_url"] === "string" ? siteSettings["slack_invite_url"] as string : "");
+            return slackUrl ? (
             <div
               className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
@@ -1094,7 +1098,7 @@ export default function AcceleratorSession() {
                 <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>Connect with your cohort, share wins, ask questions, and get support between live sessions.</p>
               </div>
               <a
-                href={session.slackUrl}
+                href={slackUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-85 flex-shrink-0"
@@ -1117,8 +1121,10 @@ export default function AcceleratorSession() {
                 <Lock size={14} /> Link Coming Soon
               </div>
             </div>
-          )}
+          );
+          })()}
         </section>
+        )}
         </>)}
 
       </div>

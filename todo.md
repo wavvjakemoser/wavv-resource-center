@@ -2464,3 +2464,5 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Fix Accelerator thumbnail loading delay — use link preload tags so banner images are ready instantly on session pages
 - [x] Make Accelerator content tiles bigger (product training, recorded sessions, live calls rows + their buttons)
 - [x] Floating PIP video must not cover the document/cheat sheet side panel — keep PIP within main content area only
+- [x] Slack community sections on individual Accelerator session tiles/topics should be hidden (respect visibility setting)
+- [x] Settings page: add URL input field for the main WAVV Accelerator Slack section so URL can be edited when made visible
