@@ -2470,3 +2470,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] ContentRow stacks vertically on narrow widths (mobile / side panel open)
 - [x] PIP player has mobile-friendly sizing on small viewports
 - [x] Product Training sections with 1 video: render inline video player with Cheat Sheet button below (no Watch Now click required)
+- [x] Inline video player: reduce size to max-width 720px, centered
+- [x] Inline video player: add Pop Out button (next to Cheat Sheet) to launch floating PIP
+- [x] Inline video player: show placeholder card when video is in PIP mode ("Video playing in picture-in-picture" + Return to player button)

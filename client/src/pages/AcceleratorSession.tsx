@@ -757,7 +757,7 @@ export default function AcceleratorSession() {
   const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
   // Video player — uses unified persistent player (no local modal)
-  const { openVideoModal, closeVideo } = useVideoPlayer();
+  const { openVideoModal, closeVideo, isPlaying, video, mode, popOutToFloating } = useVideoPlayer();
 
   function handleOpenVideo(embedUrl: string, title: string, accentColor?: string) {
     openVideoModal(embedUrl, title, accentColor || "#00A9E2");
@@ -1011,6 +1011,8 @@ export default function AcceleratorSession() {
               const embedUrl = item.loomUrl ? getEmbedUrl(item.loomUrl) : null;
               const isHostedVideo = item.loomUrl?.startsWith("/manus-storage");
               const playUrl = embedUrl ?? (isHostedVideo ? item.loomUrl : null);
+              // Check if THIS video is currently in PIP mode
+              const thisVideoInPip = isPlaying && mode === "floating" && video?.embedUrl === playUrl;
               return (
                 <div className="space-y-4">
                   {/* Video title */}
@@ -1021,36 +1023,73 @@ export default function AcceleratorSession() {
                   {item.description && (
                     <p className="text-sm text-gray-400 ml-5">{item.description}</p>
                   )}
-                  {/* Inline video player */}
-                  {playUrl ? (
-                    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${TILE_COLORS.training}25` }}>
-                      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                        <iframe
-                          src={playUrl}
-                          className="absolute inset-0 w-full h-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          loading="eager"
-                        />
+                  {/* Inline video player — max 720px, centered */}
+                  <div className="mx-auto w-full" style={{ maxWidth: "720px" }}>
+                    {thisVideoInPip ? (
+                      /* Placeholder card when video is in PIP */
+                      <div
+                        className="rounded-xl p-8 flex flex-col items-center justify-center gap-4"
+                        style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${TILE_COLORS.training}30`, minHeight: "280px" }}
+                      >
+                        <PictureInPicture2 size={40} style={{ color: TILE_COLORS.training, opacity: 0.7 }} />
+                        <p className="text-base text-gray-300 font-medium">Video playing in picture-in-picture</p>
+                        <button
+                          type="button"
+                          onClick={() => { closeVideo(); }}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-85"
+                          style={{ background: `${TILE_COLORS.training}20`, color: TILE_COLORS.training, border: `1px solid ${TILE_COLORS.training}40` }}
+                        >
+                          <Play size={14} /> Return to Player
+                        </button>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}>
-                      <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
-                      <p className="text-xs text-gray-500">Video coming soon</p>
-                    </div>
-                  )}
-                  {/* Cheat Sheet button below video */}
-                  {item.cheatSheetUrl && (
-                    <button
-                      type="button"
-                      onClick={() => setPanelItem({ type: "pdf", title: `${item.title} \u2014 Cheat Sheet`, url: item.cheatSheetUrl! })}
-                      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl text-base font-bold transition-all hover:opacity-85 hover:scale-[1.02]"
-                      style={{ background: `${TILE_COLORS.training}18`, color: TILE_COLORS.training, border: `1px solid ${TILE_COLORS.training}35` }}
-                    >
-                      <FileText size={18} /> View Cheat Sheet
-                    </button>
-                  )}
+                    ) : playUrl ? (
+                      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${TILE_COLORS.training}25` }}>
+                        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                          <iframe
+                            src={playUrl}
+                            className="absolute inset-0 w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            loading="eager"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}>
+                        <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
+                        <p className="text-xs text-gray-500">Video coming soon</p>
+                      </div>
+                    )}
+                  </div>
+                  {/* Action buttons below video */}
+                  <div className="mx-auto flex flex-wrap items-center gap-3" style={{ maxWidth: "720px" }}>
+                    {/* Pop Out button — launches PIP */}
+                    {playUrl && !thisVideoInPip && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          openVideoModal(playUrl, item.title, TILE_COLORS.training, isHostedVideo || false);
+                          // Small delay to let the modal open, then pop out to floating
+                          setTimeout(() => popOutToFloating(), 50);
+                        }}
+                        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-85 hover:scale-[1.02]"
+                        style={{ background: "rgba(255,255,255,0.06)", color: "#fff", border: "1px solid rgba(255,255,255,0.12)" }}
+                      >
+                        <PictureInPicture2 size={16} /> Pop Out
+                      </button>
+                    )}
+                    {/* Cheat Sheet button */}
+                    {item.cheatSheetUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setPanelItem({ type: "pdf", title: `${item.title} \u2014 Cheat Sheet`, url: item.cheatSheetUrl! })}
+                        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-85 hover:scale-[1.02]"
+                        style={{ background: `${TILE_COLORS.training}18`, color: TILE_COLORS.training, border: `1px solid ${TILE_COLORS.training}35` }}
+                      >
+                        <FileText size={16} /> View Cheat Sheet
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })() : cmsProductTraining.length > 1 ? (
