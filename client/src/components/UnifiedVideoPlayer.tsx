@@ -35,9 +35,14 @@ export default function UnifiedVideoPlayer() {
     if (mode === "floating") {
       const availableRight = getAvailableRight();
       const vh = window.innerHeight;
-      const w = floatingExpanded ? Math.min(800, availableRight - 32) : Math.min(480, availableRight - 32);
-      const h = floatingExpanded ? Math.min(500, vh - 80) : Math.min(300, vh - 80);
-      setPos({ left: availableRight - w - 24, top: vh - h - 24 });
+      const mobile = availableRight < 640;
+      const w = mobile
+        ? Math.min(280, availableRight - 16)
+        : floatingExpanded ? Math.min(800, availableRight - 32) : Math.min(480, availableRight - 32);
+      const h = mobile
+        ? Math.min(180, vh - 60)
+        : floatingExpanded ? Math.min(500, vh - 80) : Math.min(300, vh - 80);
+      setPos({ left: availableRight - w - (mobile ? 8 : 24), top: vh - h - (mobile ? 8 : 24) });
     } else {
       setPos(null);
     }
@@ -49,10 +54,15 @@ export default function UnifiedVideoPlayer() {
     const observer = new MutationObserver(() => {
       const availableRight = getAvailableRight();
       const vh = window.innerHeight;
-      const w = floatingExpanded ? Math.min(800, availableRight - 32) : Math.min(480, availableRight - 32);
-      const h = floatingExpanded ? Math.min(500, vh - 80) : Math.min(300, vh - 80);
+      const mobile = availableRight < 640;
+      const w = mobile
+        ? Math.min(280, availableRight - 16)
+        : floatingExpanded ? Math.min(800, availableRight - 32) : Math.min(480, availableRight - 32);
+      const h = mobile
+        ? Math.min(180, vh - 60)
+        : floatingExpanded ? Math.min(500, vh - 80) : Math.min(300, vh - 80);
       setPos((prev) => {
-        if (!prev) return { left: availableRight - w - 24, top: vh - h - 24 };
+        if (!prev) return { left: availableRight - w - (mobile ? 8 : 24), top: vh - h - (mobile ? 8 : 24) };
         // If current position would overlap the panel, nudge left
         const maxLeft = availableRight - (containerRef.current?.offsetWidth ?? w) - 8;
         if (prev.left > maxLeft) return { ...prev, left: Math.max(0, maxLeft) };
@@ -115,7 +125,13 @@ export default function UnifiedVideoPlayer() {
   const isModal = mode === "modal";
   const isFloating = mode === "floating";
   const availableWidth = getAvailableRight();
-  const floatingWidth = floatingExpanded ? Math.min(800, availableWidth - 32) : Math.min(480, availableWidth - 32);
+  const isMobileViewport = availableWidth < 640;
+  // On mobile: smaller floating player that doesn't dominate the screen
+  const floatingWidth = isMobileViewport
+    ? Math.min(280, availableWidth - 16)
+    : floatingExpanded
+      ? Math.min(800, availableWidth - 32)
+      : Math.min(480, availableWidth - 32);
 
   // ── Compute wrapper styles based on mode ────────────────────────────────────
   const wrapperStyle: React.CSSProperties = isModal

@@ -665,43 +665,44 @@ function ContentRow({
   }
 
   const rowContent = (
-    <div className="flex items-center gap-5 px-6 py-5">
-      {/* Left accent bar */}
-      <div className="w-1.5 self-stretch rounded-full flex-shrink-0" style={{ background: accentColor }} />
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 px-4 sm:px-6 py-4 sm:py-5">
+      {/* Left accent bar - horizontal on mobile, vertical on desktop */}
+      <div className="hidden sm:block w-1.5 self-stretch rounded-full flex-shrink-0" style={{ background: accentColor }} />
+      <div className="sm:hidden w-12 h-1 rounded-full flex-shrink-0" style={{ background: accentColor }} />
 
       {/* Title + host */}
       <div className="flex-1 min-w-0">
-        <p className="text-base font-bold text-white leading-snug">{index + 1}. {item.title}</p>
+        <p className="text-sm sm:text-base font-bold text-white leading-snug">{index + 1}. {item.title}</p>
         {item.hostName && (
-          <p className="text-sm mt-1.5 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
+          <p className="text-xs sm:text-sm mt-1 sm:mt-1.5 flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.5)" }}>
             <User size={13} />
             {item.hostName}
           </p>
         )}
       </div>
 
-      {/* Action buttons */}
-      <div className="flex items-center gap-3 flex-shrink-0">
+      {/* Action buttons - wrap on mobile */}
+      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 flex-wrap">
         {isComingSoon ? (
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
+          <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold" style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>
             <Timer size={14} /> Coming Soon
           </span>
         ) : hasVideo ? (
           <span
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-base font-bold"
+            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl text-sm sm:text-base font-bold"
             style={{ background: `${accentColor}22`, color: accentColor, border: `1px solid ${accentColor}40` }}
           >
-            <PlayCircle size={18} /> Watch Now
+            <PlayCircle size={16} className="sm:w-[18px] sm:h-[18px]" /> Watch Now
           </span>
         ) : null}
         {!isComingSoon && item.cheatSheetUrl && onCheatSheet && (
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onCheatSheet(item.cheatSheetUrl!, item.title); }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-base font-bold transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl text-sm sm:text-base font-bold transition-opacity hover:opacity-80"
             style={{ background: `${accentColor}10`, color: accentColor, border: `1px solid ${accentColor}30` }}
           >
-            <FileText size={18} /> Cheat Sheet
+            <FileText size={16} className="sm:w-[18px] sm:h-[18px]" /> Cheat Sheet
           </button>
         )}
       </div>

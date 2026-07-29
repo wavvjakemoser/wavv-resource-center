@@ -2466,3 +2466,6 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Floating PIP video must not cover the document/cheat sheet side panel — keep PIP within main content area only
 - [x] Slack community sections on individual Accelerator session tiles/topics should be hidden (respect visibility setting)
 - [x] Settings page: add URL input field for the main WAVV Accelerator Slack section so URL can be edited when made visible
+- [x] Side panel uses overlay mode on mobile (< lg breakpoint) instead of push mode
+- [x] ContentRow stacks vertically on narrow widths (mobile / side panel open)
+- [x] PIP player has mobile-friendly sizing on small viewports

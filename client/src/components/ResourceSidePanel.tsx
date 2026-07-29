@@ -373,7 +373,17 @@ export default function ResourceSidePanel({
   const isOpen = !!item;
   const [panelWidth, setPanelWidth] = useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Detect mobile viewport — switch to overlay mode below 1024px
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const accentColor =
     item?.type === "article" ? ARTICLE_COLOR :
@@ -421,7 +431,8 @@ export default function ResourceSidePanel({
   }, [isResizing]);
 
   // ── Push mode: flex sibling, no overlay ──────────────────────────────────────
-  if (pushMode) {
+  // On mobile, always use overlay mode regardless of pushMode prop
+  if (pushMode && !isMobile) {
     return (
       <div
         ref={panelRef}
