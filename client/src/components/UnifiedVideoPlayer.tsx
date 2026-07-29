@@ -17,6 +17,8 @@ export default function UnifiedVideoPlayer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ startX: number; startY: number; origLeft: number; origTop: number } | null>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  // Track available width reactively so floatingWidth re-renders when panel opens/closes
+  const [trackedAvailableRight, setTrackedAvailableRight] = useState(window.innerWidth);
 
   // Detect available width (exclude side panel if open)
   const getAvailableRight = useCallback(() => {
@@ -34,6 +36,7 @@ export default function UnifiedVideoPlayer() {
   useEffect(() => {
     if (mode === "floating") {
       const availableRight = getAvailableRight();
+      setTrackedAvailableRight(availableRight);
       const vh = window.innerHeight;
       const mobile = availableRight < 640;
       const w = mobile
@@ -48,11 +51,13 @@ export default function UnifiedVideoPlayer() {
     }
   }, [mode, floatingExpanded, getAvailableRight]);
 
-  // Re-position when side panel opens/closes (observe DOM mutations)
+  // Re-position AND resize when side panel opens/closes (observe DOM mutations)
   useEffect(() => {
     if (mode !== "floating") return;
-    const observer = new MutationObserver(() => {
+    let rafId: number | null = null;
+    const reposition = () => {
       const availableRight = getAvailableRight();
+      setTrackedAvailableRight(availableRight);
       const vh = window.innerHeight;
       const mobile = availableRight < 640;
       const w = mobile
@@ -64,13 +69,29 @@ export default function UnifiedVideoPlayer() {
       setPos((prev) => {
         if (!prev) return { left: availableRight - w - (mobile ? 8 : 24), top: vh - h - (mobile ? 8 : 24) };
         // If current position would overlap the panel, nudge left
-        const maxLeft = availableRight - (containerRef.current?.offsetWidth ?? w) - 8;
+        const maxLeft = availableRight - w - 8;
         if (prev.left > maxLeft) return { ...prev, left: Math.max(0, maxLeft) };
         return prev;
       });
+    };
+    const observer = new MutationObserver(() => {
+      // Debounce with rAF to catch post-transition width
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(reposition);
     });
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
-    return () => observer.disconnect();
+    // Also listen for transitionend on the panel to catch final width after animation
+    const handleTransitionEnd = (e: TransitionEvent) => {
+      if (e.propertyName === "width" && (e.target as HTMLElement)?.hasAttribute?.("data-side-panel")) {
+        reposition();
+      }
+    };
+    document.addEventListener("transitionend", handleTransitionEnd);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("transitionend", handleTransitionEnd);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [mode, floatingExpanded, getAvailableRight]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
@@ -124,7 +145,7 @@ export default function UnifiedVideoPlayer() {
   const accentColor = video.accentColor || "#00A9E2";
   const isModal = mode === "modal";
   const isFloating = mode === "floating";
-  const availableWidth = getAvailableRight();
+  const availableWidth = trackedAvailableRight;
   const isMobileViewport = availableWidth < 640;
   // On mobile: smaller floating player that doesn't dominate the screen
   const floatingWidth = isMobileViewport
