@@ -757,7 +757,7 @@ export default function AcceleratorSession() {
   const { data: allLiveCalls = [] } = trpc.accelerator.listLiveCalls.useQuery({});
 
   // Video player — uses unified persistent player (no local modal)
-  const { openVideoModal, closeVideo, isPlaying, video, mode, popOutToFloating } = useVideoPlayer();
+  const { openVideoModal, openVideoInline, closeVideo, returnToInline, isPlaying, video, mode, popOutToFloating, inlineTargetRef } = useVideoPlayer();
 
   function handleOpenVideo(embedUrl: string, title: string, accentColor?: string) {
     openVideoModal(embedUrl, title, accentColor || "#00A9E2");
@@ -1006,13 +1006,15 @@ export default function AcceleratorSession() {
             )}
 
             {cmsProductTraining.length === 1 ? (() => {
-              // Single video: render inline player directly
+              // Single video: use the unified player (inline mode) for seamless PIP transitions
               const item = cmsProductTraining[0];
               const embedUrl = item.loomUrl ? getEmbedUrl(item.loomUrl) : null;
               const isHostedVideo = item.loomUrl?.startsWith("/manus-storage");
               const playUrl = embedUrl ?? (isHostedVideo ? item.loomUrl : null);
-              // Check if THIS video is currently in PIP mode
+              // Check if THIS video is currently in PIP/floating mode
               const thisVideoInPip = isPlaying && mode === "floating" && video?.embedUrl === playUrl;
+              // Check if THIS video is playing inline (in the unified player)
+              const thisVideoInline = isPlaying && mode === "inline" && video?.embedUrl === playUrl;
               return (
                 <div className="space-y-4">
                   {/* Video title */}
@@ -1023,7 +1025,7 @@ export default function AcceleratorSession() {
                   {item.description && (
                     <p className="text-sm text-gray-400 ml-5">{item.description}</p>
                   )}
-                  {/* Inline video player — max 720px, centered */}
+                  {/* Inline video player — max 920px, centered */}
                   <div className="mx-auto w-full" style={{ maxWidth: "920px" }}>
                     {thisVideoInPip ? (
                       /* Placeholder card when video is in PIP */
@@ -1035,29 +1037,30 @@ export default function AcceleratorSession() {
                         <p className="text-base text-gray-300 font-medium">Video playing in picture-in-picture</p>
                         <button
                           type="button"
-                          onClick={() => { closeVideo(); }}
+                          onClick={() => { returnToInline(); }}
                           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-85"
                           style={{ background: `${TILE_COLORS.training}20`, color: TILE_COLORS.training, border: `1px solid ${TILE_COLORS.training}40` }}
                         >
                           <Play size={14} /> Return to Player
                         </button>
                       </div>
-                    ) : playUrl ? (
-                      <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${TILE_COLORS.training}25` }}>
-                        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                          <iframe
-                            src={playUrl}
-                            className="absolute inset-0 w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            loading="eager"
-                          />
-                        </div>
-                      </div>
                     ) : (
-                      <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}>
-                        <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
-                        <p className="text-xs text-gray-500">Video coming soon</p>
+                      /* Portal target for the unified player's inline mode */
+                      <div
+                        ref={inlineTargetRef}
+                        className="rounded-xl overflow-hidden"
+                        style={{ border: `1px solid ${TILE_COLORS.training}25` }}
+                      >
+                        {/* If video not yet started or a different video is playing, show a static placeholder that auto-starts */}
+                        {!thisVideoInline && playUrl && (
+                          <InlineAutoStart playUrl={playUrl} title={item.title} accentColor={TILE_COLORS.training} isHosted={isHostedVideo || false} />
+                        )}
+                        {!playUrl && !thisVideoInline && (
+                          <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}>
+                            <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
+                            <p className="text-xs text-gray-500">Video coming soon</p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1068,9 +1071,13 @@ export default function AcceleratorSession() {
                       <button
                         type="button"
                         onClick={() => {
-                          openVideoModal(playUrl, item.title, TILE_COLORS.training, isHostedVideo || false);
-                          // Small delay to let the modal open, then pop out to floating
-                          setTimeout(() => popOutToFloating(), 50);
+                          // If already inline, just switch mode — no reload
+                          if (thisVideoInline) {
+                            popOutToFloating();
+                          } else {
+                            openVideoInline(playUrl, item.title, TILE_COLORS.training, isHostedVideo || false);
+                            setTimeout(() => popOutToFloating(), 50);
+                          }
                         }}
                         className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-85 hover:scale-[1.02]"
                         style={{ background: "rgba(255,255,255,0.06)", color: "#fff", border: "1px solid rgba(255,255,255,0.12)" }}
@@ -1222,5 +1229,29 @@ export default function AcceleratorSession() {
 
 
     </>
+  );
+}
+
+/**
+ * InlineAutoStart — automatically starts the video in inline mode when mounted.
+ * This ensures the unified player takes over the inline target on first render.
+ */
+function InlineAutoStart({ playUrl, title, accentColor, isHosted }: { playUrl: string; title: string; accentColor: string; isHosted: boolean }) {
+  const { openVideoInline, isPlaying, video } = useVideoPlayer();
+
+  useEffect(() => {
+    // Only auto-start if no video is currently playing, or a different video is playing
+    if (!isPlaying || video?.embedUrl !== playUrl) {
+      openVideoInline(playUrl, title, accentColor, isHosted);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- intentionally run once on mount
+
+  // Render a 16:9 placeholder while the portal takes over
+  return (
+    <div className="relative w-full" style={{ paddingBottom: "56.25%", background: "#000" }}>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: `${accentColor} transparent ${accentColor} ${accentColor}` }} />
+      </div>
+    </div>
   );
 }

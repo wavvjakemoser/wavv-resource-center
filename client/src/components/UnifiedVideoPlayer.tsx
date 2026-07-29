@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X, GripHorizontal, Maximize2, Minimize2, Expand, PictureInPicture2 } from "lucide-react";
 import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
 
@@ -6,11 +7,12 @@ import { useVideoPlayer } from "@/contexts/VideoPlayerContext";
  * UnifiedVideoPlayer — renders ONE persistent iframe at the App level.
  *
  * CRITICAL: The iframe is rendered exactly ONCE and is never conditionally
- * unmounted. Mode switches (modal ↔ floating) only change the wrapper's
- * CSS positioning/sizing. This guarantees zero playback interruption.
+ * unmounted. Mode switches (inline ↔ modal ↔ floating) only change the wrapper's
+ * CSS positioning/sizing OR portal the content into an inline target.
+ * This guarantees zero playback interruption.
  */
 export default function UnifiedVideoPlayer() {
-  const { video, mode, popOutToFloating, expandToModal, closeVideo } = useVideoPlayer();
+  const { video, mode, popOutToFloating, expandToModal, returnToInline, closeVideo, inlineTargetRef } = useVideoPlayer();
   const [floatingExpanded, setFloatingExpanded] = useState(true);
 
   // ── Drag logic (floating mode only) ──────────────────────────────────────
@@ -22,8 +24,6 @@ export default function UnifiedVideoPlayer() {
 
   // Detect available width (exclude side panel if open)
   const getAvailableRight = useCallback(() => {
-    // The ResourceSidePanel is rendered as a flex-shrink-0 sibling inside the body row.
-    // Detect it by looking for the panel's container that has borderLeft set.
     const panels = document.querySelectorAll<HTMLElement>('[data-side-panel="true"]');
     for (const panel of panels) {
       const w = panel.offsetWidth;
@@ -68,19 +68,16 @@ export default function UnifiedVideoPlayer() {
         : floatingExpanded ? Math.min(500, vh - 80) : Math.min(300, vh - 80);
       setPos((prev) => {
         if (!prev) return { left: availableRight - w - (mobile ? 8 : 24), top: vh - h - (mobile ? 8 : 24) };
-        // If current position would overlap the panel, nudge left
         const maxLeft = availableRight - w - 8;
         if (prev.left > maxLeft) return { ...prev, left: Math.max(0, maxLeft) };
         return prev;
       });
     };
     const observer = new MutationObserver(() => {
-      // Debounce with rAF to catch post-transition width
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(reposition);
     });
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
-    // Also listen for transitionend on the panel to catch final width after animation
     const handleTransitionEnd = (e: TransitionEvent) => {
       if (e.propertyName === "width" && (e.target as HTMLElement)?.hasAttribute?.("data-side-panel")) {
         reposition();
@@ -108,7 +105,6 @@ export default function UnifiedVideoPlayer() {
       const dy = e.clientY - dragState.current.startY;
       const newLeft = dragState.current.origLeft + dx;
       const newTop = dragState.current.origTop + dy;
-      const vw = window.innerWidth;
       const vh = window.innerHeight;
       const w = containerRef.current?.offsetWidth ?? 480;
       const h = containerRef.current?.offsetHeight ?? 300;
@@ -145,19 +141,53 @@ export default function UnifiedVideoPlayer() {
   const accentColor = video.accentColor || "#00A9E2";
   const isModal = mode === "modal";
   const isFloating = mode === "floating";
+  const isInline = mode === "inline";
   const availableWidth = trackedAvailableRight;
   const isMobileViewport = availableWidth < 640;
-  // On mobile: smaller floating player that doesn't dominate the screen
   const floatingWidth = isMobileViewport
     ? Math.min(280, availableWidth - 16)
     : floatingExpanded
       ? Math.min(800, availableWidth - 32)
       : Math.min(480, availableWidth - 32);
 
-  // ── Compute wrapper styles based on mode ────────────────────────────────────
+  // ── The persistent video element (never unmounted) ──────────────────────────
+  const videoElement = video.isHosted ? (
+    <video
+      controls
+      autoPlay
+      className="absolute inset-0 w-full h-full"
+      style={{ background: "#000", border: "none" }}
+    >
+      <source src={video.embedUrl} />
+    </video>
+  ) : (
+    <iframe
+      src={video.embedUrl}
+      title={video.title}
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+      allowFullScreen
+      className="absolute inset-0 w-full h-full"
+      style={{ border: "none" }}
+    />
+  );
+
+  // ── INLINE MODE: portal into the target element on the page ────────────────
+  if (isInline) {
+    const target = inlineTargetRef.current;
+    if (!target) return null; // Target not mounted yet, don't render
+
+    const inlineContent = (
+      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+        {videoElement}
+      </div>
+    );
+
+    return createPortal(inlineContent, target);
+  }
+
+  // ── MODAL / FLOATING MODES ─────────────────────────────────────────────────
   const wrapperStyle: React.CSSProperties = isModal
     ? {
-        // Modal: fixed, centered, full viewport
         position: "fixed",
         inset: 0,
         zIndex: 9999,
@@ -166,7 +196,6 @@ export default function UnifiedVideoPlayer() {
         justifyContent: "center",
       }
     : {
-        // Floating: fixed, positioned in corner
         position: "fixed",
         zIndex: 9999,
         width: floatingWidth,
@@ -178,7 +207,7 @@ export default function UnifiedVideoPlayer() {
 
   return (
     <div style={wrapperStyle} ref={containerRef}>
-      {/* ── MODAL BACKDROP (only visible in modal mode) ── */}
+      {/* ── MODAL BACKDROP ── */}
       {isModal && (
         <div
           className="absolute inset-0 bg-black/85 backdrop-blur-sm"
@@ -186,7 +215,7 @@ export default function UnifiedVideoPlayer() {
         />
       )}
 
-      {/* ── PLAYER CONTAINER — always rendered, changes size/position via CSS ── */}
+      {/* ── PLAYER CONTAINER ── */}
       <div
         className="relative overflow-hidden select-none"
         style={isModal ? {
@@ -204,7 +233,6 @@ export default function UnifiedVideoPlayer() {
       >
         {/* ── HEADER BAR ── */}
         {isModal ? (
-          // Modal header
           <div className="flex items-center gap-3 mb-3">
             <p className="text-sm font-semibold text-white truncate flex-1">{video.title}</p>
             <button
@@ -227,7 +255,6 @@ export default function UnifiedVideoPlayer() {
             </button>
           </div>
         ) : (
-          // Floating header with drag handle
           <div
             className="flex items-center gap-2 px-3 py-2 cursor-grab active:cursor-grabbing"
             style={{ borderBottom: "1px solid #2a2a2a", background: "#0d0f14" }}
@@ -264,7 +291,7 @@ export default function UnifiedVideoPlayer() {
           </div>
         )}
 
-        {/* ── VIDEO AREA — THE SINGLE PERSISTENT IFRAME ── */}
+        {/* ── VIDEO AREA ── */}
         <div
           className="relative w-full"
           style={isModal ? {
@@ -276,25 +303,7 @@ export default function UnifiedVideoPlayer() {
             paddingBottom: "56.25%",
           }}
         >
-          {video.isHosted ? (
-            <video
-              controls
-              autoPlay
-              className="absolute inset-0 w-full h-full"
-              style={{ background: "#000", border: "none" }}
-            >
-              <source src={video.embedUrl} />
-            </video>
-          ) : (
-            <iframe
-              src={video.embedUrl}
-              title={video.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              allowFullScreen
-              className="absolute inset-0 w-full h-full"
-              style={{ border: "none" }}
-            />
-          )}
+          {videoElement}
         </div>
 
         {/* ── FOOTER ── */}

@@ -2475,3 +2475,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Inline video player: show placeholder card when video is in PIP mode ("Video playing in picture-in-picture" + Return to player button)
 - [x] PIP floating player: repositions and resizes when cheat sheet side panel opens (stays to the left of the panel)
 - [x] PIP floating player: listens for transitionend to catch final panel width after animation
+- [x] Inline video player to PIP: no delay or restart when switching between inline and floating/PIP modes (share same iframe instance)
