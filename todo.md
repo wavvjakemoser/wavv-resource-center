@@ -2469,3 +2469,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] Side panel uses overlay mode on mobile (< lg breakpoint) instead of push mode
 - [x] ContentRow stacks vertically on narrow widths (mobile / side panel open)
 - [x] PIP player has mobile-friendly sizing on small viewports
+- [x] Product Training sections with 1 video: render inline video player with Cheat Sheet button below (no Watch Now click required)

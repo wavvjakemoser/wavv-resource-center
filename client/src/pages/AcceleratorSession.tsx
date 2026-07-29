@@ -1005,7 +1005,55 @@ export default function AcceleratorSession() {
               </div>
             )}
 
-            {cmsProductTraining.length > 0 ? (
+            {cmsProductTraining.length === 1 ? (() => {
+              // Single video: render inline player directly
+              const item = cmsProductTraining[0];
+              const embedUrl = item.loomUrl ? getEmbedUrl(item.loomUrl) : null;
+              const isHostedVideo = item.loomUrl?.startsWith("/manus-storage");
+              const playUrl = embedUrl ?? (isHostedVideo ? item.loomUrl : null);
+              return (
+                <div className="space-y-4">
+                  {/* Video title */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-8 rounded-full" style={{ background: TILE_COLORS.training }} />
+                    <h3 className="text-lg font-bold text-white">{item.title}</h3>
+                  </div>
+                  {item.description && (
+                    <p className="text-sm text-gray-400 ml-5">{item.description}</p>
+                  )}
+                  {/* Inline video player */}
+                  {playUrl ? (
+                    <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${TILE_COLORS.training}25` }}>
+                      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                        <iframe
+                          src={playUrl}
+                          className="absolute inset-0 w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          loading="eager"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl p-8 text-center" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.07)" }}>
+                      <Play size={24} className="mx-auto mb-2" style={{ color: "rgba(255,255,255,0.12)" }} />
+                      <p className="text-xs text-gray-500">Video coming soon</p>
+                    </div>
+                  )}
+                  {/* Cheat Sheet button below video */}
+                  {item.cheatSheetUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setPanelItem({ type: "pdf", title: `${item.title} \u2014 Cheat Sheet`, url: item.cheatSheetUrl! })}
+                      className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl text-base font-bold transition-all hover:opacity-85 hover:scale-[1.02]"
+                      style={{ background: `${TILE_COLORS.training}18`, color: TILE_COLORS.training, border: `1px solid ${TILE_COLORS.training}35` }}
+                    >
+                      <FileText size={18} /> View Cheat Sheet
+                    </button>
+                  )}
+                </div>
+              );
+            })() : cmsProductTraining.length > 1 ? (
               <div className="space-y-3">
                 {cmsProductTraining.map((item: any, idx: number) => (
                   <ContentRow
