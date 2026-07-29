@@ -1024,7 +1024,7 @@ export default function AcceleratorSession() {
                     <p className="text-sm text-gray-400 ml-5">{item.description}</p>
                   )}
                   {/* Inline video player — max 720px, centered */}
-                  <div className="mx-auto w-full" style={{ maxWidth: "720px" }}>
+                  <div className="mx-auto w-full" style={{ maxWidth: "840px" }}>
                     {thisVideoInPip ? (
                       /* Placeholder card when video is in PIP */
                       <div
@@ -1062,7 +1062,7 @@ export default function AcceleratorSession() {
                     )}
                   </div>
                   {/* Action buttons below video */}
-                  <div className="mx-auto flex flex-wrap items-center gap-3" style={{ maxWidth: "720px" }}>
+                  <div className="mx-auto flex flex-wrap items-center gap-3" style={{ maxWidth: "840px" }}>
                     {/* Pop Out button — launches PIP */}
                     {playUrl && !thisVideoInPip && (
                       <button
