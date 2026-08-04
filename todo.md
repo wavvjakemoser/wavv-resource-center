@@ -2476,3 +2476,4 @@ UI is production-ready. Thumbnails, card layout, and CTA strip are finalized. Th
 - [x] PIP floating player: repositions and resizes when cheat sheet side panel opens (stays to the left of the panel)
 - [x] PIP floating player: listens for transitionend to catch final panel width after animation
 - [x] Inline video player to PIP: no delay or restart when switching between inline and floating/PIP modes (share same iframe instance)
+- [x] Accelerator session hero color must match the tile color from the landing page (e.g., green tile → green hero, not purple)
